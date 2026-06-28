@@ -1,0 +1,322 @@
+{
+  "edit": "Redaktirlemek",
+  "delete": "Pozmak",
+  "apply": "Ulanmak",
+  "cancel": "Ýatyrmak",
+  "reset": "Sıfırla",
+  "all": "Hemmesi",
+  "search": "Gözleg",
+  "login": {
+    "welcomeTitle": "Oguz Travel Portalyna Goş Geldiňiz",
+    "welcomeSubtitle": "Syýahat agentligi, agentler we ýolagçylar üçin häzirki zaman, howpsuz we çeýe rol esasly dolandyryş ulgamy.",
+    "signIn": "Giriş ediň",
+    "signInSubtitle": "Dowam etmek üçin telefon nomeriňizi we paroluňyzy giriziň",
+    "phoneNumber": "Telefon nomeri",
+    "phoneNumberRequired": "Telefon nomeri zerurdyr",
+    "phoneNumberInvalid": "Dogry nomer giriziň: 61–65 ýa-da 71 bilen başlanýan 8 san",
+    "phoneNumberLength": "Telefon nomeri +993-den soň takyk 8 san bolmaly",
+    "phoneNumberHint": "Mysal: 61123456",
+    "password": "Parol",
+    "passwordRequired": "Parol zerurdyr",
+    "passwordTooShort": "Parol azyndan 6 harp bolmaly",
+    "passwordMaxLength": "Parol iň köp 20 harp bolmaly",
+    "loginButton": "Giriş et",
+    "loggingIn": "Giriş edilýär...",
+    "testMode": "TEST REŽIMI (ROL SAÝLAP ÇALT GIRIŞ EDIŇ)",
+    "quickLoginText": "Demo hasapy bilen girmek üçin basňyz:",
+    "admin": "Admin",
+    "agent": "Agent",
+    "user": "Ulanyjy",
+    "loginFailed": "Giriş şowsuz boldy. Maglumatlaryňyzy barlap görüň.",
+    "invalidResponse": "Serweriň nädogry jogaby. Haýyş edip, bir gezek has synap görüň.",
+    "networkError": "Tor ulgamynda ýalňyşlyk. Haýyş edip, siziň baglanşygyňyzy barlaň."
+  },
+  "actions": {
+    "save": "Ýatda sakla",
+    "close": "Ýap",
+    "delete": "Poz"
+  },
+  "header": {
+    "languageTooltip": "Dil / Language",
+    "themeTooltipDark": "Gara režim",
+    "themeTooltipLight": "Ýagty režim",
+    "userMenuTooltip": "Ulanyjy menýusy",
+    "profile": "Profil",
+    "logout": "Ulgamdan çyk"
+  },
+  "sidebar": {
+    "rolePortal": "Rol Portaly",
+    "management": "Dolandyryş",
+    "operations": "Amallar",
+    "explore": "Syýahatlar",
+    "space": "{{role}} meýdançasy",
+    "departments": "Bölümler",
+    "ticket": "Bilet",
+    "ticketB2B": "B2B",
+    "ticketTurkishAirlines": "Türkhowaýollary",
+    "adminDashboard": "Admin paneli",
+    "agentsDirectory": "Agentler sanawy",
+    "allBookings": "Ähli sargytlar",
+    "systemLogs": "Ulgam žurnallary",
+    "settings": "Sazlamalar",
+    "agentDashboard": "Agent paneli",
+    "clientsList": "Müşderiler sanawy",
+    "clients": "Müşderiler",
+    "tripPlanner": "Syýahat meýilleşdiriji",
+    "manageBookings": "Sargytlary dolandyrmak",
+    "travelDashboard": "Syýahat paneli",
+    "searchFlights": "Uçar bileti gözlegi",
+    "myBookings": "Meniň sargytlarym",
+    "myProfile": "Meniň profilim",
+    "employee": "Işgärler",
+    "employees": "Işgärler",
+    "users": "Ulanyjylar"
+  },
+  "employee": {
+    "title": "Işgärler",
+    "subtitle": "Işgärleň hasabatlaryny we belliklerini dolandyryň.",
+    "add": "Işgär goşmak",
+    "filter": "Filter",
+    "columns": {
+      "fullName": "Add Familýa",
+      "phoneNumber": "Telefon belgisi",
+      "gmail": "El. poçta",
+      "department": "Bölüm",
+      "position": "Wezipe",
+      "office": "Ofis",
+      "actions": "Amallar"
+    }
+  },
+  "clients": {
+    "title": "Müşderiler",
+    "subtitle": "Müşderi maglumatlaryny we pasport maglumatlaryny dolandyrmak.",
+    "add": "Müşderi goşmak",
+    "addSuccess": "Müşderi üstünlikli goşuldy!",
+    "addError": "Müşderini ýazdyrmakda ýalňyşlyk ýüze çykdy.",
+    "genderWomen": "Zenan",
+    "genderMen": "Erkek",
+    "columns": {
+      "fullName": "Doly ady",
+      "phoneNumber": "Telefon belgisi",
+      "dateOfBirth": "Doglan senesi",
+      "passportNumber": "Pasport belgisi",
+      "passportExpiryDate": "Pasportyň gutarýan senesi",
+      "passportCountryOfIssue": "Pasportyň berlen ýurdy",
+      "gender": "Jynsy",
+      "actions": "Amallar"
+    },
+    "autocomplete": {
+      "noClientFound": "Müşderi tapylmady.",
+      "addClient": "+ Müşderi goş"
+    },
+    "validation": {
+      "fullNameRequired": "Doly ady zerurdyr",
+      "phoneNumberRequired": "Telefon belgisi zerurdyr",
+      "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",
+      "phoneNumberInvalid": "Nädogry telefon belgisi (61/62/63/64/65/71/12 bilen başlamaly we 8 sandan ybarat bolmaly)",
+      "dateOfBirthRequired": "Doglan senesi zerurdyr",
+      "passportNumberRequired": "Pasport belgisi zerurdyr",
+      "passportExpiryDateRequired": "Pasportyň gutarýan senesi zerurdyr",
+      "passportCountryOfIssueRequired": "Pasportyň berlen ýurdy zerurdyr",
+      "genderRequired": "Jyns saýlanmalydyr"
+    }
+  },
+  "ticket": {
+    "filter": "Filter",
+    "export": "Eksport",
+    "summary": {
+      "totalTickets": "Jemi biletler",
+      "totalProfit": "Jemi peýda",
+      "sales": "Satuwlar",
+      "refunds": "Yzyna gaýtarylanlar"
+    },
+    "b2b": {
+      "title": "B2B",
+      "addTicket": "Bilet goş",
+      "editTicket": "B2B bileti redaktirle",
+      "client": "Müşderi",
+      "clientPlaceholder": "Müşderini gözle...",
+      "issueDate": "Çykaryş senesi",
+      "operator": "Operator",
+      "office": "Ofis",
+      "operatorTwo": "Operator 2",
+      "agent": "Agent",
+      "pnr": "PNR",
+      "status": "Ýagdaýy",
+      "airline": "Awiakompaniýa",
+      "route": "Ugurlar",
+      "cabinClass": "Synp",
+      "tripType": "Uçuş görnüşi",
+      "flightDate": "Uçuş senesi",
+      "netFare": "Net baha",
+      "saleFare": "Satyş bahasy",
+      "profit": "Peýda",
+      "card": "Karta",
+      "note": "Bellik",
+      "ticketNo": "Bilet belgisi",
+      "actions": "Amallar",
+      "saveSuccess": "Bilet üstünlikli saklandy!",
+      "saveError": "Bileti saklamakda ýalňyşlyk ýüze çykdy."
+    },
+    "turkish": {
+      "title": "Turkish Airlines",
+      "client": "Müşderi",
+      "flight": "Uçuş",
+      "status": "Ýagdaýy",
+      "cabin": "Kabina",
+      "totalBookings": "Sargytlar",
+      "ticketed": "Biletlenen",
+      "pending": "Garaşylýar"
+    }
+  },
+  "users": {
+    "title": "Ulanyjylar",
+    "subtitle": "Ulgam ulanyjylaryny we giriş hukuklaryny dolandyryň.",
+    "add": "Ulanyjy goş",
+    "filter": "Filtr",
+    "deleteConfirm": "Hakykatdan hem bu ulanyjyny öçürmek isleýärsiňizmi?",
+    "statusActiveLabel": "Aktiw",
+    "statusInactiveLabel": "Passiw",
+    "permissionsCount": "Saýlanan",
+    "editTitle": "Ulanyjyny redaktirlemek",
+    "addTitle": "Ulanyjy goş",
+    "update": "Täzelemek",
+    "updateSuccess": "Ulanyjy üstünlikli täzelendi!",
+    "addSuccess": "Ulanyjy üstünlikli goşuldy!",
+    "submitError": "Ulanyjyny ýazdyrmakda ýalňyşlyk ýüze çykdy.",
+    "selectEmployee": "Işgär saýlaň...",
+    "phoneNumberPlaceholder": "61 123456",
+    "passwordEditPlaceholder": "Häzirki paroly saklamak üçin boş goýuň",
+    "statusActive": "Aktiw ulanyjy",
+    "permissionsTitle": "Giriş hukuklary",
+    "selected": "Saýlanan",
+    "selectAll": "Ählisini saýla",
+    "clearAll": "Ählisini arassala",
+    "tabs": {
+      "information": "Maglumat",
+      "access": "Giriş"
+    },
+    "columns": {
+      "fullName": "Doly ady",
+      "phoneNumber": "Telefon belgisi",
+      "status": "Ýagdaýy",
+      "permissions": "Giriş hukuklary",
+      "actions": "Amallar",
+      "employee": "Işgär",
+      "password": "Parol"
+    },
+    "validation": {
+      "employeeRequired": "Işgär saýlanmalydyr",
+      "phoneNumberRequired": "Telefon belgisi gerek",
+      "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",
+      "phoneNumberInvalid": "Nädogry telefon belgisi (61/62/63/64/65/71/12 bilen başlamaly we 8 sandan ybarat bolmaly)",
+      "passwordRequired": "Parol gerek",
+      "passwordTooShort": "Parol gysga (azyndan 6 simwol bolmaly)"
+    },
+    "permissions": {
+      "groups": {
+        "management": "Dolandyryş",
+        "reporting": "Hasabatlar",
+        "tickets": "Biletler",
+        "employees": "Işgärler"
+      },
+      "items": {
+        "users_view": "Ulanyjylary görmek",
+        "users_create": "Ulanyjy goşmak",
+        "users_edit": "Ulanyjy redaktirlemek",
+        "users_delete": "Ulanyjyny öçürmek",
+        "reports_view": "Hasabatlar",
+        "dashboard_view": "Dolandyryş paneli",
+        "tickets_view": "Biletleri görmek",
+        "tickets_create": "Bilet döretmek",
+        "tickets_edit": "Bilet redaktirlemek",
+        "tickets_delete": "Bileti öçürmek",
+        "employees_view": "Işgärleri görmek",
+        "employees_create": "Işgär goşmak",
+        "employees_edit": "Işgär redaktirlemek"
+      }
+    }
+  },
+  "admin": {
+    "title": "Admin dolandyryş paneli",
+    "subtitle": "Hoş geldiňiz, {{name}}. Ulgam ýagdaýyny we umumy statistikalary aşakdan yzarap bilersiňiz.",
+    "stats": {
+      "totalRevenue": "Jemi girdeji",
+      "registeredUsers": "Hasaba alnan ulanyjylar",
+      "activeAgents": "Aktiw agentler",
+      "apiIntegrations": "API integrasiýalary"
+    },
+    "statsChanges": {
+      "revenue": "bu aý +14.2%",
+      "users": "hepdelik +3.1%",
+      "agents": "2 sanysy tassyklamaga garaşýar",
+      "api": "Ähli ulgamlar kadaly işleýär"
+    },
+    "logs": {
+      "title": "Soňky ulgam ýazgylary",
+      "subtitle": "Serwerden gelen iň soňky 4 waka ýazgysy",
+      "viewAll": "Ählisini gör",
+      "id": "ID",
+      "event": "Waka / Amalyýet",
+      "actor": "Amala aşyran",
+      "time": "Wagt",
+      "status": "Ýagdaý",
+      "newAgent": "Täze agent hasaba alyndy",
+      "priceUpdated": "Ählumumy nyrh indeksi täzelendi",
+      "backupCreated": "Maglumatlar binýadynyň ätiýaçlyk nusgasy üstünlikli döredildi",
+      "failedLogin": "Şowsuz giriş synanyşygy anyklandy"
+    }
+  },
+  "agent": {
+    "title": "Agent paneli",
+    "subtitle": "Hoş geldiňiz, {{name}}. Syýahat meýilleşdiriş we müşderi dolandyryş amallaryny şu ýerden ýöridip bilersiňiz.",
+    "stats": {
+      "activeTours": "Aktiw tur sargytlary",
+      "earnedCommission": "Gazanylan komissiýa",
+      "clientSatisfaction": "Müşderi kanagatlanmasy"
+    },
+    "clients": {
+      "title": "Meniň soňky müşderilerim",
+      "addClient": "Müşderi goş",
+      "destination": "Ugur: {{destination}}",
+      "statusProposal": "Teklip tapgyrynda",
+      "statusPaid": "Tölendi / Tamamlandy",
+      "statusFlightPending": "Uçuşa garaşylýar"
+    },
+    "proposal": {
+      "title": "Çalt syýahat teklibi",
+      "clientName": "Müşderiniň ady",
+      "destination": "Gidiljek ýer / Şäher",
+      "details": "Maglumatlar / Myhmanhana we wagt saýlamalary",
+      "submit": "Teklip döret we iber"
+    }
+  },
+  "user": {
+    "welcome": "Salam, {{name}}! 👋",
+    "readyToExplore": "Indiki syýahatyňyzy gözlemäge taýynmy? Uçuş, myhmanhana ýa-da ulag kärendesi teklipnamalarymyzy barlaň.",
+    "search": {
+      "from": "Nireden?",
+      "to": "Nirä?",
+      "button": "Uçar bileti gözle"
+    },
+    "popular": "Meşhur ugurlar",
+    "details": "Maglumatlar",
+    "destinations": {
+      "antalya": {
+        "title": "Antalýa, Türkiýe",
+        "desc": "Deňiz, gum we günüň ajaýyp utgaşmasy.",
+        "price": "1.200 TL-den başlaýan"
+      },
+      "rome": {
+        "title": "Rim, Italiýa",
+        "desc": "Taryh yslan köçeleri we lezzetli pizzalary açyş ediň.",
+        "price": "4.500 TL-den başlaýan"
+      },
+      "tokyo": {
+        "title": "Tokio, Ýaponiýa",
+        "desc": "Döwrebap tehnologiýa we adaty medeniýetiň utgaşmasy.",
+        "price": "12.000 TL-den başlaýan"
+      }
+    }
+  }
+}

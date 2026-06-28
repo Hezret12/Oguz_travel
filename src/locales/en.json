@@ -1,0 +1,318 @@
+{
+  "edit": "Edit",
+  "delete": "Delete",
+  "apply": "Apply",
+  "cancel": "Cancel",
+  "reset": "Reset",
+  "all": "All",
+  "search": "Search",
+  "login": {
+    "welcomeTitle": "Welcome to Oguz Travel Portal",
+    "welcomeSubtitle": "Modern, secure and flexible role-based management system for travel agencies, agents and passengers.",
+    "signIn": "Sign In",
+    "signInSubtitle": "Enter your phone number and password to continue",
+    "phoneNumber": "Phone Number",
+    "phoneNumberRequired": "Phone number is required",
+    "phoneNumberInvalid": "Enter a valid number: operator 61–65 or 71, then 6 more digits (8 total)",
+    "phoneNumberLength": "Phone number must be exactly 8 digits after +993",
+    "phoneNumberHint": "Example: 61123456",
+    "password": "Password",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordMaxLength": "Password must be at most 20 characters",
+    "loginButton": "Sign In",
+    "loggingIn": "Signing In...",
+    "testMode": "TEST MODE (QUICK LOGIN BY SELECTING ROLE)",
+    "quickLoginText": "Click to login with demo credentials:",
+    "admin": "Admin",
+    "agent": "Agent",
+    "user": "User",
+    "loginFailed": "Login failed. Please check your credentials.",
+    "invalidResponse": "Invalid server response. Please try again.",
+    "networkError": "Network error. Please check your connection."
+  },
+  "header": {
+    "languageTooltip": "Language / Dil",
+    "themeTooltipDark": "Dark Mode",
+    "themeTooltipLight": "Light Mode",
+    "userMenuTooltip": "User menu",
+    "profile": "Profile",
+    "logout": "Log Out"
+  },
+  "sidebar": {
+    "rolePortal": "Role Portal",
+    "management": "Management",
+    "operations": "Operations",
+    "explore": "Explore",
+    "space": "{{role}} Space",
+    "departments": "Departments",
+    "ticket": "Ticket",
+    "ticketB2B": "B2B",
+    "ticketTurkishAirlines": "Turkish Airlines",
+    "adminDashboard": "Admin Dashboard",
+    "agentsDirectory": "Agents Directory",
+    "allBookings": "All Bookings",
+    "systemLogs": "System Logs",
+    "settings": "Settings",
+    "agentDashboard": "Agent Dashboard",
+    "clientsList": "Clients List",
+    "clients": "Clients",
+    "tripPlanner": "Trip Planner",
+    "manageBookings": "Manage Bookings",
+    "travelDashboard": "Travel Dashboard",
+    "searchFlights": "Search Flights",
+    "myBookings": "My Bookings",
+    "myProfile": "My Profile",
+    "employee": "Employee",
+    "employees": "Employees",
+    "users": "Users"
+  },
+  "employee": {
+    "title": "Employees",
+    "subtitle": "Manage employee records and assignments.",
+    "add": "Add Employee",
+    "filter": "Filter",
+    "columns": {
+      "fullName": "Full Name",
+      "phoneNumber": "Phone Number",
+      "gmail": "Email",
+      "department": "Department",
+      "position": "Position",
+      "office": "Office",
+      "actions": "Actions"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "Manage client records and passport details.",
+    "add": "Add Client",
+    "addSuccess": "Client added successfully!",
+    "addError": "An error occurred while saving the client.",
+    "genderWomen": "Women",
+    "genderMen": "Men",
+    "columns": {
+      "fullName": "Full Name",
+      "phoneNumber": "Phone Number",
+      "dateOfBirth": "Date of Birth",
+      "passportNumber": "Passport Number",
+      "passportExpiryDate": "Passport Expiry Date",
+      "passportCountryOfIssue": "Passport Country of Issue",
+      "gender": "Gender",
+      "actions": "Actions"
+    },
+    "autocomplete": {
+      "noClientFound": "No client found.",
+      "addClient": "+ Add Client"
+    },
+    "validation": {
+      "fullNameRequired": "Full name is required",
+      "phoneNumberRequired": "Phone number is required",
+      "phoneNumberLength": "Phone number must be exactly 8 digits",
+      "phoneNumberInvalid": "Invalid phone number (must start with 61/62/63/64/65/71/12 and have 8 digits)",
+      "dateOfBirthRequired": "Date of birth is required",
+      "passportNumberRequired": "Passport number is required",
+      "passportExpiryDateRequired": "Passport expiry date is required",
+      "passportCountryOfIssueRequired": "Passport country of issue is required",
+      "genderRequired": "Gender is required"
+    }
+  },
+  "ticket": {
+    "filter": "Filter",
+    "export": "Export",
+    "summary": {
+      "totalTickets": "Total Tickets",
+      "totalProfit": "Total Profit",
+      "sales": "Sales",
+      "refunds": "Refunds"
+    },
+    "b2b": {
+      "title": "B2B",
+      "addTicket": "Add Ticket",
+      "editTicket": "Edit B2B Ticket",
+      "client": "Client",
+      "clientPlaceholder": "Search client...",
+      "issueDate": "Issue Date",
+      "operator": "Operator",
+      "office": "Office",
+      "operatorTwo": "Operator 2",
+      "agent": "Agent",
+      "pnr": "PNR",
+      "status": "Status",
+      "airline": "Airline",
+      "route": "Route",
+      "cabinClass": "Class",
+      "tripType": "Trip Type",
+      "flightDate": "Flight Date",
+      "netFare": "Net Fare",
+      "saleFare": "Sale Fare",
+      "profit": "Profit",
+      "card": "Card",
+      "note": "Note",
+      "ticketNo": "Ticket No",
+      "actions": "Actions",
+      "saveSuccess": "Ticket saved successfully!",
+      "saveError": "An error occurred while saving the ticket."
+    },
+    "turkish": {
+      "title": "Turkish Airlines",
+      "client": "Client",
+      "flight": "Flight",
+      "status": "Status",
+      "cabin": "Cabin",
+      "totalBookings": "Bookings",
+      "ticketed": "Ticketed",
+      "pending": "Pending"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "subtitle": "Manage system users and access permissions.",
+    "add": "Add User",
+    "filter": "Filter",
+    "deleteConfirm": "Are you sure you want to delete this user?",
+    "statusActiveLabel": "Active",
+    "statusInactiveLabel": "Inactive",
+    "permissionsCount": "Selected",
+    "editTitle": "Edit User",
+    "addTitle": "Add User",
+    "update": "Update",
+    "save": "Save",
+    "updateSuccess": "User updated successfully!",
+    "addSuccess": "User added successfully!",
+    "submitError": "An error occurred while saving user.",
+    "selectEmployee": "Select Employee...",
+    "phoneNumberPlaceholder": "61 123456",
+    "passwordEditPlaceholder": "Leave blank to keep current",
+    "statusActive": "Active User",
+    "permissionsTitle": "Permissions",
+    "selected": "Selected",
+    "selectAll": "Select All",
+    "clearAll": "Clear All",
+    "tabs": {
+      "information": "Information",
+      "access": "Access"
+    },
+    "columns": {
+      "fullName": "Full Name",
+      "phoneNumber": "Phone Number",
+      "status": "Status",
+      "permissions": "Permissions",
+      "actions": "Actions",
+      "employee": "Employee",
+      "password": "Password"
+    },
+    "validation": {
+      "employeeRequired": "Employee is required",
+      "phoneNumberRequired": "Phone number is required",
+      "phoneNumberLength": "Phone number must be exactly 8 digits",
+      "phoneNumberInvalid": "Invalid phone number (must start with 61/62/63/64/65/71/12 and have 8 digits)",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 6 characters"
+    },
+    "permissions": {
+      "groups": {
+        "management": "Management",
+        "reporting": "Reporting",
+        "tickets": "Tickets",
+        "employees": "Employees"
+      },
+      "items": {
+        "users_view": "View Users",
+        "users_create": "Create Users",
+        "users_edit": "Edit Users",
+        "users_delete": "Delete Users",
+        "reports_view": "Reports",
+        "dashboard_view": "Dashboard",
+        "tickets_view": "View Tickets",
+        "tickets_create": "Create Tickets",
+        "tickets_edit": "Edit Tickets",
+        "tickets_delete": "Delete Tickets",
+        "employees_view": "View Employees",
+        "employees_create": "Create Employees",
+        "employees_edit": "Edit Employees"
+      }
+    }
+  },
+  "admin": {
+    "title": "Admin Control Panel",
+    "subtitle": "Welcome, {{name}}. You can monitor system status and general statistics below.",
+    "stats": {
+      "totalRevenue": "Total Revenue",
+      "registeredUsers": "Registered Users",
+      "activeAgents": "Active Agents",
+      "apiIntegrations": "API Integrations"
+    },
+    "statsChanges": {
+      "revenue": "+14.2% this month",
+      "users": "+3.1% weekly",
+      "agents": "2 pending approval",
+      "api": "All systems operational"
+    },
+    "logs": {
+      "title": "Recent System Logs",
+      "subtitle": "Latest 4 event logs from server",
+      "viewAll": "View All",
+      "id": "ID",
+      "event": "Event / Action",
+      "actor": "Actor",
+      "time": "Time",
+      "status": "Status",
+      "newAgent": "New agent registered",
+      "priceUpdated": "Global price index updated",
+      "backupCreated": "Database backup successfully created",
+      "failedLogin": "Failed login attempt detected"
+    }
+  },
+  "agent": {
+    "title": "Agent Panel",
+    "subtitle": "Welcome, {{name}}. You can manage travel planning and client processes here.",
+    "stats": {
+      "activeTours": "Active Tour Bookings",
+      "earnedCommission": "Earned Commission",
+      "clientSatisfaction": "Client Satisfaction"
+    },
+    "clients": {
+      "title": "My Recent Clients",
+      "addClient": "Add Client",
+      "destination": "Destination: {{destination}}",
+      "statusProposal": "Proposal Phase",
+      "statusPaid": "Paid / Completed",
+      "statusFlightPending": "Waiting for Flight"
+    },
+    "proposal": {
+      "title": "Quick Travel Proposal",
+      "clientName": "Client Name",
+      "destination": "Destination / City",
+      "details": "Details / Hotel and Date Preferences",
+      "submit": "Create & Send Proposal"
+    }
+  },
+  "user": {
+    "welcome": "Hello, {{name}}! 👋",
+    "readyToExplore": "Ready to explore your next trip? Check our flights, hotels, or car rental deals.",
+    "search": {
+      "from": "From where?",
+      "to": "To where?",
+      "button": "Search Flights"
+    },
+    "popular": "Popular Destinations",
+    "details": "Details",
+    "destinations": {
+      "antalya": {
+        "title": "Antalya, Turkey",
+        "desc": "A wonderful combination of sea, sand, and sun.",
+        "price": "Starting from 1,200 TL"
+      },
+      "rome": {
+        "title": "Rome, Italy",
+        "desc": "Explore streets smelling of history and delicious pizzas.",
+        "price": "Starting from 4,500 TL"
+      },
+      "tokyo": {
+        "title": "Tokyo, Japan",
+        "desc": "Synthesis of modern technology and traditional culture.",
+        "price": "Starting from 12,000 TL"
+      }
+    }
+  }
+}
