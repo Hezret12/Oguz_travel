@@ -1,9 +1,4 @@
-import {
-  Box,
-  Dialog,
-  DialogContent,
-  IconButton,
-} from "@mui/material";
+import { Box, Dialog, DialogContent, Divider, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
 export const CustomDialog = ({ open, close, widthX, children }) => {
@@ -22,6 +17,7 @@ export const CustomDialog = ({ open, close, widthX, children }) => {
           sx: {
             width: widthX,
             maxWidth: "90%",
+            position: 'relative'
           },
         },
       }}
@@ -30,21 +26,43 @@ export const CustomDialog = ({ open, close, widthX, children }) => {
       <DialogContent
         sx={{
           position: "relative",
-          padding: 3,
+          display: "flex",
+          flexDirection: "column",
+          padding: 0,
+          gap: 0,
+          height: "100%",
         }}
       >
+        <Divider
+          sx={{
+            top: 57,
+            position: "absolute",
+            width: "100%",
+          }}
+        />
         <IconButton
           sx={{
             position: "absolute",
             top: 8,
             right: 5,
+            zIndex: 1,
           }}
           onClick={close}
           className=" dialog-cancel-btn"
         >
           <CloseIcon />
         </IconButton>
-        <Box>{children}</Box>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            px: 3,
+            py: 2.5,
+          }}
+        >
+          {children}
+        </Box>
       </DialogContent>
     </Dialog>
   );

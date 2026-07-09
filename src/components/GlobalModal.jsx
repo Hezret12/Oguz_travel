@@ -73,10 +73,10 @@ const ModalFooterButton = ({ btn, index }) => {
             }
           : {
               ...(btn.color === 'primary' && {
-                backgroundColor: '#0d9488',
-                color: '#ffffff',
+                backgroundColor: (theme) => theme.palette.primary.main,
+                color: (theme) => theme.palette.primary.contrastText,
                 '&:hover': {
-                  backgroundColor: '#0f766e',
+                  backgroundColor: (theme) => theme.palette.primary.dark,
                 },
               }),
             }),
@@ -193,12 +193,16 @@ const GlobalModal = () => {
               theme.palette.mode === 'dark'
                 ? '0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)'
                 : '0 24px 64px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)',
+            backgroundColor: 'background.paper',
             backgroundImage: 'none',
           },
         },
         backdrop: {
           sx: {
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'dark'
+                ? 'rgba(2, 6, 23, 0.7)'
+                : 'rgba(15, 23, 42, 0.45)',
             backdropFilter: 'blur(4px)',
           },
         },
@@ -262,7 +266,10 @@ const GlobalModal = () => {
               onChange={(_, newVal) => setActiveTab(newVal)}
               sx={{
                 minHeight: 36,
-                backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f3f4f6',
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.05)'
+                    : theme.palette.action.hover,
                 borderRadius: '8px',
                 p: '4px',
                 display: 'inline-flex',
@@ -281,7 +288,10 @@ const GlobalModal = () => {
                   '&.Mui-selected': {
                     color: 'text.primary',
                     fontWeight: 600,
-                    backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#374151' : '#ffffff',
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.09)'
+                        : theme.palette.background.paper,
                     boxShadow: (theme) => theme.palette.mode === 'dark' ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
                   },
                   '&:hover:not(.Mui-selected)': {

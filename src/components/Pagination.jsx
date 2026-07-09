@@ -37,36 +37,42 @@ const Pagination = ({ pageIndex = 0, pageCount = 1, onPageChange, totalRows }) =
 
   const baseBtn = {
     width: 34, height: 34, borderRadius: "8px",
-    border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "#e2e8f0"}`,
-    backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#fff",
-    color: isDark ? "rgba(255,255,255,0.7)" : "#374151",
+    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.secondary,
     fontSize: "13px", fontWeight: 500,
     display: "flex", alignItems: "center", justifyContent: "center",
     cursor: "pointer", transition: "all 0.15s ease",
     "&:hover": {
-      backgroundColor: isDark ? "rgba(99,102,241,0.15)" : "rgba(99,102,241,0.07)",
-      borderColor: "#6366f1",
-      color: "#6366f1",
+      backgroundColor: theme.palette.action.hover,
+      borderColor: theme.palette.primary.main,
+      color: theme.palette.primary.main,
     },
   };
 
   const activeBtn = {
     ...baseBtn,
-    backgroundColor: "#2563eb", borderColor: "#2563eb",
-    color: "#fff", fontWeight: 700,
-    boxShadow: "0 2px 8px rgba(37,99,235,0.35)",
-    "&:hover": { backgroundColor: "#1d4ed8", borderColor: "#1d4ed8", color: "#fff" },
+    backgroundColor: theme.palette.primary.main,
+    borderColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    fontWeight: 700,
+    boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(37,99,235,0.35)",
+    "&:hover": {
+      backgroundColor: theme.palette.primary.dark,
+      borderColor: theme.palette.primary.dark,
+      color: theme.palette.primary.contrastText,
+    },
   };
 
   const navSx = {
     width: 34, height: 34, borderRadius: "8px",
-    border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "#e2e8f0"}`,
-    backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#fff",
-    color: isDark ? "rgba(255,255,255,0.6)" : "#374151",
+    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.secondary,
     transition: "all 0.15s ease",
     "&:hover": {
-      backgroundColor: isDark ? "rgba(99,102,241,0.15)" : "rgba(99,102,241,0.07)",
-      borderColor: "#6366f1",
+      backgroundColor: theme.palette.action.hover,
+      borderColor: theme.palette.primary.main,
     },
     "&.Mui-disabled": { opacity: 0.35, pointerEvents: "none" },
   };
@@ -85,7 +91,7 @@ const Pagination = ({ pageIndex = 0, pageCount = 1, onPageChange, totalRows }) =
         page === "..." ? (
           <Typography
             key={`el-${idx}`}
-            sx={{ width: 34, textAlign: "center", fontSize: "13px", color: isDark ? "rgba(255,255,255,0.4)" : "#94a3b8", userSelect: "none" }}
+            sx={{ width: 34, textAlign: "center", fontSize: "13px", color: theme.palette.text.disabled, userSelect: "none" }}
           >
             …
           </Typography>
@@ -102,11 +108,11 @@ const Pagination = ({ pageIndex = 0, pageCount = 1, onPageChange, totalRows }) =
       </IconButton>
 
       {/* Separator */}
-      <Box sx={{ width: "1px", height: 20, backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "#e2e8f0", mx: 0.5 }} />
+      <Box sx={{ width: "1px", height: 20, backgroundColor: theme.palette.divider, mx: 0.5 }} />
 
       {/* Go to page */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-        <Typography sx={{ fontSize: "13px", color: isDark ? "rgba(255,255,255,0.45)" : "#94a3b8", whiteSpace: "nowrap" }}>
+        <Typography sx={{ fontSize: "13px", color: theme.palette.text.secondary, whiteSpace: "nowrap" }}>
           Go to
         </Typography>
         <InputBase
@@ -117,17 +123,22 @@ const Pagination = ({ pageIndex = 0, pageCount = 1, onPageChange, totalRows }) =
           placeholder="pg"
           sx={{
             width: 46, height: 34, borderRadius: "8px",
-            border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "#e2e8f0"}`,
-            backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#fff",
+            border: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.background.paper,
             fontSize: "13px", fontWeight: 500,
-            color: isDark ? "rgba(255,255,255,0.75)" : "#374151",
+            color: theme.palette.text.primary,
             px: 0.5,
             "& input": {
               textAlign: "center",
               padding: "0 4px",
               "&::-webkit-outer-spin-button, &::-webkit-inner-spin-button": { WebkitAppearance: "none", margin: 0 },
             },
-            "&.Mui-focused": { borderColor: "#2563eb", boxShadow: "0 0 0 2px rgba(37,99,235,0.15)" },
+            "&.Mui-focused": {
+              borderColor: theme.palette.primary.main,
+              boxShadow: isDark
+                ? "0 0 0 2px rgba(59,130,246,0.18)"
+                : "0 0 0 2px rgba(37,99,235,0.15)",
+            },
             transition: "all 0.15s ease",
           }}
         />
@@ -135,7 +146,7 @@ const Pagination = ({ pageIndex = 0, pageCount = 1, onPageChange, totalRows }) =
 
       {/* Total pages */}
       {totalRows !== undefined && (
-        <Typography sx={{ fontSize: "12px", color: isDark ? "rgba(255,255,255,0.3)" : "#94a3b8", ml: 0.25, whiteSpace: "nowrap" }}>
+        <Typography sx={{ fontSize: "12px", color: theme.palette.text.disabled, ml: 0.25, whiteSpace: "nowrap" }}>
           / {pageCount} pg
         </Typography>
       )}

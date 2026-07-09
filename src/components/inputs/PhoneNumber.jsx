@@ -1,5 +1,5 @@
+import { Box, InputAdornment, TextField, Typography, useColorScheme } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { Box, Typography, TextField, InputAdornment, useColorScheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { normalizePhoneInput } from '../../utils/phone';
 
@@ -37,7 +37,10 @@ const baseFieldStyles = {
       '&.Mui-focused': {
         backgroundColor: (theme) =>
           theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : '#ffffff',
-        boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.12)',
+        boxShadow: (theme) =>
+          theme.palette.mode === 'dark'
+            ? '0 0 0 3px rgba(59, 130, 246, 0.16)'
+            : '0 0 0 3px rgba(37, 99, 235, 0.12)',
       },
     },
     '& .MuiOutlinedInput-input': {
@@ -67,7 +70,14 @@ const baseFieldStyles = {
         transition: 'border-color 0.3s ease',
       },
       '&:hover fieldset': { borderColor: '#15C3C2' },
-      '&.Mui-focused': { backgroundColor: '#0E858433' },
+      '&.Mui-focused': {
+        backgroundColor: (theme) =>
+          theme.palette.mode === 'dark' ? 'rgba(59, 130, 246, 0.12)' : '#0E858433',
+        boxShadow: (theme) =>
+          theme.palette.mode === 'dark'
+            ? '0 0 0 3px rgba(59, 130, 246, 0.16)'
+            : '0 0 0 3px rgba(37, 99, 235, 0.12)',
+      },
       '&.Mui-focused fieldset': { borderColor: '#15C3C2', borderWidth: 1 },
     },
     '& .MuiOutlinedInput-input': {
@@ -109,7 +119,9 @@ const PhoneNumberField = ({
   name = 'phone',
   error,
   label,
-  placeholder = '__ __ __ __',
+  required = false,
+  disabled = false,
+  placeholder = '********',
   prefix = '+993',
   maxLength = 8,
   variant = 'form',
@@ -125,16 +137,14 @@ const PhoneNumberField = ({
     : 'text.primary';
   const variantStyles = baseFieldStyles[variant] ?? baseFieldStyles.form;
   const variantLabelStyles = baseLabelStyles[variant] ?? baseLabelStyles.form;
-
-  const resolvedLabel = label === false ? null : (label ?? t('login.phoneNumber'));
+  const resolvedLabel = label === false ? null : (label ?? t('columns.phoneNumber'));
 
   return (
     <Box sx={{ width: '100%', position: 'relative', ...sx }}>
       {resolvedLabel && (
-        <Typography
-          sx={variantLabelStyles}
-        >
+        <Typography sx={variantLabelStyles}>
           {resolvedLabel}
+          {required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
         </Typography>
       )}
 
@@ -145,65 +155,67 @@ const PhoneNumberField = ({
           const resolvedError = error ?? fieldState.error;
 
           return (
-          <TextField
-            {...field}
-            fullWidth
-            placeholder={placeholder}
-            error={Boolean(resolvedError)}
-            size='medium'
-            helperText={resolvedError?.message}
-            onChange={(e) => field.onChange(normalizePhoneInput(e.target.value))}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment
-                    position="start"
-                    sx={{
-                      marginRight: 0,
-                      '& .MuiInputAdornment-root': { marginRight: 0 },
-                    }}
-                  >
-                    <Typography
+            <TextField
+              {...field}
+              value={field.value ?? ''}
+              fullWidth
+              disabled={disabled}
+              placeholder={placeholder}
+              error={Boolean(resolvedError)}
+              size="medium"
+              helperText={resolvedError?.message}
+              onChange={(e) => field.onChange(normalizePhoneInput(e.target.value))}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment
+                      position="start"
                       sx={{
-                        fontSize: '1.05rem',
-                        fontWeight: 500,
-                        color: textColor,
-                        lineHeight: '1.6',
-                        mr: '6px',
-                        userSelect: 'none',
-                        pointerEvents: 'none',
+                        marginRight: 0,
+                        '& .MuiInputAdornment-root': { marginRight: 0 },
                       }}
                     >
-                      {prefix}
-                    </Typography>
-                  </InputAdornment>
-                ),
-              },
-              htmlInput: {
-                maxLength,
-                inputMode: 'numeric',
-                style: { paddingLeft: 0 },
-              },
-            }}
-            sx={mergeSx(
-              {
-                position: 'relative',
-                '& .MuiOutlinedInput-input::placeholder': {
-                  color:
-                    variant === 'login'
-                      ? 'rgba(255,255,255,0.35)'
-                      : 'text.disabled',
-                  opacity: 1,
-                  letterSpacing: variant === 'login' ? '0.12em' : '0.02em',
+                      <Typography
+                        sx={{
+                          fontSize: '1.05rem',
+                          fontWeight: 500,
+                          color: textColor,
+                          lineHeight: '1.6',
+                          mr: '6px',
+                          userSelect: 'none',
+                          pointerEvents: 'none',
+                        }}
+                      >
+                        {prefix}
+                      </Typography>
+                    </InputAdornment>
+                  ),
                 },
-                '& .MuiOutlinedInput-input': {
-                  color: variant === 'login' ? textColor : 'text.primary',
+                htmlInput: {
+                  maxLength,
+                  inputMode: 'numeric',
+                  style: { paddingLeft: 0 },
                 },
-              },
-              variantStyles,
-              inputSx
-            )}
-          />
+              }}
+              sx={mergeSx(
+                {
+                  position: 'relative',
+                  '& .MuiOutlinedInput-input::placeholder': {
+                    color:
+                      variant === 'login'
+                        ? 'rgba(255,255,255,0.35)'
+                        : 'text.disabled',
+                    opacity: 1,
+                    letterSpacing: variant === 'login' ? '0.12em' : '0.02em',
+                  },
+                  '& .MuiOutlinedInput-input': {
+                    color: variant === 'login' ? textColor : 'text.primary',
+                  },
+                },
+                variantStyles,
+                inputSx,
+              )}
+            />
           );
         }}
       />
@@ -212,3 +224,4 @@ const PhoneNumberField = ({
 };
 
 export default PhoneNumberField;
+

@@ -334,22 +334,21 @@ const Sidebar = ({ mobileOpen, onSidebarClose, onCollapsedChange }) => {
   }, []);
 
   useEffect(() => {
-    const activeGroups = {};
-    let shouldUpdate = false;
     navItems.forEach((item) => {
       if (item.isGroup && item.children) {
         const hasActiveChild = item.children.some((c) => c.path === location.pathname);
-        if (hasActiveChild && !openGroups[item.text]) {
-          activeGroups[item.text] = true;
-          shouldUpdate = true;
+        if (hasActiveChild) {
+          setOpenGroups((prev) => {
+            if (prev[item.text] === undefined) {
+              return { ...prev, [item.text]: true };
+            }
+            return prev;
+          });
         }
       }
     });
-    if (shouldUpdate) {
-      const timer = setTimeout(() => setOpenGroups((prev) => ({ ...prev, ...activeGroups })), 0);
-      return () => clearTimeout(timer);
-    }
-  }, [location.pathname, navItems, openGroups]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -366,7 +365,10 @@ const Sidebar = ({ mobileOpen, onSidebarClose, onCollapsedChange }) => {
     left: 0,
     height: '100vh',
     width: isCol ? SIDEBAR_CW : SIDEBAR_W,
-    background: 'linear-gradient(180deg, #042F2E 0%, #0C4A6E 100%)',
+    background:
+      mode === 'dark'
+        ? 'linear-gradient(180deg, #021819 0%, #022C45 100%)'
+        : 'linear-gradient(180deg, #042F2E 0%, #0C4A6E 100%)',
     borderRight: '1px solid #14B8A633',
     display: 'flex',
     flexDirection: 'column',
@@ -385,7 +387,9 @@ const Sidebar = ({ mobileOpen, onSidebarClose, onCollapsedChange }) => {
     height: 26,
     minWidth: 26,
     borderRadius: '50%',
-    background: 'linear-gradient(135deg, #0F766E, #0E7490)',
+    background: mode === 'dark'
+      ? 'linear-gradient(135deg, #0D9488 0%, #06B6D4 100%)'
+      : 'linear-gradient(135deg, #0F766E, #0E7490)',
     border: '2px solid #042F2E',
     color: '#fff',
     display: 'flex',
@@ -395,7 +399,9 @@ const Sidebar = ({ mobileOpen, onSidebarClose, onCollapsedChange }) => {
     boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
     '&:hover': {
       transform: 'scale(1.1)',
-      background: 'linear-gradient(135deg, #0F766E, #0E7490)',
+      background: mode === 'dark'
+        ? 'linear-gradient(135deg, #0B7F74 0%, #0891B2 100%)'
+        : 'linear-gradient(135deg, #0F766E, #0E7490)',
     },
     transition: 'all 0.2s ease',
     padding: 0,

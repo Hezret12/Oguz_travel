@@ -6,30 +6,347 @@
   "reset": "Сбросить",
   "all": "Все",
   "search": "Поиск",
-  "login": {
-    "welcomeTitle": "Добро пожаловать на портал Oguz Travel",
-    "welcomeSubtitle": "Современная, безопасная и гибкая система управления на основе ролей для туристических агентств, агентов и пассажиров.",
-    "signIn": "Войти в систему",
-    "signInSubtitle": "Введите номер телефона и пароль для продолжения",
+  "save": "Сохранить",
+  "filter": "Фильтр",
+  "validation": {
+    "required": "Required",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email address",
+    "dateRequired": "Date is required",
+    "phoneRequired": "Phone number is required",
+    "phoneLength": "Phone number must be 8 digits",
+    "phoneInvalid": "Invalid phone number",
+    "passwordRequired": "Password is required",
+    "passwordMin": "Password is too short",
+    "passwordMax": "Password is too long",
+    "numberRequired": "Enter a valid number",
+    "requiredNumber": "Enter a valid number",
+    "invalidNumber": "Enter a valid number",
+    "onlyNumbers": "Only numbers are allowed",
+    "max20Chars": "Must be 20 characters or less",
+    "onlyLetters": "Only letters are allowed",
+    "confirmPasswordRequired": "Confirm password is required",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "genderRequired": "Gender is required",
+    "tcNoRequired": "TC number is required",
+    "tcNoInvalid": "Invalid TC number",
+    "passportRequired": "Passport number is required",
+    "passportInvalid": "Invalid passport number",
+    "messageMin": "Message must be at least 10 characters",
+    "minPassengers": "At least 1 passenger must be selected",
+    "invalidReturnDate": "Return date cannot be before departure date"
+  },
+  "columns": {
+    "fullName": "Полное имя",
     "phoneNumber": "Номер телефона",
-    "phoneNumberRequired": "Требуется номер телефона",
-    "phoneNumberInvalid": "Введите номер: код 61–65 или 71 и ещё 6 цифр (всего 8)",
-    "phoneNumberLength": "После +993 должно быть ровно 8 цифр",
-    "phoneNumberHint": "Пример: 61123456",
+    "gmail": "Эл. почта",
+    "department": "Отдел",
+    "position": "Должность",
+    "office": "Офис",
+    "dateOfBirth": "Дата рождения",
+    "passportNumber": "Номер паспорта",
+    "passportExpiryDate": "Дата окончания паспорта",
+    "passportCountryOfIssue": "Страна выдачи паспорта",
+    "gender": "Пол",
+    "employee": "Сотрудник",
     "password": "Пароль",
-    "passwordRequired": "Требуется пароль",
-    "passwordTooShort": "Пароль должен быть не менее 6 символов",
-    "passwordMaxLength": "Пароль не должен превышать 20 символов",
-    "loginButton": "Войти",
-    "loggingIn": "Вход в систему...",
-    "testMode": "ТЕСТОВЫЙ РЕЖИМ (БЫСТРЫЙ ВХОД С ВЫБОРОМ РОЛИ)",
-    "quickLoginText": "Нажмите для входа с демо-учетными данными:",
-    "admin": "Администратор",
+    "status": "Статус",
+    "permissions": "Разрешения",
+    "actions": "Действия",
+    "client": "Клиент",
+    "issueDate": "Дата оформления",
+    "operator": "Оператор",
+    "operatorTwo": "Оператор 2",
     "agent": "Агент",
-    "user": "Пользователь",
-    "loginFailed": "Ошибка входа. Пожалуйста, проверьте свои учетные данные.",
-    "invalidResponse": "Неверный ответ сервера. Пожалуйста, попробуйте снова.",
-    "networkError": "Ошибка сети. Пожалуйста, проверьте ваше соединение."
+    "agentFullName": "Agent Full Name",
+    "pnr": "PNR",
+    "airline": "Авиакомпания",
+    "route": "Маршрут",
+    "cabinClass": "Класс",
+    "tripType": "Тип поездки",
+    "flightDate": "Дата вылета",
+    "netFare": "Чистая цена",
+    "saleFare": "Цена продажи",
+    "profit": "Прибыль",
+    "card": "Карта",
+    "note": "Заметка",
+    "ticketNo": "Номер билета",
+    "flight": "Рейс",
+    "cabin": "Кабина",
+    "totalBookings": "Бронирования"
+  },
+  "pages": {
+    "login": {
+      "welcomeTitle": "Добро пожаловать на портал Oguz Travel",
+      "welcomeSubtitle": "Современная, безопасная и гибкая система управления на основе ролей для туристических агентств, агентов и пассажиров.",
+      "signIn": "Войти в систему",
+      "signInSubtitle": "Введите номер телефона и пароль для продолжения",
+      "phoneNumberHint": "Пример: 61123456",
+      "loginButton": "Войти",
+      "loggingIn": "Вход в систему...",
+      "testMode": "ТЕСТОВЫЙ РЕЖИМ (БЫСТРЫЙ ВХОД С ВЫБОРОМ РОЛИ)",
+      "quickLoginText": "Нажмите для входа с демо-учетными данными:",
+      "admin": "Администратор",
+      "agent": "Агент",
+      "user": "Пользователь",
+      "loginFailed": "Ошибка входа. Пожалуйста, проверьте свои учетные данные.",
+      "invalidResponse": "Неверный ответ сервера. Пожалуйста, попробуйте снова.",
+      "networkError": "Ошибка сети. Пожалуйста, проверьте ваше соединение.",
+      "validation": {
+        "phoneNumberRequired": "����� �������� ����������",
+        "phoneNumberLength": "����� �������� ������ ��������� 8 ����",
+        "phoneNumberInvalid": "�������� ����� ��������",
+        "passwordRequired": "������ ����������",
+        "passwordTooShort": "������ ������� ��������",
+        "passwordMaxLength": "������ ������� �������"
+      }
+    },
+    "employee": {
+      "title": "Сотрудники",
+      "subtitle": "Управление записями и назначениями сотрудников.",
+      "add": "Добавить сотрудника",
+      "addSuccess": "��������� ������� ��������!",
+      "addError": "��������� ������ ��� ���������� ����������.",
+      "validation": {
+        "fullNameRequired": "������ ��� �����������",
+        "phoneNumberRequired": "����� �������� ����������",
+        "phoneNumberLength": "����� �������� ������ ��������� 8 ����",
+        "phoneNumberInvalid": "�������� ����� ��������",
+        "gmailRequired": "��. ����� �����������",
+        "gmailInvalid": "�������� ����� ��. �����",
+        "departmentRequired": "����� ����������",
+        "positionRequired": "��������� �����������",
+        "officeRequired": "���� ����������"
+      }
+    },
+    "clients": {
+      "title": "Клиенты",
+      "subtitle": "Управление данными клиентов и паспортными данными.",
+      "add": "Добавить клиента",
+      "addSuccess": "Клиент успешно добавлен!",
+      "addError": "Произошла ошибка при сохранении клиента.",
+      "genderWomen": "Женщина",
+      "genderMen": "Мужчина",
+      "autocomplete": {
+        "noClientFound": "Клиент не найден.",
+        "addClient": "+ Добавить клиента"
+      },
+      "validation": {
+        "fullNameRequired": "Полное имя обязательно",
+        "phoneNumberRequired": "Номер телефона обязателен",
+        "phoneNumberLength": "Номер телефона должен содержать 8 цифр",
+        "phoneNumberInvalid": "Некорректный номер телефона (61/62/63/64/65/71/12 и 8 цифр)",
+        "dateOfBirthRequired": "Дата рождения обязательна",
+        "passportNumberRequired": "Номер паспорта обязателен",
+        "passportExpiryDateRequired": "Дата окончания паспорта обязательна",
+        "passportCountryOfIssueRequired": "Страна выдачи паспорта обязательна",
+        "genderRequired": "Пол обязателен"
+      }
+    },
+    "referralLetter": {
+      "title": "Письма и договоры",
+      "add": "Добавить письмо",
+      "addSuccess": "Письмо успешно добавлено!",
+      "addError": "Произошла ошибка при сохранении письма.",
+      "validation": {
+        "arzaNoRequired": "Номер письма обязателен",
+        "operatorRequired": "Оператор обязателен",
+        "nameRequired": "Имя обязательно",
+        "surnameRequired": "Фамилия обязательна",
+        "genderRequired": "Пол обязателен",
+        "dateOfBirthRequired": "Дата рождения обязательна",
+        "passportNumberRequired": "Номер паспорта обязателен",
+        "destinationCountryRequired": "Страна назначения обязательна",
+        "departureDateRequired": "Дата отправления обязательна",
+        "returnDateRequired": "Дата возвращения обязательна",
+        "priceRequired": "Цена обязательна",
+        "numberRequired": "Введите корректное число",
+        "contractDateRequired": "Дата договора обязательна"
+      }
+    },
+    "ticket": {
+      "export": "Экспорт",
+      "summary": {
+        "totalTickets": "Всего билетов",
+        "totalProfit": "Общая прибыль",
+        "sales": "Продажи",
+        "refunds": "Возвраты"
+      },
+      "b2b": {
+        "title": "B2B",
+        "addTicket": "Добавить билет",
+        "editTicket": "Редактировать B2B билет",
+        "clientPlaceholder": "Найти клиента...",
+        "saveSuccess": "Билет успешно сохранен!",
+        "saveError": "Произошла ошибка при сохранении билета.",
+        "validation": {
+          "clientRequired": "Client is required",
+          "issueDateRequired": "Issue date is required",
+          "operatorRequired": "Operator is required",
+          "officeRequired": "Office is required",
+          "operatorTwoRequired": "Secondary operator is required",
+          "agentFullNameRequired": "Agent full name is required",
+          "agentPhoneNumberRequired": "Agent phone number is required",
+          "agentPhoneNumberLength": "Phone number must be exactly 8 digits",
+          "agentPhoneNumberInvalid": "Invalid phone number",
+          "pnrRequired": "PNR is required",
+          "statusRequired": "Status is required",
+          "airlineRequired": "Airline is required",
+          "routeRequired": "Route is required",
+          "cabinClassRequired": "Class is required",
+          "tripTypeRequired": "Trip type is required",
+          "flightDateRequired": "Flight date is required",
+          "numberRequired": "Enter a valid number",
+          "netFareRequired": "Net fare is required",
+          "saleFareRequired": "Sale fare is required",
+          "cardRequired": "Card is required"
+        }
+      },
+      "turkish": {
+        "title": "Turkish Airlines"
+      }
+    },
+    "users": {
+      "title": "Пользователи",
+      "subtitle": "Управление пользователями системы и правами доступа.",
+      "add": "Добавить пользователя",
+      "deleteConfirm": "Вы уверены, что хотите удалить этого пользователя?",
+      "statusActiveLabel": "Активный",
+      "statusInactiveLabel": "Неактивный",
+      "permissionsCount": "Выбрано",
+      "editTitle": "Редактировать пользователя",
+      "addTitle": "Добавить пользователя",
+      "update": "Обновить",
+      "save": "Сохранить",
+      "updateSuccess": "Пользователь успешно обновлен!",
+      "addSuccess": "Пользователь успешно добавлен!",
+      "submitError": "Произошла ошибка при сохранении пользователя.",
+      "selectEmployee": "Выберите сотрудника...",
+      "phoneNumberPlaceholder": "61 123456",
+      "passwordEditPlaceholder": "Оставьте пустым, чтобы сохранить текущий",
+      "statusActive": "Активный пользователь",
+      "permissionsTitle": "Разрешения",
+      "selected": "Выбрано",
+      "selectAll": "Выбрать все",
+      "clearAll": "Очистить все",
+      "tabs": {
+        "information": "Информация",
+        "access": "Доступ"
+      },
+      "validation": {
+        "employeeRequired": "Сотрудник обязателен для выбора",
+        "phoneNumberRequired": "Номер телефона обязателен",
+        "phoneNumberLength": "Номер телефона должен содержать 8 цифр",
+        "phoneNumberInvalid": "Некорректный номер телефона (должен начинаться на 61/62/63/64/65/71/12 и состоять из 8 цифр)",
+        "passwordRequired": "Пароль обязателен",
+        "passwordTooShort": "Пароль слишком короткий (минимум 6 символов)"
+      },
+      "permissions": {
+        "groups": {
+          "management": "Управление",
+          "reporting": "Отчетность",
+          "tickets": "Билеты",
+          "employees": "Сотрудники"
+        },
+        "items": {
+          "users_view": "Просмотр пользователей",
+          "users_create": "Создание пользователей",
+          "users_edit": "Редактирование пользователей",
+          "users_delete": "Удаление пользователей",
+          "reports_view": "Отчеты",
+          "dashboard_view": "Панель управления",
+          "tickets_view": "Просмотр билетов",
+          "tickets_create": "Создание билетов",
+          "tickets_edit": "Редактирование билетов",
+          "tickets_delete": "Удаление билетов",
+          "employees_view": "Просмотр сотрудников",
+          "employees_create": "Добавление сотрудников",
+          "employees_edit": "Редактирование сотрудников"
+        }
+      }
+    },
+    "admin": {
+      "title": "Панель Управления Администратора",
+      "subtitle": "Добро пожаловать, {{name}}. Ниже вы можете отслеживать состояние системы и общую статистику.",
+      "stats": {
+        "totalRevenue": "Общая Выручка",
+        "registeredUsers": "Зарегистрированные Пользователи",
+        "activeAgents": "Активные Агенты",
+        "apiIntegrations": "Интеграции API"
+      },
+      "statsChanges": {
+        "revenue": "+14.2% в этом месяце",
+        "users": "+3.1% еженедельно",
+        "agents": "2 ожидают одобрения",
+        "api": "Все системы работают нормально"
+      },
+      "logs": {
+        "title": "Последние Системные Логи",
+        "subtitle": "4 последних события с сервера",
+        "viewAll": "Посмотреть все",
+        "id": "ID",
+        "event": "Событие / Действие",
+        "actor": "Исполнитель",
+        "time": "Время",
+        "status": "Статус",
+        "newAgent": "Зарегистрирован новый агент",
+        "priceUpdated": "Обновлен глобальный индекс цен",
+        "backupCreated": "Резервная копия базы данных успешно создана",
+        "failedLogin": "Обнаружена неудачная попытка входа"
+      }
+    },
+    "agent": {
+      "title": "Панель Агента",
+      "subtitle": "Добро пожаловать, {{name}}. Здесь вы можете управлять планированием поездок и процессами клиентов.",
+      "stats": {
+        "activeTours": "Активные Бронирования Туров",
+        "earnedCommission": "Заработанная Комиссия",
+        "clientSatisfaction": "Удовлетворенность Клиентов"
+      },
+      "clients": {
+        "title": "Мои Последние Клиенты",
+        "addClient": "Добавить Клиента",
+        "destination": "Направление: {{destination}}",
+        "statusProposal": "Стадия Предложения",
+        "statusPaid": "Оплачено / Завершено",
+        "statusFlightPending": "Ожидание Рейса"
+      },
+      "proposal": {
+        "title": "Быстрое Предложение о Поездке",
+        "clientName": "Имя Клиента",
+        "destination": "Направление / Город",
+        "details": "Детали / Предпочтения по Отелю и Датам",
+        "submit": "Создать и Отправить Предложение"
+      }
+    },
+    "user": {
+      "welcome": "Привет, {{name}}! 👋",
+      "readyToExplore": "Готовы к следующему путешествию? Ознакомьтесь с нашими предложениями по авиабилетам, отелям и аренде автомобилей.",
+      "search": {
+        "from": "Откуда?",
+        "to": "Куда?",
+        "button": "Найти Рейсы"
+      },
+      "popular": "Популярные Направления",
+      "details": "Подробнее",
+      "destinations": {
+        "antalya": {
+          "title": "Анталья, Турция",
+          "desc": "Прекрасное сочетание моря, песка и солнца.",
+          "price": "От 1 200 TL"
+        },
+        "rome": {
+          "title": "Рим, Италия",
+          "desc": "Исследуйте пропитанные историей улицы и вкуснейшую пиццу.",
+          "price": "От 4 500 TL"
+        },
+        "tokyo": {
+          "title": "Токио, Япония",
+          "desc": "Синтез современных технологий и традиционной культуры.",
+          "price": "От 12 000 TL"
+        }
+      }
+    }
   },
   "header": {
     "languageTooltip": "Язык / Dil",
@@ -66,253 +383,5 @@
     "employee": "Сотрудники",
     "employees": "Сотрудники",
     "users": "Пользователи"
-  },
-  "employee": {
-    "title": "Сотрудники",
-    "subtitle": "Управление записями и назначениями сотрудников.",
-    "add": "Добавить сотрудника",
-    "filter": "Фильтр",
-    "columns": {
-      "fullName": "Полное имя",
-      "phoneNumber": "Номер телефона",
-      "gmail": "Эл. почта",
-      "department": "Отдел",
-      "position": "Должность",
-      "office": "Офис",
-      "actions": "Действия"
-    }
-  },
-  "clients": {
-    "title": "Клиенты",
-    "subtitle": "Управление данными клиентов и паспортными данными.",
-    "add": "Добавить клиента",
-    "addSuccess": "Клиент успешно добавлен!",
-    "addError": "Произошла ошибка при сохранении клиента.",
-    "genderWomen": "Женщина",
-    "genderMen": "Мужчина",
-    "columns": {
-      "fullName": "Полное имя",
-      "phoneNumber": "Номер телефона",
-      "dateOfBirth": "Дата рождения",
-      "passportNumber": "Номер паспорта",
-      "passportExpiryDate": "Дата окончания паспорта",
-      "passportCountryOfIssue": "Страна выдачи паспорта",
-      "gender": "Пол",
-      "actions": "Действия"
-    },
-    "autocomplete": {
-      "noClientFound": "Клиент не найден.",
-      "addClient": "+ Добавить клиента"
-    },
-    "validation": {
-      "fullNameRequired": "Полное имя обязательно",
-      "phoneNumberRequired": "Номер телефона обязателен",
-      "phoneNumberLength": "Номер телефона должен содержать 8 цифр",
-      "phoneNumberInvalid": "Некорректный номер телефона (61/62/63/64/65/71/12 и 8 цифр)",
-      "dateOfBirthRequired": "Дата рождения обязательна",
-      "passportNumberRequired": "Номер паспорта обязателен",
-      "passportExpiryDateRequired": "Дата окончания паспорта обязательна",
-      "passportCountryOfIssueRequired": "Страна выдачи паспорта обязательна",
-      "genderRequired": "Пол обязателен"
-    }
-  },
-  "ticket": {
-    "filter": "Фильтр",
-    "export": "Экспорт",
-    "summary": {
-      "totalTickets": "Всего билетов",
-      "totalProfit": "Общая прибыль",
-      "sales": "Продажи",
-      "refunds": "Возвраты"
-    },
-    "b2b": {
-      "title": "B2B",
-      "addTicket": "Добавить билет",
-      "editTicket": "Редактировать B2B билет",
-      "client": "Клиент",
-      "clientPlaceholder": "Найти клиента...",
-      "issueDate": "Дата оформления",
-      "operator": "Оператор",
-      "office": "Офис",
-      "operatorTwo": "Оператор 2",
-      "agent": "Агент",
-      "pnr": "PNR",
-      "status": "Статус",
-      "airline": "Авиакомпания",
-      "route": "Маршрут",
-      "cabinClass": "Класс",
-      "tripType": "Тип поездки",
-      "flightDate": "Дата вылета",
-      "netFare": "Чистая цена",
-      "saleFare": "Цена продажи",
-      "profit": "Прибыль",
-      "card": "Карта",
-      "note": "Заметка",
-      "ticketNo": "Номер билета",
-      "actions": "Действия",
-      "saveSuccess": "Билет успешно сохранен!",
-      "saveError": "Произошла ошибка при сохранении билета."
-    },
-    "turkish": {
-      "title": "Turkish Airlines",
-      "client": "Клиент",
-      "flight": "Рейс",
-      "status": "Статус",
-      "cabin": "Кабина",
-      "totalBookings": "Бронирования",
-      "ticketed": "Оформлено",
-      "pending": "В ожидании"
-    }
-  },
-  "users": {
-    "title": "Пользователи",
-    "subtitle": "Управление пользователями системы и правами доступа.",
-    "add": "Добавить пользователя",
-    "filter": "Фильтр",
-    "deleteConfirm": "Вы уверены, что хотите удалить этого пользователя?",
-    "statusActiveLabel": "Активный",
-    "statusInactiveLabel": "Неактивный",
-    "permissionsCount": "Выбрано",
-    "editTitle": "Редактировать пользователя",
-    "addTitle": "Добавить пользователя",
-    "update": "Обновить",
-    "save": "Сохранить",
-    "updateSuccess": "Пользователь успешно обновлен!",
-    "addSuccess": "Пользователь успешно добавлен!",
-    "submitError": "Произошла ошибка при сохранении пользователя.",
-    "selectEmployee": "Выберите сотрудника...",
-    "phoneNumberPlaceholder": "61 123456",
-    "passwordEditPlaceholder": "Оставьте пустым, чтобы сохранить текущий",
-    "statusActive": "Активный пользователь",
-    "permissionsTitle": "Разрешения",
-    "selected": "Выбрано",
-    "selectAll": "Выбрать все",
-    "clearAll": "Очистить все",
-    "tabs": {
-      "information": "Информация",
-      "access": "Доступ"
-    },
-    "columns": {
-      "fullName": "Полное имя",
-      "phoneNumber": "Номер телефона",
-      "status": "Статус",
-      "permissions": "Разрешения",
-      "actions": "Действия",
-      "employee": "Сотрудник",
-      "password": "Пароль"
-    },
-    "validation": {
-      "employeeRequired": "Сотрудник обязателен для выбора",
-      "phoneNumberRequired": "Номер телефона обязателен",
-      "phoneNumberLength": "Номер телефона должен содержать 8 цифр",
-      "phoneNumberInvalid": "Некорректный номер телефона (должен начинаться на 61/62/63/64/65/71/12 и состоять из 8 цифр)",
-      "passwordRequired": "Пароль обязателен",
-      "passwordTooShort": "Пароль слишком короткий (минимум 6 символов)"
-    },
-    "permissions": {
-      "groups": {
-        "management": "Управление",
-        "reporting": "Отчетность",
-        "tickets": "Билеты",
-        "employees": "Сотрудники"
-      },
-      "items": {
-        "users_view": "Просмотр пользователей",
-        "users_create": "Создание пользователей",
-        "users_edit": "Редактирование пользователей",
-        "users_delete": "Удаление пользователей",
-        "reports_view": "Отчеты",
-        "dashboard_view": "Панель управления",
-        "tickets_view": "Просмотр билетов",
-        "tickets_create": "Создание билетов",
-        "tickets_edit": "Редактирование билетов",
-        "tickets_delete": "Удаление билетов",
-        "employees_view": "Просмотр сотрудников",
-        "employees_create": "Добавление сотрудников",
-        "employees_edit": "Редактирование сотрудников"
-      }
-    }
-  },
-  "admin": {
-    "title": "Панель Управления Администратора",
-    "subtitle": "Добро пожаловать, {{name}}. Ниже вы можете отслеживать состояние системы и общую статистику.",
-    "stats": {
-      "totalRevenue": "Общая Выручка",
-      "registeredUsers": "Зарегистрированные Пользователи",
-      "activeAgents": "Активные Агенты",
-      "apiIntegrations": "Интеграции API"
-    },
-    "statsChanges": {
-      "revenue": "+14.2% в этом месяце",
-      "users": "+3.1% еженедельно",
-      "agents": "2 ожидают одобрения",
-      "api": "Все системы работают нормально"
-    },
-    "logs": {
-      "title": "Последние Системные Логи",
-      "subtitle": "4 последних события с сервера",
-      "viewAll": "Посмотреть все",
-      "id": "ID",
-      "event": "Событие / Действие",
-      "actor": "Исполнитель",
-      "time": "Время",
-      "status": "Статус",
-      "newAgent": "Зарегистрирован новый агент",
-      "priceUpdated": "Обновлен глобальный индекс цен",
-      "backupCreated": "Резервная копия базы данных успешно создана",
-      "failedLogin": "Обнаружена неудачная попытка входа"
-    }
-  },
-  "agent": {
-    "title": "Панель Агента",
-    "subtitle": "Добро пожаловать, {{name}}. Здесь вы можете управлять планированием поездок и процессами клиентов.",
-    "stats": {
-      "activeTours": "Активные Бронирования Туров",
-      "earnedCommission": "Заработанная Комиссия",
-      "clientSatisfaction": "Удовлетворенность Клиентов"
-    },
-    "clients": {
-      "title": "Мои Последние Клиенты",
-      "addClient": "Добавить Клиента",
-      "destination": "Направление: {{destination}}",
-      "statusProposal": "Стадия Предложения",
-      "statusPaid": "Оплачено / Завершено",
-      "statusFlightPending": "Ожидание Рейса"
-    },
-    "proposal": {
-      "title": "Быстрое Предложение о Поездке",
-      "clientName": "Имя Клиента",
-      "destination": "Направление / Город",
-      "details": "Детали / Предпочтения по Отелю и Датам",
-      "submit": "Создать и Отправить Предложение"
-    }
-  },
-  "user": {
-    "welcome": "Привет, {{name}}! 👋",
-    "readyToExplore": "Готовы к следующему путешествию? Ознакомьтесь с нашими предложениями по авиабилетам, отелям и аренде автомобилей.",
-    "search": {
-      "from": "Откуда?",
-      "to": "Куда?",
-      "button": "Найти Рейсы"
-    },
-    "popular": "Популярные Направления",
-    "details": "Подробнее",
-    "destinations": {
-      "antalya": {
-        "title": "Анталья, Турция",
-        "desc": "Прекрасное сочетание моря, песка и солнца.",
-        "price": "От 1 200 TL"
-      },
-      "rome": {
-        "title": "Рим, Италия",
-        "desc": "Исследуйте пропитанные историей улицы и вкуснейшую пиццу.",
-        "price": "От 4 500 TL"
-      },
-      "tokyo": {
-        "title": "Токио, Япония",
-        "desc": "Синтез современных технологий и традиционной культуры.",
-        "price": "От 12 000 TL"
-      }
-    }
   }
 }

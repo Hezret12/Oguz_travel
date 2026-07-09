@@ -1,23 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
-/**
- * Verilen değeri belirtilen gecikme süresi kadar debounce eder.
- * Kullanıcı yazmayı bıraktıktan sonra API'ye istek gönderir.
- *
- * @param {any} value - Debounce edilecek değer
- * @param {number} delay - Gecikme süresi (ms), varsayılan 400ms
- * @returns {any} - Debounce edilmiş değer
- */
-export const useDebounce = (value, delay = 400) => {
+export function useDebounce(value, delay = 400) {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(handler);
+    };
   }, [value, delay]);
 
   return debouncedValue;
-};
+}

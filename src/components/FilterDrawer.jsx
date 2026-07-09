@@ -1,4 +1,4 @@
-  import {
+import {
   Box,
   Button,
   Divider,
@@ -16,22 +16,14 @@ import { useLocale } from "../hooks/useLocale";
 const FilterDrawer = ({
   open,
   onClose,
-  title,
   onApply,
   onCancel,
   onReset,
-  applyText,
-  cancelText,
-  resetText,
   showFooter = true,
   children,
 }) => {
   const { t } = useLocale();
 
-  const drawerTitle = title ?? (t("filter") ?? "Filtreler");
-  const btnApplyText = applyText ?? (t("apply") ?? "Uygula");
-  const btnCancelText = cancelText ?? (t("cancel") ?? "İptal");
-  const btnResetText = resetText ?? (t("reset") ?? "Sıfırla");
 
   const handleCancel = () => {
     if (onCancel) {
@@ -46,10 +38,14 @@ const FilterDrawer = ({
       anchor="right"
       open={open}
       onClose={onClose}
+      sx={(theme) => ({
+        zIndex: theme.zIndex.drawer + 2,
+      })}
       slotProps={{
         paper: {
           sx: (theme) => ({
             width: { xs: "100%", sm: 380 },
+            zIndex: "inherit",
             backgroundColor: theme.palette.background.paper,
             boxShadow: "-4px 0 24px rgba(0,0,0,0.12)",
             display: "flex",
@@ -63,10 +59,10 @@ const FilterDrawer = ({
         direction="row"
         sx={{ px: 2.5, py: 2, alignItems: "center", justifyContent: "space-between" }}
       >
-        <Stack direction="row" sx={{ alignItems: "center" }} gap={1.25}>
-          <FilterListIcon fontSize="small" color="primary" />
+        <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+          <FilterListIcon fontSize="small" />
           <Typography variant="h6" fontWeight={600} fontSize="1.1rem">
-            {drawerTitle}
+            {(t("filter"))}
           </Typography>
         </Stack>
 
@@ -105,7 +101,7 @@ const FilterDrawer = ({
       >
         {children ?? (
           <Typography variant="body2" color="text.secondary">
-            Filtre içeriği buraya gelecek.
+            Not found
           </Typography>
         )}
       </Box>
@@ -144,13 +140,13 @@ const FilterDrawer = ({
                   },
                 }}
               >
-                {btnResetText}
+                {t("reset")}
               </Button>
 
               <Stack direction="row" spacing={1}>
                 <Button
-                  variant="text"
-                  color="inherit"
+                  variant="outlined"
+                  color="info"
                   size="medium"
                   onClick={handleCancel}
                   sx={{
@@ -158,10 +154,9 @@ const FilterDrawer = ({
                     textTransform: "none",
                     fontWeight: 600,
                     px: 1.5,
-                    color: "text.secondary",
                   }}
                 >
-                  {btnCancelText}
+                  {t("cancel")}
                 </Button>
                 <Button
                   variant="contained"
@@ -182,7 +177,7 @@ const FilterDrawer = ({
                     },
                   }}
                 >
-                  {btnApplyText}
+                  {t("apply")}
                 </Button>
               </Stack>
             </Stack>

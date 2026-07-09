@@ -17,7 +17,7 @@ export const getDefaultMRTOptions = () => ({
   enableCreatingRow: true,
   enableColumnFilters: false,
   enableGlobalFilter: false,
-//   enableRowSelection: true,
+  //   enableRowSelection: true,
   enableClickToRowSelect: true,
   enableBottomToolbar: true,
   enableSorting: false,
@@ -57,6 +57,9 @@ export const getDefaultMRTOptions = () => ({
       flexDirection: "column",
       height: "100%",
       width: "100%",
+      border: "1px solid",
+      borderColor: (theme) =>
+        theme.palette.mode === "dark" ? "#1e1e1e" : "#e5e7eb",
     },
   },
 

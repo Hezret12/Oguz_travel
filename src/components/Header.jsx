@@ -44,9 +44,6 @@ const Header = ({ sidebarWidth = 100 }) => {
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
         backdropFilter: 'blur(10px)',
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(4,47,46,0.92)' : 'rgba(255,255,255,0.92)',
-        color: 'text.primary',
         borderBottom: '1px solid',
         borderColor: 'rgba(20,184,166,0.2)',
         boxShadow: 'none',

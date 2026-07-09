@@ -8,8 +8,8 @@ const initialAddClientState = {
 
 const initialState = {
   isOpen: false,
-  modalType: null, // e.g., 'CONFIRM' | 'INFO'
-  modalProps: {},  // e.g., { title, content, confirmLabel, cancelLabel, onConfirm, onCancel }
+  modalType: null,
+  modalProps: {},
   addClient: initialAddClientState,
 };
 

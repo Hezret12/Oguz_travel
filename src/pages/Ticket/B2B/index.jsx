@@ -19,9 +19,9 @@ import PageHeader from '../../../components/PageHeader';
 import GlobalSearchInput from '../../../components/GlobalSearchInput';
 import Pagination from '../../../components/Pagination';
 import FilterDrawer from '../../../components/FilterDrawer';
-import { useClientsQuery } from '../../../features/Clients/hooks/useClientsQuery';
-import { useB2BTickets } from '../../../features/Tickets/B2B/useB2BTickets';
-import AddB2BTicketDialog from '../../../features/Tickets/B2B/AddB2BTicketDialog';
+import { useClientsQuery } from '../../../pages/Clients/hooks/useClientsQuery';
+import { useB2BTickets } from './useB2BTickets';
+import AddB2BTicketDialog from './AddB2BTicketDialog';
 
 const formatDate = (value) => {
   if (!value) return '';
@@ -83,6 +83,8 @@ const B2B = () => {
         ticket.operator,
         ticket.operatorTwo,
         ticket.agent,
+        ticket.agentFullName,
+        ticket.agentPhoneNumber,
         client?.fullName,
         client?.passportNumber,
         client?.phoneNumber,
@@ -129,13 +131,13 @@ const B2B = () => {
       {
         accessorFn: (row) => row.ticketNo,
         id: 'ticketNo',
-        header: t('ticket.b2b.ticketNo', 'Ticket No'),
+        header: t('columns.ticketNo', 'Ticket No'),
         size: 100,
       },
       {
         accessorFn: (row) => clientById[row.clientId]?.fullName ?? row.clientId,
         id: 'client',
-        header: t('ticket.b2b.client', 'Client'),
+        header: t('columns.client', 'Client'),
         size: 260,
         Cell: ({ row }) => {
           const client = clientById[row.original.clientId];
@@ -160,7 +162,7 @@ const B2B = () => {
       {
         accessorFn: (row) => row.status,
         id: 'status',
-        header: t('ticket.b2b.status', 'Status'),
+        header: t('columns.status', 'Status'),
         size: 120,
         Cell: ({ cell }) => {
           const value = cell.getValue();
@@ -187,52 +189,52 @@ const B2B = () => {
       {
         accessorFn: (row) => row.airline,
         id: 'airline',
-        header: t('ticket.b2b.airline', 'Airline'),
+        header: t('columns.airline', 'Airline'),
         size: 160,
       },
       {
         accessorFn: (row) => row.route,
         id: 'route',
-        header: t('ticket.b2b.route', 'Route'),
+        header: t('columns.route', 'Route'),
         size: 180,
       },
       {
         accessorFn: (row) => row.cabinClass,
         id: 'cabinClass',
-        header: t('ticket.b2b.cabinClass', 'Class'),
+        header: t('columns.cabinClass', 'Class'),
         size: 120,
       },
       {
         accessorFn: (row) => row.tripType,
         id: 'tripType',
-        header: t('ticket.b2b.tripType', 'Trip Type'),
+        header: t('columns.tripType', 'Trip Type'),
         size: 130,
       },
       {
         accessorFn: (row) => row.flightDate,
         id: 'flightDate',
-        header: t('ticket.b2b.flightDate', 'Flight Date'),
+        header: t('columns.flightDate', 'Flight Date'),
         size: 120,
         Cell: ({ cell }) => formatDate(cell.getValue()),
       },
       {
         accessorFn: (row) => row.netFare,
         id: 'netFare',
-        header: t('ticket.b2b.netFare', 'Net Fare'),
+        header: t('columns.netFare', 'Net Fare'),
         size: 110,
         Cell: ({ cell }) => currency.format(Number(cell.getValue() ?? 0)),
       },
       {
         accessorFn: (row) => row.saleFare,
         id: 'saleFare',
-        header: t('ticket.b2b.saleFare', 'Sale Fare'),
+        header: t('columns.saleFare', 'Sale Fare'),
         size: 110,
         Cell: ({ cell }) => currency.format(Number(cell.getValue() ?? 0)),
       },
       {
         accessorFn: (row) => row.profit,
         id: 'profit',
-        header: t('ticket.b2b.profit', 'Profit'),
+        header: t('columns.profit', 'Profit'),
         size: 100,
         Cell: ({ cell }) => {
           const profit = Number(cell.getValue() ?? 0);
@@ -246,12 +248,12 @@ const B2B = () => {
       {
         accessorFn: (row) => row.office,
         id: 'office',
-        header: t('ticket.b2b.office', 'Office'),
+        header: t('columns.office', 'Office'),
         size: 110,
       },
       {
         id: 'actions',
-        header: t('ticket.b2b.actions', 'Actions'),
+        header: t('columns.actions', 'Actions'),
         size: 100,
         enableSorting: false,
         muiTableHeadCellProps: { align: 'center' },
@@ -454,22 +456,20 @@ const B2B = () => {
   });
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, overflow: 'hidden' }}>
+    <Box>
       <PageHeader
-        title={t('ticket.b2b.title', 'B2B')}
-        pageTitle={`${t('ticket.b2b.title', 'B2B')} | Oguz Travel`}
-        addButtonText={t('ticket.b2b.addTicket', 'Add Ticket')}
+        title={t('pages.ticket.b2b.title', 'B2B')}
+        pageTitle={`${t('pages.ticket.b2b.title', 'B2B')} | Oguz Travel`}
+        addButtonText={t('pages.ticket.b2b.addTicket', 'Add Ticket')}
         onAddClick={() => {
           setEditingTicket(null);
           setCreateOpen(true);
         }}
-        filterButtonText={t('ticket.filter', 'Filter')}
+        filterButtonText={t('pages.ticket.filter', 'Filter')}
         onFilterClick={() => setIsFilterOpen(true)}
       />
      
-      <Box sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <MaterialReactTable table={table} />
-      </Box>
 
       <FilterDrawer
         open={isFilterOpen}
@@ -477,14 +477,14 @@ const B2B = () => {
         onApply={() => setIsFilterOpen(false)}
         onReset={() => setFilters({ status: '', airline: '', tripType: '', office: '' })}
         onCancel={() => setIsFilterOpen(false)}
-        title={t('ticket.filter', 'Filter')}
+        title={t('pages.ticket.filter', 'Filter')}
       >
         <Stack spacing={2.5}>
           {[
-            { label: t('ticket.b2b.status', 'Status'), key: 'status', options: statusOptions },
-            { label: t('ticket.b2b.airline', 'Airline'), key: 'airline', options: airlineOptions },
-            { label: t('ticket.b2b.tripType', 'Trip Type'), key: 'tripType', options: tripTypeOptions },
-            { label: t('ticket.b2b.office', 'Office'), key: 'office', options: officeOptions },
+            { label: t('columns.status', 'Status'), key: 'status', options: statusOptions },
+            { label: t('columns.airline', 'Airline'), key: 'airline', options: airlineOptions },
+            { label: t('columns.tripType', 'Trip Type'), key: 'tripType', options: tripTypeOptions },
+            { label: t('columns.office', 'Office'), key: 'office', options: officeOptions },
           ].map((filterConfig) => (
             <FormControl key={filterConfig.key} fullWidth size="small">
               <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 600, color: 'text.primary' }}>
@@ -555,3 +555,4 @@ const B2B = () => {
 };
 
 export default B2B;
+

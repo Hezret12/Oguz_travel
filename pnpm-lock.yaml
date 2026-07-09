@@ -47,9 +47,6 @@ importers:
       material-react-table:
         specifier: ^3.2.1
         version: 3.2.1(241e4f99bd329b45ac3c180f8145e52a)
-      nprogress:
-        specifier: ^0.2.0
-        version: 0.2.0
       react:
         specifier: ^19.2.6
         version: 19.2.6
@@ -1190,9 +1187,6 @@ packages:
   node-releases@2.0.46:
     resolution: {integrity: sha512-GYVXHE2KnrzAfsAjl4uP++evGFCrAU1jta4ubEjIG7YWt/64Gqv66a30yKwWczVjA6j3bM4nBwH7Pk1JmDHaxQ==}
     engines: {node: '>=18'}
-
-  nprogress@0.2.0:
-    resolution: {integrity: sha512-I19aIingLgR1fmhftnbWWO3dXc0hSxqHQHQb3H8m+K3TnEn/iSeTZZOyvKXWqQESMwuUVnatlCnZdLBZZt2VSA==}
 
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
@@ -2559,8 +2553,6 @@ snapshots:
   natural-compare@1.4.0: {}
 
   node-releases@2.0.46: {}
-
-  nprogress@0.2.0: {}
 
   object-assign@4.1.1: {}
 

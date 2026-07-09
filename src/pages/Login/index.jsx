@@ -17,9 +17,9 @@ import { useAuth } from '../../context/AuthContext';
 import { getRoleHomePath } from '../../utils/auth';
 
 import { Helmet } from 'react-helmet-async';
-import { handleError, hdlErrResMsg, hdlScsResMsg } from '../../functions/generalHelpers';
+import { handleError, hdlErrResMsg, hdlSuccessResMsg } from '../../functions/generalHelpers';
 import { loginApi } from '../../api/queries/post';
-import { useValidSchema } from '../../functions/useValidShema';
+import { useValidShema } from '../../functions/useValidShema';
 import { formatTurkmenPhoneForApi } from '../../utils/phone';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
 import ThemeToggle from '../../components/ThemeToggle';
@@ -37,7 +37,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { login, isAuthenticated, user, loading: authLoading } = useAuth();
-  const { loginValidSchema } = useValidSchema();
+  const { loginValidSchema } = useValidShema();
   const { mode, setMode } = useColorScheme();
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function Login() {
             user: payload.user,
             tableNames: payload.tableNames,
           });
-          hdlScsResMsg(response);
+          hdlSuccessResMsg(response);
           navigate(getRoleHomePath(authenticatedUser.role), { replace: true });
         } else {
           hdlErrResMsg(response);
@@ -116,7 +116,7 @@ export default function Login() {
       }}
     >
       <Helmet>
-        <title>{t('login.welcomeTitle')} | Oguz Travel</title>
+        <title>{t('pages.login.welcomeTitle')} | Oguz Travel</title>
       </Helmet>
 
       {/* Glow circles */}
@@ -264,7 +264,7 @@ export default function Login() {
                 mb: 0.8,
               }}
             >
-              {t('login.password')}
+              {t('columns.password')}
             </Typography>
             <Controller
               name="password"
@@ -390,7 +390,7 @@ export default function Login() {
             {isLoading ? (
               <CircularProgress size={20} sx={{ color: '#fff' }} />
             ) : (
-              t('login.loginButton')
+              t('pages.login.loginButton')
             )}
           </Box>
         </Box>
@@ -400,3 +400,5 @@ export default function Login() {
     </Box>
   );
 }
+
+

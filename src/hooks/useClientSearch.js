@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useDebounce } from './useDebounce';
-import { useClientsQuery } from '../features/Clients/hooks/useClientsQuery';
+import { useClientsQuery } from '../pages/Clients/hooks/useClientsQuery';
 
 export const useClientSearch = () => {
   const { data = [], isLoading } = useClientsQuery();

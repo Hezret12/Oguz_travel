@@ -33,20 +33,20 @@ export const FooterButton = ({
         sx={{
           height: "40px",
           px: 2.5,
-          borderRadius: "10px",
+          borderRadius: "7px",
           textTransform: "none",
           fontWeight: 600,
           minWidth: 140,
           fontSize: "14px",
           borderColor: (theme) =>
-            theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.2)" : "#d1d5db",
+            theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.14)" : theme.palette.divider,
           color: "text.primary",
           transition: "all 200ms ease",
           "&:hover": {
             backgroundColor: (theme) =>
-              theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "#f9fafb",
+              theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.06)" : theme.palette.action.hover,
             borderColor: (theme) =>
-              theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.4)" : "#9ca3af",
+              theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.3)" : theme.palette.text.secondary,
             transform: "translateY(-1px)",
           },
           "&:active": {
@@ -73,23 +73,24 @@ export const FooterButton = ({
         sx={{
           height: "40px",
           px: 3,
-          borderRadius: "10px",
+          borderRadius: "7px",
           textTransform: "none",
           fontWeight: 600,
           minWidth: 140,
           fontSize: "14px",
-          backgroundColor: "#16a34a",
+          backgroundColor: "#0E8584",
+          border: "0.5px solid #2CA7A6",
           color: "#ffffff",
-          boxShadow: "0 2px 8px rgba(22, 163, 74, 0.30)",
+          boxShadow: "0 2px 8px rgba(14, 133, 132, 0.30)",
           transition: "all 200ms ease",
           "&:hover": {
-            backgroundColor: "#15803d",
+            backgroundColor: "#0C7776",
             transform: "translateY(-1px)",
-            boxShadow: "0 4px 14px rgba(22, 163, 74, 0.38)",
+            boxShadow: "0 4px 14px rgba(14, 133, 132, 0.36)",
           },
           "&:active": {
             transform: "scale(0.98)",
-            boxShadow: "0 1px 4px rgba(22, 163, 74, 0.25)",
+            boxShadow: "0 1px 4px rgba(14, 133, 132, 0.24)",
           },
           "&.Mui-disabled": {
             backgroundColor: "action.disabledBackground",
@@ -98,7 +99,7 @@ export const FooterButton = ({
           },
         }}
       >
-        {saveText ?? t("actions.save")}
+        {saveText ?? t("save")}
       </Button>
     </Box>
   );

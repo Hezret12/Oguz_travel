@@ -24,8 +24,7 @@ export const useB2BTickets = () => {
               ...ticket,
               ...patch,
               profit:
-                Number(patch.saleFare ?? ticket.saleFare ?? 0) -
-                Number(patch.netFare ?? ticket.netFare ?? 0),
+                Number(patch.saleFare ?? ticket.saleFare ?? 0) - Number(patch.netFare ?? ticket.netFare ?? 0),
             }
           : ticket,
       ),

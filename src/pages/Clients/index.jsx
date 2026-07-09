@@ -1,16 +1,17 @@
 import { useMemo, useState } from "react";
 import { Box } from "@mui/material";
-import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+} from "material-react-table";
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import { useClientSearch } from "../../hooks/useClientSearch";
-import { useDispatch } from "react-redux";
-import { openAddClientModal } from "../../store/slices/modalSlice";
+import ColumnActionButtons from "../../components/ColumnActionButtons";
+import AddClient from "./Contents/AddClient";
+import EditClient from "./Contents/EditClient";
 
 const formatDate = (value) => {
   if (!value) return "";
@@ -21,10 +22,7 @@ const formatDate = (value) => {
 const Clients = () => {
   const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
-  const dispatch = useDispatch();
   const [rowSelection, setRowSelection] = useState({});
-
-  const { clients, isLoading, searchQuery, setSearchQuery } = useClientSearch();
 
   const columns = useMemo(
     () => [
@@ -33,165 +31,90 @@ const Clients = () => {
         header: "#",
         size: 10,
         enableSorting: false,
-        Cell: ({ row, table }) => {
-          const { pageIndex, pageSize } = table.getState().pagination ?? {
-            pageIndex: 0,
-            pageSize: clients.length,
-          };
-
-          return (
-            <Box sx={{ color: "text.secondary", fontWeight: 500 }}>
-              {pageIndex * (pageSize || clients.length) + row.index + 1}
-            </Box>
-          );
-        },
       },
       {
         accessorFn: (row) => row.fullName,
         id: "fullName",
-        header: t("clients.columns.fullName") ?? "Full Name",
+        header: t("columns.fullName"),
         size: 180,
       },
       {
         accessorFn: (row) => row.phoneNumber,
         id: "phoneNumber",
-        header: t("clients.columns.phoneNumber") ?? "Phone Number",
+        header: t("columns.phoneNumber"),
         size: 150,
         Cell: ({ cell }) => `+993 ${cell.getValue()}`,
       },
       {
         accessorFn: (row) => row.dateOfBirth,
         id: "dateOfBirth",
-        header: t("clients.columns.dateOfBirth") ?? "Date of Birth",
+        header: t("columns.dateOfBirth"),
         size: 150,
         Cell: ({ cell }) => formatDate(cell.getValue()),
       },
       {
         accessorFn: (row) => row.passportNumber,
         id: "passportNumber",
-        header: t("clients.columns.passportNumber") ?? "Passport Number",
+        header: t("columns.passportNumber"),
         size: 150,
       },
       {
         accessorFn: (row) => row.passportExpiryDate,
         id: "passportExpiryDate",
-        header: t("clients.columns.passportExpiryDate") ?? "Passport Expiry Date",
+        header: t("columns.passportExpiryDate"),
         size: 160,
         Cell: ({ cell }) => formatDate(cell.getValue()),
       },
       {
         accessorFn: (row) => row.passportCountryOfIssue,
         id: "passportCountryOfIssue",
-        header: t("clients.columns.passportCountryOfIssue") ?? "Passport Country of Issue",
+        header: t("columns.passportCountryOfIssue"),
         size: 180,
       },
       {
         accessorFn: (row) => row.gender,
         id: "gender",
-        header: t("clients.columns.gender") ?? "Gender",
+        header: t("columns.gender"),
         size: 120,
         Cell: ({ cell }) => (
           <Box sx={{ fontWeight: 500 }}>
             {cell.getValue() === "Women"
-              ? t("clients.genderWomen") ?? "Women"
-              : t("clients.genderMen") ?? "Men"}
+              ? t("pages.clients.genderWomen")
+              : t("pages.clients.genderMen")}
           </Box>
         ),
       },
       {
         id: "actions",
-        header: t("clients.columns.actions") ?? "Actions",
+        header: t("columns.actions"),
         size: 100,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => (
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-            <Box
-              component="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log("TODO: edit client", row.original);
-              }}
-              sx={(theme) => ({
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 30,
-                height: 30,
-                borderRadius: "7px",
-                border: `1px solid ${theme.palette.divider}`,
-                backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                color: theme.palette.text.secondary,
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-                outline: "none",
-                "&:hover": {
-                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.09)",
-                  borderColor: theme.palette.text.secondary,
-                  color: theme.palette.text.primary,
-                  transform: "translateY(-1px)",
-                },
-                "&:active": { transform: "scale(0.95)" },
-              })}
-            >
-              <EditIcon sx={{ fontSize: 14 }} />
-            </Box>
-
-            <Box
-              component="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                console.log("TODO: delete client", row.original);
-              }}
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 30,
-                height: 30,
-                borderRadius: "7px",
-                border: "1px solid rgba(239,68,68,0.35)",
-                backgroundColor: "rgba(239,68,68,0.07)",
-                color: "#ef4444",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-                outline: "none",
-                "&:hover": {
-                  backgroundColor: "rgba(239,68,68,0.15)",
-                  borderColor: "#ef4444",
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 2px 8px rgba(239,68,68,0.25)",
-                },
-                "&:active": { transform: "scale(0.95)" },
-              }}
-            >
-              <DeleteOutlineOutlinedIcon sx={{ fontSize: 14 }} />
-            </Box>
-          </Box>
+        Cell: ({ row, table }) => (
+          <ColumnActionButtons row={row} table={table} />
         ),
       },
     ],
-    [clients.length, t]
+    [t],
   );
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
     columns,
-    data: clients,
+    data: [],
     state: {
       ...defaultMrtOptions.state,
       rowSelection,
-      isLoading,
     },
     getRowId: (row) => row.id,
     onRowSelectionChange: setRowSelection,
     renderTopToolbarCustomActions: () => (
       <GlobalSearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder={t("search") ?? "Search..."}
-        disabled={isLoading}
+      // value={searchQuery}
+      // onChange={setSearchQuery}
+      // placeholder={t("search") ?? "Search..."}
+      // disabled={isLoading}
       />
     ),
     renderBottomToolbar: ({ table }) => {
@@ -216,7 +139,7 @@ const Clients = () => {
             pageIndex={pageIndex}
             pageCount={pageCount}
             pageSize={pageSize}
-            totalRows={clients.length}
+            // totalRows={clients.length}
             onPageChange={(newIndex) => table.setPageIndex(newIndex)}
           />
         </Box>
@@ -244,15 +167,19 @@ const Clients = () => {
         ...defaultMrtOptions.muiTablePaperProps?.sx,
       }),
     },
+    renderCreateRowDialogContent: ({ table }) => <AddClient table={table} />,
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditClient table={table} row={row} />
+    ),
   });
 
   return (
     <>
       <PageHeader
-        title={t("clients.title") ?? "Clients"}
-        pageTitle={`${t("clients.title") ?? "Clients"} | Oguz Travel`}
-        addButtonText={t("clients.add") ?? "Add Client"}
-        onAddClick={() => dispatch(openAddClientModal())}
+        title={t("pages.clients.title")}
+        pageTitle={`${t("pages.clients.title")} | Oguz Travel`}
+        addButtonText={t("pages.clients.add")}
+        onAddClick={() => table.setCreatingRow(true)}
       />
 
       <MaterialReactTable table={table} />

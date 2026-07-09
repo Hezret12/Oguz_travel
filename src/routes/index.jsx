@@ -14,6 +14,8 @@ import TicketB2BPage from '../pages/Ticket/B2B';
 import TicketTurkishAirlinesPage from '../pages/Ticket/TurkishAirlines';
 import NotFoundPage from '../pages/NotFound';
 import UnauthorizedPage from '../pages/Unauthorized';
+import VisaPage from '../pages/Visa';
+import ReferralLetter from '../pages/ReferralLetter/index';
 
 const router = createBrowserRouter([
   {
@@ -37,6 +39,8 @@ const router = createBrowserRouter([
               { path: 'employee',       element: <EmployeePage /> },
               { path: 'employee/users', element: <UsersPage /> },
               { path: 'clients',        element: <ClientsPage /> },
+              { path: 'visa/applications', element: <VisaPage /> },
+              { path: 'visa/referal-letters', element: <ReferralLetter /> },
               {
                 path: 'ticket',
                 element: <TicketPage />,

@@ -13,7 +13,7 @@ const NotFound = () => {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        background: (theme) => theme.palette.mode === 'dark' ? '#0f172a' : '#f8fafc',
+        background: (theme) => theme.palette.mode === 'dark' ? '' : '#f8fafc',
         p: 2,
       }}
     >

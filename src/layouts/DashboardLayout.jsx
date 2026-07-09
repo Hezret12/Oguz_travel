@@ -40,7 +40,7 @@ const DashboardLayout = () => {
           ml: { xs: 0, md: `${sidebarWidth}px` },
           mt: '64px', // header height
           backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? '#0F172A' : '#F0F4F8',
+            theme.palette.mode === 'dark' ? '' : '#F0F4F8',
           height: 'calc(100vh - 64px)',
           minHeight: 0,
           overflow: 'hidden',

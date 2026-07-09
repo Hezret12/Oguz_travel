@@ -5,7 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useLocale } from '../../../hooks/useLocale';
-import { useValidSchema } from '../../../functions/useValidShema';
+import { useValidShema } from '../../../functions/useValidShema';
 import { CustomDialog } from '../../Dialog/CustomDialog';
 import { CustomDialogHeader } from '../../Dialog/CustomDialogHeader';
 import { CustomForm } from '../../Dialog/CustomForm';
@@ -14,12 +14,12 @@ import CustomTextField from '../../CustomTextField';
 import CustomSelect from '../../CustomSelect';
 import PhoneNumberField from '../../inputs/PhoneNumber';
 import { closeAddClientModal, selectAddClientModal } from '../../../store/slices/modalSlice';
-import { useCreateClientMutation } from '../../../features/Clients/hooks/useClientsQuery';
+import { useCreateClientMutation } from '../../../pages/Clients/hooks/useClientsQuery';
 
 const AddClientModal = () => {
   const dispatch = useDispatch();
   const { t } = useLocale();
-  const { addClient } = useValidSchema();
+  const { addClient } = useValidShema();
   const { open, initialValues, onCreated } = useSelector(selectAddClientModal);
   const [loading, setLoading] = useState(false);
   const createClientMutation = useCreateClientMutation();
@@ -27,7 +27,7 @@ const AddClientModal = () => {
   const defaultValues = useMemo(
     () => ({
       fullName: '',
-      phoneNumber: '',
+      phone_number: '',
       dateOfBirth: '',
       passportNumber: '',
       passportExpiryDate: '',
@@ -57,12 +57,12 @@ const AddClientModal = () => {
     try {
       setLoading(true);
       const createdClient = await createClientMutation.mutateAsync(data);
-      toast.success(t('clients.addSuccess', 'Client added successfully!'));
+      toast.success(t('pages.clients.addSuccess', 'Client added successfully!'));
       onCreated?.(createdClient);
       closeModal();
     } catch (error) {
       console.error(error);
-      toast.error(t('clients.addError', 'An error occurred while saving client.'));
+      toast.error(t('pages.clients.addError', 'An error occurred while saving client.'));
     } finally {
       setLoading(false);
     }
@@ -72,12 +72,11 @@ const AddClientModal = () => {
     <CustomDialog widthX={820} open={open} close={closeModal}>
       <CustomDialogHeader
         variant="h5"
-        title={t('clients.add', 'Add Client')}
+        title={t('pages.clients.add')}
       />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box
           sx={{
-            mt: 3,
             display: 'flex',
             flexWrap: 'wrap',
             gap: 2.5,
@@ -87,7 +86,7 @@ const AddClientModal = () => {
             <CustomTextField
               name="fullName"
               control={control}
-              label={t('clients.columns.fullName', 'Full Name')}
+              label={t('columns.fullName', 'Full Name')}
             />
           </Box>
 
@@ -95,7 +94,7 @@ const AddClientModal = () => {
             <PhoneNumberField
               control={control}
               name="phoneNumber"
-              label={t('clients.columns.phoneNumber', 'Phone Number')}
+              label={t('columns.phoneNumber', 'Phone Number')}
             />
           </Box>
 
@@ -104,7 +103,7 @@ const AddClientModal = () => {
               name="dateOfBirth"
               control={control}
               type="date"
-              label={t('clients.columns.dateOfBirth', 'Date of Birth')}
+              label={t('columns.dateOfBirth', 'Date of Birth')}
               InputLabelProps={{ shrink: true }}
             />
           </Box>
@@ -113,7 +112,7 @@ const AddClientModal = () => {
             <CustomTextField
               name="passportNumber"
               control={control}
-              label={t('clients.columns.passportNumber', 'Passport Number')}
+              label={t('columns.passportNumber', 'Passport Number')}
             />
           </Box>
 
@@ -122,7 +121,7 @@ const AddClientModal = () => {
               name="passportExpiryDate"
               control={control}
               type="date"
-              label={t('clients.columns.passportExpiryDate', 'Passport Expiry Date')}
+              label={t('columns.passportExpiryDate', 'Passport Expiry Date')}
               InputLabelProps={{ shrink: true }}
             />
           </Box>
@@ -131,18 +130,18 @@ const AddClientModal = () => {
             <CustomTextField
               name="passportCountryOfIssue"
               control={control}
-              label={t('clients.columns.passportCountryOfIssue', 'Passport Country of Issue')}
+              label={t('columns.passportCountryOfIssue', 'Passport Country of Issue')}
             />
           </Box>
 
-          <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 10px)' } }}>
+          <Box sx={{width: "49%"}}>
             <CustomSelect
               name="gender"
               control={control}
-              label={t('clients.columns.gender', 'Gender')}
+              label={t('columns.gender', 'Gender')}
               options={[
-                { label: t('clients.genderWomen', 'Women'), value: 'Women' },
-                { label: t('clients.genderMen', 'Men'), value: 'Men' },
+                { label: t('pages.clients.genderWomen', 'Women'), value: 'Women' },
+                { label: t('pages.clients.genderMen', 'Men'), value: 'Men' },
               ]}
             />
           </Box>
@@ -155,3 +154,5 @@ const AddClientModal = () => {
 };
 
 export default AddClientModal;
+
+

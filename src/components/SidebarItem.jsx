@@ -4,7 +4,6 @@ import { Tooltip, ListItemButton, ListItemIcon, ListItemText, Collapse, List, Bo
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-// ─── Single item (flat link) ──────────────────────────────────────
 const FlatItem = ({ item, isActive, onSidebarClose, collapsed }) => {
   const el = (
     <ListItemButton
@@ -22,12 +21,18 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed }) => {
         minWidth: collapsed ? '44px' : 'auto',
         justifyContent: collapsed ? 'center' : 'flex-start',
         color: isActive ? '#ffffff' : 'rgba(255,255,255,0.65)',
-        backgroundColor: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-        boxShadow: isActive ? 'inset 0 0 0 1px rgba(20,184,166,0.35)' : 'none',
+        backgroundColor: isActive ? 'rgba(20,184,166,0.13)' : 'transparent',
+        borderLeft: collapsed
+          ? 'none'
+          : isActive
+          ? '3px solid #14B8A6'
+          : '3px solid transparent',
+        boxShadow: isActive ? '0 2px 12px rgba(20,184,166,0.15)' : 'none',
         fontFamily: "'Inter', sans-serif",
         '&:hover': {
-          backgroundColor: isActive ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)',
+          backgroundColor: isActive ? 'rgba(20,184,166,0.16)' : 'rgba(255,255,255,0.07)',
           color: '#ffffff',
+          borderLeft: collapsed ? 'none' : isActive ? '3px solid #14B8A6' : '3px solid rgba(20,184,166,0.4)',
           '& .MuiListItemIcon-root': {
             color: '#14B8A6',
           }
@@ -82,7 +87,6 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed }) => {
   return el;
 };
 
-// ─── Group item ───────────────────────────────────────────────────
 const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, collapsed }) => {
   const hasActiveChild = item.children?.some((c) => c.path === location.pathname);
 
@@ -99,12 +103,12 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
         width: collapsed ? '44px' : 'calc(100% - 20px)',
         minWidth: collapsed ? '44px' : 'auto',
         justifyContent: collapsed ? 'center' : 'flex-start',
-        color: hasActiveChild ? '#ffffff' : 'rgba(255,255,255,0.65)',
-        backgroundColor: hasActiveChild ? 'rgba(255,255,255,0.08)' : 'transparent',
+        color: hasActiveChild ? '#ffffff' : 'rgba(255,255,255,0.65)',     
         fontFamily: "'Inter', sans-serif",
         '&:hover': {
-          backgroundColor: hasActiveChild ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.07)',
+          backgroundColor: hasActiveChild ? 'rgba(20,184,166,0.14)' : 'rgba(255,255,255,0.07)',
           color: '#ffffff',
+          borderLeft: collapsed ? 'none' : hasActiveChild ? '3px solid #14B8A6' : '3px solid rgba(20,184,166,0.4)',
           '& .MuiListItemIcon-root': {
             color: '#14B8A6',
           }
@@ -183,12 +187,14 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                   borderRadius: '10px',
                   width: 'calc(100% - 20px)',
                   color: isChildActive ? '#ffffff' : 'rgba(255,255,255,0.65)',
-                  backgroundColor: isChildActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                  boxShadow: isChildActive ? 'inset 0 0 0 1px rgba(20,184,166,0.35)' : 'none',
+                  backgroundColor: isChildActive ? 'rgba(20,184,166,0.13)' : 'transparent',
+                  borderLeft: isChildActive ? '3px solid #14B8A6' : '3px solid transparent',
+                  boxShadow: isChildActive ? '0 2px 10px rgba(20,184,166,0.15)' : 'none',
                   fontFamily: "'Inter', sans-serif",
                   '&:hover': {
-                    backgroundColor: isChildActive ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)',
+                    backgroundColor: isChildActive ? 'rgba(20,184,166,0.16)' : 'rgba(255,255,255,0.07)',
                     color: '#ffffff',
+                    borderLeft: isChildActive ? '3px solid #14B8A6' : '3px solid rgba(20,184,166,0.4)',
                     '& .MuiListItemIcon-root': {
                       color: '#14B8A6',
                     }

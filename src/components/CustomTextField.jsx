@@ -12,12 +12,13 @@ const CustomTextField = ({
   multiline = false,
   rows,
   placeholder,
-  fullWidth = true,
   size = 'medium',
   startIcon,
   endIcon,
+  onChange,
   sx = {},
   InputProps = {},
+  InputLabelProps = {},
   ...props
 }) => {
   return (
@@ -28,8 +29,14 @@ const CustomTextField = ({
       render={({ field, fieldState: { error } }) => {
         const hasError = Boolean(error);
 
+        const handleChange = (event) => {
+          const nextValue = event?.target?.value ?? event;
+          field.onChange(nextValue);
+          onChange?.(event);
+        };
+
         return (
-          <Box sx={{ width: fullWidth ? '100%' : 'auto' }}>
+          <Box sx={{ width: '100%' }}>
             {label && (
               <Typography
                 variant="body2"
@@ -49,6 +56,7 @@ const CustomTextField = ({
               inputRef={field.ref}
               value={field.value ?? ''}
               type={type}
+              onChange={handleChange}
               size={size}
               disabled={disabled}
               multiline={multiline}
@@ -56,7 +64,23 @@ const CustomTextField = ({
               placeholder={placeholder}
               error={hasError}
               helperText={error?.message}
-              fullWidth={fullWidth}
+              fullWidth
+              slotProps={{
+                input: {
+                  ...InputProps,
+                  startAdornment: startIcon ? (
+                    <span style={{ display: 'flex', alignItems: 'center', marginRight: '8px', color: 'inherit' }}>
+                      {startIcon}
+                    </span>
+                  ) : InputProps.startAdornment,
+                  endAdornment: endIcon ? (
+                    <span style={{ display: 'flex', alignItems: 'center', marginLeft: '8px', color: 'inherit' }}>
+                      {endIcon}
+                    </span>
+                  ) : InputProps.endAdornment,
+                },
+                inputLabel: InputLabelProps,
+              }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '10px',
@@ -74,7 +98,10 @@ const CustomTextField = ({
                   '&.Mui-focused': {
                     backgroundColor: (theme) =>
                       theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : '#ffffff',
-                    boxShadow: '0 0 0 3px rgba(37, 99, 235, 0.12)',
+                    boxShadow: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? '0 0 0 3px rgba(59, 130, 246, 0.16)'
+                        : '0 0 0 3px rgba(37, 99, 235, 0.12)',
                   },
                 },
                 '& .MuiOutlinedInput-input': {
@@ -87,21 +114,6 @@ const CustomTextField = ({
                   fontWeight: 500,
                 },
                 ...sx,
-              }}
-              slotProps={{
-                input: {
-                  startAdornment: startIcon ? (
-                    <span style={{ display: 'flex', alignItems: 'center', marginRight: '8px', color: 'gray' }}>
-                      {startIcon}
-                    </span>
-                  ) : undefined,
-                  endAdornment: endIcon ? (
-                    <span style={{ display: 'flex', alignItems: 'center', marginLeft: '8px', color: 'gray' }}>
-                      {endIcon}
-                    </span>
-                  ) : undefined,
-                  ...InputProps,
-                },
               }}
               {...props}
             />

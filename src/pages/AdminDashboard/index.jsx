@@ -27,31 +27,31 @@ const AdminDashboard = () => {
   const { t } = useTranslation();
 
   const stats = [
-    { title: t('admin.stats.totalRevenue'), value: '$124,500', change: t('admin.statsChanges.revenue'), icon: <TrendingUpIcon color="success" />, bg: '#E8F5E9' },
-    { title: t('admin.stats.registeredUsers'), value: '1,482', change: t('admin.statsChanges.users'), icon: <PeopleIcon color="primary" />, bg: '#E3F2FD' },
-    { title: t('admin.stats.activeAgents'), value: '45', change: t('admin.statsChanges.agents'), icon: <SupportAgentIcon color="warning" />, bg: '#FFF3E0' },
-    { title: t('admin.stats.apiIntegrations'), value: '99.9%', change: t('admin.statsChanges.api'), icon: <LayersIcon color="secondary" />, bg: '#F3E5F5' },
+    { title: t('pages.admin.stats.totalRevenue'), value: '$124,500', change: t('pages.admin.statsChanges.revenue'), icon: <TrendingUpIcon color="success" />, bg: '#E8F5E9' },
+    { title: t('pages.admin.stats.registeredUsers'), value: '1,482', change: t('pages.admin.statsChanges.users'), icon: <PeopleIcon color="primary" />, bg: '#E3F2FD' },
+    { title: t('pages.admin.stats.activeAgents'), value: '45', change: t('pages.admin.statsChanges.agents'), icon: <SupportAgentIcon color="warning" />, bg: '#FFF3E0' },
+    { title: t('pages.admin.stats.apiIntegrations'), value: '99.9%', change: t('pages.admin.statsChanges.api'), icon: <LayersIcon color="secondary" />, bg: '#F3E5F5' },
   ];
 
   const recentLogs = [
-    { id: 'LOG-001', event: t('admin.logs.newAgent'), user: 'Kerem Agent', time: '10 mins ago', status: 'success' },
-    { id: 'LOG-002', event: t('admin.logs.priceUpdated'), user: 'Oğuzhan Admin', time: '1 hour ago', status: 'success' },
-    { id: 'LOG-003', event: t('admin.logs.backupCreated'), user: 'System Cron', time: '3 hours ago', status: 'info' },
-    { id: 'LOG-004', event: t('admin.logs.failedLogin'), user: 'IP: 192.168.1.45', time: '5 hours ago', status: 'warning' },
+    { id: 'LOG-001', event: t('pages.admin.logs.newAgent'), user: 'Kerem Agent', time: '10 mins ago', status: 'success' },
+    { id: 'LOG-002', event: t('pages.admin.logs.priceUpdated'), user: 'Oğuzhan Admin', time: '1 hour ago', status: 'success' },
+    { id: 'LOG-003', event: t('pages.admin.logs.backupCreated'), user: 'System Cron', time: '3 hours ago', status: 'info' },
+    { id: 'LOG-004', event: t('pages.admin.logs.failedLogin'), user: 'IP: 192.168.1.45', time: '5 hours ago', status: 'warning' },
   ];
 
   return (
     <Box sx={{ py: 2 }}>
       <Helmet>
-        <title>{t('admin.title') || 'Admin Dashboard'} | Oguz Travel</title>
+        <title>{t('pages.admin.title') || 'Admin Dashboard'} | Oguz Travel</title>
       </Helmet>
       {/* Welcome Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 800 }}>
-          {t('admin.title')}
+          {t('pages.admin.title')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          {t('admin.subtitle', { name: user?.name })}
+          {t('pages.admin.subtitle', { name: user?.name })}
         </Typography>
       </Box>
 
@@ -87,24 +87,24 @@ const AdminDashboard = () => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                {t('admin.logs.title')}
+                {t('pages.admin.logs.title')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {t('admin.logs.subtitle')}
+                {t('pages.admin.logs.subtitle')}
               </Typography>
             </Box>
-            <Button variant="outlined" size="small"> {t('admin.logs.viewAll')} </Button>
+            <Button variant="outlined" size="small"> {t('pages.admin.logs.viewAll')} </Button>
           </Box>
 
           <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '8px' }}>
             <Table aria-label="simple table">
               <TableHead sx={{ backgroundColor: 'action.hover' }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>{t('admin.logs.id')}</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>{t('admin.logs.event')}</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>{t('admin.logs.actor')}</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>{t('admin.logs.time')}</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>{t('admin.logs.status')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('pages.admin.logs.id')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('pages.admin.logs.event')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('pages.admin.logs.actor')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('pages.admin.logs.time')}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{t('pages.admin.logs.status')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -139,3 +139,4 @@ const AdminDashboard = () => {
 import { Avatar } from '@mui/material';
 
 export default AdminDashboard;
+

@@ -5,7 +5,7 @@ export const themeConfig = createTheme({
         light: {
             palette: {
                 mode: 'light',
-                primary: { main: '#2563EB' },
+                primary: { main: '#0E8584' },
                 background: {
                     default: '#ffffff',
                     paper: '#ffffff',
@@ -21,7 +21,7 @@ export const themeConfig = createTheme({
         dark: {
             palette: {
                 mode: 'dark',
-                primary: { main: '#ffffff' },
+                primary: { main: '#0E8584' },
                 background: {
                     default: '#000000',
                     paper: '#121213',

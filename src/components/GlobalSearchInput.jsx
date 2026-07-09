@@ -6,7 +6,7 @@ import IconButton from '@mui/material/IconButton';
 const GlobalSearchInput = ({
   value,
   onChange,
-  placeholder = 'Ara...',
+  placeholder = '',
   disabled = false,
 }) => {
   return (
@@ -40,7 +40,7 @@ const GlobalSearchInput = ({
                 size="small"
                 onClick={() => onChange('')}
                 edge="end"
-                aria-label="Aramayı temizle"
+                aria-label="Clear all"
               >
                 <ClearIcon fontSize="small" />
               </IconButton>

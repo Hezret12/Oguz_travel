@@ -1,9 +1,6 @@
 import { useState, useMemo } from 'react';
-import { useDebounce } from './useDebounce';
 
-// ─── MOCK DATA ────────────────────────────────────────────────────────────────
-// API hazır olunca bu bölümü silin ve aşağıdaki useApiQuery bloğunu açın.
-const MOCK_EMPLOYEES = [
+export const MOCK_EMPLOYEES = [
   { id: '1',  fullName: 'Ahmet Yılmaz',       phoneNumber: '+993 61 123456', gmail: 'ahmet.yilmaz@oguztravel.com',       department: 'Engineering',  position: 'Software Engineer',      office: 'Ashgabat' },
   { id: '2',  fullName: 'Fatma Demir',         phoneNumber: '+993 62 234567', gmail: 'fatma.demir@oguztravel.com',        department: 'Management',   position: 'Project Manager',        office: 'Istanbul' },
   { id: '3',  fullName: 'Mehmet Kaya',         phoneNumber: '+993 63 345678', gmail: 'mehmet.kaya@oguztravel.com',        department: 'Sales',        position: 'Sales Director',         office: 'Ankara' },
@@ -56,49 +53,21 @@ const MOCK_EMPLOYEES = [
   { id: '50', fullName: 'Yasemin Topçu',       phoneNumber: '+993 62 113113', gmail: 'yasemin.topcu@oguztravel.com',      department: 'Engineering',  position: 'Tech Lead',              office: 'Istanbul' },
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Employee sayfası için server-side search yönetimi.
- * 
- * Mock modunda: veriler client-side filtrelenir.
- * API modunda: searchQuery API'ye parametre olarak gönderilir.
- *
- * @returns {{ data, isLoading, searchQuery, setSearchQuery }}
- */
 export const useEmployeeSearch = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const debouncedQuery = useDebounce(searchQuery, 400);
 
-  // ── API MODU (API hazır olunca bu bloğu açın, mock bloğunu silin) ──────────
-  // import { useApiQuery } from './useApiQuery';
-  // import { getEmployees } from '../api/queries/getters';
-  //
-  // const { data, isLoading } = useApiQuery(
-  //   ['employees', debouncedQuery],
-  //   () => getEmployees({ search: debouncedQuery }),
-  //   { keepPreviousData: true }
-  // );
-  //
-  // return { data: data ?? [], isLoading, searchQuery, setSearchQuery };
-  // ──────────────────────────────────────────────────────────────────────────
-
-  // ── MOCK MODU ─────────────────────────────────────────────────────────────
   const data = useMemo(() => {
-    if (!debouncedQuery.trim()) return MOCK_EMPLOYEES;
-    const q = debouncedQuery.toLowerCase();
     return MOCK_EMPLOYEES.filter((emp) =>
       Object.values(emp).some((val) =>
-        String(val).toLowerCase().includes(q)
+        String(val).toLowerCase().includes()
       )
     );
-  }, [debouncedQuery]);
+  }, []);
 
   return {
     data,
-    isLoading: false,   // API gelince useApiQuery'nin isLoading'ini kullan
+    isLoading: false, 
     searchQuery,
     setSearchQuery,
   };
-  // ──────────────────────────────────────────────────────────────────────────
 };

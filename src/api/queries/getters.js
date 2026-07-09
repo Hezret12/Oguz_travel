@@ -1,17 +1,39 @@
-import { axiosInstance } from '../axiosIntance';
+import { axiosInstance } from "../axiosIntance";
+import Cookies from 'js-cookie';
+import { api } from '../service/apiHelper';
 
-/**
- * Çalışan listesini getirir.
- * 
- * @param {Object} params - Query parametreleri
- * @param {string} [params.search] - Arama metni
- * @returns {Promise<Array>} - Çalışan listesi
- * 
- * Kullanım (useEmployeeSearch.js içinde):
- *   const { data } = useApiQuery(
- *     ['employees', debouncedQuery],
- *     () => getEmployees({ search: debouncedQuery }),
- *   );
- */
-export const getEmployees = (params = {}) =>
-  axiosInstance.get('/employees', { params }).then((res) => res.data);
+
+export const renewAccessTokenApi = async () => {
+  const refreshToken = Cookies.get('refreshToken');
+  const bearer = 'Bearer ' + refreshToken;
+  return axiosInstance.get('/auth/renew-access-token', {
+    headers: {
+      Authorization: bearer,
+    },
+  });
+};
+
+export const getAllComplexApi = async ({ limit = 30, page = 1 }) => {
+  return await api.getPrivate('/employee/get-all-employee', {
+    limit,
+    page,
+  });
+};
+
+
+export const getEmployees = async (params = {}) => {
+  return await api.getPrivate('/employee/get-all-employee', params);
+};
+
+export const getAllDepartmentApi = async (params = {}) => {
+  return await api.getPrivate('/employee/get-all-employee', params);
+};
+
+export const getAllPositionApi = async (params = {}) => {
+  return await api.getPrivate('/employee/get-all-employee', params);
+};
+
+export const getAllEmployeeApi = async (params = {}) => {
+  return await api.getPrivate('/employee/get-all-employee', params);
+};
+

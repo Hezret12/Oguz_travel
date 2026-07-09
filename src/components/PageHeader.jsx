@@ -91,22 +91,38 @@ const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonT
                 fontSize: "14px",
                 letterSpacing: "0.1px",
                 whiteSpace: "nowrap",
-                backgroundColor: "#16a34a",
+                background: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "linear-gradient(135deg, #0D9488 0%, #06B6D4 100%)"
+                    : "#0E8584",
+                border: "0.5px solid #2CA7A6",
                 color: "#ffffff",
-                boxShadow: "0 2px 8px rgba(22, 163, 74, 0.30)",
+                boxShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0 2px 8px rgba(0, 0, 0, 0.32)"
+                    : "0 2px 8px rgba(14, 133, 132, 0.30)",
 
                 transition:
                   "background-color 200ms ease, transform 200ms ease, box-shadow 200ms ease",
 
                 "&:hover": {
-                  backgroundColor: "#15803d",
+                  background: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "linear-gradient(135deg, #0B7F74 0%, #0891B2 100%)"
+                      : "#0C7776",
                   transform: "translateY(-1px)",
-                  boxShadow: "0 4px 14px rgba(22, 163, 74, 0.38)",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "0 4px 14px rgba(0, 0, 0, 0.38)"
+                      : "0 4px 14px rgba(14, 133, 132, 0.36)",
                 },
 
                 "&:active": {
                   transform: "scale(0.98)",
-                  boxShadow: "0 1px 4px rgba(22, 163, 74, 0.25)",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "0 1px 4px rgba(0, 0, 0, 0.28)"
+                      : "0 1px 4px rgba(14, 133, 132, 0.24)",
                 },
               }}
             >
