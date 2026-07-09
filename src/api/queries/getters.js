@@ -13,27 +13,20 @@ export const renewAccessTokenApi = async () => {
   });
 };
 
-export const getAllComplexApi = async ({ limit = 30, page = 1 }) => {
-  return await api.getPrivate('/employee/get-all-employee', {
-    limit,
-    page,
-  });
-};
-
-
-export const getEmployees = async (params = {}) => {
-  return await api.getPrivate('/employee/get-all-employee', params);
-};
 
 export const getAllDepartmentApi = async (params = {}) => {
-  return await api.getPrivate('/employee/get-all-employee', params);
+  return await api.getPrivate('/department/get-all-departments', params);
 };
 
 export const getAllPositionApi = async (params = {}) => {
-  return await api.getPrivate('/employee/get-all-employee', params);
+  return await api.getPrivate('/position/get-all-postions', params);
+};
+
+export const getAllOfficeApi = async (params = {}) => {
+  return await api.getPrivate('/office/get-all-offices', params);
 };
 
 export const getAllEmployeeApi = async (params = {}) => {
-  return await api.getPrivate('/employee/get-all-employee', params);
+  return await api.getPrivate('/employee/get-all-employees', params);
 };
 

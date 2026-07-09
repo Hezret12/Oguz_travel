@@ -106,7 +106,7 @@ export function usePageFilters({ actions, selectors }) {
     setSearch,
 
     page:        root.page,
-    pageSize:    root.pageSize,
+    limit:    root.limit,
     setPage,
     setPageSize,
 

@@ -1,7 +1,7 @@
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
 import { MaterialReactTable } from "material-react-table";
 import { useMaterialReactTable } from "material-react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import PageHeader from "../../components/PageHeader";
@@ -12,51 +12,28 @@ import AddEmployee from "./Contents/AddEmployee";
 import EditEmployee from "./Contents/EditEmployee";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
-import { getEmployees } from "../../api/queries/getters";
 import {
   employeeFilterActions,
   employeeFilterSelectors,
 } from "../../store/slices/filters/employeeFilterSlice";
 import FilterDrawer from "../../components/FilterDrawer";
 import EmployeeFilter from "./Contents/EmployeeFilter";
-
-const DEPARTMENT_OPTIONS = [
-  "Engineering",
-  "Management",
-  "Sales",
-  "HR",
-  "Finance",
-  "Marketing",
-  "IT",
-];
-
-const OFFICE_OPTIONS = ["Ashgabat", "Istanbul", "Ankara"];
-
-const POSITION_OPTIONS = [
-  "Software Engineer",
-  "Project Manager",
-  "Sales Director",
-  "HR Specialist",
-  "Accountant",
-  "Marketing Specialist",
-  "System Administrator",
-  "Frontend Developer",
-  "Backend Developer",
-  "DevOps Engineer",
-];
+import { getAllEmployeeApi } from "../../api/queries/getters";
+import DeleteDialog from "../../components/DeleteDialog";
+import { useDeleteDialog } from "../../hooks/useDeleteDialog";
+import { useDelete } from "../../hooks/CRUD/useDelete";
+import { deleteEmployee } from "../../api/queries/delete";
 
 const Employee = () => {
   const [rowSelection, setRowSelection] = useState({});
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
 
   const {
     applied,
     draft,
-    queryParams,
     isDrawerOpen,
     openDrawer,
-    // closeDrawer,
     setDraftFilter,
     setFilter,
     applyFilters,
@@ -65,15 +42,14 @@ const Employee = () => {
     searchQuery,
     setSearch,
     page,
-    pageSize,
+    limit,
     setPage,
     setPageSize,
-    sortBy,
-    sortOrder,
     setSort,
     selectsOpen,
     openSelect,
     closeSelect,
+    queryParams,
   } = usePageFilters({
     actions: employeeFilterActions,
     selectors: employeeFilterSelectors,
@@ -84,20 +60,38 @@ const Employee = () => {
     isLoading,
     isFetching,
     pageCount,
+    totalItems,
   } = usePagginationGet({
-    apiFn: getEmployees,
+    apiFn: getAllEmployeeApi,
     key: "employees",
     params: queryParams,
   });
 
+  // ── Delete ──────────────────────────────────────────────────────────────
+  const { mutate: deleteEmployeeMutate, isPending: isDeleting } = useDelete({
+    deleteFn: deleteEmployee,
+    queryKey: ["employees", queryParams],
+    idKey: "guid",
+    apiName: "employee_guids",
+    isPaginated: true,
+  });
+
+  const deleteDialog = useDeleteDialog({
+    onConfirm: (employee) => deleteEmployeeMutate([employee.guid]),
+  });
+
+  const handleDeleteClick = useCallback(
+    (employee) => deleteDialog.open(employee),
+    [deleteDialog]
+  );
+
   const columns = useMemo(
     () => [
       {
-        id: "rowNumber",
+        accessorFn: (row) => row.index_number,
+        id: "index_number",
         header: "№",
         size: 10,
-        enableSorting: false,
-        Cell: ({ row }) => (page - 1) * pageSize + row.index + 1,
       },
       {
         accessorFn: (row) => row.fullName,
@@ -106,8 +100,8 @@ const Employee = () => {
         size: 180,
       },
       {
-        accessorFn: (row) => row.phoneNumber,
-        id: "phoneNumber",
+        accessorFn: (row) => row.phone_number,
+        id: "phone_number",
         header: t("columns.phoneNumber"),
         size: 150,
       },
@@ -118,19 +112,19 @@ const Employee = () => {
         size: 200,
       },
       {
-        accessorFn: (row) => row.department,
+        accessorFn: (row) => selectedLang(row.department?.name),
         id: "department",
         header: t("columns.department"),
         size: 150,
       },
       {
-        accessorFn: (row) => row.position,
+        accessorFn: (row) => selectedLang(row.position?.name),
         id: "position",
         header: t("columns.position"),
         size: 150,
       },
       {
-        accessorFn: (row) => row.office,
+        accessorFn: (row) => selectedLang(row.office?.fullName),
         id: "office",
         header: t("columns.office"),
         size: 130,
@@ -143,104 +137,118 @@ const Employee = () => {
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row, table }) => (
-          <ColumnActionButtons row={row} table={table} />
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={handleDeleteClick}
+          />
         ),
       },
     ],
-    [t, page, pageSize],
+    [t, selectedLang, handleDeleteClick],
+  );
+
+  const activeFilters = useMemo(
+    () =>
+      Object.entries(applied).filter(
+        ([key, value]) =>
+          key !== "search" &&
+          value !== "" &&
+          value !== null &&
+          value !== undefined,
+      ),
+    [applied],
   );
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
     columns,
     data: employeesData,
+
     state: {
       ...defaultMrtOptions.state,
       rowSelection,
       isLoading: isLoading || isFetching,
       pagination: {
         pageIndex: page - 1,
-        pageSize: pageSize,
+        pageSize: limit,
       },
-      sorting: sortBy ? [{ id: sortBy, desc: sortOrder === "desc" }] : [],
     },
-    getRowId: (row) => row.id,
+
+    getRowId: (row) => row.guid,
     onRowSelectionChange: setRowSelection,
 
     manualPagination: true,
     manualFiltering: true,
     manualSorting: true,
     enableSorting: true,
-    pageCount: pageCount,
+    pageCount,
 
     onPaginationChange: (updater) => {
-      const nextPagination =
+      const next =
         typeof updater === "function"
           ? updater(table.getState().pagination)
           : updater;
-      if (nextPagination.pageIndex !== undefined) {
-        setPage(nextPagination.pageIndex + 1);
-      }
-      if (nextPagination.pageSize !== undefined) {
-        setPageSize(nextPagination.pageSize);
-      }
+      if (next.pageIndex !== undefined) setPage(next.pageIndex + 1);
+      if (next.pageSize !== undefined) setPageSize(next.pageSize);
     },
 
     onSortingChange: (updater) => {
-      const nextSorting =
+      const next =
         typeof updater === "function"
           ? updater(table.getState().sorting)
           : updater;
-      if (nextSorting && nextSorting.length > 0) {
-        setSort(nextSorting[0].id, nextSorting[0].desc ? "desc" : "asc");
+      if (next && next.length > 0) {
+        setSort(next[0].id, next[0].desc ? "desc" : "asc");
       } else {
         setSort("", "asc");
       }
     },
 
-    renderTopToolbarCustomActions: () => {
-      const activeFilters = Object.entries(applied).filter(
-        ([key, value]) => key !== "search" && value !== "" && value !== null && value !== undefined
-      );
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search") ?? "Ara..."}
+          disabled={isLoading}
+        />
 
-      return (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap", mt: 0.5 }}>
-          <GlobalSearchInput
-            value={searchQuery}
-            onChange={setSearch}
-            placeholder={t("search") ?? "Ara..."}
-            disabled={isLoading}
-          />
-          {activeFilters.map(([key, value]) => (
-            <Chip
-              key={key}
-              label={`${t(`columns.${key}`)}: ${value}`}
-              onDelete={() => setFilter(key, "")}
-              color="primary"
-              variant="outlined"
-              size="small"
-              sx={{
-                borderRadius: "8px",
-                height: "32px",
-                borderColor: "primary.main",
+        {activeFilters.map(([key, value]) => (
+          <Chip
+            key={key}
+            label={`${t(`columns.${key}`)}: ${value}`}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderRadius: "8px",
+              height: "32px",
+              borderColor: "primary.main",
+              color: "primary.main",
+              fontWeight: 500,
+              "& .MuiChip-deleteIcon": {
                 color: "primary.main",
-                fontWeight: 500,
-                "& .MuiChip-deleteIcon": {
-                  color: "primary.main",
-                  transition: "all 0.15s ease",
-                  "&:hover": {
-                    color: "primary.dark",
-                  },
-                },
-              }}
-            />
-          ))}
-        </Box>
-      );
-    },
+                transition: "all 0.15s ease",
+                "&:hover": { color: "primary.dark" },
+              },
+            }}
+          />
+        ))}
+      </Box>
+    ),
 
     renderBottomToolbar: ({ table }) => {
-      const { pageIndex, pageSize } = table.getState().pagination;
+      const { pageIndex } = table.getState().pagination;
       return (
         <Box
           sx={(theme) => ({
@@ -258,7 +266,7 @@ const Employee = () => {
           <Pagination
             pageIndex={pageIndex}
             pageCount={pageCount}
-            pageSize={pageSize}
+            totalRows={totalItems}
             onPageChange={(newIndex) => table.setPageIndex(newIndex)}
           />
         </Box>
@@ -289,6 +297,7 @@ const Employee = () => {
       }),
     },
 
+    // ── CRUD dialogs ─────────────────────────────────────────────────────
     renderCreateRowDialogContent: ({ table }) => <AddEmployee table={table} />,
     renderEditRowDialogContent: ({ table, row }) => (
       <EditEmployee table={table} row={row} />
@@ -306,31 +315,30 @@ const Employee = () => {
         onFilterClick={openDrawer}
       />
 
+      {/* Filter Drawer */}
       <FilterDrawer
         open={isDrawerOpen}
         onClose={cancelFilters}
         onApply={applyFilters}
         onReset={resetFilters}
         onCancel={cancelFilters}
-        title={t("filter")}
       >
         <EmployeeFilter
           filters={draft}
           selectsOpen={selectsOpen}
-          departmentOptions={DEPARTMENT_OPTIONS}
-          positionOptions={POSITION_OPTIONS}
-          officeOptions={OFFICE_OPTIONS}
-          allText={t("all")}
-          labels={{
-            department: t("columns.department"),
-            position: t("columns.position"),
-            office: t("columns.office"),
-          }}
           onFilterChange={setDraftFilter}
           onSelectOpen={openSelect}
           onSelectClose={closeSelect}
         />
       </FilterDrawer>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteDialog
+        open={deleteDialog.isOpen}
+        onClose={deleteDialog.close}
+        onConfirm={deleteDialog.confirm}
+        isLoading={isDeleting}
+      />
 
       <MaterialReactTable table={table} />
     </>

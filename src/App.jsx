@@ -43,7 +43,7 @@ function App() {
       <RouterProvider router={routes} />
       <GlobalModal />
       <AddClientModal />
-      <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
     </LocalizationProvider>
   );
 }

@@ -26,7 +26,13 @@ export const useDelete = ({
       hdlSuccessResMsg(resData);
       const finalKey = Array.isArray(queryKey) ? queryKey : [queryKey];
       if (isPaginated) {
-        // testing infinite query delete
+        // For paginated queries, invalidate so the current page refetches.
+        // Optimistic removal is unsafe here because removing an item shifts
+        // items across pages, which would cause incorrect counts/gaps.
+        queryClient.invalidateQueries({
+          queryKey: finalKey,
+          refetchType: "active",
+        });
       } else if (isInfiniteQuery) {
         queryClient.setQueryData(finalKey, (old) => {
           if (!old?.pages) return old;

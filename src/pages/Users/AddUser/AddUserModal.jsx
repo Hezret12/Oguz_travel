@@ -15,13 +15,28 @@ import UserInformationTab from "./UserInformationTab";
 import UserAccessTab from "./UserAccessTab";
 import { tabStyles, scrollAreaStyles } from "../shared/modalStyles";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
+import { useGet } from "../../../hooks/CRUD/useGet";
 import { addUserApi } from "../../../api/queries/post";
+import { getAllEmployeeApi } from "../../../api/queries/getters";
 
 const AddUserModal = ({ table }) => {
   const { t } = useLocale();
   const { addUser } = useValidShema();
   const [activeTab, setActiveTab] = useState(0);
 
+
+  const { data: rawEmployees = [] } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  // Map API shape → shape expected by UserInformationTab
+  const employees = rawEmployees.map((emp) => ({
+    id: emp.guid,
+    fullName: emp.fullName,
+    position: emp.position?.name ?? "",
+    phoneNumber: emp.phone_number ?? "",
+  }));
 
   const { mutate: createUser, isLoading } = useCreate({
     apiFn: addUserApi,
@@ -89,6 +104,7 @@ const AddUserModal = ({ table }) => {
               {activeTab === 0 ? (
                 <UserInformationTab
                   control={control}
+                  employees={employees}
                   watch={watch}
                   setValue={setValue}
                   isEdit={false}

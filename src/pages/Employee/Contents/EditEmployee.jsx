@@ -10,46 +10,64 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
 import PhoneNumberField from "../../../components/inputs/PhoneNumber";
-import { updateEmployeeApi } from "../../../api/queries/put";
+import { updateEmployeeApi } from "../../../api/queries/patch";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
-
-const DEPARTMENT_OPTIONS = [
-  { label: "Engineering", value: "Engineering" },
-  { label: "Management", value: "Management" },
-  { label: "Sales", value: "Sales" },
-  { label: "HR", value: "HR" },
-  { label: "Finance", value: "Finance" },
-  { label: "Marketing", value: "Marketing" },
-  { label: "IT", value: "IT" },
-];
-
-const OFFICE_OPTIONS = [
-  { label: "Ashgabat", value: "Ashgabat" },
-  { label: "Istanbul", value: "Istanbul" },
-  { label: "Ankara", value: "Ankara" },
-];
+import { useGet } from "../../../hooks/CRUD/useGet";
+import {
+  getAllDepartmentApi,
+  getAllOfficeApi,
+  getAllPositionApi,
+} from "../../../api/queries/getters";
 
 const EditEmployee = ({ table, row }) => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
   const { addEmployee } = useValidShema();
 
   const { mutate: updateEmployee, isPending: loading } = useUpdate({
     apiFn: updateEmployeeApi,
-    key: "employee",
-    idKey: "empl_guid",
+    key: "employees",
+    idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);
     },
   });
 
+  const {
+    data: department,
+    isLoading: isDepartmentLoading,
+    isError: isDepartmentError,
+  } = useGet({
+    apiFn: getAllDepartmentApi,
+    key: "department",
+  });
+
+  const {
+    data: office,
+    isLoading: isOfficeLoading,
+    isError: isOfficeError,
+  } = useGet({
+    apiFn: getAllOfficeApi,
+    key: "office",
+  });
+
+  const {
+    data: position,
+    isLoading: isPositionLoading,
+    isError: isPositionError,
+  } = useGet({
+    apiFn: getAllPositionApi,
+    key: "position",
+  });
+
   const { control, handleSubmit } = useForm({
     defaultValues: {
+      guid: row?.original?.guid || '',
       fullName: row.original.fullName || "",
-      phoneNumber: row.original.phoneNumber || "",
+      phone_number: row.original.phone_number || "",
       gmail: row.original.gmail || "",
-      departmentId: row.original.departmentId || "",
-      positionId: row.original.positionId || "",
-      officeId: row.original.officeId || "",
+      department_guid: row.original.department_guid || "",
+      position_guid: row.original.position_guid || "",
+      office_guid: row.original.office_guid || "",
       address: row.original.address || "",
     },
     resolver: yupResolver(addEmployee),
@@ -72,7 +90,7 @@ const EditEmployee = ({ table, row }) => {
 
   return (
     <CustomDialog widthX={700} open={true} close={closeDialog}>
-      <CustomDialogHeader variant={"h5"} title={t("pages.employee.add")} />
+      <CustomDialogHeader variant={"h5"} title={t("pages.employee.aedit")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box
           sx={{
@@ -92,8 +110,8 @@ const EditEmployee = ({ table, row }) => {
           <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
             <PhoneNumberField
               control={control}
-              name="phoneNumber"
-              label={t("columns.phoneNumber")}
+              name="phone_number"
+              label={t("columns.phone_number")}
             />
           </Box>
 
@@ -101,34 +119,46 @@ const EditEmployee = ({ table, row }) => {
             <CustomTextField
               name="gmail"
               control={control}
-              label={t("columns.gmail") ?? "Email"}
+              label={t("columns.gmail")}
             />
           </Box>
 
           <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
             <CustomSelect
-              name="departmentId"
+              name="department_guid"
               control={control}
               label={t("columns.department") ?? "Department"}
-              options={DEPARTMENT_OPTIONS}
+              options={department}
+              isLoading={isDepartmentLoading}
+              isError={isDepartmentError}
+              getRowId={(item) => item.guid}
+              getRowLabel={(item) => selectedLang(item.name)}
             />
           </Box>
 
           <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
             <CustomSelect
-              name="positionId"
+              name="position_guid"
               control={control}
-              label={t("columns.position") ?? "Position"}
-              options={[]}
+              label={t("columns.position")}
+              options={position}
+              isLoading={isPositionLoading}
+              isError={isPositionError}
+              getRowId={(item) => item.guid}
+              getRowLabel={(item) => selectedLang(item.name)}
             />
           </Box>
 
           <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
             <CustomSelect
-              name="officeId"
+              name="office_guid"
               control={control}
-              label={t("columns.office") ?? "Office"}
-              options={OFFICE_OPTIONS}
+              label={t("columns.office")}
+              options={office}
+              isLoading={isOfficeLoading}
+              isError={isOfficeError}
+              getRowId={(item) => item.guid}
+              getRowLabel={(item) => selectedLang(item.fullName)}
             />
           </Box>
 

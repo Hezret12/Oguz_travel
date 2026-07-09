@@ -10,7 +10,7 @@ import { FooterButton } from "../../../components/Dialog/FooterButton";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
 import PhoneNumberField from "../../../components/inputs/PhoneNumber";
-import { updateClientApi } from "../../../api/queries/put";
+import { updateClientApi } from "../../../api/queries/patch";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 
 const EditClient = ({ table, row }) => {

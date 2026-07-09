@@ -1,39 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
-export const usePagginationGet = ({ apiFn, key, params = {}, options = {} }) => {
-  const query = useQuery({
+export function usePagginationGet({ apiFn, key, params }) {
+  const { data, isLoading, isFetching, isError, error } = useQuery({
     queryKey: [key, params],
-    queryFn: async () => {
-      try {
-        const res = await apiFn(params);
-        return res;
-      } catch (err) {
-        console.error(`Error fetching paginated data for key "${key}":`, err);
-        throw err;
-      }
-    },
-    ...options,
+    queryFn: () => apiFn(params),
+    placeholderData: keepPreviousData,
   });
 
-  const data = query?.data?.data?.data ?? query?.data?.data ?? [];
-
-  const totalCount =
-    query?.data?.data?.totalCount ??
-    query?.data?.data?.total ??
-    query?.data?.data?.count ??
-    query?.data?.data?.totalRows ??
-    (Array.isArray(data) ? data.length : 0);
-
-  const limit = params.pageSize || 20;
-  const pageCount =
-    query?.data?.data?.totalPages ??
-    query?.data?.data?.pageCount ??
-    (Math.ceil(totalCount / limit) || 1);
+  const responseBody = data?.data;
 
   return {
-    ...query,
-    data,
-    totalCount,
-    pageCount,
+    data: responseBody?.data ?? [],
+    totalItems: responseBody?.meta?.totalItems ?? 0,
+    pageCount: responseBody?.meta?.totalPages ?? 0,
+    currentPage: responseBody?.meta?.currentPage ?? 1,
+    isLoading,
+    isFetching,
+    isError,
+    error,
   };
-};
+}

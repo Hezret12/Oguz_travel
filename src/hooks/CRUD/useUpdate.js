@@ -13,76 +13,68 @@ export const useUpdate = ({
 
   const mutation = useMutation({
     mutationFn: async (variables) => {
-      const { [idKey]: id, ...rest } = variables;
-      const res = await apiFn({ [idKey]: id, ...rest });
-      hdlSuccessResMsg(res);
-      return res.data?.data || res.data;
+      const res = await apiFn(variables);
+      const updatedItem = res.data?.data || res.data;
+      const message = res.data?.message || res.message;
+
+      return { updatedItem, message };
     },
 
-    onSuccess: (updatedItem) => {
+    onSuccess: ({ updatedItem, message }) => {
       const finalKey = Array.isArray(key) ? key : [key];
-       if (isInfiniteQuery) {
-        queryClient.setQueryData(finalKey, (old) => {
-          if (!old?.pages) return old;
 
-          return {
-            ...old,
-            pages: old.pages.map((page) => {
-              const pageData = page?.data?.data;
-              if (!Array.isArray(pageData)) return page;
+      const mergeItem = (oldItem) =>
+        oldItem?.[idKey] === updatedItem[idKey]
+          ? { ...oldItem, ...updatedItem }
+          : oldItem;
 
-              return {
-                ...page,
-                data: {
-                  ...page.data,
-                  data: pageData.map((item) =>
-                    item[idKey] === updatedItem[idKey] ? updatedItem : item,
-                  ),
-                },
-              };
-            }),
-          };
-        });
-      } else {
-        queryClient.setQueryData(finalKey, (old) => {
+      queryClient.setQueriesData(
+        { queryKey: finalKey, exact: false },
+        (old) => {
           if (!old) return old;
-          const list = Array.isArray(old)
-            ? [...old]
-            : old.data?.data
-              ? [...old.data.data]
-              : [];
 
-          const index = list.findIndex(
-            (item) => item[idKey] === updatedItem[idKey],
-          );
-          if (index === -1) return old;
-
-          list[index] = updatedItem;
-
-          if (Array.isArray(old)) {
-            return list;
+          if (isInfiniteQuery) {
+            if (!old.pages) return old;
+            return {
+              ...old,
+              pages: old.pages.map((page) => {
+                const pageData = page?.data?.data;
+                if (!Array.isArray(pageData)) return page;
+                return {
+                  ...page,
+                  data: { ...page.data, data: pageData.map(mergeItem) },
+                };
+              }),
+            };
           }
 
-          return {
-            ...old,
-            data: {
-              ...old.data,
-              data: list,
-            },
-          };
-        });
-      }
+          if (Array.isArray(old)) {
+            return old.map(mergeItem);
+          }
 
-      if (invalidateQueries?.length > 0) {
-        invalidateQueries.forEach((key) => {
-          queryClient.invalidateQueries({
-            queryKey: [key],
-            refetchType: "active",
-          });
-        });
-      }
+          if (Array.isArray(old?.data?.data)) {
+            return {
+              ...old,
+              data: { ...old.data, data: old.data.data.map(mergeItem) },
+            };
+          }
+          if (Array.isArray(old?.data)) {
+            return { ...old, data: old.data.map(mergeItem) };
+          }
 
-      onSuccessUpdate();
+          return old;
+        },
+      );
+
+      invalidateQueries?.forEach((queryKey) => {
+        queryClient.invalidateQueries({
+          queryKey: [queryKey],
+          refetchType: "active",
+        });
+      });
+
+      hdlSuccessResMsg({ data: { message } });
+      onSuccessUpdate?.();
     },
 
     onError: (err) => hdlErrResMsg(err),

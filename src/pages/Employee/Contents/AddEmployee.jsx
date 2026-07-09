@@ -13,26 +13,47 @@ import PhoneNumberField from "../../../components/inputs/PhoneNumber";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { addEmployeeApi } from "../../../api/queries/post";
 import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllDepartmentApi, getAllPositionApi } from "../../../api/queries/getters";
+import {
+  getAllDepartmentApi,
+  getAllOfficeApi,
+  getAllPositionApi,
+} from "../../../api/queries/getters";
 
 const AddEmployee = ({ table }) => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
   const { addEmployee } = useValidShema();
 
-  const { mutate: createEmployee } = useCreate({
+  const { mutate: createEmployee, isLoading: isSubmit } = useCreate({
     apiFn: addEmployeeApi,
-    key: "employee",
+    key: "employees",
     onSuccess: () => {
       table.setCreatingRow(null);
     },
   });
 
-  const { data: department, isLoading: isDepartmentLoading, isError: isDepartmentError } = useGet({
+  const {
+    data: department,
+    isLoading: isDepartmentLoading,
+    isError: isDepartmentError,
+  } = useGet({
     apiFn: getAllDepartmentApi,
     key: "department",
   });
 
-  const { data: position, isLoading: isPositionLoading, isError: isPositionError } = useGet({
+  const {
+    data: office,
+    isLoading: isOfficeLoading,
+    isError: isOfficeError,
+  } = useGet({
+    apiFn: getAllOfficeApi,
+    key: "office",
+  });
+
+  const {
+    data: position,
+    isLoading: isPositionLoading,
+    isError: isPositionError,
+  } = useGet({
     apiFn: getAllPositionApi,
     key: "position",
   });
@@ -87,7 +108,7 @@ const AddEmployee = ({ table }) => {
           <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
             <PhoneNumberField
               control={control}
-              name="phoneNumber"
+              name="phone_number"
               label={t("columns.phoneNumber")}
             />
           </Box>
@@ -96,38 +117,46 @@ const AddEmployee = ({ table }) => {
             <CustomTextField
               name="gmail"
               control={control}
-              label={t("columns.gmail") ?? "Email"}
+              label={t("columns.gmail")}
             />
           </Box>
 
           <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
             <CustomSelect
-              name="departmentId"
+              name="department_guid"
               control={control}
               label={t("columns.department") ?? "Department"}
               options={department}
-              loading={isDepartmentLoading}
-              error={isDepartmentError}
+              isLoading={isDepartmentLoading}
+              isError={isDepartmentError}
+              getRowId={(item) => item.guid}
+              getRowLabel={(item) => selectedLang(item.name)}
             />
           </Box>
 
           <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
             <CustomSelect
-              name="positionId"
+              name="position_guid"
               control={control}
-              label={t("columns.position") ?? "Position"}
+              label={t("columns.position")}
               options={position}
-              loading={isPositionLoading}
-              error={isPositionError}
+              isLoading={isPositionLoading}
+              isError={isPositionError}
+              getRowId={(item) => item.guid}
+              getRowLabel={(item) => selectedLang(item.name)}
             />
           </Box>
 
           <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
             <CustomSelect
-              name="officeId"
+              name="office_guid"
               control={control}
-              label={t("columns.office") ?? "Office"}
-              options={[]}
+              label={t("columns.office")}
+              options={office}
+              isLoading={isOfficeLoading}
+              isError={isOfficeError}
+              getRowId={(item) => item.guid}
+              getRowLabel={(item) => selectedLang(item.fullName)}
             />
           </Box>
 
@@ -140,7 +169,7 @@ const AddEmployee = ({ table }) => {
           </Box>
         </Box>
 
-        <FooterButton onCancel={closeDialog} type="submit" />
+        <FooterButton loading={isSubmit} onCancel={closeDialog} type="submit" />
       </CustomForm>
     </CustomDialog>
   );

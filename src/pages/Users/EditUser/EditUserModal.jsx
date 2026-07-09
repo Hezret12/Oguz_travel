@@ -9,21 +9,33 @@ import { CustomForm } from "../../../components/Dialog/CustomForm";
 import FooterButton from "../../../components/Dialog/FooterButton";
 
 import { useLocale } from "../../../hooks/useLocale";
-import { useEmployeeSearch } from "../../../hooks/useEmployeeSearch";
+import { useGet } from "../../../hooks/CRUD/useGet";
+import { getAllEmployeeApi } from "../../../api/queries/getters";
 import { useValidShema } from "../../../functions/useValidShema";
 
 import UserInformationTab from "../AddUser/UserInformationTab";
 import UserAccessTab from "../AddUser/UserAccessTab";
 import { tabStyles, scrollAreaStyles } from "../shared/modalStyles";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
-import { updateUserApi } from "../../../api/queries/put";
+import { updateUserApi } from "../../../api/queries/patch";
 
 const EditUserModal = ({ table, row }) => {
   const { t } = useLocale();
   const { addUser } = useValidShema();
   const [activeTab, setActiveTab] = useState(0);
 
-  const { data: employees = [] } = useEmployeeSearch();
+  const { data: rawEmployees = [] } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  // Map API shape → shape expected by UserInformationTab
+  const employees = rawEmployees.map((emp) => ({
+    id: emp.guid,
+    fullName: emp.fullName,
+    position: emp.position?.name ?? "",
+    phoneNumber: emp.phone_number ?? "",
+  }));
 
   const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: {

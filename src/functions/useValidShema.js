@@ -31,19 +31,7 @@ export const useValidShema = () => {
   });
 
   const addEmployee = yup.object({
-    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired", "Full name is required")),
-    phoneNumber: phoneNumberRequiredValidSchema({
-      requiredMessage: t("pages.employee.validation.phoneNumberRequired", "Phone number is required"),
-      lengthMessage: t("pages.employee.validation.phoneNumberLength", "Phone number must be 8 digits"),
-      invalidMessage: t("pages.employee.validation.phoneNumberInvalid", "Invalid phone number"),
-    }),
-    gmail: emailRequiredValidSchema({
-      requiredMessage: t("pages.employee.validation.gmailRequired", "Email is required"),
-      invalidMessage: t("pages.employee.validation.gmailInvalid", "Invalid email address"),
-    }),
-    departmentId: stringRequiredValidSchema(t("pages.employee.validation.departmentRequired", "Department is required")),
-    positionId: stringRequiredValidSchema(t("pages.employee.validation.positionRequired", "Position is required")),
-    officeId: stringRequiredValidSchema(t("pages.employee.validation.officeRequired", "Office is required")),
+    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired", "Full name is required")),  
   });
 
   const addClient = yup.object({
