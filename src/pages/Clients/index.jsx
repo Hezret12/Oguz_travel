@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Box } from "@mui/material";
+import { useMemo, useState, useCallback } from "react";
+import { Box, Chip } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -12,6 +12,20 @@ import Pagination from "../../components/Pagination";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import AddClient from "./Contents/AddClient";
 import EditClient from "./Contents/EditClient";
+import ClientFilter from "./Contents/ClientFilter";
+import { usePageFilters } from "../../hooks/usePageFilters";
+import { usePagginationGet } from "../../hooks/usePagginationGet";
+import {
+  clientFilterActions,
+  clientFilterSelectors,
+} from "../../store/slices/filters/clientFilterSlice";
+import FilterDrawer from "../../components/FilterDrawer";
+import { getClientsApi } from "../../api/queries/getters";
+import DeleteDialog from "../../components/DeleteDialog";
+import { useDeleteDialog } from "../../hooks/useDeleteDialog";
+import { useDelete } from "../../hooks/CRUD/useDelete";
+import { deleteClient } from "../../api/queries/delete";
+import { actions } from "../../utils/helperConstant";
 
 const formatDate = (value) => {
   if (!value) return "";
@@ -24,11 +38,86 @@ const Clients = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
 
+  const {
+    applied,
+    draft,
+    isDrawerOpen,
+    openDrawer,
+    setDraftFilter,
+    setFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    searchQuery,
+    setSearch,
+    page,
+    limit,
+    setPage,
+    setPageSize,
+    setSort,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+    queryParams,
+  } = usePageFilters({
+    actions: clientFilterActions,
+    selectors: clientFilterSelectors,
+  });
+
+  const {
+    data: clientsData,
+    isLoading,
+    isFetching,
+    pageCount,
+    totalItems,
+  } = usePagginationGet({
+    apiFn: getClientsApi,
+    key: "clients",
+    params: queryParams,
+  });
+
+  const { mutate: deleteClientMutate, isPending: isDeleting } = useDelete({
+    deleteFn: deleteClient,
+    queryKey: ["clients", queryParams],
+    idKey: "client_guid",
+    apiName: "client_guid",
+    isPaginated: true,
+  });
+
+  const deleteDialog = useDeleteDialog({
+    onConfirm: (client) => deleteClientMutate(client.client_guid),
+  });
+
+  const handleDeleteClick = useCallback(
+    (client) => deleteDialog.open(client),
+    [deleteDialog],
+  );
+
+  const getFilterChipLabel = useCallback(
+    (key, value) => {
+      if (key === "gender") {
+        const label =
+          value === "Women"
+            ? t("pages.clients.genderWomen")
+            : value === "Men"
+              ? t("pages.clients.genderMen")
+              : value;
+        return `${t(`columns.${key}`)}: ${label}`;
+      }
+      if (key === "dateOfBirth") {
+        return `${t(`columns.${key}`)}: ${formatDate(value)}`;
+      }
+      return `${t(`columns.${key}`)}: ${value}`;
+    },
+    [t],
+  );
+
   const columns = useMemo(
     () => [
       {
-        id: "rowNumber",
-        header: "#",
+        accessorFn: (row) => row.index_number,
+        id: "index_number",
+        header: "№",
         size: 10,
         enableSorting: false,
       },
@@ -39,11 +128,14 @@ const Clients = () => {
         size: 180,
       },
       {
-        accessorFn: (row) => row.phoneNumber,
-        id: "phoneNumber",
+        accessorFn: (row) => row.phone_number,
+        id: "phone_number",
         header: t("columns.phoneNumber"),
         size: 150,
-        Cell: ({ cell }) => `+993 ${cell.getValue()}`,
+        Cell: ({ cell }) => {
+          const value = cell.getValue();
+          return value ? `+993 ${value}` : "";
+        },
       },
       {
         accessorFn: (row) => row.dateOfBirth,
@@ -53,8 +145,8 @@ const Clients = () => {
         Cell: ({ cell }) => formatDate(cell.getValue()),
       },
       {
-        accessorFn: (row) => row.passportNumber,
-        id: "passportNumber",
+        accessorFn: (row) => row.passport_number,
+        id: "passport_number",
         header: t("columns.passportNumber"),
         size: 150,
       },
@@ -87,40 +179,120 @@ const Clients = () => {
       {
         id: "actions",
         header: t("columns.actions"),
-        size: 100,
+        size: actions,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row, table }) => (
-          <ColumnActionButtons row={row} table={table} />
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={handleDeleteClick}
+          />
         ),
       },
     ],
-    [t],
+    [t, handleDeleteClick],
+  );
+
+  const activeFilters = useMemo(
+    () =>
+      Object.entries(applied).filter(
+        ([key, value]) =>
+          key !== "search" &&
+          value !== "" &&
+          value !== null &&
+          value !== undefined,
+      ),
+    [applied],
   );
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
     columns,
-    data: [],
+    data: clientsData,
+
     state: {
       ...defaultMrtOptions.state,
       rowSelection,
+      isLoading: isLoading || isFetching,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
+      },
     },
-    getRowId: (row) => row.id,
-    onRowSelectionChange: setRowSelection,
-    renderTopToolbarCustomActions: () => (
-      <GlobalSearchInput
-      // value={searchQuery}
-      // onChange={setSearchQuery}
-      // placeholder={t("search") ?? "Search..."}
-      // disabled={isLoading}
-      />
-    ),
-    renderBottomToolbar: ({ table }) => {
-      const { pageIndex, pageSize } = table.getState().pagination;
-      const pageCount = table.getPageCount();
 
+    getRowId: (row) => row.client_guid,
+    onRowSelectionChange: setRowSelection,
+
+    manualPagination: true,
+    manualFiltering: true,
+    manualSorting: true,
+    enableSorting: true,
+    pageCount,
+    rowCount: totalItems,
+
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().pagination)
+          : updater;
+      if (next.pageIndex !== undefined) setPage(next.pageIndex + 1);
+      if (next.pageSize !== undefined) setPageSize(next.pageSize);
+    },
+
+    onSortingChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().sorting)
+          : updater;
+      if (next && next.length > 0) {
+        setSort(next[0].id, next[0].desc ? "desc" : "asc");
+      } else {
+        setSort("", "asc");
+      }
+    },
+
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search")}
+          disabled={isLoading}
+        />
+
+        {activeFilters.map(([key, value]) => (
+          <Chip
+            key={key}
+            label={getFilterChipLabel(key, value)}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderRadius: "8px",
+              height: "32px",
+              fontWeight: 500,
+              "& .MuiChip-deleteIcon": {
+                color: "primary.main",
+                transition: "all 0.15s ease",
+              },
+            }}
+          />
+        ))}
+      </Box>
+    ),
+
+    renderBottomToolbar: ({ table }) => {
+      const { pageIndex } = table.getState().pagination;
       return (
         <Box
           sx={(theme) => ({
@@ -131,37 +303,19 @@ const Clients = () => {
             py: 0.75,
             minHeight: "52px",
             borderTop: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
           })}
         >
           <Box />
           <Pagination
             pageIndex={pageIndex}
             pageCount={pageCount}
-            pageSize={pageSize}
-            // totalRows={clients.length}
-            onPageChange={(newIndex) => table.setPageIndex(newIndex)}
+            totalRows={totalItems}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
           />
         </Box>
       );
     },
-    muiTableBodyRowProps: ({ row }) => ({
-      onClick: row.getToggleSelectedHandler(),
-      sx: (theme) => ({
-        cursor: "pointer",
-        backgroundColor: row.getIsSelected()
-          ? theme.palette.mode === "dark"
-            ? "rgba(0, 114, 229, 0.2) !important"
-            : "rgba(0, 114, 229, 0.1) !important"
-          : "inherit",
-        "&:hover": {
-          backgroundColor:
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.08)"
-              : "rgba(0,0,0,0.04)",
-        },
-      }),
-    }),
+
     muiTablePaperProps: {
       sx: () => ({
         ...defaultMrtOptions.muiTablePaperProps?.sx,
@@ -180,6 +334,31 @@ const Clients = () => {
         pageTitle={`${t("pages.clients.title")} | Oguz Travel`}
         addButtonText={t("pages.clients.add")}
         onAddClick={() => table.setCreatingRow(true)}
+        filterButtonText={t("filter")}
+        onFilterClick={openDrawer}
+      />
+
+      <FilterDrawer
+        open={isDrawerOpen}
+        onClose={cancelFilters}
+        onApply={applyFilters}
+        onReset={resetFilters}
+        onCancel={cancelFilters}
+      >
+        <ClientFilter
+          filters={draft}
+          selectsOpen={selectsOpen}
+          onFilterChange={setDraftFilter}
+          onSelectOpen={openSelect}
+          onSelectClose={closeSelect}
+        />
+      </FilterDrawer>
+
+      <DeleteDialog
+        open={deleteDialog.isOpen}
+        onClose={deleteDialog.close}
+        onConfirm={deleteDialog.confirm}
+        isLoading={isDeleting}
       />
 
       <MaterialReactTable table={table} />

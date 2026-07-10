@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import toast from "react-hot-toast";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
@@ -13,12 +11,10 @@ import { useValidShema } from "../../../functions/useValidShema";
 import GlobalClientAutocomplete from "../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import AgentAccordion from "../../../components/global/AgentAccordion";
-
-const STATUS_OPTIONS = [
-  { label: "Sale", value: "SALE" },
-  { label: "Reissue", value: "REISSUE" },
-  { label: "Refund", value: "REFUND" },
-];
+import { addB2BApi } from "../../../api/queries/post";
+import { useCreate } from "../../../hooks/CRUD/useCreate";
+import { getAllStatusApi } from "../../../api/queries/getters";
+import { useGet } from "../../../hooks/CRUD/useGet";
 
 const TRIP_TYPE_OPTIONS = [
   { label: "One Way", value: "ONE WAY" },
@@ -32,25 +28,35 @@ const CABIN_OPTIONS = [
   { label: "EXTRA", value: "EXTRA" },
 ];
 
-const AddB2BTicketDialog = ({ open, onClose, onSave, ticket }) => {
-  const { t } = useLocale();
+const AddB2BTicketDialog = ({ table }) => {
+  const { t, selectedLang } = useLocale();
   const { addB2BTicket } = useValidShema();
-  const [loading, setLoading] = useState(false);
 
-  const defaultValues = useMemo(() => {
-    const currentTicket = ticket ?? {};
-    const agentFullName =
-      currentTicket.agentFullName ?? currentTicket.agent ?? "";
-    const agentPhoneNumber = currentTicket.agentPhoneNumber ?? "";
+  const {
+    data: status,
+    isLoading,
+    isError: isStatusError,
+  } = useGet({
+    apiFn: getAllStatusApi,
+    key: "status",
+  });
 
-    return {
-      clientId: "",
+  const { mutate: createB2B, isLoading: isSubmit } = useCreate({
+    apiFn: addB2BApi,
+    key: "b2b",
+    onSuccess: () => {
+      table.setCreatingRow(null);
+    },
+  });
+
+  const { control, handleSubmit } = useForm({
+    defaultValues: {
+      client_guid: "",
       issueDate: "",
-      operator: "",
-      office: "",
-      operatorTwo: "",
+      operator_guid: "",
+      recieved_operator_guid: "",
       pnr: "",
-      status: "SALE",
+      status: "",
       airline: "",
       route: "",
       cabinClass: "",
@@ -59,57 +65,27 @@ const AddB2BTicketDialog = ({ open, onClose, onSave, ticket }) => {
       netFare: "",
       saleFare: "",
       card: "",
+      agent: {
+        name: "",
+        phone_number: "",
+      },
       note: "",
-      ...currentTicket,
-      agent: currentTicket.agent ?? agentFullName,
-      agentFullName,
-      agentPhoneNumber,
-    };
-  }, [ticket]);
-
-  const { control, handleSubmit, reset } = useForm({
-    defaultValues,
+    },
     resolver: yupResolver(addB2BTicket),
     mode: "onSubmit",
   });
 
-  useEffect(() => {
-    if (open) {
-      reset(defaultValues);
-    }
-  }, [open, defaultValues, reset]);
-
   const closeDialog = () => {
-    onClose?.();
-    reset(defaultValues);
+    if (table) {
+      table.setCreatingRow(null);
+    }
   };
 
   const submitHandler = async (data) => {
     try {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const agentFullName = data.agentFullName?.trim() ?? "";
-      const agentPhoneNumber = data.agentPhoneNumber?.trim() ?? "";
-      const payload = {
-        ...data,
-        agent: agentFullName,
-        agentFullName,
-        agentPhoneNumber,
-      };
-
-      onSave?.(payload);
-      toast.success(
-        t("pages.ticket.b2b.saveSuccess") ?? "Ticket saved successfully!",
-      );
-      closeDialog();
+      await createB2B(data);
     } catch (error) {
       console.error(error);
-      toast.error(
-        t("pages.ticket.b2b.saveError") ??
-          "An error occurred while saving the ticket.",
-      );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -124,11 +100,7 @@ const AddB2BTicketDialog = ({ open, onClose, onSave, ticket }) => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={
-            ticket
-              ? (t("pages.ticket.b2b.editTicket") ?? "Edit B2B Ticket")
-              : (t("pages.ticket.b2b.addTicket") ?? "Add B2B Ticket")
-          }
+          title={t("pages.ticket.b2b.addTicket")}
         />
 
         <CustomForm handleSubmit={handleSubmit(submitHandler)}>
@@ -149,10 +121,7 @@ const AddB2BTicketDialog = ({ open, onClose, onSave, ticket }) => {
               <GlobalClientAutocomplete
                 control={control}
                 name="clientId"
-                label={t("columns.client") ?? "Client"}
-                placeholder={
-                  t("columns.clientPlaceholder") ?? "Search client..."
-                }
+                label={t("columns.client")}
               />
             </Box>
 
@@ -229,12 +198,15 @@ const AddB2BTicketDialog = ({ open, onClose, onSave, ticket }) => {
               }}
             >
               <CustomSelect
-                name="status"
+                name="status_guid"
                 control={control}
-                label={t("columns.status") ?? "Status"}
-                options={STATUS_OPTIONS}
+                label={t("columns.status")}
+                options={status}
+                isLoading={isLoading}
+                isError={isStatusError}
+                getRowId={(item) => item.guid}
+                getRowLabel={(item) => selectedLang(item.name)}
               />
-
               <CustomSelect
                 name="cabinClass"
                 control={control}
@@ -270,11 +242,15 @@ const AddB2BTicketDialog = ({ open, onClose, onSave, ticket }) => {
                 type="number"
                 label={t("columns.saleFare") ?? "Sale Fare"}
               />
-              <CustomTextField
-                name="profit"
+              <CustomSelect
+                name="status_guid"
                 control={control}
-                type="number"
-                label={t("columns.profit") ?? "Peyda"}
+                label={t("columns.status")}
+                options={status}
+                isLoading={isLoading}
+                isError={isStatusError}
+                getRowId={(item) => item.guid}
+                getRowLabel={(item) => selectedLang(item.name)}
               />
             </Box>
 
@@ -291,20 +267,11 @@ const AddB2BTicketDialog = ({ open, onClose, onSave, ticket }) => {
                 label={t("columns.card") ?? "Cart"}
               />
 
-              <CustomTextField
-                name="paymentType"
-                control={control}
-                label={t("columns.paymentType")}
-              />
-
               <AgentAccordion
                 control={control}
-                title={t("columns.agent") ?? "Agent"}
-                fullNameLabel={t("columns.agentFullName", "Agent Full Name")}
-                phoneNumberLabel={t(
-                  "ticket.b2b.agentPhoneNumber",
-                  "Agent Phone Number",
-                )}
+                title={t("columns.agent")}
+                fullNameLabel={t("columns.agentFullName")}
+                phoneNumberLabel={t("ticket.b2b.agentPhoneNumber")}
               />
             </Box>
 
@@ -314,13 +281,13 @@ const AddB2BTicketDialog = ({ open, onClose, onSave, ticket }) => {
                 control={control}
                 multiline
                 rows={2}
-                label={t("columns.note") ?? "Note"}
+                label={t("columns.note")}
               />
             </Box>
           </Box>
 
           <FooterButton
-            loading={loading}
+            loading={isSubmit}
             onCancel={closeDialog}
             type="submit"
             sx={{ mt: 3, flexShrink: 0 }}

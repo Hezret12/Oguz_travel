@@ -32,7 +32,7 @@ const AddUserModal = ({ table }) => {
 
   // Map API shape → shape expected by UserInformationTab
   const employees = rawEmployees.map((emp) => ({
-    id: emp.guid,
+    guid: emp.guid,
     fullName: emp.fullName,
     position: emp.position?.name ?? "",
     phoneNumber: emp.phone_number ?? "",

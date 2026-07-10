@@ -28,3 +28,11 @@ export const addClientsApi = async (data) => {
   );
   return response;
 };
+
+export const addB2BApi = async (data) => {
+  const response = await api.postPrivate(
+    "/client/add-client",
+    data,
+  );
+  return response;
+};

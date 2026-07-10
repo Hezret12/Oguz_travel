@@ -1,6 +1,6 @@
 import {
   Button,
-  CircularProgress,
+  // CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -10,31 +10,9 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
-import { useLocale } from "../../hooks/useLocale";
+import { useLocale } from "../hooks/useLocale";
 
-/**
- * Generic reusable delete confirmation dialog.
- *
- * Props:
- *  open         — boolean, controls visibility
- *  onClose      — () => void, called on cancel / backdrop click
- *  onConfirm    — () => void, called when user confirms deletion
- *  isLoading    — boolean, shows spinner on confirm button while deleting
- *  title        — string  (optional, falls back to t("deleteDialog.title"))
- *  description  — string  (optional, falls back to t("deleteDialog.description"))
- *  confirmText  — string  (optional, falls back to t("delete"))
- *  cancelText   — string  (optional, falls back to t("cancel"))
- *
- * Usage (any page):
- *   <DeleteDialog
- *     open={deleteDialog.open}
- *     onClose={deleteDialog.handleClose}
- *     onConfirm={deleteDialog.handleConfirm}
- *     isLoading={isPending}
- *   />
- */
 const DeleteDialog = ({
   open,
   onClose,
@@ -167,13 +145,13 @@ const DeleteDialog = ({
           onClick={onConfirm}
           disabled={isLoading}
           disableElevation
-          startIcon={
-            isLoading ? (
-              <CircularProgress size={15} color="inherit" />
-            ) : (
-              <DeleteOutlineIcon sx={{ fontSize: "17px !important" }} />
-            )
-          }
+          // startIcon={
+          //   isLoading ? (
+          //     <CircularProgress size={15} color="inherit" />
+          //   ) : (
+          //     <DeleteOutlineIcon sx={{ fontSize: "17px !important" }} />
+          //   )
+          // }
           sx={{
             flex: 1,
             borderRadius: "9px",

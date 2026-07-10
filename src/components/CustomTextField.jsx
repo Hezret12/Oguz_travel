@@ -44,7 +44,6 @@ const CustomTextField = ({
                   mb: 0.75,
                   fontWeight: 600,
                   fontSize: '0.875rem',
-                  color: 'text.primary',
                 }}
               >
                 {label}
@@ -83,7 +82,7 @@ const CustomTextField = ({
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: '10px',
+                  borderRadius: '4px',
                   minHeight: multiline ? 'auto' : '44px',
                   backgroundColor: (theme) =>
                     theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : '#ffffff',

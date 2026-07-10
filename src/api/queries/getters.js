@@ -30,3 +30,11 @@ export const getAllEmployeeApi = async (params = {}) => {
   return await api.getPrivate('/employee/get-all-employees', params);
 };
 
+export const getAllStatusApi = async (params = {}) => {
+  return await api.getPrivate('/general/get-all-status', params);
+};
+
+export const getClientsApi = async (params = {}) => {
+  return await api.getPrivate('/client/get-all-client', params);
+};
+

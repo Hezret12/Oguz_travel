@@ -26,6 +26,7 @@ const AddEmployee = ({ table }) => {
   const { mutate: createEmployee, isLoading: isSubmit } = useCreate({
     apiFn: addEmployeeApi,
     key: "employees",
+    invalidateQueries: ["employees"],
     onSuccess: () => {
       table.setCreatingRow(null);
     },

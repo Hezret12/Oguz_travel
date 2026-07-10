@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 
 const StackedCell = ({ primary, secondary }) => (
   <Box sx={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
-    <Box component="span" sx={{ fontSize: 14, fontWeight: 500 }}>
+    <Box component="span" sx={{ fontSize: 16, fontWeight: 500 }}>
       {primary || "-"}
     </Box>
     {secondary ? (

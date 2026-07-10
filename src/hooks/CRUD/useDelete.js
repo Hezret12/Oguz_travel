@@ -13,16 +13,16 @@ export const useDelete = ({
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (ids) => {
+    mutationFn: async (guid) => {
       try {
-        const res = await deleteFn({ [apiName]: ids });
+        const res = await deleteFn({guid});
         return res.data ?? res;
       } catch (err) {
         console.error(err);
         throw err;
       }
     },
-    onSuccess: (resData, ids) => {
+    onSuccess: (resData, guid) => {
       hdlSuccessResMsg(resData);
       const finalKey = Array.isArray(queryKey) ? queryKey : [queryKey];
       if (isPaginated) {
@@ -41,7 +41,7 @@ export const useDelete = ({
             const pageData = page?.data?.data || [];
 
             const filteredData = pageData.filter(
-              (item) => !ids.includes(item[idKey]),
+              (item) => !guid.includes(item[idKey]),
             );
 
             return {
@@ -65,7 +65,7 @@ export const useDelete = ({
             ...prev,
             data: {
               ...prev.data,
-              data: prev.data.data.filter((item) => !ids.includes(item[idKey])),
+              data: prev.data.data.filter((item) => !guid.includes(item[idKey])),
             },
           };
         });

@@ -129,7 +129,7 @@ const CustomSelect = ({
               required={required}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: "10px",
+                  borderRadius: "4px",
                   minHeight: "44px",
                   backgroundColor: (theme) =>
                     theme.palette.mode === "dark"

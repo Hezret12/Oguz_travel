@@ -68,7 +68,7 @@ export const getDefaultMRTOptions = () => ({
   muiTableContainerProps: {
     sx: (theme) => ({
       flex: 1,
-      overflowY: "auto",
+      overflow: "auto",
       position: "relative",
       "&::-webkit-scrollbar": {
         width: "8px",

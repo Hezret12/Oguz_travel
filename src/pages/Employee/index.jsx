@@ -23,6 +23,7 @@ import DeleteDialog from "../../components/DeleteDialog";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { deleteEmployee } from "../../api/queries/delete";
+import { actions } from "../../utils/helperConstant";
 
 const Employee = () => {
   const [rowSelection, setRowSelection] = useState({});
@@ -67,22 +68,21 @@ const Employee = () => {
     params: queryParams,
   });
 
-  // ── Delete ──────────────────────────────────────────────────────────────
   const { mutate: deleteEmployeeMutate, isPending: isDeleting } = useDelete({
     deleteFn: deleteEmployee,
     queryKey: ["employees", queryParams],
     idKey: "guid",
-    apiName: "employee_guids",
+    apiName: "guid",
     isPaginated: true,
   });
 
   const deleteDialog = useDeleteDialog({
-    onConfirm: (employee) => deleteEmployeeMutate([employee.guid]),
+    onConfirm: (employee) => deleteEmployeeMutate(employee.guid),
   });
 
   const handleDeleteClick = useCallback(
     (employee) => deleteDialog.open(employee),
-    [deleteDialog]
+    [deleteDialog],
   );
 
   const columns = useMemo(
@@ -92,6 +92,7 @@ const Employee = () => {
         id: "index_number",
         header: "№",
         size: 10,
+        enableSorting: false,
       },
       {
         accessorFn: (row) => row.fullName,
@@ -132,10 +133,9 @@ const Employee = () => {
       {
         id: "actions",
         header: t("columns.actions"),
-        size: 100,
+        size: actions,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row, table }) => (
           <ColumnActionButtons
             row={row}
@@ -145,7 +145,7 @@ const Employee = () => {
         ),
       },
     ],
-    [t, selectedLang, handleDeleteClick],
+    [t],
   );
 
   const activeFilters = useMemo(
@@ -183,6 +183,7 @@ const Employee = () => {
     manualSorting: true,
     enableSorting: true,
     pageCount,
+    rowCount: totalItems,
 
     onPaginationChange: (updater) => {
       const next =
@@ -218,7 +219,7 @@ const Employee = () => {
         <GlobalSearchInput
           value={searchQuery}
           onChange={setSearch}
-          placeholder={t("search") ?? "Ara..."}
+          placeholder={t("search")}
           disabled={isLoading}
         />
 
@@ -233,13 +234,10 @@ const Employee = () => {
             sx={{
               borderRadius: "8px",
               height: "32px",
-              borderColor: "primary.main",
-              color: "primary.main",
               fontWeight: 500,
               "& .MuiChip-deleteIcon": {
                 color: "primary.main",
                 transition: "all 0.15s ease",
-                "&:hover": { color: "primary.dark" },
               },
             }}
           />
@@ -259,7 +257,6 @@ const Employee = () => {
             py: 0.75,
             minHeight: "52px",
             borderTop: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
           })}
         >
           <Box />
@@ -267,37 +264,16 @@ const Employee = () => {
             pageIndex={pageIndex}
             pageCount={pageCount}
             totalRows={totalItems}
-            onPageChange={(newIndex) => table.setPageIndex(newIndex)}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
           />
         </Box>
       );
     },
-
-    muiTableBodyRowProps: ({ row }) => ({
-      onClick: row.getToggleSelectedHandler(),
-      sx: (theme) => ({
-        cursor: "pointer",
-        backgroundColor: row.getIsSelected()
-          ? theme.palette.mode === "dark"
-            ? "rgba(0, 114, 229, 0.2) !important"
-            : "rgba(0, 114, 229, 0.1) !important"
-          : "inherit",
-        "&:hover": {
-          backgroundColor:
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.08)"
-              : "rgba(0,0,0,0.04)",
-        },
-      }),
-    }),
-
     muiTablePaperProps: {
       sx: () => ({
         ...defaultMrtOptions.muiTablePaperProps?.sx,
       }),
     },
-
-    // ── CRUD dialogs ─────────────────────────────────────────────────────
     renderCreateRowDialogContent: ({ table }) => <AddEmployee table={table} />,
     renderEditRowDialogContent: ({ table, row }) => (
       <EditEmployee table={table} row={row} />
