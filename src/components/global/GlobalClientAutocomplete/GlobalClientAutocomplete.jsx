@@ -1,4 +1,4 @@
-import { useMemo, useState, forwardRef } from "react";
+import { useMemo, useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -9,58 +9,132 @@ import {
 } from "@mui/material";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import AddIcon from "@mui/icons-material/Add";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Controller } from "react-hook-form";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { useClientsQuery } from "../../../pages/Clients/hooks/useClientsQuery";
-import ClientOption from "../ClientOption/ClientOption";
 import { openAddClientModal } from "../../../store/slices/modalSlice";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { getAllClientsApi } from "../../../api/queries/getters";
+import { useDebounce } from "../../../hooks/useDebounce";
 
-const normalize = (value) =>
-  String(value ?? "")
-    .toLowerCase()
-    .trim();
+const DEFAULT_COLUMNS = ["fullName", "phone_number", "passport_number"];
 
-const matchesQuery = (client, query) => {
-  if (!query) return true;
-  const normalizedQuery = normalize(query);
+const getResponseClients = (response) => response?.data?.data ?? [];
+console.log(getResponseClients)
+const normalizeClient = (client) => ({
+  ...client,
+  guid: client?.guid,
+  fullName: client?.fullName || "",
+  phone_number: client?.phone_number ?? "",
+  passport_number: client?.passport_number ?? "",
+});
 
-  return [
-    client.fullName,
-    client.passportNumber,
-    client.phoneNumber,
-    client.clientId,
-  ].some((value) => normalize(value).includes(normalizedQuery));
+const resolveColumn = (column, t) =>
+  typeof column === "string"
+    ? { key: column, label: t(`columns.${column}`, column) }
+    : {
+        key: column.key,
+        label: column.label ?? t(`columns.${column.key}`, column.key),
+        format: column.format,
+      };
+
+const getColumnValue = (client, column, t) => {
+  const { key, format } = resolveColumn(column, t);
+  const rawValue = client?.[key];
+
+  if (format) return format(rawValue, client);
+  if (key === "phone_number" && rawValue) return `+993 ${rawValue}`;
+  return rawValue ?? "";
 };
 
-// eslint-disable-next-line no-unused-vars
-const CustomListbox = forwardRef(({ children, ownerState, ...rest }, ref) => {
+const getClientSummary = (client, columns, t) =>
+  columns
+    .map((column) => getColumnValue(client, column, t))
+    .filter(Boolean)
+    .join(" | ");
+
+const HighlightedText = ({ text, query }) => {
+  const value = String(text ?? "");
+  const normalizedQuery = query.trim();
+
+  if (!normalizedQuery) return value || "-";
+
+  const index = value
+    .toLocaleLowerCase()
+    .indexOf(normalizedQuery.toLocaleLowerCase());
+  if (index < 0) return value || "-";
+
   return (
-    <div ref={ref} {...rest}>
+    <>
+      {value.slice(0, index)}
       <Box
+        component="mark"
         sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: 2,
-          backgroundColor: (theme) =>
-            theme.palette.mode === "dark"
-              ? theme.palette.background.paper
-              : "#f8fafc",
-          borderBottom: "2px solid",
-          borderColor: "divider",
-          px: "16px",
-          py: 1,
+          borderRadius: 0.5,
+          px: 0.25,
+          fontWeight: 700,
         }}
       >
-        <ClientOption isHeader dense />
+        {value.slice(index, index + normalizedQuery.length)}
       </Box>
-
-      {children}
-    </div>
+      {value.slice(index + normalizedQuery.length)}
+    </>
   );
-});
-CustomListbox.displayName = "CustomListbox";
+};
+
+const ClientOption = ({ client, columns, query, selected, t }) => (
+  <Box
+    sx={(theme) => ({
+      display: "grid",
+      gridTemplateColumns: `repeat(auto-fit, minmax(${columns.length > 2 ? 130 : 190}px, 1fr))`,
+      gap: { xs: 1, sm: 1.5 },
+      width: "100%",
+      px: 1.5,
+      py: 1.25,
+      border: "1px solid",
+      borderColor: selected ? "primary.main" : "divider",
+      borderRadius: 1.5,
+      boxShadow: selected ? `0 0 0 1px ${theme.palette.primary.main}` : "none",
+      transition:
+        "background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease",
+    })}
+  >
+    {columns.map((column) => {
+      const { key, label } = resolveColumn(column, t);
+      const value = getColumnValue(client, column, t);
+
+      return (
+        <Box key={key} sx={{ minWidth: 0 }}>
+          <Typography
+            component="span"
+            variant="caption"
+            sx={{
+              display: "block",
+              mb: 0.25,
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+            }}
+          >
+            {label}
+          </Typography>
+          <Typography
+            component="span"
+            variant="body2"
+            noWrap
+            sx={{
+              display: "block",
+              fontWeight: key === "fullName" ? 700 : 500,
+            }}
+          >
+            <HighlightedText text={value} query={query} />
+          </Typography>
+        </Box>
+      );
+    })}
+  </Box>
+);
 
 const GlobalClientAutocompleteField = ({
   field,
@@ -73,18 +147,23 @@ const GlobalClientAutocompleteField = ({
   disabled,
   onClientChange,
   onAddClient,
+  columns,
   sx,
   dispatch,
   t,
+  inputValue,
+  onInputValueChange,
 }) => {
-  const [inputValue, setInputValue] = useState("");
-
+  const [createdClient, setCreatedClient] = useState(null);
   const selectedClient =
-    clients.find((client) => client.id === field.value) ?? null;
-  const filteredClients = useMemo(
-    () => clients.filter((client) => matchesQuery(client, inputValue)),
-    [clients, inputValue],
-  );
+    clients.find((client) => client.id === field.value) ?? createdClient;
+
+  const selectClient = (client) => {
+    setCreatedClient(client);
+    field.onChange(client?.guid ?? "");
+    onClientChange?.(client ?? null);
+    onInputValueChange(client ? getClientSummary(client, columns, t) : "");
+  };
 
   const handleAddClient = () => {
     if (onAddClient) {
@@ -94,16 +173,16 @@ const GlobalClientAutocompleteField = ({
 
     dispatch(
       openAddClientModal({
-        initialValues: {
-          fullName: inputValue,
-        },
-        onCreated: (createdClient) => {
-          field.onChange(createdClient?.id ?? "");
-          onClientChange?.(createdClient ?? null);
-          setInputValue(createdClient?.fullName ?? "");
-        },
+        initialValues: { fullName: inputValue },
+        onCreated: (created) => selectClient(normalizeClient(created)),
       }),
     );
+  };
+
+  const handleInputChange = (_, value, reason) => {
+    if (reason === "input" || reason === "clear") {
+      onInputValueChange(value);
+    }
   };
 
   return (
@@ -111,12 +190,7 @@ const GlobalClientAutocompleteField = ({
       {label && (
         <Typography
           variant="body2"
-          sx={{
-            mb: 0.75,
-            fontWeight: 600,
-            fontSize: "0.875rem",
-            color: "text.primary",
-          }}
+          sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}
         >
           {label}
           {required && (
@@ -127,71 +201,71 @@ const GlobalClientAutocompleteField = ({
       <Autocomplete
         value={selectedClient}
         inputValue={inputValue}
-        onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
-        options={filteredClients}
+        onInputChange={handleInputChange}
+        options={clients}
         loading={isLoading}
         disabled={disabled}
         clearOnBlur={false}
         autoHighlight
         popupIcon={<KeyboardArrowDownIcon />}
-        isOptionEqualToValue={(option, value) => option.id === value.id}
-        getOptionLabel={(option) => {
-          if (!option) return "";
-          const name = option.fullName ?? "";
-          const id = option.clientId ? `ID: ${option.clientId}` : "";
-          const passport = option.passportNumber
-            ? `Pass: ${option.passportNumber}`
-            : "";
-          const phone = option.phoneNumber
-            ? `Tel: +993 ${option.phoneNumber}`
-            : "";
-          return [name, id, passport, phone].filter(Boolean).join("  |  ");
-        }}
+        isOptionEqualToValue={(option, value) => option.guid === value.guid}
+        getOptionLabel={(option) => getClientSummary(option, columns, t)}
         filterOptions={(options) => options}
         noOptionsText={
-          <Box sx={{ py: 1.5, px: 1 }}>
-            <Typography sx={{ fontWeight: 600, mb: 0.5 }}>
-              {t(
-                "pages.clients.autocomplete.noClientFound",
-                "No client found.",
-              )}
-            </Typography>
-            <Button
-              startIcon={<AddIcon />}
-              onClick={handleAddClient}
-              size="small"
-              sx={{ textTransform: "none", px: 0, fontWeight: 700 }}
-            >
-              {t("pages.clients.autocomplete.addClient", "+ Add Client")}
-            </Button>
-          </Box>
+          !isLoading && (
+            <Box sx={{ py: 1.5, px: 1 }}>
+              <Typography sx={{ fontWeight: 700, mb: 0.5 }}>
+                {t(
+                  "pages.clients.autocomplete.noClientFound",
+                  "No client found.",
+                )}
+              </Typography>
+              <Button
+                startIcon={<AddIcon />}
+                onClick={handleAddClient}
+                size="small"
+                sx={{ textTransform: "none", px: 0, fontWeight: 700 }}
+              >
+                {t("pages.clients.autocomplete.addClient", "Add Client")}
+              </Button>
+            </Box>
+          )
         }
-        onChange={(_, newClient) => {
-          field.onChange(newClient?.id ?? "");
-          onClientChange?.(newClient ?? null);
-          setInputValue(newClient?.fullName ?? "");
-        }}
-        slots={{ listbox: CustomListbox }}
+        onChange={(_, client) => selectClient(client)}
         renderOption={(props, option) => {
           const { key, ...optionProps } = props;
+          const selected = optionProps["aria-selected"] === "true";
           return (
-            <li key={key} {...optionProps}>
-              <ClientOption client={option} dense />
+            <li key={key} {...optionProps} style={{ padding: "4px 8px" }}>
+              <ClientOption
+                client={option}
+                columns={columns}
+                query={
+                  selectedClient &&
+                  inputValue === getClientSummary(selectedClient, columns, t)
+                    ? ""
+                    : inputValue
+                }
+                selected={selected}
+                t={t}
+              />
             </li>
           );
         }}
         renderInput={(params) => {
+          const { slotProps: paramsSlotProps, ...textFieldProps } = params;
+
           return (
             <TextField
-              {...params}
+              {...textFieldProps}
               placeholder={placeholder}
               required={required}
               error={Boolean(fieldState.error)}
               helperText={fieldState.error?.message}
               slotProps={{
-                ...params.slotProps,
+                ...paramsSlotProps,
                 input: {
-                  ...params.slotProps?.input,
+                  ...paramsSlotProps?.input,
                   startAdornment: (
                     <>
                       <Box
@@ -199,26 +273,47 @@ const GlobalClientAutocompleteField = ({
                           display: "flex",
                           alignItems: "center",
                           mr: 1,
-                          color: "text.secondary",
                         }}
                       >
                         <PersonSearchIcon sx={{ fontSize: 20 }} />
                       </Box>
-                      {params.slotProps?.input?.startAdornment}
+                      {paramsSlotProps?.input?.startAdornment}
                     </>
                   ),
                   endAdornment: (
                     <>
-                      {isLoading ? (
-                        <CircularProgress color="inherit" size={16} />
-                      ) : null}
-                      {params.slotProps?.input?.endAdornment}
+                      {isLoading && (
+                        <CircularProgress
+                          color="inherit"
+                          size={16}
+                          aria-label={t("loading", "Loading")}
+                        />
+                      )}
+                      {paramsSlotProps?.input?.endAdornment}
                     </>
                   ),
+                },
+                htmlInput: {
+                  ...paramsSlotProps?.htmlInput,
+                  "aria-label":
+                    label ?? placeholder ?? t("columns.client", "Client"),
                 },
               }}
             />
           );
+        }}
+        slotProps={{
+          paper: {
+            elevation: 8,
+            sx: {
+              mt: 0.75,
+              p: 0.5,
+              borderRadius: 2,
+              border: "1px solid",
+              borderColor: "divider",
+              maxWidth: "min(100vw - 32px, 720px)",
+            },
+          },
         }}
         sx={{
           ...sx,
@@ -231,25 +326,18 @@ const GlobalClientAutocompleteField = ({
                 : "#ffffff",
             transition: "all 0.2s ease-in-out",
             "&:hover": {
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.05)"
-                  : "#ffffff",
               "& .MuiOutlinedInput-notchedOutline": {
                 borderColor: "primary.main",
               },
             },
             "&.Mui-focused": {
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.02)"
-                  : "#ffffff",
               boxShadow: (theme) =>
                 theme.palette.mode === "dark"
                   ? "0 0 0 3px rgba(59, 130, 246, 0.16)"
                   : "0 0 0 3px rgba(37, 99, 235, 0.12)",
             },
           },
+          "& .MuiAutocomplete-input": { minWidth: 0 },
           "& .MuiFormHelperText-root": {
             mx: 1,
             mt: 0.5,
@@ -262,7 +350,7 @@ const GlobalClientAutocompleteField = ({
   );
 };
 
-const GlobalClientAutocomplete = ({
+const GlobalAutoCompleteClient = ({
   control,
   name,
   label,
@@ -271,35 +359,62 @@ const GlobalClientAutocomplete = ({
   disabled = false,
   onClientChange,
   onAddClient,
+  columns = DEFAULT_COLUMNS,
   sx = {},
 }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { data: clients = [], isLoading } = useClientsQuery();
+  const [inputValue, setInputValue] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const debouncedSearch = useDebounce(inputValue, 400);
+  const queryParams = useMemo(
+    () => ({
+      page: 1,
+      limit: 20,
+      ...(debouncedSearch.trim() ? { search: debouncedSearch.trim() } : {}),
+    }),
+    [debouncedSearch],
+  );
+  const { data: response, isFetching } = useQuery({
+    queryKey: ["clients", "autocomplete", queryParams],
+    queryFn: () => getAllClientsApi(queryParams),
+    enabled: isOpen,
+    placeholderData: keepPreviousData,
+    staleTime: 30_000,
+  });
+  const clients = useMemo(() => {
+    const items = getResponseClients(response);
+    return Array.isArray(items) ? items.map(normalizeClient) : [];
+  }, [response]);
 
   return (
     <Controller
       control={control}
       name={name}
       render={({ field, fieldState }) => (
-        <GlobalClientAutocompleteField
-          field={field}
-          fieldState={fieldState}
-          clients={clients}
-          isLoading={isLoading}
-          label={label}
-          placeholder={placeholder}
-          required={required}
-          disabled={disabled}
-          onClientChange={onClientChange}
-          onAddClient={onAddClient}
-          sx={sx}
-          dispatch={dispatch}
-          t={t}
-        />
+        <Box onFocus={() => setIsOpen(true)}>
+          <GlobalClientAutocompleteField
+            field={field}
+            fieldState={fieldState}
+            clients={clients}
+            isLoading={isFetching}
+            label={label}
+            placeholder={placeholder}
+            required={required}
+            disabled={disabled}
+            onClientChange={onClientChange}
+            onAddClient={onAddClient}
+            columns={columns}
+            sx={sx}
+            dispatch={dispatch}
+            t={t}
+            inputValue={inputValue}
+            onInputValueChange={setInputValue}
+          />
+        </Box>
       )}
     />
   );
 };
 
-export default GlobalClientAutocomplete;
+export default GlobalAutoCompleteClient;

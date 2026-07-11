@@ -82,7 +82,7 @@ const CustomTextField = ({
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  borderRadius: '4px',
+                  borderRadius: '7px',
                   minHeight: multiline ? 'auto' : '44px',
                   backgroundColor: (theme) =>
                     theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : '#ffffff',

@@ -8,7 +8,7 @@ export const nameColSize = 170;
 // Description column size
 export const colSize = 100;
 // Route
-export const route = 120;
+export const route = 150;
 // maliye
 export const price = 100;
 // actions

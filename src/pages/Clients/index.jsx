@@ -20,7 +20,7 @@ import {
   clientFilterSelectors,
 } from "../../store/slices/filters/clientFilterSlice";
 import FilterDrawer from "../../components/FilterDrawer";
-import { getClientsApi } from "../../api/queries/getters";
+import { getAllClientsApi } from "../../api/queries/getters";
 import DeleteDialog from "../../components/DeleteDialog";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
@@ -71,7 +71,7 @@ const Clients = () => {
     pageCount,
     totalItems,
   } = usePagginationGet({
-    apiFn: getClientsApi,
+    apiFn: getAllClientsApi,
     key: "clients",
     params: queryParams,
   });

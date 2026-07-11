@@ -3,6 +3,7 @@ import { Box } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useLocale } from '../../../hooks/useLocale';
 import { useValidShema } from '../../../functions/useValidShema';
@@ -14,7 +15,7 @@ import CustomTextField from '../../CustomTextField';
 import CustomSelect from '../../CustomSelect';
 import PhoneNumberField from '../../inputs/PhoneNumber';
 import { closeAddClientModal, selectAddClientModal } from '../../../store/slices/modalSlice';
-import { useCreateClientMutation } from '../../../pages/Clients/hooks/useClientsQuery';
+import { addClientsApi } from '../../../api/queries/post';
 
 const AddClientModal = () => {
   const dispatch = useDispatch();
@@ -22,14 +23,15 @@ const AddClientModal = () => {
   const { addClient } = useValidShema();
   const { open, initialValues, onCreated } = useSelector(selectAddClientModal);
   const [loading, setLoading] = useState(false);
-  const createClientMutation = useCreateClientMutation();
+  const queryClient = useQueryClient();
+  const { mutateAsync: createClient } = useMutation({ mutationFn: addClientsApi });
 
   const defaultValues = useMemo(
     () => ({
       fullName: '',
       phone_number: '',
       dateOfBirth: '',
-      passportNumber: '',
+      passport_number: '',
       passportExpiryDate: '',
       passportCountryOfIssue: '',
       gender: '',
@@ -56,9 +58,12 @@ const AddClientModal = () => {
   const submitHandler = async (data) => {
     try {
       setLoading(true);
-      const createdClient = await createClientMutation.mutateAsync(data);
-      toast.success(t('pages.clients.addSuccess', 'Client added successfully!'));
+      const response = await createClient(data);
+      const createdClient = response?.data?.data ?? response?.data;
+
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
       onCreated?.(createdClient);
+      toast.success(t('pages.clients.addSuccess', 'Client added successfully!'));
       closeModal();
     } catch (error) {
       console.error(error);
@@ -93,7 +98,7 @@ const AddClientModal = () => {
           <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 10px)' } }}>
             <PhoneNumberField
               control={control}
-              name="phoneNumber"
+              name="phone_number"
               label={t('columns.phoneNumber', 'Phone Number')}
             />
           </Box>
@@ -110,7 +115,7 @@ const AddClientModal = () => {
 
           <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 10px)' } }}>
             <CustomTextField
-              name="passportNumber"
+              name="passport_number"
               control={control}
               label={t('columns.passportNumber', 'Passport Number')}
             />
@@ -140,8 +145,8 @@ const AddClientModal = () => {
               control={control}
               label={t('columns.gender', 'Gender')}
               options={[
-                { label: t('pages.clients.genderWomen', 'Women'), value: 'Women' },
-                { label: t('pages.clients.genderMen', 'Men'), value: 'Men' },
+                { label: t('pages.clients.genderWomen', 'Women'), value: 'Female' },
+                { label: t('pages.clients.genderMen', 'Men'), value: 'Male' },
               ]}
             />
           </Box>

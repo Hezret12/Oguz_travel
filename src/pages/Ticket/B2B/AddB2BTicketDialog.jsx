@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useMemo } from "react";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
@@ -8,17 +9,18 @@ import FooterButton from "../../../components/Dialog/FooterButton";
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { useLocale } from "../../../hooks/useLocale";
 import { useValidShema } from "../../../functions/useValidShema";
-import GlobalClientAutocomplete from "../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
+import GlobalAutoCompleteClient from "../../../components/global/GlobalAutoCompleteClient/GlobalAutoCompleteClient";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import AgentAccordion from "../../../components/global/AgentAccordion";
+import AppAutocomplete from "../../../components/AppAutocomplete";
 import { addB2BApi } from "../../../api/queries/post";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
-import { getAllStatusApi } from "../../../api/queries/getters";
+import { getAllStatusApi, getAllEmployeeApi } from "../../../api/queries/getters";
 import { useGet } from "../../../hooks/CRUD/useGet";
 
 const TRIP_TYPE_OPTIONS = [
-  { label: "One Way", value: "ONE WAY" },
-  { label: "Round Trip", value: "ROUND TRIP" },
+  { label: "One Way", value: 0 },
+  { label: "Round Trip", value: 1 },
 ];
 
 const CABIN_OPTIONS = [
@@ -28,18 +30,39 @@ const CABIN_OPTIONS = [
   { label: "EXTRA", value: "EXTRA" },
 ];
 
+const PAYMENT_OPTIONS = [
+  { label: "Tolendi", value: true },
+  { label: "Kredit", value: false },
+];
+
 const AddB2BTicketDialog = ({ table }) => {
   const { t, selectedLang } = useLocale();
   const { addB2BTicket } = useValidShema();
 
   const {
     data: status,
-    isLoading,
+    isLoading: isStatusLoading,
     isError: isStatusError,
   } = useGet({
     apiFn: getAllStatusApi,
     key: "status",
   });
+
+  const {
+    data: employees = [],
+  } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  const employeeOptions = useMemo(
+    () =>
+      (employees || []).map((emp) => ({
+        label: emp.fullName,
+        value: emp.guid,
+      })),
+    [employees],
+  );
 
   const { mutate: createB2B, isLoading: isSubmit } = useCreate({
     apiFn: addB2BApi,
@@ -51,25 +74,25 @@ const AddB2BTicketDialog = ({ table }) => {
 
   const { control, handleSubmit } = useForm({
     defaultValues: {
-      client_guid: "",
-      issueDate: "",
-      operator_guid: "",
-      recieved_operator_guid: "",
-      pnr: "",
-      status: "",
-      airline: "",
-      route: "",
-      cabinClass: "",
-      tripType: "",
-      flightDate: "",
-      netFare: "",
-      saleFare: "",
-      card: "",
+      datetime: "",
+      assignment_opr_guid: "",
+      receiver_opr_guid: "",
       agent: {
         name: "",
         phone_number: "",
       },
+      client_guid: "",
+      status_guid: "",
+      airline: "",
+      route: "",
+      class: "",
+      travel_type: 0,
+      flight_date: "",
+      net_price: "",
+      sale_price: "",
+      card: "",
       note: "",
+      is_paid: true,
     },
     resolver: yupResolver(addB2BTicket),
     mode: "onSubmit",
@@ -83,14 +106,22 @@ const AddB2BTicketDialog = ({ table }) => {
 
   const submitHandler = async (data) => {
     try {
-      await createB2B(data);
+      const payload = {
+        ...data,
+        datetime: data.datetime ? new Date(data.datetime).toISOString() : new Date().toISOString(),
+        flight_date: data.flight_date ? new Date(data.flight_date).toISOString() : new Date().toISOString(),
+        net_price: Number(data.net_price || 0),
+        sale_price: Number(data.sale_price || 0),
+      };
+
+      await createB2B(payload);
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <CustomDialog widthX={760} open={open} close={closeDialog}>
+    <CustomDialog widthX={760} open={true} close={closeDialog}>
       <Box
         sx={{
           display: "flex",
@@ -118,10 +149,11 @@ const AddB2BTicketDialog = ({ table }) => {
             }}
           >
             <Box sx={{ flex: { xs: "1 1 100%" }, mt: 1 }}>
-              <GlobalClientAutocomplete
+              <GlobalAutoCompleteClient
                 control={control}
-                name="clientId"
+                name="client_guid"
                 label={t("columns.client")}
+                columns={["fullName", "phoneNumber", "passport_number"]}
               />
             </Box>
 
@@ -135,20 +167,22 @@ const AddB2BTicketDialog = ({ table }) => {
                 gap: 2,
               }}
             >
-              <CustomTextField
-                name="operator"
+              <AppAutocomplete
+                name="assignment_opr_guid"
                 control={control}
                 label={t("columns.operator") ?? "Tabsyryjy"}
+                options={employeeOptions}
               />
 
-              <CustomTextField
-                name="operatorTwo"
+              <AppAutocomplete
+                name="receiver_opr_guid"
                 control={control}
                 label={t("columns.operatorTwo") ?? "Kabul ediji"}
+                options={employeeOptions}
               />
 
               <CustomTextField
-                name="issueDate"
+                name="datetime"
                 control={control}
                 type="date"
                 label={t("columns.issueDate") ?? "Issue Date"}
@@ -170,18 +204,12 @@ const AddB2BTicketDialog = ({ table }) => {
               />
 
               <CustomTextField
-                name="pnr"
-                control={control}
-                label={t("columns.pnr") ?? "PNR"}
-              />
-
-              <CustomTextField
                 name="route"
                 control={control}
                 label={t("columns.route") ?? "Route"}
               />
               <CustomTextField
-                name="flightDate"
+                name="flight_date"
                 control={control}
                 type="date"
                 label={t("columns.flightDate") ?? "Flight Date"}
@@ -202,20 +230,20 @@ const AddB2BTicketDialog = ({ table }) => {
                 control={control}
                 label={t("columns.status")}
                 options={status}
-                isLoading={isLoading}
+                isLoading={isStatusLoading}
                 isError={isStatusError}
                 getRowId={(item) => item.guid}
                 getRowLabel={(item) => selectedLang(item.name)}
               />
               <CustomSelect
-                name="cabinClass"
+                name="class"
                 control={control}
                 label={t("columns.cabinClass") ?? "Class"}
                 options={CABIN_OPTIONS}
               />
 
               <CustomSelect
-                name="tripType"
+                name="travel_type"
                 control={control}
                 label={t("columns.tripType") ?? "Trip Type"}
                 options={TRIP_TYPE_OPTIONS}
@@ -230,27 +258,23 @@ const AddB2BTicketDialog = ({ table }) => {
               }}
             >
               <CustomTextField
-                name="netFare"
+                name="net_price"
                 control={control}
                 type="number"
                 label={t("columns.netFare") ?? "Net Fare"}
               />
 
               <CustomTextField
-                name="saleFare"
+                name="sale_price"
                 control={control}
                 type="number"
                 label={t("columns.saleFare") ?? "Sale Fare"}
               />
               <CustomSelect
-                name="status_guid"
+                name="is_paid"
                 control={control}
-                label={t("columns.status")}
-                options={status}
-                isLoading={isLoading}
-                isError={isStatusError}
-                getRowId={(item) => item.guid}
-                getRowLabel={(item) => selectedLang(item.name)}
+                label={t("columns.paymentStatus") ?? "Payment Status"}
+                options={PAYMENT_OPTIONS}
               />
             </Box>
 
@@ -269,6 +293,8 @@ const AddB2BTicketDialog = ({ table }) => {
 
               <AgentAccordion
                 control={control}
+                fullNameName="agent.name"
+                phoneNumberName="agent.phone_number"
                 title={t("columns.agent")}
                 fullNameLabel={t("columns.agentFullName")}
                 phoneNumberLabel={t("ticket.b2b.agentPhoneNumber")}

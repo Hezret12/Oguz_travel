@@ -55,7 +55,7 @@ export const getDefaultMRTOptions = () => ({
     sx: {
       display: "flex",
       flexDirection: "column",
-      height: "100%",
+      height: "calc(100vh - 190px)",
       width: "100%",
       border: "1px solid",
       borderColor: (theme) =>

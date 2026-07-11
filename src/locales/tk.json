@@ -142,7 +142,7 @@
       "genderMen": "Erkek",
       "autocomplete": {
         "noClientFound": "Müşderi tapylmady.",
-        "addClient": "+ Müşderi goş"
+        "addClient": "Müşderi goş"
       },
       "validation": {
         "fullNameRequired": "Doly ady zerurdyr",

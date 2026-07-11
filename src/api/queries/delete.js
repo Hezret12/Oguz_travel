@@ -10,3 +10,8 @@ export const deleteClient = async (guid) => {
   const response = await api.deletePrivate('/client/delete-client', guid);
   return response;
 };
+
+export const deleteB2BApi = async (guid) => {
+  const response = await api.deletePrivate('/ticket-b2b/delete-ticket-b2b', guid);
+  return response;
+};

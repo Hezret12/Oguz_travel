@@ -29,6 +29,7 @@ const EditClient = ({ table, row }) => {
 
   const { control, handleSubmit } = useForm({
     defaultValues: {
+      guid: row?.original?.guid || '',
       fullName: row?.original?.fullName || "",
       phone_number: row?.original?.phone_number || "",
       dateOfBirth: row?.original?.dateOfBirth || "",
@@ -43,7 +44,7 @@ const EditClient = ({ table, row }) => {
 
   const closeDialog = () => {
     if (table) {
-      table.setCreatingRow(null);
+      table.setEditingRow(null);
     }
   };
 
@@ -86,7 +87,7 @@ const EditClient = ({ table, row }) => {
 
           <Grid size={6}>
             <CustomTextField
-              name="passportNumber"
+              name="passport_number"
               control={control}
               label={t("columns.passportNumber")}
             />
@@ -114,8 +115,8 @@ const EditClient = ({ table, row }) => {
               control={control}
               label={t("columns.gender")}
               options={[
-                { label: t("pages.clients.genderWomen"), value: "Women" },
-                { label: t("pages.clients.genderMen"), value: "Men" },
+                { label: t("pages.clients.genderWomen"), value: "Female" },
+                { label: t("pages.clients.genderMen"), value: "Male" },
               ]}
             />
           </Grid>

@@ -31,7 +31,7 @@ export const addClientsApi = async (data) => {
 
 export const addB2BApi = async (data) => {
   const response = await api.postPrivate(
-    "/client/add-client",
+    "/b2b/add-b2b",
     data,
   );
   return response;

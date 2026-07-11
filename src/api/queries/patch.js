@@ -12,6 +12,11 @@ export const updateUserApi = async (data) => {
 };
 
 export const updateClientApi = async (data) => {
-  const response = await api.patchPrivate(`/user/update-user`, data);
+  const response = await api.patchPrivate(`/client/update-client`, data);
+  return response;
+};
+
+export const updateB2BApi = async (data) => {
+  const response = await api.patchPrivate(`/ticket-b2b/update-ticket-b2b`, data);
   return response;
 };

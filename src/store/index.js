@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import modalReducer from './slices/modalSlice';
 import employeeFiltersReducer from './slices/filters/employeeFilterSlice';
 import clientFiltersReducer from './slices/filters/clientFilterSlice';
+import b2bFiltersReducer from './slices/filters/b2bFilterSlice';
 
 const store = configureStore({
   reducer: {
     modal:           modalReducer,
     employeeFilters: employeeFiltersReducer,
     clientFilters: clientFiltersReducer,
+    b2bFilters:      b2bFiltersReducer,
     // ticketFilters:  ticketFiltersReducer,
     // visaFilters:    visaFiltersReducer,
     // paymentFilters: paymentFiltersReducer,

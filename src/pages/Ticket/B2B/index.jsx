@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Box } from "@mui/material";
+import { useMemo, useState, useCallback } from "react";
+import { Box, Chip } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -9,18 +9,35 @@ import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import PageHeader from "../../../components/PageHeader";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
-import { useClientsQuery } from "../../../pages/Clients/hooks/useClientsQuery";
-import { useB2BTickets } from "./useB2BTickets";
 import StackedCell from "../../../components/inputs/StackCell";
 import {
   colSize,
   nameColSize,
-  orderNumber,
+  ordNumColSize,
   price,
   route,
 } from "../../../utils/helperConstant";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import AddB2BTicketDialog from "./AddB2BTicketDialog";
+import StatusChip from "../../../components/StatusChip";
+import {
+  PAYMENT_STATUS_CONFIG,
+  SALE_STATUS_CONFIG,
+} from "../../../functions/statusChipConfigs";
+import { usePageFilters } from "../../../hooks/usePageFilters";
+import { usePagginationGet } from "../../../hooks/usePagginationGet";
+import { useGet } from "../../../hooks/CRUD/useGet";
+import {
+  b2bFilterActions,
+  b2bFilterSelectors,
+} from "../../../store/slices/filters/b2bFilterSlice";
+import FilterDrawer from "../../../components/FilterDrawer";
+import B2BFilter from "./Contents/B2BFilter";
+import { getAllB2BApi, getAllStatusApi } from "../../../api/queries/getters";
+import DeleteDialog from "../../../components/DeleteDialog";
+import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
+import { useDelete } from "../../../hooks/CRUD/useDelete";
+import { deleteB2BApi } from "../../../api/queries/delete";
 
 const formatDate = (value) => {
   if (!value) return "";
@@ -33,77 +50,117 @@ const currency = new Intl.NumberFormat("en-US", {
 });
 
 const B2B = () => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
-  const { data: clients = [] } = useClientsQuery();
-  const { tickets } = useB2BTickets();
-  const [searchQuery, setSearchQuery] = useState("");
   const [rowSelection, setRowSelection] = useState({});
 
-  const clientById = useMemo(
-    () => Object.fromEntries(clients.map((client) => [client.id, client])),
-    [clients],
+  const {
+    applied,
+    draft,
+    isDrawerOpen,
+    openDrawer,
+    setDraftFilter,
+    setFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    searchQuery,
+    setSearch,
+    page,
+    limit,
+    setPage,
+    setPageSize,
+    setSort,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+    queryParams,
+  } = usePageFilters({
+    actions: b2bFilterActions,
+    selectors: b2bFilterSelectors,
+  });
+
+
+  const { data: statusList } = useGet({
+    apiFn: getAllStatusApi,
+    key: "status",
+  });
+
+
+  const statusById = useMemo(
+    () => Object.fromEntries((statusList || []).map((s) => [s.guid || s.id, s])),
+    [statusList],
   );
 
-  const filteredTickets = useMemo(() => {
-    const normalizedQuery = searchQuery.toLowerCase().trim();
+  const getStatusKey = useCallback((row) => {
+    if (row.tstatus?.name?.en) return row.tstatus.name.en;
+    if (row.tstatus?.name && typeof row.tstatus.name === "string") return row.tstatus.name;
+    if (row.status?.name?.en) return row.status.name.en;
+    if (row.status?.name && typeof row.status.name === "string") return row.status.name;
+    if (typeof row.status === "string") return row.status;
+    
+    const guid = row.status_guid;
+    const statusObj = statusById[guid];
+    if (statusObj?.name?.en) return statusObj.name.en;
+    if (statusObj?.name && typeof statusObj.name === "string") return statusObj.name;
+    
+    return "";
+  }, [statusById]);
 
-    return tickets.filter((ticket) => {
-      const client = clientById[ticket.clientId];
-      if (!normalizedQuery) return true;
+  const {
+    data: b2bData,
+    isLoading,
+    isFetching,
+    pageCount,
+    totalItems,
+  } = usePagginationGet({
+    apiFn: getAllB2BApi,
+    key: "b2b",
+    params: queryParams,
+  });
 
-      return [
-        ticket.ticketNo,
-        ticket.pnr,
-        ticket.status,
-        ticket.airline,
-        ticket.route,
-        ticket.office,
-        ticket.operator,
-        ticket.operatorTwo,
-        ticket.agent,
-        ticket.agentFullName,
-        ticket.agentPhoneNumber,
-        client?.fullName,
-        client?.passportNumber,
-        client?.phoneNumber,
-        client?.clientId,
-      ].some((value) =>
-        String(value ?? "")
-          .toLowerCase()
-          .includes(normalizedQuery),
-      );
-    });
-  }, [tickets, searchQuery, clientById]);
+  const { mutate: deleteB2BMutate, isPending: isDeleting } = useDelete({
+    deleteFn: deleteB2BApi,
+    queryKey: ["b2b", queryParams],
+    idKey: "guid",
+    apiName: "guid",
+    isPaginated: true,
+  });
+
+  const deleteDialog = useDeleteDialog({
+    onConfirm: (ticket) => deleteB2BMutate(ticket.guid),
+  });
+
+  const handleDeleteClick = useCallback(
+    (ticket) => deleteDialog.open(ticket),
+    [deleteDialog],
+  );
 
   const columns = useMemo(
     () => [
       {
-        accessorFn: (row) => row.id,
-        id: "id",
+        accessorFn: (row) => row.index_number,
+        id: "index_number",
         header: "№",
-        size: orderNumber,
+        size: ordNumColSize,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
       },
       {
-        accessorFn: (row) => row.ticketNo,
-        id: "ticketNo",
-        header: t("columns.ticketNo"),
-        size: 100,
-      },
-      {
-        accessorFn: (row) => clientById[row.clientId]?.fullName ?? row.clientId,
+        accessorFn: (row) => row.client?.fullName,
         id: "client",
-        header: t("columns.client", "Client"),
+        header: t("columns.client"),
         size: nameColSize,
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.clientId}
-            secondary={row.original.issueDate}
-          />
-        ),
+        Cell: ({ row }) => {
+          console.log(row)
+          return (
+            <StackedCell
+              primary={row?.original?.client?.fullName}
+              secondary={row?.original?.client?.passport_number}
+            />
+          );
+        },
       },
       {
         accessorFn: (row) => row.pnr,
@@ -114,12 +171,24 @@ const B2B = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorFn: (row) => row.status,
+        accessorFn: (row) => getStatusKey(row),
         id: "status",
-        header: t("columns.status"),
-        size: colSize,
+        header: "Status",
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => (
+          <StatusChip status={getStatusKey(row.original)} config={SALE_STATUS_CONFIG} />
+        ),
+        size: 90,
+      },
+      {
+        accessorFn: (row) => selectedLang(row.tstatus.name),
+        id: "payment_status",
+        header: "Payment Status",
+        Cell: ({ cell }) => (
+          <StatusChip status={cell.getValue()} config={PAYMENT_STATUS_CONFIG} />
+        ),
+        size: 90,
       },
       {
         accessorFn: (row) => row.airline,
@@ -135,15 +204,20 @@ const B2B = () => {
         muiTableHeadCellProps: { align: "center" },
       },
       {
-        accessorFn: (row) => row.cabinClass,
-        id: "cabinClass",
-        header: t("columns.cabinClass", "Class"),
+        accessorFn: (row) => row.class,
+        id: "class",
+        header: t("columns.cabinClass"),
         size: colSize,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorFn: (row) => row.tripType,
+        accessorFn: (row) => {
+          if (row.travel_type !== undefined) {
+            return row.travel_type === 1 ? "ROUND TRIP" : "ONE WAY";
+          }
+          return row.tripType;
+        },
         id: "tripType",
         header: t("columns.tripType", "Trip Type"),
         size: colSize,
@@ -151,34 +225,39 @@ const B2B = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorFn: (row) => row.flightDate,
-        id: "flightDate",
-        header: t("columns.flightDate"),
+        accessorFn: (row) => row.flight_date,
+        id: "flight_date",
+        header: t("columns.flight_date"),
         size: 120,
-        Cell: ({ cell }) => formatDate(cell.getValue()),
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          if (!val) return "";
+          const dateOnly = val.split("T")[0];
+          return formatDate(dateOnly);
+        },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorFn: (row) => row.netFare,
+        accessorFn: (row) => row.net_price,
         id: "netFare",
         header: t("columns.netFare"),
         size: price,
-        Cell: ({ cell }) => currency.format(Number(cell.getValue() ?? 0)),
-        muiTableHeadCellProps: { align: "center" },
+        muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
       },
       {
-        accessorFn: (row) => row.saleFare,
-        id: "saleFare",
+        accessorFn: (row) => row.sale_price,
+        id: "sale_price",
         header: t("columns.saleFare"),
         size: price,
-        Cell: ({ cell }) => currency.format(Number(cell.getValue() ?? 0)),
+        muiTableHeadCellProps: { align: "right" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         accessorFn: (row) => row.profit,
         id: "profit",
-        header: t("columns.profit", "Profit"),
+        header: t("columns.profit"),
         size: 100,
         Cell: ({ cell }) => {
           const profit = Number(cell.getValue() ?? 0);
@@ -186,13 +265,17 @@ const B2B = () => {
             <Box
               sx={{
                 fontWeight: 700,
-                color: profit >= 0 ? "#16a34a" : "#ef4444",
+                fontVariantNumeric: "tabular-nums",
+                color: profit > 0 ? "#16a34a" : profit < 0 ? "#ef4444" : "text.secondary",
               }}
             >
+              {profit > 0 ? "+" : ""}
               {currency.format(profit)}
             </Box>
           );
         },
+        muiTableHeadCellProps: { align: "right" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         id: "actions",
@@ -205,7 +288,8 @@ const B2B = () => {
           <ColumnActionButtons
             row={row}
             table={table}
-            // onDelete={handleDeleteClick}
+            showPayment={true}
+            onDelete={handleDeleteClick}
           />
         ),
       },
@@ -214,34 +298,115 @@ const B2B = () => {
     [t],
   );
 
+  const activeFilters = useMemo(
+    () =>
+      Object.entries(applied).filter(
+        ([key, value]) =>
+          key !== "search" &&
+          value !== "" &&
+          value !== null &&
+          value !== undefined,
+      ),
+    [applied],
+  );
+
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
     enableColumnPinning: true,
     initialState: {
-      ...defaultMrtOptions.initialState,
       columnPinning: {
-        left: ["id"],
+        left: ["guid"],
         right: ["actions"],
       },
     },
     columns,
-    data: filteredTickets,
+    data: b2bData,
     state: {
       ...defaultMrtOptions.state,
       rowSelection,
+      isLoading: isLoading || isFetching,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
+      },
     },
-    getRowId: (row) => row.id,
+    getRowId: (row) => row.guid,
     onRowSelectionChange: setRowSelection,
+
+    manualPagination: true,
+    manualFiltering: true,
+    manualSorting: true,
+    enableSorting: true,
+    pageCount,
+    rowCount: totalItems,
+
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().pagination)
+          : updater;
+      if (next.pageIndex !== undefined) setPage(next.pageIndex + 1);
+      if (next.pageSize !== undefined) setPageSize(next.pageSize);
+    },
+
+    onSortingChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().sorting)
+          : updater;
+      if (next && next.length > 0) {
+        setSort(next[0].id, next[0].desc ? "desc" : "asc");
+      } else {
+        setSort("", "asc");
+      }
+    },
+
     renderTopToolbarCustomActions: () => (
-      <GlobalSearchInput
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder={t("search")}
-      />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search")}
+          disabled={isLoading}
+        />
+
+        {activeFilters.map(([key, value]) => (
+          <Chip
+            key={key}
+            label={`${t(`columns.${key}`, key)}: ${
+              key === "status_guid"
+                ? selectedLang(statusById[value]?.name)
+                : key === "payment_types"
+                ? t(`payment_types.${value}`, value)
+                : value
+            }`}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderRadius: "8px",
+              height: "32px",
+              fontWeight: 500,
+              "& .MuiChip-deleteIcon": {
+                color: "primary.main",
+                transition: "all 0.15s ease",
+              },
+            }}
+          />
+        ))}
+      </Box>
     ),
     renderBottomToolbar: ({ table: mrtTable }) => {
-      const { pageIndex, pageSize } = mrtTable.getState().pagination;
-      const pageCount = mrtTable.getPageCount();
+      const { pageIndex } = mrtTable.getState().pagination;
 
       return (
         <Box
@@ -260,9 +425,9 @@ const B2B = () => {
           <Pagination
             pageIndex={pageIndex}
             pageCount={pageCount}
-            pageSize={pageSize}
-            totalRows={filteredTickets.length}
-            onPageChange={(newIndex) => mrtTable.setPageIndex(newIndex)}
+            pageSize={limit}
+            totalRows={totalItems}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
           />
         </Box>
       );
@@ -270,9 +435,6 @@ const B2B = () => {
     renderCreateRowDialogContent: ({ table }) => (
       <AddB2BTicketDialog table={table} />
     ),
-    // renderEditRowDialogContent: ({ table, row }) => (
-    //   <EditEmployee table={table} row={row} />
-    // ),
   });
 
   return (
@@ -283,6 +445,30 @@ const B2B = () => {
         addButtonText={t("pages.ticket.b2b.addTicket")}
         filterButtonText={t("pages.ticket.filter", "Filter")}
         onAddClick={() => table.setCreatingRow(true)}
+        onFilterClick={openDrawer}
+      />
+
+      <FilterDrawer
+        open={isDrawerOpen}
+        onClose={cancelFilters}
+        onApply={applyFilters}
+        onReset={resetFilters}
+        onCancel={cancelFilters}
+      >
+        <B2BFilter
+          filters={draft}
+          selectsOpen={selectsOpen}
+          onFilterChange={setDraftFilter}
+          onSelectOpen={openSelect}
+          onSelectClose={closeSelect}
+        />
+      </FilterDrawer>
+
+      <DeleteDialog
+        open={deleteDialog.isOpen}
+        onClose={deleteDialog.close}
+        onConfirm={deleteDialog.confirm}
+        isLoading={isDeleting}
       />
 
       <MaterialReactTable table={table} />
