@@ -73,7 +73,6 @@ const Employee = () => {
     queryKey: ["employees", queryParams],
     idKey: "guid",
     apiName: "guid",
-    isPaginated: true,
   });
 
   const deleteDialog = useDeleteDialog({
@@ -166,7 +165,6 @@ const Employee = () => {
     data: employeesData,
 
     state: {
-      ...defaultMrtOptions.state,
       rowSelection,
       isLoading: isLoading || isFetching,
       pagination: {
@@ -181,7 +179,7 @@ const Employee = () => {
     manualPagination: true,
     manualFiltering: true,
     manualSorting: true,
-    enableSorting: true,
+    // enableSorting: true,
     pageCount,
     rowCount: totalItems,
 

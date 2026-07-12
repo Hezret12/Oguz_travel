@@ -1,5 +1,6 @@
 import { Autocomplete, Box, TextField, Typography } from "@mui/material";
 import { Controller } from "react-hook-form";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
 const AppAutocomplete = ({
   name,
@@ -11,6 +12,7 @@ const AppAutocomplete = ({
   fullWidth = true,
   size = "medium",
   disabled = false,
+  popupIcon = <KeyboardArrowDownIcon />,
   ...props
 }) => {
   return (
@@ -47,6 +49,7 @@ const AppAutocomplete = ({
                 onChange(newValue ? newValue.value : "");
               }}
               isOptionEqualToValue={(option, val) => option.value === (val?.value ?? val)}
+              popupIcon={popupIcon}
               renderInput={(params) => (
                 <TextField
                   {...params}

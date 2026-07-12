@@ -64,6 +64,7 @@ const SidebarFooter = ({
           borderTop: `1px solid ${t.border}`,
         }}
       >
+        {/* Language & Theme toggles commented out
         <Button
           onClick={() => {
             const idx = LANGS.indexOf(activeLang);
@@ -106,6 +107,7 @@ const SidebarFooter = ({
             <DarkModeIcon sx={{ fontSize: 17 }} />
           )}
         </IconButton>
+        */}
 
         <IconButton
           onClick={onLogout}
@@ -151,6 +153,7 @@ const SidebarFooter = ({
         Aşgabat
       </Box>
 
+      {/* Language & Theme toggles commented out
       <Box
         sx={{
           display: "flex",
@@ -245,6 +248,7 @@ const SidebarFooter = ({
           <DarkModeIcon sx={{ fontSize: 16 }} />
         </Button>
       </Box>
+      */}
 
       <Button
         onClick={onLogout}

@@ -93,7 +93,6 @@ const EmployeeFilter = ({
 }) => {
   const { t, selectedLang } = useLocale();
 
-  // ── Fetch lookup lists ─────────────────────────────────────────────────
   const { data: departments, isLoading: isDeptLoading } = useGet({
     apiFn: getAllDepartmentApi,
     key: "department",
@@ -109,7 +108,6 @@ const EmployeeFilter = ({
     key: "office",
   });
 
-  // ── Map API data → option arrays ───────────────────────────────────────
   const deptOptions = departments.map((d) => ({
     value: d.guid,
     label: selectedLang(d.name),

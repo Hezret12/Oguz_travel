@@ -20,7 +20,7 @@ import { addUserApi } from "../../../api/queries/post";
 import { getAllEmployeeApi } from "../../../api/queries/getters";
 
 const AddUserModal = ({ table }) => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
   const { addUser } = useValidShema();
   const [activeTab, setActiveTab] = useState(0);
 
@@ -32,9 +32,9 @@ const AddUserModal = ({ table }) => {
 
   // Map API shape → shape expected by UserInformationTab
   const employees = rawEmployees.map((emp) => ({
-    guid: emp.guid,
+    id: emp.guid,
     fullName: emp.fullName,
-    position: emp.position?.name ?? "",
+    officeName: selectedLang(emp.office?.fullName) ?? "",
     phoneNumber: emp.phone_number ?? "",
   }));
 

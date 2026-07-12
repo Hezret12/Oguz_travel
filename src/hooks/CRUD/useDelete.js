@@ -5,7 +5,6 @@ export const useDelete = ({
   deleteFn,
   queryKey,
   idKey,
-  apiName,
   invalidateQueries = [],
   isInfiniteQuery = false,
   isPaginated = false,

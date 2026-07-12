@@ -18,6 +18,9 @@ import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LanguageSwitcher from './LanguageSwitcher';
+import ThemeToggle from './ThemeToggle';
+
 
 const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => {
   const { t } = useTranslation();
@@ -92,77 +95,82 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
           )}
         </IconButton>
 
-        {/* User menu */}
-        {user && (
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title={t('header.userMenuTooltip')}>
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt={user.name} sx={{ width: 38, height: 38, border: '2px solid #0E8584', bgcolor: 'rgba(14,133,132,0.1)', color: '#0E8584', fontWeight: 600 }}>
-                  {(user.name || '?').charAt(0).toUpperCase()}
-                </Avatar>
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-              keepMounted
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-              slotProps={{
-                paper: {
-                  sx: {
-                    boxShadow: '0px 10px 30px rgba(0,0,0,0.15)',
-                    borderRadius: '12px',
-                    minWidth: 200,
-                    p: 1,
+        {/* Right side items: Language switcher, Dark/Light mode toggle, User menu */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <LanguageSwitcher />
+          <ThemeToggle />
+
+          {user && (
+            <Box sx={{ flexGrow: 0 }}>
+              <Tooltip title={t('header.userMenuTooltip')}>
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar alt={user.name} sx={{ width: 38, height: 38, border: '2px solid #0E8584', bgcolor: 'rgba(14,133,132,0.1)', color: '#0E8584', fontWeight: 600 }}>
+                    {(user.name || '?').charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
+              <Menu
+                sx={{ mt: '45px' }}
+                id="menu-appbar"
+                anchorEl={anchorElUser}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                keepMounted
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                open={Boolean(anchorElUser)}
+                onClose={handleCloseUserMenu}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      boxShadow: '0px 10px 30px rgba(0,0,0,0.15)',
+                      borderRadius: '12px',
+                      minWidth: 200,
+                      p: 1,
+                    },
                   },
-                },
-              }}
-            >
-              <Box sx={{ px: 2, py: 1.5 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                  {user.name}
-                </Typography>
-                {user.email ? (
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                    {user.email}
+                }}
+              >
+                <Box sx={{ px: 2, py: 1.5 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                    {user.name}
                   </Typography>
-                ) : null}
-                <Box
-                  sx={{
-                    display: 'inline-block',
-                    px: 1,
-                    py: 0.25,
-                    borderRadius: '4px',
-                    fontSize: '0.65rem',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    color:
-                      user.role === 'admin'
-                        ? 'error.contrastText'
-                        : user.role === 'agent'
-                          ? 'warning.contrastText'
-                          : 'primary.contrastText',
-                  }}
-                >
-                  {user.role}
+                  {user.email ? (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                      {user.email}
+                    </Typography>
+                  ) : null}
+                  <Box
+                    sx={{
+                      display: 'inline-block',
+                      px: 1,
+                      py: 0.25,
+                      borderRadius: '4px',
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      color:
+                        user.role === 'admin'
+                          ? 'error.contrastText'
+                          : user.role === 'agent'
+                            ? 'warning.contrastText'
+                            : 'primary.contrastText',
+                    }}
+                  >
+                    {user.role}
+                  </Box>
                 </Box>
-              </Box>
-              <Divider sx={{ my: 1 }} />
-              <MenuItem onClick={handleCloseUserMenu}>
-                <AccountCircleIcon sx={{ mr: 1.5, fontSize: 20 }} />
-                {t('header.profile')}
-              </MenuItem>
-              <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-                <LogoutIcon sx={{ mr: 1.5, fontSize: 20 }} />
-                {t('header.logout')}
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
+                <Divider sx={{ my: 1 }} />
+                <MenuItem onClick={handleCloseUserMenu}>
+                  <AccountCircleIcon sx={{ mr: 1.5, fontSize: 20 }} />
+                  {t('header.profile')}
+                </MenuItem>
+                <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                  <LogoutIcon sx={{ mr: 1.5, fontSize: 20 }} />
+                  {t('header.logout')}
+                </MenuItem>
+              </Menu>
+            </Box>
+          )}
+        </Box>
       </Toolbar>
     </AppBar>
   );

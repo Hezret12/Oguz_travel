@@ -17,6 +17,7 @@ const FilterDrawer = ({
   open,
   onClose,
   onApply,
+  // eslint-disable-next-line no-unused-vars
   onCancel,
   onReset,
   showFooter = true,
@@ -24,14 +25,13 @@ const FilterDrawer = ({
 }) => {
   const { t } = useLocale();
 
-
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    } else if (onClose) {
-      onClose();
-    }
-  };
+  // const handleCancel = () => {
+  //   if (onCancel) {
+  //     onCancel();
+  //   } else if (onClose) {
+  //     onClose();
+  //   }
+  // };
 
   return (
     <Drawer
@@ -57,12 +57,17 @@ const FilterDrawer = ({
       {/* Header */}
       <Stack
         direction="row"
-        sx={{ px: 2.5, py: 2, alignItems: "center", justifyContent: "space-between" }}
+        sx={{
+          px: 2.5,
+          py: 2,
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
       >
         <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
           <FilterListIcon fontSize="small" />
           <Typography variant="h6" fontWeight={600} fontSize="1.1rem">
-            {(t("filter"))}
+            {t("filter")}
           </Typography>
         </Stack>
 
@@ -73,7 +78,10 @@ const FilterDrawer = ({
           sx={{
             color: "text.secondary",
             borderRadius: "8px",
-            "&:hover": { color: "text.primary", backgroundColor: "action.hover" },
+            "&:hover": {
+              color: "text.primary",
+              backgroundColor: "action.hover",
+            },
           }}
         >
           <CloseIcon fontSize="small" />
@@ -120,31 +128,8 @@ const FilterDrawer = ({
                   : "#f9fafb",
             }}
           >
-            <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }} spacing={1.5}>
-              <Button
-                variant="outlined"
-                color="inherit"
-                size="medium"
-                startIcon={<RestartAltIcon fontSize="small" />}
-                onClick={onReset}
-                sx={{
-                  borderRadius: "10px",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  px: 1.5,
-                  color: "text.secondary",
-                  borderColor: "divider",
-                  "&:hover": {
-                    borderColor: "text.secondary",
-                    backgroundColor: "action.hover",
-                  },
-                }}
-              >
-                {t("reset")}
-              </Button>
-
-              <Stack direction="row" spacing={1}>
-                <Button
+            <Stack direction="row" spacing={1.5}>
+                {/* <Button
                   variant="outlined"
                   color="info"
                   size="medium"
@@ -157,29 +142,47 @@ const FilterDrawer = ({
                   }}
                 >
                   {t("cancel")}
+                </Button> */}
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  size="medium"
+                  fullWidth
+                  startIcon={<RestartAltIcon fontSize="small" />}
+                  onClick={onReset}
+                  sx={{
+                    borderRadius: "10px",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    width: 'full',
+                    px: 1.5,
+                    color: "text.secondary",
+                    borderColor: "divider",
+                    "&:hover": {
+                      borderColor: "text.secondary",
+                      backgroundColor: "action.hover",
+                    },
+                  }}
+                >
+                  {t("reset")}
                 </Button>
                 <Button
                   variant="contained"
                   color="primary"
                   size="medium"
+                  fullWidth
                   startIcon={<CheckIcon fontSize="small" />}
                   onClick={onApply}
                   sx={{
                     borderRadius: "10px",
+                    width: 'full',
                     textTransform: "none",
                     fontWeight: 600,
                     px: 2,
-                    backgroundColor: "#6366f1",
-                    boxShadow: "0 2px 8px rgba(99, 102, 241, 0.28)",
-                    "&:hover": {
-                      backgroundColor: "#4f46e5",
-                      boxShadow: "0 4px 14px rgba(99, 102, 241, 0.38)",
-                    },
                   }}
                 >
                   {t("apply")}
                 </Button>
-              </Stack>
             </Stack>
           </Box>
         </>
@@ -189,4 +192,3 @@ const FilterDrawer = ({
 };
 
 export default FilterDrawer;
-

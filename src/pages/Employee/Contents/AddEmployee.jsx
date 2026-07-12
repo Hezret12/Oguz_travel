@@ -4,7 +4,7 @@ import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { FooterButton } from "../../../components/Dialog/FooterButton";
-import { Box } from "@mui/material";
+import { Grid } from "@mui/material";
 import { useValidShema } from "../../../functions/useValidShema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import CustomTextField from "../../../components/CustomTextField";
@@ -26,7 +26,6 @@ const AddEmployee = ({ table }) => {
   const { mutate: createEmployee, isLoading: isSubmit } = useCreate({
     apiFn: addEmployeeApi,
     key: "employees",
-    invalidateQueries: ["employees"],
     onSuccess: () => {
       table.setCreatingRow(null);
     },
@@ -91,51 +90,45 @@ const AddEmployee = ({ table }) => {
     <CustomDialog widthX={700} open={true} close={closeDialog}>
       <CustomDialogHeader variant={"h5"} title={t("pages.employee.add")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 2.5,
-          }}
-        >
-          <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
+        <Grid container spacing={2.5}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               name="fullName"
               control={control}
               label={t("columns.fullName")}
             />
-          </Box>
+          </Grid>
 
-          <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <PhoneNumberField
               control={control}
               name="phone_number"
               label={t("columns.phoneNumber")}
             />
-          </Box>
+          </Grid>
 
-          <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               name="gmail"
               control={control}
               label={t("columns.gmail")}
             />
-          </Box>
+          </Grid>
 
-          <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <CustomSelect
               name="department_guid"
               control={control}
-              label={t("columns.department") ?? "Department"}
+              label={t("columns.department")}
               options={department}
               isLoading={isDepartmentLoading}
               isError={isDepartmentError}
               getRowId={(item) => item.guid}
               getRowLabel={(item) => selectedLang(item.name)}
             />
-          </Box>
+          </Grid>
 
-          <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <CustomSelect
               name="position_guid"
               control={control}
@@ -146,9 +139,9 @@ const AddEmployee = ({ table }) => {
               getRowId={(item) => item.guid}
               getRowLabel={(item) => selectedLang(item.name)}
             />
-          </Box>
+          </Grid>
 
-          <Box sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 10px)" } }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <CustomSelect
               name="office_guid"
               control={control}
@@ -159,16 +152,16 @@ const AddEmployee = ({ table }) => {
               getRowId={(item) => item.guid}
               getRowLabel={(item) => selectedLang(item.fullName)}
             />
-          </Box>
+          </Grid>
 
-          <Box sx={{ width: "48%" }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               name="address"
               control={control}
               label={t("columns.address")}
             />
-          </Box>
-        </Box>
+          </Grid>
+        </Grid>
 
         <FooterButton loading={isSubmit} onCancel={closeDialog} type="submit" />
       </CustomForm>

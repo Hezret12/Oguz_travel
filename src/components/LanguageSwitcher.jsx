@@ -58,16 +58,31 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
     minWidth: 140,
   };
 
-  /* ── Header variant styles ── */
   const headerButtonSx = {
     textTransform: 'uppercase',
     fontWeight: 600,
+    borderRadius: '10px',
+    height: 38,
+    px: 1.5,
+    color: (theme) =>
+      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : '#334155',
+    '&:hover': {
+      backgroundColor: (theme) =>
+        theme.palette.mode === 'dark'
+          ? 'rgba(255,255,255,0.08)'
+          : 'rgba(0,0,0,0.06)',
+    },
+    transition: 'all 0.2s ease',
   };
 
   const headerMenuPaperSx = {
     mt: 1.5,
-    boxShadow: '0px 4px 20px rgba(0,0,0,0.1)',
-    borderRadius: '8px',
+    boxShadow: (theme) =>
+      theme.palette.mode === 'dark'
+        ? '0px 10px 30px rgba(0,0,0,0.4), 0px 0px 0px 1px rgba(255,255,255,0.08)'
+        : '0px 10px 30px rgba(0,0,0,0.1), 0px 0px 0px 1px rgba(0,0,0,0.05)',
+    borderRadius: '12px',
+    p: 0.5,
   };
 
   const isLogin = variant === 'login';

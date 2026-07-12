@@ -16,18 +16,18 @@ export const useValidShema = () => {
   } = useValidShemaConst();
 
   const loginValidSchema = yup.object({
-    phone: phoneNumberRequiredValidSchema({
-      requiredMessage: t("pages.login.validation.phoneNumberRequired", "Phone number is required"),
-      lengthMessage: t("pages.login.validation.phoneNumberLength", "Phone number must be exactly 8 digits"),
-      invalidMessage: t("pages.login.validation.phoneNumberInvalid", "Invalid phone number"),
-    }),
-    password: passwordRequiredValidSchema({
-      requiredMessage: t("pages.login.validation.passwordRequired", "Password is required"),
-      minLength: 6,
-      minMessage: t("pages.login.validation.passwordTooShort", "Password is too short"),
-      maxLength: 20,
-      maxMessage: t("pages.login.validation.passwordMaxLength", "Password is too long"),
-    }),
+    // phone: phoneNumberRequiredValidSchema({
+    //   requiredMessage: t("pages.login.validation.phoneNumberRequired", "Phone number is required"),
+    //   lengthMessage: t("pages.login.validation.phoneNumberLength", "Phone number must be exactly 8 digits"),
+    //   invalidMessage: t("pages.login.validation.phoneNumberInvalid", "Invalid phone number"),
+    // }),
+    // password: passwordRequiredValidSchema({
+    //   requiredMessage: t("pages.login.validation.passwordRequired", "Password is required"),
+    //   minLength: 6,
+    //   minMessage: t("pages.login.validation.passwordTooShort", "Password is too short"),
+    //   maxLength: 20,
+    //   maxMessage: t("pages.login.validation.passwordMaxLength", "Password is too long"),
+    // }),
   });
 
   const addEmployee = yup.object({
@@ -53,6 +53,41 @@ export const useValidShema = () => {
   const addUser = yup.object({
     isExternalUser: yup.boolean().default(false),
     permissions: yup.array().of(yup.string()).default([]),
+    employee_guid: yup.string().when("isExternalUser", {
+      is: false,
+      then: (schema) => schema.required(t("pages.users.validation.employeeRequired", "Employee is required")),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    phone_number: phoneNumberRequiredValidSchema({
+      requiredMessage: t("pages.users.validation.phoneNumberRequired", "Phone number is required"),
+      lengthMessage: t("pages.users.validation.phoneNumberLength", "Phone number must be exactly 8 digits"),
+      invalidMessage: t("pages.users.validation.phoneNumberInvalid", "Invalid phone number"),
+    }),
+    password: yup
+      .string()
+      .required(t("pages.users.validation.passwordRequired", "Password is required"))
+      .min(6, t("pages.users.validation.passwordTooShort", "Password is too short (min 6 characters)")),
+  });
+
+  const editUser = yup.object({
+    isExternalUser: yup.boolean().default(false),
+    permissions: yup.array().of(yup.string()).default([]),
+    employee_guid: yup.string().when("isExternalUser", {
+      is: false,
+      then: (schema) => schema.required(t("pages.users.validation.employeeRequired", "Employee is required")),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    phone_number: phoneNumberRequiredValidSchema({
+      requiredMessage: t("pages.users.validation.phoneNumberRequired", "Phone number is required"),
+      lengthMessage: t("pages.users.validation.phoneNumberLength", "Phone number must be exactly 8 digits"),
+      invalidMessage: t("pages.users.validation.phoneNumberInvalid", "Invalid phone number"),
+    }),
+    password: yup
+      .string()
+      .transform((value) => (value === "" ? null : value))
+      .nullable()
+      .notRequired()
+      .min(6, t("pages.users.validation.passwordTooShort", "Password is too short (min 6 characters)")),
   });
 
   return {
@@ -62,6 +97,7 @@ export const useValidShema = () => {
     addEmployee,
     addReferralLetter,
     addUser,
+    editUser,
     loginValidSchema,
   };
 };

@@ -17,7 +17,14 @@ export const CustomDialog = ({ open, close, widthX, children }) => {
           sx: {
             width: widthX,
             maxWidth: "90%",
-            position: 'relative'
+            position: 'relative',
+            backgroundColor: 'background.paper',
+            backgroundImage: 'none',
+            borderRadius: '16px',
+            border: (theme) => theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)',
+            boxShadow: (theme) => theme.palette.mode === 'dark' 
+              ? '0 16px 48px rgba(0, 0, 0, 0.45)' 
+              : '0 16px 48px rgba(0, 0, 0, 0.08)',
           },
         },
       }}

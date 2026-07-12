@@ -66,7 +66,7 @@ export default function Login() {
     try {
       const response = await loginApi({
         password: values.password,
-        phone: formatTurkmenPhoneForApi(values.phone),
+        phone_number: formatTurkmenPhoneForApi(values.phone),
       });
       if (response?.status === 200) {
         const payload = response?.data?.data;

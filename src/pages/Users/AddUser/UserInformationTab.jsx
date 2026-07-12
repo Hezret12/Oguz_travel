@@ -29,23 +29,23 @@ const UserInformationTab = ({
         const cleanPhone = emp.phoneNumber
           .replace("+993", "")
           .replace(/\s/g, "");
-        setValue("phoneNumber", cleanPhone, {
+        setValue("phone_number", cleanPhone, {
           shouldValidate: true,
           shouldDirty: true,
         });
       } else if (!isEdit) {
-        setValue("phoneNumber", "", {
+        setValue("phone_number", "", {
           shouldValidate: true,
           shouldDirty: true,
         });
       }
     } else if (!isEdit) {
-      setValue("phoneNumber", "", { shouldValidate: true, shouldDirty: true });
+      setValue("phone_number", "", { shouldValidate: true, shouldDirty: true });
     }
   }, [selectedEmployeeId, employees, setValue, isEdit, isExternalUser]);
 
   const employeeOptions = employees.map((emp) => ({
-    label: `${emp.fullName} (${emp.position || ""})`,
+    label: emp.officeName ? `${emp.fullName}   (${emp.officeName})` : emp.fullName,
     value: emp.id,
   }));
 
@@ -94,13 +94,13 @@ const UserInformationTab = ({
         <CustomCheckbox
           name="isActive"
           control={control}
-          label={t("pages.users.statusActive") ?? "Active User"}
+          label={t("pages.users.statusActive")}
         />
 
         <CustomCheckbox
           name="isExternalUser"
           control={control}
-          label={t("pages.users.isExternalUser") ?? "External User"}
+          label={t("pages.users.isExternalUser")}
         />
       </Box>
     </Box>

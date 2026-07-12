@@ -23,15 +23,16 @@ export const themeConfig = createTheme({
                 mode: 'dark',
                 primary: { main: '#0E8584' },
                 background: {
-                    default: '#000000',
-                    paper: '#121213',
-                    secondary: '#212224'
+                    default: '#0B0F19',
+                    paper: '#111827',
+                    secondary: '#1F2937'
                 },
                 text: {
-                    primary: '#ffffff',
-                    secondary: '#bbbbbb',
+                    primary: '#F3F4F6',
+                    secondary: '#9CA3AF',
                 },
-                subtable: { header: '#242424', }
+                divider: 'rgba(255, 255, 255, 0.08)',
+                subtable: { header: '#1F2937', }
             },
         },
     },

@@ -3,6 +3,7 @@ import modalReducer from './slices/modalSlice';
 import employeeFiltersReducer from './slices/filters/employeeFilterSlice';
 import clientFiltersReducer from './slices/filters/clientFilterSlice';
 import b2bFiltersReducer from './slices/filters/b2bFilterSlice';
+import usersFiltersReducer from './slices/filters/usersFilterSlice';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     employeeFilters: employeeFiltersReducer,
     clientFilters: clientFiltersReducer,
     b2bFilters:      b2bFiltersReducer,
+    usersFilters:    usersFiltersReducer,
     // ticketFilters:  ticketFiltersReducer,
     // visaFilters:    visaFiltersReducer,
     // paymentFilters: paymentFiltersReducer,

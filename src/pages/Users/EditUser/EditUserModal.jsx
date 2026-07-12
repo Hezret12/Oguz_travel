@@ -20,8 +20,8 @@ import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { updateUserApi } from "../../../api/queries/patch";
 
 const EditUserModal = ({ table, row }) => {
-  const { t } = useLocale();
-  const { addUser } = useValidShema();
+  const { t, selectedLang } = useLocale();
+  const { editUser } = useValidShema();
   const [activeTab, setActiveTab] = useState(0);
 
   const { data: rawEmployees = [] } = useGet({
@@ -33,7 +33,7 @@ const EditUserModal = ({ table, row }) => {
   const employees = rawEmployees.map((emp) => ({
     id: emp.guid,
     fullName: emp.fullName,
-    position: emp.position?.name ?? "",
+    officeName: selectedLang(emp.office?.fullName) ?? "",
     phoneNumber: emp.phone_number ?? "",
   }));
 
@@ -45,7 +45,7 @@ const EditUserModal = ({ table, row }) => {
       isExternalUser: row?.original?.isExternalUser || true,
       permissions: row?.original?.permissions || [],
     },
-    resolver: yupResolver(addUser),
+    resolver: yupResolver(editUser),
     mode: "onSubmit",
   });
 

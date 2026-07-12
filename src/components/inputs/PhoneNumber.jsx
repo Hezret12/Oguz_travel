@@ -121,7 +121,7 @@ const PhoneNumberField = ({
   label,
   required = false,
   disabled = false,
-  placeholder = '********',
+  placeholder = '________',
   prefix = '+993',
   maxLength = 8,
   variant = 'form',
@@ -139,6 +139,12 @@ const PhoneNumberField = ({
   const variantLabelStyles = baseLabelStyles[variant] ?? baseLabelStyles.form;
   const resolvedLabel = label === false ? null : (label ?? t('columns.phoneNumber'));
 
+  // Gelen değer +993 ile başlıyorsa temizler, yoksa olduğu gibi bırakır (input'ta hep rakamlar gösterilir)
+  const stripPrefix = (value) => {
+    if (typeof value !== 'string') return '';
+    return value.startsWith(prefix) ? value.slice(prefix.length) : value;
+  };
+
   return (
     <Box sx={{ width: '100%', position: 'relative', ...sx }}>
       {resolvedLabel && (
@@ -153,18 +159,22 @@ const PhoneNumberField = ({
         control={control}
         render={({ field, fieldState }) => {
           const resolvedError = error ?? fieldState.error;
+          const digitsOnly = stripPrefix(field.value);
 
           return (
             <TextField
               {...field}
-              value={field.value ?? ''}
+              value={digitsOnly}
               fullWidth
               disabled={disabled}
               placeholder={placeholder}
               error={Boolean(resolvedError)}
               size="medium"
               helperText={resolvedError?.message}
-              onChange={(e) => field.onChange(normalizePhoneInput(e.target.value))}
+              onChange={(e) => {
+                const normalized = normalizePhoneInput(e.target.value);
+                field.onChange(normalized ? `${prefix}${normalized}` : '');
+              }}
               slotProps={{
                 input: {
                   startAdornment: (

@@ -38,7 +38,10 @@ export const getAllClientsApi = async (params = {}) => {
   return await api.getPrivate('/client/get-all-client', params);
 };
 
-
 export const getAllB2BApi = async (params = {}) => {
   return await api.getPrivate('/b2b/get-all-b2b', params);
+};
+
+export const getAllUsersApi = async (params = {}) => {
+  return await api.getPrivate('/user/get-all-user', params);
 };

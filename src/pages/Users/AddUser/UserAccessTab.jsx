@@ -27,7 +27,6 @@ const getSelectedAccessIds = (value, accessIds) =>
     (id) => value.includes(id) || value.includes(LEGACY_ACCESS_IDS[id]),
   );
 
-// Tek bir satır: ikon + label + Switch
 const AccessRow = ({ item, selected, onToggle, isLast }) => (
   <>
     <Box
@@ -78,7 +77,6 @@ const AccessRow = ({ item, selected, onToggle, isLast }) => (
   </>
 );
 
-// Grup başlığı + altındaki satırlar
 const AccessGroup = ({ group, selectedAccessIds, onToggle }) => {
   const children = group.children ?? [group];
   const groupAccessIds = children.map(getAccessId);
@@ -95,7 +93,6 @@ const AccessGroup = ({ group, selectedAccessIds, onToggle }) => {
         overflow: "hidden",
       }}
     >
-      {/* Grup header — sadece group items için */}
       {group.isGroup && (
         <Box
           sx={{
@@ -110,7 +107,7 @@ const AccessGroup = ({ group, selectedAccessIds, onToggle }) => {
           <Box sx={{ display: "flex", color: "text.secondary", flexShrink: 0 }}>
             {group.icon}
           </Box>
-          <Typography sx={{ flex: 1, fontSize: 13, fontWeight: 700, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          <Typography sx={{ flex: 1, fontSize: 13, fontWeight: 700,textTransform: "uppercase", letterSpacing: "0.04em" }}>
             {group.text}
           </Typography>
           <Typography variant="caption" sx={{ color: selectedCount ? "primary.main" : "text.disabled", fontWeight: 700 }}>
@@ -162,7 +159,6 @@ const UserAccessTab = ({ control }) => {
 
         return (
           <Box sx={{ pt: 1 }}>
-            {/* Özet satırı */}
             <Box
               sx={{
                 mb: 2,
