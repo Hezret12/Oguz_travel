@@ -80,32 +80,37 @@ const B2B = () => {
     selectors: b2bFilterSelectors,
   });
 
-
   const { data: statusList } = useGet({
     apiFn: getAllStatusApi,
     key: "status",
   });
 
-
   const statusById = useMemo(
-    () => Object.fromEntries((statusList || []).map((s) => [s.guid || s.id, s])),
+    () =>
+      Object.fromEntries((statusList || []).map((s) => [s.guid || s.id, s])),
     [statusList],
   );
 
-  const getStatusKey = useCallback((row) => {
-    if (row.tstatus?.name?.en) return row.tstatus.name.en;
-    if (row.tstatus?.name && typeof row.tstatus.name === "string") return row.tstatus.name;
-    if (row.status?.name?.en) return row.status.name.en;
-    if (row.status?.name && typeof row.status.name === "string") return row.status.name;
-    if (typeof row.status === "string") return row.status;
-    
-    const guid = row.status_guid;
-    const statusObj = statusById[guid];
-    if (statusObj?.name?.en) return statusObj.name.en;
-    if (statusObj?.name && typeof statusObj.name === "string") return statusObj.name;
-    
-    return "";
-  }, [statusById]);
+  const getStatusKey = useCallback(
+    (row) => {
+      if (row.tstatus?.name?.en) return row.tstatus.name.en;
+      if (row.tstatus?.name && typeof row.tstatus.name === "string")
+        return row.tstatus.name;
+      if (row.status?.name?.en) return row.status.name.en;
+      if (row.status?.name && typeof row.status.name === "string")
+        return row.status.name;
+      if (typeof row.status === "string") return row.status;
+
+      const guid = row.status_guid;
+      const statusObj = statusById[guid];
+      if (statusObj?.name?.en) return statusObj.name.en;
+      if (statusObj?.name && typeof statusObj.name === "string")
+        return statusObj.name;
+
+      return "";
+    },
+    [statusById],
+  );
 
   const {
     data: b2bData,
@@ -148,12 +153,57 @@ const B2B = () => {
         muiTableBodyCellProps: { align: "right" },
       },
       {
+        accessorFn: (row) => row.datetime,
+        id: "datetime",
+        header: t("columns.dateTime"),
+        size: 90,
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          if (!val) return "";
+          const dateOnly = val.split("T")[0];
+          return formatDate(dateOnly);
+        },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        accessorFn: (row) => row.assignment_operator?.fullName,
+        id: "assignment_operator",
+        header: t("columns.operator"),
+        size: 200,
+        Cell: ({ row }) => {
+          return (
+            <StackedCell
+              primary={row?.original?.assignment_operator?.fullName}
+              secondary={selectedLang(
+                row?.original?.assignment_operator?.office?.fullName,
+              )}
+            />
+          );
+        },
+      },
+      {
+        accessorFn: (row) => row.receiver_operator?.fullName,
+        id: "receiver_operator",
+        header: t("columns.operatorTwo"),
+        size: 200,
+        Cell: ({ row }) => {
+          return (
+            <StackedCell
+              primary={row?.original?.receiver_operator?.fullName}
+              secondary={selectedLang(
+                row?.original?.receiver_operator?.office?.fullName,
+              )}
+            />
+          );
+        },
+      },
+      {
         accessorFn: (row) => row.client?.fullName,
         id: "client",
         header: t("columns.client"),
         size: nameColSize,
         Cell: ({ row }) => {
-          console.log(row)
           return (
             <StackedCell
               primary={row?.original?.client?.fullName}
@@ -163,80 +213,27 @@ const B2B = () => {
         },
       },
       {
-        accessorFn: (row) => row.pnr,
-        id: "pnr",
-        header: "PNR",
-        size: colSize,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-      },
-      {
         accessorFn: (row) => getStatusKey(row),
         id: "status",
-        header: "Status",
+        header: t('columns.status'),
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => (
-          <StatusChip status={getStatusKey(row.original)} config={SALE_STATUS_CONFIG} />
+          <StatusChip
+            status={getStatusKey(row.original)}
+            config={SALE_STATUS_CONFIG}
+          />
         ),
         size: 90,
       },
       {
-        accessorFn: (row) => selectedLang(row.tstatus.name),
+        accessorFn: (row) => (row.is_paid ? "TOLENDI" : "KREDIT"),
         id: "payment_status",
-        header: "Payment Status",
+        header: t('columns.paymentStatus'),
         Cell: ({ cell }) => (
           <StatusChip status={cell.getValue()} config={PAYMENT_STATUS_CONFIG} />
         ),
         size: 90,
-      },
-      {
-        accessorFn: (row) => row.airline,
-        id: "airline",
-        header: t("columns.airline", "Airline"),
-        size: 160,
-      },
-      {
-        accessorFn: (row) => row.route,
-        id: "route",
-        header: t("columns.route", "Route"),
-        size: route,
-        muiTableHeadCellProps: { align: "center" },
-      },
-      {
-        accessorFn: (row) => row.class,
-        id: "class",
-        header: t("columns.cabinClass"),
-        size: colSize,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-      },
-      {
-        accessorFn: (row) => {
-          if (row.travel_type !== undefined) {
-            return row.travel_type === 1 ? "ROUND TRIP" : "ONE WAY";
-          }
-          return row.tripType;
-        },
-        id: "tripType",
-        header: t("columns.tripType", "Trip Type"),
-        size: colSize,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-      },
-      {
-        accessorFn: (row) => row.flight_date,
-        id: "flight_date",
-        header: t("columns.flight_date"),
-        size: 120,
-        Cell: ({ cell }) => {
-          const val = cell.getValue();
-          if (!val) return "";
-          const dateOnly = val.split("T")[0];
-          return formatDate(dateOnly);
-        },
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => row.net_price,
@@ -266,7 +263,12 @@ const B2B = () => {
               sx={{
                 fontWeight: 700,
                 fontVariantNumeric: "tabular-nums",
-                color: profit > 0 ? "#16a34a" : profit < 0 ? "#ef4444" : "text.secondary",
+                color:
+                  profit > 0
+                    ? "#16a34a"
+                    : profit < 0
+                      ? "#ef4444"
+                      : "text.secondary",
               }}
             >
               {profit > 0 ? "+" : ""}
@@ -276,6 +278,83 @@ const B2B = () => {
         },
         muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
+      },
+      {
+        accessorFn: (row) => row.pnr,
+        id: "pnr",
+        header: "PNR",
+        size: colSize,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        accessorFn: (row) => row.airline,
+        id: "airline",
+        header: t("columns.airline"),
+        size: 160,
+      },
+      {
+        accessorFn: (row) => row.route,
+        id: "route",
+        header: t("columns.route"),
+        size: route,
+        muiTableHeadCellProps: { align: "center" },
+      },
+      {
+        accessorFn: (row) => row.class,
+        id: "class",
+        header: t("columns.cabinClass"),
+        size: colSize,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        accessorFn: (row) => {
+          if (row.travel_type !== undefined) {
+            return row.travel_type === 1 ? "ROUND TRIP" : "ONE WAY";
+          }
+          return row.tripType;
+        },
+        id: "tripType",
+        header: t("columns.tripType", "Trip Type"),
+        size: colSize,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        accessorFn: (row) => row.flight_date,
+        id: "flight_date",
+        header: t("columns.flightDate"),
+        size: 120,
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          if (!val) return "";
+          const dateOnly = val.split("T")[0];
+          return formatDate(dateOnly);
+        },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        accessorFn: (row) => row.agent?.name,
+        id: "agent",
+        header: t("columns.agent"),
+        size: 100,
+        Cell: ({ row }) => {
+          return (
+            <StackedCell
+              primary={row?.original?.agent?.name}
+              secondary={row?.original?.agent?.phone_number}
+            />
+          );
+        },
+      },
+      {
+        accessorFn: (row) => row.note,
+        id: "note",
+        header: t("columns.note"),
+        size: colSize,
+        muiTableHeadCellProps: { align: "center" },
       },
       {
         id: "actions",
@@ -315,14 +394,13 @@ const B2B = () => {
     enableColumnPinning: true,
     initialState: {
       columnPinning: {
-        left: ["guid"],
+        left: ["index_number"],
         right: ["actions"],
       },
     },
     columns,
     data: b2bData,
     state: {
-      ...defaultMrtOptions.state,
       rowSelection,
       isLoading: isLoading || isFetching,
       pagination: {
@@ -336,7 +414,7 @@ const B2B = () => {
     manualPagination: true,
     manualFiltering: true,
     manualSorting: true,
-    enableSorting: true,
+    // enableSorting: true,
     pageCount,
     rowCount: totalItems,
 
@@ -385,8 +463,8 @@ const B2B = () => {
               key === "status_guid"
                 ? selectedLang(statusById[value]?.name)
                 : key === "payment_types"
-                ? t(`payment_types.${value}`, value)
-                : value
+                  ? t(`payment_types.${value}`, value)
+                  : value
             }`}
             onDelete={() => setFilter(key, "")}
             color="primary"

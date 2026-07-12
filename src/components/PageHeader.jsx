@@ -38,7 +38,7 @@ const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonT
           {/* Filter butonu */}
           {showFilterButton && (
             <Button
-              variant="contained"
+              variant="outlined"
               startIcon={<FilterListIcon sx={{ fontSize: "17px !important" }} />}
               onClick={onFilterClick}
               disableElevation
@@ -46,29 +46,7 @@ const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonT
                 height: "40px",
                 px: 2.5,
                 borderRadius: "10px",
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: "14px",
-                whiteSpace: "nowrap",
-
-                // Slate-indigo palet
-                backgroundColor: "#868688",
-                color: "#ffffff",
                 boxShadow: "0 2px 8px rgba(99, 102, 241, 0.28)",
-
-                transition:
-                  "background-color 200ms ease, transform 200ms ease, box-shadow 200ms ease",
-
-                "&:hover": {
-                  backgroundColor: "#4f46e5",
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 4px 14px rgba(99, 102, 241, 0.38)",
-                },
-
-                "&:active": {
-                  transform: "scale(0.98)",
-                  boxShadow: "0 1px 4px rgba(99, 102, 241, 0.22)",
-                },
               }}
             >
               {filterButtonText ?? "Filtrele"}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box, CssBaseline } from '@mui/material';
 import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
+import Sidebar from '../components/Sidebar/Sidebar';
 
 const SIDEBAR_W  = 280;
 const SIDEBAR_CW = 68;
@@ -15,6 +15,10 @@ const DashboardLayout = () => {
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
   const handleDrawerClose  = () => setMobileOpen(false);
 
+  const handleSidebarCollapse = () => {
+    setSidebarCollapsed((prev) => !prev);
+  };
+
   const sidebarWidth = sidebarCollapsed ? SIDEBAR_CW : SIDEBAR_W;
 
   return (
@@ -23,13 +27,15 @@ const DashboardLayout = () => {
 
       <Header
         onSidebarToggle={handleDrawerToggle}
+        onSidebarCollapse={handleSidebarCollapse}
         sidebarWidth={sidebarWidth}
+        sidebarCollapsed={sidebarCollapsed}
       />
 
       <Sidebar
         mobileOpen={mobileOpen}
         onSidebarClose={handleDrawerClose}
-        onCollapsedChange={setSidebarCollapsed}
+        collapsed={sidebarCollapsed}
       />
 
       <Box

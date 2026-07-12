@@ -8,8 +8,8 @@ import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import ContactEmergencyRoundedIcon from "@mui/icons-material/ContactEmergencyRounded";
 import ConfirmationNumberRoundedIcon from "@mui/icons-material/ConfirmationNumberRounded";
 import FlightRoundedIcon from "@mui/icons-material/FlightRounded";
-import ContactEmergencyIcon from '@mui/icons-material/ContactEmergency';
-import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import ContactEmergencyIcon from "@mui/icons-material/ContactEmergency";
+import NoteAddIcon from "@mui/icons-material/NoteAdd";
 export const useSidebarItems = () => {
   const { t } = useTranslation();
 
@@ -55,16 +55,9 @@ export const useSidebarItems = () => {
         ],
       },
       {
-        isGroup: true,
         text: t("sidebar.clients"),
         icon: createElement(PeopleIcon),
-        children: [
-          {
-            text: t("sidebar.clientsList"),
-            path: "/clients",
-            icon: createElement(PeopleIcon),
-          },
-        ],
+        path: "/clients"
       },
       {
         isGroup: true,

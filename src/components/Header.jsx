@@ -13,11 +13,13 @@ import {
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import MenuIcon from '@mui/icons-material/Menu';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const Header = ({ sidebarWidth = 100 }) => {
+const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -45,19 +47,57 @@ const Header = ({ sidebarWidth = 100 }) => {
         zIndex: (theme) => theme.zIndex.drawer + 1,
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid',
-        borderColor: 'rgba(20,184,166,0.2)',
-        boxShadow: 'none',
+        borderColor: (theme) =>
+          theme.palette.mode === 'dark'
+            ? 'rgba(20,184,166,0.15)'
+            : '#e2e8f0',
+        backgroundColor: (theme) =>
+          theme.palette.mode === 'dark'
+            ? theme.palette.background.paper
+            : '#ffffff',
+        boxShadow: (theme) =>
+          theme.palette.mode === 'dark'
+            ? 'none'
+            : '0 1px 3px rgba(0,0,0,0.04)',
         left: { xs: 0, md: sidebarWidth },
         width: { xs: '100%', md: `calc(100% - ${sidebarWidth}px)` },
         transition: 'left 0.3s cubic-bezier(0.4,0,0.2,1), width 0.3s cubic-bezier(0.4,0,0.2,1)',
       }}
     >
-      <Toolbar sx={{ justifyContent: 'flex-end' }}>
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        {/* Sidebar collapse toggle */}
+        <IconButton
+          onClick={onSidebarCollapse}
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          sx={{
+            height: 38,
+            borderRadius: '10px',
+            color: (theme) =>
+              theme.palette.mode === 'dark'
+                ? 'rgba(255,255,255,0.7)'
+                : '#334155',
+            '&:hover': {
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(255,255,255,0.08)'
+                  : 'rgba(0,0,0,0.06)',
+            },
+            transition: 'all 0.2s ease',
+          }}
+        >
+          {sidebarCollapsed ? (
+            <MenuIcon sx={{ fontSize: 22 }} />
+          ) : (
+            <MenuOpenIcon sx={{ fontSize: 22 }} />
+          )}
+        </IconButton>
+
+        {/* User menu */}
         {user && (
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title={t('header.userMenuTooltip')}>
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt={user.name} sx={{ width: 38, height: 38, border: '2px solid #2563EB' }}>
+                <Avatar alt={user.name} sx={{ width: 38, height: 38, border: '2px solid #0E8584', bgcolor: 'rgba(14,133,132,0.1)', color: '#0E8584', fontWeight: 600 }}>
                   {(user.name || '?').charAt(0).toUpperCase()}
                 </Avatar>
               </IconButton>
@@ -100,8 +140,6 @@ const Header = ({ sidebarWidth = 100 }) => {
                     fontSize: '0.65rem',
                     fontWeight: 700,
                     textTransform: 'uppercase',
-                    backgroundColor:
-                      user.role === 'admin' ? 'error.light' : user.role === 'agent' ? 'warning.light' : 'primary.light',
                     color:
                       user.role === 'admin'
                         ? 'error.contrastText'
@@ -131,4 +169,3 @@ const Header = ({ sidebarWidth = 100 }) => {
 };
 
 export default Header;
-

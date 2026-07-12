@@ -31,7 +31,6 @@ const CustomDatePicker = ({
                   mb: 0.75,
                   fontWeight: 600,
                   fontSize: "0.875rem",
-                  color: "text.primary",
                 }}
               >
                 {label}
@@ -63,8 +62,8 @@ const CustomDatePicker = ({
                 sx: {
                   "& .MuiInputBase-root": {
                     fontSize: "0.9rem",
-                    height: "44px",
-                    minHeight: "44px",
+                    height: "48px",
+                    minHeight: "48px",
                   },
                   "& .MuiInputLabel-root": { fontSize: "0.9rem" },
                   "& .MuiInputAdornment-root .MuiIconButton-root": {

@@ -15,20 +15,18 @@ import AgentAccordion from "../../../components/global/AgentAccordion";
 import AppAutocomplete from "../../../components/AppAutocomplete";
 import { addB2BApi } from "../../../api/queries/post";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
-import { getAllStatusApi, getAllEmployeeApi } from "../../../api/queries/getters";
+import {
+  getAllStatusApi,
+  getAllEmployeeApi,
+} from "../../../api/queries/getters";
 import { useGet } from "../../../hooks/CRUD/useGet";
+import CustomDatePicker from "../../../components/CustomDatePicker";
 
 const TRIP_TYPE_OPTIONS = [
   { label: "One Way", value: 0 },
   { label: "Round Trip", value: 1 },
 ];
 
-const CABIN_OPTIONS = [
-  { label: "ECO", value: "ECO" },
-  { label: "ECO/Q", value: "ECO/Q" },
-  { label: "BUSINESS", value: "BUSINESS" },
-  { label: "EXTRA", value: "EXTRA" },
-];
 
 const PAYMENT_OPTIONS = [
   { label: "Tolendi", value: true },
@@ -48,9 +46,7 @@ const AddB2BTicketDialog = ({ table }) => {
     key: "status",
   });
 
-  const {
-    data: employees = [],
-  } = useGet({
+  const { data: employees = [] } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
   });
@@ -92,6 +88,7 @@ const AddB2BTicketDialog = ({ table }) => {
       sale_price: "",
       card: "",
       note: "",
+      pnr: "",
       is_paid: true,
     },
     resolver: yupResolver(addB2BTicket),
@@ -108,8 +105,12 @@ const AddB2BTicketDialog = ({ table }) => {
     try {
       const payload = {
         ...data,
-        datetime: data.datetime ? new Date(data.datetime).toISOString() : new Date().toISOString(),
-        flight_date: data.flight_date ? new Date(data.flight_date).toISOString() : new Date().toISOString(),
+        datetime: data.datetime
+          ? new Date(data.datetime).toISOString()
+          : new Date().toISOString(),
+        flight_date: data.flight_date
+          ? new Date(data.flight_date).toISOString()
+          : new Date().toISOString(),
         net_price: Number(data.net_price || 0),
         sale_price: Number(data.sale_price || 0),
       };
@@ -170,23 +171,21 @@ const AddB2BTicketDialog = ({ table }) => {
               <AppAutocomplete
                 name="assignment_opr_guid"
                 control={control}
-                label={t("columns.operator") ?? "Tabsyryjy"}
+                label={t("columns.operator")}
                 options={employeeOptions}
               />
 
               <AppAutocomplete
                 name="receiver_opr_guid"
                 control={control}
-                label={t("columns.operatorTwo") ?? "Kabul ediji"}
+                label={t("columns.operatorTwo")}
                 options={employeeOptions}
               />
 
-              <CustomTextField
+              <CustomDatePicker
                 name="datetime"
                 control={control}
-                type="date"
-                label={t("columns.issueDate") ?? "Issue Date"}
-                InputLabelProps={{ shrink: true }}
+                label={t("columns.issueDate")}
               />
             </Box>
 
@@ -200,20 +199,18 @@ const AddB2BTicketDialog = ({ table }) => {
               <CustomTextField
                 name="airline"
                 control={control}
-                label={t("columns.airline") ?? "Airline"}
+                label={t("columns.airline")}
               />
 
               <CustomTextField
                 name="route"
                 control={control}
-                label={t("columns.route") ?? "Route"}
+                label={t("columns.route")}
               />
-              <CustomTextField
+              <CustomDatePicker
                 name="flight_date"
                 control={control}
-                type="date"
-                label={t("columns.flightDate") ?? "Flight Date"}
-                InputLabelProps={{ shrink: true }}
+                label={t("columns.flightDate")}
               />
             </Box>
 
@@ -235,11 +232,12 @@ const AddB2BTicketDialog = ({ table }) => {
                 getRowId={(item) => item.guid}
                 getRowLabel={(item) => selectedLang(item.name)}
               />
-              <CustomSelect
+
+              <CustomTextField
                 name="class"
                 control={control}
-                label={t("columns.cabinClass") ?? "Class"}
-                options={CABIN_OPTIONS}
+                type="number"
+                label={t("columns.cabinClass")}
               />
 
               <CustomSelect
@@ -291,6 +289,13 @@ const AddB2BTicketDialog = ({ table }) => {
                 label={t("columns.card") ?? "Cart"}
               />
 
+              <CustomTextField
+                name="pnr"
+                control={control}
+                type="number"
+                label={t("columns.pnr")}
+              />
+
               <AgentAccordion
                 control={control}
                 fullNameName="agent.name"
@@ -305,8 +310,6 @@ const AddB2BTicketDialog = ({ table }) => {
               <CustomTextField
                 name="note"
                 control={control}
-                multiline
-                rows={2}
                 label={t("columns.note")}
               />
             </Box>

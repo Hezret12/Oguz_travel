@@ -4,7 +4,24 @@ import { Tooltip, ListItemButton, ListItemIcon, ListItemText, Collapse, List, Bo
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-const FlatItem = ({ item, isActive, onSidebarClose, collapsed }) => {
+// ── Shared palette helper ──
+const getTokens = (isDark) => ({
+  text: isDark ? 'rgba(255,255,255,0.65)' : '#111827',
+  textActive: isDark ? '#ffffff' : '#030712',
+  icon: isDark ? 'rgba(255,255,255,0.5)' : '#334155',
+  iconActive: isDark ? '#14B8A6' : '#0E8584',
+  activeBg: isDark ? 'rgba(20,184,166,0.13)' : 'rgba(14,133,132,0.08)',
+  activeHoverBg: isDark ? 'rgba(20,184,166,0.16)' : 'rgba(14,133,132,0.12)',
+  hoverBg: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)',
+  borderActive: isDark ? '#14B8A6' : '#0E8584',
+  borderHover: isDark ? 'rgba(20,184,166,0.4)' : 'rgba(14,133,132,0.25)',
+  shadow: isDark ? '0 2px 12px rgba(20,184,166,0.15)' : '0 2px 8px rgba(14,133,132,0.08)',
+  expandIcon: isDark ? 'rgba(255,255,255,0.4)' : '#334155',
+});
+
+const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
+  const t = getTokens(isDark);
+
   const el = (
     <ListItemButton
       component={NavLink}
@@ -20,21 +37,21 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed }) => {
         width: collapsed ? '44px' : 'calc(100% - 20px)',
         minWidth: collapsed ? '44px' : 'auto',
         justifyContent: collapsed ? 'center' : 'flex-start',
-        color: isActive ? '#ffffff' : 'rgba(255,255,255,0.65)',
-        backgroundColor: isActive ? 'rgba(20,184,166,0.13)' : 'transparent',
+        color: isActive ? t.textActive : t.text,
+        backgroundColor: isActive ? t.activeBg : 'transparent',
         borderLeft: collapsed
           ? 'none'
           : isActive
-          ? '3px solid #14B8A6'
+          ? `3px solid ${t.borderActive}`
           : '3px solid transparent',
-        boxShadow: isActive ? '0 2px 12px rgba(20,184,166,0.15)' : 'none',
+        boxShadow: isActive ? t.shadow : 'none',
         fontFamily: "'Inter', sans-serif",
         '&:hover': {
-          backgroundColor: isActive ? 'rgba(20,184,166,0.16)' : 'rgba(255,255,255,0.07)',
-          color: '#ffffff',
-          borderLeft: collapsed ? 'none' : isActive ? '3px solid #14B8A6' : '3px solid rgba(20,184,166,0.4)',
+          backgroundColor: isActive ? t.activeHoverBg : t.hoverBg,
+          color: t.textActive,
+          borderLeft: collapsed ? 'none' : isActive ? `3px solid ${t.borderActive}` : `3px solid ${t.borderHover}`,
           '& .MuiListItemIcon-root': {
-            color: '#14B8A6',
+            color: t.iconActive,
           }
         },
         transition: 'all 0.2s ease',
@@ -43,7 +60,7 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed }) => {
       <ListItemIcon
         sx={{
           minWidth: 'auto',
-          color: isActive ? '#14B8A6' : 'rgba(255,255,255,0.5)',
+          color: isActive ? t.iconActive : t.icon,
           fontSize: 20,
           display: 'flex',
           alignItems: 'center',
@@ -63,7 +80,7 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed }) => {
               noWrap: true,
               sx: {
                 fontSize: 13.5,
-                fontWeight: 500,
+                fontWeight: isActive ? 600 : 500,
                 fontFamily: "'Inter', sans-serif",
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -87,7 +104,8 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed }) => {
   return el;
 };
 
-const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, collapsed }) => {
+const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, collapsed, isDark }) => {
+  const t = getTokens(isDark);
   const hasActiveChild = item.children?.some((c) => c.path === location.pathname);
 
   const headerEl = (
@@ -103,14 +121,14 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
         width: collapsed ? '44px' : 'calc(100% - 20px)',
         minWidth: collapsed ? '44px' : 'auto',
         justifyContent: collapsed ? 'center' : 'flex-start',
-        color: hasActiveChild ? '#ffffff' : 'rgba(255,255,255,0.65)',     
+        color: hasActiveChild ? t.textActive : t.text,
         fontFamily: "'Inter', sans-serif",
         '&:hover': {
-          backgroundColor: hasActiveChild ? 'rgba(20,184,166,0.14)' : 'rgba(255,255,255,0.07)',
-          color: '#ffffff',
-          borderLeft: collapsed ? 'none' : hasActiveChild ? '3px solid #14B8A6' : '3px solid rgba(20,184,166,0.4)',
+          backgroundColor: hasActiveChild ? t.activeHoverBg : t.hoverBg,
+          color: t.textActive,
+          borderLeft: collapsed ? 'none' : hasActiveChild ? `3px solid ${t.borderActive}` : `3px solid ${t.borderHover}`,
           '& .MuiListItemIcon-root': {
-            color: '#14B8A6',
+            color: t.iconActive,
           }
         },
         transition: 'all 0.2s ease',
@@ -119,7 +137,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
       <ListItemIcon
         sx={{
           minWidth: 'auto',
-          color: hasActiveChild ? '#14B8A6' : 'rgba(255,255,255,0.5)',
+          color: hasActiveChild ? t.iconActive : t.icon,
           fontSize: 20,
           display: 'flex',
           alignItems: 'center',
@@ -140,7 +158,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                 noWrap: true,
                 sx: {
                   fontSize: 13.5,
-                  fontWeight: 500,
+                  fontWeight: hasActiveChild ? 600 : 500,
                   fontFamily: "'Inter', sans-serif",
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -150,7 +168,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
             }}
             sx={{ margin: 0 }}
           />
-          <Box sx={{ color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ color: t.expandIcon, display: 'flex', alignItems: 'center' }}>
             {isExpanded
               ? <ExpandLessIcon sx={{ fontSize: 16 }} />
               : <ExpandMoreIcon sx={{ fontSize: 16 }} />}
@@ -186,17 +204,17 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                   margin: '2px 10px',
                   borderRadius: '10px',
                   width: 'calc(100% - 20px)',
-                  color: isChildActive ? '#ffffff' : 'rgba(255,255,255,0.65)',
-                  backgroundColor: isChildActive ? 'rgba(20,184,166,0.13)' : 'transparent',
-                  borderLeft: isChildActive ? '3px solid #14B8A6' : '3px solid transparent',
-                  boxShadow: isChildActive ? '0 2px 10px rgba(20,184,166,0.15)' : 'none',
+                  color: isChildActive ? t.textActive : t.text,
+                  backgroundColor: isChildActive ? t.activeBg : 'transparent',
+                  borderLeft: isChildActive ? `3px solid ${t.borderActive}` : '3px solid transparent',
+                  boxShadow: isChildActive ? t.shadow : 'none',
                   fontFamily: "'Inter', sans-serif",
                   '&:hover': {
-                    backgroundColor: isChildActive ? 'rgba(20,184,166,0.16)' : 'rgba(255,255,255,0.07)',
-                    color: '#ffffff',
-                    borderLeft: isChildActive ? '3px solid #14B8A6' : '3px solid rgba(20,184,166,0.4)',
+                    backgroundColor: isChildActive ? t.activeHoverBg : t.hoverBg,
+                    color: t.textActive,
+                    borderLeft: isChildActive ? `3px solid ${t.borderActive}` : `3px solid ${t.borderHover}`,
                     '& .MuiListItemIcon-root': {
-                      color: '#14B8A6',
+                      color: t.iconActive,
                     }
                   },
                   transition: 'all 0.2s ease',
@@ -205,7 +223,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                 <ListItemIcon
                   sx={{
                     minWidth: 'auto',
-                    color: isChildActive ? '#14B8A6' : 'rgba(255,255,255,0.5)',
+                    color: isChildActive ? t.iconActive : t.icon,
                     fontSize: 17,
                     display: 'flex',
                     alignItems: 'center',
@@ -224,7 +242,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                       noWrap: true,
                       sx: {
                         fontSize: 13,
-                        fontWeight: 500,
+                        fontWeight: isChildActive ? 600 : 500,
                         fontFamily: "'Inter', sans-serif",
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
@@ -242,7 +260,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
   );
 };
 
-const SidebarItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, collapsed }) => {
+const SidebarItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, collapsed, isDark }) => {
   if (item.isGroup) {
     return (
       <GroupItem
@@ -252,6 +270,7 @@ const SidebarItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup
         isExpanded={isExpanded}
         onToggleGroup={onToggleGroup}
         collapsed={collapsed}
+        isDark={isDark}
       />
     );
   }
@@ -263,6 +282,7 @@ const SidebarItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup
       isActive={isActive}
       onSidebarClose={onSidebarClose}
       collapsed={collapsed}
+      isDark={isDark}
     />
   );
 };
@@ -273,5 +293,6 @@ export default memo(SidebarItem, (prev, next) =>
   prev.item === next.item &&
   prev.onSidebarClose === next.onSidebarClose &&
   prev.onToggleGroup === next.onToggleGroup &&
-  prev.collapsed === next.collapsed
+  prev.collapsed === next.collapsed &&
+  prev.isDark === next.isDark
 );

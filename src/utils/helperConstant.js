@@ -4,7 +4,7 @@ export const orderNumber = "№";
 // Order number column size
 export const ordNumColSize = 30;
 // Name column size
-export const nameColSize = 170;
+export const nameColSize = 220;
 // Description column size
 export const colSize = 100;
 // Route

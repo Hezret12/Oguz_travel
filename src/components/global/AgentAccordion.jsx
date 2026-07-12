@@ -28,12 +28,11 @@ const AgentAccordion = ({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const fullName = useWatch({ control, name: fullNameName });
-  const phoneNumber = useWatch({ control, name: phoneNumberName });
   const summaryText = fullName
-    ? `${fullName}${phoneNumber ? ` | +993 ${phoneNumber}` : ""}`
-    : t("agentForm.summary", "Full name and phone number");
+    ? `${fullName}`
+    : t("agent.summary");
 
-  const resolvedTitle = title ?? t("agentForm.title", "Agent");
+  const resolvedTitle = title ?? t("agentForm.title");
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -110,7 +109,6 @@ const AgentAccordion = ({
 
             <Typography
               sx={{
-                color: "text.secondary",
                 fontSize: "0.95rem",
                 fontWeight: 500,
                 overflow: "hidden",

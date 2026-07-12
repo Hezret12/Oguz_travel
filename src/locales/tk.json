@@ -49,6 +49,8 @@
     "passportNumber": "Pasport №",
     "passportExpiryDate": "Pasportyň gutarýan senesi",
     "passportCountryOfIssue": "Pasportyň berlen ýurdy",
+    "dateTime": "Senesi",
+    "paymentStatus": "Töleg görnüşi",
     "gender": "Jynsy",
     "employee": "Işgär",
     "password": "Parol",
@@ -62,7 +64,7 @@
     "agent": "Agent",
     "agentFullName": "Agent Ady Familýasy",
     "pnr": "PNR",
-    "airline": "Awiakompaniýa",
+    "airline": "Howa ýoly",
     "route": "Ugurlar",
     "cabinClass": "Synp",
     "tripType": "Uçuş görnüşi",
@@ -311,6 +313,7 @@
     "agent": {
       "title": "Agent paneli",
       "subtitle": "Hoş geldiňiz, {{name}}. Syýahat meýilleşdiriş we müşderi dolandyryş amallaryny şu ýerden ýöridip bilersiňiz.",
+      "summery": "Agent",
       "stats": {
         "activeTours": "Aktiw tur sargytlary",
         "earnedCommission": "Gazanylan komissiýa",
