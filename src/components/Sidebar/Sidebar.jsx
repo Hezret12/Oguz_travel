@@ -66,7 +66,7 @@ const SidebarLogo = ({ collapsed, isDark }) => {
         transition: "all 0.3s ease",
         overflow: "hidden",
         minHeight: 64,
-        my: 0.5
+        my: 1
       }}
     >
       <Box
@@ -181,8 +181,8 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
   }, [logout, navigate]);
 
   const toggleTheme = useCallback(() => {
-    setMode((prev) => (prev === "dark" ? "light" : "dark"));
-  }, [setMode]);
+    setMode(mode === "dark" ? "light" : "dark");
+  }, [mode, setMode]);
 
   const desktopStyles = useMemo(
     () => sidebarSurfaceStyles(isDark, collapsed ? SIDEBAR_CW : SIDEBAR_W),
