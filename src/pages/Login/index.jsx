@@ -234,7 +234,7 @@ export default function Login() {
         >
           <Box
             component="img"
-            src="/oguz_logo.svg"
+            src="/logo/oguz_logo.svg"
             alt="Oguz Travel Logo"
             sx={{ width: { xs: 180, sm: 240 }, height: 'auto', display: 'block' }}
           />

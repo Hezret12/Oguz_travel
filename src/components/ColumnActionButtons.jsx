@@ -116,11 +116,13 @@ const ColumnActionButtons = ({ row, table, onDelete, showPayment = false }) => {
       </Box>
 
       {/* Payment Management Modal */}
-      <PaymentManagementModal
-        open={isPaymentOpen}
-        onClose={() => setIsPaymentOpen(false)}
-        row={row}
-      />
+      {isPaymentOpen && (
+        <PaymentManagementModal
+          open={isPaymentOpen}
+          onClose={() => setIsPaymentOpen(false)}
+          row={row}
+        />
+      )}
     </>
   );
 };

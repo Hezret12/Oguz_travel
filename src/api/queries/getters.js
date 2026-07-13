@@ -45,3 +45,7 @@ export const getAllB2BApi = async (params = {}) => {
 export const getAllUsersApi = async (params = {}) => {
   return await api.getPrivate('/user/get-all-user', params);
 };
+
+export const getAllPaymentStatusApi = async (params = {}) => {
+  return await api.getPrivate('/ticket-payment/getAll-ticket-payment', params);
+};

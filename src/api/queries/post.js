@@ -36,3 +36,12 @@ export const addB2BApi = async (data) => {
   );
   return response;
 };
+
+
+export const addPaymentApi = async (data) => {
+  const response = await api.postPrivate(
+    "/ticket-payment/add-ticket-payment",
+    data,
+  );
+  return response;
+};
