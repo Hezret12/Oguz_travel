@@ -21,6 +21,8 @@ import {
 } from "../../../api/queries/getters";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import CustomDatePicker from "../../../components/CustomDatePicker";
+import CurrencyAmount from "../../../components/inputs/CurrencyAmount";
+
 
 const TRIP_TYPE_OPTIONS = [
   { label: "One Way", value: 0 },
@@ -32,6 +34,13 @@ const PAYMENT_OPTIONS = [
   { label: "Tolendi", value: true },
   { label: "Kredit", value: false },
 ];
+
+const CURRENCY_SYMBOLS = {
+  USD: "$",
+  EUR: "€",
+  TMT: "m",
+  RUB: "₽",
+};
 
 const AddB2BTicketDialog = ({ table }) => {
   const { t, selectedLang } = useLocale();
@@ -68,7 +77,7 @@ const AddB2BTicketDialog = ({ table }) => {
     },
   });
 
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
       datetime: "",
       assignment_opr_guid: "",
@@ -86,6 +95,7 @@ const AddB2BTicketDialog = ({ table }) => {
       flight_date: "",
       net_price: "",
       sale_price: "",
+      currency: "USD",
       card: "",
       note: "",
       pnr: "",
@@ -94,6 +104,10 @@ const AddB2BTicketDialog = ({ table }) => {
     resolver: yupResolver(addB2BTicket),
     mode: "onSubmit",
   });
+
+  const selectedCurrency = watch("currency") || "USD";
+  const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
+
 
   const closeDialog = () => {
     if (table) {
@@ -113,6 +127,7 @@ const AddB2BTicketDialog = ({ table }) => {
           : new Date().toISOString(),
         net_price: Number(data.net_price || 0),
         sale_price: Number(data.sale_price || 0),
+        currency: data.currency || "USD",
       };
 
       await createB2B(payload);
@@ -120,6 +135,7 @@ const AddB2BTicketDialog = ({ table }) => {
       console.error(error);
     }
   };
+
 
   return (
     <CustomDialog widthX={760} open={true} close={closeDialog}>
@@ -236,7 +252,6 @@ const AddB2BTicketDialog = ({ table }) => {
               <CustomTextField
                 name="class"
                 control={control}
-                type="number"
                 label={t("columns.cabinClass")}
               />
 
@@ -255,23 +270,53 @@ const AddB2BTicketDialog = ({ table }) => {
                 gap: 1.5,
               }}
             >
-              <CustomTextField
+              <CurrencyAmount
                 name="net_price"
                 control={control}
-                type="number"
-                label={t("columns.netFare") ?? "Net Fare"}
+                label={t("columns.netFare")}
+                currency={selectedCurrency}
+                onCurrencyChange={(curr) => setValue("currency", curr)}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "7px",
+                    minHeight: "44px",
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
+                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    pr: 0.5,
+                    "&:hover": {
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "#ffffff",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "primary.main",
+                      },
+                    },
+                    "&.Mui-focused": {
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.02)" : "#ffffff",
+                      boxShadow: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "0 0 0 3px rgba(59, 130, 246, 0.16)"
+                          : "0 0 0 3px rgba(37, 99, 235, 0.12)",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderWidth: 1.5,
+                    },
+                  },
+                }}
               />
 
               <CustomTextField
                 name="sale_price"
                 control={control}
                 type="number"
-                label={t("columns.saleFare") ?? "Sale Fare"}
+                label={t("columns.saleFare")}
+                startIcon={currencySymbol}
               />
               <CustomSelect
                 name="is_paid"
                 control={control}
-                label={t("columns.paymentStatus") ?? "Payment Status"}
+                label={t("columns.paymentStatus")}
                 options={PAYMENT_OPTIONS}
               />
             </Box>
@@ -292,7 +337,6 @@ const AddB2BTicketDialog = ({ table }) => {
               <CustomTextField
                 name="pnr"
                 control={control}
-                type="number"
                 label={t("columns.pnr")}
               />
 

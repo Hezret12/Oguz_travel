@@ -45,3 +45,12 @@ export const addPaymentApi = async (data) => {
   );
   return response;
 };
+
+export const addTurkishAirlinesApi = async (data) => {
+  const response = await api.postPrivate(
+    "/turkish-airlines/add-turkish-airlines",
+    data,
+  );
+  return response;
+};
+

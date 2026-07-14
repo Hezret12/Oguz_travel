@@ -19,7 +19,9 @@ import {
 } from "../../../utils/helperConstant";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import AddB2BTicketDialog from "./AddB2BTicketDialog";
+import EditB2BDialog from "./EditB2BDialog";
 import StatusChip from "../../../components/StatusChip";
+
 import {
   PAYMENT_STATUS_CONFIG,
   SALE_STATUS_CONFIG,
@@ -513,6 +515,10 @@ const B2B = () => {
     renderCreateRowDialogContent: ({ table }) => (
       <AddB2BTicketDialog table={table} />
     ),
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditB2BDialog table={table} row={row} />
+    ),
+
   });
 
   return (

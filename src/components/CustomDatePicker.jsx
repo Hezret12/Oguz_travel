@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { Controller } from "react-hook-form";
 import dayjs from "dayjs";
 
@@ -11,9 +12,12 @@ const CustomDatePicker = ({
   disabled = false,
   required = false,
   size = "small",
-  format = "DD.MM.YYYY",
+  showTime = false,
+  format = showTime ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY",
   ...props
 }) => {
+  const PickerComponent = showTime ? DateTimePicker : DatePicker;
+
   return (
     <Controller
       name={name}
@@ -39,7 +43,7 @@ const CustomDatePicker = ({
                 )}
               </Typography>
             )}
-            <DatePicker
+            <PickerComponent
               value={field.value ? dayjs(field.value) : null}
               onChange={(newValue) => {
                 field.onChange(
@@ -50,7 +54,7 @@ const CustomDatePicker = ({
               }}
               format={format}
               disabled={disabled}
-              views={["year", "month", "day"]}
+              views={showTime ? undefined : ["year", "month", "day"]}
               slotProps={{
                 textField: {
                   fullWidth: true,
@@ -62,8 +66,6 @@ const CustomDatePicker = ({
                 sx: {
                   "& .MuiInputBase-root": {
                     fontSize: "0.9rem",
-                    // height: "48px",
-                    // minHeight: "48px",
                   },
                   "& .MuiInputLabel-root": { fontSize: "0.9rem" },
                   "& .MuiInputAdornment-root .MuiIconButton-root": {

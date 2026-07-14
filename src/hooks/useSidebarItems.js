@@ -7,9 +7,10 @@ import { useTranslation } from "react-i18next";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import ContactEmergencyRoundedIcon from "@mui/icons-material/ContactEmergencyRounded";
 import ConfirmationNumberRoundedIcon from "@mui/icons-material/ConfirmationNumberRounded";
-import FlightRoundedIcon from "@mui/icons-material/FlightRounded";
 import ContactEmergencyIcon from "@mui/icons-material/ContactEmergency";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
+import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
+
 export const useSidebarItems = () => {
   const { t } = useTranslation();
 
@@ -50,7 +51,11 @@ export const useSidebarItems = () => {
           {
             text: t("sidebar.ticketTurkishAirlines", "Turkish Airlines"),
             path: "/ticket/turkish-airlines",
-            icon: createElement(FlightRoundedIcon),
+            icon: createElement("img", {
+              src: TurkishAirlinesIcon,
+              alt: "Turkish Airlines",
+              style: { width: 32, height: 30, objectFit: "contain" },
+            }),
           },
         ],
       },

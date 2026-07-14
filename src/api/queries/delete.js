@@ -20,3 +20,8 @@ export const deleteTicketPaymentApi = async (guid) => {
   const response = await api.deletePrivate('/ticket-payment/delete-ticket-payment', guid);
   return response;
 };
+
+export const deleteTurkishAirlinesApi = async (guid) => {
+  const response = await api.deletePrivate('/turkish-airlines/delete-turkish-airlines', guid);
+  return response;
+};

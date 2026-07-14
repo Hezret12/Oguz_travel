@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Box, Chip } from "@mui/material";
+import { useMemo, useState, useCallback } from "react";
+import { Box } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -10,185 +10,148 @@ import PageHeader from "../../../components/PageHeader";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 import AddTurkishAirlinesContent from "./CRUD/addTurkishAirlinesContent";
+import EditTurkishAirlinesContent from "./CRUD/editTurkishAirlinesContent";
+import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import StackedCell from "../../../components/inputs/StackCell";
+import StatusChip from "../../../components/StatusChip";
+import { SALE_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
+import { usePageFilters } from "../../../hooks/usePageFilters";
+import { usePagginationGet } from "../../../hooks/usePagginationGet";
+import { useGet } from "../../../hooks/CRUD/useGet";
+import DeleteDialog from "../../../components/DeleteDialog";
+import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
+import { useDelete } from "../../../hooks/CRUD/useDelete";
+import { deleteTurkishAirlinesApi } from "../../../api/queries/delete";
+import {
+  turkishAirlinesFilterActions,
+  turkishAirlinesFilterSelectors,
+} from "../../../store/slices/filters/turkishAirlinesFilterSlice";
+import {
+  getAllTurkishAirlinesApi,
+  getAllStatusApi,
+} from "../../../api/queries/getters";
 
-const initialData = [
-  {
-    id: "ta-1",
-    date: "2026-06-15",
-    operator: "ATABAY",
-    ofis: "LB",
-    op2: "POLAT",
-    op2Ofis: "AYLAR",
-    agent: "MERDAN",
-    agentTel: "+99365932397",
-    name: "MERDAN",
-    surname: "BABAJANOV",
-    yolagcyTel: "+99363375482",
-    dob: "2001-07-23",
-    milesSmiles: "TK4471829",
-    passportId: "A2088696",
-    pcoi: "TURKMENISTAN",
-    pdoe: "2028-04-25",
-    status: "SALE",
-    pnr: "VZ636D",
-    ticketNumber: "2352212890995",
-    route: "ASB-IST-ECN",
-    flightClass: "LY",
-    flightDate: "2026-07-10",
-    total: 850,
-    baseFare: 620,
-    aydylanBaha: 850,
-    accepted: 850,
-    changeAmount: 0,
-    kassir: "Lbdan",
-    bellik: "",
-  },
-  {
-    id: "ta-2",
-    date: "2026-06-16",
-    operator: "AYLAR",
-    ofis: "AYLAR",
-    op2: "",
-    op2Ofis: "",
-    agent: "BEGENCH",
-    agentTel: "",
-    name: "SERDAR",
-    surname: "ANNAGULIYEV",
-    yolagcyTel: "+99361234567",
-    dob: "1990-02-11",
-    milesSmiles: "",
-    passportId: "B1122334",
-    pcoi: "TC",
-    pdoe: "2027-09-01",
-    status: "REISSUE",
-    pnr: "V7GN8C",
-    ticketNumber: "2352212891112",
-    route: "ECN-IST-ASB",
-    flightClass: "YH",
-    flightDate: "2026-07-14",
-    total: 1200,
-    baseFare: 950,
-    aydylanBaha: 1200,
-    accepted: 1000,
-    changeAmount: 0,
-    kassir: "AYLAR",
-    bellik: "VIP client, priority seating",
-  },
-  {
-    id: "ta-3",
-    date: "2026-06-18",
-    operator: "ATABAY",
-    ofis: "LB",
-    op2: "AYLAR",
-    op2Ofis: "LB",
-    agent: "",
-    agentTel: "",
-    name: "MERYEM",
-    surname: "HUDAEVA",
-    yolagcyTel: "+99362998877",
-    dob: "1995-11-30",
-    milesSmiles: "TK9982341",
-    passportId: "C5566778",
-    pcoi: "TURKMENISTAN",
-    pdoe: "2026-12-15",
-    status: "REFUND",
-    pnr: "TA3234",
-    ticketNumber: "2352212893321",
-    route: "ASB-IST-ASB",
-    flightClass: "OO",
-    flightDate: "2026-06-20",
-    total: 700,
-    baseFare: 500,
-    aydylanBaha: 700,
-    accepted: 700,
-    changeAmount: -700,
-    kassir: "Lbdan",
-    bellik: "Refunded due to schedule change",
-  },
-  {
-    id: "ta-4",
-    date: "2026-06-20",
-    operator: "POLAT",
-    ofis: "AYLAR",
-    op2: "",
-    op2Ofis: "",
-    agent: "",
-    agentTel: "",
-    name: "AYNA",
-    surname: "MAMMEDOVA",
-    yolagcyTel: "+99365443322",
-    dob: "1988-05-04",
-    milesSmiles: "",
-    passportId: "D7788990",
-    pcoi: "KKTC",
-    pdoe: "2029-01-20",
-    status: "VOID",
-    pnr: "TA9981",
-    ticketNumber: "2352212894456",
-    route: "IST-ANK",
-    flightClass: "L",
-    flightDate: "2026-06-25",
-    total: 0,
-    baseFare: 0,
-    aydylanBaha: 0,
-    accepted: 0,
-    changeAmount: 0,
-    kassir: "AYLAR",
-    bellik: "Ticket cancelled by client",
-  },
-];
+const CURRENCY_SYMBOLS = {
+  USD: "$",
+  EUR: "€",
+  TMT: "m",
+  RUB: "₽",
+};
 
 const TurkishAirlines = () => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
-  const [searchQuery, setSearchQuery] = useState("");
   const [rowSelection, setRowSelection] = useState({});
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editingTicket, setEditingTicket] = useState(null);
-  const filteredData = useMemo(() => {
-    const normalizedQuery = searchQuery.toLowerCase().trim();
-    if (!normalizedQuery) return initialData;
-    return initialData.filter((row) =>
-      Object.values(row).some((value) =>
-        String(value).toLowerCase().includes(normalizedQuery),
-      ),
-    );
-  }, [searchQuery]);
 
-  const statusColors = {
-    SALE: { dot: "#16a34a", text: "#15803d", bg: "#dcfce7" },
-    REISSUE: { dot: "#2563eb", text: "#1d4ed8", bg: "#dbeafe" },
-    REFUND: { dot: "#ea580c", text: "#c2410c", bg: "#ffedd5" },
-    VOID: { dot: "#6b7280", text: "#374151", bg: "#f3f4f6" },
-  };
+  // Redux filters integration matching B2B
+  const {
+    searchQuery,
+    setSearch,
+    page,
+    limit,
+    setPage,
+    setPageSize,
+    setSort,
+    queryParams,
+  } = usePageFilters({
+    actions: turkishAirlinesFilterActions,
+    selectors: turkishAirlinesFilterSelectors,
+  });
+
+  // Fetch status list for display
+  const { data: statusList } = useGet({
+    apiFn: getAllStatusApi,
+    key: "status",
+  });
+
+  const statusById = useMemo(
+    () =>
+      Object.fromEntries((statusList || []).map((s) => [s.guid || s.id, s])),
+    [statusList],
+  );
+
+  const getStatusKey = useCallback(
+    (row) => {
+      if (row.tstatus?.name?.en) return row.tstatus.name.en;
+      if (row.tstatus?.name && typeof row.tstatus.name === "string")
+        return row.tstatus.name;
+      if (row.status?.name?.en) return row.status.name.en;
+      if (row.status?.name && typeof row.status.name === "string")
+        return row.status.name;
+      if (typeof row.status === "string") return row.status;
+
+      const guid = row.status_guid;
+      const statusObj = statusById[guid];
+      if (statusObj?.name?.en) return statusObj.name.en;
+      if (statusObj?.name && typeof statusObj.name === "string")
+        return statusObj.name;
+
+      return "";
+    },
+    [statusById],
+  );
+
+  // Paginated data fetching matching B2B
+  const {
+    data: turkishData,
+    isLoading,
+    isFetching,
+    pageCount,
+    totalItems,
+  } = usePagginationGet({
+    apiFn: getAllTurkishAirlinesApi,
+    key: "turkish-airlines",
+    params: queryParams,
+  });
+
+  const { mutate: deleteTurkishAirlinesMutate, isPending: isDeleting } = useDelete({
+    deleteFn: deleteTurkishAirlinesApi,
+    queryKey: ["turkish-airlines", queryParams],
+    idKey: "guid",
+    apiName: "guid",
+    isPaginated: true,
+  });
+
+  const deleteDialog = useDeleteDialog({
+    onConfirm: (ticket) => deleteTurkishAirlinesMutate(ticket.guid),
+  });
+
+  const handleDeleteClick = useCallback(
+    (ticket) => deleteDialog.open(ticket),
+    [deleteDialog],
+  );
 
   const columns = useMemo(
     () => [
       {
-        id: "rowNumber",
-        header: "#",
+        accessorFn: (row) => row.index_number,
+        id: "index_number",
+        header: "№",
         size: 50,
         enableSorting: false,
-        Cell: ({ row }) => row.index + 1,
       },
       {
-        accessorKey: "date",
+        accessorKey: "datetime",
         header: t("columns.issueDate"),
         size: 100,
-        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          if (!val) return "";
+          const dateOnly = val.split("T")[0];
+          return formatChange(dateOnly, { dateOnly: true });
+        },
       },
       {
         id: "operator",
         header: t("columns.operator") ?? "Operator",
         size: 150,
-        accessorFn: (row) => row.operator ?? "",
+        accessorFn: (row) => row.ta_assignment_operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.operator}
-            secondary={row.original.ofis}
+            primary={row.original.ta_assignment_operator?.fullName}
+            secondary={selectedLang(row.original.ta_assignment_operator?.office?.fullName)}
           />
         ),
       },
@@ -196,11 +159,11 @@ const TurkishAirlines = () => {
         id: "op2",
         header: t("columns.operatorTwo"),
         size: 150,
-        accessorFn: (row) => row.op2 ?? "",
+        accessorFn: (row) => row.ta_receiver_operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.op2}
-            secondary={row.original.op2Ofis}
+            primary={row.original.ta_receiver_operator?.fullName}
+            secondary={selectedLang(row.original.ta_receiver_operator?.office?.fullName)}
           />
         ),
       },
@@ -208,11 +171,11 @@ const TurkishAirlines = () => {
         id: "agent",
         header: t("columns.agent") ?? "Agent",
         size: 150,
-        accessorFn: (row) => row.agent ?? "",
+        accessorFn: (row) => row.agent?.name ?? "",
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.agent}
-            secondary={row.original.agentTel}
+            primary={row.original.agent?.name}
+            secondary={row.original.agent?.phone_number}
           />
         ),
       },
@@ -220,77 +183,57 @@ const TurkishAirlines = () => {
         id: "fullName",
         header: t("columns.client"),
         size: 200,
-        accessorFn: (row) => `${row.name ?? ""} ${row.surname ?? ""}`.trim(),
+        accessorFn: (row) => row.client?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
-            primary={`${row.original.name ?? ""} ${row.original.surname ?? ""}`.trim()}
-            secondary={row.original.yolagcyTel}
+            primary={row.original.client?.fullName}
+            secondary={row.original.client?.phoneNumber}
           />
         ),
       },
       {
-        accessorKey: "dob",
+        accessorFn: (row) => row.client?.dateOfBirth ?? "",
+        id: "dob",
         header: t("columns.dateOfBirth"),
         size: 110,
-        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          return val ? formatChange(val.split("T")[0], { dateOnly: true }) : "";
+        },
       },
-      // {
-      //   accessorKey: "milesSmiles",
-      //   header: t("columns.milesSmiles"),
-      //   size: 130,
-      // },
       {
-        accessorKey: "passportId",
+        accessorFn: (row) => row.client?.passport_number ?? "",
+        id: "passportId",
         header: t("columns.passportNumber"),
         size: 130,
       },
       {
-        accessorKey: "pcoi",
+        accessorFn: (row) => row.client?.passportCountryOfIssue ?? "",
+        id: "pcoi",
         header: t("columns.passportCountryOfIssue"),
         size: 130,
       },
       {
-        accessorKey: "pdoe",
+        accessorFn: (row) => row.client?.passportExpiryDate ?? "",
+        id: "pdoe",
         header: t("columns.passportExpiryDate"),
         size: 110,
-        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          return val ? formatChange(val.split("T")[0], { dateOnly: true }) : "";
+        },
       },
       {
-        accessorKey: "status",
+        accessorFn: (row) => getStatusKey(row),
+        id: "status",
         header: t("columns.status") ?? "Status",
         size: 130,
-        Cell: ({ cell }) => {
-          const value = cell.getValue();
-          const colors = statusColors[value] ?? statusColors.VOID;
-          return (
-            <Chip
-              size="small"
-              label={value}
-              sx={{
-                fontWeight: 700,
-                color: colors.text,
-                bgcolor: colors.bg,
-                "& .MuiChip-label": {
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                },
-              }}
-              icon={
-                <Box
-                  component="span"
-                  sx={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    bgcolor: colors.dot,
-                    ml: 1,
-                  }}
-                />
-              }
-            />
-          );
-        },
+        Cell: ({ row }) => (
+          <StatusChip
+            status={getStatusKey(row.original)}
+            config={SALE_STATUS_CONFIG}
+          />
+        ),
       },
       {
         accessorKey: "pnr",
@@ -298,7 +241,7 @@ const TurkishAirlines = () => {
         size: 110,
       },
       {
-        accessorKey: "ticketNumber",
+        accessorKey: "ticket_number",
         header: t("columns.ticketNumber") ?? "Ticket #",
         size: 160,
       },
@@ -308,76 +251,151 @@ const TurkishAirlines = () => {
         size: 140,
       },
       {
-        accessorKey: "flightClass",
+        accessorKey: "class",
         header: t("columns.class") ?? "Class",
         size: 90,
       },
       {
-        accessorKey: "flightDate",
+        accessorKey: "flight_date",
         header: t("columns.flightDate") ?? "Flight Date",
         size: 120,
-        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          return val ? formatChange(val.split("T")[0], { dateOnly: true }) : "";
+        },
       },
       {
-        accessorKey: "baseFare",
+        accessorKey: "base_fare",
         header: t("columns.baseFare"),
         size: 110,
-        Cell: ({ cell }) => `$${Number(cell.getValue() ?? 0).toFixed(2)}`,
+        Cell: ({ row, cell }) => {
+          const currencyCode = row.original.currency || "USD";
+          const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
+          return `${symbol}${Number(cell.getValue() ?? 0).toFixed(2)}`;
+        },
       },
       {
         id: "totalCollected",
-        header: t("columns.total") ?? "Total ($)",
+        header: t("columns.total") ?? "Total",
         size: 120,
-        accessorFn: (row) => row.total ?? 0,
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={`$${Number(row.original.aydylanBaha ?? 0).toFixed(2)}`}
-            secondary={`$${Number(row.original.total ?? 0).toFixed(2)}`}
-          />
-        ),
+        accessorFn: (row) => row.total_price ?? 0,
+        Cell: ({ row }) => {
+          const currencyCode = row.original.currency || "USD";
+          const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
+          return (
+            <StackedCell
+              primary={`${symbol}${Number(row.original.quoted_price ?? 0).toFixed(2)}`}
+              secondary={`${symbol}${Number(row.original.total_price ?? 0).toFixed(2)}`}
+            />
+          );
+        },
       },
       {
-        accessorKey: "accepted",
+        accessorKey: "accepted_price",
         header: t("columns.accepted") ?? "Accepted",
         size: 110,
-        Cell: ({ cell }) => `$${Number(cell.getValue() ?? 0).toFixed(2)}`,
+        Cell: ({ row, cell }) => {
+          const currencyCode = row.original.currency || "USD";
+          const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
+          return `${symbol}${Number(cell.getValue() ?? 0).toFixed(2)}`;
+        },
       },
       {
-        accessorKey: "changeAmount",
+        accessorKey: "returned_price",
         header: t("columns.changeAmount"),
         size: 110,
-        Cell: ({ cell }) => `$${Number(cell.getValue() ?? 0).toFixed(2)}`,
+        Cell: ({ row, cell }) => {
+          const currencyCode = row.original.currency || "USD";
+          const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
+          return `${symbol}${Number(cell.getValue() ?? 0).toFixed(2)}`;
+        },
       },
       {
-        accessorKey: "kassir",
-        header: t("columns.cashier"),
-        size: 110,
-      },
-      {
-        accessorKey: "bellik",
+        accessorKey: "note",
         header: t("columns.note"),
         size: 200,
       },
+      {
+        id: "actions",
+        header: t("columns.actions") ?? "Actions",
+        size: 100,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row, table }) => (
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            showPayment={false}
+            onDelete={handleDeleteClick}
+          />
+        ),
+      },
     ],
-    [t, formatChange],
+    [t, formatChange, getStatusKey, selectedLang, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
+      },
+    },
     columns,
-    data: filteredData,
-    state: { ...defaultMrtOptions.state, rowSelection },
+    data: turkishData || [],
+    state: {
+      ...defaultMrtOptions.state,
+      rowSelection,
+      isLoading: isLoading || isFetching,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
+      },
+    },
     onRowSelectionChange: setRowSelection,
+    renderCreateRowDialogContent: ({ table }) => (
+      <AddTurkishAirlinesContent table={table} />
+    ),
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditTurkishAirlinesContent table={table} row={row} />
+    ),
+    manualPagination: true,
+    manualFiltering: true,
+    manualSorting: true,
+    pageCount,
+    rowCount: totalItems,
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().pagination)
+          : updater;
+      if (next.pageIndex !== undefined) setPage(next.pageIndex + 1);
+      if (next.pageSize !== undefined) setPageSize(next.pageSize);
+    },
+    onSortingChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().sorting)
+          : updater;
+      if (next && next.length > 0) {
+        setSort(next[0].id, next[0].desc ? "desc" : "asc");
+      } else {
+        setSort("", "asc");
+      }
+    },
     renderTopToolbarCustomActions: () => (
       <GlobalSearchInput
         value={searchQuery}
-        onChange={setSearchQuery}
+        onChange={setSearch}
         placeholder={t("search") ?? "Search..."}
+        disabled={isLoading}
       />
     ),
-    renderBottomToolbar: ({ table }) => {
-      const { pageIndex, pageSize } = table.getState().pagination;
-      const pageCount = table.getPageCount();
+    renderBottomToolbar: ({ table: mrtTable }) => {
+      const { pageIndex } = mrtTable.getState().pagination;
 
       return (
         <Box
@@ -396,48 +414,33 @@ const TurkishAirlines = () => {
           <Pagination
             pageIndex={pageIndex}
             pageCount={pageCount}
-            pageSize={pageSize}
-            totalRows={filteredData.length}
-            onPageChange={(newIndex) => table.setPageIndex(newIndex)}
+            pageSize={limit}
+            totalRows={totalItems}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
           />
         </Box>
       );
-    },
-    muiTablePaperProps: {
-      sx: () => ({
-        ...defaultMrtOptions.muiTablePaperProps?.sx,
-      }),
     },
   });
 
   return (
     <>
       <PageHeader
-        title={t("pages.ticket.turkish.title") ?? "Turkish Airlines"}
+        title={t("pages.ticket.turkish.title")}
         pageTitle={`${t("pages.ticket.turkish.title") ?? "Turkish Airlines"} | Oguz Travel`}
         onAddClick={() => {
-          setEditingTicket(null);
-          setCreateOpen(true);
+          table.setCreatingRow(true);
         }}
+      />
+
+      <DeleteDialog
+        open={deleteDialog.isOpen}
+        onClose={deleteDialog.close}
+        onConfirm={deleteDialog.confirm}
+        isLoading={isDeleting}
       />
 
       <MaterialReactTable table={table} />
-
-      <AddTurkishAirlinesContent
-        open={createOpen}
-        ticket={editingTicket}
-        onClose={() => {
-          setCreateOpen(false);
-          setEditingTicket(null);
-        }}
-        // onSave={(values) => {
-        //   if (editingTicket) {
-        //     updateTicket(editingTicket.id, values);
-        //   } else {
-        //     addTicket(values);
-        //   }
-        // }}
-      />
     </>
   );
 };

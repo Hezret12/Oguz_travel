@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useForm } from "react-hook-form";
 import {
   Box,
   Typography,
@@ -6,21 +7,22 @@ import {
   Grid,
   IconButton,
   Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputAdornment,
-  TextField,
   Card,
   CardContent,
   Divider,
   CircularProgress,
+  Pagination,
 } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+
 import { CustomDialog } from "./CustomDialog";
-import { getAllPaymentStatusApi } from "../../api/queries/getters";
+import CustomTextField from "../CustomTextField";
+import CustomDatePicker from "../CustomDatePicker";
+import AppAutocomplete from "../AppAutocomplete";
+import { useLocale } from "../../hooks/useLocale";
+import { getAllPaymentStatusApi, getAllEmployeeApi } from "../../api/queries/getters";
 import { deleteTicketPaymentApi } from "../../api/queries/delete";
 import { addPaymentApi } from "../../api/queries/post";
 import { useGet } from "../../hooks/CRUD/useGet";
@@ -64,6 +66,7 @@ const getMethodLabel = (method) => {
 export const PaymentManagementModal = ({ open, onClose, row }) => {
   const ticket = row?.original;
   const clientName = ticket?.client?.fullName || ticket?.clientId || "Client";
+  const { t } = useLocale();
 
   const isCredit =
     ticket?.is_paid === false ||
@@ -72,14 +75,25 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   const [localPayments, setLocalPayments] = useState([]);
 
-  const [amount, setAmount] = useState("");
-  const [paymentDate, setPaymentDate] = useState(() => {
-    return new Date().toISOString().split("T")[0];
+  const { handleSubmit, reset, watch, control } = useForm({
+    defaultValues: {
+      amount: "",
+      paymentDate: new Date().toISOString(),
+      description: "",
+      opr_guid: "",
+    },
   });
-  const [method, setMethod] = useState("cash");
-  const [description, setDescription] = useState("");
 
-  const queryParams = useMemo(() => ({ b2b_guid: ticket?.guid }), [ticket?.guid]);
+  const amountValue = watch("amount");
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+
+  const queryParams = useMemo(() => ({
+    b2b_guid: ticket?.guid,
+    page,
+    limit,
+  }), [ticket?.guid, page, limit]);
 
   const { data: allPayments, isLoading: paymentsLoading } = useGet({
     apiFn: getAllPaymentStatusApi,
@@ -90,13 +104,38 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     },
   });
 
+  const { data: employees = [] } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+    options: {
+      enabled: open,
+    },
+  });
+
+  const employeeOptions = useMemo(
+    () =>
+      (employees || []).map((emp) => ({
+        label: emp.fullName,
+        value: emp.guid,
+      })),
+    [employees],
+  );
+
+  const queryClient = useQueryClient();
+  const rawData = queryClient.getQueryData(["payment-status", queryParams]);
+  const totalPages = rawData?.data?.meta?.totalPages ?? 1;
+
   const { mutate: createPayment, isPending: createLoading } = useCreate({
     apiFn: addPaymentApi,
     key: "payment-status",
     invalidateQueries: ["payment-status"],
     onSuccess: () => {
-      setAmount("");
-      setDescription("");
+      reset({
+        amount: "",
+        paymentDate: new Date().toISOString(),
+        description: "",
+        opr_guid: "",
+      });
     },
   });
 
@@ -115,6 +154,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     return (allPayments || []).filter((p) => p.b2b_guid === ticket.guid);
   }, [allPayments, ticket, localPayments]);
 
+
   if (!ticket) return null;
 
   const salesTotal = Number(ticket.sale_price ?? ticket.saleFare ?? 0);
@@ -122,8 +162,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const remaining = salesTotal - totalPaid;
 
 
-  const handleAddPayment = async (e) => {
-    e.preventDefault();
+  const handleAddPayment = async (data) => {
+    const { amount, paymentDate, description, opr_guid } = data;
     if (!amount || Number(amount) <= 0) return;
 
     if (ticket.guid) {
@@ -131,8 +171,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         b2b_guid: ticket.guid,
         amount: Number(amount),
         payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
-        method: method,
-        note: description.trim(),
+        note: description?.trim() || "",
+        opr_guid: opr_guid || null,
       };
       createPayment(payload);
     } else {
@@ -141,13 +181,17 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         guid: `p-${Date.now()}`,
         amount: Number(amount),
         payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
-        method: method,
-        note: description.trim(),
+        note: description?.trim() || "",
+        opr_guid: opr_guid || null,
       };
 
       setLocalPayments((prev) => [...prev, newPayment]);
-      setAmount("");
-      setDescription("");
+      reset({
+        amount: "",
+        paymentDate: new Date().toISOString(),
+        description: "",
+        opr_guid: "",
+      });
     }
   };
 
@@ -173,8 +217,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         }}
       >
         <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            Payment for B2B Client: {clientName}
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            Müşderi ady: {clientName}
           </Typography>
         </Box>
         {isCredit && (
@@ -186,6 +230,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               borderRadius: "16px",
               fontWeight: 600,
               fontSize: "0.85rem",
+              mr: 5,
               px: 0.5,
             }}
           />
@@ -240,44 +285,6 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             </Grid>
           </Box>
 
-          {/* B2B Credit Details Row */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Credit Limit
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 700 }}>
-                {/* {formatCurrency(creditLimit)} */}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Available Credit
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 700, color: "primary.main" }}>
-                {/* {formatCurrency(availableCredit)} */}
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                Account Status
-              </Typography>
-              <Box sx={{ mt: 0.25 }}>
-                <Chip
-                  label="Active"
-                  color="success"
-                  size="small"
-                  sx={{
-                    borderRadius: "6px",
-                    fontWeight: 600,
-                    fontSize: "0.75rem",
-                    height: "22px",
-                  }}
-                />
-              </Box>
-            </Box>
-          </Box>
-
           <Divider />
 
           {/* Payments History List */}
@@ -295,154 +302,113 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                   Toleg ýok (No payments history)
                 </Typography>
               ) : (
-                payments.map((p) => (
-                  <Card
-                    key={p.guid || p.id}
-                    variant="outlined"
-                    sx={(theme) => ({
-                      borderRadius: "8px",
-                      borderColor: theme.palette.divider,
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.01)"
-                          : "rgba(0,0,0,0.005)",
-                    })}
-                  >
-                    <CardContent
-                      sx={{
-                        p: "12px 16px !important",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
+                <>
+                  {payments.map((p) => (
+                    <Card
+                      key={p.guid || p.id}
+                      variant="outlined"
+                      sx={(theme) => ({
+                        borderRadius: "8px",
+                        borderColor: theme.palette.divider,
+                        backgroundColor:
+                          theme.palette.mode === "dark"
+                            ? "rgba(255,255,255,0.01)"
+                            : "rgba(0,0,0,0.005)",
+                      })}
                     >
-                      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                          {formatCurrency(p.amount)}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          {formatDateToDisplay(p.payment_date || p.date)} • {getMethodLabel(p.method)}{p.note || p.description ? ` • ${p.note || p.description}` : ""}
-                        </Typography>
-                      </Box>
-                      <IconButton
-                        color="error"
-                        size="small"
-                        onClick={() => handleDeletePayment(p.guid || p.id)}
+                      <CardContent
                         sx={{
-                          border: "1px solid rgba(239, 68, 68, 0.2)",
-                          backgroundColor: "rgba(239, 68, 68, 0.05)",
-                          "&:hover": {
-                            backgroundColor: "rgba(239, 68, 68, 0.12)",
-                            borderColor: "error.main",
-                          },
+                          p: "12px 16px !important",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                         }}
                       >
-                        <DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
-                      </IconButton>
-                    </CardContent>
-                  </Card>
-                ))
+                        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                            {formatCurrency(p.amount)}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            {formatDateToDisplay(p.payment_date || p.date)} • {getMethodLabel(p.method)}{p.note || p.description ? ` • ${p.note || p.description}` : ""}
+                          </Typography>
+                        </Box>
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => handleDeletePayment(p.guid || p.id)}
+                          sx={{
+                            border: "1px solid rgba(239, 68, 68, 0.2)",
+                            backgroundColor: "rgba(239, 68, 68, 0.05)",
+                            "&:hover": {
+                              backgroundColor: "rgba(239, 68, 68, 0.12)",
+                              borderColor: "error.main",
+                            },
+                          }}
+                        >
+                          <DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {totalPages > 1 && (
+                    <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                      <Pagination
+                        count={totalPages}
+                        page={page}
+                        onChange={(_, value) => setPage(value)}
+                        size="small"
+                        color="primary"
+                      />
+                    </Box>
+                  )}
+                </>
               )}
             </Box>
+
           </Box>
 
           <Divider />
 
           {/* Create Payment Form */}
-          <Box component="form" onSubmit={handleAddPayment}>
+          <Box component="form" onSubmit={handleSubmit(handleAddPayment)}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
               Toleg goş (Add Payment)
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}>
-                  Mukdar (Amount)
-                </Typography>
-                <TextField
-                  fullWidth
+              <Grid size={6}>
+                <CustomTextField
+                  name="amount"
+                  control={control}
+                  label="Mukdar (Amount)"
                   placeholder="Amount"
                   type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
                   required
-                  slotProps={{
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <AttachMoneyIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "7px",
-                      height: "44px",
-                    },
-                  }}
+                  startIcon={<AttachMoneyIcon fontSize="small" />}
                 />
               </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}>
-                  paymentDate
-                </Typography>
-                <TextField
-                  fullWidth
-                  type="date"
-                  value={paymentDate}
-                  onChange={(e) => setPaymentDate(e.target.value)}
+              <Grid size={6}>
+                <CustomDatePicker
+                  name="paymentDate"
+                  control={control}
+                  label="Toleg senesi (Payment Date)"
                   required
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <CalendarTodayIcon fontSize="small" />
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "7px",
-                      height: "44px",
-                    },
-                  }}
+                  showTime={true}
                 />
               </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}>
-                  Usul (Method)
-                </Typography>
-                <FormControl fullWidth>
-                  <Select
-                    value={method}
-                    onChange={(e) => setMethod(e.target.value)}
-                    sx={{
-                      borderRadius: "7px",
-                      height: "44px",
-                    }}
-                  >
-                    <MenuItem value="cash">Nagt (Cash)</MenuItem>
-                    <MenuItem value="card">Karta (Card)</MenuItem>
-                    <MenuItem value="account">Hasap (Account)</MenuItem>
-                  </Select>
-                </FormControl>
+              <Grid size={6}>
+                <AppAutocomplete
+                  name="opr_guid"
+                  control={control}
+                  label={t("columns.operator") ?? "Operator"}
+                  options={employeeOptions}
+                />
               </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}>
-                  Bellik (Description)
-                </Typography>
-                <TextField
-                  fullWidth
+              <Grid size={6}>
+                <CustomTextField
+                  name="description"
+                  control={control}
+                  label="Bellik (Description)"
                   placeholder="Bellik"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "7px",
-                      height: "44px",
-                    },
-                  }}
                 />
               </Grid>
             </Grid>
@@ -450,10 +416,9 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             {/* Bottom Actions */}
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, mt: 3.5 }}>
               <Button
-                variant="text"
+                variant="outlined"
                 onClick={onClose}
                 sx={{
-                  color: "text.secondary",
                   fontWeight: 600,
                   px: 3,
                   textTransform: "none",
@@ -464,7 +429,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               <Button
                 variant="contained"
                 type="submit"
-                disabled={!amount || Number(amount) <= 0}
+                disabled={!amountValue || Number(amountValue) <= 0}
                 sx={{
                   borderRadius: "7px",
                   fontWeight: 600,

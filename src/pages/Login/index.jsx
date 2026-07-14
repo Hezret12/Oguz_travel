@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { useMutation } from '@tanstack/react-query';
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Box,
@@ -20,7 +21,6 @@ import { Helmet } from 'react-helmet-async';
 import { handleError, hdlErrResMsg, hdlSuccessResMsg } from '../../functions/generalHelpers';
 import { loginApi } from '../../api/queries/post';
 import { useValidShema } from '../../functions/useValidShema';
-import { formatTurkmenPhoneForApi } from '../../utils/phone';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
 import ThemeToggle from '../../components/ThemeToggle';
 import DevLoginHelper from '../../components/DevLoginHelper';
@@ -32,7 +32,6 @@ import PhoneNumberField from '../../components/inputs/PhoneNumber';
 
 export default function Login() {
   const [passwordVisibility, setPasswordVisibility] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -61,13 +60,9 @@ export default function Login() {
     mode: 'onSubmit',
   });
 
-  const onSubmit = async (values) => {
-    setIsLoading(true);
-    try {
-      const response = await loginApi({
-        password: values.password,
-        phone_number: formatTurkmenPhoneForApi(values.phone),
-      });
+  const loginMutation = useMutation({
+    mutationFn: loginApi,
+    onSuccess: (response) => {
       if (response?.status === 200) {
         const payload = response?.data?.data;
         if (payload?.user?.user_is_login) {
@@ -83,11 +78,17 @@ export default function Login() {
           hdlErrResMsg(response);
         }
       }
-    } catch (error) {
+    },
+    onError: (error) => {
       handleError('Failed to login: ', error);
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = (values) => {
+    loginMutation.mutate({
+      password: values.password,
+      phone_number: values.phone,
+    });
   };
 
   const isDark = mode === 'dark';
@@ -351,7 +352,7 @@ export default function Login() {
           <Box
             component="button"
             type="submit"
-            disabled={isLoading}
+            disabled={loginMutation.isPending}
             sx={{
               mt: 1.5,
               width: 424,
@@ -359,7 +360,7 @@ export default function Login() {
               mx: 'auto',
               border: 'none',
               borderRadius: '18px',
-              background: isLoading
+              background: loginMutation.isPending
                 ? 'rgba(43,181,160,0.6)'
                 : isDark
                   ? 'linear-gradient(90deg, #0D9488 0%, #228EA1 100%)'
@@ -370,7 +371,7 @@ export default function Login() {
               fontWeight: 700,
               letterSpacing: '0.04em',
               padding: '10px',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
+              cursor: loginMutation.isPending ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -387,7 +388,7 @@ export default function Login() {
               },
             }}
           >
-            {isLoading ? (
+            {loginMutation.isPending ? (
               <CircularProgress size={20} sx={{ color: '#fff' }} />
             ) : (
               t('pages.login.loginButton')

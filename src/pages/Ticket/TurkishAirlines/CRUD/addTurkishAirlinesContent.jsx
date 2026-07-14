@@ -1,143 +1,111 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Grid } from "@mui/material";
+import { useMemo, useRef } from "react";
+import { Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import toast from "react-hot-toast";
 
 import { useLocale } from "../../../../hooks/useLocale";
 import { useValidShema } from "../../../../functions/useValidShema";
 import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
-import GlobalClientAutocomplete from "../../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
+import GlobalAutoCompleteClient from "../../../../components/global/GlobalAutoCompleteClient/GlobalAutoCompleteClient";
 import CustomTextField from "../../../../components/CustomTextField";
 import CustomSelect from "../../../../components/CustomSelect";
-import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import FooterButton from "../../../../components/Dialog/FooterButton";
 import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
 import { CustomForm } from "../../../../components/Dialog/CustomForm";
 import AgentAccordion from "../../../../components/global/AgentAccordion";
-import {
-  TURKISH_AIRLINES_OPERATOR_OPTIONS,
-  TURKISH_AIRLINES_OP2_OPTIONS,
-} from "../options";
+import AppAutocomplete from "../../../../components/AppAutocomplete";
+import CustomDatePicker from "../../../../components/CustomDatePicker";
+import { useCreate } from "../../../../hooks/CRUD/useCreate";
+import { addTurkishAirlinesApi } from "../../../../api/queries/post";
+import { useGet } from "../../../../hooks/CRUD/useGet";
+import { getAllEmployeeApi, getAllStatusApi } from "../../../../api/queries/getters";
+import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 
-const STATUS_OPTIONS = [
-  { label: "Sale", value: "SALE" },
-  { label: "Reissue", value: "REISSUE" },
-  { label: "Refund", value: "REFUND" },
-  { label: "Void", value: "VOID" },
-  { label: "Voided Sale", value: "VOIDED SALE" },
-];
-
-const cabinLabel = "Class";
-
-const normalizeText = (value) =>
-  String(value ?? "")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const buildCurrencyAmountValue = (value, fallbackCurrency = "USD") => {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return {
-      total: value.total ?? value.amount ?? "",
-      currency: value.currency ?? fallbackCurrency,
-    };
-  }
-
-  return {
-    total: value ?? "",
-    currency: fallbackCurrency,
-  };
+const CURRENCY_SYMBOLS = {
+  USD: "$",
+  EUR: "€",
+  TMT: "m",
+  RUB: "₽",
 };
 
-const findPairSelection = (options, first, second) => {
-  const targetLabel = `${normalizeText(first)} | ${normalizeText(second)}`;
-  return (
-    options.find((option) => normalizeText(option.label) === targetLabel)
-      ?.value ?? ""
-  );
-};
 
-const splitPairSelection = (options, selection) => {
-  const option = options.find((item) => item.value === selection);
-  if (!option) return { first: "", second: "" };
-
-  const [first = "", second = ""] = option.label.split(" | ");
-  return {
-    first: first.trim(),
-    second: second.trim(),
-  };
-};
-
-const AddTurkishAirlinesContent = ({ open, onClose, onSave, ticket }) => {
-  const { t } = useLocale();
+const AddTurkishAirlinesContent = ({ table }) => {
+  const { t, selectedLang } = useLocale();
   const { addTurkishAirlinesTicket } = useValidShema();
-  const [loading, setLoading] = useState(false);
   const isAdjustedFareManualRef = useRef(false);
 
+  // Fetch status options from the API
+  const {
+    data: statusList,
+    isLoading: isStatusLoading,
+    isError: isStatusError,
+  } = useGet({
+    apiFn: getAllStatusApi,
+    key: "status",
+  });
+
+  // Fetch employee options from the API
+  const { data: employees = [] } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  const employeeOptions = useMemo(
+    () =>
+      (employees || []).map((emp) => ({
+        label: emp.fullName,
+        value: emp.guid,
+      })),
+    [employees],
+  );
+
+  const { mutate: createTurkishAirlines, isPending: isSubmit } = useCreate({
+    apiFn: addTurkishAirlinesApi,
+    key: "turkish-airlines",
+    onSuccess: () => {
+      closeDialog();
+    },
+  });
+
   const defaultValues = useMemo(() => {
-    const currentTicket = ticket ?? {};
-
     return {
-      clientId: currentTicket.clientId ?? "",
-      fullName: currentTicket.fullName ?? currentTicket.clientName ?? "",
-      phoneNumber: currentTicket.phoneNumber ?? "",
-      dateOfBirth: currentTicket.dateOfBirth ?? "",
-      passportNumber: currentTicket.passportNumber ?? "",
-      passportCountryOfIssue: currentTicket.passportCountryOfIssue ?? "",
-      passportExpiryDate: currentTicket.passportExpiryDate ?? "",
-      milesAndSmiles: currentTicket.milesAndSmiles ?? "",
-      date: currentTicket.date ?? currentTicket.issueDate ?? "",
-      operatorSelection:
-        currentTicket.operatorSelection ??
-        findPairSelection(
-          TURKISH_AIRLINES_OPERATOR_OPTIONS,
-          currentTicket.operator,
-          currentTicket.office,
-        ),
-      operatorTwoSelection:
-        currentTicket.operatorTwoSelection ??
-        findPairSelection(
-          TURKISH_AIRLINES_OP2_OPTIONS,
-          currentTicket.operatorTwo,
-          currentTicket.operatorTwoOffice,
-        ),
-      agentFullName: currentTicket.agentFullName ?? currentTicket.agent ?? "",
-      agentPhoneNumber: currentTicket.agentPhoneNumber ?? "",
-      status: currentTicket.status ?? "SALE",
-      pnr: currentTicket.pnr ?? "",
-      ticketNo: currentTicket.ticketNo ?? "",
-      route: currentTicket.route ?? "",
-      cabinClass: currentTicket.cabinClass ?? "",
-      flightDate: currentTicket.flightDate ?? "",
-      totalAmount: currentTicket.totalAmount ?? currentTicket.totalFare ?? "",
-      baseFare: buildCurrencyAmountValue(
-        currentTicket.baseFare,
-        currentTicket.baseFareCurrency ?? "USD",
-      ),
-      adjustedFare: currentTicket.adjustedFare ?? "",
-      receivedAmount: currentTicket.receivedAmount ?? "",
-      returnedAmount: currentTicket.returnedAmount ?? "",
-      cashier: currentTicket.cashier ?? "",
-      note: currentTicket.note ?? "",
+      datetime: "",
+      assignment_opr_guid: "",
+      receiver_opr_guid: "",
+      client_guid: "",
+      milesSmiles: "",
+      status_guid: "",
+      pnr: "",
+      ticket_number: "",
+      route: "",
+      class: "",
+      flight_date: "",
+      total_price: "",
+      base_fare: "",
+      quoted_price: "",
+      accepted_price: "",
+      returned_price: "",
+      currency: "USD",
+      agent: {
+        name: "",
+        phone_number: "",
+      },
+      note: "",
     };
-  }, [ticket]);
+  }, []);
 
-  const { control, handleSubmit, reset, setValue } = useForm({
+  const { control, handleSubmit, setValue, watch } = useForm({
     defaultValues,
     resolver: yupResolver(addTurkishAirlinesTicket),
     mode: "onSubmit",
   });
 
-  useEffect(() => {
-    if (open) {
-      reset(defaultValues);
-      isAdjustedFareManualRef.current = false;
-    }
-  }, [open, defaultValues, reset]);
+  const selectedCurrency = watch("currency") || "USD";
+  const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
 
   const handleTotalAmountChange = (event) => {
     const nextValue = event?.target?.value ?? event ?? "";
-    setValue("totalAmount", nextValue, {
+    setValue("total_price", nextValue, {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -147,7 +115,7 @@ const AddTurkishAirlinesContent = ({ open, onClose, onSave, ticket }) => {
     }
 
     if (nextValue === "") {
-      setValue("adjustedFare", "", {
+      setValue("quoted_price", "", {
         shouldDirty: true,
         shouldValidate: true,
       });
@@ -159,97 +127,62 @@ const AddTurkishAirlinesContent = ({ open, onClose, onSave, ticket }) => {
       return;
     }
 
-    setValue("adjustedFare", Math.round(numericTotal), {
+    setValue("quoted_price", Math.round(numericTotal), {
       shouldDirty: true,
       shouldValidate: true,
     });
   };
 
   const closeDialog = () => {
-    onClose?.();
-    reset(defaultValues);
-  };
-
-  const applyClientToForm = (client) => {
-    setValue("clientId", client?.id ?? "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue("fullName", client?.fullName ?? "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue("phoneNumber", client?.phoneNumber ?? "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue("dateOfBirth", client?.dateOfBirth ?? "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue("passportNumber", client?.passportNumber ?? "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue("passportCountryOfIssue", client?.passportCountryOfIssue ?? "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue("passportExpiryDate", client?.passportExpiryDate ?? "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    if (table) {
+      table.setCreatingRow(null);
+    }
   };
 
   const submitHandler = async (data) => {
     try {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const operatorPair = splitPairSelection(
-        TURKISH_AIRLINES_OPERATOR_OPTIONS,
-        data.operatorSelection,
+      // Find selected operator's office_guid from employees list
+      const selectedEmployee = employees.find(
+        (emp) => emp.guid === data.assignment_opr_guid
       );
-      const operatorTwoPair = splitPairSelection(
-        TURKISH_AIRLINES_OP2_OPTIONS,
-        data.operatorTwoSelection,
-      );
+      const officeGuid =
+        selectedEmployee?.office?.guid ||
+        selectedEmployee?.office_guid ||
+        "";
 
       const payload = {
-        ...data,
-        operator: operatorPair.first,
-        office: operatorPair.second,
-        operatorTwo: operatorTwoPair.first,
-        operatorTwoOffice: operatorTwoPair.second,
-        agent: data.agentFullName?.trim() ?? "",
-        fullName: data.fullName?.trim() ?? "",
-        phoneNumber: data.phoneNumber?.trim() ?? "",
-        dateOfBirth: data.dateOfBirth ?? "",
-        passportNumber: data.passportNumber?.trim() ?? "",
-        passportCountryOfIssue: data.passportCountryOfIssue?.trim() ?? "",
-        passportExpiryDate: data.passportExpiryDate ?? "",
-        milesAndSmiles: data.milesAndSmiles?.trim() ?? "",
-        totalAmount: Number(data.totalAmount || 0),
-        baseFare: {
-          total: Number(data.baseFare?.total || 0),
-          currency: data.baseFare?.currency || "USD",
+        datetime: data.datetime
+          ? new Date(data.datetime).toISOString()
+          : new Date().toISOString(),
+        assignment_opr_guid: data.assignment_opr_guid || null,
+        receiver_opr_guid: data.receiver_opr_guid || null,
+        agent: {
+          name: data.agent?.name?.trim() || "",
+          phone_number: data.agent?.phone_number?.trim() || "",
         },
-        adjustedFare: Number(data.adjustedFare || 0),
-        receivedAmount: Number(data.receivedAmount || 0),
-        returnedAmount: Number(data.returnedAmount || 0),
+        client_guid: data.client_guid || null,
+        milesSmiles: data.milesSmiles?.trim() || "",
+        status_guid: data.status_guid || null,
+        pnr: data.pnr?.trim() || "",
+        ticket_number: data.ticket_number?.trim() || "",
+        route: data.route?.trim() || "",
+        class: data.class?.trim() || "",
+        flight_date: data.flight_date
+          ? new Date(data.flight_date).toISOString()
+          : new Date().toISOString(),
+        total_price: Number(data.total_price || 0),
+        base_fare: Number(data.base_fare || 0),
+        quoted_price: Number(data.quoted_price || 0),
+        accepted_price: Number(data.accepted_price || 0),
+        returned_price: Number(data.returned_price || 0),
+        currency: data.currency || "USD",
+        office_guid: officeGuid || null,
+        note: data.note?.trim() || "",
       };
 
-      delete payload.operatorSelection;
-      delete payload.operatorTwoSelection;
-
-      onSave?.(payload);
-      toast.success("Turkish Airlines ticket saved successfully!");
-      closeDialog();
+      await createTurkishAirlines(payload);
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred while saving Turkish Airlines ticket.");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -262,7 +195,7 @@ const AddTurkishAirlinesContent = ({ open, onClose, onSave, ticket }) => {
   });
 
   return (
-    <CustomDialog widthX={1000} open={open} close={closeDialog}>
+    <CustomDialog widthX={1000} open={true} close={closeDialog}>
       <Box
         sx={{
           display: "flex",
@@ -271,11 +204,7 @@ const AddTurkishAirlinesContent = ({ open, onClose, onSave, ticket }) => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={
-            ticket
-              ? "Edit Turkish Airlines Ticket"
-              : "Add Turkish Airlines Ticket"
-          }
+          title={t("pages.ticket.turkish.addTicket") ?? "Add Turkish Airlines Ticket"}
         />
 
         <CustomForm handleSubmit={handleSubmit(submitHandler)}>
@@ -291,17 +220,33 @@ const AddTurkishAirlinesContent = ({ open, onClose, onSave, ticket }) => {
                 lg: "repeat(3, minmax(0, 1fr))",
               },
               gap: 2.5,
+              pr: 0.5,
             }}
           >
             <Box sx={fieldItemSx(3)}>
-              <GlobalClientAutocomplete
+              <GlobalAutoCompleteClient
                 control={control}
-                name="clientId"
+                name="client_guid"
                 label={t("columns.client") ?? "Client"}
-                placeholder={
-                  t("columns.clientPlaceholder") ?? "Search client..."
-                }
-                onClientChange={applyClientToForm}
+                columns={[
+                  "fullName",
+                  "phone_number",
+                  "passport_number",
+                  "passportCountryOfIssue",
+                  {
+                    key: "passportExpiryDate",
+                    label: t("columns.passportExpiryDate") ?? "Passport Expiry Date",
+                    format: (value) => {
+                      if (!value) return "";
+                      const dateOnly = value.split("T")[0];
+                      const parts = dateOnly.split("-");
+                      if (parts.length === 3) {
+                        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+                      }
+                      return dateOnly;
+                    },
+                  },
+                ]}
               />
             </Box>
 
@@ -317,107 +262,149 @@ const AddTurkishAirlinesContent = ({ open, onClose, onSave, ticket }) => {
                 }}
               >
                 <CustomTextField
-                  name="milesAndSmiles"
+                  name="milesSmiles"
                   control={control}
                   label="MILES & SMILES"
                 />
-                {/*
-                  FIX: `InputLabelProps` is deprecated on MUI v6 TextField
-                  in favor of `slotProps={{ inputLabel: {...} }}`.
-                  If your CustomTextField forwards unknown props directly
-                  to <TextField>, MUI logs a deprecation warning here.
-                  Kept both patterns commented so you can pick based on
-                  your installed MUI version.
-                */}
-                <CustomTextField
-                  name="date"
+
+                <CustomDatePicker
+                  name="datetime"
                   control={control}
-                  type="date"
                   label={t("columns.issueDate")}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  // If your MUI version is < 6, use this instead:
-                  // InputLabelProps={{ shrink: true }}
                 />
+
                 <CustomTextField
-                  name="ticketNo"
+                  name="ticket_number"
                   control={control}
                   label="TICKET #"
                 />
+
                 <CustomTextField name="pnr" control={control} label="PNR" />
+
                 <CustomTextField name="route" control={control} label="Route" />
-                <CustomTextField
-                  name="flightDate"
+
+                <CustomDatePicker
+                  name="flight_date"
                   control={control}
-                  type="date"
                   label={t("columns.flightDate")}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                  // InputLabelProps={{ shrink: true }}
                 />
+
                 <CustomSelect
-                  name="status"
+                  name="status_guid"
                   control={control}
-                  label="STATUS"
-                  options={STATUS_OPTIONS}
+                  label={t("columns.status") ?? "Status"}
+                  options={statusList}
+                  isLoading={isStatusLoading}
+                  isError={isStatusError}
+                  getRowId={(item) => item.guid}
+                  getRowLabel={(item) => selectedLang(item.name)}
                 />
+
                 <CustomTextField
-                  name="cabinClass"
+                  name="class"
                   control={control}
-                  label={cabinLabel}
+                  label="Class"
                 />
-                <CustomTextField
-                  name="cashier"
-                  control={control}
-                  label={t("columns.cashier")}
-                />
+
                 <CurrencyAmount
-                  name="baseFare"
+                  name="base_fare"
                   control={control}
                   label={t("columns.baseFare")}
+                  currency={selectedCurrency}
+                  onCurrencyChange={(curr) => setValue("currency", curr)}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "7px",
+                      minHeight: "44px",
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
+                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                      pr: 0.5,
+                      "&:hover": {
+                        backgroundColor: (theme) =>
+                          theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "#ffffff",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "primary.main",
+                        },
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: (theme) =>
+                          theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.02)" : "#ffffff",
+                        boxShadow: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "0 0 0 3px rgba(59, 130, 246, 0.16)"
+                            : "0 0 0 3px rgba(37, 99, 235, 0.12)",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderWidth: 1.5,
+                      },
+                    },
+                  }}
                 />
+
                 <CustomTextField
-                  name="totalAmount"
+                  name="total_price"
                   control={control}
                   type="number"
                   label={t("columns.total")}
                   onChange={handleTotalAmountChange}
+                  startIcon={currencySymbol}
                 />
+
                 <CustomTextField
-                  name="adjustedFare"
+                  name="quoted_price"
                   control={control}
                   type="number"
                   label="AYDYLAN BAHA"
+                  startIcon={currencySymbol}
                   onChange={() => {
                     isAdjustedFareManualRef.current = true;
                   }}
                 />
-              </Box>
 
-              <Grid sx={{ mt: 2 }} container spacing={2}>
-                <Grid size={3}>
-                  <CustomTextField
-                    name="receivedAmount"
-                    control={control}
-                    type="number"
-                    label={t("columns.accepted")}
-                  />
-                </Grid>
-                <Grid size={3}>
-                  <CustomTextField
-                    name="returnedAmount"
-                    control={control}
-                    type="number"
-                    label={t("columns.changeAmount")}
-                  />
-                </Grid>
-                <Grid size={6}>
-                  <CustomSelect
-                    name="operatorSelection"
-                    control={control}
-                    label={t("columns.operator")}
-                    options={TURKISH_AIRLINES_OPERATOR_OPTIONS}
-                  />
-                </Grid>
-              </Grid>
+                <CustomTextField
+                  name="accepted_price"
+                  control={control}
+                  type="number"
+                  label={t("columns.accepted")}
+                  startIcon={currencySymbol}
+                />
+
+                <CustomTextField
+                  name="returned_price"
+                  control={control}
+                  type="number"
+                  label={t("columns.changeAmount")}
+                  startIcon={currencySymbol}
+                />
+              </Box>
+            </Box>
+
+            <Box sx={fieldItemSx(3)}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    lg: "repeat(2, minmax(0, 1fr))",
+                  },
+                  gap: 2,
+                }}
+              >
+                <AppAutocomplete
+                  name="assignment_opr_guid"
+                  control={control}
+                  label={t("columns.operator")}
+                  options={employeeOptions}
+                />
+
+                <AppAutocomplete
+                  name="receiver_opr_guid"
+                  control={control}
+                  label={t("columns.operatorTwo")}
+                  options={employeeOptions}
+                />
+              </Box>
             </Box>
 
             <Box sx={fieldItemSx(3)}>
@@ -433,15 +420,11 @@ const AddTurkishAirlinesContent = ({ open, onClose, onSave, ticket }) => {
               >
                 <AgentAccordion
                   control={control}
-                  title="Agent"
+                  fullNameName="agent.name"
+                  phoneNumberName="agent.phone_number"
+                  title={t("columns.agent") ?? "Agent"}
                   fullNameLabel={t("columns.agentFullName")}
-                  phoneNumberLabel={t("columns.agentPhoneNumber")}
-                />
-                <CustomSelect
-                  name="operatorTwoSelection"
-                  control={control}
-                  label={t("columns.operatorTwo")}
-                  options={TURKISH_AIRLINES_OP2_OPTIONS}
+                  phoneNumberLabel={t("ticket.b2b.agentPhoneNumber") ?? "Agent Phone Number"}
                 />
               </Box>
             </Box>
@@ -458,7 +441,7 @@ const AddTurkishAirlinesContent = ({ open, onClose, onSave, ticket }) => {
           </Box>
 
           <FooterButton
-            loading={loading}
+            loading={isSubmit}
             onCancel={closeDialog}
             type="submit"
             sx={{ mt: 3, flexShrink: 0 }}

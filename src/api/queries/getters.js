@@ -49,3 +49,7 @@ export const getAllUsersApi = async (params = {}) => {
 export const getAllPaymentStatusApi = async (params = {}) => {
   return await api.getPrivate('/ticket-payment/getAll-ticket-payment', params);
 };
+
+export const getAllTurkishAirlinesApi = async (params = {}) => {
+  return await api.getPrivate('/turkish-airlines/get-all-turkish-airlines', params);
+};

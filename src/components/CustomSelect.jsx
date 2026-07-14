@@ -184,7 +184,7 @@ const CustomSelect = ({
                   )
                 }
                 renderValue={(selected) => {
-                  if (!selected) {
+                  if (selected === undefined || selected === null || selected === "") {
                     return (
                       <Typography
                         sx={{

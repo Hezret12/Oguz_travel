@@ -17,6 +17,11 @@ export const updateClientApi = async (data) => {
 };
 
 export const updateB2BApi = async (data) => {
-  const response = await api.patchPrivate(`/ticket-b2b/update-ticket-b2b`, data);
+  const response = await api.patchPrivate(`/b2b/update-b2b`, data);
+  return response;
+};
+
+export const updateTurkishAirlinesApi = async (data) => {
+  const response = await api.patchPrivate(`/turkish-airlines/update-turkish-airlines`, data);
   return response;
 };

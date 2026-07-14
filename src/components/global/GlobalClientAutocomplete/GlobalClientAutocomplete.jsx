@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -153,10 +153,18 @@ const GlobalClientAutocompleteField = ({
   t,
   inputValue,
   onInputValueChange,
+  initialClient = null,
 }) => {
-  const [createdClient, setCreatedClient] = useState(null);
+  const [createdClient, setCreatedClient] = useState(initialClient);
+
+  useEffect(() => {
+    if (initialClient) {
+      setCreatedClient(initialClient);
+    }
+  }, [initialClient]);
+
   const selectedClient =
-    clients.find((client) => client.id === field.value) ?? createdClient;
+    clients.find((client) => (client.guid || client.id) === field.value) ?? createdClient;
 
   const selectClient = (client) => {
     setCreatedClient(client);
@@ -311,7 +319,9 @@ const GlobalClientAutocompleteField = ({
               borderRadius: 2,
               border: "1px solid",
               borderColor: "divider",
-              maxWidth: "min(100vw - 32px, 720px)",
+              width: "max-content !important",
+              minWidth: "100%",
+              maxWidth: "min(100vw - 32px, 1000px)",
             },
           },
         }}
@@ -361,10 +371,19 @@ const GlobalAutoCompleteClient = ({
   onAddClient,
   columns = DEFAULT_COLUMNS,
   sx = {},
+  initialClient = null,
 }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(
+    initialClient ? getClientSummary(initialClient, columns, t) : ""
+  );
+
+  useEffect(() => {
+    if (initialClient) {
+      setInputValue(getClientSummary(initialClient, columns, t));
+    }
+  }, [initialClient, columns, t]);
   const [isOpen, setIsOpen] = useState(false);
   const debouncedSearch = useDebounce(inputValue, 400);
   const queryParams = useMemo(
@@ -410,6 +429,7 @@ const GlobalAutoCompleteClient = ({
             t={t}
             inputValue={inputValue}
             onInputValueChange={setInputValue}
+            initialClient={initialClient}
           />
         </Box>
       )}
