@@ -147,16 +147,36 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
   const navItems = useNavItems();
   const isDark = mode === "dark";
 
+  const filteredNavItems = useMemo(() => {
+    if (!user || !user.permissions) return navItems;
+
+    return navItems
+      .map((item) => {
+        if (item.isGroup && item.children) {
+          const allowedChildren = item.children.filter((child) =>
+            user.permissions.includes(child.path)
+          );
+          if (allowedChildren.length === 0) return null;
+          return { ...item, children: allowedChildren };
+        }
+        if (item.path && !user.permissions.includes(item.path)) {
+          return null;
+        }
+        return item;
+      })
+      .filter(Boolean);
+  }, [navItems, user]);
+
   const autoOpenGroups = useMemo(() => {
     const result = {};
-    navItems.forEach((item) => {
+    filteredNavItems.forEach((item) => {
       if (!item.isGroup || !item.children) return;
       if (item.children.some((c) => c.path === location.pathname)) {
         result[item.text] = true;
       }
     });
     return result;
-  }, [navItems, location.pathname]);
+  }, [filteredNavItems, location.pathname]);
 
   const [manualOverrides, setManualOverrides] = useState({});
 
@@ -202,7 +222,7 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
 
   const panelProps = {
     isDark,
-    navItems,
+    navItems: filteredNavItems,
     location,
     openGroups,
     onToggleGroup: handleGroupToggle,

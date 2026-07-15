@@ -39,10 +39,15 @@ const EditUserModal = ({ table, row }) => {
 
   const { control, handleSubmit, watch, setValue } = useForm({
     defaultValues: {
-      employee_guid: row?.original?.employee_guid || "",
-      phone_number: row?.original?.phoneNumber || "",
-      is_active: row?.original.isActive || true,
-      isExternalUser: row?.original?.isExternalUser || true,
+      guid: row?.original?.guid || row?.original?.user_guid || "",
+      employee_guid: row?.original?.employee_guid || row?.original?.employee?.guid || "",
+      phone_number: row?.original?.phoneNumber
+        ? (row.original.phoneNumber.startsWith("+993")
+          ? row.original.phoneNumber
+          : `+993${row.original.phoneNumber.replace(/\s/g, "")}`)
+        : "",
+      isActive: row?.original?.isActive ?? true,
+      isExternalUser: row?.original?.isExternalUser ?? !Boolean(row?.original?.employee_guid || row?.original?.employee?.guid),
       permissions: row?.original?.permissions || [],
     },
     resolver: yupResolver(editUser),
@@ -60,7 +65,18 @@ const EditUserModal = ({ table, row }) => {
 
   const onSubmit = async (data) => {
     try {
-      await updateUser(data);
+      const formattedData = {
+        ...data,
+        phone_number: data.phone_number
+          ? (data.phone_number.startsWith("+993")
+            ? data.phone_number
+            : `+993${data.phone_number}`)
+          : "",
+      };
+      if (!formattedData.password) {
+        delete formattedData.password;
+      }
+      await updateUser(formattedData);
     } catch (err) {
       console.error(err);
     }
@@ -72,10 +88,12 @@ const EditUserModal = ({ table, row }) => {
     }
   };
 
+  const isDialogOpen = Boolean(row);
+
   return (
-    <CustomDialog widthX={560} open={open} close={closeDialog}>
+    <CustomDialog widthX={560} open={isDialogOpen} close={closeDialog}>
       <Box
-        key={String(open)}
+        key={row?.original?.guid || "edit-user"}
         sx={{
           display: "flex",
           flexDirection: "column",

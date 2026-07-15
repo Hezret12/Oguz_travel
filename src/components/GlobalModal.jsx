@@ -181,7 +181,7 @@ const GlobalModal = () => {
       onClose={handleClose}
       maxWidth={maxWidth}
       fullWidth
-      TransitionComponent={Fade}
+      slots={{ transition: Fade }}
       transitionDuration={200}
       slotProps={{
         paper: {

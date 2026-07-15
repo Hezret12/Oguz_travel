@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-export const ROLES = ['admin', 'agent', 'user'];
+export const ROLES = ['admin', 'user'];
 
 export function resolveUserRole(rawUser) {
   if (!rawUser) return null;
@@ -9,7 +9,6 @@ export function resolveUserRole(rawUser) {
   if (ROLES.includes(role)) return role;
 
   if (rawUser.user_is_admin) return 'admin';
-  if (rawUser.user_is_agent) return 'agent';
 
   return 'user';
 }
@@ -22,15 +21,13 @@ export function normalizeUser(rawUser) {
   return {
     ...rawUser,
     role,
-    name: rawUser.name ?? rawUser.user_name ?? rawUser.phone ?? '',
+    name: rawUser.name ?? rawUser.employee_name ?? rawUser.user_name ?? rawUser.phone_number ?? rawUser.phone ?? '',
     email: rawUser.email ?? rawUser.user_email ?? '',
   };
 }
 
 export function getRoleHomePath(role) {
-  if (role === 'admin') return '/admin';
-  if (role === 'agent') return '/agent';
-  return '/user';
+  return '/';
 }
 
 export function getStoredSession() {

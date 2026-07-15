@@ -64,7 +64,9 @@ const EditEmployee = ({ table, row }) => {
       guid: row?.original?.guid || "",
       fullName: row.original.fullName || "",
       phone_number: row.original.phone_number
-        ? String(row.original.phone_number).replace("+993", "").replace(/\s/g, "")
+        ? (row.original.phone_number.startsWith("+993")
+          ? row.original.phone_number
+          : `+993${row.original.phone_number.replace(/\s/g, "")}`)
         : "",
       gmail: row.original.gmail || "",
       department_guid: row.original.department_guid || "",
@@ -80,7 +82,11 @@ const EditEmployee = ({ table, row }) => {
     try {
       const payload = {
         ...data,
-        phone_number: data.phone_number ? `+993${data.phone_number}` : "",
+        phone_number: data.phone_number
+          ? (data.phone_number.startsWith("+993")
+            ? data.phone_number
+            : `+993${data.phone_number}`)
+          : "",
       };
       await updateEmployee(payload);
     } catch (err) {

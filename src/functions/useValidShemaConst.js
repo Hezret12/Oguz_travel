@@ -28,8 +28,11 @@ export const useValidShemaConst = () => {
     yup
       .string()
       .required(requiredMessage)
-      .length(PHONE_LENGTH, lengthMessage)
-      .matches(TURKMEN_MOBILE_DIGITS_REGEX, invalidMessage);
+      .test("is-valid-phone", invalidMessage, (value) => {
+        if (!value) return false;
+        const digits = value.startsWith("+993") ? value.slice(4) : value;
+        return digits.length === PHONE_LENGTH && TURKMEN_MOBILE_DIGITS_REGEX.test(digits);
+      });
 
   const phoneNumberOptionalValidSchema = ({
     invalidMessage = t("validation.phoneInvalid", "Invalid phone number"),
@@ -39,9 +42,10 @@ export const useValidShemaConst = () => {
       .transform((value) => (value === "" ? null : value))
       .nullable()
       .notRequired()
-      .matches(TURKMEN_MOBILE_DIGITS_REGEX, {
-        message: invalidMessage,
-        excludeEmptyString: true,
+      .test("is-valid-phone-optional", invalidMessage, (value) => {
+        if (value === null || value === undefined || value === "") return true;
+        const digits = value.startsWith("+993") ? value.slice(4) : value;
+        return digits.length === PHONE_LENGTH && TURKMEN_MOBILE_DIGITS_REGEX.test(digits);
       });
 
   const passwordRequiredValidSchema = ({

@@ -312,6 +312,7 @@ const Employee = () => {
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
+        description={t('deleteConfirm.employee')}
       />
 
       <MaterialReactTable table={table} />

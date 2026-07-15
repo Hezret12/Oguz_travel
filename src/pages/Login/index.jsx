@@ -65,12 +65,13 @@ export default function Login() {
     onSuccess: (response) => {
       if (response?.status === 200) {
         const payload = response?.data?.data;
-        if (payload?.user?.user_is_login) {
+        if (payload?.user?.user_is_login || payload?.access_token) {
           const authenticatedUser = login({
-            accessToken: payload.accessToken,
-            refreshToken: payload.refreshToken,
-            user: payload.user,
-            tableNames: payload.tableNames,
+            ...payload,
+            accessToken: payload?.accessToken || payload?.access_token,
+            refreshToken: payload?.refreshToken || payload?.refresh_token,
+            user: payload?.user || null,
+            tableNames: payload?.tableNames || null,
           });
           hdlSuccessResMsg(response);
           navigate(getRoleHomePath(authenticatedUser.role), { replace: true });

@@ -61,7 +61,15 @@ const AddUserModal = ({ table }) => {
 
   const onSubmit = async (data) => {
     try {
-      await createUser(data);
+      const formattedData = {
+        ...data,
+        phone_number: data.phone_number
+          ? (data.phone_number.startsWith("+993")
+            ? data.phone_number
+            : `+993${data.phone_number}`)
+          : "",
+      };
+      await createUser(formattedData);
     } catch (err) {
       console.error(err);
     }

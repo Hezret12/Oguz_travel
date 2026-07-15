@@ -72,7 +72,6 @@ const Users = () => {
         id: "phone_number",
         header: t("columns.phoneNumber"),
         size: 150,
-        Cell: ({ cell }) => `+993 ${cell.getValue()}`,
       },
       {
         accessorFn: (row) => row.isActive,

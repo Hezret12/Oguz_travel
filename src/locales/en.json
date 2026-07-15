@@ -119,6 +119,9 @@
         "officeRequired": "Office is required"
       }
     },
+    "deleteConfirm": {
+      "employee": "Are you sure you want to delete this employee? This action cannot be undone."
+    },
     "clients": {
       "title": "Clients",
       "subtitle": "Manage client records and passport details.",

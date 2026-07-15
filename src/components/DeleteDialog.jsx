@@ -1,6 +1,6 @@
 import {
   Button,
-  // CircularProgress,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import { useLocale } from "../hooks/useLocale";
 
 const DeleteDialog = ({
@@ -18,14 +19,12 @@ const DeleteDialog = ({
   onClose,
   onConfirm,
   isLoading = false,
-  title,
   description,
   confirmText,
   cancelText,
 }) => {
   const { t } = useLocale();
 
-  const resolvedTitle       = title       ?? t("deleteDialog.title")       ?? "Delete Record";
   const resolvedDescription = description ?? t("deleteDialog.description") ?? "Are you sure you want to delete this record? This action cannot be undone.";
   const resolvedConfirm     = confirmText ?? t("delete")                   ?? "Delete";
   const resolvedCancel      = cancelText  ?? t("cancel")                   ?? "Cancel";
@@ -36,7 +35,7 @@ const DeleteDialog = ({
       onClose={isLoading ? undefined : onClose}
       maxWidth="xs"
       fullWidth
-      TransitionComponent={Fade}
+      slots={{ transition: Fade }}
       transitionDuration={200}
       slotProps={{
         paper: {
@@ -88,7 +87,7 @@ const DeleteDialog = ({
             variant="h6"
             sx={{ fontWeight: 700, fontSize: "1rem", color: "text.primary" }}
           >
-            {resolvedTitle}
+            {t('delete')}
           </Typography>
         </Typography>
 
@@ -145,13 +144,13 @@ const DeleteDialog = ({
           onClick={onConfirm}
           disabled={isLoading}
           disableElevation
-          // startIcon={
-          //   isLoading ? (
-          //     <CircularProgress size={15} color="inherit" />
-          //   ) : (
-          //     <DeleteOutlineIcon sx={{ fontSize: "17px !important" }} />
-          //   )
-          // }
+          startIcon={
+            isLoading ? (
+              <CircularProgress size={15} color="inherit" />
+            ) : (
+              <DeleteOutlineIcon sx={{ fontSize: "17px !important" }} />
+            )
+          }
           sx={{
             flex: 1,
             borderRadius: "9px",

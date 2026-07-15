@@ -26,10 +26,9 @@ const UserInformationTab = ({
     if (selectedEmployeeId) {
       const emp = employees.find((e) => e.id === selectedEmployeeId);
       if (emp?.phoneNumber) {
-        const cleanPhone = emp.phoneNumber
-          .replace("+993", "")
-          .replace(/\s/g, "");
-        setValue("phone_number", cleanPhone, {
+        const rawPhone = emp.phoneNumber.replace(/\s/g, "");
+        const formattedPhone = rawPhone.startsWith("+993") ? rawPhone : `+993${rawPhone}`;
+        setValue("phone_number", formattedPhone, {
           shouldValidate: true,
           shouldDirty: true,
         });

@@ -84,10 +84,12 @@ export const useValidShema = () => {
     }),
     password: yup
       .string()
-      .transform((value) => (value === "" ? null : value))
       .nullable()
       .notRequired()
-      .min(6, t("pages.users.validation.passwordTooShort", "Password is too short (min 6 characters)")),
+      .test("len", t("pages.users.validation.passwordTooShort", "Password is too short (min 6 characters)"), (val) => {
+        if (!val) return true;
+        return val.length >= 6;
+      }),
   });
 
   return {

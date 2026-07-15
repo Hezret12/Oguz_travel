@@ -37,6 +37,9 @@
     "minPassengers": "At least 1 passenger must be selected",
     "invalidReturnDate": "Return date cannot be before departure date"
   },
+  "deleteConfirm" : {
+    "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz."
+  },
   "columns": {
     "fullName": "Add Familýa",
     "phoneNumber": "Telefon belgisi",

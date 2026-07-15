@@ -14,18 +14,42 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false);
 
   const login = useCallback((sessionData) => {
-    const { accessToken, refreshToken, user: rawUser, tableNames } = sessionData;
-    const normalized = normalizeUser(rawUser);
-
-    const userToStore = {
-      ...rawUser,
-      role: normalized.role,
-    };
-
-    persistSession({
+    const {
       accessToken,
       refreshToken,
-      user: userToStore,
+      access_token,
+      refresh_token,
+      user: rawUser,
+      tableNames,
+    } = sessionData;
+
+    const finalAccessToken = accessToken || access_token;
+    const finalRefreshToken = refreshToken || refresh_token;
+
+    let userObj = rawUser;
+    if (!userObj) {
+      const {
+        accessToken: _at,
+        refreshToken: _rt,
+        access_token: _at2,
+        refresh_token: _rt2,
+        tableNames: _tn,
+        ...rest
+      } = sessionData;
+      userObj = rest;
+    }
+
+    userObj = {
+      ...userObj,
+      user_is_login: true,
+    };
+
+    const normalized = normalizeUser(userObj);
+
+    persistSession({
+      accessToken: finalAccessToken,
+      refreshToken: finalRefreshToken,
+      user: userObj,
       tableNames,
     });
 

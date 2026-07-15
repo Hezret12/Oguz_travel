@@ -121,7 +121,7 @@ const PhoneNumberField = ({
   label,
   required = false,
   disabled = false,
-  placeholder = '________',
+  placeholder = '',
   prefix = '+993',
   maxLength = 8,
   variant = 'form',
@@ -139,7 +139,6 @@ const PhoneNumberField = ({
   const variantLabelStyles = baseLabelStyles[variant] ?? baseLabelStyles.form;
   const resolvedLabel = label === false ? null : (label ?? t('columns.phoneNumber'));
 
-  // Gelen değer +993 ile başlıyorsa temizler, yoksa olduğu gibi bırakır (input'ta hep rakamlar gösterilir)
   const stripPrefix = (value) => {
     if (typeof value !== 'string') return '';
     return value.startsWith(prefix) ? value.slice(prefix.length) : value;
