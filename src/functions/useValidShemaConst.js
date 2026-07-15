@@ -21,9 +21,8 @@ export const useValidShemaConst = () => {
     yup.string().required(message);
 
   const phoneNumberRequiredValidSchema = ({
-    requiredMessage = t("validation.phoneRequired", "Phone number is required"),
-    lengthMessage = t("validation.phoneLength", "Phone number must be 8 digits"),
-    invalidMessage = t("validation.phoneInvalid", "Invalid phone number"),
+    requiredMessage = t("validation.phoneRequired"),
+    invalidMessage = t("validation.phoneInvalid"),
   } = {}) =>
     yup
       .string()

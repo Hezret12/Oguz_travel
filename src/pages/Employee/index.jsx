@@ -18,7 +18,13 @@ import {
 } from "../../store/slices/filters/employeeFilterSlice";
 import FilterDrawer from "../../components/FilterDrawer";
 import EmployeeFilter from "./Contents/EmployeeFilter";
-import { getAllEmployeeApi } from "../../api/queries/getters";
+import {
+  getAllEmployeeApi,
+  getAllDepartmentApi,
+  getAllPositionApi,
+  getAllOfficeApi,
+} from "../../api/queries/getters";
+import { useGet } from "../../hooks/CRUD/useGet";
 import DeleteDialog from "../../components/DeleteDialog";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
@@ -55,6 +61,40 @@ const Employee = () => {
     actions: employeeFilterActions,
     selectors: employeeFilterSelectors,
   });
+
+  const { data: departments } = useGet({
+    apiFn: getAllDepartmentApi,
+    key: "department",
+  });
+
+  const { data: positions } = useGet({
+    apiFn: getAllPositionApi,
+    key: "position",
+  });
+
+  const { data: offices } = useGet({
+    apiFn: getAllOfficeApi,
+    key: "office",
+  });
+
+  const getFilterValueName = useCallback(
+    (key, value) => {
+      if (key === "department_guid") {
+        const item = departments.find((d) => d.guid === value);
+        return item ? selectedLang(item.name) : value;
+      }
+      if (key === "position_guid") {
+        const item = positions.find((p) => p.guid === value);
+        return item ? selectedLang(item.name) : value;
+      }
+      if (key === "office_guid") {
+        const item = offices.find((o) => o.guid === value);
+        return item ? selectedLang(item.fullName) : value;
+      }
+      return value;
+    },
+    [departments, positions, offices, selectedLang],
+  );
 
   const {
     data: employeesData,
@@ -221,25 +261,29 @@ const Employee = () => {
           disabled={isLoading}
         />
 
-        {activeFilters.map(([key, value]) => (
-          <Chip
-            key={key}
-            label={`${t(`columns.${key}`)}: ${value}`}
-            onDelete={() => setFilter(key, "")}
-            color="primary"
-            variant="outlined"
-            size="small"
-            sx={{
-              borderRadius: "8px",
-              height: "32px",
-              fontWeight: 500,
-              "& .MuiChip-deleteIcon": {
-                color: "primary.main",
-                transition: "all 0.15s ease",
-              },
-            }}
-          />
-        ))}
+        {activeFilters.map(([key, value]) => {
+          const labelKey = key.endsWith("_guid") ? key.replace("_guid", "") : key;
+          const displayValue = getFilterValueName(key, value);
+          return (
+            <Chip
+              key={key}
+              label={`${t(`columns.${labelKey}`, labelKey)}: ${displayValue}`}
+              onDelete={() => setFilter(key, "")}
+              color="primary"
+              variant="outlined"
+              size="small"
+              sx={{
+                borderRadius: "8px",
+                height: "32px",
+                fontWeight: 500,
+                "& .MuiChip-deleteIcon": {
+                  color: "primary.main",
+                  transition: "all 0.15s ease",
+                },
+              }}
+            />
+          );
+        })}
       </Box>
     ),
 

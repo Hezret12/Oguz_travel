@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import PageHeader from "../../components/PageHeader";
@@ -19,6 +19,10 @@ import {
   usersFilterSelectors,
 } from "../../store/slices/filters/usersFilterSlice";
 import { getAllUsersApi } from "../../api/queries/getters";
+import DeleteDialog from "../../components/DeleteDialog";
+import { useDeleteDialog } from "../../hooks/useDeleteDialog";
+import { useDelete } from "../../hooks/CRUD/useDelete";
+import { deleteUser } from "../../api/queries/delete";
 
 const Users = () => {
   const { t } = useLocale();
@@ -51,6 +55,22 @@ const Users = () => {
     key: "users",
     params: queryParams,
   });
+
+  const { mutate: deleteUserMutate, isPending: isDeleting } = useDelete({
+    deleteFn: deleteUser,
+    queryKey: ["users", queryParams],
+    idKey: "guid",
+    isPaginated: true,
+  });
+
+  const deleteDialog = useDeleteDialog({
+    onConfirm: (user) => deleteUserMutate(user.guid),
+  });
+
+  const handleDeleteClick = useCallback(
+    (user) => deleteDialog.open(user),
+    [deleteDialog],
+  );
 
   const columns = useMemo(
     () => [
@@ -121,11 +141,15 @@ const Users = () => {
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row, table }) => (
-          <ColumnActionButtons row={row} table={table} />
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={handleDeleteClick}
+          />
         ),
       },
     ],
-    [t],
+    [t, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({
@@ -225,6 +249,15 @@ const Users = () => {
         pageTitle={`${t("pages.users.title")} | Oguz Travel`}
         addButtonText={t("pages.users.add")}
         onAddClick={() => table.setCreatingRow(true)}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteDialog
+        open={deleteDialog.isOpen}
+        onClose={deleteDialog.close}
+        onConfirm={deleteDialog.confirm}
+        isLoading={isDeleting}
+        description={t("pages.users.deleteConfirm")}
       />
 
       <MaterialReactTable table={table} />

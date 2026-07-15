@@ -14,14 +14,14 @@ import { updateClientApi } from "../../../api/queries/patch";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 
-const EditClient = ({ table, row }) => {
+const EditClient = ({ table, row, queryParams }) => {
   const { t } = useLocale();
-  const { addClient } = useValidShema();
+  const { clientValidShema } = useValidShema();
 
   const { mutate: updateClient, isPending } = useUpdate({
     apiFn: updateClientApi,
-    key: "clients",
-    idKey: "client_guid",
+    key: ["clients", queryParams],
+    idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);
     },
@@ -38,7 +38,7 @@ const EditClient = ({ table, row }) => {
       passportCountryOfIssue: row?.original?.passportCountryOfIssue || "",
       gender: row?.original?.gender || "",
     },
-    resolver: yupResolver(addClient),
+    resolver: yupResolver(clientValidShema),
     mode: "onSubmit",
   });
 

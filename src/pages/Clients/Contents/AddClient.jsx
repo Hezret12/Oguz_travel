@@ -16,7 +16,7 @@ import CustomDatePicker from "../../../components/CustomDatePicker";
 
 const AddClient = ({ table }) => {
   const { t } = useLocale();
-  const { addClient } = useValidShema();
+  const { clientValidShema } = useValidShema();
 
   const { mutate: createClient, isLoading } = useCreate({
     apiFn: addClientsApi,
@@ -36,7 +36,7 @@ const AddClient = ({ table }) => {
       passportCountryOfIssue: "",
       gender: "",
     },
-    resolver: yupResolver(addClient),
+    resolver: yupResolver(clientValidShema),
     mode: "onSubmit",
   });
 

@@ -79,13 +79,13 @@ const Clients = () => {
   const { mutate: deleteClientMutate, isPending: isDeleting } = useDelete({
     deleteFn: deleteClient,
     queryKey: ["clients", queryParams],
-    idKey: "client_guid",
-    apiName: "client_guid",
-    isPaginated: true,
+    idKey: "guid",
+    apiName: "guid",
+    isInfiniteQuery: true
   });
 
   const deleteDialog = useDeleteDialog({
-    onConfirm: (client) => deleteClientMutate(client.client_guid),
+    onConfirm: (client) => deleteClientMutate(client.guid),
   });
 
   const handleDeleteClick = useCallback(
@@ -132,10 +132,6 @@ const Clients = () => {
         id: "phone_number",
         header: t("columns.phoneNumber"),
         size: 150,
-        Cell: ({ cell }) => {
-          const value = cell.getValue();
-          return value ? `+993 ${value}` : "";
-        },
       },
       {
         accessorFn: (row) => row.dateOfBirth,
@@ -212,7 +208,6 @@ const Clients = () => {
     data: clientsData,
 
     state: {
-      ...defaultMrtOptions.state,
       rowSelection,
       isLoading: isLoading || isFetching,
       pagination: {
@@ -221,7 +216,7 @@ const Clients = () => {
       },
     },
 
-    getRowId: (row) => row.client_guid,
+    getRowId: (row) => row.guid,
     onRowSelectionChange: setRowSelection,
 
     manualPagination: true,
@@ -323,7 +318,7 @@ const Clients = () => {
     },
     renderCreateRowDialogContent: ({ table }) => <AddClient table={table} />,
     renderEditRowDialogContent: ({ table, row }) => (
-      <EditClient table={table} row={row} />
+      <EditClient table={table} row={row} queryParams={queryParams} />
     ),
   });
 

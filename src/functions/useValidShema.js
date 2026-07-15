@@ -13,29 +13,48 @@ export const useValidShema = () => {
     phoneNumberRequiredValidSchema,
     stringOptionalValidSchema,
     stringRequiredValidSchema,
+    guidRequiredValidSchema
   } = useValidShemaConst();
 
   const loginValidSchema = yup.object({
-    // phone: phoneNumberRequiredValidSchema({
-    //   requiredMessage: t("pages.login.validation.phoneNumberRequired", "Phone number is required"),
-    //   lengthMessage: t("pages.login.validation.phoneNumberLength", "Phone number must be exactly 8 digits"),
-    //   invalidMessage: t("pages.login.validation.phoneNumberInvalid", "Invalid phone number"),
-    // }),
-    // password: passwordRequiredValidSchema({
-    //   requiredMessage: t("pages.login.validation.passwordRequired", "Password is required"),
-    //   minLength: 6,
-    //   minMessage: t("pages.login.validation.passwordTooShort", "Password is too short"),
-    //   maxLength: 20,
-    //   maxMessage: t("pages.login.validation.passwordMaxLength", "Password is too long"),
-    // }),
+    phone: phoneNumberRequiredValidSchema({
+      requiredMessage: t("pages.login.validation.phoneNumberRequired"),
+      lengthMessage: t("pages.login.validation.phoneNumberLength"),
+      invalidMessage: t("pages.login.validation.phoneNumberInvalid"),
+    }),
+    password: passwordRequiredValidSchema({
+      requiredMessage: t("pages.login.validation.passwordRequired"),
+      minLength: 5,
+      minMessage: t("pages.login.validation.passwordTooShort"),
+      maxLength: 20,
+      maxMessage: t("pages.login.validation.passwordMaxLength"),
+    }),
   });
 
   const addEmployee = yup.object({
-    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired", "Full name is required")),  
+    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired")),
+     phone_number: phoneNumberRequiredValidSchema({
+      requiredMessage: t("pages.users.validation.phoneNumberRequired"),
+      lengthMessage: t("pages.users.validation.phoneNumberLength"),
+      invalidMessage: t("pages.users.validation.phoneNumberInvalid"),
+    }),
   });
 
-  const addClient = yup.object({
-    gender: stringRequiredValidSchema(t("pages.clients.validation.genderRequired", "Gender is required")),
+    const editEmployee = yup.object({
+    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired")),
+     phone_number: phoneNumberRequiredValidSchema({
+      requiredMessage: t("pages.users.validation.phoneNumberRequired"),
+      lengthMessage: t("pages.users.validation.phoneNumberLength"),
+      invalidMessage: t("pages.users.validation.phoneNumberInvalid"),
+    }),
+    guid: guidRequiredValidSchema
+  })
+
+  const clientValidShema = yup.object({
+    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired")),
+    phone_number: phoneNumberOptionalValidSchema({
+      invalidMessage: t("pages.users.validation.phoneNumberInvalid"),
+    }),
   });
 
   const addReferralLetter = yup.object({
@@ -52,7 +71,11 @@ export const useValidShema = () => {
 
   const addUser = yup.object({
     isExternalUser: yup.boolean().default(false),
-    permissions: yup.array().of(yup.string()).default([]),
+    permissions: yup
+      .array()
+      .of(yup.string())
+      .min(1, t("pages.users.validation.permissionsRequired", "At least one permission is required"))
+      .required(t("pages.users.validation.permissionsRequired", "At least one permission is required")),
     employee_guid: yup.string().when("isExternalUser", {
       is: false,
       then: (schema) => schema.required(t("pages.users.validation.employeeRequired", "Employee is required")),
@@ -71,7 +94,11 @@ export const useValidShema = () => {
 
   const editUser = yup.object({
     isExternalUser: yup.boolean().default(false),
-    permissions: yup.array().of(yup.string()).default([]),
+    permissions: yup
+      .array()
+      .of(yup.string())
+      .min(1, t("pages.users.validation.permissionsRequired"))
+      .required(t("pages.users.validation.permissionsRequired")),
     employee_guid: yup.string().when("isExternalUser", {
       is: false,
       then: (schema) => schema.required(t("pages.users.validation.employeeRequired", "Employee is required")),
@@ -95,8 +122,9 @@ export const useValidShema = () => {
   return {
     addB2BTicket,
     addTurkishAirlinesTicket,
-    addClient,
+    clientValidShema,
     addEmployee,
+    editEmployee,
     addReferralLetter,
     addUser,
     editUser,

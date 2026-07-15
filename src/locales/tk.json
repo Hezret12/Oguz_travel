@@ -153,7 +153,7 @@
         "fullNameRequired": "Doly ady zerurdyr",
         "phoneNumberRequired": "Telefon belgisi zerurdyr",
         "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",
-        "phoneNumberInvalid": "Nädogry telefon belgisi (61/62/63/64/65/71/12 bilen başlamaly we 8 sandan ybarat bolmaly)",
+        "phoneNumberInvalid": "Nädogry telefon belgisi",
         "dateOfBirthRequired": "Doglan senesi zerurdyr",
         "passportNumberRequired": "Pasport belgisi zerurdyr",
         "passportExpiryDateRequired": "Pasportyň gutarýan senesi zerurdyr",

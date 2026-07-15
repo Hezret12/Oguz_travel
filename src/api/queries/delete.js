@@ -25,3 +25,8 @@ export const deleteTurkishAirlinesApi = async (guid) => {
   const response = await api.deletePrivate('/turkish-airlines/delete-turkish-airlines', guid);
   return response;
 };
+
+export const deleteUser = async (guid) => {
+  const response = await api.deletePrivate('/user/delete-user', guid);
+  return response;
+};
