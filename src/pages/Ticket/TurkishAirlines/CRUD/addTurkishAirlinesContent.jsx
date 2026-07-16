@@ -34,6 +34,11 @@ const AddTurkishAirlinesContent = ({ table }) => {
   const { addTurkishAirlinesTicket } = useValidShema();
   const isAdjustedFareManualRef = useRef(false);
 
+  const paymentOptions = useMemo(() => [
+    { label: t("pages.ticket.payment.paid", "Tolendi"), value: true },
+    { label: t("pages.ticket.payment.credit", "Kredit"), value: false },
+  ], [t]);
+
   // Fetch status options from the API
   const {
     data: statusList,
@@ -86,6 +91,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
       accepted_price: "",
       returned_price: "",
       currency: "USD",
+      is_paid: true,
       agent: {
         name: "",
         phone_number: "",
@@ -102,6 +108,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
 
   const selectedCurrency = watch("currency") || "USD";
   const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
+  const isPaidValue = watch("is_paid");
 
   const handleTotalAmountChange = (event) => {
     const nextValue = event?.target?.value ?? event ?? "";
@@ -178,6 +185,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
         currency: data.currency || "USD",
         office_guid: officeGuid || null,
         note: data.note?.trim() || "",
+        is_paid: Boolean(data.is_paid),
       };
 
       await createTurkishAirlines(payload);
@@ -204,7 +212,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={t("pages.ticket.turkish.addTicket") ?? "Add Turkish Airlines Ticket"}
+          title={t("turkish.addTicket")}
         />
 
         <CustomForm handleSubmit={handleSubmit(submitHandler)}>
@@ -227,7 +235,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
               <GlobalAutoCompleteClient
                 control={control}
                 name="client_guid"
-                label={t("columns.client") ?? "Client"}
+                label={t("columns.client")}
                 columns={[
                   "fullName",
                   "phone_number",
@@ -264,7 +272,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
                 <CustomTextField
                   name="milesSmiles"
                   control={control}
-                  label="MILES & SMILES"
+                  label={t("columns.milesSmiles") ?? "MILES & SMILES"}
                 />
 
                 <CustomDatePicker
@@ -276,12 +284,12 @@ const AddTurkishAirlinesContent = ({ table }) => {
                 <CustomTextField
                   name="ticket_number"
                   control={control}
-                  label="TICKET #"
+                  label={t("columns.ticketNo") ?? "TICKET #"}
                 />
 
-                <CustomTextField name="pnr" control={control} label="PNR" />
+                <CustomTextField name="pnr" control={control} label={t("columns.pnr") ?? "PNR"} />
 
-                <CustomTextField name="route" control={control} label="Route" />
+                <CustomTextField name="route" control={control} label={t("columns.route") ?? "Route"} />
 
                 <CustomDatePicker
                   name="flight_date"
@@ -303,7 +311,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
                 <CustomTextField
                   name="class"
                   control={control}
-                  label="Class"
+                  label={t("columns.cabinClass") ?? "Class"}
                 />
 
                 <CurrencyAmount
@@ -355,19 +363,20 @@ const AddTurkishAirlinesContent = ({ table }) => {
                   name="quoted_price"
                   control={control}
                   type="number"
-                  label="AYDYLAN BAHA"
+                  label={t("columns.quotedFare") ?? "AYDYLAN BAHA"}
                   startIcon={currencySymbol}
                   onChange={() => {
                     isAdjustedFareManualRef.current = true;
                   }}
                 />
 
-                <CustomTextField
+                 <CustomTextField
                   name="accepted_price"
                   control={control}
                   type="number"
                   label={t("columns.accepted")}
                   startIcon={currencySymbol}
+                  disabled={isPaidValue === false}
                 />
 
                 <CustomTextField
@@ -376,7 +385,26 @@ const AddTurkishAirlinesContent = ({ table }) => {
                   type="number"
                   label={t("columns.changeAmount")}
                   startIcon={currencySymbol}
+                  disabled={isPaidValue === false}
                 />
+
+                <CustomSelect
+                  name="is_paid"
+                  control={control}
+                  label={t("columns.paymentStatus")}
+                  options={paymentOptions}
+                />
+
+                <Box sx={{ gridColumn: { xs: "1 / -1", md: "span 2" } }}>
+                  <AgentAccordion
+                    control={control}
+                    fullNameName="agent.name"
+                    phoneNumberName="agent.phone_number"
+                    title={t("columns.agent") ?? "Agent"}
+                    fullNameLabel={t("columns.agentFullName")}
+                    phoneNumberLabel={t("ticket.b2b.agentPhoneNumber") ?? "Agent Phone Number"}
+                  />
+                </Box>
               </Box>
             </Box>
 
@@ -408,33 +436,9 @@ const AddTurkishAirlinesContent = ({ table }) => {
             </Box>
 
             <Box sx={fieldItemSx(3)}>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    lg: "repeat(2, minmax(0, 1fr))",
-                  },
-                  gap: 2,
-                }}
-              >
-                <AgentAccordion
-                  control={control}
-                  fullNameName="agent.name"
-                  phoneNumberName="agent.phone_number"
-                  title={t("columns.agent") ?? "Agent"}
-                  fullNameLabel={t("columns.agentFullName")}
-                  phoneNumberLabel={t("ticket.b2b.agentPhoneNumber") ?? "Agent Phone Number"}
-                />
-              </Box>
-            </Box>
-
-            <Box sx={fieldItemSx(3)}>
               <CustomTextField
                 name="note"
                 control={control}
-                multiline
-                rows={2}
                 label={t("columns.note")}
               />
             </Box>

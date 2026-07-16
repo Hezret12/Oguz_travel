@@ -16,11 +16,12 @@ import CustomSelect from '../../CustomSelect';
 import PhoneNumberField from '../../inputs/PhoneNumber';
 import { closeAddClientModal, selectAddClientModal } from '../../../store/slices/modalSlice';
 import { addClientsApi } from '../../../api/queries/post';
+import CustomDatePicker from '../../CustomDatePicker';
 
 const AddClientModal = () => {
   const dispatch = useDispatch();
   const { t } = useLocale();
-  const { addClient } = useValidShema();
+  const { clientValidShema } = useValidShema();
   const { open, initialValues, onCreated } = useSelector(selectAddClientModal);
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
@@ -42,7 +43,7 @@ const AddClientModal = () => {
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues,
-    resolver: yupResolver(addClient),
+    resolver: yupResolver(clientValidShema),
     mode: 'onSubmit',
   });
 
@@ -104,12 +105,11 @@ const AddClientModal = () => {
           </Box>
 
           <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 10px)' } }}>
-            <CustomTextField
+            <CustomDatePicker
               name="dateOfBirth"
               control={control}
               type="date"
-              label={t('columns.dateOfBirth', 'Date of Birth')}
-              InputLabelProps={{ shrink: true }}
+              label={t('dateOfBirth')}
             />
           </Box>
 
@@ -122,12 +122,10 @@ const AddClientModal = () => {
           </Box>
 
           <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 10px)' } }}>
-            <CustomTextField
+            <CustomDatePicker
               name="passportExpiryDate"
               control={control}
-              type="date"
               label={t('columns.passportExpiryDate', 'Passport Expiry Date')}
-              InputLabelProps={{ shrink: true }}
             />
           </Box>
 
@@ -139,7 +137,7 @@ const AddClientModal = () => {
             />
           </Box>
 
-          <Box sx={{width: "49%"}}>
+          <Box sx={{ width: "49%" }}>
             <CustomSelect
               name="gender"
               control={control}

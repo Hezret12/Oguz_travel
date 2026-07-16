@@ -15,7 +15,9 @@ import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import StackedCell from "../../../components/inputs/StackCell";
 import StatusChip from "../../../components/StatusChip";
-import { SALE_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
+import {
+  SALE_STATUS_CONFIG,
+} from "../../../functions/statusChipConfigs";
 import { usePageFilters } from "../../../hooks/usePageFilters";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -31,6 +33,7 @@ import {
   getAllTurkishAirlinesApi,
   getAllStatusApi,
 } from "../../../api/queries/getters";
+import PaymentStatusCell from "../../../components/PaymentStatusCell";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -106,13 +109,14 @@ const TurkishAirlines = () => {
     params: queryParams,
   });
 
-  const { mutate: deleteTurkishAirlinesMutate, isPending: isDeleting } = useDelete({
-    deleteFn: deleteTurkishAirlinesApi,
-    queryKey: ["turkish-airlines", queryParams],
-    idKey: "guid",
-    apiName: "guid",
-    isPaginated: true,
-  });
+  const { mutate: deleteTurkishAirlinesMutate, isPending: isDeleting } =
+    useDelete({
+      deleteFn: deleteTurkishAirlinesApi,
+      queryKey: ["turkish-airlines", queryParams],
+      idKey: "guid",
+      apiName: "guid",
+      isPaginated: true,
+    });
 
   const deleteDialog = useDeleteDialog({
     onConfirm: (ticket) => deleteTurkishAirlinesMutate(ticket.guid),
@@ -135,7 +139,7 @@ const TurkishAirlines = () => {
       {
         accessorKey: "datetime",
         header: t("columns.issueDate"),
-        size: 100,
+        size: 80,
         Cell: ({ cell }) => {
           const val = cell.getValue();
           if (!val) return "";
@@ -145,13 +149,15 @@ const TurkishAirlines = () => {
       },
       {
         id: "operator",
-        header: t("columns.operator") ?? "Operator",
+        header: t("columns.operator"),
         size: 150,
         accessorFn: (row) => row.ta_assignment_operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
             primary={row.original.ta_assignment_operator?.fullName}
-            secondary={selectedLang(row.original.ta_assignment_operator?.office?.fullName)}
+            secondary={selectedLang(
+              row.original.ta_assignment_operator?.office?.fullName,
+            )}
           />
         ),
       },
@@ -163,19 +169,9 @@ const TurkishAirlines = () => {
         Cell: ({ row }) => (
           <StackedCell
             primary={row.original.ta_receiver_operator?.fullName}
-            secondary={selectedLang(row.original.ta_receiver_operator?.office?.fullName)}
-          />
-        ),
-      },
-      {
-        id: "agent",
-        header: t("columns.agent") ?? "Agent",
-        size: 150,
-        accessorFn: (row) => row.agent?.name ?? "",
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.agent?.name}
-            secondary={row.original.agent?.phone_number}
+            secondary={selectedLang(
+              row.original.ta_receiver_operator?.office?.fullName,
+            )}
           />
         ),
       },
@@ -187,7 +183,7 @@ const TurkishAirlines = () => {
         Cell: ({ row }) => (
           <StackedCell
             primary={row.original.client?.fullName}
-            secondary={row.original.client?.phoneNumber}
+            secondary={row.original.client?.phone_number}
           />
         ),
       },
@@ -226,8 +222,8 @@ const TurkishAirlines = () => {
       {
         accessorFn: (row) => getStatusKey(row),
         id: "status",
-        header: t("columns.status") ?? "Status",
-        size: 130,
+        header: t("columns.status"),
+        size: 80,
         Cell: ({ row }) => (
           <StatusChip
             status={getStatusKey(row.original)}
@@ -236,48 +232,29 @@ const TurkishAirlines = () => {
         ),
       },
       {
-        accessorKey: "pnr",
-        header: "PNR",
+        id: "payment_status",
+        header: t("columns.paymentStatus"),
         size: 110,
-      },
-      {
-        accessorKey: "ticket_number",
-        header: t("columns.ticketNumber") ?? "Ticket #",
-        size: 160,
-      },
-      {
-        accessorKey: "route",
-        header: t("columns.route") ?? "Route",
-        size: 140,
-      },
-      {
-        accessorKey: "class",
-        header: t("columns.class") ?? "Class",
-        size: 90,
-      },
-      {
-        accessorKey: "flight_date",
-        header: t("columns.flightDate") ?? "Flight Date",
-        size: 120,
-        Cell: ({ cell }) => {
-          const val = cell.getValue();
-          return val ? formatChange(val.split("T")[0], { dateOnly: true }) : "";
-        },
+        Cell: ({ row }) => (
+          <PaymentStatusCell percent={row.original.payment_percent} />
+        ),
       },
       {
         accessorKey: "base_fare",
         header: t("columns.baseFare"),
-        size: 110,
+        size: 100,
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
           return `${symbol}${Number(cell.getValue() ?? 0).toFixed(2)}`;
         },
+        muiTableHeadCellProps: { align: "right" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         id: "totalCollected",
-        header: t("columns.total") ?? "Total",
-        size: 120,
+        header: t("columns.total"),
+        size: 100,
         accessorFn: (row) => row.total_price ?? 0,
         Cell: ({ row }) => {
           const currencyCode = row.original.currency || "USD";
@@ -289,26 +266,73 @@ const TurkishAirlines = () => {
             />
           );
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         accessorKey: "accepted_price",
         header: t("columns.accepted") ?? "Accepted",
-        size: 110,
+        size: 90,
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
           return `${symbol}${Number(cell.getValue() ?? 0).toFixed(2)}`;
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         accessorKey: "returned_price",
         header: t("columns.changeAmount"),
-        size: 110,
+        size: 90,
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
           return `${symbol}${Number(cell.getValue() ?? 0).toFixed(2)}`;
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+      },
+      {
+        accessorKey: "pnr",
+        header: "PNR",
+        size: 110,
+      },
+      {
+        accessorKey: "ticket_number",
+        header: t("columns.ticketNo"),
+        size: 160,
+      },
+      {
+        accessorKey: "route",
+        header: t("columns.route"),
+        size: 140,
+      },
+      {
+        accessorKey: "class",
+        header: t("columns.cabinClass"),
+        size: 90,
+      },
+      {
+        accessorKey: "flight_date",
+        header: t("columns.flightDate"),
+        size: 120,
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          return val ? formatChange(val.split("T")[0], { dateOnly: true }) : "";
+        },
+      },
+      {
+        id: "agent",
+        header: t("columns.agent"),
+        size: 150,
+        accessorFn: (row) => row.agent?.name ?? "",
+        Cell: ({ row }) => (
+          <StackedCell
+            primary={row.original.agent?.name}
+            secondary={row.original.agent?.phone_number}
+          />
+        ),
       },
       {
         accessorKey: "note",
@@ -326,7 +350,7 @@ const TurkishAirlines = () => {
           <ColumnActionButtons
             row={row}
             table={table}
-            showPayment={false}
+            showPayment={true}
             onDelete={handleDeleteClick}
           />
         ),
@@ -426,8 +450,9 @@ const TurkishAirlines = () => {
   return (
     <>
       <PageHeader
-        title={t("pages.ticket.turkish.title")}
-        pageTitle={`${t("pages.ticket.turkish.title") ?? "Turkish Airlines"} | Oguz Travel`}
+        title={t("sidebar.ticketTurkishAirlines")}
+        addButtonText={t("turkish.add")}
+        pageTitle={`${t("turkish.title")} | Oguz Travel`}
         onAddClick={() => {
           table.setCreatingRow(true);
         }}

@@ -37,7 +37,7 @@
     "minPassengers": "At least 1 passenger must be selected",
     "invalidReturnDate": "Return date cannot be before departure date"
   },
-  "deleteConfirm" : {
+  "deleteConfirm": {
     "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz."
   },
   "columns": {
@@ -50,8 +50,8 @@
     "office": "Ofis",
     "dateOfBirth": "Doglan senesi",
     "passportNumber": "Pasport №",
-    "passportExpiryDate": "Pasportyň gutarýan senesi",
-    "passportCountryOfIssue": "Pasportyň berlen ýurdy",
+    "passportExpiryDate": "Gutarýan senesi",
+    "passportCountryOfIssue": "Berlen ýurdy",
     "dateTime": "Senesi",
     "paymentStatus": "Töleg görnüşi",
     "gender": "Jynsy",
@@ -91,33 +91,30 @@
     "transit": "Tranzit",
     "departureDate": "Gidýän senesi",
     "returnDate": "Gaýdyp gelýän senesi",
-    "contractDate": "Şertnama senesi"
-    },
-  "pages": {
-    "login": {
-      "welcomeTitle": "Oguz Travel Portalyna Hoş Geldiňiz",
-      "welcomeSubtitle": "Syýahat agentligi, agentler we ýolagçylar üçin häzirki zaman, howpsuz we çeýe rol esasly dolandyryş ulgamy.",
-      "signIn": "Giriş ediň",
-      "signInSubtitle": "Dowam etmek üçin telefon nomeriňizi we paroluňyzy giriziň",
-      "phoneNumberHint": "Mysal: 61123456",
-      "loginButton": "Giriş et",
-      "loggingIn": "Giriş edilýär...",
-      "testMode": "TEST REŽIMI (ROL SAÝLAP ÇALT GIRIŞ EDIŇ)",
-      "quickLoginText": "Demo hasapy bilen girmek üçin basňyz:",
-      "admin": "Admin",
-      "agent": "Agent",
-      "user": "Ulanyjy",
-      "loginFailed": "Giriş şowsuz boldy. Maglumatlaryňyzy barlap görüň.",
-      "invalidResponse": "Serweriň nädogry jogaby. Haýyş edip, bir gezek has synap görüň.",
-      "networkError": "Tor ulgamynda ýalňyşlyk. Haýyş edip, siziň baglanşygyňyzy barlaň.",
-      "validation": {
-        "phoneNumberRequired": "Telefon belgisi zerurdyr",
-        "phoneNumberLength": "Telefon belgisi takyk 8 sandan ybarat bolmaly",
-        "phoneNumberInvalid": "Nadogry telefon belgisi",
-        "passwordRequired": "Parol zerurdyr",
-        "passwordTooShort": "Parol gysga",
-        "passwordMaxLength": "Parol oran uzyn"
-      }
+    "contractDate": "Şertnama senesi",
+    "milesSmiles": "Miles & Smiles",
+    "quotedFare": "Aýdylan baha"
+  },
+  "login": {
+    "welcomeTitle": "Oguz Travel Portalyna Hoş Geldiňiz",
+    "welcomeSubtitle": "Syýahat agentligi, agentler we ýolagçylar üçin häzirki zaman, howpsuz we çeýe rol esasly dolandyryş ulgamy.",
+    "signIn": "Giriş ediň",
+    "signInSubtitle": "Dowam etmek üçin telefon nomeriňizi we paroluňyzy giriziň",
+    "phoneNumberHint": "Mysal: 61123456",
+    "loginButton": "Giriş et",
+    "loggingIn": "Giriş edilýär...",
+    "testMode": "TEST REŽIMI (ROL SAÝLAP ÇALT GIRIŞ EDIŇ)",
+    "quickLoginText": "Demo hasapy bilen girmek üçin basňyz:",
+    "loginFailed": "Giriş şowsuz boldy. Maglumatlaryňyzy barlap görüň.",
+    "invalidResponse": "Serweriň nädogry jogaby. Haýyş edip, bir gezek has synap görüň.",
+    "networkError": "Tor ulgamynda ýalňyşlyk. Haýyş edip, siziň baglanşygyňyzy barlaň.",
+    "validation": {
+      "phoneNumberRequired": "Telefon belgisi zerurdyr",
+      "phoneNumberLength": "Telefon belgisi takyk 8 sandan ybarat bolmaly",
+      "phoneNumberInvalid": "Nadogry telefon belgisi",
+      "passwordRequired": "Parol zerurdyr",
+      "passwordTooShort": "Parol gysga",
+      "passwordMaxLength": "Parol oran uzyn"
     },
     "employee": {
       "title": "Işgärler",
@@ -161,69 +158,6 @@
         "genderRequired": "Jyns saýlanmalydyr"
       }
     },
-    "referralLetter": {
-      "title": "Ýollanma haty",
-      "add": "Hat goşmak",
-      "addSuccess": "Hat üstünlikli goşuldy!",
-      "addError": "Hat ýazdyrmakda ýalňyşlyk ýüze çykdy.",
-      "validation": {
-        "arzaNoRequired": "Hat belgisi zerurdyr",
-        "operatorRequired": "Operator zerurdyr",
-        "nameRequired": "Ady zerurdyr",
-        "surnameRequired": "Familiýasy zerurdyr",
-        "genderRequired": "Jyns zerurdyr",
-        "dateOfBirthRequired": "Doglan senesi zerurdyr",
-        "passportNumberRequired": "Pasport belgisi zerurdyr",
-        "destinationCountryRequired": "Gidýän ýurdy zerurdyr",
-        "departureDateRequired": "Gidiş senesi zerurdyr",
-        "returnDateRequired": "Gaýdyp gelýän senesi zerurdyr",
-        "priceRequired": "Bahasy zerurdyr",
-        "numberRequired": "Dogry san girizilmeli",
-        "contractDateRequired": "Şertnama senesi zerurdyr"
-      }
-    },
-    "ticket": {
-      "export": "Eksport",
-      "summary": {
-        "totalTickets": "Jemi biletler",
-        "totalProfit": "Jemi peýda",
-        "sales": "Satuwlar",
-        "refunds": "Yzyna gaýtarylanlar"
-      },
-      "b2b": {
-        "title": "B2B",
-        "addTicket": "B2B bilet goşmak",
-        "editTicket": "B2B bileti redaktirle",
-        "clientPlaceholder": "Müşderini gözle...",
-        "saveSuccess": "Bilet üstünlikli saklandy!",
-        "saveError": "Bileti saklamakda ýalňyşlyk ýüze çykdy.",
-        "validation": {
-          "clientRequired": "Client is required",
-          "issueDateRequired": "Issue date is required",
-          "operatorRequired": "Operator is required",
-          "officeRequired": "Office is required",
-          "operatorTwoRequired": "Secondary operator is required",
-          "agentFullNameRequired": "Agent full name is required",
-          "agentPhoneNumberRequired": "Agent phone number is required",
-          "agentPhoneNumberLength": "Phone number must be exactly 8 digits",
-          "agentPhoneNumberInvalid": "Invalid phone number",
-          "pnrRequired": "PNR is required",
-          "statusRequired": "Status is required",
-          "airlineRequired": "Airline is required",
-          "routeRequired": "Route is required",
-          "cabinClassRequired": "Class is required",
-          "tripTypeRequired": "Trip type is required",
-          "flightDateRequired": "Flight date is required",
-          "numberRequired": "Enter a valid number",
-          "netFareRequired": "Net fare is required",
-          "saleFareRequired": "Sale fare is required",
-          "cardRequired": "Card is required"
-        }
-      },
-      "turkish": {
-        "title": "Turkish Airlines"
-      }
-    },
     "users": {
       "title": "Ulanyjylar",
       "subtitle": "Ulgam ulanyjylaryny we giriş hukuklaryny dolandyryň.",
@@ -250,120 +184,6 @@
       "tabs": {
         "information": "Maglumat",
         "access": "Giriş"
-      },
-      "validation": {
-        "employeeRequired": "Işgär saýlanmalydyr",
-        "phoneNumberRequired": "Telefon belgisi gerek",
-        "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",
-        "phoneNumberInvalid": "Nädogry telefon belgisi (61/62/63/64/65/71/12 bilen başlamaly we 8 sandan ybarat bolmaly)",
-        "passwordRequired": "Parol gerek",
-        "passwordTooShort": "Parol gysga (azyndan 6 simwol bolmaly)"
-      },
-      "permissions": {
-        "groups": {
-          "management": "Dolandyryş",
-          "reporting": "Hasabatlar",
-          "tickets": "Biletler",
-          "employees": "Işgärler"
-        },
-        "items": {
-          "users_view": "Ulanyjylary görmek",
-          "users_create": "Ulanyjy goşmak",
-          "users_edit": "Ulanyjy redaktirlemek",
-          "users_delete": "Ulanyjyny öçürmek",
-          "reports_view": "Hasabatlar",
-          "dashboard_view": "Dolandyryş paneli",
-          "tickets_view": "Biletleri görmek",
-          "tickets_create": "Bilet döretmek",
-          "tickets_edit": "Bilet redaktirlemek",
-          "tickets_delete": "Bileti öçürmek",
-          "employees_view": "Işgärleri görmek",
-          "employees_create": "Işgär goşmak",
-          "employees_edit": "Işgär redaktirlemek"
-        }
-      }
-    },
-    "admin": {
-      "title": "Admin dolandyryş paneli",
-      "subtitle": "Hoş geldiňiz, {{name}}. Ulgam ýagdaýyny we umumy statistikalary aşakdan yzarap bilersiňiz.",
-      "stats": {
-        "totalRevenue": "Jemi girdeji",
-        "registeredUsers": "Hasaba alnan ulanyjylar",
-        "activeAgents": "Aktiw agentler",
-        "apiIntegrations": "API integrasiýalary"
-      },
-      "statsChanges": {
-        "revenue": "bu aý +14.2%",
-        "users": "hepdelik +3.1%",
-        "agents": "2 sanysy tassyklamaga garaşýar",
-        "api": "Ähli ulgamlar kadaly işleýär"
-      },
-      "logs": {
-        "title": "Soňky ulgam ýazgylary",
-        "subtitle": "Serwerden gelen iň soňky 4 waka ýazgysy",
-        "viewAll": "Ählisini gör",
-        "id": "ID",
-        "event": "Waka / Amalyýet",
-        "actor": "Amala aşyran",
-        "time": "Wagt",
-        "status": "Ýagdaý",
-        "newAgent": "Täze agent hasaba alyndy",
-        "priceUpdated": "Ählumumy nyrh indeksi täzelendi",
-        "backupCreated": "Maglumatlar binýadynyň ätiýaçlyk nusgasy üstünlikli döredildi",
-        "failedLogin": "Şowsuz giriş synanyşygy anyklandy"
-      }
-    },
-    "agent": {
-      "title": "Agent paneli",
-      "subtitle": "Hoş geldiňiz, {{name}}. Syýahat meýilleşdiriş we müşderi dolandyryş amallaryny şu ýerden ýöridip bilersiňiz.",
-      "summery": "Agent",
-      "stats": {
-        "activeTours": "Aktiw tur sargytlary",
-        "earnedCommission": "Gazanylan komissiýa",
-        "clientSatisfaction": "Müşderi kanagatlanmasy"
-      },
-      "clients": {
-        "title": "Meniň soňky müşderilerim",
-        "addClient": "Müşderi goş",
-        "destination": "Ugur: {{destination}}",
-        "statusProposal": "Teklip tapgyrynda",
-        "statusPaid": "Tölendi / Tamamlandy",
-        "statusFlightPending": "Uçuşa garaşylýar"
-      },
-      "proposal": {
-        "title": "Çalt syýahat teklibi",
-        "clientName": "Müşderiniň ady",
-        "destination": "Gidiljek ýer / Şäher",
-        "details": "Maglumatlar / Myhmanhana we wagt saýlamalary",
-        "submit": "Teklip döret we iber"
-      }
-    },
-    "user": {
-      "welcome": "Salam, {{name}}! 👋",
-      "readyToExplore": "Indiki syýahatyňyzy gözlemäge taýynmy? Uçuş, myhmanhana ýa-da ulag kärendesi teklipnamalarymyzy barlaň.",
-      "search": {
-        "from": "Nireden?",
-        "to": "Nirä?",
-        "button": "Uçar bileti gözle"
-      },
-      "popular": "Meşhur ugurlar",
-      "details": "Maglumatlar",
-      "destinations": {
-        "antalya": {
-          "title": "Antalýa, Türkiýe",
-          "desc": "Deňiz, gum we günüň ajaýyp utgaşmasy.",
-          "price": "1.200 TL-den başlaýan"
-        },
-        "rome": {
-          "title": "Rim, Italiýa",
-          "desc": "Taryh yslan köçeleri we lezzetli pizzalary açyş ediň.",
-          "price": "4.500 TL-den başlaýan"
-        },
-        "tokyo": {
-          "title": "Tokio, Ýaponiýa",
-          "desc": "Döwrebap tehnologiýa we adaty medeniýetiň utgaşmasy.",
-          "price": "12.000 TL-den başlaýan"
-        }
       }
     }
   },
@@ -404,5 +224,58 @@
     "users": "Ulanyjylar",
     "referalLetters": "Ýollanma haty",
     "visaApplications": "Wiza arza"
+  },
+  "turkish": {
+    "addTicket": "Türk howa ýollary bilet goşmak",
+    "editTicket": "Türk howa ýollary biledi üytgetmek",
+    "add": "Bilet goşmak"
+  },
+  "payment": {
+    "title": "Töleg dolandyryşy",
+    "clientName": "Müşderi ady",
+    "salesTotal": "Satyş bahasy",
+    "totalPaid": "Jemi tölenen",
+    "remaining": "Galdy",
+    "paymentHistory": "Tölegler taryhy",
+    "noPayments": "Töleg ýok",
+    "addPayment": "Töleg goş",
+    "editPayment": "Tölegi üýtget",
+    "amount": "Mukdar",
+    "paymentDate": "Töleg senesi",
+    "description": "Bellik",
+    "close": "Ýap",
+    "nonCreditMessage": "Bu bilet doly tölenen ýa-da kredit däl.",
+    "credit": "Kredit",
+    "paid": "Tölenen"
+  },
+  "b2b": {
+    "title": "B2B",
+    "addTicket": "B2B bilet goşmak",
+    "editTicket": "B2B bileti redaktirle",
+    "clientPlaceholder": "Müşderini gözle...",
+    "saveSuccess": "Bilet üstünlikli saklandy!",
+    "saveError": "Bileti saklamakda ýalňyşlyk ýüze çykdy.",
+    "validation": {
+      "clientRequired": "Client is required",
+      "issueDateRequired": "Issue date is required",
+      "operatorRequired": "Operator is required",
+      "officeRequired": "Office is required",
+      "operatorTwoRequired": "Secondary operator is required",
+      "agentFullNameRequired": "Agent full name is required",
+      "agentPhoneNumberRequired": "Agent phone number is required",
+      "agentPhoneNumberLength": "Phone number must be exactly 8 digits",
+      "agentPhoneNumberInvalid": "Invalid phone number",
+      "pnrRequired": "PNR is required",
+      "statusRequired": "Status is required",
+      "airlineRequired": "Airline is required",
+      "routeRequired": "Route is required",
+      "cabinClassRequired": "Class is required",
+      "tripTypeRequired": "Trip type is required",
+      "flightDateRequired": "Flight date is required",
+      "numberRequired": "Enter a valid number",
+      "netFareRequired": "Net fare is required",
+      "saleFareRequired": "Sale fare is required",
+      "cardRequired": "Card is required"
+    }
   }
 }

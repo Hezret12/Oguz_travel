@@ -16,8 +16,10 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import EditIcon from "@mui/icons-material/Edit";
 
 import { CustomDialog } from "./CustomDialog";
+import { CustomDialogHeader } from "./CustomDialogHeader";
 import CustomTextField from "../CustomTextField";
 import CustomDatePicker from "../CustomDatePicker";
 import AppAutocomplete from "../AppAutocomplete";
@@ -25,9 +27,11 @@ import { useLocale } from "../../hooks/useLocale";
 import { getAllPaymentStatusApi, getAllEmployeeApi } from "../../api/queries/getters";
 import { deleteTicketPaymentApi } from "../../api/queries/delete";
 import { addPaymentApi } from "../../api/queries/post";
+import { updateTicketPaymentApi } from "../../api/queries/patch";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
+import { useUpdate } from "../../hooks/CRUD/useUpdate";
 
 const formatCurrency = (val) => {
   const num = Number(val || 0);
@@ -74,6 +78,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     ticket?.payment_status?.toLowerCase() === "kredit";
 
   const [localPayments, setLocalPayments] = useState([]);
+  const [editingPayment, setEditingPayment] = useState(null);
 
   const { handleSubmit, reset, watch, control } = useForm({
     defaultValues: {
@@ -89,11 +94,20 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
 
-  const queryParams = useMemo(() => ({
-    b2b_guid: ticket?.guid,
-    page,
-    limit,
-  }), [ticket?.guid, page, limit]);
+  const isTurkish = useMemo(() => {
+    if (!ticket) return false;
+    return "ticket_number" in ticket || "base_fare" in ticket || "ta_assignment_operator" in ticket;
+  }, [ticket]);
+
+  const queryParams = useMemo(() => {
+    const params = { page, limit };
+    if (isTurkish) {
+      params.ta_guid = ticket?.guid;
+    } else {
+      params.b2b_guid = ticket?.guid;
+    }
+    return params;
+  }, [ticket?.guid, page, limit, isTurkish]);
 
   const { data: allPayments, isLoading: paymentsLoading } = useGet({
     apiFn: getAllPaymentStatusApi,
@@ -145,53 +159,125 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     idKey: "guid",
   });
 
-  const loading = paymentsLoading || createLoading || deleteLoading;
+  const { mutate: updatePayment, isPending: updateLoading } = useUpdate({
+    apiFn: updateTicketPaymentApi,
+    key: "payment-status",
+    idKey: "guid",
+    invalidateQueries: ["payment-status"],
+    onSuccessUpdate: () => {
+      handleCancelEdit();
+    },
+  });
+
+  const loading = paymentsLoading || createLoading || deleteLoading || updateLoading;
 
   const payments = useMemo(() => {
     if (!ticket?.guid) {
       return localPayments;
     }
-    return (allPayments || []).filter((p) => p.b2b_guid === ticket.guid);
-  }, [allPayments, ticket, localPayments]);
+    return (allPayments || []).filter((p) => {
+      if (isTurkish) {
+        return p.ta_guid === ticket.guid;
+      }
+      return p.b2b_guid === ticket.guid;
+    });
+  }, [allPayments, ticket, localPayments, isTurkish]);
 
 
   if (!ticket) return null;
 
-  const salesTotal = Number(ticket.sale_price ?? ticket.saleFare ?? 0);
+  const salesTotal = Number(ticket.total_price ?? ticket.sale_price ?? ticket.saleFare ?? 0);
   const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
   const remaining = salesTotal - totalPaid;
 
+  const handleEditClick = (p) => {
+    setEditingPayment(p);
+    reset({
+      amount: p.amount,
+      paymentDate: p.payment_date || p.date,
+      description: p.note || p.description || "",
+      opr_guid: p.opr_guid || "",
+    });
+  };
 
-  const handleAddPayment = async (data) => {
+  const handleCancelEdit = () => {
+    setEditingPayment(null);
+    reset({
+      amount: "",
+      paymentDate: new Date().toISOString(),
+      description: "",
+      opr_guid: "",
+    });
+  };
+
+  const handleSavePayment = async (data) => {
     const { amount, paymentDate, description, opr_guid } = data;
     if (!amount || Number(amount) <= 0) return;
 
-    if (ticket.guid) {
-      const payload = {
-        b2b_guid: ticket.guid,
-        amount: Number(amount),
-        payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
-        note: description?.trim() || "",
-        opr_guid: opr_guid || null,
-      };
-      createPayment(payload);
+    if (editingPayment) {
+      if (ticket.guid && !String(editingPayment.guid).startsWith("p-")) {
+        const payload = {
+          guid: editingPayment.guid,
+          amount: Number(amount),
+          payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
+          note: description?.trim() || "",
+          opr_guid: opr_guid || null,
+        };
+        if (isTurkish) {
+          payload.ta_guid = ticket.guid;
+        } else {
+          payload.b2b_guid = ticket.guid;
+        }
+        updatePayment(payload);
+      } else {
+        // Local edit fallback
+        setLocalPayments((prev) =>
+          prev.map((p) =>
+            (p.guid || p.id) === editingPayment.guid
+              ? {
+                  ...p,
+                  amount: Number(amount),
+                  payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
+                  note: description?.trim() || "",
+                  opr_guid: opr_guid || null,
+                }
+              : p
+          )
+        );
+        handleCancelEdit();
+      }
     } else {
-      // Local fallback
-      const newPayment = {
-        guid: `p-${Date.now()}`,
-        amount: Number(amount),
-        payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
-        note: description?.trim() || "",
-        opr_guid: opr_guid || null,
-      };
+      if (ticket.guid) {
+        const payload = {
+          amount: Number(amount),
+          payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
+          note: description?.trim() || "",
+          opr_guid: opr_guid || null,
+        };
+        if (isTurkish) {
+          payload.ta_guid = ticket.guid;
+        } else {
+          payload.b2b_guid = ticket.guid;
+        }
+        createPayment(payload);
+      } else {
+        // Local fallback
+        const newPayment = {
+          guid: `p-${Date.now()}`,
+          amount: Number(amount),
+          payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
+          note: description?.trim() || "",
+          opr_guid: opr_guid || null,
+        };
 
-      setLocalPayments((prev) => [...prev, newPayment]);
-      reset({
-        amount: "",
-        paymentDate: new Date().toISOString(),
-        description: "",
-        opr_guid: "",
-      });
+        setLocalPayments((prev) => [...prev, newPayment]);
+        reset({
+          amount: "",
+          paymentDate: new Date().toISOString(),
+          description: "",
+          opr_guid: "",
+        });
+      }
     }
   };
 
@@ -212,18 +298,16 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
+          alignItems: "center",
           mb: 3,
         }}
       >
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Müşderi ady: {clientName}
-          </Typography>
-        </Box>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          {t("pages.ticket.payment.clientName")}: {clientName}
+        </Typography>
         {isCredit && (
           <Chip
-            label="Credit"
+            label={t("pages.ticket.payment.credit") || "Credit"}
             color="error"
             variant="outlined"
             sx={{
@@ -254,7 +338,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             <Grid container spacing={2}>
               <Grid item xs={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Satyş baha (Sales Total)
+                  {t("pages.ticket.payment.salesTotal")}
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 700, mt: 0.5 }}>
                   {formatCurrency(salesTotal)}
@@ -262,7 +346,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               </Grid>
               <Grid item xs={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Jemi tolendi (Total Paid)
+                  {t("pages.ticket.payment.totalPaid")}
                 </Typography>
                 <Typography
                   variant="h5"
@@ -273,7 +357,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               </Grid>
               <Grid item xs={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  Galdy (Remaining)
+                  {t("pages.ticket.payment.remaining")}
                 </Typography>
                 <Typography
                   variant="h5"
@@ -290,97 +374,184 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           {/* Payments History List */}
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
-              Tolegler (Payments History)
+              {t("pages.ticket.payment.paymentHistory")}
             </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, minHeight: "60px", justifyContent: "center" }}>
+            <Box sx={{ height: "228px", display: "flex", flexDirection: "column" }}>
               {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
                   <CircularProgress size={24} />
                 </Box>
               ) : payments.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
-                  Toleg ýok (No payments history)
-                </Typography>
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {t("pages.ticket.payment.noPayments")}
+                  </Typography>
+                </Box>
               ) : (
-                <>
-                  {payments.map((p) => (
-                    <Card
-                      key={p.guid || p.id}
-                      variant="outlined"
-                      sx={(theme) => ({
-                        borderRadius: "8px",
-                        borderColor: theme.palette.divider,
-                        backgroundColor:
-                          theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.01)"
-                            : "rgba(0,0,0,0.005)",
-                      })}
-                    >
-                      <CardContent
-                        sx={{
-                          p: "12px 16px !important",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1.5,
+                    overflowY: "auto",
+                    flex: 1,
+                    pr: 0.5,
+                  }}
+                >
+                  {payments.map((p) => {
+                    const operator = employees.find((emp) => emp.guid === p.opr_guid);
+                    const operatorName = operator ? operator.fullName : (p.operator?.fullName || p.operator_name || "");
+
+                    return (
+                      <Card
+                        key={p.guid || p.id}
+                        variant="outlined"
+                        sx={(theme) => ({
+                          borderRadius: "8px",
+                          borderColor: theme.palette.divider,
+                          height: "72px",
+                          flexShrink: 0,
+                          backgroundColor:
+                            theme.palette.mode === "dark"
+                              ? "rgba(255,255,255,0.01)"
+                              : "rgba(0,0,0,0.005)",
+                        })}
                       >
-                        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                            {formatCurrency(p.amount)}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                            {formatDateToDisplay(p.payment_date || p.date)} • {getMethodLabel(p.method)}{p.note || p.description ? ` • ${p.note || p.description}` : ""}
-                          </Typography>
-                        </Box>
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleDeletePayment(p.guid || p.id)}
+                        <CardContent
                           sx={{
-                            border: "1px solid rgba(239, 68, 68, 0.2)",
-                            backgroundColor: "rgba(239, 68, 68, 0.05)",
-                            "&:hover": {
-                              backgroundColor: "rgba(239, 68, 68, 0.12)",
-                              borderColor: "error.main",
-                            },
+                            p: "10px 16px !important",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            height: "100%",
+                            boxSizing: "border-box",
+                            gap: 2,
                           }}
                         >
-                          <DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
-                        </IconButton>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {totalPages > 1 && (
-                    <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-                      <Pagination
-                        count={totalPages}
-                        page={page}
-                        onChange={(_, value) => setPage(value)}
-                        size="small"
-                        color="primary"
-                      />
-                    </Box>
-                  )}
-                </>
+                          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1, minWidth: 0 }}>
+                            {/* Row 1: Amount & Date/Method */}
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main" }}>
+                                {formatCurrency(p.amount)}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                                {formatDateToDisplay(p.payment_date || p.date)} • {getMethodLabel(p.method)}
+                              </Typography>
+                            </Box>
+
+                            {/* Row 2: Operator & Note */}
+                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", minHeight: "22px" }}>
+                              {operatorName ? (
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 0.5,
+                                    fontWeight: 600,
+                                    backgroundColor: (theme) =>
+                                      theme.palette.mode === "dark"
+                                        ? "rgba(255,255,255,0.06)"
+                                        : "rgba(0,0,0,0.04)",
+                                    px: 1,
+                                    py: 0.25,
+                                    borderRadius: "4px",
+                                    fontSize: "0.725rem",
+                                  }}
+                                >
+                                  👤 {operatorName}
+                                </Typography>
+                              ) : (
+                                <span />
+                              )}
+
+                              {(p.note || p.description) ? (
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  noWrap
+                                  sx={{
+                                    fontStyle: "italic",
+                                    maxWidth: "220px",
+                                    fontSize: "0.75rem",
+                                  }}
+                                  title={p.note || p.description}
+                                >
+                                  {p.note || p.description}
+                                </Typography>
+                              ) : (
+                                <span />
+                              )}
+                            </Box>
+                          </Box>
+                          <Box sx={{ display: "flex", gap: 1 }}>
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => handleEditClick(p)}
+                              sx={{
+                                border: "1px solid rgba(25, 118, 210, 0.2)",
+                                backgroundColor: "rgba(25, 118, 210, 0.05)",
+                                "&:hover": {
+                                  backgroundColor: "rgba(25, 118, 210, 0.12)",
+                                  borderColor: "primary.main",
+                                },
+                              }}
+                            >
+                              <EditIcon sx={{ fontSize: 18 }} />
+                            </IconButton>
+                            <IconButton
+                              color="error"
+                              size="small"
+                              onClick={() => handleDeletePayment(p.guid || p.id)}
+                              sx={{
+                                border: "1px solid rgba(239, 68, 68, 0.2)",
+                                backgroundColor: "rgba(239, 68, 68, 0.05)",
+                                "&:hover": {
+                                  backgroundColor: "rgba(239, 68, 68, 0.12)",
+                                  borderColor: "error.main",
+                                },
+                              }}
+                            >
+                              <DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
+                            </IconButton>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </Box>
               )}
             </Box>
+            {totalPages > 1 && !loading && payments.length > 0 && (
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={(_, value) => setPage(value)}
+                  size="small"
+                  color="primary"
+                />
+              </Box>
+            )}
 
           </Box>
 
           <Divider />
 
           {/* Create Payment Form */}
-          <Box component="form" onSubmit={handleSubmit(handleAddPayment)}>
+          <Box component="form" onSubmit={handleSubmit(handleSavePayment)}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
-              Toleg goş (Add Payment)
+              {editingPayment ? t("pages.ticket.payment.editPayment") : t("pages.ticket.payment.addPayment")}
             </Typography>
             <Grid container spacing={2}>
               <Grid size={6}>
                 <CustomTextField
                   name="amount"
                   control={control}
-                  label="Mukdar (Amount)"
-                  placeholder="Amount"
+                  label={t("pages.ticket.payment.amount")}
+                  placeholder={t("pages.ticket.payment.amount")}
                   type="number"
                   required
                   startIcon={<AttachMoneyIcon fontSize="small" />}
@@ -390,7 +561,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                 <CustomDatePicker
                   name="paymentDate"
                   control={control}
-                  label="Toleg senesi (Payment Date)"
+                  label={t("pages.ticket.payment.paymentDate")}
                   required
                   showTime={true}
                 />
@@ -407,14 +578,28 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                 <CustomTextField
                   name="description"
                   control={control}
-                  label="Bellik (Description)"
-                  placeholder="Bellik"
+                  label={t("pages.ticket.payment.description")}
+                  placeholder={t("pages.ticket.payment.description")}
                 />
               </Grid>
             </Grid>
 
             {/* Bottom Actions */}
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, mt: 3.5 }}>
+              {editingPayment && (
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  onClick={handleCancelEdit}
+                  sx={{
+                    fontWeight: 600,
+                    px: 3,
+                    textTransform: "none",
+                  }}
+                >
+                  {t("cancel")}
+                </Button>
+              )}
               <Button
                 variant="outlined"
                 onClick={onClose}
@@ -424,7 +609,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                   textTransform: "none",
                 }}
               >
-                Ýap (Close)
+                {t("pages.ticket.payment.close")}
               </Button>
               <Button
                 variant="contained"
@@ -441,7 +626,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                   },
                 }}
               >
-                Toleg goş (Add Payment)
+                {editingPayment ? t("pages.ticket.payment.editPayment") : t("pages.ticket.payment.addPayment")}
               </Button>
             </Box>
           </Box>
@@ -449,8 +634,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ) : (
         <Box sx={{ py: 4, textAlign: "center" }}>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            This ticket is fully paid or not a credit transaction (Payment Status
-            {ticket.payment_status || "Unknown"}).
+            {t("pages.ticket.payment.nonCreditMessage")} ({ticket.payment_status || "Unknown"}).
           </Typography>
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
@@ -463,7 +647,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                 textTransform: "none",
               }}
             >
-              Close
+              {t("pages.ticket.payment.close")}
             </Button>
           </Box>
         </Box>

@@ -73,9 +73,13 @@
     "ticketNo": "Ticket No",
     "flight": "Flight",
     "cabin": "Cabin",
-    "totalBookings": "Bookings"
+    "totalBookings": "Bookings",
+    "baseFare": "Base Fare",
+    "accepted": "Accepted",
+    "changeAmount": "Change",
+    "milesSmiles": "Miles & Smiles",
+    "quotedFare": "Quoted Fare"
   },
-  "pages": {
     "login": {
       "welcomeTitle": "Welcome to Oguz Travel Portal",
       "welcomeSubtitle": "Modern, secure and flexible role-based management system for travel agencies, agents and passengers.",
@@ -86,9 +90,6 @@
       "loggingIn": "Signing In...",
       "testMode": "TEST MODE (QUICK LOGIN BY SELECTING ROLE)",
       "quickLoginText": "Click to login with demo credentials:",
-      "admin": "Admin",
-      "agent": "Agent",
-      "user": "User",
       "loginFailed": "Login failed. Please check your credentials.",
       "invalidResponse": "Invalid server response. Please try again.",
       "networkError": "Network error. Please check your connection.",
@@ -99,8 +100,7 @@
         "passwordRequired": "Password is required",
         "passwordTooShort": "Password is too short",
         "passwordMaxLength": "Password is too long"
-      }
-    },
+      },
     "employee": {
       "title": "Employees",
       "subtitle": "Manage employee records and assignments.",
@@ -174,6 +174,24 @@
         "totalProfit": "Total Profit",
         "sales": "Sales",
         "refunds": "Refunds"
+      },
+      "payment": {
+        "title": "Payment Management",
+        "clientName": "Client Name",
+        "salesTotal": "Sales Total",
+        "totalPaid": "Total Paid",
+        "remaining": "Remaining",
+        "paymentHistory": "Payments History",
+        "noPayments": "No payments history",
+        "addPayment": "Add Payment",
+        "editPayment": "Edit Payment",
+        "amount": "Amount",
+        "paymentDate": "Payment Date",
+        "description": "Description",
+        "close": "Close",
+        "nonCreditMessage": "This ticket is fully paid or not a credit transaction.",
+        "credit": "Credit",
+        "paid": "Paid"
       },
       "b2b": {
         "title": "B2B",
@@ -387,5 +405,62 @@
     "employee": "Employee",
     "employees": "Employees",
     "users": "Users"
+  },
+  "turkish": {
+    "title": "Turkish Airlines",
+    "addTicket": "Add Turkish Airlines Ticket",
+    "editTicket": "Edit Turkish Airlines Ticket"
+  },
+  "pages": {
+    "ticket": {
+      "payment": {
+        "title": "Payment Management",
+        "clientName": "Client Name",
+        "salesTotal": "Sales Total",
+        "totalPaid": "Total Paid",
+        "remaining": "Remaining",
+        "paymentHistory": "Payments History",
+        "noPayments": "No payments history",
+        "addPayment": "Add Payment",
+        "editPayment": "Edit Payment",
+        "amount": "Amount",
+        "paymentDate": "Payment Date",
+        "description": "Description",
+        "close": "Close",
+        "nonCreditMessage": "This ticket is fully paid or not a credit transaction.",
+        "credit": "Credit",
+        "paid": "Paid"
+      },
+      "b2b": {
+        "title": "B2B",
+        "addTicket": "Add Ticket",
+        "editTicket": "Edit B2B Ticket",
+        "clientPlaceholder": "Search client...",
+        "saveSuccess": "Ticket saved successfully!",
+        "saveError": "An error occurred while saving the ticket.",
+        "validation": {
+          "clientRequired": "Client is required",
+          "issueDateRequired": "Issue date is required",
+          "operatorRequired": "Operator is required",
+          "officeRequired": "Office is required",
+          "operatorTwoRequired": "Secondary operator is required",
+          "agentFullNameRequired": "Agent full name is required",
+          "agentPhoneNumberRequired": "Agent phone number is required",
+          "agentPhoneNumberLength": "Phone number must be exactly 8 digits",
+          "agentPhoneNumberInvalid": "Invalid phone number",
+          "pnrRequired": "PNR is required",
+          "statusRequired": "Status is required",
+          "airlineRequired": "Airline is required",
+          "routeRequired": "Route is required",
+          "cabinClassRequired": "Class is required",
+          "tripTypeRequired": "Trip type is required",
+          "flightDateRequired": "Flight date is required",
+          "numberRequired": "Enter a valid number",
+          "netFareRequired": "Net fare is required",
+          "saleFareRequired": "Sale fare is required",
+          "cardRequired": "Card is required"
+        }
+      }
+    }
   }
 }

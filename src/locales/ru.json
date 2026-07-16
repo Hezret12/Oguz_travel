@@ -73,33 +73,33 @@
     "ticketNo": "Номер билета",
     "flight": "Рейс",
     "cabin": "Кабина",
-    "totalBookings": "Бронирования"
+    "totalBookings": "Бронирования",
+    "baseFare": "Базовый тариф",
+    "accepted": "Принято",
+    "changeAmount": "Сдача",
+    "milesSmiles": "Miles & Smiles",
+    "quotedFare": "Названная цена"
   },
-  "pages": {
-    "login": {
-      "welcomeTitle": "Добро пожаловать на портал Oguz Travel",
-      "welcomeSubtitle": "Современная, безопасная и гибкая система управления на основе ролей для туристических агентств, агентов и пассажиров.",
-      "signIn": "Войти в систему",
-      "signInSubtitle": "Введите номер телефона и пароль для продолжения",
-      "phoneNumberHint": "Пример: 61123456",
-      "loginButton": "Войти",
-      "loggingIn": "Вход в систему...",
-      "testMode": "ТЕСТОВЫЙ РЕЖИМ (БЫСТРЫЙ ВХОД С ВЫБОРОМ РОЛИ)",
-      "quickLoginText": "Нажмите для входа с демо-учетными данными:",
-      "admin": "Администратор",
-      "agent": "Агент",
-      "user": "Пользователь",
-      "loginFailed": "Ошибка входа. Пожалуйста, проверьте свои учетные данные.",
-      "invalidResponse": "Неверный ответ сервера. Пожалуйста, попробуйте снова.",
-      "networkError": "Ошибка сети. Пожалуйста, проверьте ваше соединение.",
-      "validation": {
-        "phoneNumberRequired": "����� �������� ����������",
-        "phoneNumberLength": "����� �������� ������ ��������� 8 ����",
-        "phoneNumberInvalid": "�������� ����� ��������",
-        "passwordRequired": "������ ����������",
-        "passwordTooShort": "������ ������� ��������",
-        "passwordMaxLength": "������ ������� �������"
-      }
+  "login": {
+    "welcomeTitle": "Добро пожаловать на портал Oguz Travel",
+    "welcomeSubtitle": "Современная, безопасная и гибкая система управления на основе ролей для туристических агентств, агентов и пассажиров.",
+    "signIn": "Войти в систему",
+    "signInSubtitle": "Введите номер телефона и пароль для продолжения",
+    "phoneNumberHint": "Пример: 61123456",
+    "loginButton": "Войти",
+    "loggingIn": "Вход в систему...",
+    "testMode": "ТЕСТОВЫЙ РЕЖИМ (БЫСТРЫЙ ВХОД С ВЫБОРОМ РОЛИ)",
+    "quickLoginText": "Нажмите для входа с демо-учетными данными:",
+    "loginFailed": "Ошибка входа. Пожалуйста, проверьте свои учетные данные.",
+    "invalidResponse": "Неверный ответ сервера. Пожалуйста, попробуйте снова.",
+    "networkError": "Ошибка сети. Пожалуйста, проверьте ваше соединение.",
+    "validation": {
+      "phoneNumberRequired": "����� �������� ����������",
+      "phoneNumberLength": "����� �������� ������ ��������� 8 ����",
+      "phoneNumberInvalid": "�������� ����� ��������",
+      "passwordRequired": "������ ����������",
+      "passwordTooShort": "������ ������� ��������",
+      "passwordMaxLength": "������ ������� �������"
     },
     "employee": {
       "title": "Сотрудники",
@@ -174,6 +174,24 @@
         "totalProfit": "Общая прибыль",
         "sales": "Продажи",
         "refunds": "Возвраты"
+      },
+      "payment": {
+        "title": "Управление платежами",
+        "clientName": "Имя клиента",
+        "salesTotal": "Сумма продажи",
+        "totalPaid": "Всего оплачено",
+        "remaining": "Остаток",
+        "paymentHistory": "История платежей",
+        "noPayments": "История платежей пуста",
+        "addPayment": "Добавить платеж",
+        "editPayment": "Редактировать платеж",
+        "amount": "Сумма",
+        "paymentDate": "Дата платежа",
+        "description": "Примечание",
+        "close": "Закрыть",
+        "nonCreditMessage": "Этот билет полностью оплачен или не является кредитной операцией.",
+        "credit": "Кредит",
+        "paid": "Оплачено"
       },
       "b2b": {
         "title": "B2B",
@@ -386,5 +404,62 @@
     "employee": "Сотрудники",
     "employees": "Сотрудники",
     "users": "Пользователи"
+  },
+  "turkish": {
+    "title": "Turkish Airlines",
+    "addTicket": "Добавить билет Turkish Airlines",
+    "editTicket": "Редактировать билет Turkish Airlines"
+  },
+  "pages": {
+    "ticket": {
+      "payment": {
+        "title": "Управление платежами",
+        "clientName": "Имя клиента",
+        "salesTotal": "Сумма продажи",
+        "totalPaid": "Всего оплачено",
+        "remaining": "Остаток",
+        "paymentHistory": "История платежей",
+        "noPayments": "История платежей пуста",
+        "addPayment": "Добавить платеж",
+        "editPayment": "Редактировать платеж",
+        "amount": "Сумма",
+        "paymentDate": "Дата платежа",
+        "description": "Примечание",
+        "close": "Закрыть",
+        "nonCreditMessage": "Этот билет полностью оплачен или не является кредитной операцией.",
+        "credit": "Кредит",
+        "paid": "Оплачено"
+      },
+      "b2b": {
+        "title": "B2B",
+        "addTicket": "Добавить билет",
+        "editTicket": "Редактировать B2B билет",
+        "clientPlaceholder": "Найти клиента...",
+        "saveSuccess": "Билет успешно сохранен!",
+        "saveError": "Произошла ошибка при сохранении билета.",
+        "validation": {
+          "clientRequired": "Client is required",
+          "issueDateRequired": "Issue date is required",
+          "operatorRequired": "Operator is required",
+          "officeRequired": "Office is required",
+          "operatorTwoRequired": "Secondary operator is required",
+          "agentFullNameRequired": "Agent full name is required",
+          "agentPhoneNumberRequired": "Agent phone number is required",
+          "agentPhoneNumberLength": "Phone number must be exactly 8 digits",
+          "agentPhoneNumberInvalid": "Invalid phone number",
+          "pnrRequired": "PNR is required",
+          "statusRequired": "Status is required",
+          "airlineRequired": "Airline is required",
+          "routeRequired": "Route is required",
+          "cabinClassRequired": "Class is required",
+          "tripTypeRequired": "Trip type is required",
+          "flightDateRequired": "Flight date is required",
+          "numberRequired": "Enter a valid number",
+          "netFareRequired": "Net fare is required",
+          "saleFareRequired": "Sale fare is required",
+          "cardRequired": "Card is required"
+        }
+      }
+    }
   }
 }

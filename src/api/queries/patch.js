@@ -25,3 +25,8 @@ export const updateTurkishAirlinesApi = async (data) => {
   const response = await api.patchPrivate(`/turkish-airlines/update-turkish-airlines`, data);
   return response;
 };
+
+export const updateTicketPaymentApi = async (data) => {
+  const response = await api.patchPrivate(`/ticket-payment/update-ticket-payment`, data);
+  return response;
+};

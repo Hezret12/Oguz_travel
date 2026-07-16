@@ -34,6 +34,11 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
   const { addTurkishAirlinesTicket } = useValidShema();
   const isAdjustedFareManualRef = useRef(false);
 
+  const paymentOptions = useMemo(() => [
+    { label: t("pages.ticket.payment.paid", "Tolendi"), value: true },
+    { label: t("pages.ticket.payment.credit", "Kredit"), value: false },
+  ], [t]);
+
   // Fetch status options from the API
   const {
     data: statusList,
@@ -90,6 +95,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
       accepted_price: currentTicket.accepted_price !== undefined ? String(currentTicket.accepted_price) : "",
       returned_price: currentTicket.returned_price !== undefined ? String(currentTicket.returned_price) : "",
       currency: currentTicket.currency || "USD",
+      is_paid: currentTicket.is_paid !== undefined ? currentTicket.is_paid : true,
       agent: {
         name: currentTicket.agent?.name ?? "",
         phone_number: currentTicket.agent?.phone_number ?? "",
@@ -98,7 +104,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
     };
   }, [row]);
 
-  const { control, handleSubmit, reset, setValue, watch } = useForm({
+  const { control, handleSubmit, setValue, watch } = useForm({
     defaultValues,
     resolver: yupResolver(addTurkishAirlinesTicket),
     mode: "onSubmit",
@@ -106,6 +112,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
 
   const selectedCurrency = watch("currency") || "USD";
   const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
+  const isPaidValue = watch("is_paid");
 
   const handleTotalAmountChange = (event) => {
     const nextValue = event?.target?.value ?? event ?? "";
@@ -145,7 +152,6 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
 
   const submitHandler = async (data) => {
     try {
-      // Find selected operator's office_guid from employees list
       const selectedEmployee = employees.find(
         (emp) => emp.guid === data.assignment_opr_guid
       );
@@ -183,6 +189,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
         currency: data.currency || "USD",
         office_guid: officeGuid || null,
         note: data.note?.trim() || "",
+        is_paid: Boolean(data.is_paid),
       };
 
       await updateTurkishAirlines(payload);
@@ -209,7 +216,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={t("pages.ticket.turkish.editTicket") ?? "Edit Turkish Airlines Ticket"}
+          title={t("turkish.editTicket")}
         />
 
         <CustomForm handleSubmit={handleSubmit(submitHandler)}>
@@ -270,7 +277,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                 <CustomTextField
                   name="milesSmiles"
                   control={control}
-                  label="MILES & SMILES"
+                  label={t("columns.milesSmiles") ?? "MILES & SMILES"}
                 />
 
                 <CustomDatePicker
@@ -282,12 +289,12 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                 <CustomTextField
                   name="ticket_number"
                   control={control}
-                  label="TICKET #"
+                  label={t("columns.ticketNo") ?? "TICKET #"}
                 />
 
-                <CustomTextField name="pnr" control={control} label="PNR" />
+                <CustomTextField name="pnr" control={control} label={t("columns.pnr") ?? "PNR"} />
 
-                <CustomTextField name="route" control={control} label="Route" />
+                <CustomTextField name="route" control={control} label={t("columns.route") ?? "Route"} />
 
                 <CustomDatePicker
                   name="flight_date"
@@ -309,7 +316,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                 <CustomTextField
                   name="class"
                   control={control}
-                  label="Class"
+                  label={t("columns.cabinClass") ?? "Class"}
                 />
 
                 <CurrencyAmount
@@ -361,19 +368,20 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   name="quoted_price"
                   control={control}
                   type="number"
-                  label="AYDYLAN BAHA"
+                  label={t("columns.quotedFare") ?? "AYDYLAN BAHA"}
                   startIcon={currencySymbol}
                   onChange={() => {
                     isAdjustedFareManualRef.current = true;
                   }}
                 />
 
-                <CustomTextField
+                 <CustomTextField
                   name="accepted_price"
                   control={control}
                   type="number"
                   label={t("columns.accepted")}
                   startIcon={currencySymbol}
+                  disabled={isPaidValue === false}
                 />
 
                 <CustomTextField
@@ -382,7 +390,26 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   type="number"
                   label={t("columns.changeAmount")}
                   startIcon={currencySymbol}
+                  disabled={isPaidValue === false}
                 />
+
+                <CustomSelect
+                  name="is_paid"
+                  control={control}
+                  label={t("columns.paymentStatus")}
+                  options={paymentOptions}
+                />
+
+                <Box sx={{ gridColumn: { xs: "1 / -1", md: "span 2" } }}>
+                  <AgentAccordion
+                    control={control}
+                    fullNameName="agent.name"
+                    phoneNumberName="agent.phone_number"
+                    title={t("columns.agent") ?? "Agent"}
+                    fullNameLabel={t("columns.agentFullName")}
+                    phoneNumberLabel={t("ticket.b2b.agentPhoneNumber") ?? "Agent Phone Number"}
+                  />
+                </Box>
               </Box>
             </Box>
 
@@ -414,33 +441,9 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
             </Box>
 
             <Box sx={fieldItemSx(3)}>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    lg: "repeat(2, minmax(0, 1fr))",
-                  },
-                  gap: 2,
-                }}
-              >
-                <AgentAccordion
-                  control={control}
-                  fullNameName="agent.name"
-                  phoneNumberName="agent.phone_number"
-                  title={t("columns.agent") ?? "Agent"}
-                  fullNameLabel={t("columns.agentFullName")}
-                  phoneNumberLabel={t("ticket.b2b.agentPhoneNumber") ?? "Agent Phone Number"}
-                />
-              </Box>
-            </Box>
-
-            <Box sx={fieldItemSx(3)}>
               <CustomTextField
                 name="note"
                 control={control}
-                multiline
-                rows={2}
                 label={t("columns.note")}
               />
             </Box>

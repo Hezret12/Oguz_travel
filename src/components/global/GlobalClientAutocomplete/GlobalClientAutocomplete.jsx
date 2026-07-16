@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -21,7 +21,6 @@ import { useDebounce } from "../../../hooks/useDebounce";
 const DEFAULT_COLUMNS = ["fullName", "phone_number", "passport_number"];
 
 const getResponseClients = (response) => response?.data?.data ?? [];
-console.log(getResponseClients)
 const normalizeClient = (client) => ({
   ...client,
   guid: client?.guid,
@@ -44,7 +43,6 @@ const getColumnValue = (client, column, t) => {
   const rawValue = client?.[key];
 
   if (format) return format(rawValue, client);
-  if (key === "phone_number" && rawValue) return `+993 ${rawValue}`;
   return rawValue ?? "";
 };
 
@@ -156,12 +154,12 @@ const GlobalClientAutocompleteField = ({
   initialClient = null,
 }) => {
   const [createdClient, setCreatedClient] = useState(initialClient);
+  const [prevInitialClient, setPrevInitialClient] = useState(initialClient);
 
-  useEffect(() => {
-    if (initialClient) {
-      setCreatedClient(initialClient);
-    }
-  }, [initialClient]);
+  if (initialClient !== prevInitialClient) {
+    setPrevInitialClient(initialClient);
+    setCreatedClient(initialClient);
+  }
 
   const selectedClient =
     clients.find((client) => (client.guid || client.id) === field.value) ?? createdClient;
@@ -375,15 +373,15 @@ const GlobalAutoCompleteClient = ({
 }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const [prevInitialClient, setPrevInitialClient] = useState(initialClient);
   const [inputValue, setInputValue] = useState(
     initialClient ? getClientSummary(initialClient, columns, t) : ""
   );
 
-  useEffect(() => {
-    if (initialClient) {
-      setInputValue(getClientSummary(initialClient, columns, t));
-    }
-  }, [initialClient, columns, t]);
+  if (initialClient !== prevInitialClient) {
+    setPrevInitialClient(initialClient);
+    setInputValue(initialClient ? getClientSummary(initialClient, columns, t) : "");
+  }
   const [isOpen, setIsOpen] = useState(false);
   const debouncedSearch = useDebounce(inputValue, 400);
   const queryParams = useMemo(
