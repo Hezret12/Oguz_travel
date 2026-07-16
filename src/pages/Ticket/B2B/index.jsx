@@ -40,6 +40,7 @@ import DeleteDialog from "../../../components/DeleteDialog";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { deleteB2BApi } from "../../../api/queries/delete";
+import PaymentStatusCell from "../../../components/PaymentStatusCell";
 
 const formatDate = (value) => {
   if (!value) return "";
@@ -217,7 +218,7 @@ const B2B = () => {
       {
         accessorFn: (row) => getStatusKey(row),
         id: "status",
-        header: t('columns.status'),
+        header: t("columns.status"),
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => (
@@ -229,13 +230,16 @@ const B2B = () => {
         size: 90,
       },
       {
-        accessorFn: (row) => (row.is_paid ? "TOLENDI" : "KREDIT"),
-        id: "payment_status",
-        header: t('columns.paymentStatus'),
-        Cell: ({ cell }) => (
-          <StatusChip status={cell.getValue()} config={PAYMENT_STATUS_CONFIG} />
+        accessorFn: (row) => {
+          const pct = row.paidPercentage;
+          return typeof pct === "string" ? parseFloat(pct) : pct;
+        },
+        id: "paidPercentage",
+        header: t("columns.paymentStatus"),
+        size: 110,
+        Cell: ({ row }) => (
+          <PaymentStatusCell percent={row.original.paidPercentage} />
         ),
-        size: 90,
       },
       {
         accessorFn: (row) => row.net_price,
@@ -518,7 +522,6 @@ const B2B = () => {
     renderEditRowDialogContent: ({ table, row }) => (
       <EditB2BDialog table={table} row={row} />
     ),
-
   });
 
   return (

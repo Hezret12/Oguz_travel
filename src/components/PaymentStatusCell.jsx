@@ -14,7 +14,8 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const PaymentStatusCell = ({ percent = 0 }) => {
-  const value = Math.min(100, Math.max(0, Math.round(percent)));
+  const numericPercent = typeof percent === "string" ? parseFloat(percent) : percent;
+  const value = Math.min(100, Math.max(0, Math.round(numericPercent || 0)));
   const { ring, track, text } = getPaymentColor(value);
   const offset = CIRCUMFERENCE - (value / 100) * CIRCUMFERENCE;
 
