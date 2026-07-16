@@ -403,7 +403,15 @@
     "myProfile": "Мой Профиль",
     "employee": "Сотрудники",
     "employees": "Сотрудники",
-    "users": "Пользователи"
+    "users": "Пользователи",
+    "referalLetters": "Рекомендательные письма",
+    "visaApplications": "Визовые анкеты",
+    "visa": {
+      "package": "Пакеты",
+      "packageDescription": "Управление визовыми пакетами и услугами",
+      "packages": "Пакеты",
+      "individualServices": "Отдельные услуги"
+    }
   },
   "turkish": {
     "title": "Turkish Airlines",

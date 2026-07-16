@@ -80,27 +80,27 @@
     "milesSmiles": "Miles & Smiles",
     "quotedFare": "Quoted Fare"
   },
-    "login": {
-      "welcomeTitle": "Welcome to Oguz Travel Portal",
-      "welcomeSubtitle": "Modern, secure and flexible role-based management system for travel agencies, agents and passengers.",
-      "signIn": "Sign In",
-      "signInSubtitle": "Enter your phone number and password to continue",
-      "phoneNumberHint": "Example: 61123456",
-      "loginButton": "Sign In",
-      "loggingIn": "Signing In...",
-      "testMode": "TEST MODE (QUICK LOGIN BY SELECTING ROLE)",
-      "quickLoginText": "Click to login with demo credentials:",
-      "loginFailed": "Login failed. Please check your credentials.",
-      "invalidResponse": "Invalid server response. Please try again.",
-      "networkError": "Network error. Please check your connection.",
-      "validation": {
-        "phoneNumberRequired": "Phone number is required",
-        "phoneNumberLength": "Phone number must be exactly 8 digits",
-        "phoneNumberInvalid": "Invalid phone number",
-        "passwordRequired": "Password is required",
-        "passwordTooShort": "Password is too short",
-        "passwordMaxLength": "Password is too long"
-      },
+  "login": {
+    "welcomeTitle": "Welcome to Oguz Travel Portal",
+    "welcomeSubtitle": "Modern, secure and flexible role-based management system for travel agencies, agents and passengers.",
+    "signIn": "Sign In",
+    "signInSubtitle": "Enter your phone number and password to continue",
+    "phoneNumberHint": "Example: 61123456",
+    "loginButton": "Sign In",
+    "loggingIn": "Signing In...",
+    "testMode": "TEST MODE (QUICK LOGIN BY SELECTING ROLE)",
+    "quickLoginText": "Click to login with demo credentials:",
+    "loginFailed": "Login failed. Please check your credentials.",
+    "invalidResponse": "Invalid server response. Please try again.",
+    "networkError": "Network error. Please check your connection.",
+    "validation": {
+      "phoneNumberRequired": "Phone number is required",
+      "phoneNumberLength": "Phone number must be exactly 8 digits",
+      "phoneNumberInvalid": "Invalid phone number",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password is too short",
+      "passwordMaxLength": "Password is too long"
+    },
     "employee": {
       "title": "Employees",
       "subtitle": "Manage employee records and assignments.",
@@ -404,7 +404,15 @@
     "myProfile": "My Profile",
     "employee": "Employee",
     "employees": "Employees",
-    "users": "Users"
+    "users": "Users",
+    "referalLetters": "Referral Letters",
+    "visaApplications": "Visa Applications",
+    "visa": {
+      "package": "Packages",
+      "packageDescription": "Visa packages and individual services",
+      "packages": "Packages",
+      "individualServices": "Individual Services"
+    }
   },
   "turkish": {
     "title": "Turkish Airlines",

@@ -16,6 +16,7 @@ import NotFoundPage from '../pages/NotFound';
 import UnauthorizedPage from '../pages/Unauthorized';
 import VisaPage from '../pages/Visa';
 import ReferralLetter from '../pages/ReferralLetter/index';
+import PackagePage from '../pages/Visa/Package/Package';
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
               { path: 'clients',        element: <ClientsPage /> },
               { path: 'visa/applications', element: <VisaPage /> },
               { path: 'visa/referal-letters', element: <ReferralLetter /> },
+              { path: 'visa/package',      element: <PackagePage /> },
               {
                 path: 'ticket',
                 element: <TicketPage />,

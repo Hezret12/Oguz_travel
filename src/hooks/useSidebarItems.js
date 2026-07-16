@@ -79,6 +79,11 @@ export const useSidebarItems = () => {
             path: "/visa/referal-letters",
             icon: createElement(NoteAddIcon),
           },
+          {
+            text: t("sidebar.visa.package"),
+            path: "/visa/package",
+            icon: createElement(NoteAddIcon),
+          },
         ],
       },
       {

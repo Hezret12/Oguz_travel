@@ -223,7 +223,13 @@
     "employees": "Işgärler",
     "users": "Ulanyjylar",
     "referalLetters": "Ýollanma haty",
-    "visaApplications": "Wiza arza"
+    "visaApplications": "Wiza arza",
+    "visa": {
+      "package": "Bukjalar",
+      "packageDescription": "Bukjalar we aýratyn hyzmatlar",
+      "packages": "Bukjalar",
+      "individualServices": "Ayratyn hyzmatlar"
+    }
   },
   "turkish": {
     "addTicket": "Türk howa ýollary bilet goşmak",
