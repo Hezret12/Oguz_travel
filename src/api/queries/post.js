@@ -54,3 +54,19 @@ export const addTurkishAirlinesApi = async (data) => {
   return response;
 };
 
+export const addVisaPackageApi = async (data) => {
+  const response = await api.postPrivate(
+    "/visa-package/add-visa-package",
+    data,
+  );
+  return response;
+};
+
+export const addVisaCategoryApi = async (data) => {
+  const response = await api.postPrivate(
+    "/visa-category/add-visa-category",
+    data,
+  );
+  return response;
+};
+

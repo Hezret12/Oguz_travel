@@ -30,3 +30,13 @@ export const updateTicketPaymentApi = async (data) => {
   const response = await api.patchPrivate(`/ticket-payment/update-ticket-payment`, data);
   return response;
 };
+
+export const updateVisaPackageApi = async (data) => {
+  const response = await api.patchPrivate(`/visa-package/update-visa-package`, data);
+  return response;
+};
+
+export const updateVisaCategoryApi = async (data) => {
+  const response = await api.patchPrivate(`/visa-category/update-visa-category`, data);
+  return response;
+};

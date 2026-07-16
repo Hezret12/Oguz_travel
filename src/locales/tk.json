@@ -93,7 +93,15 @@
     "returnDate": "Gaýdyp gelýän senesi",
     "contractDate": "Şertnama senesi",
     "milesSmiles": "Miles & Smiles",
-    "quotedFare": "Aýdylan baha"
+    "quotedFare": "Aýdylan baha",
+    "serviceName": "Hyzmat ady",
+    "price": "Bahasy",
+    "category": "Kategoriýa",
+    "sortOrder": "Tertip belgisi",
+    "description": "Düşündiriş",
+    "salePrice": "Arzanladyşly bahasy",
+    "saleStartDate": "Başlangyç senesi",
+    "saleEndDate": "Gutarýan senesi"
   },
   "login": {
     "welcomeTitle": "Oguz Travel Portalyna Hoş Geldiňiz",
@@ -283,5 +291,10 @@
       "saleFareRequired": "Sale fare is required",
       "cardRequired": "Card is required"
     }
-  }
+  },
+  "sale": "Arzanladyş",
+  "saleSettings": "Arzanladyş / Indirim Sazlamalary (Gerek bolsa)",
+  "categoryExists": "Bu kategoriýa eýýäm bar!",
+  "editCategory": "Kategoriýany düzetmek",
+  "addCategory": "Täze kategoriýa goşmak"
 }

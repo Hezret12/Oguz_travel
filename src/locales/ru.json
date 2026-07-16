@@ -78,7 +78,15 @@
     "accepted": "Принято",
     "changeAmount": "Сдача",
     "milesSmiles": "Miles & Smiles",
-    "quotedFare": "Названная цена"
+    "quotedFare": "Названная цена",
+    "serviceName": "Название услуги",
+    "price": "Цена",
+    "category": "Категория",
+    "sortOrder": "Порядок сортировки",
+    "description": "Описание",
+    "salePrice": "Скидочная цена",
+    "saleStartDate": "Дата начала скидки",
+    "saleEndDate": "Дата окончания скидки"
   },
   "login": {
     "welcomeTitle": "Добро пожаловать на портал Oguz Travel",
@@ -469,5 +477,10 @@
         }
       }
     }
-  }
+  },
+  "sale": "Скидка",
+  "saleSettings": "Настройки скидок (Необязательно)",
+  "categoryExists": "Эта категория уже существует!",
+  "editCategory": "Редактировать категорию",
+  "addCategory": "Добавить новую категорию"
 }

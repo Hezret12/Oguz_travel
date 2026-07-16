@@ -78,7 +78,15 @@
     "accepted": "Accepted",
     "changeAmount": "Change",
     "milesSmiles": "Miles & Smiles",
-    "quotedFare": "Quoted Fare"
+    "quotedFare": "Quoted Fare",
+    "serviceName": "Service Name",
+    "price": "Price",
+    "category": "Category",
+    "sortOrder": "Sort Order",
+    "description": "Description",
+    "salePrice": "Sale Price",
+    "saleStartDate": "Sale Start Date",
+    "saleEndDate": "Sale End Date"
   },
   "login": {
     "welcomeTitle": "Welcome to Oguz Travel Portal",
@@ -470,5 +478,10 @@
         }
       }
     }
-  }
+  },
+  "sale": "Sale",
+  "saleSettings": "Sale / Discount Settings (Optional)",
+  "categoryExists": "This category already exists!",
+  "editCategory": "Edit Category",
+  "addCategory": "Add New Category"
 }

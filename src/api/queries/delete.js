@@ -30,3 +30,8 @@ export const deleteUser = async (guid) => {
   const response = await api.deletePrivate('/user/delete-user', guid);
   return response;
 };
+
+export const deleteVisaPackageApi = async (guid) => {
+  const response = await api.deletePrivate('/visa-package/delete-visa-package', guid);
+  return response;
+};
