@@ -61,3 +61,7 @@ export const getAllVisaPackagesApi = async (params = {}) => {
 export const getAllVisaCategoriesApi = async (params = {}) => {
   return await api.getPrivate('/visa-category/get-all-visa-categories', params);
 };
+
+export const getAllReferralLettersApi = async (params = {}) => {
+  return await api.getPrivate('/referral-letter/get-all-referral-letters', params);
+};

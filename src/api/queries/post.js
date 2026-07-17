@@ -70,3 +70,11 @@ export const addVisaCategoryApi = async (data) => {
   return response;
 };
 
+export const addReferralLetterApi = async (data) => {
+  const response = await api.postPrivate(
+    "/referral-letter/add-referral-letter",
+    data,
+  );
+  return response;
+};
+

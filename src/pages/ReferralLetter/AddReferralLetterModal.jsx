@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { Box, Tooltip } from "@mui/material";
-import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
-import { useForm } from "react-hook-form";
+import { useMemo } from "react";
+import { Box } from "@mui/material";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import toast from "react-hot-toast";
 
 import { useLocale } from "../../hooks/useLocale";
 import { useValidShema } from "../../functions/useValidShema";
@@ -20,13 +18,14 @@ import CurrencyAmount from "../../components/inputs/CurrencyAmount";
 import AgentAccordion from "../../components/global/AgentAccordion";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import LabelWithTooltip from "../../components/LabelWithTooltip";
+import { useCreate } from "../../hooks/CRUD/useCreate";
+import { addReferralLetterApi } from "../../api/queries/post";
 
-const AddReferralLetterModal = ({ open, onClose, onSave, editItem }) => {
+
+const AddReferralLetterModal = ({ table }) => {
   const { t, selectedLang } = useLocale();
   const { addReferralLetter } = useValidShema();
-  const [loading, setLoading] = useState(false);
 
-  // Fetch employees list for receiver operator
   const { data: employees = [] } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
@@ -43,10 +42,7 @@ const AddReferralLetterModal = ({ open, onClose, onSave, editItem }) => {
         const label = officeShort
           ? `${emp.fullName} (${officeShort})`
           : emp.fullName;
-        return {
-          label,
-          value: emp.guid,
-        };
+        return { label, value: emp.guid };
       }),
     [employees, selectedLang],
   );
@@ -59,125 +55,47 @@ const AddReferralLetterModal = ({ open, onClose, onSave, editItem }) => {
     [t],
   );
 
-  const defaultValues = useMemo(
-    () => ({
-      client_guid: editItem?.client_guid ?? "",
-      application_number: editItem?.application_number ?? "",
-      received_opr_guid: editItem?.received_opr_guid ?? "",
-      agent: {
-        name: editItem?.agent?.name ?? editItem?.agent ?? "",
-        phone_number: editItem?.agent?.phone_number ?? editItem?.agentTel ?? "",
-      },
-      destination_country: editItem?.destination_country ?? "",
-      tranzit: editItem?.tranzit ?? "",
-      travel_document_number: editItem?.travel_document_number ?? "",
-      departure_date: editItem?.departure_date ?? "",
-      return_date: editItem?.return_date ?? "",
-      price: editItem?.price ?? "",
-      currency: editItem?.currency ?? "USD",
-      is_paid: editItem?.is_paid ?? true,
-      contract_number: editItem?.contract_number ?? "",
-      contract_date: editItem?.contract_date ?? "",
-      note: editItem?.note ?? "",
-    }),
-    [editItem],
-  );
+  const { mutate: createReferralLetter, isPending: isSubmit } = useCreate({
+    apiFn: addReferralLetterApi,
+    key: "referralLetters",
+    onSuccess: () => {
+      table.setCreatingRow(null);
+    },
+  });
 
-  const { control, handleSubmit, reset, setValue, watch } = useForm({
-    defaultValues,
+  const { control, handleSubmit, setValue } = useForm({
+    defaultValues: {
+      client_guid: "",
+      application_number: "",
+      received_opr_guid: "",
+      agent: { name: "", phone_number: "" },
+      destination_country: "",
+      tranzit: "",
+      travel_document_number: "",
+      departure_date: "",
+      return_date: "",
+      price: "",
+      currency: "TMT",
+      is_paid: true,
+      contract_number: "",
+      contract_date: "",
+      note: "",
+    },
     resolver: yupResolver(addReferralLetter),
     mode: "onSubmit",
   });
 
-  const selectedCurrency = watch("currency") || "USD";
-
-  const applyClientToForm = (client) => {
-    let firstName = client?.name || "";
-    let lastName = client?.surname || "";
-    if (!firstName && !lastName && client?.fullName) {
-      const parts = client.fullName.trim().split(/\s+/);
-      firstName = parts[0] || "";
-      lastName = parts.slice(1).join(" ") || "";
-    }
-    setValue("name", firstName, { shouldDirty: true, shouldValidate: true });
-    setValue("surname", lastName, { shouldDirty: true, shouldValidate: true });
-    setValue("yolagcyTel", client?.phone_number || "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue("gender", client?.gender || "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue(
-      "dateOfBirth",
-      client?.dateOfBirth ? client.dateOfBirth.split("T")[0] : "",
-      {
-        shouldDirty: true,
-        shouldValidate: true,
-      },
-    );
-    setValue("passportNumber", client?.passport_number || "", {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-  };
-
-  useEffect(() => {
-    if (open) {
-      reset(defaultValues);
-    }
-  }, [open, reset, defaultValues]);
+  const selectedCurrency = useWatch({ control, name: "currency" }) || "TMT";
 
   const closeDialog = () => {
-    onClose?.();
-    reset(defaultValues);
+    table.setCreatingRow(null);
   };
 
-  const submitHandler = async (values) => {
-    try {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 250));
-
-      const selectedEmployee = employees.find(
-        (emp) => emp.guid === values.received_opr_guid,
-      );
-      const operatorName = selectedEmployee ? selectedEmployee.fullName : "";
-      const officeName =
-        selectedEmployee?.office?.name ||
-        selectedEmployee?.office?.fullName ||
-        "";
-
-      onSave?.({
-        ...values,
-        price: Number(values.price || 0),
-        operator: operatorName || values.operator,
-        ofis: officeName || values.ofis,
-      });
-
-      toast.success(
-        editItem
-          ? t(
-            "pages.referralLetter.editSuccess",
-            "Referral updated successfully!",
-          )
-          : t(
-            "pages.referralLetter.addSuccess",
-            "Referral added successfully!",
-          ),
-      );
-      closeDialog();
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        t(
-          "pages.referralLetter.addError",
-          "An error occurred while saving referral.",
-        ),
-      );
-    } finally {
-      setLoading(false);
-    }
+  const submitHandler = (values) => {
+    createReferralLetter({
+      ...values,
+      price: Number(values.price || 0),
+    });
   };
 
   const autocompleteColumns = useMemo(
@@ -191,14 +109,10 @@ const AddReferralLetterModal = ({ open, onClose, onSave, editItem }) => {
   );
 
   return (
-    <CustomDialog widthX={860} open={open} close={closeDialog}>
+    <CustomDialog widthX={860} open={true} close={closeDialog}>
       <CustomDialogHeader
         variant="h5"
-        title={
-          editItem
-            ? t("pages.referralLetter.edit")
-            : t("pages.referralLetter.add")
-        }
+        title={t("pages.referralLetter.add")}
       />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box
@@ -213,13 +127,8 @@ const AddReferralLetterModal = ({ open, onClose, onSave, editItem }) => {
             <GlobalClientAutocomplete
               control={control}
               name="client_guid"
-              label={t("columns.client") ?? "Client"}
-              placeholder={
-                t("pages.clients.autocomplete.clientPlaceholder") ??
-                "Search client..."
-              }
+              label={t("columns.client")}
               columns={autocompleteColumns}
-              onClientChange={applyClientToForm}
             />
           </Box>
 
@@ -275,6 +184,7 @@ const AddReferralLetterModal = ({ open, onClose, onSave, editItem }) => {
               />
             }
           />
+
           <CurrencyAmount
             name="price"
             control={control}
@@ -323,7 +233,7 @@ const AddReferralLetterModal = ({ open, onClose, onSave, editItem }) => {
           </Box>
         </Box>
 
-        <FooterButton loading={loading} onCancel={closeDialog} type="submit" />
+        <FooterButton loading={isSubmit} onCancel={closeDialog} type="submit" />
       </CustomForm>
     </CustomDialog>
   );

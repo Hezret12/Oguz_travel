@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMemo } from "react";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
@@ -23,12 +23,10 @@ import { useGet } from "../../../hooks/CRUD/useGet";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import CurrencyAmount from "../../../components/inputs/CurrencyAmount";
 
-
 const TRIP_TYPE_OPTIONS = [
   { label: "One Way", value: 0 },
   { label: "Round Trip", value: 1 },
 ];
-
 
 const PAYMENT_OPTIONS = [
   { label: "Tolendi", value: true },
@@ -87,7 +85,7 @@ const AddB2BTicketDialog = ({ table }) => {
     },
   });
 
-  const { control, handleSubmit, watch, setValue } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
       datetime: "",
       assignment_opr_guid: "",
@@ -115,9 +113,10 @@ const AddB2BTicketDialog = ({ table }) => {
     mode: "onSubmit",
   });
 
-  const selectedCurrency = watch("currency") || "USD";
-  const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
+  // const selectedCurrency = watch("currency") || "USD";
+  const selectedCurrency = useWatch({ control, name: "currency" }) || "USD";
 
+  const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
 
   const closeDialog = () => {
     if (table) {
@@ -146,7 +145,6 @@ const AddB2BTicketDialog = ({ table }) => {
     }
   };
 
-
   return (
     <CustomDialog widthX={760} open={true} close={closeDialog}>
       <Box
@@ -156,10 +154,7 @@ const AddB2BTicketDialog = ({ table }) => {
           minHeight: 0,
         }}
       >
-        <CustomDialogHeader
-          variant="h5"
-          title={t("b2b.addTicket")}
-        />
+        <CustomDialogHeader variant="h5" title={t("b2b.addTicket")} />
 
         <CustomForm handleSubmit={handleSubmit(submitHandler)}>
           <Box
@@ -291,19 +286,25 @@ const AddB2BTicketDialog = ({ table }) => {
                     borderRadius: "7px",
                     minHeight: "44px",
                     backgroundColor: (theme) =>
-                      theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.03)"
+                        : "#ffffff",
                     transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                     pr: 0.5,
                     "&:hover": {
                       backgroundColor: (theme) =>
-                        theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "#ffffff",
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.05)"
+                          : "#ffffff",
                       "& .MuiOutlinedInput-notchedOutline": {
                         borderColor: "primary.main",
                       },
                     },
                     "&.Mui-focused": {
                       backgroundColor: (theme) =>
-                        theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.02)" : "#ffffff",
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.02)"
+                          : "#ffffff",
                       boxShadow: (theme) =>
                         theme.palette.mode === "dark"
                           ? "0 0 0 3px rgba(59, 130, 246, 0.16)"

@@ -5,6 +5,7 @@ import clientFiltersReducer from './slices/filters/clientFilterSlice';
 import b2bFiltersReducer from './slices/filters/b2bFilterSlice';
 import usersFiltersReducer from './slices/filters/usersFilterSlice';
 import turkishAirlinesFiltersReducer from './slices/filters/turkishAirlinesFilterSlice';
+import referralLetterFiltersReducer from './slices/filters/referralLetterFilterSlice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     b2bFilters:      b2bFiltersReducer,
     usersFilters:    usersFiltersReducer,
     turkishAirlinesFilters: turkishAirlinesFiltersReducer,
+    referralLetterFilters: referralLetterFiltersReducer,
     // ticketFilters:  ticketFiltersReducer,
     // visaFilters:    visaFiltersReducer,
     // paymentFilters: paymentFiltersReducer,

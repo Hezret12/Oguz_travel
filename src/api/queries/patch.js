@@ -40,3 +40,8 @@ export const updateVisaCategoryApi = async (data) => {
   const response = await api.patchPrivate(`/visa-category/update-visa-category`, data);
   return response;
 };
+
+export const updateReferralLetterApi = async (data) => {
+  const response = await api.patchPrivate(`/referral-letter/update-referral-letter`, data);
+  return response;
+};
