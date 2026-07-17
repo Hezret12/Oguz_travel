@@ -296,17 +296,16 @@
       "cardRequired": "Card is required"
     }
   },
-  "pages": {
-    "referralLetter": {
-      "title": "Ýollanma hatlary",
-      "add": "Ýollanma hatyny goşmak",
-      "edit": "Ýollanma hatyny üýtgetmek",
-      "deleteConfirm": "Siz hakykatdan hem bu ýollanma hatyny pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz.",
-      "deleteSuccess": "Ýollanma haty üstünlikli pozuldy!",
-      "addSuccess": "Ýollanma haty üstünlikli goşuldy!",
-      "editSuccess": "Ýollanma haty üstünlikli üýtgedildi!",
-      "travel_doc_tooltip": "Syýahat ýol hatynyň №."
-    }
+  "referralLetter": {
+    "title": "Ýollanma hatlary",
+    "add": "Ýollanma hatyny goşmak",
+    "edit": "Ýollanma hatyny üýtgetmek",
+    "deleteConfirm": "Siz hakykatdan hem bu ýollanma hatyny pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz.",
+    "deleteSuccess": "Ýollanma haty üstünlikli pozuldy!",
+    "addSuccess": "Ýollanma haty üstünlikli goşuldy!",
+    "editSuccess": "Ýollanma haty üstünlikli üýtgedildi!",
+    "travel_doc_tooltip": "Syýahat ýol hatynyň №.",
+    "syhNo": "S-ÝH №"
   },
   "sale": "Arzanladyş",
   "saleSettings": "Arzanladyş sazlamalary (Gerek bolsa)",

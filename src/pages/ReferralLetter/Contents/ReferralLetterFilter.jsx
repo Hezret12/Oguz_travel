@@ -3,7 +3,6 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { useLocale } from "../../../hooks/useLocale";
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
 const selectSx = {
   borderRadius: "10px",
   "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
@@ -23,7 +22,6 @@ const menuPaperProps = {
   },
 };
 
-// ─── Generic Filter Select ────────────────────────────────────────────────────
 const FilterSelect = ({
   label,
   name,
@@ -65,7 +63,6 @@ const FilterSelect = ({
   </FormControl>
 );
 
-// ─── Filter Date ──────────────────────────────────────────────────────────────
 const FilterDate = ({ label, name, value, onChange }) => (
   <FormControl fullWidth size="small">
     <Typography
@@ -92,7 +89,6 @@ const FilterDate = ({ label, name, value, onChange }) => (
   </FormControl>
 );
 
-// ─── ReferralLetterFilter ─────────────────────────────────────────────────────
 const ReferralLetterFilter = ({
   filters,
   selectsOpen,

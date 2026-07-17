@@ -72,7 +72,7 @@ export const addVisaCategoryApi = async (data) => {
 
 export const addReferralLetterApi = async (data) => {
   const response = await api.postPrivate(
-    "/referral-letter/add-referral-letter",
+    "/refferal-letter/add-refferal-letter",
     data,
   );
   return response;

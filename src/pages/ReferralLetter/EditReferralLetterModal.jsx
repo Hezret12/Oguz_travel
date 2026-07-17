@@ -21,17 +21,11 @@ import LabelWithTooltip from "../../components/LabelWithTooltip";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { updateReferralLetterApi } from "../../api/queries/patch";
 
-/**
- * EditReferralLetterModal — MRT pattern (like EditB2BDialog).
- * Props:
- *   table — MRT table instance (used to close editing row via table.setEditingRow(null))
- *   row   — MRT row instance (row.original contains the current record data)
- */
+
 const EditReferralLetterModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addReferralLetter } = useValidShema();
 
-  // ── Fetch employees (cache shared with AddReferralLetterModal) ──
   const { data: employees = [] } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
@@ -42,8 +36,8 @@ const EditReferralLetterModal = ({ table, row }) => {
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
           ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
+          selectedLang(emp.office.fullName) ||
+          ""
           : "";
         const label = officeShort
           ? `${emp.fullName} (${officeShort})`
@@ -53,15 +47,6 @@ const EditReferralLetterModal = ({ table, row }) => {
     [employees, selectedLang],
   );
 
-  const paymentOptions = useMemo(
-    () => [
-      { label: t("pages.ticket.payment.paid", "Tolendi"), value: true },
-      { label: t("pages.ticket.payment.credit", "Kredit"), value: false },
-    ],
-    [t],
-  );
-
-  // ── useUpdate — patches the "referralLetters" cache by guid ──
   const { mutate: updateReferralLetter, isPending: isSubmit } = useUpdate({
     apiFn: updateReferralLetterApi,
     key: "referralLetters",
@@ -71,7 +56,6 @@ const EditReferralLetterModal = ({ table, row }) => {
     },
   });
 
-  // ── Form — pre-filled from row.original ──
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
       guid: row?.original?.guid || "",
@@ -92,8 +76,6 @@ const EditReferralLetterModal = ({ table, row }) => {
           ? String(row.original.price)
           : "",
       currency: row?.original?.currency || "TMT",
-      is_paid:
-        row?.original?.is_paid !== undefined ? row.original.is_paid : true,
       contract_number: row?.original?.contract_number || "",
       contract_date: row?.original?.contract_date || "",
       note: row?.original?.note || "",
@@ -129,7 +111,7 @@ const EditReferralLetterModal = ({ table, row }) => {
     <CustomDialog widthX={860} open={true} close={closeDialog}>
       <CustomDialogHeader
         variant="h5"
-        title={t("pages.referralLetter.edit")}
+        title={t("referralLetter.edit")}
       />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box
@@ -208,14 +190,6 @@ const EditReferralLetterModal = ({ table, row }) => {
             label={t("price")}
             currency={selectedCurrency}
             onCurrencyChange={(curr) => setValue("currency", curr)}
-            required
-          />
-
-          <CustomSelect
-            name="is_paid"
-            control={control}
-            label={t("columns.paymentStatus")}
-            options={paymentOptions}
             required
           />
 

@@ -411,9 +411,9 @@ const ReferalLetter = () => {
   return (
     <>
       <PageHeader
-        title={t("pages.referralLetter.title")}
-        pageTitle={`${t("pages.referralLetter.title")} | Oguz Travel`}
-        addButtonText={t("pages.referralLetter.add")}
+        title={t("referralLetter.title")}
+        pageTitle={`${t("referralLetter.title")} | Oguz Travel`}
+        addButtonText={t("referralLetter.add")}
         filterButtonText={t("filter")}
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}

@@ -47,14 +47,6 @@ const AddReferralLetterModal = ({ table }) => {
     [employees, selectedLang],
   );
 
-  const paymentOptions = useMemo(
-    () => [
-      { label: t("pages.ticket.payment.paid", "Tolendi"), value: true },
-      { label: t("pages.ticket.payment.credit", "Kredit"), value: false },
-    ],
-    [t],
-  );
-
   const { mutate: createReferralLetter, isPending: isSubmit } = useCreate({
     apiFn: addReferralLetterApi,
     key: "referralLetters",
@@ -76,7 +68,6 @@ const AddReferralLetterModal = ({ table }) => {
       return_date: "",
       price: "",
       currency: "TMT",
-      is_paid: true,
       contract_number: "",
       contract_date: "",
       note: "",
@@ -112,7 +103,7 @@ const AddReferralLetterModal = ({ table }) => {
     <CustomDialog widthX={860} open={true} close={closeDialog}>
       <CustomDialogHeader
         variant="h5"
-        title={t("pages.referralLetter.add")}
+        title={t("referralLetter.add")}
       />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box
@@ -180,7 +171,7 @@ const AddReferralLetterModal = ({ table }) => {
             label={
               <LabelWithTooltip
                 label={t("columns.syhNo", "S-ÝH №")}
-                tooltip={t("pages.referralLetter.travel_doc_tooltip")}
+                tooltip={t("referralLetter.travel_doc_tooltip")}
               />
             }
           />
@@ -194,13 +185,6 @@ const AddReferralLetterModal = ({ table }) => {
             required
           />
 
-          <CustomSelect
-            name="is_paid"
-            control={control}
-            label={t("columns.paymentStatus")}
-            options={paymentOptions}
-            required
-          />
 
           <CustomTextField
             name="contract_number"
