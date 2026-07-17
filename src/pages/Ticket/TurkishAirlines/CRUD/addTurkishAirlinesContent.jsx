@@ -18,7 +18,7 @@ import CustomDatePicker from "../../../../components/CustomDatePicker";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { addTurkishAirlinesApi } from "../../../../api/queries/post";
 import { useGet } from "../../../../hooks/CRUD/useGet";
-import { getAllEmployeeApi, getAllStatusApi } from "../../../../api/queries/getters";
+import { getAllEmployeeApi, getAllStatusApi, getAllOfficeApi } from "../../../../api/queries/getters";
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 
 const CURRENCY_SYMBOLS = {
@@ -55,13 +55,28 @@ const AddTurkishAirlinesContent = ({ table }) => {
     key: "employees",
   });
 
+  const { data: offices = [], isLoading: isOfficeLoading, isError: isOfficeError } = useGet({
+    apiFn: getAllOfficeApi,
+    key: "office",
+  });
+
   const employeeOptions = useMemo(
     () =>
-      (employees || []).map((emp) => ({
-        label: emp.fullName,
-        value: emp.guid,
-      })),
-    [employees],
+      (employees || []).map((emp) => {
+        const officeShort = emp.office?.shortName
+          ? selectedLang(emp.office.shortName) ||
+            selectedLang(emp.office.fullName) ||
+            ""
+          : "";
+        const label = officeShort
+          ? `${emp.fullName} (${officeShort})`
+          : emp.fullName;
+        return {
+          label,
+          value: emp.guid,
+        };
+      }),
+    [employees, selectedLang],
   );
 
   const { mutate: createTurkishAirlines, isPending: isSubmit } = useCreate({
@@ -92,6 +107,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
       returned_price: "",
       currency: "USD",
       is_paid: true,
+      paymentDestination_guid: "",
       agent: {
         name: "",
         phone_number: "",
@@ -148,15 +164,6 @@ const AddTurkishAirlinesContent = ({ table }) => {
 
   const submitHandler = async (data) => {
     try {
-      // Find selected operator's office_guid from employees list
-      const selectedEmployee = employees.find(
-        (emp) => emp.guid === data.assignment_opr_guid
-      );
-      const officeGuid =
-        selectedEmployee?.office?.guid ||
-        selectedEmployee?.office_guid ||
-        "";
-
       const payload = {
         datetime: data.datetime
           ? new Date(data.datetime).toISOString()
@@ -183,7 +190,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
         accepted_price: Number(data.accepted_price || 0),
         returned_price: Number(data.returned_price || 0),
         currency: data.currency || "USD",
-        office_guid: officeGuid || null,
+        paymentDestination_guid: data.paymentDestination_guid || null,
         note: data.note?.trim() || "",
         is_paid: Boolean(data.is_paid),
       };
@@ -359,18 +366,25 @@ const AddTurkishAirlinesContent = ({ table }) => {
                   startIcon={currencySymbol}
                 />
 
-                <CustomTextField
-                  name="quoted_price"
+                <CustomSelect
+                  name="paymentDestination_guid"
                   control={control}
-                  type="number"
-                  label={t("columns.quotedFare") ?? "AYDYLAN BAHA"}
-                  startIcon={currencySymbol}
-                  onChange={() => {
-                    isAdjustedFareManualRef.current = true;
-                  }}
+                  label={t("kassa")}
+                  options={offices}
+                  isLoading={isOfficeLoading}
+                  isError={isOfficeError}
+                  getRowId={(item) => item.guid}
+                  getRowLabel={(item) => selectedLang(item?.shortName) || selectedLang(item?.fullName)}
                 />
 
-                 <CustomTextField
+                <CustomSelect
+                  name="is_paid"
+                  control={control}
+                  label={t("columns.paymentStatus")}
+                  options={paymentOptions}
+                />
+
+                <CustomTextField
                   name="accepted_price"
                   control={control}
                   type="number"
@@ -388,21 +402,16 @@ const AddTurkishAirlinesContent = ({ table }) => {
                   disabled={isPaidValue === false}
                 />
 
-                <CustomSelect
-                  name="is_paid"
-                  control={control}
-                  label={t("columns.paymentStatus")}
-                  options={paymentOptions}
-                />
+
 
                 <Box sx={{ gridColumn: { xs: "1 / -1", md: "span 2" } }}>
                   <AgentAccordion
                     control={control}
                     fullNameName="agent.name"
                     phoneNumberName="agent.phone_number"
-                    title={t("columns.agent") ?? "Agent"}
+                    title={t("columns.agent")}
                     fullNameLabel={t("columns.agentFullName")}
-                    phoneNumberLabel={t("ticket.b2b.agentPhoneNumber") ?? "Agent Phone Number"}
+                    phoneNumberLabel={t("ticket.b2b.agentPhoneNumber")}
                   />
                 </Box>
               </Box>

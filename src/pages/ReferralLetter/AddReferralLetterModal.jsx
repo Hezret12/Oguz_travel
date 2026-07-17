@@ -1,86 +1,123 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Box } from '@mui/material';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import toast from 'react-hot-toast';
-import { useLocale } from '../../hooks/useLocale';
-import { useValidShema } from '../../functions/useValidShema';
-import { CustomDialog } from '../../components/Dialog/CustomDialog';
-import { CustomDialogHeader } from '../../components/Dialog/CustomDialogHeader';
-import { CustomForm } from '../../components/Dialog/CustomForm';
-import CustomTextField from '../../components/CustomTextField';
-import CustomSelect from '../../components/CustomSelect';
-import PhoneNumberField from '../../components/inputs/PhoneNumber';
-import FooterButton from '../../components/Dialog/FooterButton';
-import GlobalClientAutocomplete from '../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete';
+import { useEffect, useMemo, useState } from "react";
+import { Box, Tooltip } from "@mui/material";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import toast from "react-hot-toast";
 
-const genderOptions = [
-  { label: 'Male', value: 'Male' },
-  { label: 'Female', value: 'Female' },
-];
+import { useLocale } from "../../hooks/useLocale";
+import { useValidShema } from "../../functions/useValidShema";
+import { CustomDialog } from "../../components/Dialog/CustomDialog";
+import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
+import { CustomForm } from "../../components/Dialog/CustomForm";
+import CustomTextField from "../../components/CustomTextField";
+import CustomSelect from "../../components/CustomSelect";
+import FooterButton from "../../components/Dialog/FooterButton";
+import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
+import { useGet } from "../../hooks/CRUD/useGet";
+import { getAllEmployeeApi } from "../../api/queries/getters";
+import CurrencyAmount from "../../components/inputs/CurrencyAmount";
+import AgentAccordion from "../../components/global/AgentAccordion";
+import CustomDatePicker from "../../components/CustomDatePicker";
+import LabelWithTooltip from "../../components/LabelWithTooltip";
 
-const AddReferralLetterModal = ({ open, onClose, onSave }) => {
-  const { t } = useLocale();
+const AddReferralLetterModal = ({ open, onClose, onSave, editItem }) => {
+  const { t, selectedLang } = useLocale();
   const { addReferralLetter } = useValidShema();
   const [loading, setLoading] = useState(false);
 
-  const defaultValues = useMemo(
-    () => ({
-      clientId: '',
-      arzaNo: '',
-      operator: '',
-      ofis: '',
-      agent: '',
-      agentTel: '',
-      name: '',
-      surname: '',
-      yolagcyTel: '',
-      gender: '',
-      dateOfBirth: '',
-      passportNumber: '',
-      destinationCountry: '',
-      tranzit: '',
-      syhNo: '',
-      departureDate: '',
-      returnDate: '',
-      price: '',
-      contractNo: '',
-      contractDate: '',
-      note: '',
-      syhHighlighted: false,
-    }),
-    [],
-  );
-
-  const { control, handleSubmit, reset, setValue } = useForm({
-    defaultValues,
-    resolver: yupResolver(addReferralLetter),
-    mode: 'onSubmit',
+  // Fetch employees list for receiver operator
+  const { data: employees = [] } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
   });
 
+  const employeeOptions = useMemo(
+    () =>
+      (employees || []).map((emp) => {
+        const officeShort = emp.office?.shortName
+          ? selectedLang(emp.office.shortName) ||
+          selectedLang(emp.office.fullName) ||
+          ""
+          : "";
+        const label = officeShort
+          ? `${emp.fullName} (${officeShort})`
+          : emp.fullName;
+        return {
+          label,
+          value: emp.guid,
+        };
+      }),
+    [employees, selectedLang],
+  );
+
+  const paymentOptions = useMemo(
+    () => [
+      { label: t("pages.ticket.payment.paid", "Tolendi"), value: true },
+      { label: t("pages.ticket.payment.credit", "Kredit"), value: false },
+    ],
+    [t],
+  );
+
+  const defaultValues = useMemo(
+    () => ({
+      client_guid: editItem?.client_guid ?? "",
+      application_number: editItem?.application_number ?? "",
+      received_opr_guid: editItem?.received_opr_guid ?? "",
+      agent: {
+        name: editItem?.agent?.name ?? editItem?.agent ?? "",
+        phone_number: editItem?.agent?.phone_number ?? editItem?.agentTel ?? "",
+      },
+      destination_country: editItem?.destination_country ?? "",
+      tranzit: editItem?.tranzit ?? "",
+      travel_document_number: editItem?.travel_document_number ?? "",
+      departure_date: editItem?.departure_date ?? "",
+      return_date: editItem?.return_date ?? "",
+      price: editItem?.price ?? "",
+      currency: editItem?.currency ?? "USD",
+      is_paid: editItem?.is_paid ?? true,
+      contract_number: editItem?.contract_number ?? "",
+      contract_date: editItem?.contract_date ?? "",
+      note: editItem?.note ?? "",
+    }),
+    [editItem],
+  );
+
+  const { control, handleSubmit, reset, setValue, watch } = useForm({
+    defaultValues,
+    resolver: yupResolver(addReferralLetter),
+    mode: "onSubmit",
+  });
+
+  const selectedCurrency = watch("currency") || "USD";
+
   const applyClientToForm = (client) => {
-    const [firstName = '', ...lastNameParts] = String(client?.fullName ?? '').trim().split(' ');
-    setValue('clientId', client?.id ?? '', {
+    let firstName = client?.name || "";
+    let lastName = client?.surname || "";
+    if (!firstName && !lastName && client?.fullName) {
+      const parts = client.fullName.trim().split(/\s+/);
+      firstName = parts[0] || "";
+      lastName = parts.slice(1).join(" ") || "";
+    }
+    setValue("name", firstName, { shouldDirty: true, shouldValidate: true });
+    setValue("surname", lastName, { shouldDirty: true, shouldValidate: true });
+    setValue("yolagcyTel", client?.phone_number || "", {
       shouldDirty: true,
       shouldValidate: true,
     });
-    setValue('name', firstName, {
+    setValue("gender", client?.gender || "", {
       shouldDirty: true,
       shouldValidate: true,
     });
-    setValue('surname', lastNameParts.join(' '), {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue('yolagcyTel', client?.phoneNumber ?? '', {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue('dateOfBirth', client?.dateOfBirth ?? '', {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setValue('passportNumber', client?.passportNumber ?? '', {
+    setValue(
+      "dateOfBirth",
+      client?.dateOfBirth ? client.dateOfBirth.split("T")[0] : "",
+      {
+        shouldDirty: true,
+        shouldValidate: true,
+      },
+    );
+    setValue("passportNumber", client?.passport_number || "", {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -101,96 +138,188 @@ const AddReferralLetterModal = ({ open, onClose, onSave }) => {
     try {
       setLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 250));
+
+      const selectedEmployee = employees.find(
+        (emp) => emp.guid === values.received_opr_guid,
+      );
+      const operatorName = selectedEmployee ? selectedEmployee.fullName : "";
+      const officeName =
+        selectedEmployee?.office?.name ||
+        selectedEmployee?.office?.fullName ||
+        "";
+
       onSave?.({
         ...values,
         price: Number(values.price || 0),
+        operator: operatorName || values.operator,
+        ofis: officeName || values.ofis,
       });
-      toast.success(t('pages.referralLetter.addSuccess', 'Referral added successfully!'));
+
+      toast.success(
+        editItem
+          ? t(
+            "pages.referralLetter.editSuccess",
+            "Referral updated successfully!",
+          )
+          : t(
+            "pages.referralLetter.addSuccess",
+            "Referral added successfully!",
+          ),
+      );
       closeDialog();
     } catch (error) {
       console.error(error);
-      toast.error(t('pages.referralLetter.addError', 'An error occurred while saving referral.'));
+      toast.error(
+        t(
+          "pages.referralLetter.addError",
+          "An error occurred while saving referral.",
+        ),
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const autocompleteColumns = useMemo(
+    () => [
+      "fullName",
+      "gender",
+      "dateOfBirth",
+      { key: "passport_number", label: t("columns.passportNumber") },
+    ],
+    [t],
+  );
+
   return (
     <CustomDialog widthX={860} open={open} close={closeDialog}>
       <CustomDialogHeader
         variant="h5"
-        title={t('pages.referralLetter.add', 'Add Referral')}
+        title={
+          editItem
+            ? t("pages.referralLetter.edit")
+            : t("pages.referralLetter.add")
+        }
       />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 2 }}>
-          <Box sx={{ width: '100%' }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
+            gap: 2.5,
+            mb: 2,
+          }}
+        >
+          <Box sx={{ gridColumn: "1 / -1" }}>
             <GlobalClientAutocomplete
               control={control}
-              name="clientId"
-              label={t('columns.client') ?? 'Client'}
-              placeholder={t('pages.clients.autocomplete.clientPlaceholder') ?? 'Search client...'}
+              name="client_guid"
+              label={t("columns.client") ?? "Client"}
+              placeholder={
+                t("pages.clients.autocomplete.clientPlaceholder") ??
+                "Search client..."
+              }
+              columns={autocompleteColumns}
               onClientChange={applyClientToForm}
             />
           </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="arzaNo" control={control} label={t('pages.referralLetter.arzaNo', 'Referral No')} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="operator" control={control} label={t('columns.operator', 'Operator')} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="ofis" control={control} label={t('columns.office', 'Office')} />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="agent" control={control} label={t('columns.agent', 'Agent')} />
-          </Box>
-          <Box sx={{  }}>
-            <PhoneNumberField control={control} name="agentTel" label={t('pages.referralLetter.agentTel', 'Agent Phone')} />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="name" control={control} label={t('columns.fullName', 'Name')} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="surname" control={control} label={t('pages.referralLetter.surname', 'Surname')} required />
-          </Box>
-          <Box sx={{  }}>
-            <PhoneNumberField control={control} name="yolagcyTel" label={t('columns.phoneNumber', 'Passenger Phone')} />
-          </Box>
-          <Box sx={{  }}>
-            <CustomSelect name="gender" control={control} label={t('columns.gender', 'Gender')} options={genderOptions} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="dateOfBirth" control={control} type="date" label={t('columns.dateOfBirth', 'Date of Birth')} InputLabelProps={{ shrink: true }} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="passportNumber" control={control} label={t('columns.passportNumber', 'Passport Number')} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="destinationCountry" control={control} label={t('columns.destinationCountry', 'Destination Country')} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="tranzit" control={control} label={t('columns.transit', 'Transit')} />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="syhNo" control={control} label={t('columns.syhNo', 'S-ÝH №')} />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="departureDate" control={control} type="date" label={t('columns.departureDate', 'Departure Date')} InputLabelProps={{ shrink: true }} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="returnDate" control={control} type="date" label={t('columns.returnDate', 'Return Date')} InputLabelProps={{ shrink: true }} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="price" control={control} label={t('price', 'Price')} required />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="contractNo" control={control} label={t('pages.referralLetter.contractNo', 'Contract No')} />
-          </Box>
-          <Box sx={{  }}>
-            <CustomTextField name="contractDate" control={control} type="date" label={t('columns.contractDate', 'Contract Date')} InputLabelProps={{ shrink: true }} required />
-          </Box>
-          <Box sx={{ width: '100%' }}>
-            <CustomTextField name="note" control={control} label={t('columns.note', 'Note')} multiline rows={2} />
+
+          <CustomSelect
+            name="received_opr_guid"
+            control={control}
+            label={t("columns.operatorTwo")}
+            options={employeeOptions}
+            required
+          />
+
+          <CustomTextField
+            name="application_number"
+            control={control}
+            label={t("application_number")}
+            required
+          />
+
+          <CustomTextField
+            name="destination_country"
+            control={control}
+            label={t("columns.destinationCountry")}
+            required
+          />
+
+          <CustomTextField
+            name="tranzit"
+            control={control}
+            label={t("columns.transit")}
+          />
+
+          <CustomDatePicker
+            name="departure_date"
+            control={control}
+            label={t("columns.departureDate")}
+            required
+          />
+
+          <CustomDatePicker
+            name="return_date"
+            control={control}
+            label={t("columns.returnDate")}
+            required
+          />
+
+          <CustomTextField
+            name="travel_document_number"
+            control={control}
+            label={
+              <LabelWithTooltip
+                label={t("columns.syhNo", "S-ÝH №")}
+                tooltip={t("pages.referralLetter.travel_doc_tooltip")}
+              />
+            }
+          />
+          <CurrencyAmount
+            name="price"
+            control={control}
+            label={t("price")}
+            currency={selectedCurrency}
+            onCurrencyChange={(curr) => setValue("currency", curr)}
+            required
+          />
+
+          <CustomSelect
+            name="is_paid"
+            control={control}
+            label={t("columns.paymentStatus")}
+            options={paymentOptions}
+            required
+          />
+
+          <CustomTextField
+            name="contract_number"
+            control={control}
+            label={t("columns.contract_number")}
+          />
+
+          <CustomDatePicker
+            name="contract_date"
+            control={control}
+            label={t("columns.contractDate")}
+            required
+          />
+
+          <AgentAccordion
+            control={control}
+            fullNameName="agent.name"
+            phoneNumberName="agent.phone_number"
+            title={t("columns.agent")}
+            fullNameLabel={t("columns.agentFullName")}
+            phoneNumberLabel={t("b2b.agentPhoneNumber")}
+          />
+
+          <Box sx={{ gridColumn: "1 / -1" }}>
+            <CustomTextField
+              name="note"
+              control={control}
+              label={t("columns.note")}
+            />
           </Box>
         </Box>
 

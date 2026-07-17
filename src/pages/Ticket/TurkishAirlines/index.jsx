@@ -454,7 +454,7 @@ const TurkishAirlines = () => {
       <PageHeader
         title={t("sidebar.ticketTurkishAirlines")}
         addButtonText={t("turkish.add")}
-        pageTitle={`${t("turkish.title")} | Oguz Travel`}
+        pageTitle={`${t("sidebar.ticketTurkishAirlines")} | Oguz Travel`}
         onAddClick={() => {
           table.setCreatingRow(true);
         }}

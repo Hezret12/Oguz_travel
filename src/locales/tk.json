@@ -8,6 +8,13 @@
   "search": "Gözleg",
   "save": "Ýatda sakla",
   "filter": "Filter",
+  "noClientFound": "Müşderi tapylmady",
+  "addClient": "Täze müşterini goşmak",
+  "addPackage": "Täze bukja goşmak",
+  "loading": "Ýüklenýär...",
+  "errorOccurred": "Maglumatlary ýüklemekde ýalňyşlyk ýüze çykdy.",
+  "noData": "Maglumat tapylmady",
+  "kassa": "Kassa",
   "price": "Bahasy",
   "validation": {
     "required": "Hökman girizilmeli",
@@ -90,8 +97,9 @@
     "destinationCountry": "Gidýän ýurdy",
     "transit": "Tranzit",
     "departureDate": "Gidýän senesi",
-    "returnDate": "Gaýdyp gelýän senesi",
+    "returnDate": "Gelýän senesi",
     "contractDate": "Şertnama senesi",
+    "contract_number": "Şertnama №",
     "milesSmiles": "Miles & Smiles",
     "quotedFare": "Aýdylan baha",
     "serviceName": "Hyzmat ady",
@@ -123,76 +131,76 @@
       "passwordRequired": "Parol zerurdyr",
       "passwordTooShort": "Parol gysga",
       "passwordMaxLength": "Parol oran uzyn"
+    }
+  },
+  "employee": {
+    "title": "Işgärler",
+    "subtitle": "Işgärleň hasabatlaryny we belliklerini dolandyryň.",
+    "add": "Işgär goşmak",
+    "addSuccess": "Isgar ustunlikli gosuldy!",
+    "addError": "Isgari yazdyrmakda yalnyslyk yuze cykdy.",
+    "validation": {
+      "fullNameRequired": "Doly ady zerurdyr",
+      "phoneNumberRequired": "Telefon belgisi zerurdyr",
+      "phoneNumberLength": "Telefon belgisi takyk 8 sandan ybarat bolmaly",
+      "phoneNumberInvalid": "Nadogry telefon belgisi",
+      "gmailRequired": "El. pocta zerurdyr",
+      "gmailInvalid": "Nadogry el. pocta adresi",
+      "departmentRequired": "Bolum zerurdyr",
+      "positionRequired": "Wezipe zerurdyr",
+      "officeRequired": "Ofis zerurdyr"
+    }
+  },
+  "clients": {
+    "title": "Müşderiler",
+    "subtitle": "Müşderi maglumatlaryny we pasport maglumatlaryny dolandyrmak.",
+    "add": "Müşderi goşmak",
+    "addSuccess": "Müşderi üstünlikli goşuldy!",
+    "addError": "Müşderini ýazdyrmakda ýalňyşlyk ýüze çykdy.",
+    "genderWomen": "Zenan",
+    "genderMen": "Erkek",
+    "autocomplete": {
+      "noClientFound": "Müşderi tapylmady.",
+      "addClient": "Müşderi goş"
     },
-    "employee": {
-      "title": "Işgärler",
-      "subtitle": "Işgärleň hasabatlaryny we belliklerini dolandyryň.",
-      "add": "Işgär goşmak",
-      "addSuccess": "Isgar ustunlikli gosuldy!",
-      "addError": "Isgari yazdyrmakda yalnyslyk yuze cykdy.",
-      "validation": {
-        "fullNameRequired": "Doly ady zerurdyr",
-        "phoneNumberRequired": "Telefon belgisi zerurdyr",
-        "phoneNumberLength": "Telefon belgisi takyk 8 sandan ybarat bolmaly",
-        "phoneNumberInvalid": "Nadogry telefon belgisi",
-        "gmailRequired": "El. pocta zerurdyr",
-        "gmailInvalid": "Nadogry el. pocta adresi",
-        "departmentRequired": "Bolum zerurdyr",
-        "positionRequired": "Wezipe zerurdyr",
-        "officeRequired": "Ofis zerurdyr"
-      }
-    },
-    "clients": {
-      "title": "Müşderiler",
-      "subtitle": "Müşderi maglumatlaryny we pasport maglumatlaryny dolandyrmak.",
-      "add": "Müşderi goşmak",
-      "addSuccess": "Müşderi üstünlikli goşuldy!",
-      "addError": "Müşderini ýazdyrmakda ýalňyşlyk ýüze çykdy.",
-      "genderWomen": "Zenan",
-      "genderMen": "Erkek",
-      "autocomplete": {
-        "noClientFound": "Müşderi tapylmady.",
-        "addClient": "Müşderi goş"
-      },
-      "validation": {
-        "fullNameRequired": "Doly ady zerurdyr",
-        "phoneNumberRequired": "Telefon belgisi zerurdyr",
-        "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",
-        "phoneNumberInvalid": "Nädogry telefon belgisi",
-        "dateOfBirthRequired": "Doglan senesi zerurdyr",
-        "passportNumberRequired": "Pasport belgisi zerurdyr",
-        "passportExpiryDateRequired": "Pasportyň gutarýan senesi zerurdyr",
-        "passportCountryOfIssueRequired": "Pasportyň berlen ýurdy zerurdyr",
-        "genderRequired": "Jyns saýlanmalydyr"
-      }
-    },
-    "users": {
-      "title": "Ulanyjylar",
-      "subtitle": "Ulgam ulanyjylaryny we giriş hukuklaryny dolandyryň.",
-      "add": "Ulanyjy goş",
-      "deleteConfirm": "Hakykatdan hem bu ulanyjyny öçürmek isleýärsiňizmi?",
-      "statusActiveLabel": "Aktiw",
-      "statusInactiveLabel": "Passiw",
-      "permissionsCount": "Saýlanan",
-      "editTitle": "Ulanyjyny redaktirlemek",
-      "addTitle": "Ulanyjy goş",
-      "update": "Täzelemek",
-      "updateSuccess": "Ulanyjy üstünlikli täzelendi!",
-      "addSuccess": "Ulanyjy üstünlikli goşuldy!",
-      "submitError": "Ulanyjyny ýazdyrmakda ýalňyşlyk ýüze çykdy.",
-      "selectEmployee": "Işgär saýlaň...",
-      "phoneNumberPlaceholder": "61 123456",
-      "passwordEditPlaceholder": "Häzirki paroly saklamak üçin boş goýuň",
-      "statusActive": "Aktiw ulanyjy",
-      "isExternalUser": "Daşarky ulanyjy",
-      "permissionsTitle": "Giriş hukuklary",
-      "selected": "Saýlanan",
-      "selectAll": "Ählisini saýla",
-      "clearAll": "Ählisini arassala",
-      "tabs": {
-        "information": "Maglumat",
-        "access": "Giriş"
-      }
+    "validation": {
+      "fullNameRequired": "Doly ady zerurdyr",
+      "phoneNumberRequired": "Telefon belgisi zerurdyr",
+      "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",
+      "phoneNumberInvalid": "Nädogry telefon belgisi",
+      "dateOfBirthRequired": "Doglan senesi zerurdyr",
+      "passportNumberRequired": "Pasport belgisi zerurdyr",
+      "passportExpiryDateRequired": "Pasportyň gutarýan senesi zerurdyr",
+      "passportCountryOfIssueRequired": "Pasportyň berlen ýurdy zerurdyr",
+      "genderRequired": "Jyns saýlanmalydyr"
+    }
+  },
+  "users": {
+    "title": "Ulanyjylar",
+    "subtitle": "Ulgam ulanyjylaryny we giriş hukuklaryny dolandyryň.",
+    "add": "Ulanyjy goş",
+    "deleteConfirm": "Hakykatdan hem bu ulanyjyny öçürmek isleýärsiňizmi?",
+    "statusActiveLabel": "Aktiw",
+    "statusInactiveLabel": "Passiw",
+    "permissionsCount": "Saýlanan",
+    "editTitle": "Ulanyjyny redaktirlemek",
+    "addTitle": "Ulanyjy goş",
+    "update": "Täzelemek",
+    "updateSuccess": "Ulanyjy üstünlikli täzelendi!",
+    "addSuccess": "Ulanyjy üstünlikli goşuldy!",
+    "submitError": "Ulanyjyny ýazdyrmakda ýalňyşlyk ýüze çykdy.",
+    "selectEmployee": "Işgär saýlaň...",
+    "phoneNumberPlaceholder": "61 123456",
+    "passwordEditPlaceholder": "Häzirki paroly saklamak üçin boş goýuň",
+    "statusActive": "Aktiw ulanyjy",
+    "isExternalUser": "Daşarky ulanyjy",
+    "permissionsTitle": "Giriş hukuklary",
+    "selected": "Saýlanan",
+    "selectAll": "Ählisini saýla",
+    "clearAll": "Ählisini arassala",
+    "tabs": {
+      "information": "Maglumat",
+      "access": "Giriş"
     }
   },
   "header": {
@@ -288,9 +296,22 @@
       "cardRequired": "Card is required"
     }
   },
+  "pages": {
+    "referralLetter": {
+      "title": "Ýollanma hatlary",
+      "add": "Ýollanma hatyny goşmak",
+      "edit": "Ýollanma hatyny üýtgetmek",
+      "deleteConfirm": "Siz hakykatdan hem bu ýollanma hatyny pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz.",
+      "deleteSuccess": "Ýollanma haty üstünlikli pozuldy!",
+      "addSuccess": "Ýollanma haty üstünlikli goşuldy!",
+      "editSuccess": "Ýollanma haty üstünlikli üýtgedildi!",
+      "travel_doc_tooltip": "Syýahat ýol hatynyň №."
+    }
+  },
   "sale": "Arzanladyş",
-  "saleSettings": "Arzanladyş / Indirim Sazlamalary (Gerek bolsa)",
+  "saleSettings": "Arzanladyş sazlamalary (Gerek bolsa)",
   "categoryExists": "Bu kategoriýa eýýäm bar!",
   "editCategory": "Kategoriýany düzetmek",
-  "addCategory": "Täze kategoriýa goşmak"
+  "addCategory": "Täze kategoriýa goşmak",
+  "application_number": "Arza №"
 }

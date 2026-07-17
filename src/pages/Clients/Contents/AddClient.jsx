@@ -56,7 +56,7 @@ const AddClient = ({ table }) => {
 
   return (
     <CustomDialog widthX={700} open={true} close={closeDialog}>
-      <CustomDialogHeader variant={"h5"} title={t("pages.clients.add")} />
+      <CustomDialogHeader variant={"h5"} title={t("clients.add")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Grid container spacing={2}>
           <Grid size={6}>

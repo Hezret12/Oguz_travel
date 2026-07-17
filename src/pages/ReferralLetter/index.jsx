@@ -7,37 +7,55 @@ import { useMemo, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
-import { Box } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
 import AddReferralLetterModal from "./AddReferralLetterModal";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteDialog from "../../components/DeleteDialog";
+import toast from "react-hot-toast";
+
+const CURRENCY_SYMBOLS = {
+  USD: "$",
+  EUR: "€",
+  TMT: "m",
+  RUB: "₽",
+};
 
 const initialData = [
   {
     id: 1,
-    arzaNo: "AG1/O7-24",
+    client_guid: "mock-client-guid",
+    application_number: "AG1/O7-24",
+    received_opr_guid: "mock-received-opr-guid",
     operator: "Operator 1",
     ofis: "Ashgabat",
-    agent: "Agent 1",
-    agentTel: "+99361234567",
+    agent: {
+      name: "Agent 1",
+      phone_number: "+99361234567",
+    },
     name: "ROZYKULOV",
     surname: "DOVLET",
     yolagcyTel: "+99361890318",
-    gender: "Erkek",
+    gender: "Male",
     dateOfBirth: "1994-08-31",
     passportNumber: "A0840437",
-    destinationCountry: "Türkiye",
+    destination_country: "Türkiye",
     tranzit: "",
-    syhNo: "SYH-001",
+    travel_document_number: "SYH-001",
     syhHighlighted: false,
-    departureDate: "2024-10-21",
-    returnDate: "2024-10-28",
+    departure_date: "2024-10-21",
+    return_date: "2024-10-28",
     price: 50,
-    contractNo: "S001",
-    contractDate: "2024-10-20",
+    currency: "USD",
+    is_paid: true,
+    contract_number: "S001",
+    contract_date: "2024-10-20",
     note: "",
   },
 ];
+
 const ReferalLetter = () => {
   const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -45,6 +63,38 @@ const ReferalLetter = () => {
   const [rowSelection, setRowSelection] = useState({});
   const [data, setData] = useState(initialData);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  
+  // Delete Dialog State
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
+  const handleEditClick = (item) => {
+    setEditItem(item);
+    setModalOpen(true);
+  };
+
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setData((prev) => prev.filter((item) => item.id !== deleteId));
+    setDeleteOpen(false);
+    setDeleteId(null);
+    toast.success(t("pages.referralLetter.deleteSuccess", "Referral deleted successfully!"));
+  };
+
+  const handleSave = (values) => {
+    if (editItem) {
+      setData((prev) =>
+        prev.map((item) => (item.id === editItem.id ? { ...item, ...values } : item))
+      );
+    } else {
+      setData((prev) => [{ id: Date.now(), ...values }, ...prev]);
+    }
+  };
 
   const columns = useMemo(
     () => [
@@ -71,11 +121,11 @@ const ReferalLetter = () => {
         id: "agent",
         header: t("columns.agent") ?? "Agent",
         size: 150,
-        accessorFn: (row) => row.agent ?? "",
+        accessorFn: (row) => row.agent?.name ?? row.agent ?? "",
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.agent}
-            secondary={row.original.agentTel}
+            primary={row.original.agent?.name ?? row.original.agent}
+            secondary={row.original.agent?.phone_number ?? row.original.agentTel}
           />
         ),
       },
@@ -94,7 +144,15 @@ const ReferalLetter = () => {
       {
         accessorKey: "gender",
         header: t("columns.gender"),
-        size: 80,
+        size: 90,
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          return val === "Male"
+            ? t("pages.clients.genderMen", "Erkek")
+            : val === "Female"
+            ? t("pages.clients.genderWomen", "Aýal")
+            : val;
+        },
       },
       {
         accessorKey: "dateOfBirth",
@@ -103,22 +161,22 @@ const ReferalLetter = () => {
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
-        accessorKey: "passportNumber", // Passport №
+        accessorKey: "passportNumber",
         header: t("columns.passportNumber") ?? "Passport №",
         size: 110,
       },
       {
-        accessorKey: "destinationCountry", // Gidýän ýurdy
+        accessorKey: "destination_country",
         header: t("columns.destinationCountry"),
         size: 110,
       },
       {
-        accessorKey: "tranzit", // Tranzit
+        accessorKey: "tranzit",
         header: t("columns.transit"),
         size: 90,
       },
       {
-        accessorKey: "syhNo", // S-ÝH №
+        accessorKey: "travel_document_number",
         header: t("columns.syhNo") ?? "S-ÝH №",
         size: 100,
         Cell: ({ row, cell }) => {
@@ -143,30 +201,64 @@ const ReferalLetter = () => {
         },
       },
       {
-        accessorKey: "departureDate", // Gidýän wagty
+        accessorKey: "departure_date",
         header: t("columns.departureDate") ?? "Gidýän wagty",
         size: 120,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
-        accessorKey: "returnDate", // Gelýän wagty
+        accessorKey: "return_date",
         header: t("columns.returnDate") ?? "Gelýän wagty",
         size: 120,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
-        accessorKey: "price", // Bahasy (TMT)
+        accessorKey: "price",
         header: t("price"),
         size: 130,
-        Cell: ({ cell }) => `${Number(cell.getValue() ?? 0).toFixed(2)} TMT`,
+        Cell: ({ row, cell }) => {
+          const amount = cell.getValue();
+          const currency = row.original.currency || "USD";
+          const symbol = CURRENCY_SYMBOLS[currency] || currency;
+          return `${symbol}${Number(amount ?? 0).toFixed(2)}`;
+        },
       },
       {
-        accessorKey: "sertnamaNo", // şertnama №
+        accessorKey: "is_paid",
+        header: t("columns.paymentStatus"),
+        size: 120,
+        Cell: ({ cell }) => {
+          const isPaid = cell.getValue();
+          return (
+            <Box
+              component="span"
+              sx={{
+                display: "inline-block",
+                px: 1.5,
+                py: 0.5,
+                borderRadius: "12px",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                backgroundColor: isPaid
+                  ? "rgba(76, 175, 80, 0.12)"
+                  : "rgba(244, 67, 54, 0.12)",
+                color: isPaid ? "#4caf50" : "#f44336",
+              }}
+            >
+              {isPaid
+                ? t("pages.ticket.payment.paid", "Tolendi")
+                : t("pages.ticket.payment.credit", "Kredit")}
+            </Box>
+          );
+        },
+      },
+      {
+        accessorKey: "contract_number",
         header: t("columns.contractNo") ?? "şertnama №",
         size: 110,
       },
       {
-        accessorKey: "sertnamaSene", // şertnama sene
+        accessorKey: "contract_date",
         header: t("columns.contractDate"),
         size: 120,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
@@ -176,11 +268,78 @@ const ReferalLetter = () => {
         header: t("columns.note"),
         size: 200,
       },
+      {
+        id: "actions",
+        header: t("columns.actions") ?? "Actions",
+        size: 110,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => (
+          <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditClick(row.original);
+              }}
+              color="primary"
+              size="small"
+              sx={(theme) => ({
+                borderRadius: "7px",
+                border: `1px solid ${theme.palette.divider}`,
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255,255,255,0.05)"
+                    : "rgba(0,0,0,0.04)",
+                color: theme.palette.text.secondary,
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255,255,255,0.10)"
+                      : "rgba(0,0,0,0.09)",
+                  borderColor: theme.palette.text.secondary,
+                  color: theme.palette.text.primary,
+                  transform: "translateY(-1px)",
+                },
+                "&:active": { transform: "scale(0.95)" },
+              })}
+            >
+              <EditIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteClick(row.original.id);
+              }}
+              color="error"
+              size="small"
+              sx={{
+                borderRadius: "7px",
+                border: "1px solid rgba(239,68,68,0.35)",
+                backgroundColor: "rgba(239,68,68,0.07)",
+                color: "#ef4444",
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  backgroundColor: "rgba(239,68,68,0.15)",
+                  borderColor: "#ef4444",
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 2px 8px rgba(239,68,68,0.25)",
+                },
+                "&:active": { transform: "scale(0.95)" },
+              }}
+            >
+              <DeleteIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Box>
+        ),
+      },
     ],
     [t, formatChange],
   );
 
-  const handleAddUserClick = () => {
+  const handleAddClick = () => {
+    setEditItem(null);
     setModalOpen(true);
   };
 
@@ -194,14 +353,6 @@ const ReferalLetter = () => {
     },
     getRowId: (row) => row.id,
     onRowSelectionChange: setRowSelection,
-    // renderTopToolbarCustomActions: () => (
-    //   <GlobalSearchInput
-    //     value={searchQuery}
-    //     onChange={setSearchQuery}
-    //     placeholder={t("search") ?? "Ara..."}
-    //     disabled={isLoading}
-    //   />
-    // ),
     renderBottomToolbar: ({ table }) => {
       const { pageIndex, pageSize } = table.getState().pagination;
       const pageCount = table.getPageCount();
@@ -223,7 +374,6 @@ const ReferalLetter = () => {
             pageIndex={pageIndex}
             pageCount={pageCount}
             pageSize={pageSize}
-            // totalRows={filteredUsers.length}
             onPageChange={(newIndex) => table.setPageIndex(newIndex)}
           />
         </Box>
@@ -259,18 +409,26 @@ const ReferalLetter = () => {
         title={t("pages.referralLetter.title") ?? "Referral Letters"}
         pageTitle={`${t("pages.referralLetter.title") ?? "Referral Letters"} | Oguz Travel`}
         addButtonText={t("pages.referralLetter.add") ?? "Add Referral"}
-        onAddClick={handleAddUserClick}
+        onAddClick={handleAddClick}
       />
 
       <MaterialReactTable table={table} />
 
       <AddReferralLetterModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSave={(values) => {
-          setData((prev) => [{ id: Date.now(), ...values }, ...prev]);
+        onClose={() => {
           setModalOpen(false);
+          setEditItem(null);
         }}
+        editItem={editItem}
+        onSave={handleSave}
+      />
+
+      <DeleteDialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        description={t("pages.referralLetter.deleteConfirm", "Are you sure you want to delete this referral letter?")}
       />
     </>
   );

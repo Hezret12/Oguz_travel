@@ -8,6 +8,13 @@
   "search": "Поиск",
   "save": "Сохранить",
   "filter": "Фильтр",
+  "noClientFound": "Клиент не найден",
+  "addClient": "Добавить нового клиента",
+  "kassa": "Касса",
+  "addPackage": "Добавить новый пакет",
+  "loading": "Загрузка...",
+  "errorOccurred": "Произошла ошибка при загрузке данных.",
+  "noData": "Данные не найдены",
   "validation": {
     "required": "Required",
     "emailRequired": "Email is required",
@@ -159,6 +166,7 @@
       "add": "Добавить письмо",
       "addSuccess": "Письмо успешно добавлено!",
       "addError": "Произошла ошибка при сохранении письма.",
+      "travel_doc_tooltip": "Введите номер проездного документа.",
       "validation": {
         "arzaNoRequired": "Номер письма обязателен",
         "operatorRequired": "Оператор обязателен",
@@ -476,6 +484,16 @@
           "cardRequired": "Card is required"
         }
       }
+    },
+    "referralLetter": {
+      "title": "Письма и договоры",
+      "add": "Добавить письмо",
+      "edit": "Редактировать письмо",
+      "deleteConfirm": "Вы уверены, что хотите удалить это рекомендательное письмо? Это действие нельзя отменить.",
+      "deleteSuccess": "Письмо успешно удалено!",
+      "addSuccess": "Письмо успешно добавлено!",
+      "editSuccess": "Письмо успешно обновлено!",
+      "travel_doc_tooltip": "Введите номер проездного документа."
     }
   },
   "sale": "Скидка",

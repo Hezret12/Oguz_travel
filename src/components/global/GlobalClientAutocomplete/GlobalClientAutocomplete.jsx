@@ -33,10 +33,10 @@ const resolveColumn = (column, t) =>
   typeof column === "string"
     ? { key: column, label: t(`columns.${column}`, column) }
     : {
-        key: column.key,
-        label: column.label ?? t(`columns.${column.key}`, column.key),
-        format: column.format,
-      };
+      key: column.key,
+      label: column.label ?? t(`columns.${column.key}`, column.key),
+      format: column.format,
+    };
 
 const getColumnValue = (client, column, t) => {
   const { key, format } = resolveColumn(column, t);
@@ -219,20 +219,56 @@ const GlobalClientAutocompleteField = ({
         filterOptions={(options) => options}
         noOptionsText={
           !isLoading && (
-            <Box sx={{ py: 1.5, px: 1 }}>
-              <Typography sx={{ fontWeight: 700, mb: 0.5 }}>
-                {t(
-                  "pages.clients.autocomplete.noClientFound",
-                  "No client found.",
-                )}
+            <Box
+              sx={{
+                py: 2.5,
+                px: 2,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: 1.5,
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.03)",
+                  color: "text.secondary",
+                }}
+              >
+                <PersonSearchIcon sx={{ fontSize: 24 }} />
+              </Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary" }}>
+                {t("noClientFound")}
               </Typography>
               <Button
+                variant="contained"
+                size="small"
                 startIcon={<AddIcon />}
                 onClick={handleAddClient}
-                size="small"
-                sx={{ textTransform: "none", px: 0, fontWeight: 700 }}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderRadius: "8px",
+                  px: 2.5,
+                  py: 0.75,
+                  boxShadow: "none",
+                  "&:hover": {
+                    boxShadow: "none",
+                  },
+                }}
               >
-                {t("pages.clients.autocomplete.addClient", "Add Client")}
+                {t("addClient")}
               </Button>
             </Box>
           )
@@ -248,7 +284,7 @@ const GlobalClientAutocompleteField = ({
                 columns={columns}
                 query={
                   selectedClient &&
-                  inputValue === getClientSummary(selectedClient, columns, t)
+                    inputValue === getClientSummary(selectedClient, columns, t)
                     ? ""
                     : inputValue
                 }

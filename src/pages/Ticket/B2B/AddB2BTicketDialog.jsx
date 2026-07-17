@@ -62,11 +62,21 @@ const AddB2BTicketDialog = ({ table }) => {
 
   const employeeOptions = useMemo(
     () =>
-      (employees || []).map((emp) => ({
-        label: emp.fullName,
-        value: emp.guid,
-      })),
-    [employees],
+      (employees || []).map((emp) => {
+        const officeShort = emp.office?.shortName
+          ? selectedLang(emp.office.shortName) ||
+            selectedLang(emp.office.fullName) ||
+            ""
+          : "";
+        const label = officeShort
+          ? `${emp.fullName} (${officeShort})`
+          : emp.fullName;
+        return {
+          label,
+          value: emp.guid,
+        };
+      }),
+    [employees, selectedLang],
   );
 
   const { mutate: createB2B, isLoading: isSubmit } = useCreate({

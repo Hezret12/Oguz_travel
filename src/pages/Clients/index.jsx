@@ -325,9 +325,9 @@ const Clients = () => {
   return (
     <>
       <PageHeader
-        title={t("pages.clients.title")}
-        pageTitle={`${t("pages.clients.title")} | Oguz Travel`}
-        addButtonText={t("pages.clients.add")}
+        title={t("clients.title")}
+        pageTitle={`${t("clients.title")} | Oguz Travel`}
+        addButtonText={t("addClient")}
         onAddClick={() => table.setCreatingRow(true)}
         filterButtonText={t("filter")}
         onFilterClick={openDrawer}

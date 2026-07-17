@@ -13,6 +13,8 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+import ErrorIcon from "@mui/icons-material/Error";
+import LayersIcon from "@mui/icons-material/Layers";
 import { useForm } from "react-hook-form";
 import { useLocale } from "../../../hooks/useLocale";
 import PageHeader from "../../../components/PageHeader";
@@ -73,6 +75,7 @@ const Package = () => {
   const {
     data: packageList,
     isLoading,
+    isError,
     refetch,
   } = useGet({
     apiFn: getAllVisaPackagesApi,
@@ -358,17 +361,112 @@ const Package = () => {
       <PageHeader
         title={t("sidebar.visa.package")}
         pageTitle={`${t("sidebar.visa.package")} | Oguz Travel`}
-        addButtonText={t("create")}
+        addButtonText={t("addPackage")}
         onAddClick={openCreate}
       />
 
       {isLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "350px",
+            gap: 2,
+          }}
+        >
+          <CircularProgress size={44} thickness={4.5} sx={{ color: "#0c8a7b" }} />
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+            {t("loading")}
+          </Typography>
+        </Box>
+      ) : isError ? (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "350px",
+            textAlign: "center",
+            gap: 2,
+            px: 3,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(239, 68, 68, 0.15)"
+                  : "rgba(239, 68, 68, 0.08)",
+              color: "#ef4444",
+            }}
+          >
+            <ErrorIcon sx={{ fontSize: 28 }} />
+          </Box>
+          <Typography variant="body1" sx={{ fontWeight: 600, color: "text.primary" }}>
+            {t("errorOccurred")}
+          </Typography>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => refetch()}
+            sx={{
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 600,
+              px: 3,
+              py: 0.75,
+              borderColor: "divider",
+              color: "text.secondary",
+              "&:hover": {
+                borderColor: "text.primary",
+                color: "text.primary",
+                backgroundColor: "transparent",
+              },
+            }}
+          >
+            {t("reset") || "Try Again"}
+          </Button>
         </Box>
       ) : Object.keys(groupedTariffs).length === 0 ? (
-        <Box sx={{ py: 6, textAlign: "center" }}>
-          <Typography variant="body1" sx={{ color: "text.secondary" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "350px",
+            textAlign: "center",
+            gap: 2,
+            px: 3,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "rgba(0, 0, 0, 0.03)",
+              color: "text.secondary",
+            }}
+          >
+            <LayersIcon sx={{ fontSize: 26 }} />
+          </Box>
+          <Typography variant="body1" sx={{ fontWeight: 600, color: "text.secondary" }}>
             {t("noData") || "Maglumat tapylmady"}
           </Typography>
         </Box>
@@ -454,7 +552,7 @@ const Package = () => {
                     letterSpacing: "0.5px",
                   }}
                 >
-                  {t("columns.serviceName")?.toUpperCase() || "HYZMAT"}
+                  {t("columns.serviceName")?.toUpperCase()}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
                   <Typography
@@ -465,7 +563,7 @@ const Package = () => {
                       letterSpacing: "0.5px",
                     }}
                   >
-                    {t("columns.price")?.toUpperCase() || "BAHASY"}
+                    {t("columns.price")?.toUpperCase()}
                   </Typography>
                   <Box sx={{ width: "72px" }} />
                 </Box>
@@ -655,7 +753,7 @@ const Package = () => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={editing ? t("edit") : t("create")}
+          title={editing ? t("edit") : t("addPackage")}
         />
         <CustomForm handleSubmit={handleSubmit(onSubmit)}>
           <Box
@@ -742,7 +840,7 @@ const Package = () => {
             <CustomTextField
               name="name"
               control={control}
-              label={t("columns.serviceName") || "Hyzmat ady"}
+              label={t("columns.serviceName")}
               required
             />
 
@@ -750,7 +848,7 @@ const Package = () => {
             <CustomTextField
               name="description"
               control={control}
-              label={t("columns.description") || "Düşündiriş"}
+              label={t("columns.description")}
               multiline
               rows={2}
             />
@@ -762,7 +860,7 @@ const Package = () => {
                   name="price"
                   control={control}
                   type="number"
-                  label={t("columns.price") || "Bahasy"}
+                  label={t("columns.price")}
                   required
                 />
               </Box>
@@ -771,7 +869,7 @@ const Package = () => {
                   name="index_number"
                   control={control}
                   type="number"
-                  label={t("columns.sortOrder") || "Tertip belgisi"}
+                  label={t("columns.sortOrder")}
                   required
                 />
               </Box>
@@ -791,29 +889,27 @@ const Package = () => {
                 variant="subtitle2"
                 sx={{ fontWeight: 700, mb: 1.5, color: "error.main" }}
               >
-                {t("saleSettings") || "Arzanladyş / Indirim (Optional)"}
+                {t("saleSettings")}
               </Typography>
               <CustomTextField
                 name="sale_price"
                 control={control}
                 type="number"
-                label={
-                  t("columns.salePrice") || "Arzanladyşly bahasy (Sale Price)"
-                }
+                label={t("columns.salePrice")}
               />
               <Box sx={{ display: "flex", gap: 2, mt: 1.5 }}>
                 <Box sx={{ flex: 1 }}>
                   <CustomDatePicker
                     name="sale_start_date"
                     control={control}
-                    label={t("columns.saleStartDate") || "Başlangyç senesi"}
+                    label={t("columns.saleStartDate")}
                   />
                 </Box>
                 <Box sx={{ flex: 1 }}>
                   <CustomDatePicker
                     name="sale_end_date"
                     control={control}
-                    label={t("columns.saleEndDate") || "Gutarýan senesi"}
+                    label={t("columns.saleEndDate")}
                   />
                 </Box>
               </Box>
@@ -835,18 +931,14 @@ const Package = () => {
       >
         <CustomDialogHeader
           variant="h6"
-          title={
-            categoryDialogMode === "edit"
-              ? t("editCategory") || "Kategoriýany düzetmek"
-              : t("addCategory") || "Täze kategoriýa goşmak"
-          }
+          title={categoryDialogMode === "edit" ? t("editCategory") : t("addCategory")}
         />
         <Box
           sx={{ display: "flex", flexDirection: "column", gap: 2.5, mt: 1.5 }}
         >
           <TextField
             fullWidth
-            label={t("columns.category") || "Kategoriýa"}
+            label={t("columns.category")}
             value={categoryInputValue}
             onChange={(e) => {
               setCategoryInputValue(e.target.value);
@@ -863,14 +955,14 @@ const Package = () => {
               onClick={() => setCategoryDialogOpen(false)}
               variant="outlined"
             >
-              {t("cancel") || "Ýatyrmak"}
+              {t("cancel")}
             </Button>
             <Button
               onClick={handleSaveCategory}
               variant="contained"
               color="primary"
             >
-              {t("save") || "Ýatda sakla"}
+              {t("save")}
             </Button>
           </Box>
         </Box>

@@ -40,6 +40,7 @@ const CustomTextField = ({
             {label && (
               <Typography
                 variant="body2"
+                component="div"
                 sx={{
                   mb: 0.75,
                   fontWeight: 600,

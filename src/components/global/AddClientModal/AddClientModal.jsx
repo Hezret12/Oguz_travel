@@ -64,11 +64,11 @@ const AddClientModal = () => {
 
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       onCreated?.(createdClient);
-      toast.success(t('pages.clients.addSuccess', 'Client added successfully!'));
+      toast.success(t('clients.addSuccess'));
       closeModal();
     } catch (error) {
       console.error(error);
-      toast.error(t('pages.clients.addError', 'An error occurred while saving client.'));
+      toast.error(t('clients.addError'));
     } finally {
       setLoading(false);
     }
@@ -78,7 +78,7 @@ const AddClientModal = () => {
     <CustomDialog widthX={820} open={open} close={closeModal}>
       <CustomDialogHeader
         variant="h5"
-        title={t('pages.clients.add')}
+        title={t('autocomplete.addClient')}
       />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box

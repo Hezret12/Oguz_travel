@@ -58,7 +58,7 @@ const EditClient = ({ table, row, queryParams }) => {
 
   return (
     <CustomDialog widthX={700} open={true} close={closeDialog}>
-      <CustomDialogHeader variant={"h5"} title={t("pages.clients.edit")} />
+      <CustomDialogHeader variant={"h5"} title={t("clients.edit")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Grid container spacing={2}>
           <Grid size={6}>
