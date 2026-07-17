@@ -15,11 +15,9 @@ import {
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import EditIcon from "@mui/icons-material/Edit";
 
 import { CustomDialog } from "./CustomDialog";
-import { CustomDialogHeader } from "./CustomDialogHeader";
 import CustomTextField from "../CustomTextField";
 import CustomDatePicker from "../CustomDatePicker";
 import AppAutocomplete from "../AppAutocomplete";
@@ -33,11 +31,18 @@ import { useCreate } from "../../hooks/CRUD/useCreate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 
-const formatCurrency = (val) => {
+const CURRENCY_SYMBOLS = {
+  USD: "$",
+  EUR: "€",
+  TMT: "m",
+  RUB: "₽",
+};
+
+const formatCurrency = (val, currencyCode = "USD") => {
   const num = Number(val || 0);
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: currencyCode,
     maximumFractionDigits: 0,
   }).format(num);
 };
@@ -71,6 +76,9 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const ticket = row?.original;
   const clientName = ticket?.client?.fullName || ticket?.clientId || "Client";
   const { t } = useLocale();
+
+  const ticketCurrency = ticket?.currency || "USD";
+  const currencySymbol = CURRENCY_SYMBOLS[ticketCurrency] || ticketCurrency;
 
   const isCredit =
     ticket?.is_paid === false ||
@@ -235,12 +243,12 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           prev.map((p) =>
             (p.guid || p.id) === editingPayment.guid
               ? {
-                  ...p,
-                  amount: Number(amount),
-                  payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
-                  note: description?.trim() || "",
-                  opr_guid: opr_guid || null,
-                }
+                ...p,
+                amount: Number(amount),
+                payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
+                note: description?.trim() || "",
+                opr_guid: opr_guid || null,
+              }
               : p
           )
         );
@@ -303,11 +311,11 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {t("pages.ticket.payment.clientName")}: {clientName}
+          {t("payment.clientName")}: {clientName}
         </Typography>
         {isCredit && (
           <Chip
-            label={t("pages.ticket.payment.credit") || "Credit"}
+            label={t("payment.credit")}
             color="error"
             variant="outlined"
             sx={{
@@ -321,7 +329,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         )}
       </Box>
 
-      {isCredit ? (
+      {(isCredit || payments.length > 0 || paymentsLoading) ? (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           {/* Summary Cards Section */}
           <Box
@@ -338,32 +346,32 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             <Grid container spacing={2}>
               <Grid item xs={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  {t("pages.ticket.payment.salesTotal")}
+                  {t("payment.salesTotal")}
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 700, mt: 0.5 }}>
-                  {formatCurrency(salesTotal)}
+                  {formatCurrency(salesTotal, ticketCurrency)}
                 </Typography>
               </Grid>
               <Grid item xs={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  {t("pages.ticket.payment.totalPaid")}
+                  {t("payment.totalPaid")}
                 </Typography>
                 <Typography
                   variant="h5"
                   sx={{ fontWeight: 700, color: "#16a34a", mt: 0.5 }}
                 >
-                  {formatCurrency(totalPaid)}
+                  {formatCurrency(totalPaid, ticketCurrency)}
                 </Typography>
               </Grid>
               <Grid item xs={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-                  {t("pages.ticket.payment.remaining")}
+                  {t("payment.remaining")}
                 </Typography>
                 <Typography
                   variant="h5"
                   sx={{ fontWeight: 700, color: "#ef4444", mt: 0.5 }}
                 >
-                  {formatCurrency(remaining)}
+                  {formatCurrency(remaining, ticketCurrency)}
                 </Typography>
               </Grid>
             </Grid>
@@ -374,7 +382,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           {/* Payments History List */}
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
-              {t("pages.ticket.payment.paymentHistory")}
+              {t("payment.paymentHistory")}
             </Typography>
             <Box sx={{ height: "228px", display: "flex", flexDirection: "column" }}>
               {loading ? (
@@ -384,7 +392,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               ) : payments.length === 0 ? (
                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
                   <Typography variant="body2" color="text.secondary">
-                    {t("pages.ticket.payment.noPayments")}
+                    {t("payment.noPayments")}
                   </Typography>
                 </Box>
               ) : (
@@ -432,7 +440,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                             {/* Row 1: Amount & Date/Method */}
                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main" }}>
-                                {formatCurrency(p.amount)}
+                                {formatCurrency(p.amount, ticketCurrency)}
                               </Typography>
                               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                                 {formatDateToDisplay(p.payment_date || p.date)} • {getMethodLabel(p.method)}
@@ -538,103 +546,120 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
           </Box>
 
-          <Divider />
+          {(remaining > 0 || editingPayment) ? (
+            <>
+              <Divider />
+              <Box component="form" onSubmit={handleSubmit(handleSavePayment)} sx={{ mt: 1.5 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
+                  {editingPayment ? t("payment.editPayment") : t("payment.addPayment")}
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid size={6}>
+                    <CustomTextField
+                      name="amount"
+                      control={control}
+                      label={t("payment.amount")}
+                      placeholder={t("payment.amount")}
+                      type="number"
+                      required
+                      startIcon={<span style={{ fontSize: "0.9rem", fontWeight: 600 }}>{currencySymbol}</span>}
+                    />
+                  </Grid>
+                  <Grid size={6}>
+                    <CustomDatePicker
+                      name="paymentDate"
+                      control={control}
+                      label={t("payment.paymentDate")}
+                      required
+                      showTime={true}
+                    />
+                  </Grid>
+                  <Grid size={6}>
+                    <AppAutocomplete
+                      name="opr_guid"
+                      control={control}
+                      label={t("columns.operator") ?? "Operator"}
+                      options={employeeOptions}
+                    />
+                  </Grid>
+                  <Grid size={6}>
+                    <CustomTextField
+                      name="description"
+                      control={control}
+                      label={t("payment.description")}
+                      placeholder={t("payment.description")}
+                    />
+                  </Grid>
+                </Grid>
 
-          {/* Create Payment Form */}
-          <Box component="form" onSubmit={handleSubmit(handleSavePayment)}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
-              {editingPayment ? t("pages.ticket.payment.editPayment") : t("pages.ticket.payment.addPayment")}
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid size={6}>
-                <CustomTextField
-                  name="amount"
-                  control={control}
-                  label={t("pages.ticket.payment.amount")}
-                  placeholder={t("pages.ticket.payment.amount")}
-                  type="number"
-                  required
-                  startIcon={<AttachMoneyIcon fontSize="small" />}
-                />
-              </Grid>
-              <Grid size={6}>
-                <CustomDatePicker
-                  name="paymentDate"
-                  control={control}
-                  label={t("pages.ticket.payment.paymentDate")}
-                  required
-                  showTime={true}
-                />
-              </Grid>
-              <Grid size={6}>
-                <AppAutocomplete
-                  name="opr_guid"
-                  control={control}
-                  label={t("columns.operator") ?? "Operator"}
-                  options={employeeOptions}
-                />
-              </Grid>
-              <Grid size={6}>
-                <CustomTextField
-                  name="description"
-                  control={control}
-                  label={t("pages.ticket.payment.description")}
-                  placeholder={t("pages.ticket.payment.description")}
-                />
-              </Grid>
-            </Grid>
-
-            {/* Bottom Actions */}
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, mt: 3.5 }}>
-              {editingPayment && (
-                <Button
-                  variant="outlined"
-                  color="warning"
-                  onClick={handleCancelEdit}
-                  sx={{
-                    fontWeight: 600,
-                    px: 3,
-                    textTransform: "none",
-                  }}
-                >
-                  {t("cancel")}
-                </Button>
-              )}
-              <Button
-                variant="outlined"
-                onClick={onClose}
-                sx={{
-                  fontWeight: 600,
-                  px: 3,
-                  textTransform: "none",
-                }}
-              >
-                {t("pages.ticket.payment.close")}
-              </Button>
+                {/* Bottom Actions */}
+                <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, mt: 3.5 }}>
+                  {editingPayment && (
+                    <Button
+                      variant="outlined"
+                      color="warning"
+                      onClick={handleCancelEdit}
+                      sx={{
+                        fontWeight: 600,
+                        px: 3,
+                        textTransform: "none",
+                      }}
+                    >
+                      {t("cancel")}
+                    </Button>
+                  )}
+                  <Button
+                    variant="outlined"
+                    onClick={onClose}
+                    sx={{
+                      fontWeight: 600,
+                      px: 3,
+                      textTransform: "none",
+                    }}
+                  >
+                    {t("payment.close")}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    disabled={!amountValue || Number(amountValue) <= 0}
+                    sx={{
+                      borderRadius: "7px",
+                      fontWeight: 600,
+                      px: 3,
+                      textTransform: "none",
+                      boxShadow: "none",
+                      "&:hover": {
+                        boxShadow: "none",
+                      },
+                    }}
+                  >
+                    {editingPayment ? t("payment.editPayment") : t("payment.addPayment")}
+                  </Button>
+                </Box>
+              </Box>
+            </>
+          ) : (
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
               <Button
                 variant="contained"
-                type="submit"
-                disabled={!amountValue || Number(amountValue) <= 0}
+                onClick={onClose}
                 sx={{
                   borderRadius: "7px",
                   fontWeight: 600,
-                  px: 3,
+                  px: 4,
                   textTransform: "none",
-                  boxShadow: "none",
-                  "&:hover": {
-                    boxShadow: "none",
-                  },
                 }}
               >
-                {editingPayment ? t("pages.ticket.payment.editPayment") : t("pages.ticket.payment.addPayment")}
+                {t("payment.close")}
               </Button>
             </Box>
-          </Box>
+          )}
         </Box>
       ) : (
         <Box sx={{ py: 4, textAlign: "center" }}>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            {t("pages.ticket.payment.nonCreditMessage")} ({ticket.payment_status || "Unknown"}).
+            {t("payment.nonCreditMessage")} ({ticket.payment_status || "Unknown"}).
           </Typography>
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
@@ -647,7 +672,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                 textTransform: "none",
               }}
             >
-              {t("pages.ticket.payment.close")}
+              {t("payment.close")}
             </Button>
           </Box>
         </Box>

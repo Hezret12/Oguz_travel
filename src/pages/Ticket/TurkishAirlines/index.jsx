@@ -246,7 +246,7 @@ const TurkishAirlines = () => {
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          return `${symbol}${Number(cell.getValue() ?? 0).toFixed(2)}`;
+          return `${symbol}${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(cell.getValue() ?? 0))}`;
         },
         muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
@@ -259,10 +259,12 @@ const TurkishAirlines = () => {
         Cell: ({ row }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
+          const quoted = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(row.original.quoted_price ?? 0));
+          const total = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(row.original.total_price ?? 0));
           return (
             <StackedCell
-              primary={`${symbol}${Number(row.original.quoted_price ?? 0).toFixed(2)}`}
-              secondary={`${symbol}${Number(row.original.total_price ?? 0).toFixed(2)}`}
+              primary={`${symbol}${quoted}`}
+              secondary={`${symbol}${total}`}
             />
           );
         },
@@ -276,7 +278,7 @@ const TurkishAirlines = () => {
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          return `${symbol}${Number(cell.getValue() ?? 0).toFixed(2)}`;
+          return `${symbol}${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(cell.getValue() ?? 0))}`;
         },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
@@ -288,7 +290,7 @@ const TurkishAirlines = () => {
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          return `${symbol}${Number(cell.getValue() ?? 0).toFixed(2)}`;
+          return `${symbol}${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(cell.getValue() ?? 0))}`;
         },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },

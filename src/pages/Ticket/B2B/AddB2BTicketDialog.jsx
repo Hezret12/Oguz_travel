@@ -148,7 +148,7 @@ const AddB2BTicketDialog = ({ table }) => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={t("pages.ticket.b2b.addTicket")}
+          title={t("b2b.addTicket")}
         />
 
         <CustomForm handleSubmit={handleSubmit(submitHandler)}>

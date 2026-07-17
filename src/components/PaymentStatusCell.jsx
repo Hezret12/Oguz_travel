@@ -1,11 +1,25 @@
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 
-const getPaymentColor = (percent) => {
-  if (percent >= 100)
-    return { ring: "#5DCAA5", track: "#E1F5EE", text: "#085041" };
-  if (percent <= 0)
-    return { ring: "#E24B4A", track: "#FCEBEB", text: "#791F1F" };
-  return { ring: "#EF9F27", track: "#FAEEDA", text: "#633806" };
+const getPaymentColor = (percent, isDarkMode) => {
+  if (percent >= 100) {
+    return {
+      ring: "#5DCAA5",
+      track: isDarkMode ? "rgba(93, 202, 165, 0.15)" : "#E1F5EE",
+      text: isDarkMode ? "#5DCAA5" : "#085041",
+    };
+  }
+  if (percent <= 0) {
+    return {
+      ring: "#E24B4A",
+      track: isDarkMode ? "rgba(226, 75, 74, 0.15)" : "#FCEBEB",
+      text: isDarkMode ? "#E24B4A" : "#791F1F",
+    };
+  }
+  return {
+    ring: "#EF9F27",
+    track: isDarkMode ? "rgba(239, 159, 39, 0.15)" : "#FAEEDA",
+    text: isDarkMode ? "#EF9F27" : "#633806",
+  };
 };
 
 const SIZE = 34;
@@ -14,9 +28,11 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const PaymentStatusCell = ({ percent = 0 }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const numericPercent = typeof percent === "string" ? parseFloat(percent) : percent;
   const value = Math.min(100, Math.max(0, Math.round(numericPercent || 0)));
-  const { ring, track, text } = getPaymentColor(value);
+  const { ring, track, text } = getPaymentColor(value, isDarkMode);
   const offset = CIRCUMFERENCE - (value / 100) * CIRCUMFERENCE;
 
   return (

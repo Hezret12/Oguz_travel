@@ -23,7 +23,6 @@ import EditB2BDialog from "./EditB2BDialog";
 import StatusChip from "../../../components/StatusChip";
 
 import {
-  PAYMENT_STATUS_CONFIG,
   SALE_STATUS_CONFIG,
 } from "../../../functions/statusChipConfigs";
 import { usePageFilters } from "../../../hooks/usePageFilters";
@@ -46,6 +45,13 @@ const formatDate = (value) => {
   if (!value) return "";
   const [year, month, day] = String(value).split("-");
   return `${day}.${month}.${year}`;
+};
+
+const CURRENCY_SYMBOLS = {
+  USD: "$",
+  EUR: "€",
+  TMT: "m",
+  RUB: "₽",
 };
 
 const currency = new Intl.NumberFormat("en-US", {
@@ -246,6 +252,11 @@ const B2B = () => {
         id: "netFare",
         header: t("columns.netFare"),
         size: price,
+        Cell: ({ row, cell }) => {
+          const currencyCode = row.original.currency || "USD";
+          const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
+          return `${symbol}${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number(cell.getValue() ?? 0))}`;
+        },
         muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
       },
@@ -254,6 +265,11 @@ const B2B = () => {
         id: "sale_price",
         header: t("columns.saleFare"),
         size: price,
+        Cell: ({ row, cell }) => {
+          const currencyCode = row.original.currency || "USD";
+          const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
+          return `${symbol}${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number(cell.getValue() ?? 0))}`;
+        },
         muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
       },
@@ -262,8 +278,10 @@ const B2B = () => {
         id: "profit",
         header: t("columns.profit"),
         size: 100,
-        Cell: ({ cell }) => {
+        Cell: ({ row, cell }) => {
           const profit = Number(cell.getValue() ?? 0);
+          const currencyCode = row.original.currency || "USD";
+          const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
           return (
             <Box
               sx={{
@@ -278,7 +296,11 @@ const B2B = () => {
               }}
             >
               {profit > 0 ? "+" : ""}
-              {currency.format(profit)}
+              {profit < 0 ? "-" : ""}
+              {symbol}
+              {new Intl.NumberFormat("en-US", {
+                maximumFractionDigits: 0,
+              }).format(Math.abs(profit))}
             </Box>
           );
         },
@@ -465,13 +487,12 @@ const B2B = () => {
         {activeFilters.map(([key, value]) => (
           <Chip
             key={key}
-            label={`${t(`columns.${key}`, key)}: ${
-              key === "status_guid"
+            label={`${t(`columns.${key}`, key)}: ${key === "status_guid"
                 ? selectedLang(statusById[value]?.name)
                 : key === "payment_types"
                   ? t(`payment_types.${value}`, value)
                   : value
-            }`}
+              }`}
             onDelete={() => setFilter(key, "")}
             color="primary"
             variant="outlined"
@@ -527,10 +548,10 @@ const B2B = () => {
   return (
     <Box>
       <PageHeader
-        title={t("pages.ticket.b2b.title")}
-        pageTitle={`${t("pages.ticket.b2b.title")} | Oguz Travel`}
-        addButtonText={t("pages.ticket.b2b.addTicket")}
-        filterButtonText={t("pages.ticket.filter", "Filter")}
+        title={t("b2b.title")}
+        pageTitle={`${t("b2b.title")} | Oguz Travel`}
+        addButtonText={t("b2b.addTicket")}
+        filterButtonText={t("filter")}
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}
       />
