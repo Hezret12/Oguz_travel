@@ -216,7 +216,6 @@ const Visa = () => {
     columns,
     data: visas || [],
     state: {
-      ...defaultMrtOptions.state,
       rowSelection,
       isLoading: false,
       showLoadingOverlay: isLoading || isFetching,
@@ -354,39 +353,16 @@ const Visa = () => {
           />
         </Box>
       );
-    },
-
-    muiTableBodyRowProps: ({ row }) => ({
-      onClick: row.getToggleSelectedHandler(),
-      sx: (theme) => ({
-        cursor: "pointer",
-        backgroundColor: row.getIsSelected()
-          ? theme.palette.mode === "dark"
-            ? "rgba(0, 114, 229, 0.2) !important"
-            : "rgba(0, 114, 229, 0.1) !important"
-          : "inherit",
-        "&:hover": {
-          backgroundColor:
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.08)"
-              : "rgba(0,0,0,0.04)",
-        },
-      }),
-    }),
-    muiTablePaperProps: {
-      sx: () => ({
-        ...defaultMrtOptions.muiTablePaperProps?.sx,
-      }),
-    },
+    }
   });
 
   return (
     <>
       <PageHeader
-        title={t("sidebar.visaApplications") || "Wiza arza"}
-        pageTitle={`${t("sidebar.visaApplications") || "Wiza arza"} | Oguz Travel`}
-        addButtonText={t("addVisa") || "Wiza goşmak"}
-        filterButtonText={t("filter") || "Filter"}
+        title={t("sidebar.visaApplications")}
+        pageTitle={`${t("sidebar.visaApplications")} | Oguz Travel`}
+        addButtonText={t("addVisa")}
+        filterButtonText={t("filter")}
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}
       />

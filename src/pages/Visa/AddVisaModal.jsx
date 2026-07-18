@@ -464,7 +464,7 @@ const AddVisaModal = ({ table }) => {
             phoneNumberName="agent.phone_number"
             title={t("columns.agent")}
             fullNameLabel={t("columns.agentFullName")}
-            phoneNumberLabel={t("b2b.agentPhoneNumber") || "Agent Telefon"}
+            phoneNumberLabel={t("b2b.agentPhoneNumber")}
           />
 
           <CustomTextField
