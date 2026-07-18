@@ -15,7 +15,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import ErrorIcon from "@mui/icons-material/Error";
 import LayersIcon from "@mui/icons-material/Layers";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useLocale } from "../../../hooks/useLocale";
 import PageHeader from "../../../components/PageHeader";
 import CustomTextField from "../../../components/CustomTextField";
@@ -56,7 +56,7 @@ const Package = () => {
   const [categoryInputValue, setCategoryInputValue] = useState("");
   const [categoryInputError, setCategoryInputError] = useState("");
 
-  const { control, handleSubmit, reset, watch, setValue } = useForm({
+  const { control, handleSubmit, reset, setValue } = useForm({
     defaultValues: {
       name: "",
       index_number: "",
@@ -70,7 +70,7 @@ const Package = () => {
     },
   });
 
-  const selectedCategoryGuid = watch("category_guid");
+  const selectedCategoryGuid = useWatch({ control, name: "category_guid" });
   const currencySymbol = "TMT";
 
   // Fetch Packages via API
