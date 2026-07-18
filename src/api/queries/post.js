@@ -78,3 +78,11 @@ export const addReferralLetterApi = async (data) => {
   return response;
 };
 
+export const addVisaApi = async (data) => {
+  const response = await api.postPrivate(
+    "/visa/add-visa",
+    data,
+  );
+  return response;
+};
+

@@ -35,8 +35,8 @@ const AddReferralLetterModal = ({ table }) => {
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
           ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
+          selectedLang(emp.office.fullName) ||
+          ""
           : "";
         const label = officeShort
           ? `${emp.fullName} (${officeShort})`
@@ -56,19 +56,19 @@ const AddReferralLetterModal = ({ table }) => {
 
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
-      client_guid: "",
-      application_number: "",
-      received_opr_guid: "",
-      agent: { name: "", phone_number: "" },
+      client_guid: null,
+      application_number: null,
+      received_opr_guid: null,
+      agent: { name: null, phone_number: null },
       destination_country: "",
-      tranzit: "",
-      travel_document_number: "",
-      departure_date: "",
-      return_date: "",
+      tranzit: null,
+      travel_document_number: null,
+      departure_date: null,
+      return_date: null,
       price: "",
       currency: "TMT",
-      contract_number: "",
-      contract_date: "",
+      contract_number: null,
+      contract_date: null,
       note: "",
     },
     resolver: yupResolver(addReferralLetter),

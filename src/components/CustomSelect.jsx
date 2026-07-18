@@ -68,6 +68,7 @@ const CustomSelect = ({
   emptyText,
   getRowId = defaultGetRowId,
   getRowLabel = defaultGetRowLabel,
+  renderOption,
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -219,11 +220,16 @@ const CustomSelect = ({
                 }}
                 {...props}
               >
-                {normalizedOptions.map((option) => (
-                  <MenuItem key={option.id} value={option.id}>
-                    {option.label}
-                  </MenuItem>
-                ))}
+                {normalizedOptions.map((option) => {
+                  if (renderOption) {
+                    return renderOption(option.raw, option);
+                  }
+                  return (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.label}
+                    </MenuItem>
+                  );
+                })}
               </Select>
 
               {(hasError || error?.message) && (

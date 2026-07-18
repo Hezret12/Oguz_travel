@@ -65,3 +65,11 @@ export const getAllVisaCategoriesApi = async (params = {}) => {
 export const getAllReferralLettersApi = async (params = {}) => {
   return await api.getPrivate('/referral-letter/get-all-referral-letters', params);
 };
+
+export const getAllVisasApi = async (params = {}) => {
+  return await api.getPrivate('/visa/get-visa', params);
+};
+
+export const getAllPackageByIndexApi = async (index) => {
+  return await api.getPrivate('/visa-package/get-visa-packages-byindex', index);
+};

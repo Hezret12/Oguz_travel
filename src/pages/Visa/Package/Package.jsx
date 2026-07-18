@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -66,10 +66,12 @@ const Package = () => {
       sale_price: "",
       sale_start_date: "",
       sale_end_date: "",
+      currency: "TMT",
     },
   });
 
   const selectedCategoryGuid = watch("category_guid");
+  const currencySymbol = "TMT";
 
   // Fetch Packages via API
   const {
@@ -94,6 +96,7 @@ const Package = () => {
   const { mutate: createVisaPackage } = useCreate({
     apiFn: addVisaPackageApi,
     key: "visa-packages",
+    invalidateQueries: ["visa-packages-byindex"],
     onSuccess: () => {
       setDialogOpen(false);
       setEditing(null);
@@ -106,6 +109,7 @@ const Package = () => {
     apiFn: updateVisaPackageApi,
     key: "visa-packages",
     idKey: "guid",
+    invalidateQueries: ["visa-packages-byindex"],
     onSuccessUpdate: () => {
       setDialogOpen(false);
       setEditing(null);
@@ -118,7 +122,7 @@ const Package = () => {
     deleteFn: deleteVisaPackageApi,
     queryKey: "visa-packages",
     idKey: "guid",
-    invalidateQueries: ["visa-packages"],
+    invalidateQueries: ["visa-packages", "visa-packages-byindex"],
   });
 
   // Create Category mutation
@@ -141,21 +145,38 @@ const Package = () => {
     },
   });
 
-  const nextSortOrder = useMemo(() => {
-    return (packageList?.length || 0) + 1;
-  }, [packageList]);
+  const getNextSortOrderForCategory = (catGuid) => {
+    if (!catGuid || !packageList) return 1;
+    const categoryPackages = packageList.filter(
+      (item) => (item.category_guid || item.category?.guid) === catGuid,
+    );
+    if (categoryPackages.length === 0) return 1;
+    const maxIndex = Math.max(
+      ...categoryPackages.map((item) => Number(item.index_number || 0)),
+    );
+    return maxIndex + 1;
+  };
+
+  useEffect(() => {
+    if (!editing && selectedCategoryGuid) {
+      const nextIndex = getNextSortOrderForCategory(selectedCategoryGuid);
+      setValue("index_number", String(nextIndex));
+    }
+  }, [selectedCategoryGuid, editing, packageList]);
 
   const openCreate = () => {
+    const defaultCatGuid = categories[0]?.guid || "";
     setEditing(null);
     reset({
       name: "",
-      index_number: String(nextSortOrder),
+      index_number: String(getNextSortOrderForCategory(defaultCatGuid)),
       price: "",
-      category_guid: categories[0]?.guid || "",
+      category_guid: defaultCatGuid,
       description: "",
       sale_price: "",
       sale_start_date: "",
       sale_end_date: "",
+      currency: "TMT",
     });
     setDialogOpen(true);
   };
@@ -164,7 +185,7 @@ const Package = () => {
     setEditing(item);
     reset({
       name: item.name || "",
-      index_number: String(item.sort_order || ""),
+      index_number: String(item.index_number || ""),
       price: String(item.price || ""),
       category_guid: item.category_guid || item.category?.guid || "",
       description: item.description || "",
@@ -174,6 +195,7 @@ const Package = () => {
           : "",
       sale_start_date: item.sale_start_date || "",
       sale_end_date: item.sale_end_date || "",
+      currency: item.currency || "TMT",
     });
     setDialogOpen(true);
   };
@@ -257,7 +279,8 @@ const Package = () => {
       name: data.name,
       category_guid: data.category_guid,
       price: Number(data.price || 0),
-      sort_order: Number(data.index_number || 0),
+      currency: data.currency || "TMT",
+      index_number: Number(data.index_number || 0),
       table_type: "bukja",
       description: data.description || "",
       sale_price: data.sale_price ? Number(data.sale_price) : null,
@@ -301,11 +324,11 @@ const Package = () => {
       groups[catName].push(t);
     });
 
-    // Sort each category's items by sort_order
+    // Sort each category's items by index_number
     Object.keys(groups).forEach((cat) => {
       groups[cat].sort(
         (a, b) =>
-          (a.sort_order || 0) - (b.sort_order || 0) ||
+          (a.index_number || 0) - (b.index_number || 0) ||
           String(a.name).localeCompare(String(b.name)),
       );
     });
@@ -357,7 +380,14 @@ const Package = () => {
   };
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+      }}
+    >
       <PageHeader
         title={t("sidebar.visa.package")}
         pageTitle={`${t("sidebar.visa.package")} | Oguz Travel`}
@@ -365,196 +395,200 @@ const Package = () => {
         onAddClick={openCreate}
       />
 
-      {isLoading ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "350px",
-            gap: 2,
-          }}
-        >
-          <CircularProgress size={44} thickness={4.5} sx={{ color: "#0c8a7b" }} />
-          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-            {t("loading")}
-          </Typography>
-        </Box>
-      ) : isError ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "350px",
-            textAlign: "center",
-            gap: 2,
-            px: 3,
-          }}
-        >
+      <Box sx={{ flexGrow: 1, overflowY: "auto", mt: 1, pb: 4, px: 0.5 }}>
+        {isLoading ? (
           <Box
             sx={{
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              width: 56,
-              height: 56,
-              borderRadius: "50%",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(239, 68, 68, 0.15)"
-                  : "rgba(239, 68, 68, 0.08)",
-              color: "#ef4444",
+              minHeight: "350px",
+              gap: 2,
             }}
           >
-            <ErrorIcon sx={{ fontSize: 28 }} />
+            <CircularProgress
+              size={44}
+              thickness={4.5}
+              sx={{ color: "#0c8a7b" }}
+            />
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontWeight: 600 }}
+            >
+              {t("loading")}
+            </Typography>
           </Box>
-          <Typography variant="body1" sx={{ fontWeight: 600, color: "text.primary" }}>
-            {t("errorOccurred")}
-          </Typography>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => refetch()}
+        ) : isError ? (
+          <Box
             sx={{
-              borderRadius: "8px",
-              textTransform: "none",
-              fontWeight: 600,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "350px",
+              textAlign: "center",
+              gap: 2,
               px: 3,
-              py: 0.75,
-              borderColor: "divider",
-              color: "text.secondary",
-              "&:hover": {
-                borderColor: "text.primary",
-                color: "text.primary",
-                backgroundColor: "transparent",
-              },
             }}
           >
-            {t("reset") || "Try Again"}
-          </Button>
-        </Box>
-      ) : Object.keys(groupedTariffs).length === 0 ? (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "350px",
-            textAlign: "center",
-            gap: 2,
-            px: 3,
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 56,
-              height: 56,
-              borderRadius: "50%",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.05)"
-                  : "rgba(0, 0, 0, 0.03)",
-              color: "text.secondary",
-            }}
-          >
-            <LayersIcon sx={{ fontSize: 26 }} />
-          </Box>
-          <Typography variant="body1" sx={{ fontWeight: 600, color: "text.secondary" }}>
-            {t("noData") || "Maglumat tapylmady"}
-          </Typography>
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
-            alignItems: "start",
-            gap: 4,
-            mt: 3,
-          }}
-        >
-          {Object.entries(groupedTariffs).map(([categoryName, items]) => (
-            <Paper
-              key={categoryName}
-              elevation={0}
+            <Box
               sx={{
-                borderRadius: "16px",
-                border: "1px solid",
-                borderColor: "divider",
-                overflow: "hidden",
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.02)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(239, 68, 68, 0.15)"
+                    : "rgba(239, 68, 68, 0.08)",
+                color: "#ef4444",
               }}
             >
-              {/* Category Solid Teal Header */}
-              <Box
+              <ErrorIcon sx={{ fontSize: 28 }} />
+            </Box>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: 600, color: "text.primary" }}
+            >
+              {t("errorOccurred")}
+            </Typography>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => refetch()}
+              sx={{
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 600,
+                px: 3,
+                py: 0.75,
+                borderColor: "divider",
+                color: "text.secondary",
+                "&:hover": {
+                  borderColor: "text.primary",
+                  color: "text.primary",
+                  backgroundColor: "transparent",
+                },
+              }}
+            >
+              {t("reset") || "Try Again"}
+            </Button>
+          </Box>
+        ) : Object.keys(groupedTariffs).length === 0 ? (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "350px",
+              textAlign: "center",
+              gap: 2,
+              px: 3,
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 56,
+                height: 56,
+                borderRadius: "50%",
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.05)"
+                    : "rgba(0, 0, 0, 0.03)",
+                color: "text.secondary",
+              }}
+            >
+              <LayersIcon sx={{ fontSize: 26 }} />
+            </Box>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: 600, color: "text.secondary" }}
+            >
+              {t("noData") || "Maglumat tapylmady"}
+            </Typography>
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+              alignItems: "start",
+              gap: 4,
+              mt: 3,
+            }}
+          >
+            {Object.entries(groupedTariffs).map(([categoryName, items]) => (
+              <Paper
+                key={categoryName}
+                elevation={0}
                 sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  bgcolor: "#0c8a7b",
-                  px: 3,
-                  py: 1.75,
-                  color: "#ffffff",
+                  borderRadius: "16px",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  overflow: "hidden",
+                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.02)",
                 }}
               >
-                <Typography
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: "1.05rem",
-                    letterSpacing: "0.5px",
-                  }}
-                >
-                  {categoryName.toUpperCase()}
-                </Typography>
+                {/* Category Solid Teal Header */}
                 <Box
                   sx={{
-                    bgcolor: "rgba(255, 255, 255, 0.18)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    bgcolor: "#0c8a7b",
+                    px: 3,
+                    py: 1.75,
                     color: "#ffffff",
-                    borderRadius: "20px",
-                    px: 2,
-                    py: 0.5,
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
                   }}
                 >
-                  {items.length} sany
+                  <Typography
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1.05rem",
+                      letterSpacing: "0.5px",
+                    }}
+                  >
+                    {categoryName.toUpperCase()}
+                  </Typography>
+                  <Box
+                    sx={{
+                      bgcolor: "rgba(255, 255, 255, 0.18)",
+                      color: "#ffffff",
+                      borderRadius: "20px",
+                      px: 2,
+                      py: 0.5,
+                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {items.length} sany
+                  </Box>
                 </Box>
-              </Box>
 
-              {/* Sub-header columns indicator */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  py: 1.25,
-                  px: 3,
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(255,255,255,0.02)"
-                      : "#faf9f5",
-                  borderBottom: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Typography
+                {/* Sub-header columns indicator */}
+                <Box
                   sx={{
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    color: "#8c7e6b",
-                    letterSpacing: "0.5px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    py: 1.25,
+                    px: 3,
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(255,255,255,0.02)"
+                        : "#faf9f5",
+                    borderBottom: "1px solid",
+                    borderColor: "divider",
                   }}
                 >
-                  {t("columns.serviceName")?.toUpperCase()}
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
                   <Typography
                     sx={{
                       fontSize: "0.75rem",
@@ -563,188 +597,239 @@ const Package = () => {
                       letterSpacing: "0.5px",
                     }}
                   >
-                    {t("columns.price")?.toUpperCase()}
+                    {t("columns.serviceName")?.toUpperCase()}
                   </Typography>
-                  <Box sx={{ width: "72px" }} />
-                </Box>
-              </Box>
-
-              {/* Category Items list */}
-              <Box>
-                {items.map((item, index) => {
-                  const isOnSale = checkIsOnSale(item);
-                  return (
-                    <Box
-                      key={item.guid || item.id}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+                    <Typography
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        py: 1.75,
-                        px: 3,
-                        borderBottom:
-                          index === items.length - 1 ? "none" : "1px solid",
-                        borderColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.05)"
-                            : "#f3f4f6",
-                        backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.01)"
-                            : "#ffffff",
-                        transition: "background-color 0.2s",
-                        "&:hover": {
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === "dark"
-                              ? "rgba(255, 255, 255, 0.04)"
-                              : "#fcfcf8",
-                        },
-                        "&:hover .row-actions": {
-                          opacity: 1,
-                          visibility: "visible",
-                        },
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        color: "#8c7e6b",
+                        letterSpacing: "0.5px",
                       }}
                     >
-                      {/* Left side: name and helper information */}
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Typography
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: "0.95rem",
-                            color: "text.primary",
-                          }}
-                        >
-                          {item.name}
-                        </Typography>
-                        {item.description && (
-                          <Tooltip
-                            title={item.description}
-                            arrow
-                            placement="top"
-                          >
-                            <IconButton
-                              size="small"
-                              sx={{ p: 0.25, color: "text.secondary" }}
-                            >
-                              <HelpOutlineRoundedIcon
-                                sx={{ fontSize: "16px" }}
-                              />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                        {isOnSale && (
-                          <Box
-                            sx={{
-                              backgroundColor: "error.main",
-                              color: "#ffffff",
-                              borderRadius: "4px",
-                              px: 0.75,
-                              py: 0.1,
-                              fontSize: "0.65rem",
-                              fontWeight: 700,
-                              textTransform: "uppercase",
-                            }}
-                          >
-                            {t("sale") || "Indirim"}
-                          </Box>
-                        )}
-                      </Box>
+                      {t("columns.price")?.toUpperCase()}
+                    </Typography>
+                    <Box sx={{ width: "72px" }} />
+                  </Box>
+                </Box>
 
-                      {/* Right side: price and action controls */}
+                {/* Category Items list */}
+                <Box>
+                  {items.map((item, index) => {
+                    const isOnSale = checkIsOnSale(item);
+                    return (
                       <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 3 }}
+                        key={item.guid || item.id}
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          py: 1.75,
+                          px: 3,
+                          borderBottom:
+                            index === items.length - 1 ? "none" : "1px solid",
+                          borderColor: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "rgba(255,255,255,0.05)"
+                              : "#f3f4f6",
+                          backgroundColor: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "rgba(255, 255, 255, 0.01)"
+                              : "#ffffff",
+                          transition: "background-color 0.2s",
+                          "&:hover": {
+                            backgroundColor: (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "rgba(255, 255, 255, 0.04)"
+                                : "#fcfcf8",
+                          },
+                          "&:hover .row-actions": {
+                            opacity: 1,
+                            visibility: "visible",
+                          },
+                        }}
                       >
-                        {isOnSale ? (
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "baseline",
-                              gap: 1,
-                            }}
-                          >
-                            <Typography
-                              sx={{
-                                textDecoration: "line-through",
-                                color: "text.secondary",
-                                fontSize: "0.85rem",
-                              }}
-                            >
-                              {formatPrice(item.price)}
-                            </Typography>
-                            <Typography
-                              sx={{
-                                fontWeight: 700,
-                                color: "error.main",
-                                fontSize: "0.95rem",
-                              }}
-                            >
-                              {formatPrice(item.sale_price)}
-                            </Typography>
-                          </Box>
-                        ) : (
+                        {/* Left side: name and helper information */}
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
                           <Typography
                             sx={{
                               fontWeight: 700,
-                              color: "text.primary",
                               fontSize: "0.95rem",
+                              color: "text.primary",
                             }}
                           >
-                            {formatPrice(item.price)}
+                            {item.name}
                           </Typography>
-                        )}
+                          {item.description && (
+                            <Tooltip
+                              title={item.description}
+                              arrow
+                              placement="top"
+                              slotProps={{
+                                tooltip: {
+                                  sx: {
+                                    fontSize: "0.85rem",
+                                    py: 0.75,
+                                    px: 1.5,
+                                    borderRadius: "6px",
+                                  },
+                                },
+                              }}
+                            >
+                              <IconButton
+                                size="small"
+                                sx={{ p: 0.25, color: "text.secondary" }}
+                              >
+                                <HelpOutlineRoundedIcon
+                                  sx={{ fontSize: "16px" }}
+                                />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          {isOnSale && (
+                            <Box
+                              sx={{
+                                backgroundColor: "error.main",
+                                color: "#ffffff",
+                                borderRadius: "4px",
+                                px: 0.75,
+                                py: 0.1,
+                                fontSize: "0.65rem",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {t("sale") || "Indirim"}
+                            </Box>
+                          )}
+                        </Box>
 
-                        {/* Actions container (shown smoothly on hover) */}
+                        {/* Right side: price and action controls */}
                         <Box
-                          className="row-actions"
-                          sx={{
-                            display: "flex",
-                            gap: 0.5,
-                            opacity: 0,
-                            visibility: "hidden",
-                            transition:
-                              "opacity 0.2s ease, visibility 0.2s ease",
-                            width: "72px",
-                            justifyContent: "flex-end",
-                          }}
+                          sx={{ display: "flex", alignItems: "center", gap: 3 }}
                         >
-                          <IconButton
-                            size="small"
-                            onClick={() => openEdit(item)}
+                          {isOnSale ? (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "baseline",
+                                gap: 1,
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  textDecoration: "line-through",
+                                  color: "text.secondary",
+                                  fontSize: "0.85rem",
+                                }}
+                              >
+                                {formatPrice(item.price, item.currency)}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  fontWeight: 700,
+                                  color: "error.main",
+                                  fontSize: "0.95rem",
+                                }}
+                              >
+                                {formatPrice(item.sale_price, item.currency)}
+                              </Typography>
+                            </Box>
+                          ) : (
+                            <Typography
+                              sx={{
+                                fontWeight: 700,
+                                color: "text.primary",
+                                fontSize: "0.95rem",
+                              }}
+                            >
+                              {formatPrice(item.price, item.currency)}
+                            </Typography>
+                          )}
+
+                          <Box
+                            className="row-actions"
                             sx={{
-                              color: "#0c8a7b",
-                              p: 0.5,
-                              "&:hover": {
-                                bgcolor: "rgba(12, 138, 123, 0.08)",
-                              },
+                              display: "flex",
+                              gap: 1,
+                              opacity: { xs: 1, md: 0 },
+                              visibility: { xs: "visible", md: "hidden" },
+                              transition:
+                                "opacity 0.25s ease-in-out, visibility 0.25s ease-in-out",
+                              width: "72px",
+                              justifyContent: "flex-end",
                             }}
                           >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDelete(item)}
-                            sx={{
-                              color: "error.main",
-                              p: 0.5,
-                              "&:hover": {
-                                bgcolor: "rgba(239, 68, 68, 0.08)",
-                              },
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => openEdit(item)}
+                              sx={{
+                                color: "text.secondary",
+                                border: "1px solid",
+                                borderColor: "divider",
+                                bgcolor: (theme) =>
+                                  theme.palette.mode === "dark"
+                                    ? "rgba(255, 255, 255, 0.02)"
+                                    : "rgba(0, 0, 0, 0.01)",
+                                p: "6px",
+                                borderRadius: "8px",
+                                transition:
+                                  "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                "&:hover": {
+                                  bgcolor: "grey.600",
+                                  borderColor: "grey.600",
+                                  color: "#ffffff",
+                                  transform: "translateY(-2px)",
+                                  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15)",
+                                },
+                              }}
+                            >
+                              <EditIcon sx={{ fontSize: "16px" }} />
+                            </IconButton>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDelete(item)}
+                              sx={{
+                                color: "error.main",
+                                border: "1px solid",
+                                borderColor: (theme) =>
+                                  theme.palette.mode === "dark"
+                                    ? "rgba(239, 68, 68, 0.3)"
+                                    : "rgba(239, 68, 68, 0.15)",
+                                bgcolor: (theme) =>
+                                  theme.palette.mode === "dark"
+                                    ? "rgba(239, 68, 68, 0.05)"
+                                    : "rgba(239, 68, 68, 0.02)",
+                                p: "6px",
+                                borderRadius: "8px",
+                                transition:
+                                  "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                "&:hover": {
+                                  bgcolor: "error.main",
+                                  borderColor: "error.main",
+                                  color: "#ffffff",
+                                  transform: "translateY(-2px)",
+                                  boxShadow:
+                                    "0 4px 10px rgba(239, 68, 68, 0.25)",
+                                },
+                              }}
+                            >
+                              <DeleteIcon sx={{ fontSize: "16px" }} />
+                            </IconButton>
+                          </Box>
                         </Box>
                       </Box>
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Paper>
-          ))}
-        </Box>
-      )}
+                    );
+                  })}
+                </Box>
+              </Paper>
+            ))}
+          </Box>
+        )}
+      </Box>
 
       <CustomDialog
         open={dialogOpen}
@@ -862,6 +947,7 @@ const Package = () => {
                   type="number"
                   label={t("columns.price")}
                   required
+                  endIcon="TMT"
                 />
               </Box>
               <Box sx={{ flex: 1 }}>
@@ -891,12 +977,18 @@ const Package = () => {
               >
                 {t("saleSettings")}
               </Typography>
-              <CustomTextField
-                name="sale_price"
-                control={control}
-                type="number"
-                label={t("columns.salePrice")}
-              />
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Box sx={{ flex: 1 }}>
+                  <CustomTextField
+                    name="sale_price"
+                    control={control}
+                    type="number"
+                    label={t("columns.salePrice")}
+                    endIcon={currencySymbol}
+                  />
+                </Box>
+                <Box sx={{ flex: 1 }} />
+              </Box>
               <Box sx={{ display: "flex", gap: 2, mt: 1.5 }}>
                 <Box sx={{ flex: 1 }}>
                   <CustomDatePicker
@@ -931,23 +1023,54 @@ const Package = () => {
       >
         <CustomDialogHeader
           variant="h6"
-          title={categoryDialogMode === "edit" ? t("editCategory") : t("addCategory")}
+          title={
+            categoryDialogMode === "edit" ? t("editCategory") : t("addCategory")
+          }
         />
-        <Box
-          sx={{ display: "flex", flexDirection: "column", gap: 2.5, mt: 1.5 }}
-        >
-          <TextField
-            fullWidth
-            label={t("columns.category")}
-            value={categoryInputValue}
-            onChange={(e) => {
-              setCategoryInputValue(e.target.value);
-              if (e.target.value.trim()) setCategoryInputError("");
-            }}
-            error={Boolean(categoryInputError)}
-            helperText={categoryInputError}
-            autoFocus
-          />
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1.5 }}>
+          <Box sx={{ width: "100%" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                mb: 0.75,
+                fontWeight: 600,
+                fontSize: "0.875rem",
+              }}
+            >
+              {t("columns.category")}
+              <span
+                style={{
+                  color: "#ef4444",
+                  marginLeft: "4px",
+                  fontSize: "17px",
+                }}
+              >
+                *
+              </span>
+            </Typography>
+            <TextField
+              fullWidth
+              placeholder={t("columns.category")}
+              value={categoryInputValue}
+              onChange={(e) => {
+                setCategoryInputValue(e.target.value);
+                if (e.target.value.trim()) setCategoryInputError("");
+              }}
+              error={Boolean(categoryInputError)}
+              helperText={categoryInputError}
+              autoFocus
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "7px",
+                  minHeight: "44px",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.03)"
+                      : "#ffffff",
+                },
+              }}
+            />
+          </Box>
           <Box
             sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}
           >

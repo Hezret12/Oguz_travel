@@ -7,80 +7,26 @@ import { useMemo, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
-import { Box } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
-
-const initialData = [
-  {
-    id: "AG1/O7-24",
-    date: "2024-10-21",
-    fullName: "ROZYKULOV DOVLET",
-    tel: "+99361890318",
-    passportNumber: "A0840437",
-    dob: "1994-08-31",
-    agent: null,
-    agentTel: null,
-    hyzmat: "KONSULTASIA",
-    otelBron: null,
-    terjime: null,
-    copyScan: null,
-    photo: null,
-    jemiTmt: 50,
-    jemiUsd: null,
-  },
-  {
-    id: "AG1/O7-25",
-    date: "2024-10-21",
-    fullName: "HOJAMBERDIYEVA TAVUS",
-    tel: "+99363825583",
-    passportNumber: "A2586045",
-    dob: "1983-07-31",
-    agent: null,
-    agentTel: null,
-    hyzmat: "KONSULTASIA",
-    otelBron: null,
-    terjime: "1 SAHYPA",
-    copyScan: "SROCNY",
-    photo: null,
-    jemiTmt: 100,
-    jemiUsd: null,
-  },
-  {
-    id: "row-2647",
-    date: "2026-06-08",
-    fullName: "RUSLAN",
-    tel: null,
-    passportNumber: null,
-    dob: null,
-    agent: null,
-    agentTel: null,
-    hyzmat: null,
-    otelBron: null,
-    terjime: null,
-    copyScan: null,
-    photo: null,
-    jemiTmt: 50,
-    jemiUsd: null,
-  },
-  {
-    id: "row-2648",
-    date: "2026-06-09",
-    fullName: "MURADOVA YAVAR",
-    tel: null,
-    passportNumber: "A2365741",
-    dob: "1954-02-10",
-    agent: null,
-    agentTel: null,
-    hyzmat: null,
-    otelBron: null,
-    terjime: null,
-    copyScan: null,
-    photo: null,
-    jemiTmt: 300,
-    jemiUsd: null,
-  },
-];
+import AddVisaModal from "./AddVisaModal";
+import EditVisaModal from "./EditVisaModal";
+import ColumnActionButtons from "../../components/ColumnActionButtons";
+import DeleteDialog from "../../components/DeleteDialog";
+import { useDelete } from "../../hooks/CRUD/useDelete";
+import { useDeleteDialog } from "../../hooks/useDeleteDialog";
+import { deleteVisaApi } from "../../api/queries/delete";
+import { usePageFilters } from "../../hooks/usePageFilters";
+import { usePagginationGet } from "../../hooks/usePagginationGet";
+import { getAllVisasApi } from "../../api/queries/getters";
+import {
+  visaFilterActions,
+  visaFilterSelectors,
+} from "../../store/slices/filters/visaFilterSlice";
+import FilterDrawer from "../../components/FilterDrawer";
+import VisaFilter from "./Contents/VisaFilter";
+import GlobalSearchInput from "../../components/GlobalSearchInput";
 
 const Visa = () => {
   const { t } = useLocale();
@@ -88,108 +34,303 @@ const Visa = () => {
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
 
+  const {
+    applied,
+    draft,
+    isDrawerOpen,
+    openDrawer,
+    setDraftFilter,
+    setFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    searchQuery,
+    setSearch,
+    page,
+    limit,
+    setPage,
+    setPageSize,
+    setSort,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+    queryParams,
+  } = usePageFilters({
+    actions: visaFilterActions,
+    selectors: visaFilterSelectors,
+  });
+
+  const {
+    data: visasData,
+    isLoading,
+    isFetching,
+    pageCount,
+    totalItems,
+  } = usePagginationGet({
+    apiFn: getAllVisasApi,
+    key: "visaApplications",
+    params: queryParams,
+  });
+
+  const visas = useMemo(() => visasData?.data ?? visasData ?? [], [visasData]);
+
+  const { mutate: deleteVisa, isPending: isDeleting } = useDelete({
+    deleteFn: deleteVisaApi,
+    queryKey: ["visaApplications", queryParams],
+    idKey: "guid",
+    isPaginated: true,
+  });
+
+  const deleteDialog = useDeleteDialog({
+    onConfirm: (item) => deleteVisa(item.guid),
+  });
+
+  const handleDeleteClick = (item) => deleteDialog.open(item);
+
+  const activeFilters = useMemo(
+    () =>
+      Object.entries(applied).filter(
+        // eslint-disable-next-line no-unused-vars
+        ([_, value]) => value !== undefined && value !== null && value !== "",
+      ),
+    [applied],
+  );
+
   const columns = useMemo(
     () => [
       {
-        id: "rowNumber",
+        accessorKey: "index_number",
+        id: "index_number",
         header: "#",
         size: 50,
         enableSorting: false,
-        Cell: ({ row }) => row.index + 1,
       },
       {
-        accessorKey: "date",
+        accessorKey: "datetime",
+        id: "date_time",
         header: t("columns.issueDate"),
         size: 100,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
         id: "client",
-        header: t("columns.client"), 
+        header: t("columns.client"),
         size: 200,
-        accessorFn: (row) => row.fullName ?? "",
+        accessorFn: (row) => row.client?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.fullName}
-            secondary={row.original.tel}
+            primary={row.original.client?.fullName}
+            secondary={row.original.client?.phone_number}
           />
         ),
       },
       {
-        accessorKey: "passportNumber", 
+        id: "passportNumber",
+        accessorFn: (row) => row.client?.passport_number,
         header: t("columns.passportNumber") ?? "Passport №",
         size: 130,
       },
       {
-        accessorKey: "dob",
+        id: "dob",
+        accessorFn: (row) => row.client?.dateOfBirth,
         header: t("columns.dateOfBirth"),
         size: 110,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
-        id: "agent",
-        header: t("columns.agent") ?? "Agent",
+        accessorFn: (row) => row?.service?.name,
+        id: "service",
+        header: t("columns.service"),
+        size: 140,
+      },
+      {
+        id: "hotel_book",
+        accessorFn: (row) => row?.hotel_booking?.name,
+        header: t("columns.hotelBron"),
+        size: 110,
+      },
+      {
+        id: "translate",
+        accessorFn: (row) => row?.translation?.name,
+        header: t("columns.translation"),
+        size: 110,
+      },
+      {
+        id: "courier",
+        accessorFn: (row) => row?.courier?.name,
+        header: t("columns.courier"),
+        size: 110,
+      },
+      {
+        accessorFn: (row) => row.price_usd,
+        id: "price_tmt",
+        header: t("columns.total"),
         size: 150,
-        accessorFn: (row) => row.agent ?? "",
+      },
+      {
+        accessorFn: (row) => row.price_usd,
+        id: "price_usd",
+        header: t("columns.total"),
+        size: 150,
+      },
+      {
+        id: "agent",
+        header: t("columns.agent"),
+        size: 150,
+        accessorFn: (row) => row.agent?.name,
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.agent}
-            secondary={row.original.agentTel} 
+            primary={row.original.agent?.name}
+            secondary={row.original.agent?.phone_number}
           />
         ),
       },
       {
-        accessorKey: "hyzmat",
-        header: t("columns.service") ?? "Hyzmat",
-        size: 140,
+        accessorFn: (row) => row.note,
+        id: "note",
+        header: t("columns.note"),
+        size: 80,
       },
       {
-        accessorKey: "otelBron",
-        header: t("columns.hotelBron") ?? "Otel Bron",
+        id: "actions",
+        header: t("columns.actions") ?? "Actions",
         size: 110,
-      },
-      {
-        accessorKey: "terjime",
-        header: t("columns.translation") ?? "Terjime",
-        size: 110,
-      },
-      {
-        id: "totalCollected",
-        header: t("columns.total") ?? "Jemi",
-        size: 150,
-        accessorFn: (row) => row.jemiUsd ?? 0,
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={`${Number(row.original.jemiTmt ?? 0).toFixed(2)} TMT`} 
-            secondary={`$${Number(row.original.jemiUsd ?? 0).toFixed(2)}`} 
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row, table }) => (
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={() => handleDeleteClick(row.original)}
           />
         ),
       },
     ],
-    [t, formatChange],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [t],
   );
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
     columns,
-    data: initialData,
+    data: visas || [],
     state: {
       ...defaultMrtOptions.state,
       rowSelection,
+      isLoading: false,
+      showLoadingOverlay: isLoading || isFetching,
+      showSkeletons: false,
+      showProgressBars: false,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
+      },
     },
-    getRowId: (row) => row.id,
+    muiTableBodyProps: {
+      sx: (theme) => ({
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.text.secondary,
+        opacity: isLoading || isFetching ? 0 : 1,
+        pointerEvents: isLoading || isFetching ? "none" : "auto",
+        transition: "opacity 0.15s ease",
+      }),
+    },
+    getRowId: (row) => row.guid,
     onRowSelectionChange: setRowSelection,
-    // renderTopToolbarCustomActions: () => (
-    //   <GlobalSearchInput
-    //     value={searchQuery}
-    //     onChange={setSearchQuery}
-    //     placeholder={t("search") ?? "Ara..."}
-    //     disabled={isLoading}
-    //   />
-    // ),
-    renderBottomToolbar: ({ table }) => {
-      const { pageIndex, pageSize } = table.getState().pagination;
-      const pageCount = table.getPageCount();
+
+    // Server-side options
+    manualPagination: true,
+    manualFiltering: true,
+    manualSorting: true,
+    pageCount,
+    rowCount: totalItems,
+
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().pagination)
+          : updater;
+      if (next.pageIndex !== undefined) setPage(next.pageIndex + 1);
+      if (next.pageSize !== undefined) setPageSize(next.pageSize);
+    },
+
+    onSortingChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().sorting)
+          : updater;
+      if (next && next.length > 0) {
+        setSort(next[0].id, next[0].desc ? "desc" : "asc");
+      } else {
+        setSort("", "asc");
+      }
+    },
+
+    renderEmptyRowsFallback: () => {
+      if (isLoading || isFetching) return null;
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            p: 4,
+            color: "text.secondary",
+            fontWeight: 500,
+          }}
+        >
+          {t("noData")}
+        </Box>
+      );
+    },
+
+    renderCreateRowDialogContent: ({ table }) => <AddVisaModal table={table} />,
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditVisaModal table={table} row={row} />
+    ),
+
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search")}
+          disabled={isLoading}
+        />
+
+        {activeFilters.map(([key, value]) => (
+          <Chip
+            key={key}
+            label={`${t(`columns.${key}`, key)}: ${value}`}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderRadius: "8px",
+              height: "32px",
+              fontWeight: 500,
+              "& .MuiChip-deleteIcon": {
+                color: "primary.main",
+                transition: "all 0.15s ease",
+              },
+            }}
+          />
+        ))}
+      </Box>
+    ),
+
+    renderBottomToolbar: ({ table: mrtTable }) => {
+      const { pageIndex } = mrtTable.getState().pagination;
       return (
         <Box
           sx={(theme) => ({
@@ -207,13 +348,14 @@ const Visa = () => {
           <Pagination
             pageIndex={pageIndex}
             pageCount={pageCount}
-            pageSize={pageSize}
-            // totalRows={filteredUsers.length}
-            onPageChange={(newIndex) => table.setPageIndex(newIndex)}
+            pageSize={limit}
+            totalRows={totalItems}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
           />
         </Box>
       );
     },
+
     muiTableBodyRowProps: ({ row }) => ({
       onClick: row.getToggleSelectedHandler(),
       sx: (theme) => ({
@@ -241,11 +383,36 @@ const Visa = () => {
   return (
     <>
       <PageHeader
-        title={t("pages.users.title")}
-        pageTitle={`${t("pages.users.title")} | Oguz Travel`}
-        addButtonText={t("pages.users.add")}
-        // onAddClick={handleAddUserClick}
-        filterButtonText={t("pages.users.filter")}
+        title={t("sidebar.visaApplications") || "Wiza arza"}
+        pageTitle={`${t("sidebar.visaApplications") || "Wiza arza"} | Oguz Travel`}
+        addButtonText={t("addVisa") || "Wiza goşmak"}
+        filterButtonText={t("filter") || "Filter"}
+        onAddClick={() => table.setCreatingRow(true)}
+        onFilterClick={openDrawer}
+      />
+
+      <FilterDrawer
+        open={isDrawerOpen}
+        onClose={cancelFilters}
+        onApply={applyFilters}
+        onReset={resetFilters}
+        onCancel={cancelFilters}
+      >
+        <VisaFilter
+          filters={draft}
+          selectsOpen={selectsOpen}
+          onFilterChange={setDraftFilter}
+          onSelectOpen={openSelect}
+          onSelectClose={closeSelect}
+        />
+      </FilterDrawer>
+
+      <DeleteDialog
+        open={deleteDialog.isOpen}
+        onClose={deleteDialog.close}
+        onConfirm={deleteDialog.confirm}
+        isLoading={isDeleting}
+        description={t("deleteConfirm")}
       />
 
       <MaterialReactTable table={table} />

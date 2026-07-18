@@ -61,6 +61,14 @@ export const useValidShema = () => {
     note: stringOptionalValidSchema(),
   });
 
+  const addVisa = yup.object({
+    client_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    index_number: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    datetime: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    received_opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    note: stringOptionalValidSchema(),
+  });
+
   const addB2BTicket = yup.object({
    
   });
@@ -126,6 +134,7 @@ export const useValidShema = () => {
     addEmployee,
     editEmployee,
     addReferralLetter,
+    addVisa,
     addUser,
     editUser,
     loginValidSchema,

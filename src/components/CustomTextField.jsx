@@ -95,14 +95,14 @@ const CustomTextField = ({
                       borderColor: 'primary.main',
                     },
                   },
-                  '&.Mui-focused': {
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : '#ffffff',
-                    boxShadow: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? '0 0 0 3px rgba(59, 130, 246, 0.16)'
-                        : '0 0 0 3px rgba(37, 99, 235, 0.12)',
-                  },
+                  // '&.Mui-focused': {
+                  //   backgroundColor: (theme) =>
+                  //     theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : '#ffffff',
+                  //   boxShadow: (theme) =>
+                  //     theme.palette.mode === 'dark'
+                  //       ? '0 0 0 3px rgba(59, 130, 246, 0.16)'
+                  //       : '0 0 0 3px rgba(37, 99, 235, 0.12)',
+                  // },
                 },
                 '& .MuiOutlinedInput-input': {
                   py: multiline ? undefined : '10px',

@@ -29,12 +29,12 @@ const AddClient = ({ table }) => {
   const { control, handleSubmit } = useForm({
     defaultValues: {
       fullName: "",
-      phone_number: "",
-      dateOfBirth: "",
-      passport_number: "",
-      passportExpiryDate: "",
-      passportCountryOfIssue: "",
-      gender: "",
+      phone_number: null,
+      dateOfBirth: null,
+      passport_number: null,
+      passportExpiryDate: null,
+      passportCountryOfIssue: null,
+      gender: null,
     },
     resolver: yupResolver(clientValidShema),
     mode: "onSubmit",

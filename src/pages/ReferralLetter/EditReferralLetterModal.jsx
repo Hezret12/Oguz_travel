@@ -58,26 +58,26 @@ const EditReferralLetterModal = ({ table, row }) => {
 
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
-      guid: row?.original?.guid || "",
-      client_guid: row?.original?.client_guid || row?.original?.client?.guid || "",
-      application_number: row?.original?.application_number || "",
-      received_opr_guid: row?.original?.received_opr_guid || "",
+      guid: row?.original?.guid || null,
+      client_guid: row?.original?.client_guid || row?.original?.client?.guid || null,
+      application_number: row?.original?.application_number || null,
+      received_opr_guid: row?.original?.received_opr_guid || null,
       agent: {
-        name: row?.original?.agent?.name || "",
-        phone_number: row?.original?.agent?.phone_number || "",
+        name: row?.original?.agent?.name || null,
+        phone_number: row?.original?.agent?.phone_number || null,
       },
-      destination_country: row?.original?.destination_country || "",
-      tranzit: row?.original?.tranzit || "",
-      travel_document_number: row?.original?.travel_document_number || "",
-      departure_date: row?.original?.departure_date || "",
-      return_date: row?.original?.return_date || "",
+      destination_country: row?.original?.destination_country || null,
+      tranzit: row?.original?.tranzit || null,
+      travel_document_number: row?.original?.travel_document_number || null,
+      departure_date: row?.original?.departure_date || null,
+      return_date: row?.original?.return_date || null,
       price:
         row?.original?.price !== undefined
           ? String(row.original.price)
           : "",
       currency: row?.original?.currency || "TMT",
-      contract_number: row?.original?.contract_number || "",
-      contract_date: row?.original?.contract_date || "",
+      contract_number: row?.original?.contract_number || null,
+      contract_date: row?.original?.contract_date || null,
       note: row?.original?.note || "",
     },
     resolver: yupResolver(addReferralLetter),
