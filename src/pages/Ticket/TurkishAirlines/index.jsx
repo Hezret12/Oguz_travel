@@ -101,6 +101,7 @@ const TurkishAirlines = () => {
     data: turkishData,
     isLoading,
     isFetching,
+    refetch,
     pageCount,
     totalItems,
   } = usePagginationGet({
@@ -418,6 +419,8 @@ const TurkishAirlines = () => {
         onChange={setSearch}
         placeholder={t("search") ?? "Search..."}
         disabled={isLoading}
+        onRefetch={refetch}
+        isFetching={isFetching}
       />
     ),
     renderBottomToolbar: ({ table: mrtTable }) => {

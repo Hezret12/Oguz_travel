@@ -49,4 +49,9 @@ export const updateReferralLetterApi = async (data) => {
 export const updateVisaApi = async (data) => {
   const response = await api.patchPrivate(`/visa/update-visa`, data);
   return response;
+};
+
+export const updateTranslatorApi = async (data) => {
+  const response = await api.patchPrivate(`/translator/update-translator`, data);
+  return response;
 };

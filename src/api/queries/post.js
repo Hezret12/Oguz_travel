@@ -86,3 +86,19 @@ export const addVisaApi = async (data) => {
   return response;
 };
 
+export const addTranslationApi = async (data) => {
+  const response = await api.postPrivate(
+    "/general-translation/add-translation",
+    data,
+  );
+  return response;
+};
+
+export const addTranslatorApi = async (data) => {
+  const response = await api.postPrivate(
+    "/translator/add-translator",
+    data,
+  );
+  return response;
+};
+

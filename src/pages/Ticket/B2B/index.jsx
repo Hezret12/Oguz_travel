@@ -122,6 +122,7 @@ const B2B = () => {
     data: b2bData,
     isLoading,
     isFetching,
+    refetch,
     pageCount,
     totalItems,
   } = usePagginationGet({
@@ -479,6 +480,8 @@ const B2B = () => {
           onChange={setSearch}
           placeholder={t("search")}
           disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
         />
 
         {activeFilters.map(([key, value]) => (

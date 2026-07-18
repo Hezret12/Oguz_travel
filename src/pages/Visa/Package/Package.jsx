@@ -162,6 +162,7 @@ const Package = () => {
       const nextIndex = getNextSortOrderForCategory(selectedCategoryGuid);
       setValue("index_number", String(nextIndex));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategoryGuid, editing, packageList]);
 
   const openCreate = () => {

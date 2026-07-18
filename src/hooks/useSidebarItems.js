@@ -9,6 +9,7 @@ import ContactEmergencyRoundedIcon from "@mui/icons-material/ContactEmergencyRou
 import ConfirmationNumberRoundedIcon from "@mui/icons-material/ConfirmationNumberRounded";
 import ContactEmergencyIcon from "@mui/icons-material/ContactEmergency";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
+import TranslateIcon from "@mui/icons-material/Translate";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 
 export const useSidebarItems = () => {
@@ -85,6 +86,11 @@ export const useSidebarItems = () => {
             icon: createElement(NoteAddIcon),
           },
         ],
+      },
+      {
+        text: t("translation") || "Terjime",
+        path: "/translation",
+        icon: createElement(TranslateIcon),
       },
       {
         text: t("sidebar.settings"),

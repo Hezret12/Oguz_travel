@@ -17,6 +17,7 @@ import UnauthorizedPage from '../pages/Unauthorized';
 import VisaPage from '../pages/Visa';
 import ReferralLetter from '../pages/ReferralLetter/index';
 import PackagePage from '../pages/Visa/Package/Package';
+import TranslatePage from '../pages/Translate';
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,7 @@ const router = createBrowserRouter([
               { path: 'visa/applications', element: <VisaPage /> },
               { path: 'visa/referal-letters', element: <ReferralLetter /> },
               { path: 'visa/package',      element: <PackagePage /> },
+              { path: 'translation',       element: <TranslatePage /> },
               {
                 path: 'ticket',
                 element: <TicketPage />,

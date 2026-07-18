@@ -73,3 +73,11 @@ export const getAllVisasApi = async (params = {}) => {
 export const getAllPackageByIndexApi = async (index) => {
   return await api.getPrivate('/visa-package/get-visa-packages-byindex', index);
 };
+
+export const getAllTranslationsApi = async (params = {}) => {
+  return await api.getPrivate('/general-translation/get-translations', params);
+};
+
+export const getAllTranslatorsApi = async (params = {}) => {
+  return await api.getPrivate('/translator/get-all-translators', params);
+};

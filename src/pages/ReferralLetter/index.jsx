@@ -71,6 +71,7 @@ const ReferalLetter = () => {
     data: referralLetters,
     isLoading,
     isFetching,
+    refetch,
     pageCount,
     totalItems,
   } = usePagginationGet({
@@ -366,6 +367,8 @@ const ReferalLetter = () => {
           onChange={setSearch}
           placeholder={t("search")}
           disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
         />
 
         {activeFilters.map(([key, value]) => (

@@ -1,7 +1,7 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
 export function usePagginationGet({ apiFn, key, params }) {
-  const { data, isLoading, isFetching, isError, error } = useQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: [key, params],
     queryFn: () => apiFn(params),
     placeholderData: keepPreviousData,
@@ -18,5 +18,6 @@ export function usePagginationGet({ apiFn, key, params }) {
     isFetching,
     isError,
     error,
+    refetch,
   };
 }

@@ -68,6 +68,7 @@ const Clients = () => {
     data: clientsData,
     isLoading,
     isFetching,
+    refetch,
     pageCount,
     totalItems,
   } = usePagginationGet({
@@ -262,6 +263,8 @@ const Clients = () => {
           onChange={setSearch}
           placeholder={t("search")}
           disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
         />
 
         {activeFilters.map(([key, value]) => (

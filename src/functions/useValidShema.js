@@ -127,6 +127,19 @@ export const useValidShema = () => {
       }),
   });
 
+  const addTranslation = yup.object({
+    received_day: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    client_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    page_count: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
+    price: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
+    note: stringOptionalValidSchema(),
+  });
+
+  const addTranslator = yup.object({
+    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired")),
+  });
+
   return {
     addB2BTicket,
     addTurkishAirlinesTicket,
@@ -138,6 +151,8 @@ export const useValidShema = () => {
     addUser,
     editUser,
     loginValidSchema,
+    addTranslation,
+    addTranslator,
   };
 };
 

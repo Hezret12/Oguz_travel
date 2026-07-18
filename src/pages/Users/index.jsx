@@ -48,6 +48,7 @@ const Users = () => {
     data: usersData = [],
     isLoading,
     isFetching,
+    refetch,
     pageCount,
     totalItems,
   } = usePagginationGet({
@@ -201,6 +202,8 @@ const Users = () => {
         onChange={setSearch}
         placeholder={t("search")}
         disabled={isLoading}
+        onRefetch={refetch}
+        isFetching={isFetching}
       />
     ),
     renderBottomToolbar: ({ table }) => {

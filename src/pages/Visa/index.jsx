@@ -64,6 +64,7 @@ const Visa = () => {
     data: visasData,
     isLoading,
     isFetching,
+    refetch,
     pageCount,
     totalItems,
   } = usePagginationGet({
@@ -350,6 +351,8 @@ const Visa = () => {
           onChange={setSearch}
           placeholder={t("search")}
           disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
         />
 
         {activeFilters.map(([key, value]) => (
