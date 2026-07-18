@@ -27,15 +27,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom NProgress styling matching the application theme */
-#nprogress .bar {
-  background: #2563EB !important;
-  height: 3px !important;
-}
-
-#nprogress .peg {
-  box-shadow: 0 0 10px #2563EB, 0 0 5px #2563EB !important;
-}
 
 [data-mui-color-scheme="dark"] #nprogress .bar {
   background: #38BDF8 !important;

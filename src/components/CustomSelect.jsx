@@ -116,7 +116,15 @@ const CustomSelect = ({
               >
                 {label}
                 {required && (
-                  <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
+                  <span
+                    style={{
+                      color: "#ef4444",
+                      marginLeft: "4px",
+                      fontSize: "17px",
+                    }}
+                  >
+                    *
+                  </span>
                 )}
               </Typography>
             )}
@@ -184,7 +192,11 @@ const CustomSelect = ({
                   )
                 }
                 renderValue={(selected) => {
-                  if (selected === undefined || selected === null || selected === "") {
+                  if (
+                    selected === undefined ||
+                    selected === null ||
+                    selected === ""
+                  ) {
                     return (
                       <Typography
                         sx={{

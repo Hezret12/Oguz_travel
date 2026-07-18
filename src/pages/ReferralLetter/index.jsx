@@ -276,15 +276,26 @@ const ReferalLetter = () => {
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
     columns,
-    data: referralLetters,
+    data: referralLetters || [],
     state: {
-      ...defaultMrtOptions.state,
       rowSelection,
-      isLoading: isLoading || isFetching,
+      isLoading: false,
+      showLoadingOverlay: isLoading || isFetching,
+      showSkeletons: false,
+      showProgressBars: false,
       pagination: {
         pageIndex: page - 1,
         pageSize: limit,
       },
+    },
+    muiTableBodyProps: {
+      sx: (theme) => ({
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.text.secondary,
+        opacity: (isLoading || isFetching) ? 0 : 1,
+        pointerEvents: (isLoading || isFetching) ? "none" : "auto",
+        transition: "opacity 0.15s ease",
+      }),
     },
     getRowId: (row) => row.guid,
     onRowSelectionChange: setRowSelection,
@@ -315,6 +326,23 @@ const ReferalLetter = () => {
       } else {
         setSort("", "asc");
       }
+    },
+    renderEmptyRowsFallback: () => {
+      if (isLoading || isFetching) return null;
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            p: 4,
+            color: "text.secondary",
+            fontWeight: 500,
+          }}
+        >
+          {t("noData")}
+        </Box>
+      );
     },
     renderCreateRowDialogContent: ({ table }) => (
       <AddReferralLetterModal table={table} />

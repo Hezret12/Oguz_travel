@@ -39,7 +39,15 @@ const CustomDatePicker = ({
               >
                 {label}
                 {required && (
-                  <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
+                  <span
+                    style={{
+                      color: "#ef4444",
+                      marginLeft: "4px",
+                      fontSize: "17px",
+                    }}
+                  >
+                    *
+                  </span>
                 )}
               </Typography>
             )}

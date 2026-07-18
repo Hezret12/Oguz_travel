@@ -140,13 +140,6 @@ const EditReferralLetterModal = ({ table, row }) => {
           />
 
           <CustomTextField
-            name="application_number"
-            control={control}
-            label={t("application_number")}
-            required
-          />
-
-          <CustomTextField
             name="destination_country"
             control={control}
             label={t("columns.destinationCountry")}
@@ -179,9 +172,10 @@ const EditReferralLetterModal = ({ table, row }) => {
             label={
               <LabelWithTooltip
                 label={t("columns.syhNo", "S-ÝH №")}
-                tooltip={t("pages.referralLetter.travel_doc_tooltip")}
+                tooltip={t("referralLetter.travel_doc_tooltip")}
               />
             }
+            required
           />
 
           <CurrencyAmount
@@ -206,14 +200,23 @@ const EditReferralLetterModal = ({ table, row }) => {
             required
           />
 
-          <AgentAccordion
+          <CustomTextField
+            name="application_number"
             control={control}
-            fullNameName="agent.name"
-            phoneNumberName="agent.phone_number"
-            title={t("columns.agent")}
-            fullNameLabel={t("columns.agentFullName")}
-            phoneNumberLabel={t("b2b.agentPhoneNumber")}
+            label={t("application_number")}
           />
+
+          <Box sx={{ gridColumn: "span 2" }}>
+            <AgentAccordion
+              control={control}
+              fullNameName="agent.name"
+              phoneNumberName="agent.phone_number"
+              title={t("columns.agent")}
+              fullNameLabel={t("columns.agentFullName")}
+              phoneNumberLabel={t("b2b.agentPhoneNumber")}
+              inline
+            />
+          </Box>
 
           <Box sx={{ gridColumn: "1 / -1" }}>
             <CustomTextField

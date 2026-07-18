@@ -55,7 +55,7 @@ export const getAllTurkishAirlinesApi = async (params = {}) => {
 };
 
 export const getAllVisaPackagesApi = async (params = {}) => {
-  return await api.getPrivate('/visa-package/get-all-visa-packages', params);
+  return await api.getPrivate('/visa-package/get-visa-packages', params);
 };
 
 export const getAllVisaCategoriesApi = async (params = {}) => {

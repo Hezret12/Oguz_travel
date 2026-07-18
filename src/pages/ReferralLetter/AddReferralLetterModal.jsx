@@ -21,7 +21,6 @@ import LabelWithTooltip from "../../components/LabelWithTooltip";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addReferralLetterApi } from "../../api/queries/post";
 
-
 const AddReferralLetterModal = ({ table }) => {
   const { t, selectedLang } = useLocale();
   const { addReferralLetter } = useValidShema();
@@ -36,8 +35,8 @@ const AddReferralLetterModal = ({ table }) => {
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
           ? selectedLang(emp.office.shortName) ||
-          selectedLang(emp.office.fullName) ||
-          ""
+            selectedLang(emp.office.fullName) ||
+            ""
           : "";
         const label = officeShort
           ? `${emp.fullName} (${officeShort})`
@@ -101,10 +100,7 @@ const AddReferralLetterModal = ({ table }) => {
 
   return (
     <CustomDialog widthX={860} open={true} close={closeDialog}>
-      <CustomDialogHeader
-        variant="h5"
-        title={t("referralLetter.add")}
-      />
+      <CustomDialogHeader variant="h5" title={t("referralLetter.add")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box
           sx={{
@@ -128,13 +124,6 @@ const AddReferralLetterModal = ({ table }) => {
             control={control}
             label={t("columns.operatorTwo")}
             options={employeeOptions}
-            required
-          />
-
-          <CustomTextField
-            name="application_number"
-            control={control}
-            label={t("application_number")}
             required
           />
 
@@ -174,6 +163,7 @@ const AddReferralLetterModal = ({ table }) => {
                 tooltip={t("referralLetter.travel_doc_tooltip")}
               />
             }
+            required
           />
 
           <CurrencyAmount
@@ -184,7 +174,6 @@ const AddReferralLetterModal = ({ table }) => {
             onCurrencyChange={(curr) => setValue("currency", curr)}
             required
           />
-
 
           <CustomTextField
             name="contract_number"
@@ -199,14 +188,23 @@ const AddReferralLetterModal = ({ table }) => {
             required
           />
 
-          <AgentAccordion
+          <CustomTextField
+            name="application_number"
             control={control}
-            fullNameName="agent.name"
-            phoneNumberName="agent.phone_number"
-            title={t("columns.agent")}
-            fullNameLabel={t("columns.agentFullName")}
-            phoneNumberLabel={t("b2b.agentPhoneNumber")}
+            label={t("application_number")}
           />
+
+          <Box sx={{ gridColumn: "span 2" }}>
+            <AgentAccordion
+              control={control}
+              fullNameName="agent.name"
+              phoneNumberName="agent.phone_number"
+              title={t("columns.agent")}
+              fullNameLabel={t("columns.agentFullName")}
+              phoneNumberLabel={t("b2b.agentPhoneNumber")}
+              inline
+            />
+          </Box>
 
           <Box sx={{ gridColumn: "1 / -1" }}>
             <CustomTextField

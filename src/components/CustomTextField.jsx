@@ -48,7 +48,7 @@ const CustomTextField = ({
                 }}
               >
                 {label}
-                {required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
+                {required && <span style={{ color: '#ef4444', marginLeft: '4px', fontSize: '17px' }}>*</span>}
               </Typography>
             )}
             <TextField

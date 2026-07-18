@@ -22,6 +22,7 @@ const AgentAccordion = ({
   fullNameLabel,
   phoneNumberLabel,
   defaultExpanded = false,
+  inline = false,
   sx = {},
 }) => {
   const { t } = useLocale();
@@ -127,7 +128,17 @@ const AgentAccordion = ({
             borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "#e2e8f0"}`,
           }}
         >
-          <Box>
+          <Box
+            sx={
+              inline
+                ? {
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 1,
+                  }
+                : {}
+            }
+          >
             <CustomTextField
               name={fullNameName}
               control={control}
