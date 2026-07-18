@@ -97,11 +97,48 @@ export const getDefaultMRTOptions = () => ({
       backgroundColor: "white",
     },
   },
-  muiTableHeadCellProps: {
-    sx: {
-      fontSize: "15px",
-      fontWeight: 600,
-    },
+  muiTableHeadCellProps: ({ column }) => {
+    const isPinned = column.getIsPinned();
+    return {
+      sx: (theme) => {
+        const base = {
+          fontSize: "15px",
+          fontWeight: 600,
+        };
+        if (!isPinned) return base;
+        const isDark = theme.palette.mode === "dark";
+        return {
+          ...base,
+          boxShadow:
+            isPinned === "left"
+              ? isDark
+                ? "4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
+                : "4px 0 8px -2px rgba(0, 0, 0, 0.08) !important"
+              : isDark
+                ? "-4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
+                : "-4px 0 8px -2px rgba(0, 0, 0, 0.08) !important",
+        };
+      },
+    };
+  },
+  muiTableBodyCellProps: ({ column }) => {
+    const isPinned = column.getIsPinned();
+    return {
+      sx: (theme) => {
+        if (!isPinned) return {};
+        const isDark = theme.palette.mode === "dark";
+        return {
+          boxShadow:
+            isPinned === "left"
+              ? isDark
+                ? "4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
+                : "4px 0 8px -2px rgba(0, 0, 0, 0.08) !important"
+              : isDark
+                ? "-4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
+                : "-4px 0 8px -2px rgba(0, 0, 0, 0.08) !important",
+        };
+      },
+    };
   },
 
   muiBottomToolbarProps: {

@@ -471,7 +471,7 @@ const AddVisaModal = ({ table }) => {
             name="price_tmt"
             control={control}
             type="number"
-            label={`${t("price") || "Baha"} (TMT)`}
+            label={`${t("price")} (TMT)`}
             endIcon="TMT"
           />
 
@@ -479,7 +479,7 @@ const AddVisaModal = ({ table }) => {
             name="price_usd"
             control={control}
             type="number"
-            label={`${t("price") || "Baha"} (USD)`}
+            label={`${t("price")} (USD)`}
             endIcon="USD"
           />
 

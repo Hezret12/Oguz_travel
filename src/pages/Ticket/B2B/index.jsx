@@ -54,9 +54,6 @@ const CURRENCY_SYMBOLS = {
   RUB: "₽",
 };
 
-const currency = new Intl.NumberFormat("en-US", {
-  maximumFractionDigits: 0,
-});
 
 const B2B = () => {
   const { t, selectedLang } = useLocale();

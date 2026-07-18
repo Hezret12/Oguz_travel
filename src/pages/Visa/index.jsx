@@ -29,7 +29,7 @@ import VisaFilter from "./Contents/VisaFilter";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 
 const Visa = () => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
@@ -113,6 +113,22 @@ const Visa = () => {
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
+        accessorFn: (row) => row.receiver_operator?.fullName,
+        id: "receiver_operator",
+        header: t("columns.operatorTwo"),
+        size: 200,
+        Cell: ({ row }) => {
+          return (
+            <StackedCell
+              primary={row?.original?.receiver_operator?.fullName}
+              secondary={selectedLang(
+                row?.original?.receiver_operator?.office?.fullName,
+              )}
+            />
+          );
+        },
+      },
+      {
         id: "client",
         header: t("columns.client"),
         size: 200,
@@ -128,50 +144,74 @@ const Visa = () => {
         id: "passportNumber",
         accessorFn: (row) => row.client?.passport_number,
         header: t("columns.passportNumber") ?? "Passport №",
-        size: 130,
+        size: 100,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "dob",
         accessorFn: (row) => row.client?.dateOfBirth,
         header: t("columns.dateOfBirth"),
-        size: 110,
+        size: 100,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => row?.service?.name,
         id: "service",
         header: t("columns.service"),
-        size: 140,
+        size: 120,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "hotel_book",
         accessorFn: (row) => row?.hotel_booking?.name,
         header: t("columns.hotelBron"),
-        size: 110,
+        size: 100,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "translate",
         accessorFn: (row) => row?.translation?.name,
         header: t("columns.translation"),
-        size: 110,
+        size: 100,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "courier",
         accessorFn: (row) => row?.courier?.name,
         header: t("columns.courier"),
-        size: 110,
+        size: 100,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorFn: (row) => row.price_usd,
+        accessorFn: (row) => row.price_tmt,
         id: "price_tmt",
-        header: t("columns.total"),
-        size: 150,
+        header: t("columns.total_tmt"),
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+        Cell: ({ cell }) => {
+          const val = Number(cell.getValue() || 0);
+          return val.toFixed(2);
+        },
       },
       {
         accessorFn: (row) => row.price_usd,
         id: "price_usd",
-        header: t("columns.total"),
-        size: 150,
+        header: t("columns.total_usd"),
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+        Cell: ({ cell }) => {
+          const val = Number(cell.getValue() || 0);
+          return val.toFixed(2);
+        },
       },
       {
         id: "agent",
@@ -224,6 +264,12 @@ const Visa = () => {
       pagination: {
         pageIndex: page - 1,
         pageSize: limit,
+      },
+    },
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
       },
     },
     muiTableBodyProps: {
@@ -353,7 +399,7 @@ const Visa = () => {
           />
         </Box>
       );
-    }
+    },
   });
 
   return (
