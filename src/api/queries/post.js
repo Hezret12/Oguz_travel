@@ -102,3 +102,11 @@ export const addTranslatorApi = async (data) => {
   return response;
 };
 
+export const addTransPaymentApi = async (data) => {
+  const response = await api.postPrivate(
+    "/trans-payment/add-trans-payment",
+    data,
+  );
+  return response;
+};
+

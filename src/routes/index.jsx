@@ -18,6 +18,7 @@ import VisaPage from '../pages/Visa';
 import ReferralLetter from '../pages/ReferralLetter/index';
 import PackagePage from '../pages/Visa/Package/Package';
 import TranslatePage from '../pages/Translate';
+import OutboundPage from '../pages/Outbound';
 
 const router = createBrowserRouter([
   {
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
               { path: 'visa/referal-letters', element: <ReferralLetter /> },
               { path: 'visa/package',      element: <PackagePage /> },
               { path: 'translation',       element: <TranslatePage /> },
+              { path: 'outbound',          element: <OutboundPage /> },
               {
                 path: 'ticket',
                 element: <TicketPage />,

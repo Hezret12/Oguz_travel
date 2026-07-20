@@ -106,23 +106,17 @@ const TranslateFilter = ({
     key: "translators",
   });
 
-  const { data: statuses = [] } = useGet({
-    apiFn: getAllStatusApi,
-    key: "statuses",
-  });
-
   const translatorOptions = useMemo(
     () => (translators || []).map((tr) => ({ value: tr.guid, label: tr.fullName })),
     [translators]
   );
 
   const statusOptions = useMemo(
-    () =>
-      (statuses || []).map((st) => ({
-        value: st.guid,
-        label: selectedLang(st.name_ru, st.name_en, st.name_tk) || st.name_ru || "",
-      })),
-    [statuses, selectedLang]
+    () => [
+      { value: false, label: t("statusNormal") || "Adaty" },
+      { value: true, label: t("statusUrgent") || "Gyssagly" },
+    ],
+    [t]
   );
 
   const allText = t("all") ?? "All";

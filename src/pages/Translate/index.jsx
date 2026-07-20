@@ -11,6 +11,7 @@ import { Box, Chip } from "@mui/material";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
 import AddTranslateModal from "./AddTranslateModal";
+import EditTranslateModal from "./EditTranslateModal";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
@@ -148,12 +149,28 @@ const TranslatePage = () => {
       },
       {
         id: "status",
-        accessorFn: (row) => row.status?.name_tk,
+        accessorFn: (row) => {
+          const statusVal = row.status_guid;
+          if (statusVal === true || statusVal === "true" || statusVal === 1 || statusVal === "1") {
+            return t("statusUrgent");
+          }
+          if (statusVal === false || statusVal === "false" || statusVal === 0 || statusVal === "0") {
+            return t("statusNormal");
+          }
+          return row.status?.name_tk || "";
+        },
         header: t("columns.status"),
         size: 120,
         Cell: ({ row }) => {
-          const status = row.original.status;
-          return status ? selectedLang(status.name_ru, status.name_en, status.name_tk) || status.name_ru : "";
+          const statusVal = row.original.status_guid;
+          if (statusVal === true || statusVal === "true" || statusVal === 1 || statusVal === "1") {
+            return t("statusUrgent");
+          }
+          if (statusVal === false || statusVal === "false" || statusVal === 0 || statusVal === "0") {
+            return t("statusNormal");
+          }
+          const statusObj = row.original.status;
+          return statusObj ? selectedLang(statusObj.name_ru, statusObj.name_en, statusObj.name_tk) || statusObj.name_ru : "";
         },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -189,6 +206,7 @@ const TranslatePage = () => {
           <ColumnActionButtons
             row={row}
             table={table}
+            showPayment={true}
           />
         ),
       },
@@ -271,6 +289,9 @@ const TranslatePage = () => {
     },
 
     renderCreateRowDialogContent: ({ table }) => <AddTranslateModal table={table} />,
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditTranslateModal table={table} row={row} queryParams={queryParams} />
+    ),
 
     renderTopToolbarCustomActions: () => (
       <Box

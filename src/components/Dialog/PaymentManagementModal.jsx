@@ -22,10 +22,10 @@ import CustomTextField from "../CustomTextField";
 import CustomDatePicker from "../CustomDatePicker";
 import AppAutocomplete from "../AppAutocomplete";
 import { useLocale } from "../../hooks/useLocale";
-import { getAllPaymentStatusApi, getAllEmployeeApi } from "../../api/queries/getters";
-import { deleteTicketPaymentApi } from "../../api/queries/delete";
-import { addPaymentApi } from "../../api/queries/post";
-import { updateTicketPaymentApi } from "../../api/queries/patch";
+import { getAllPaymentStatusApi, getAllEmployeeApi, getAllTransPaymentApi } from "../../api/queries/getters";
+import { deleteTicketPaymentApi, deleteTransPaymentApi } from "../../api/queries/delete";
+import { addPaymentApi, addTransPaymentApi } from "../../api/queries/post";
+import { updateTicketPaymentApi, updateTransPaymentApi } from "../../api/queries/patch";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
@@ -77,7 +77,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const clientName = ticket?.client?.fullName || ticket?.clientId || "Client";
   const { t } = useLocale();
 
-  const ticketCurrency = ticket?.currency || "USD";
+  const isTranslation = ticket && ("source_to_target" in ticket || "page_count" in ticket || "completed_page_count" in ticket);
+  const ticketCurrency = ticket?.currency || (isTranslation ? "TMT" : "USD");
   const currencySymbol = CURRENCY_SYMBOLS[ticketCurrency] || ticketCurrency;
 
   const isCredit =
@@ -107,19 +108,24 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     return "ticket_number" in ticket || "base_fare" in ticket || "ta_assignment_operator" in ticket;
   }, [ticket]);
 
+  const apiFn = isTranslation ? getAllTransPaymentApi : getAllPaymentStatusApi;
+  const key = isTranslation ? "trans-payment" : "payment-status";
+
   const queryParams = useMemo(() => {
     const params = { page, limit };
-    if (isTurkish) {
+    if (isTranslation) {
+      params.translation_guid = ticket?.guid;
+    } else if (isTurkish) {
       params.ta_guid = ticket?.guid;
     } else {
       params.b2b_guid = ticket?.guid;
     }
     return params;
-  }, [ticket?.guid, page, limit, isTurkish]);
+  }, [ticket?.guid, page, limit, isTurkish, isTranslation]);
 
   const { data: allPayments, isLoading: paymentsLoading } = useGet({
-    apiFn: getAllPaymentStatusApi,
-    key: "payment-status",
+    apiFn,
+    key,
     params: queryParams,
     options: {
       enabled: open && !!ticket?.guid,
@@ -144,13 +150,19 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   );
 
   const queryClient = useQueryClient();
-  const rawData = queryClient.getQueryData(["payment-status", queryParams]);
-  const totalPages = rawData?.data?.meta?.totalPages ?? 1;
+  const rawData = queryClient.getQueryData([key, queryParams]);
+  const totalPages = useMemo(() => {
+    if (!rawData?.data) return 1;
+    if (rawData.data.data?.meta?.totalPages !== undefined) {
+      return rawData.data.data.meta.totalPages;
+    }
+    return rawData.data.meta?.totalPages ?? 1;
+  }, [rawData]);
 
   const { mutate: createPayment, isPending: createLoading } = useCreate({
-    apiFn: addPaymentApi,
-    key: "payment-status",
-    invalidateQueries: ["payment-status"],
+    apiFn: isTranslation ? addTransPaymentApi : addPaymentApi,
+    key: key,
+    invalidateQueries: [key],
     onSuccess: () => {
       reset({
         amount: "",
@@ -162,16 +174,16 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   });
 
   const { mutate: deletePayment, isPending: deleteLoading } = useDelete({
-    deleteFn: deleteTicketPaymentApi,
-    queryKey: ["payment-status", queryParams],
+    deleteFn: isTranslation ? deleteTransPaymentApi : deleteTicketPaymentApi,
+    queryKey: [key, queryParams],
     idKey: "guid",
   });
 
   const { mutate: updatePayment, isPending: updateLoading } = useUpdate({
-    apiFn: updateTicketPaymentApi,
-    key: "payment-status",
+    apiFn: isTranslation ? updateTransPaymentApi : updateTicketPaymentApi,
+    key: key,
     idKey: "guid",
-    invalidateQueries: ["payment-status"],
+    invalidateQueries: [key],
     onSuccessUpdate: () => {
       handleCancelEdit();
     },
@@ -183,18 +195,27 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     if (!ticket?.guid) {
       return localPayments;
     }
-    return (allPayments || []).filter((p) => {
+    const list = Array.isArray(allPayments)
+      ? allPayments
+      : allPayments?.data && Array.isArray(allPayments.data)
+      ? allPayments.data
+      : [];
+
+    return list.filter((p) => {
+      if (isTranslation) {
+        return p.translation_guid === ticket.guid;
+      }
       if (isTurkish) {
         return p.ta_guid === ticket.guid;
       }
       return p.b2b_guid === ticket.guid;
     });
-  }, [allPayments, ticket, localPayments, isTurkish]);
+  }, [allPayments, ticket, localPayments, isTurkish, isTranslation]);
 
 
   if (!ticket) return null;
 
-  const salesTotal = Number(ticket.total_price ?? ticket.sale_price ?? ticket.saleFare ?? 0);
+  const salesTotal = Number(ticket.price ?? ticket.total_price ?? ticket.sale_price ?? ticket.saleFare ?? 0);
   const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
   const remaining = salesTotal - totalPaid;
 
@@ -231,7 +252,9 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           note: description?.trim() || "",
           opr_guid: opr_guid || null,
         };
-        if (isTurkish) {
+        if (isTranslation) {
+          payload.translation_guid = ticket.guid;
+        } else if (isTurkish) {
           payload.ta_guid = ticket.guid;
         } else {
           payload.b2b_guid = ticket.guid;
@@ -262,7 +285,9 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           note: description?.trim() || "",
           opr_guid: opr_guid || null,
         };
-        if (isTurkish) {
+        if (isTranslation) {
+          payload.translation_guid = ticket.guid;
+        } else if (isTurkish) {
           payload.ta_guid = ticket.guid;
         } else {
           payload.b2b_guid = ticket.guid;
@@ -344,7 +369,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             })}
           >
             <Grid container spacing={2}>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                   {t("payment.salesTotal")}
                 </Typography>
@@ -352,7 +377,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                   {formatCurrency(salesTotal, ticketCurrency)}
                 </Typography>
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                   {t("payment.totalPaid")}
                 </Typography>
@@ -363,7 +388,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                   {formatCurrency(totalPaid, ticketCurrency)}
                 </Typography>
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                   {t("payment.remaining")}
                 </Typography>

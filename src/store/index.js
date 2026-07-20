@@ -8,6 +8,7 @@ import turkishAirlinesFiltersReducer from './slices/filters/turkishAirlinesFilte
 import referralLetterFiltersReducer from './slices/filters/referralLetterFilterSlice';
 import visaFiltersReducer from './slices/filters/visaFilterSlice';
 import translateFiltersReducer from './slices/filters/translateFilterSlice';
+import outboundFiltersReducer from './slices/filters/outboundFilterSlice';
 
 const store = configureStore({
   reducer: {
@@ -21,6 +22,7 @@ const store = configureStore({
     // ticketFilters:  ticketFiltersReducer,
     visaFilters:    visaFiltersReducer,
     translateFilters: translateFiltersReducer,
+    outboundFilters: outboundFiltersReducer,
     // paymentFilters: paymentFiltersReducer,
   },
   middleware: (getDefaultMiddleware) =>

@@ -140,6 +140,15 @@ export const useValidShema = () => {
     fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired")),
   });
 
+  const addOutbound = yup.object({
+    request_date: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    operator_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    client_name: yup.string().required(t("validation.required") || "Hökman girizilmeli"),
+    prepared_by: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    cost: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
+    price: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
+  });
+
   return {
     addB2BTicket,
     addTurkishAirlinesTicket,
@@ -153,6 +162,7 @@ export const useValidShema = () => {
     loginValidSchema,
     addTranslation,
     addTranslator,
+    addOutbound,
   };
 };
 

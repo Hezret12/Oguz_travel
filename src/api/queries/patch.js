@@ -54,4 +54,14 @@ export const updateVisaApi = async (data) => {
 export const updateTranslatorApi = async (data) => {
   const response = await api.patchPrivate(`/translator/update-translator`, data);
   return response;
+};
+
+export const updateTranslationApi = async (data) => {
+  const response = await api.patchPrivate(`/general-translation/update-translation`, data);
+  return response;
+};
+
+export const updateTransPaymentApi = async (data) => {
+  const response = await api.patchPrivate(`/trans-payment/update-trans-payment`, data);
+  return response;
 };

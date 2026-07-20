@@ -10,6 +10,7 @@ import ConfirmationNumberRoundedIcon from "@mui/icons-material/ConfirmationNumbe
 import ContactEmergencyIcon from "@mui/icons-material/ContactEmergency";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import TranslateIcon from "@mui/icons-material/Translate";
+import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 
 export const useSidebarItems = () => {
@@ -91,6 +92,11 @@ export const useSidebarItems = () => {
         text: t("translation") || "Terjime",
         path: "/translation",
         icon: createElement(TranslateIcon),
+      },
+      {
+        text: t("outbound.title") || "Outbound",
+        path: "/outbound",
+        icon: createElement(FlightTakeoffIcon),
       },
       {
         text: t("sidebar.settings"),

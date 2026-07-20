@@ -81,3 +81,7 @@ export const getAllTranslationsApi = async (params = {}) => {
 export const getAllTranslatorsApi = async (params = {}) => {
   return await api.getPrivate('/translator/get-all-translators', params);
 };
+
+export const getAllTransPaymentApi = async (params = {}) => {
+  return await api.getPrivate('/trans-payment/get-all-trans-payment', params);
+};

@@ -874,8 +874,8 @@ const Package = () => {
                   onClick={openAddCategory}
                   color="primary"
                   sx={{
-                    height: "44px",
-                    width: "44px",
+                    height: "40px",
+                    width: "40px",
                     borderRadius: "7px",
                     border: (theme) =>
                       theme.palette.mode === "dark"
@@ -889,15 +889,15 @@ const Package = () => {
                     },
                   }}
                 >
-                  <AddIcon />
+                  <AddIcon fontSize="small" />
                 </IconButton>
                 <IconButton
                   onClick={openEditCategory}
                   disabled={!selectedCategoryGuid}
                   color="primary"
                   sx={{
-                    height: "44px",
-                    width: "44px",
+                    height: "40px",
+                    width: "40px",
                     borderRadius: "7px",
                     border: (theme) =>
                       theme.palette.mode === "dark"
@@ -917,7 +917,7 @@ const Package = () => {
                     },
                   }}
                 >
-                  <EditIcon />
+                  <EditIcon fontSize="small" />
                 </IconButton>
               </Box>
             </Box>
