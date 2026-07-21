@@ -24,6 +24,8 @@ import FilterDrawer from "../../components/FilterDrawer";
 import TranslateFilter from "./Contents/TranslateFilter";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import PaymentStatusCell from "../../components/PaymentStatusCell";
+import StatusChip from "../../components/StatusChip";
+import { TRANSLATION_STATUS_CONFIG } from "../../functions/statusChipConfigs";
 
 const TranslatePage = () => {
   const { t, selectedLang } = useLocale();
@@ -165,44 +167,15 @@ const TranslatePage = () => {
       },
       {
         id: "is_paid",
-        accessorFn: (row) => {
-          const val = row.is_paid;
-          if (val === 0 || val === "0") {
-            return t("paymentRefunded") || "Gaýtaryldy";
-          }
-          if (row.paidPercentage !== undefined) return row.paidPercentage;
-          if (val === true || val === "true" || val === 1 || val === "1") return 100;
-          return 0;
-        },
+        accessorFn: (row) => row.paidPercentage,
         header: t("columns.paymentStatus"),
         size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
           const val = row.original.is_paid;
-          if (val === 0 || val === "0") {
-            return (
-              <Chip
-                label={t("paymentRefunded")}
-                size="small"
-                sx={{
-                  backgroundColor: "rgba(245, 158, 11, 0.12)",
-                  color: "#d97706",
-                  fontWeight: 600,
-                  borderRadius: "6px",
-                  fontSize: "0.75rem",
-                  border: "1px solid rgba(245, 158, 11, 0.3)",
-                  height: "24px",
-                }}
-              />
-            );
-          }
-          const percent = row.original.paidPercentage ?? (
-            val === true || val === "true" || val === 1 || val === "1"
-              ? 100
-              : 0
-          );
-          return <PaymentStatusCell percent={percent} />;
+
+          return <PaymentStatusCell percent={row?.original.paidPercentage} />;
         },
       },
       {
@@ -223,98 +196,21 @@ const TranslatePage = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
+        accessorFn: (row) => (row.status !== undefined ? row.status : row.status_guid),
         id: "status",
-        accessorFn: (row) => {
-          const statusVal = row.status !== undefined ? row.status : row.status_guid;
-          if (statusVal === true || statusVal === "true" || statusVal === 1 || statusVal === "1") {
-            return t("statusUrgent") || "Gyssagly";
-          }
-          if (statusVal === false || statusVal === "false") {
-            return t("statusNormal") || "Adaty";
-          }
-          if (statusVal === 0 || statusVal === "0") {
-            return t("paymentRefunded") || "Gaýtaryldy";
-          }
-          return row.status?.name_tk || "";
-        },
         header: t("columns.status") || "Ýagdaýy",
-        size: 120,
+        size: 100,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
           const statusVal = row.original.status !== undefined ? row.original.status : row.original.status_guid;
-          if (statusVal === true || statusVal === "true" || statusVal === 1 || statusVal === "1") {
-            return (
-              <Chip
-                label={t("statusUrgent") || "Gyssagly"}
-                size="small"
-                sx={{
-                  backgroundColor: "rgba(239, 68, 68, 0.12)",
-                  color: "#ef4444",
-                  fontWeight: 600,
-                  borderRadius: "6px",
-                  fontSize: "0.75rem",
-                  border: "1px solid rgba(239, 68, 68, 0.3)",
-                  height: "24px",
-                }}
-              />
-            );
-          }
-          if (statusVal === false || statusVal === "false") {
-            return (
-              <Chip
-                label={t("statusNormal") || "Adaty"}
-                size="small"
-                sx={{
-                  backgroundColor: "rgba(59, 130, 246, 0.12)",
-                  color: "#2563eb",
-                  fontWeight: 600,
-                  borderRadius: "6px",
-                  fontSize: "0.75rem",
-                  border: "1px solid rgba(59, 130, 246, 0.3)",
-                  height: "24px",
-                }}
-              />
-            );
-          }
-          if (statusVal === 0 || statusVal === "0") {
-            return (
-              <Chip
-                label={t("paymentRefunded") || "Gaýtaryldy"}
-                size="small"
-                sx={{
-                  backgroundColor: "rgba(245, 158, 11, 0.12)",
-                  color: "#d97706",
-                  fontWeight: 600,
-                  borderRadius: "6px",
-                  fontSize: "0.75rem",
-                  border: "1px solid rgba(245, 158, 11, 0.3)",
-                  height: "24px",
-                }}
-              />
-            );
-          }
-          const statusObj = row.original.status;
-          const label = typeof statusObj === "object"
-            ? (selectedLang(statusObj?.name_ru, statusObj?.name_en, statusObj?.name_tk) || statusObj?.name_ru || "")
-            : String(statusObj || "");
-          if (!label) return null;
           return (
-            <Chip
-              label={label}
-              size="small"
-              sx={{
-                backgroundColor: "rgba(107, 114, 128, 0.12)",
-                color: "#4b5563",
-                fontWeight: 600,
-                borderRadius: "6px",
-                fontSize: "0.75rem",
-                border: "1px solid rgba(107, 114, 128, 0.3)",
-                height: "24px",
-              }}
+            <StatusChip
+              status={statusVal}
+              config={TRANSLATION_STATUS_CONFIG}
             />
           );
         },
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => row.correction_status,

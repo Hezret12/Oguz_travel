@@ -68,7 +68,7 @@ const AddTranslateModal = ({ table }) => {
       client_guid: null,
       source_to_target: null,
       completed_time: null,
-      status: false,
+      status: "false",
       completed_page_count: null,
       completed_day: null,
       translator_guid: null,
@@ -107,6 +107,7 @@ const AddTranslateModal = ({ table }) => {
   const onSubmit = (data) => {
     const payload = {
       ...data,
+      status: String(data.status ?? "false"),
       received_day: data.received_day
         ? dayjs(data.received_day).format("YYYY-MM-DD")
         : null,
@@ -162,9 +163,9 @@ const AddTranslateModal = ({ table }) => {
 
   const statusOptions = useMemo(
     () => [
-      { value: false, label: t("statusNormal") || "Adaty" },
-      { value: true, label: t("statusUrgent") || "Gyssagly" },
-      { label: t("paymentRefunded") || "Gaýtaryldy", value: 0 },
+      { value: "false", label: t("statusNormal") || "Adaty" },
+      { value: "true", label: t("statusUrgent") || "Gyssagly" },
+      { value: "0", label: t("paymentRefunded") || "Gaýtaryldy" },
     ],
     [t],
   );

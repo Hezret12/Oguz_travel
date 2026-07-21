@@ -87,8 +87,8 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
         : "",
       status:
         row?.original?.status !== undefined && row?.original?.status !== null
-          ? row.original.status
-          : (row?.original?.status_guid ?? false),
+          ? String(row.original.status)
+          : (row?.original?.status_guid ? String(row.original.status_guid) : "false"),
       completed_page_count:
         row?.original?.completed_page_count != null ? Number(row.original.completed_page_count) : 0,
       completed_day: row?.original?.completed_day
@@ -110,9 +110,7 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
     apiFn: updateTranslationApi,
     key: "translations",
     idKey: "guid",
-    invalidateQueries: ["translations"],
     onSuccessUpdate: () => {
-      queryClient.invalidateQueries({ queryKey: ["translations"] });
       table.setEditingRow(null);
     },
   });
@@ -152,6 +150,7 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
   const onSubmit = (data) => {
     const payload = {
       ...data,
+      status: String(data.status ?? "false"),
       received_day: data.received_day
         ? dayjs(data.received_day).format("YYYY-MM-DD")
         : null,
@@ -165,7 +164,6 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
         data.is_paid === 0 || data.is_paid === "0"
           ? 0
           : data.is_paid === true || data.is_paid === "true",
-      status: data.status === true || data.status === "true",
     };
     updateTranslation(payload);
   };
@@ -207,8 +205,8 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
           ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
+          selectedLang(emp.office.fullName) ||
+          ""
           : "";
         const label = officeShort
           ? `${emp.fullName} (${officeShort})`
@@ -226,9 +224,9 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
 
   const statusOptions = useMemo(
     () => [
-      { value: false, label: t("statusNormal") || "Adaty" },
-      { value: true, label: t("statusUrgent") || "Gyssagly" },
-      { label: t("paymentRefunded") || "Gaýtaryldy", value: 0 },
+      { value: "false", label: t("statusNormal") || "Adaty" },
+      { value: "true", label: t("statusUrgent") || "Gyssagly" },
+      { value: "0", label: t("paymentRefunded") || "Gaýtaryldy" },
     ],
     [t],
   );

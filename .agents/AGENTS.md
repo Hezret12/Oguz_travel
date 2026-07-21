@@ -1,0 +1,299 @@
+# Oguz Travel — Project Coding Rules (AGENTS.md)
+
+> Comprehensive rules derived from full analysis of the project's hooks, components, and page patterns.
+
+---
+
+## 1. CRUD Hook Signatures — NEVER Guess Parameter Names
+
+### `useCreate` (`src/hooks/CRUD/useCreate.js`)
+```js
+useCreate({ apiFn, key, onSuccess, invalidateQueries = [] })
+```
+| Param | Type | Required | Notes |
+|---|---|---|---|
+| `apiFn` | function | **YES** | The API function (e.g., `addTranslationApi`). **NOT** `createFn`. |
+| `key` | string \| string[] | **YES** | React Query cache key (e.g., `"translations"`). **NOT** `queryKey`. |
+| `onSuccess` | function | optional | Called after mutation succeeds and cache is updated. Receives raw Axios response. |
+| `invalidateQueries` | string[] | optional | Additional query keys to invalidate. |
+
+- **Cache behavior**: Automatically prepends the created item to the cache (`setQueriesData`). No manual `invalidateQueries` call needed for the primary key.
+- **Success handler**: `onSuccess?.()` is called after cache update. Use it only for UI side effects (close modal, reset form).
+
+### `useUpdate` (`src/hooks/CRUD/useUpdate.js`)
+```js
+useUpdate({ apiFn, key, idKey, onSuccessUpdate, invalidateQueries = [], isInfiniteQuery = false })
+```
+| Param | Type | Required | Notes |
+|---|---|---|---|
+| `apiFn` | function | **YES** | The API function (e.g., `updateTranslationApi`). |
+| `key` | string \| string[] | **YES** | React Query cache key. |
+| `idKey` | string | **YES** | The unique identifier field name (e.g., `"guid"`). |
+| `onSuccessUpdate` | function | optional | Called after mutation succeeds and cache is updated. **NOT** `onSuccess`. |
+| `invalidateQueries` | string[] | optional | Additional query keys to invalidate. |
+| `isInfiniteQuery` | boolean | optional | Set `true` for infinite scroll queries. |
+
+- **Cache behavior**: Automatically merges (`{ ...oldItem, ...updatedItem }`) matching items by `idKey` using `setQueriesData`. **Do NOT manually call `queryClient.setQueriesData` or `queryClient.invalidateQueries` in `onSuccessUpdate` unless you need to update a DIFFERENT query key.** The hook handles the primary key cache update internally.
+- **Success handler name**: `onSuccessUpdate` — NOT `onSuccess`.
+
+### `useDelete` (`src/hooks/CRUD/useDelete.js`)
+```js
+useDelete({ deleteFn, queryKey, idKey, invalidateQueries = [], isInfiniteQuery = false, isPaginated = false })
+```
+| Param | Type | Required | Notes |
+|---|---|---|---|
+| `deleteFn` | function | **YES** | The delete API function. **NOT** `apiFn`. |
+| `queryKey` | string \| string[] | **YES** | React Query cache key. **NOT** `key`. |
+| `idKey` | string | **YES** | The unique identifier field name (e.g., `"guid"`). |
+| `isPaginated` | boolean | optional | When `true`, invalidates query instead of removing from cache. |
+
+- **⚠️ CRITICAL**: `useDelete` uses `deleteFn` and `queryKey` — different param names from `useCreate`/`useUpdate`.
+- The `mutate` function receives a `guid` (string or array of strings).
+
+### `useGet` (`src/hooks/CRUD/useGet.js`)
+```js
+useGet({ apiFn, key, params = {}, options = {} })
+```
+- Returns `{ data, ...queryResult }` where `data = query?.data?.data?.data ?? []`.
+
+### `usePagginationGet` (`src/hooks/usePagginationGet.js`)
+```js
+usePagginationGet({ apiFn, key, params })
+```
+- Returns `{ data, totalItems, pageCount, currentPage, isLoading, isFetching, isError, error, refetch }`.
+- Uses `keepPreviousData` for smooth pagination transitions.
+
+---
+
+## 2. Status & Payment Display Components
+
+### `StatusChip` (`src/components/StatusChip.jsx`)
+```jsx
+<StatusChip status={value} config={CONFIG_OBJECT} size="small" />
+```
+- Converts `status` to `String(status).toUpperCase()` to find the matching config key.
+- If no match found, renders a plain outlined `Chip` with the raw value.
+- **ALWAYS** use `StatusChip` + a centralized config from `statusChipConfigs.js` for status columns. **NEVER** write inline `Chip` logic in table cells.
+
+### `statusChipConfigs.js` (`src/functions/statusChipConfigs.js`)
+All status config objects live here. Each entry: `{ label, color, icon }`.
+
+Available configs:
+- `SALE_STATUS_CONFIG`: `SALE`, `REISSUE`, `REFUND`
+- `PAYMENT_STATUS_CONFIG`: `TOLENDI`, `KREDIT`
+- `TRANSLATION_STATUS_CONFIG`: `TRUE`, `FALSE`, `"0"`
+
+When adding a new feature's status display:
+1. Add a new exported config to this file.
+2. Import both `StatusChip` and the config in the page.
+3. Use `<StatusChip status={value} config={MY_CONFIG} />` in the `Cell` renderer.
+
+### `PaymentStatusCell` (`src/components/PaymentStatusCell.jsx`)
+```jsx
+<PaymentStatusCell percent={numericValue} />
+```
+- Renders a circular SVG ring chart showing payment percentage (0–100).
+- Colors: green (100%), orange (1–99%), red (0%).
+- Supports dark mode. Theme-aware.
+- Use for `is_paid` / payment percentage columns.
+
+---
+
+## 3. Dialog / Modal Components
+
+### `CustomDialog` (`src/components/Dialog/CustomDialog.jsx`)
+```jsx
+<CustomDialog open={boolean} close={fn} widthX={700}>
+  <CustomDialogHeader variant="h5" title="..." />
+  <CustomForm onSubmit={handleSubmit(onSubmit)}>
+    {/* form fields */}
+    <FooterButton loading={isPending} onCancel={closeFn} />
+  </CustomForm>
+</CustomDialog>
+```
+- `widthX`: dialog max-width in pixels.
+- `close`: callback function. NOT `onClose`.
+- Always compose with `CustomDialogHeader`, `CustomForm`, and `FooterButton`.
+
+### `FooterButton` (`src/components/Dialog/FooterButton.jsx`)
+```jsx
+<FooterButton loading={boolean} onCancel={fn} saveText="..." cancelText="..." />
+```
+- Renders Cancel + Save buttons with consistent styling.
+- `type="submit"` by default.
+
+### `PaymentManagementModal` (`src/components/Dialog/PaymentManagementModal.jsx`)
+```jsx
+<PaymentManagementModal open={boolean} onClose={fn} row={mrtRow} />
+```
+- Opened via `ColumnActionButtons` when `showPayment={true}`.
+- Auto-detects entity type (translation vs ticket vs B2B) from row data.
+- Handles add/edit/delete payments with internal CRUD hooks.
+
+---
+
+## 4. Form Input Components
+
+### `AppAutocomplete` (`src/components/AppAutocomplete.jsx`)
+```jsx
+<AppAutocomplete
+  name="field_name"
+  control={control}
+  label="Label"
+  options={[{ label: "...", value: "..." }]}
+  required
+/>
+```
+- Options format: `[{ label: string, value: string }]`
+- Uses `react-hook-form` `Controller` internally.
+- For employee/operator/translator dropdowns in modals.
+
+### `GlobalClientAutocomplete` (`src/components/global/GlobalClientAutocomplete/GlobalClientAutocomplete.jsx`)
+```jsx
+<GlobalClientAutocomplete
+  name="client_guid"
+  control={control}
+  columns={["fullName", "phone_number"]}
+  required
+/>
+```
+- Server-side search with debounce (400ms).
+- `columns` prop controls which fields are displayed and searchable.
+- Includes built-in "Add Client" button when no results found.
+- Default export name: `GlobalAutoCompleteClient`.
+
+### `CustomTextField` (`src/components/CustomTextField.jsx`)
+```jsx
+<CustomTextField name="..." control={control} label="..." type="number" required />
+```
+
+### `CustomDatePicker` (`src/components/CustomDatePicker.jsx`)
+```jsx
+<CustomDatePicker name="..." control={control} label="..." required />
+```
+
+### `CustomSelect` (`src/components/CustomSelect.jsx`)
+```jsx
+<CustomSelect name="..." control={control} label="..." options={[...]} required />
+```
+
+---
+
+## 5. Table & Page Layout Pattern
+
+### Standard page structure:
+```
+PageHeader → GlobalSearchInput + FilterDrawer → MaterialReactTable → Pagination
+```
+
+### `ColumnActionButtons` (`src/components/ColumnActionButtons.jsx`)
+```jsx
+<ColumnActionButtons
+  row={row}
+  table={table}
+  onDelete={handleDelete}
+  showPayment={true}  // enables payment modal button
+/>
+```
+- Always use in the actions column.
+- `showPayment={true}` adds the payment button and renders `PaymentManagementModal` internally.
+
+### `FilterDrawer` (`src/components/FilterDrawer.jsx`)
+```jsx
+<FilterDrawer
+  open={isDrawerOpen}
+  onClose={closeDrawer}
+  onApply={applyFilters}
+  onReset={resetFilters}
+>
+  <MyPageFilter ... />
+</FilterDrawer>
+```
+- `children`: the page-specific filter content component (e.g., `TranslateFilter`, `B2BFilter`).
+- **Each page must have a `Contents/` subfolder with its own filter component.**
+
+### `usePageFilters` Hook (`src/hooks/usePageFilters.js`)
+```js
+const {
+  applied, draft, queryParams, isDrawerOpen,
+  openDrawer, closeDrawer, setDraftFilter, setFilter,
+  applyFilters, cancelFilters, resetFilters,
+  searchQuery, setSearch, page, limit, setPage, setPageSize,
+  sortBy, sortOrder, setSort, selectsOpen, openSelect, closeSelect,
+} = usePageFilters({ actions: myFilterActions, selectors: myFilterSelectors });
+```
+- Requires a Redux filter slice with `actions` and `selectors`.
+- Returns debounced `queryParams` ready for API calls.
+
+### `GlobalSearchInput` (`src/components/GlobalSearchInput.jsx`)
+```jsx
+<GlobalSearchInput
+  value={searchQuery}
+  onChange={setSearch}
+  placeholder={t("search")}
+  onRefetch={refetch}
+  isFetching={isFetching}
+/>
+```
+
+### `Pagination` (`src/components/Pagination.jsx`)
+```jsx
+<Pagination
+  totalItems={totalItems}
+  page={page}
+  limit={limit}
+  setPage={setPage}
+  setPageSize={setPageSize}
+/>
+```
+
+---
+
+## 6. Localization
+
+- Use `const { t, selectedLang } = useLocale();` for translations.
+- `selectedLang(obj)` extracts the correct language field from multilingual objects (e.g., `office.shortName`).
+- All user-facing strings must go through `t("key")` with fallback: `t("key") || "Fallback"`.
+
+---
+
+## 7. Cache Management Rules
+
+1. **useCreate**: Automatically prepends new item to cache. Only add `invalidateQueries` if you need to refresh a DIFFERENT query.
+2. **useUpdate**: Automatically merges updated fields into cache by `idKey`. Only add `invalidateQueries` if you need to refresh a DIFFERENT query. **Do NOT call `queryClient.invalidateQueries` inside `onSuccessUpdate` for the same key.**
+3. **useDelete**: Automatically removes item from cache by `idKey`. For paginated queries, use `isPaginated: true` (invalidates instead of optimistic removal).
+
+---
+
+## 8. Backend Data Shape Conventions
+
+- Relations come as nested objects: `{ operator: { guid, fullName, office }, client: { guid, fullName }, translator: { guid, fullName } }`.
+- When setting form defaults from row data, always check both flat GUID and nested object: `row?.original?.client_guid || row?.original?.client?.guid`.
+- Time fields from backend are `"HH:mm:ss"` (8 chars). Slice to `"HH:mm"` (5 chars) for display/form: `.slice(0, 5)`.
+- Boolean fields from backend may come as `true`/`false` or strings. Always normalize in the form/payload.
+
+---
+
+## 9. File & Folder Structure
+
+```
+src/pages/<Feature>/
+├── index.jsx                 # Main page component with table
+├── AddXxxModal.jsx           # Create modal (add-only)
+├── EditXxxModal.jsx          # Edit modal
+└── Contents/
+    └── XxxFilter.jsx         # Filter content for FilterDrawer
+```
+
+- **Every page that uses `FilterDrawer` MUST have a corresponding filter component in `Contents/`.**
+- **Never remove existing imports** when editing a file. Always verify all imports remain intact after edits.
+
+---
+
+## 10. General Rules
+
+- **Never duplicate cache update logic** that hooks already handle internally.
+- **Never write ad-hoc status `Chip` components** inline — always use `StatusChip` + centralized config.
+- **Always verify hook parameter names** by reading the hook source before using them. The three CRUD hooks have **different** parameter names.
+- **Always preserve existing imports** when editing files. Run a mental diff before submitting changes.
+- **All form option values must be consistent types** — if the backend expects strings, use string values in `statusOptions` / `paymentOptions`.
