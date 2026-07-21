@@ -23,6 +23,7 @@ import {
 import FilterDrawer from "../../components/FilterDrawer";
 import TranslateFilter from "./Contents/TranslateFilter";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
+import PaymentStatusCell from "../../components/PaymentStatusCell";
 
 const TranslatePage = () => {
   const { t, selectedLang } = useLocale();
@@ -99,6 +100,14 @@ const TranslatePage = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
+        accessorKey: "received_time",
+        id: "received_time",
+        header: t("columns.receivedTime") || "Alnan wagty",
+        size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
         id: "client",
         header: t("columns.client"),
         size: 200,
@@ -119,10 +128,26 @@ const TranslatePage = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
+        accessorFn: (row) => row.source_to_target,
+        id: "source_to_target",
+        header: t("columns.direction") || "Ugur",
+        size: 120,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
         accessorFn: (row) => row.page_count,
         id: "page_count",
         header: t("columns.pageCount") || "Sahypa",
         size: 80,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        accessorFn: (row) => row.completed_page_count,
+        id: "completed_page_count",
+        header: t("columns.completedPageCount") || "Tabşyrylan sahypa sany",
+        size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
@@ -139,6 +164,48 @@ const TranslatePage = () => {
         },
       },
       {
+        id: "is_paid",
+        accessorFn: (row) => {
+          const val = row.is_paid;
+          if (val === 0 || val === "0") {
+            return t("paymentRefunded") || "Gaýtaryldy";
+          }
+          if (row.paidPercentage !== undefined) return row.paidPercentage;
+          if (val === true || val === "true" || val === 1 || val === "1") return 100;
+          return 0;
+        },
+        header: t("columns.paymentStatus") || "Töleg görnüşi",
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => {
+          const val = row.original.is_paid;
+          if (val === 0 || val === "0") {
+            return (
+              <Chip
+                label={t("paymentRefunded") || "Gaýtaryldy"}
+                size="small"
+                sx={{
+                  backgroundColor: "rgba(245, 158, 11, 0.12)",
+                  color: "#d97706",
+                  fontWeight: 600,
+                  borderRadius: "6px",
+                  fontSize: "0.75rem",
+                  border: "1px solid rgba(245, 158, 11, 0.3)",
+                  height: "24px",
+                }}
+              />
+            );
+          }
+          const percent = row.original.paidPercentage ?? (
+            val === true || val === "true" || val === 1 || val === "1"
+              ? 100
+              : 0
+          );
+          return <PaymentStatusCell percent={percent} />;
+        },
+      },
+      {
         accessorKey: "completed_day",
         id: "completed_day",
         header: t("columns.completedDay") || "Tabşyrylan güni",
@@ -148,30 +215,112 @@ const TranslatePage = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
+        accessorKey: "completed_time",
+        id: "completed_time",
+        header: t("columns.completedTime") || "Tabşyrylan wagty",
+        size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
         id: "status",
         accessorFn: (row) => {
-          const statusVal = row.status_guid;
+          const statusVal = row.status !== undefined ? row.status : row.status_guid;
           if (statusVal === true || statusVal === "true" || statusVal === 1 || statusVal === "1") {
-            return t("statusUrgent");
+            return t("statusUrgent") || "Gyssagly";
           }
-          if (statusVal === false || statusVal === "false" || statusVal === 0 || statusVal === "0") {
-            return t("statusNormal");
+          if (statusVal === false || statusVal === "false") {
+            return t("statusNormal") || "Adaty";
+          }
+          if (statusVal === 0 || statusVal === "0") {
+            return t("paymentRefunded") || "Gaýtaryldy";
           }
           return row.status?.name_tk || "";
         },
-        header: t("columns.status"),
+        header: t("columns.status") || "Ýagdaýy",
         size: 120,
         Cell: ({ row }) => {
-          const statusVal = row.original.status_guid;
+          const statusVal = row.original.status !== undefined ? row.original.status : row.original.status_guid;
           if (statusVal === true || statusVal === "true" || statusVal === 1 || statusVal === "1") {
-            return t("statusUrgent");
+            return (
+              <Chip
+                label={t("statusUrgent") || "Gyssagly"}
+                size="small"
+                sx={{
+                  backgroundColor: "rgba(239, 68, 68, 0.12)",
+                  color: "#ef4444",
+                  fontWeight: 600,
+                  borderRadius: "6px",
+                  fontSize: "0.75rem",
+                  border: "1px solid rgba(239, 68, 68, 0.3)",
+                  height: "24px",
+                }}
+              />
+            );
           }
-          if (statusVal === false || statusVal === "false" || statusVal === 0 || statusVal === "0") {
-            return t("statusNormal");
+          if (statusVal === false || statusVal === "false") {
+            return (
+              <Chip
+                label={t("statusNormal") || "Adaty"}
+                size="small"
+                sx={{
+                  backgroundColor: "rgba(59, 130, 246, 0.12)",
+                  color: "#2563eb",
+                  fontWeight: 600,
+                  borderRadius: "6px",
+                  fontSize: "0.75rem",
+                  border: "1px solid rgba(59, 130, 246, 0.3)",
+                  height: "24px",
+                }}
+              />
+            );
+          }
+          if (statusVal === 0 || statusVal === "0") {
+            return (
+              <Chip
+                label={t("paymentRefunded") || "Gaýtaryldy"}
+                size="small"
+                sx={{
+                  backgroundColor: "rgba(245, 158, 11, 0.12)",
+                  color: "#d97706",
+                  fontWeight: 600,
+                  borderRadius: "6px",
+                  fontSize: "0.75rem",
+                  border: "1px solid rgba(245, 158, 11, 0.3)",
+                  height: "24px",
+                }}
+              />
+            );
           }
           const statusObj = row.original.status;
-          return statusObj ? selectedLang(statusObj.name_ru, statusObj.name_en, statusObj.name_tk) || statusObj.name_ru : "";
+          const label = typeof statusObj === "object"
+            ? (selectedLang(statusObj?.name_ru, statusObj?.name_en, statusObj?.name_tk) || statusObj?.name_ru || "")
+            : String(statusObj || "");
+          if (!label) return null;
+          return (
+            <Chip
+              label={label}
+              size="small"
+              sx={{
+                backgroundColor: "rgba(107, 114, 128, 0.12)",
+                color: "#4b5563",
+                fontWeight: 600,
+                borderRadius: "6px",
+                fontSize: "0.75rem",
+                border: "1px solid rgba(107, 114, 128, 0.3)",
+                height: "24px",
+              }}
+            />
+          );
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        accessorFn: (row) => row.correction_status,
+        id: "correction_status",
+        header: t("columns.correctionStatus") || "Düzeliş ýagdaýy",
+        size: 120,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
@@ -211,14 +360,20 @@ const TranslatePage = () => {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t],
+    [t, selectedLang, formatChange],
   );
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    enableColumnPinning: true,
     columns,
     data: translations || [],
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
+      },
+    },
     state: {
       rowSelection,
       isLoading: false,

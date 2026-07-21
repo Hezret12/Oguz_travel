@@ -8,8 +8,7 @@ import {
   Button,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 import { useQueryClient } from "@tanstack/react-query";
@@ -25,14 +24,11 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { useCreate } from "../../hooks/CRUD/useCreate";
-import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import {
   getAllTranslatorsApi,
   getAllEmployeeApi,
-  getAllStatusApi,
 } from "../../api/queries/getters";
 import { addTranslationApi, addTranslatorApi } from "../../api/queries/post";
-import { updateTranslatorApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
 
 const AddTranslateModal = ({ table }) => {
@@ -42,7 +38,6 @@ const AddTranslateModal = ({ table }) => {
 
   // Translator dialog state
   const [translatorDialogOpen, setTranslatorDialogOpen] = useState(false);
-  const [translatorDialogMode, setTranslatorDialogMode] = useState("add"); // "add" | "edit"
   const [translatorInputValue, setTranslatorInputValue] = useState("");
   const [translatorInputError, setTranslatorInputError] = useState("");
 
@@ -56,7 +51,6 @@ const AddTranslateModal = ({ table }) => {
     apiFn: getAllTranslatorsApi,
     key: "translators",
   });
-
 
   // react-hook-form setup
   const {
@@ -74,31 +68,29 @@ const AddTranslateModal = ({ table }) => {
       client_guid: null,
       source_to_target: null,
       completed_time: null,
-      status_guid: false,
+      status: false,
       completed_page_count: null,
       completed_day: null,
       translator_guid: null,
       correction_status: null,
       price: 0,
-      note: null,
-      is_paid: true,
+      note: '',
+      is_paid: null,
     },
   });
 
   const { mutate: createTranslation } = useCreate({
-    createFn: addTranslationApi,
-    queryKey: "translations",
+    apiFn: addTranslationApi,
+    key: "translations",
     onSuccess: () => {
       table.setCreatingRow(null);
     },
   });
 
-  const selectedTranslatorGuid = useWatch({ control, name: "translator_guid" });
-
   const { mutate: createTranslator, isPending: isCreatingTranslator } =
     useCreate({
-      createFn: addTranslatorApi,
-      queryKey: "translators",
+      apiFn: addTranslatorApi,
+      key: "translators",
       onSuccess: (res) => {
         // Invalidate query to refetch translators list
         queryClient.invalidateQueries({ queryKey: ["translators"] });
@@ -107,19 +99,6 @@ const AddTranslateModal = ({ table }) => {
         if (newGuid) {
           setValue("translator_guid", newGuid);
         }
-        setTranslatorDialogOpen(false);
-        setTranslatorInputValue("");
-      },
-    });
-
-  const { mutate: updateTranslator, isPending: isUpdatingTranslator } =
-    useUpdate({
-      apiFn: updateTranslatorApi,
-      key: "translators",
-      idKey: "guid",
-      onSuccessUpdate: () => {
-        // Invalidate query to refetch translators list
-        queryClient.invalidateQueries({ queryKey: ["translators"] });
         setTranslatorDialogOpen(false);
         setTranslatorInputValue("");
       },
@@ -145,22 +124,9 @@ const AddTranslateModal = ({ table }) => {
   };
 
   const openAddTranslator = () => {
-    setTranslatorDialogMode("add");
     setTranslatorInputValue("");
     setTranslatorInputError("");
     setTranslatorDialogOpen(true);
-  };
-
-  const openEditTranslator = () => {
-    const selectedTranslator = translators.find(
-      (t) => t.guid === selectedTranslatorGuid,
-    );
-    if (selectedTranslator) {
-      setTranslatorDialogMode("edit");
-      setTranslatorInputValue(selectedTranslator.fullName);
-      setTranslatorInputError("");
-      setTranslatorDialogOpen(true);
-    }
   };
 
   const handleSaveTranslator = () => {
@@ -169,11 +135,7 @@ const AddTranslateModal = ({ table }) => {
       setTranslatorInputError(t("validation.required") || "Required");
       return;
     }
-    if (translatorDialogMode === "edit") {
-      updateTranslator({ guid: selectedTranslatorGuid, fullName: val });
-    } else {
-      createTranslator({ fullName: val });
-    }
+    createTranslator({ fullName: val });
   };
 
   const employeeOptions = useMemo(
@@ -202,6 +164,7 @@ const AddTranslateModal = ({ table }) => {
     () => [
       { value: false, label: t("statusNormal") || "Adaty" },
       { value: true, label: t("statusUrgent") || "Gyssagly" },
+      { label: t("paymentRefunded") || "Gaýtaryldy", value: 0 },
     ],
     [t],
   );
@@ -210,7 +173,6 @@ const AddTranslateModal = ({ table }) => {
     () => [
       { label: t("paymentPaid") || "Tölendi", value: true },
       { label: t("paymentCredit") || "Kredit", value: false },
-      { label: t("paymentRefunded") || "Gaýtaryldy", value: 0 },
     ],
     [t],
   );
@@ -224,7 +186,7 @@ const AddTranslateModal = ({ table }) => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={t("addTranslation") || "Terjime goşmak"}
+          title={t("addTranslation")}
         />
         <CustomForm onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -258,7 +220,7 @@ const AddTranslateModal = ({ table }) => {
 
             <Grid size={4}>
               <CustomSelect
-                name="status_guid"
+                name="status"
                 control={control}
                 label={t("columns.status") || "Ýagdaýy"}
                 options={statusOptions}
@@ -315,34 +277,6 @@ const AddTranslateModal = ({ table }) => {
                   }}
                 >
                   <AddIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  onClick={openEditTranslator}
-                  disabled={!selectedTranslatorGuid}
-                  color="primary"
-                  sx={{
-                    height: "40px",
-                    width: "40px",
-                    borderRadius: "7px",
-                    border: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "1px solid rgba(255, 255, 255, 0.12)"
-                        : "1px solid rgba(0, 0, 0, 0.23)",
-                    "&.Mui-disabled": {
-                      borderColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.06)"
-                          : "rgba(0, 0, 0, 0.12)",
-                    },
-                    "&:hover": {
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.08)"
-                          : "rgba(0, 0, 0, 0.04)",
-                    },
-                  }}
-                >
-                  <EditIcon fontSize="small" />
                 </IconButton>
               </Box>
             </Grid>
@@ -453,11 +387,7 @@ const AddTranslateModal = ({ table }) => {
       >
         <CustomDialogHeader
           variant="h6"
-          title={
-            translatorDialogMode === "edit"
-              ? t("editTranslator") || "Terjimeçini düzeltmek"
-              : t("addTranslator") || "Täze terjimeçi goşmak"
-          }
+          title={t("addTranslator") || "Täze terjimeçi goşmak"}
         />
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1.5 }}>
           <Box sx={{ width: "100%" }}>
@@ -508,7 +438,7 @@ const AddTranslateModal = ({ table }) => {
               onClick={handleSaveTranslator}
               variant="contained"
               color="primary"
-              disabled={isCreatingTranslator || isUpdatingTranslator}
+              disabled={isCreatingTranslator}
             >
               {t("save")}
             </Button>

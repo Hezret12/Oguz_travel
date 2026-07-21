@@ -75,10 +75,10 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
       client_guid: row?.original?.client_guid || "",
       source_to_target: row?.original?.source_to_target || "",
       completed_time: row?.original?.completed_time || "",
-      status_guid:
-        row?.original?.status_guid !== undefined
-          ? row.original.status_guid
-          : false,
+      status:
+        row?.original?.status !== undefined && row?.original?.status !== null
+          ? row.original.status
+          : (row?.original?.status_guid ?? false),
       completed_page_count: row?.original?.completed_page_count || 0,
       completed_day: row?.original?.completed_day
         ? dayjs(row.original.completed_day).format("YYYY-MM-DD")
@@ -105,8 +105,8 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
 
   const { mutate: createTranslator, isPending: isCreatingTranslator } =
     useCreate({
-      createFn: addTranslatorApi,
-      queryKey: "translators",
+      apiFn: addTranslatorApi,
+      key: "translators",
       onSuccess: (res) => {
         // Invalidate query to refetch translators list
         queryClient.invalidateQueries({ queryKey: ["translators"] });
@@ -211,6 +211,7 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
     () => [
       { value: false, label: t("statusNormal") || "Adaty" },
       { value: true, label: t("statusUrgent") || "Gyssagly" },
+      { label: t("paymentRefunded") || "Gaýtaryldy", value: 0 },
     ],
     [t],
   );
@@ -219,7 +220,6 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
     () => [
       { label: t("paymentPaid") || "Tölendi", value: true },
       { label: t("paymentCredit") || "Kredit", value: false },
-      { label: t("paymentRefunded") || "Gaýtaryldy", value: 0 },
     ],
     [t],
   );
@@ -268,7 +268,7 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
 
             <Grid size={4}>
               <CustomSelect
-                name="status_guid"
+                name="status"
                 control={control}
                 label={t("columns.status") || "Ýagdaýy"}
                 options={statusOptions}

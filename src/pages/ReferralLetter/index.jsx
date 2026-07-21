@@ -36,7 +36,7 @@ const CURRENCY_SYMBOLS = {
 };
 
 const ReferalLetter = () => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
@@ -123,75 +123,68 @@ const ReferalLetter = () => {
         id: "operator",
         header: t("columns.operator"),
         size: 160,
-        accessorFn: (row) => row.operator ?? "",
+        accessorFn: (row) => row.refferaloperator?.fullName,
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.operator}
-            secondary={row.original.ofis}
+            primary={row?.original?.refferaloperator?.fullName}
+            secondary={selectedLang(row?.original.refferaloperator?.shortName)}
           />
         ),
       },
       {
-        id: "agent",
-        header: t("columns.agent"),
-        size: 150,
-        accessorFn: (row) => row.agent?.name,
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.agent?.name}
-            secondary={row.original.agentTel}
-          />
-        ),
-      },
-      {
-        id: "fullName",
         header: t("columns.client"),
+        id: "fullName",
         size: 200,
-        accessorFn: (row) =>
-          `${row.name ?? ""} ${row.surname ?? ""}`.trim(),
+        accessorFn: (row) => row.client.fullName,
         Cell: ({ row }) => (
           <StackedCell
-            primary={`${row.original.name ?? ""} ${row.original.surname ?? ""}`.trim()}
+            primary={row.original.client.fullName}
             secondary={row.original.yolagcyTel}
           />
         ),
       },
       {
-        accessorKey: "gender",
+        accessorFn: (row) => row.client.gender,
+        id: "gender",
         header: t("columns.gender"),
         size: 90,
         Cell: ({ cell }) => {
           const val = cell.getValue();
           return val === "Male"
-            ? t("pages.clients.genderMen")
+            ? t("clients.genderMen")
             : val === "Female"
-              ? t("pages.clients.genderWomen")
+              ? t("clients.genderWomen")
               : val;
         },
       },
       {
-        accessorKey: "dateOfBirth",
+        accessorFn: (row) => row.client.dateOfBirth,
+        id: "dateOfBirth",
         header: t("columns.dateOfBirth"),
         size: 110,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
-        accessorKey: "passportNumber",
+        accessorFn: (row) => row.client.passport_number,
+        id: "passport_number",
         header: t("columns.passportNumber") ?? "Passport №",
         size: 110,
       },
       {
         accessorKey: "destination_country",
+        id: "destination_country",
         header: t("columns.destinationCountry"),
         size: 110,
       },
       {
         accessorKey: "tranzit",
+        id: "tranzit",
         header: t("columns.transit"),
         size: 90,
       },
       {
         accessorKey: "travel_document_number",
+        id: "travel_document_number",
         header: t("columns.syhNo"),
         size: 100,
         Cell: ({ row, cell }) => {
@@ -217,18 +210,21 @@ const ReferalLetter = () => {
       },
       {
         accessorKey: "departure_date",
+        id: "departure_date",
         header: t("columns.departureDate"),
         size: 120,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
         accessorKey: "return_date",
+        id: "return_date",
         header: t("columns.returnDate"),
         size: 120,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
         accessorKey: "price",
+        id: "price",
         header: t("price"),
         size: 130,
         Cell: ({ row, cell }) => {
@@ -240,17 +236,32 @@ const ReferalLetter = () => {
       },
       {
         accessorKey: "contract_number",
+        id: "contract_number",
         header: t("columns.contractNo") ?? "şertnama №",
         size: 110,
       },
       {
         accessorKey: "contract_date",
+        id: "contract_date",
         header: t("columns.contractDate"),
         size: 120,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
+        id: "agent",
+        header: t("columns.agent"),
+        size: 150,
+        accessorFn: (row) => row.agent?.name,
+        Cell: ({ row }) => (
+          <StackedCell
+            primary={row.original.agent?.name}
+            secondary={row.original.phone_number}
+          />
+        ),
+      },
+      {
         accessorKey: "note",
+        id: "note",
         header: t("columns.note"),
         size: 200,
       },
@@ -293,8 +304,8 @@ const ReferalLetter = () => {
       sx: (theme) => ({
         backgroundColor: theme.palette.background.default,
         color: theme.palette.text.secondary,
-        opacity: (isLoading || isFetching) ? 0 : 1,
-        pointerEvents: (isLoading || isFetching) ? "none" : "auto",
+        opacity: isLoading || isFetching ? 0 : 1,
+        pointerEvents: isLoading || isFetching ? "none" : "auto",
         transition: "opacity 0.15s ease",
       }),
     },
