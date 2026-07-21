@@ -69,23 +69,37 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
       received_day: row?.original?.received_day
         ? dayjs(row.original.received_day).format("YYYY-MM-DD")
         : dayjs().format("YYYY-MM-DD"),
-      received_time: row?.original?.received_time || dayjs().format("HH:mm"),
-      opr_guid: row?.original?.opr_guid || "",
-      page_count: row?.original?.page_count || 1,
-      client_guid: row?.original?.client_guid || "",
+      received_time: row?.original?.received_time
+        ? row.original.received_time.slice(0, 5)
+        : dayjs().format("HH:mm"),
+      opr_guid:
+        row?.original?.opr_guid ||
+        row?.original?.operator?.guid ||
+        "",
+      page_count: row?.original?.page_count != null ? Number(row.original.page_count) : 1,
+      client_guid:
+        row?.original?.client_guid ||
+        row?.original?.client?.guid ||
+        "",
       source_to_target: row?.original?.source_to_target || "",
-      completed_time: row?.original?.completed_time || "",
+      completed_time: row?.original?.completed_time
+        ? row.original.completed_time.slice(0, 5)
+        : "",
       status:
         row?.original?.status !== undefined && row?.original?.status !== null
           ? row.original.status
           : (row?.original?.status_guid ?? false),
-      completed_page_count: row?.original?.completed_page_count || 0,
+      completed_page_count:
+        row?.original?.completed_page_count != null ? Number(row.original.completed_page_count) : 0,
       completed_day: row?.original?.completed_day
         ? dayjs(row.original.completed_day).format("YYYY-MM-DD")
         : null,
-      translator_guid: row?.original?.translator_guid || "",
+      translator_guid:
+        row?.original?.translator_guid ||
+        row?.original?.translator?.guid ||
+        "",
       correction_status: row?.original?.correction_status || "",
-      price: row?.original?.price || 0,
+      price: row?.original?.price != null ? Number(row.original.price) : 0,
       note: row?.original?.note || "",
       is_paid:
         row?.original?.is_paid !== undefined ? row.original.is_paid : true,
@@ -94,9 +108,11 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
 
   const { mutate: updateTranslation, isPending: isUpdatingTranslation } = useUpdate({
     apiFn: updateTranslationApi,
-    key: ["translations", queryParams],
+    key: "translations",
     idKey: "guid",
+    invalidateQueries: ["translations"],
     onSuccessUpdate: () => {
+      queryClient.invalidateQueries({ queryKey: ["translations"] });
       table.setEditingRow(null);
     },
   });
@@ -149,6 +165,7 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
         data.is_paid === 0 || data.is_paid === "0"
           ? 0
           : data.is_paid === true || data.is_paid === "true",
+      status: data.status === true || data.status === "true",
     };
     updateTranslation(payload);
   };

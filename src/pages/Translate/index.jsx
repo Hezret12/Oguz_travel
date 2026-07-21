@@ -174,7 +174,7 @@ const TranslatePage = () => {
           if (val === true || val === "true" || val === 1 || val === "1") return 100;
           return 0;
         },
-        header: t("columns.paymentStatus") || "Töleg görnüşi",
+        header: t("columns.paymentStatus"),
         size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -183,7 +183,7 @@ const TranslatePage = () => {
           if (val === 0 || val === "0") {
             return (
               <Chip
-                label={t("paymentRefunded") || "Gaýtaryldy"}
+                label={t("paymentRefunded")}
                 size="small"
                 sx={{
                   backgroundColor: "rgba(245, 158, 11, 0.12)",

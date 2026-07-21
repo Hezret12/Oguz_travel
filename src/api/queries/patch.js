@@ -64,4 +64,4 @@ export const updateTranslationApi = async (data) => {
 export const updateTransPaymentApi = async (data) => {
   const response = await api.patchPrivate(`/trans-payment/update-trans-payment`, data);
   return response;
-};
+};
