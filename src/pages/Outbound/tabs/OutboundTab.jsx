@@ -99,7 +99,7 @@ const OutboundTab = ({ activeTab, queryParams, page, limit, setPage, setPageSize
             secondary={
               row.original.operator?.office
                 ? selectedLang(row.original.operator.office.shortName) ||
-                  selectedLang(row.original.operator.office.fullName)
+                selectedLang(row.original.operator.office.fullName)
                 : ""
             }
           />
@@ -122,7 +122,7 @@ const OutboundTab = ({ activeTab, queryParams, page, limit, setPage, setPageSize
             secondary={
               row.original.prepared_by_employee?.office
                 ? selectedLang(row.original.prepared_by_employee.office.shortName) ||
-                  selectedLang(row.original.prepared_by_employee.office.fullName)
+                selectedLang(row.original.prepared_by_employee.office.fullName)
                 : ""
             }
           />

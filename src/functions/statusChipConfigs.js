@@ -18,8 +18,8 @@ export const PAYMENT_STATUS_CONFIG = {
 };
 
 export const TRANSLATION_STATUS_CONFIG = {
-  TRUE: { label: "Gyssagly", color: "#dc2626", icon: BoltRoundedIcon },
-  FALSE: { label: "Adaty", color: "#2563eb", icon: ScheduleRoundedIcon },
-  "0": { label: "Gaýtaryldy", color: "#d97706", icon: ReplayRoundedIcon },
-  0: { label: "Gaýtaryldy", color: "#d97706", icon: ReplayRoundedIcon },
+  TRUE: { label: "Gyssagly", color: "#e11d48", icon: BoltRoundedIcon },
+  FALSE: { label: "Adaty", color: "#0284c7", icon: ScheduleRoundedIcon },
+  "0": { label: "Gaýtaryldy", color: "#ea580c", icon: ReplayRoundedIcon },
+  0: { label: "Gaýtaryldy", color: "#ea580c", icon: ReplayRoundedIcon },
 };

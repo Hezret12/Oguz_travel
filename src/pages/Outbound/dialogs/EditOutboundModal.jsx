@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Grid } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -12,6 +12,7 @@ import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
 import FooterButton from "../../../components/Dialog/FooterButton";
 import CustomDatePicker from "../../../components/CustomDatePicker";
+import GlobalClientAutocomplete from "../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { getAllEmployeeApi, getAllOfficeApi } from "../../../api/queries/getters";
@@ -43,6 +44,19 @@ const EditOutboundModal = ({ table, row, activeTab }) => {
 
   const item = row?.original || {};
 
+  const initialClient = useMemo(() => {
+    if (item.client) return item.client;
+    if (item.client_guid || item.client_name) {
+      return {
+        guid: item.client_guid || "",
+        fullName: item.client_name || "",
+      };
+    }
+    return null;
+  }, [item]);
+
+  const [selectedClientObj, setSelectedClientObj] = useState(initialClient);
+
   // react-hook-form setup
   const {
     control,
@@ -57,7 +71,7 @@ const EditOutboundModal = ({ table, row, activeTab }) => {
         : dayjs().format("YYYY-MM-DD"),
       office_guid: item.office_guid || item.office?.guid || "",
       operator_guid: item.operator_guid || item.operator?.guid || "",
-      client_name: item.client_name || "",
+      client_name: item.client_guid || item.client?.guid || item.client_name || "",
       prepared_by: item.prepared_by || item.prepared_by_employee?.guid || "",
       cost: item.cost || 0,
       price: item.price || 0,
@@ -95,6 +109,8 @@ const EditOutboundModal = ({ table, row, activeTab }) => {
   const onSubmit = (data) => {
     const payload = {
       ...data,
+      client_name: selectedClientObj?.fullName || data.client_name || "",
+      client_guid: selectedClientObj?.guid || (typeof data.client_name === "string" && data.client_name.length > 20 ? data.client_name : undefined),
       type: activeTab,
       request_date: data.request_date
         ? dayjs(data.request_date).format("YYYY-MM-DD")
@@ -148,7 +164,7 @@ const EditOutboundModal = ({ table, row, activeTab }) => {
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
           {/* Common Fields */}
-          <Grid size={4}>
+          <Grid size={3}>
             <CustomDatePicker
               name="request_date"
               control={control}
@@ -157,7 +173,7 @@ const EditOutboundModal = ({ table, row, activeTab }) => {
             />
           </Grid>
 
-          <Grid size={4}>
+          <Grid size={3}>
             <CustomSelect
               name="office_guid"
               control={control}
@@ -167,7 +183,7 @@ const EditOutboundModal = ({ table, row, activeTab }) => {
             />
           </Grid>
 
-          <Grid size={4}>
+          <Grid size={3}>
             <CustomSelect
               name="operator_guid"
               control={control}
@@ -177,22 +193,27 @@ const EditOutboundModal = ({ table, row, activeTab }) => {
             />
           </Grid>
 
-          <Grid size={4}>
-            <CustomTextField
-              name="client_name"
-              control={control}
-              label={t("outbound.clientName") || "Müşderiniň ady"}
-              required
-            />
-          </Grid>
-
-          <Grid size={4}>
+          <Grid size={3}>
             <CustomSelect
               name="prepared_by"
               control={control}
               label={t("outbound.preparedBy") || "Taýýarlan"}
               options={employeeOptions}
               required
+            />
+          </Grid>
+
+          <Grid size={8}>
+            <GlobalClientAutocomplete
+              name="client_name"
+              control={control}
+              label={t("outbound.clientName") || "Müşderiniň ady"}
+              columns={["fullName"]}
+              required
+              initialClient={initialClient}
+              onClientChange={(client) => {
+                setSelectedClientObj(client);
+              }}
             />
           </Grid>
 
@@ -226,21 +247,21 @@ const EditOutboundModal = ({ table, row, activeTab }) => {
                   label={t("outbound.destinationCountry") || "Ugur ýurdy"}
                 />
               </Grid>
-              <Grid size={4}>
+              <Grid size={8}>
                 <CustomTextField
                   name="hotelName"
                   control={control}
                   label={t("outbound.hotelName") || "Otel ady"}
                 />
               </Grid>
-              <Grid size={4}>
+              <Grid size={5}>
                 <CustomTextField
                   name="roomType"
                   control={control}
                   label={t("outbound.roomType") || "Otag görnüşi"}
                 />
               </Grid>
-              <Grid size={6}>
+              <Grid size={4}>
                 <CustomSelect
                   name="mealPlan"
                   control={control}
@@ -248,7 +269,7 @@ const EditOutboundModal = ({ table, row, activeTab }) => {
                   options={MEAL_PLAN_OPTIONS}
                 />
               </Grid>
-              <Grid size={6}>
+              <Grid size={3}>
                 <CustomTextField
                   name="guestCount"
                   control={control}
