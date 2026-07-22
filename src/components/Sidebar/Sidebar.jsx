@@ -102,7 +102,7 @@ const SidebarPanel = ({
   i18n,
 }) => (
   <>
-    <SidebarLogo collapsed={collapsed} isDark={isDark} />
+    {/* <SidebarLogo collapsed={collapsed} isDark={isDark} /> */}
 
     <Divider
       sx={{

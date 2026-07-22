@@ -7,7 +7,7 @@ export const translateFilterSlice = createFilterSlice({
     start_date: '',
     end_date: '',
     translator_guid: '',
-    status_guid: '',
+    status: '',
   },
   defaultPageSize: 20,
 });

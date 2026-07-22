@@ -110,6 +110,20 @@ const TranslatePage = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
+        id: "operator",
+        header: t("columns.operator"),
+        size: 190,
+        accessorFn: (row) => row.operator?.fullName,
+        Cell: ({ row }) => (
+          <StackedCell
+            primary={row.original.operator?.fullName}
+            secondary={selectedLang(
+              row?.original?.operator?.office?.fullName
+            )}
+          />
+        ),
+      },
+      {
         id: "client",
         header: t("columns.client"),
         size: 200,
@@ -124,16 +138,8 @@ const TranslatePage = () => {
       {
         id: "translator",
         accessorFn: (row) => row.translator?.fullName,
-        header: t("columns.translator") || "Terjimeçi",
+        header: t("columns.translator"),
         size: 130,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-      },
-      {
-        accessorFn: (row) => row.source_to_target,
-        id: "source_to_target",
-        header: t("columns.direction") || "Ugur",
-        size: 120,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
@@ -149,7 +155,7 @@ const TranslatePage = () => {
         accessorFn: (row) => row.completed_page_count,
         id: "completed_page_count",
         header: t("columns.completedPageCount") || "Tabşyrylan sahypa sany",
-        size: 110,
+        size: 130,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
@@ -179,6 +185,31 @@ const TranslatePage = () => {
         },
       },
       {
+        accessorFn: (row) => (row.status !== undefined ? row.status : row.status_guid),
+        id: "status",
+        header: t("columns.status"),
+        size: 100,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => {
+          const statusVal = row.original.status !== undefined ? row.original.status : row.original.status_guid;
+          return (
+            <StatusChip
+              status={statusVal}
+              config={TRANSLATION_STATUS_CONFIG}
+            />
+          );
+        },
+      },
+      {
+        accessorFn: (row) => row.source_to_target,
+        id: "source_to_target",
+        header: t("columns.direction"),
+        size: 140,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
         accessorKey: "completed_day",
         id: "completed_day",
         header: t("columns.completedDay") || "Tabşyrylan güni",
@@ -196,49 +227,18 @@ const TranslatePage = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorFn: (row) => (row.status !== undefined ? row.status : row.status_guid),
-        id: "status",
-        header: t("columns.status") || "Ýagdaýy",
-        size: 100,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => {
-          const statusVal = row.original.status !== undefined ? row.original.status : row.original.status_guid;
-          return (
-            <StatusChip
-              status={statusVal}
-              config={TRANSLATION_STATUS_CONFIG}
-            />
-          );
-        },
-      },
-      {
         accessorFn: (row) => row.correction_status,
         id: "correction_status",
-        header: t("columns.correctionStatus") || "Düzeliş ýagdaýy",
+        header: t("columns.correctionStatus"),
         size: 120,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        id: "operator",
-        header: t("columns.operator"),
-        size: 150,
-        accessorFn: (row) => row.operator?.fullName,
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.operator?.fullName}
-            secondary={selectedLang(
-              row?.original?.operator?.office?.fullName
-            )}
-          />
-        ),
-      },
-      {
         accessorFn: (row) => row.note,
         id: "note",
         header: t("columns.note"),
-        size: 100,
+        size: 150,
       },
       {
         id: "actions",
