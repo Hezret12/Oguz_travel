@@ -29,13 +29,13 @@ const AddClientModal = () => {
 
   const defaultValues = useMemo(
     () => ({
-      fullName: null,
+      fullName: "",
       phone_number: null,
       dateOfBirth: null,
       passport_number: null,
       passportExpiryDate: null,
       passportCountryOfIssue: null,
-      gender: '',
+      gender: null,
       ...initialValues,
     }),
     [initialValues],
