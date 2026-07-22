@@ -295,5 +295,5 @@ src/pages/<Feature>/
 - **Never duplicate cache update logic** that hooks already handle internally.
 - **Never write ad-hoc status `Chip` components** inline — always use `StatusChip` + centralized config.
 - **Always verify hook parameter names** by reading the hook source before using them. The three CRUD hooks have **different** parameter names.
-- **Always preserve existing imports** when editing files. Run a mental diff before submitting changes.
+- **Always preserve necessary imports & clean up unused imports**: Remove any unused component, icon, or constant imports after refactoring to keep the codebase clean and warning-free.
 - **All form option values must be consistent types** — if the backend expects strings, use string values in `statusOptions` / `paymentOptions`.

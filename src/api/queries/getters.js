@@ -85,3 +85,28 @@ export const getAllTranslatorsApi = async (params = {}) => {
 export const getAllTransPaymentApi = async (params = {}) => {
   return await api.getPrivate('/trans-payment/get-all-trans-payment', params);
 };
+
+// Outbound Tab GET APIs
+export const getAllHotelsApi = async (params = {}) => {
+  return await api.getPrivate('/hotel/get-hotels', params);
+};
+
+export const getAllAirwaysApi = async (params = {}) => {
+  return await api.getPrivate('/airway/get-airways', params);
+};
+
+export const getAllRailwaysApi = async (params = {}) => {
+  return await api.getPrivate('/railway/get-railways', params);
+};
+
+export const getAllToursApi = async (params = {}) => {
+  return await api.getPrivate('/tour/get-tours', params);
+};
+
+export const getAllTransfersApi = async (params = {}) => {
+  return await api.getPrivate('/transfer/get-transfers', params);
+};
+
+export const getAllPackagesApi = async (params = {}) => {
+  return await api.getPrivate('/package/get-packages', params);
+};

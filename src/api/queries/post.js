@@ -102,6 +102,31 @@ export const addTranslatorApi = async (data) => {
   return response;
 };
 
+// Outbound Tab POST APIs
+export const addHotelApi = async (data) => {
+  return await api.postPrivate('/hotel/add-hotel', data);
+};
+
+export const addAirwayApi = async (data) => {
+  return await api.postPrivate('/airway/add-airway', data);
+};
+
+export const addRailwayApi = async (data) => {
+  return await api.postPrivate('/railway/add-railway', data);
+};
+
+export const addTourApi = async (data) => {
+  return await api.postPrivate('/tour/add-tour', data);
+};
+
+export const addTransferApi = async (data) => {
+  return await api.postPrivate('/transfer/add-transfer', data);
+};
+
+export const addPackageApi = async (data) => {
+  return await api.postPrivate('/package/add-package', data);
+};
+
 export const addTransPaymentApi = async (data) => {
   const response = await api.postPrivate(
     "/trans-payment/add-trans-payment",

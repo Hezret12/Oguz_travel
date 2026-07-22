@@ -37,7 +37,7 @@ function sanitizeDecimalInput(raw) {
 
 const sharedInputSx = {
   "& .MuiOutlinedInput-root": {
-    borderRadius: "10px",
+    borderRadius: "7px",
     minHeight: "44px",
     backgroundColor: (theme) =>
       theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
@@ -170,6 +170,7 @@ const CurrencyAmount = forwardRef(function CurrencyAmount(
         {label && (
           <Typography
             variant="body2"
+            component="div"
             sx={{
               mb: 0.75,
               fontWeight: 600,
@@ -179,7 +180,7 @@ const CurrencyAmount = forwardRef(function CurrencyAmount(
           >
             {label}
             {required && (
-              <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
+              <span style={{ color: "#ef4444", marginLeft: "4px", fontSize: "17px" }}>*</span>
             )}
           </Typography>
         )}

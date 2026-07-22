@@ -49,4 +49,29 @@ export const deleteVisaApi = async (guid) => {
 export const deleteTransPaymentApi = async (guid) => {
   const response = await api.deletePrivate('/trans-payment/delete-trans-payment', guid);
   return response;
+};
+
+// Outbound Tab DELETE APIs
+export const deleteHotelApi = async (guid) => {
+  return await api.deletePrivate('/hotel/delete-hotel', guid);
+};
+
+export const deleteAirwayApi = async (guid) => {
+  return await api.deletePrivate('/airway/delete-airway', guid);
+};
+
+export const deleteRailwayApi = async (guid) => {
+  return await api.deletePrivate('/railway/delete-railway', guid);
+};
+
+export const deleteTourApi = async (guid) => {
+  return await api.deletePrivate('/tour/delete-tour', guid);
+};
+
+export const deleteTransferApi = async (guid) => {
+  return await api.deletePrivate('/transfer/delete-transfer', guid);
+};
+
+export const deletePackageApi = async (guid) => {
+  return await api.deletePrivate('/package/delete-package', guid);
 };

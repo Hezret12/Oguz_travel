@@ -145,7 +145,7 @@ export const useValidShema = () => {
     operator_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
     client_name: yup.string().required(t("validation.required") || "Hökman girizilmeli"),
     prepared_by: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
-    cost: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
+    net_fare: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
     price: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
   });
 

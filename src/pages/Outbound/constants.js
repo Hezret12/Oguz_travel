@@ -29,8 +29,8 @@ export const PARTNER_OPTIONS = [
 
 // Ticket type options
 export const TICKET_TYPE_OPTIONS = [
-  { value: "ONE WAY", label: "One Way" },
-  { value: "ROUND TRIP", label: "Round Trip" },
+  { value: "ONE_WAY", label: "One Way" },
+  { value: "ROUND_TRIP", label: "Round Trip" },
 ];
 
 // Meal plan options (Hotel)
@@ -57,8 +57,9 @@ export const CAR_TYPE_OPTIONS = [
   { value: "MINIVAN", label: "Minivan" },
 ];
 
-// Transfer type
-export const TRANSFER_TYPE_OPTIONS = [
-  { value: "ONE WAY", label: "One Way" },
-  { value: "ROUND TRIP", label: "Round Trip" },
+// Payment status options
+export const PAYMENT_OPTIONS = [
+  { value: true, label: "Tölendi" },
+  { value: false, label: "Kredit" },
 ];
+

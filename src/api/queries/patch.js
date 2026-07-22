@@ -65,3 +65,28 @@ export const updateTransPaymentApi = async (data) => {
   const response = await api.patchPrivate(`/trans-payment/update-trans-payment`, data);
   return response;
 };
+
+// Outbound Tab PATCH APIs
+export const updateHotelApi = async (data) => {
+  return await api.patchPrivate('/hotel/update-hotel', data);
+};
+
+export const updateAirwayApi = async (data) => {
+  return await api.patchPrivate('/airway/update-airway', data);
+};
+
+export const updateRailwayApi = async (data) => {
+  return await api.patchPrivate('/railway/update-railway', data);
+};
+
+export const updateTourApi = async (data) => {
+  return await api.patchPrivate('/tour/update-tour', data);
+};
+
+export const updateTransferApi = async (data) => {
+  return await api.patchPrivate('/transfer/update-transfer', data);
+};
+
+export const updatePackageApi = async (data) => {
+  return await api.patchPrivate('/package/update-package', data);
+};
