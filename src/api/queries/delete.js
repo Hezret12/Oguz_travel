@@ -51,27 +51,26 @@ export const deleteTransPaymentApi = async (guid) => {
   return response;
 };
 
-// Outbound Tab DELETE APIs
-export const deleteHotelApi = async (guid) => {
-  return await api.deletePrivate('/hotel/delete-hotel', guid);
+export const deleteHotelApi = async (payload) => {
+  return await api.deletePrivate('/hotel/delete-hotel', payload);
 };
 
-export const deleteAirwayApi = async (guid) => {
-  return await api.deletePrivate('/airway/delete-airway', guid);
+export const deleteAirwayApi = async (payload) => {
+  return await api.deletePrivate('/airway/delete-airway', payload);
 };
 
-export const deleteRailwayApi = async (guid) => {
-  return await api.deletePrivate('/railway/delete-railway', guid);
+export const deleteRailwayApi = async (payload) => {
+  return await api.deletePrivate('/railway/delete-railway', payload);
 };
 
-export const deleteTourApi = async (guid) => {
-  return await api.deletePrivate('/tour/delete-tour', guid);
+export const deleteTourApi = async (payload) => {
+  return await api.deletePrivate('/tour/delete-tour', payload);
 };
 
-export const deleteTransferApi = async (guid) => {
-  return await api.deletePrivate('/transfer/delete-transfer', guid);
+export const deleteTransferApi = async (payload) => {
+  return await api.deletePrivate('/transfer/delete-transfer', payload);
 };
 
-export const deletePackageApi = async (guid) => {
-  return await api.deletePrivate('/package/delete-package', guid);
-};
+export const deletePackageApi = async (payload) => {
+  return await api.deletePrivate('/package/delete-package', payload);
+};

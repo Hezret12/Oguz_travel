@@ -16,7 +16,7 @@ import GlobalClientAutocomplete from "../../../../components/global/GlobalClient
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
-import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
+import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { addHotelApi } from "../../../../api/queries/post";
 import { SOURCE_OPTIONS, PAYMENT_OPTIONS } from "../../constants";
 import HotelFields from "../fields/HotelFields";
@@ -35,10 +35,6 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
     key: "employees",
   });
 
-  const { data: offices = [] } = useGet({
-    apiFn: getAllOfficeApi,
-    key: "offices",
-  });
 
   const {
     control,
