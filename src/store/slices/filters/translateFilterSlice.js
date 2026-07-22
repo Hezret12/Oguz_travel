@@ -4,10 +4,12 @@ export const translateFilterSlice = createFilterSlice({
   name: 'translateFilters',
   defaultFilters: {
     search: '',
-    start_date: '',
-    end_date: '',
+    received_day: '',
+    received_time: '',
+    opr_guid: '',
+    completed_time: '',
+    completed_day: '',
     translator_guid: '',
-    status: '',
   },
   defaultPageSize: 20,
 });
