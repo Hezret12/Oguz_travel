@@ -50,6 +50,7 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
     defaultValues: {
       application_date: dayjs().format("YYYY-MM-DD"),
       opr_guid: "",
+      client_name: "",
       prepared_opr_guid: "",
       net_fare: 0,
       price: 0,
@@ -59,7 +60,7 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
       hotel_name: "",
       room_type: "",
       meal_plan: "",
-      guests_count: 1,
+      guests_count: null,
       note: "",
       is_paid: null,
     },
@@ -91,14 +92,14 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
       destination_country: data.destination_country || "",
       hotel_name: data.hotel_name || "",
       room_type: data.room_type || "",
-      meal_plan: data.mealPlan || "",
-      guests_count: Number(data.guestCount || 1),
+      meal_plan: data.meal_plan || "",
+      guests_count: data.guests_count !== null && data.guests_count !== "" ? Number(data.guests_count) : null,
       cost: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
       system: data.source || "",
       note: data.note || "",
-      is_paid: Boolean(data.is_paid),
+      is_paid: data.is_paid !== null ? Boolean(data.is_paid) : false,
     };
     createHotel(payload);
   };

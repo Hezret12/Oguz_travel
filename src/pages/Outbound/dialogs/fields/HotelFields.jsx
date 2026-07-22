@@ -11,28 +11,28 @@ const HotelFields = ({ control }) => {
     <>
       <Grid size={4}>
         <CustomTextField
-          name="destinationCountry"
+          name="destination_country"
           control={control}
           label={t("outbound.destinationCountry") || "Ugur ýurdy"}
         />
       </Grid>
       <Grid size={4}>
         <CustomTextField
-          name="hotelName"
+          name="hotel_name"
           control={control}
           label={t("outbound.hotelName") || "Otel ady"}
         />
       </Grid>
       <Grid size={4}>
         <CustomTextField
-          name="roomType"
+          name="room_type"
           control={control}
           label={t("outbound.roomType") || "Otag görnüşi"}
         />
       </Grid>
       <Grid size={4}>
         <CustomSelect
-          name="mealPlan"
+          name="meal_plan"
           control={control}
           label={t("outbound.mealPlan") || "Iýmit"}
           options={MEAL_PLAN_OPTIONS}
@@ -40,7 +40,7 @@ const HotelFields = ({ control }) => {
       </Grid>
       <Grid size={4}>
         <CustomTextField
-          name="guestCount"
+          name="guests_count"
           control={control}
           type="number"
           label={t("outbound.guestCount") || "Myhmanlaryň sany"}
