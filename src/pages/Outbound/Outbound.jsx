@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Box, Chip, Tab, Tabs } from "@mui/material";
+import { Tab, Tabs } from "@mui/material";
 import { useLocale } from "../../hooks/useLocale";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import PageHeader from "../../components/PageHeader";
 import FilterDrawer from "../../components/FilterDrawer";
-import GlobalSearchInput from "../../components/GlobalSearchInput";
-import OutboundFilter from "./dialogs/OutboundFilter";
+import OutboundFilter from "./Contents/OutboundFilter";
 import { OUTBOUND_TABS } from "./constants";
 import { tabStyles } from "../Users/shared/modalStyles";
 import {
@@ -98,48 +97,31 @@ const OutboundPage = () => {
         />
       </FilterDrawer>
 
-      <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
-        <GlobalSearchInput
-          value={searchQuery}
-          onChange={setSearch}
-          placeholder={t("search")}
-        />
-
-        {activeFilters.map(([key, value]) => (
-          <Chip
-            key={key}
-            label={`${t(`outbound.${key}`, key)}: ${value}`}
-            onDelete={() => setFilter(key, "")}
-            color="primary"
-            variant="outlined"
-            size="small"
-            sx={{
-              borderRadius: "8px",
-              height: "32px",
-              fontWeight: 500,
-            }}
-          />
-        ))}
-      </Box>
-
-      {activeTab === "hotel" && (
-        <HotelTab queryParams={queryParams} page={page} limit={limit} setPage={setPage} setPageSize={setPageSize} isAddOpen={isAddOpen} onCloseAdd={() => setIsAddOpen(false)} />
-      )}
-      {activeTab === "airway" && (
-        <AirwayTab queryParams={queryParams} page={page} limit={limit} setPage={setPage} setPageSize={setPageSize} isAddOpen={isAddOpen} onCloseAdd={() => setIsAddOpen(false)} />
-      )}
-      {activeTab === "railway" && (
-        <RailwayTab queryParams={queryParams} page={page} limit={limit} setPage={setPage} setPageSize={setPageSize} isAddOpen={isAddOpen} onCloseAdd={() => setIsAddOpen(false)} />
-      )}
-      {activeTab === "tour" && (
-        <TourTab queryParams={queryParams} page={page} limit={limit} setPage={setPage} setPageSize={setPageSize} isAddOpen={isAddOpen} onCloseAdd={() => setIsAddOpen(false)} />
-      )}
-      {activeTab === "transfer" && (
-        <TransferTab queryParams={queryParams} page={page} limit={limit} setPage={setPage} setPageSize={setPageSize} isAddOpen={isAddOpen} onCloseAdd={() => setIsAddOpen(false)} />
-      )}
-      {activeTab === "package" && (
-        <PackageTab queryParams={queryParams} page={page} limit={limit} setPage={setPage} setPageSize={setPageSize} isAddOpen={isAddOpen} onCloseAdd={() => setIsAddOpen(false)} />
-      )}
+      {(() => {
+        const tabProps = {
+          queryParams,
+          searchQuery,
+          setSearch,
+          setFilter,
+          activeFilters,
+          page,
+          limit,
+          setPage,
+          setPageSize,
+          isAddOpen,
+          onCloseAdd: () => setIsAddOpen(false),
+        };
+        return (
+          <>
+            {activeTab === "hotel" && <HotelTab {...tabProps} />}
+            {activeTab === "airway" && <AirwayTab {...tabProps} />}
+            {activeTab === "railway" && <RailwayTab {...tabProps} />}
+            {activeTab === "tour" && <TourTab {...tabProps} />}
+            {activeTab === "transfer" && <TransferTab {...tabProps} />}
+            {activeTab === "package" && <PackageTab {...tabProps} />}
+          </>
+        );
+      })()}
     </>
   );
 };

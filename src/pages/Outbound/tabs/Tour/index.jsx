@@ -10,10 +10,24 @@ import StackedCell from "../../../../components/inputs/StackCell";
 import ColumnActionButtons from "../../../../components/ColumnActionButtons";
 import { getAllToursApi } from "../../../../api/queries/getters";
 import { deleteTourApi } from "../../../../api/queries/delete";
-import AddTourModal from "../../dialogs/Tour/AddTourModal";
-import EditTourModal from "../../dialogs/Tour/EditTourModal";
+import { Box, Chip } from "@mui/material";
+import GlobalSearchInput from "../../../../components/GlobalSearchInput";
+import AddTourModal from "./AddTourModal";
+import EditTourModal from "./EditTourModal";
 
-const TourTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen, onCloseAdd }) => {
+const TourTab = ({
+  queryParams,
+  searchQuery,
+  setSearch,
+  setFilter,
+  activeFilters,
+  page,
+  limit,
+  setPage,
+  setPageSize,
+  isAddOpen,
+  onCloseAdd,
+}) => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
 
@@ -23,6 +37,7 @@ const TourTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen, on
     data: tourData = [],
     isLoading,
     isFetching,
+    refetch,
     totalItems,
   } = usePagginationGet({
     apiFn: getAllToursApi,
@@ -135,9 +150,6 @@ const TourTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen, on
     ...defaultMrtOptions,
     columns,
     data: listData,
-    enableRowActions: false,
-    enableEditing: true,
-    enableCreatingRow: true,
     state: { isLoading, showSkeletons: isLoading && isFetching },
     rowCount: totalItems,
     manualPagination: true,
@@ -146,6 +158,42 @@ const TourTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen, on
       setPage(nextPagination.pageIndex + 1);
       setPageSize(nextPagination.pageSize);
     },
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search")}
+          disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
+        />
+
+        {(activeFilters || []).map(([key, value]) => (
+          <Chip
+            key={key}
+            label={`${t(`outbound.${key}`, key)}: ${value}`}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderRadius: "8px",
+              height: "32px",
+              fontWeight: 500,
+            }}
+          />
+        ))}
+      </Box>
+    ),
     renderCreateRowDialogContent: ({ table }) => <AddTourModal open={true} onClose={onCloseAdd} table={table} />,
     renderEditRowDialogContent: ({ table, row }) => <EditTourModal table={table} row={row} />,
   });

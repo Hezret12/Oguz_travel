@@ -88,7 +88,7 @@ const AddEmployee = ({ table }) => {
 
   return (
     <CustomDialog widthX={700} open={true} close={closeDialog}>
-      <CustomDialogHeader variant={"h5"} title={t("pages.employee.add")} />
+      <CustomDialogHeader variant={"h5"} title={t("employee.add")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Grid container spacing={2.5}>
           <Grid size={{ xs: 12, sm: 6 }}>

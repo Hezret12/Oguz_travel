@@ -32,28 +32,28 @@ export const useValidShema = () => {
   });
 
   const addEmployee = yup.object({
-    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired")),
+    fullName: stringRequiredValidSchema(t("employee.validation.fullNameRequired")),
      phone_number: phoneNumberRequiredValidSchema({
-      requiredMessage: t("pages.users.validation.phoneNumberRequired"),
-      lengthMessage: t("pages.users.validation.phoneNumberLength"),
-      invalidMessage: t("pages.users.validation.phoneNumberInvalid"),
+      requiredMessage: t("users.validation.phoneNumberRequired"),
+      lengthMessage: t("users.validation.phoneNumberLength"),
+      invalidMessage: t("users.validation.phoneNumberInvalid"),
     }),
   });
 
     const editEmployee = yup.object({
-    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired")),
+    fullName: stringRequiredValidSchema(t("employee.validation.fullNameRequired")),
      phone_number: phoneNumberRequiredValidSchema({
-      requiredMessage: t("pages.users.validation.phoneNumberRequired"),
-      lengthMessage: t("pages.users.validation.phoneNumberLength"),
-      invalidMessage: t("pages.users.validation.phoneNumberInvalid"),
+      requiredMessage: t("users.validation.phoneNumberRequired"),
+      lengthMessage: t("users.validation.phoneNumberLength"),
+      invalidMessage: t("users.validation.phoneNumberInvalid"),
     }),
     guid: guidRequiredValidSchema
   })
 
   const clientValidShema = yup.object({
-    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired")),
+    fullName: stringRequiredValidSchema(t("employee.validation.fullNameRequired")),
     phone_number: phoneNumberOptionalValidSchema({
-      invalidMessage: t("pages.users.validation.phoneNumberInvalid"),
+      invalidMessage: t("users.validation.phoneNumberInvalid"),
     }),
   });
 
@@ -82,22 +82,22 @@ export const useValidShema = () => {
     permissions: yup
       .array()
       .of(yup.string())
-      .min(1, t("pages.users.validation.permissionsRequired", "At least one permission is required"))
-      .required(t("pages.users.validation.permissionsRequired", "At least one permission is required")),
+      .min(1, t("users.validation.permissionsRequired", "At least one permission is required"))
+      .required(t("users.validation.permissionsRequired", "At least one permission is required")),
     employee_guid: yup.string().when("isExternalUser", {
       is: false,
-      then: (schema) => schema.required(t("pages.users.validation.employeeRequired", "Employee is required")),
+      then: (schema) => schema.required(t("users.validation.employeeRequired", "Employee is required")),
       otherwise: (schema) => schema.nullable().notRequired(),
     }),
     phone_number: phoneNumberRequiredValidSchema({
-      requiredMessage: t("pages.users.validation.phoneNumberRequired", "Phone number is required"),
-      lengthMessage: t("pages.users.validation.phoneNumberLength", "Phone number must be exactly 8 digits"),
-      invalidMessage: t("pages.users.validation.phoneNumberInvalid", "Invalid phone number"),
+      requiredMessage: t("users.validation.phoneNumberRequired", "Phone number is required"),
+      lengthMessage: t("users.validation.phoneNumberLength", "Phone number must be exactly 8 digits"),
+      invalidMessage: t("users.validation.phoneNumberInvalid", "Invalid phone number"),
     }),
     password: yup
       .string()
-      .required(t("pages.users.validation.passwordRequired", "Password is required"))
-      .min(6, t("pages.users.validation.passwordTooShort", "Password is too short (min 6 characters)")),
+      .required(t("users.validation.passwordRequired", "Password is required"))
+      .min(6, t("users.validation.passwordTooShort", "Password is too short (min 6 characters)")),
   });
 
   const editUser = yup.object({
@@ -105,23 +105,23 @@ export const useValidShema = () => {
     permissions: yup
       .array()
       .of(yup.string())
-      .min(1, t("pages.users.validation.permissionsRequired"))
-      .required(t("pages.users.validation.permissionsRequired")),
+      .min(1, t("users.validation.permissionsRequired"))
+      .required(t("users.validation.permissionsRequired")),
     employee_guid: yup.string().when("isExternalUser", {
       is: false,
-      then: (schema) => schema.required(t("pages.users.validation.employeeRequired", "Employee is required")),
+      then: (schema) => schema.required(t("users.validation.employeeRequired", "Employee is required")),
       otherwise: (schema) => schema.nullable().notRequired(),
     }),
     phone_number: phoneNumberRequiredValidSchema({
-      requiredMessage: t("pages.users.validation.phoneNumberRequired", "Phone number is required"),
-      lengthMessage: t("pages.users.validation.phoneNumberLength", "Phone number must be exactly 8 digits"),
-      invalidMessage: t("pages.users.validation.phoneNumberInvalid", "Invalid phone number"),
+      requiredMessage: t("users.validation.phoneNumberRequired", "Phone number is required"),
+      lengthMessage: t("users.validation.phoneNumberLength", "Phone number must be exactly 8 digits"),
+      invalidMessage: t("users.validation.phoneNumberInvalid", "Invalid phone number"),
     }),
     password: yup
       .string()
       .nullable()
       .notRequired()
-      .test("len", t("pages.users.validation.passwordTooShort", "Password is too short (min 6 characters)"), (val) => {
+      .test("len", t("users.validation.passwordTooShort", "Password is too short (min 6 characters)"), (val) => {
         if (!val) return true;
         return val.length >= 6;
       }),
@@ -137,14 +137,14 @@ export const useValidShema = () => {
   });
 
   const addTranslator = yup.object({
-    fullName: stringRequiredValidSchema(t("pages.employee.validation.fullNameRequired")),
+    fullName: stringRequiredValidSchema(t("employee.validation.fullNameRequired")),
   });
 
   const addOutbound = yup.object({
-    request_date: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
-    operator_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    application_date: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
     client_name: yup.string().required(t("validation.required") || "Hökman girizilmeli"),
-    prepared_by: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    prepared_opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
     net_fare: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
     price: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
   });

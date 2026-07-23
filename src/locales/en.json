@@ -138,8 +138,11 @@
       "title": "Employees",
       "subtitle": "Manage employee records and assignments.",
       "add": "Add Employee",
+      "edit": "Edit Employee",
+      "deleteConfirm": "Are you sure you want to delete this employee? This action cannot be undone.",
       "addSuccess": "Employee added successfully!",
       "addError": "An error occurred while saving the employee.",
+      "editSuccess": "Employee updated successfully!",
       "validation": {
         "fullNameRequired": "Full name is required",
         "phoneNumberRequired": "Phone number is required",

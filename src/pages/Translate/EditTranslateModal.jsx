@@ -34,7 +34,7 @@ import { addTranslatorApi } from "../../api/queries/post";
 import { updateTranslatorApi, updateTranslationApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
 
-const EditTranslateModal = ({ table, row, queryParams }) => {
+const EditTranslateModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addTranslation } = useValidShema();
   const queryClient = useQueryClient();
@@ -110,7 +110,9 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
     apiFn: updateTranslationApi,
     key: "translations",
     idKey: "guid",
+    invalidateQueries: ["translations"],
     onSuccessUpdate: () => {
+      queryClient.invalidateQueries({ queryKey: ["translations"] });
       table.setEditingRow(null);
     },
   });
@@ -205,8 +207,8 @@ const EditTranslateModal = ({ table, row, queryParams }) => {
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
           ? selectedLang(emp.office.shortName) ||
-          selectedLang(emp.office.fullName) ||
-          ""
+            selectedLang(emp.office.fullName) ||
+            ""
           : "";
         const label = officeShort
           ? `${emp.fullName} (${officeShort})`

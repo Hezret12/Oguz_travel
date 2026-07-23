@@ -9,6 +9,7 @@ import referralLetterFiltersReducer from './slices/filters/referralLetterFilterS
 import visaFiltersReducer from './slices/filters/visaFilterSlice';
 import translateFiltersReducer from './slices/filters/translateFilterSlice';
 import outboundFiltersReducer from './slices/filters/outboundFilterSlice';
+import visaIntakeFiltersReducer from './slices/filters/visaIntakeFilterSlice';
 
 const store = configureStore({
   reducer: {
@@ -23,6 +24,7 @@ const store = configureStore({
     visaFilters:    visaFiltersReducer,
     translateFilters: translateFiltersReducer,
     outboundFilters: outboundFiltersReducer,
+    visaIntakeFilters: visaIntakeFiltersReducer,
     // paymentFilters: paymentFiltersReducer,
   },
   middleware: (getDefaultMiddleware) =>

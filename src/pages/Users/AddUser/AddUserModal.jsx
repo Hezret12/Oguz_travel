@@ -93,7 +93,7 @@ const AddUserModal = ({ table }) => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={t("pages.users.addTitle") ?? "Add User"}
+          title={t("users.addTitle") ?? "Add User"}
         />
 
         <CustomForm handleSubmit={handleSubmit(onSubmit)}>
@@ -104,8 +104,8 @@ const AddUserModal = ({ table }) => {
               variant="fullWidth"
               sx={tabStyles}
             >
-              <Tab label={t("pages.users.tabs.information")} />
-              <Tab label={t("pages.users.tabs.access")} />
+              <Tab label={t("users.tabs.information")} />
+              <Tab label={t("users.tabs.access")} />
             </Tabs>
 
             <Box sx={scrollAreaStyles}>

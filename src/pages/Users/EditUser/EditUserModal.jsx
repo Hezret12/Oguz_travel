@@ -103,7 +103,7 @@ const EditUserModal = ({ table, row }) => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={t("pages.users.editTitle")}
+          title={t("users.editTitle")}
         />
 
         <CustomForm handleSubmit={handleSubmit(onSubmit)}>
@@ -114,8 +114,8 @@ const EditUserModal = ({ table, row }) => {
               variant="fullWidth"
               sx={tabStyles}
             >
-              <Tab label={t("pages.users.tabs.information")} />
-              <Tab label={t("pages.users.tabs.access")} />
+              <Tab label={t("users.tabs.information")} />
+              <Tab label={t("users.tabs.access")} />
             </Tabs>
 
             <Box sx={scrollAreaStyles}>

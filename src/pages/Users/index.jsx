@@ -117,8 +117,8 @@ const Users = () => {
               }}
             >
               {isActive
-                ? (t("pages.users.statusActiveLabel") ?? "Active")
-                : (t("pages.users.statusInactiveLabel") ?? "Inactive")}
+                ? (t("users.statusActiveLabel") ?? "Active")
+                : (t("users.statusInactiveLabel") ?? "Inactive")}
             </Box>
           );
         },
@@ -130,7 +130,7 @@ const Users = () => {
         size: 150,
         Cell: ({ cell }) => (
           <Box sx={{ fontWeight: 500 }}>
-            {cell.getValue()} {t("pages.users.permissionsCount") ?? "Selected"}
+            {cell.getValue()} {t("users.permissionsCount") ?? "Selected"}
           </Box>
         ),
       },
@@ -197,14 +197,24 @@ const Users = () => {
     },
 
     renderTopToolbarCustomActions: () => (
-      <GlobalSearchInput
-        value={searchQuery}
-        onChange={setSearch}
-        placeholder={t("search")}
-        disabled={isLoading}
-        onRefetch={refetch}
-        isFetching={isFetching}
-      />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search")}
+          disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
+        />
+      </Box>
     ),
     renderBottomToolbar: ({ table }) => {
       const { pageIndex } = table.getState().pagination;
@@ -248,9 +258,9 @@ const Users = () => {
   return (
     <>
       <PageHeader
-        title={t("pages.users.title")}
-        pageTitle={`${t("pages.users.title")} | Oguz Travel`}
-        addButtonText={t("pages.users.add")}
+        title={t("users.title")}
+        pageTitle={`${t("users.title")} | Oguz Travel`}
+        addButtonText={t("users.add")}
         onAddClick={() => table.setCreatingRow(true)}
       />
 
@@ -260,7 +270,7 @@ const Users = () => {
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
-        description={t("pages.users.deleteConfirm")}
+        description={t("users.deleteConfirm")}
       />
 
       <MaterialReactTable table={table} />

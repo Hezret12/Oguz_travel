@@ -11,6 +11,7 @@ import ContactEmergencyIcon from "@mui/icons-material/ContactEmergency";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import TranslateIcon from "@mui/icons-material/Translate";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
+import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 
 export const useSidebarItems = () => {
@@ -85,6 +86,11 @@ export const useSidebarItems = () => {
             text: t("sidebar.visa.package"),
             path: "/visa/package",
             icon: createElement(NoteAddIcon),
+          },
+          {
+            text: t("sidebar.visaIntake") || "Kabul ediji",
+            path: "/visa/intake",
+            icon: createElement(AssignmentRoundedIcon),
           },
         ],
       },

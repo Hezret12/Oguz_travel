@@ -59,7 +59,7 @@ export const CAR_TYPE_OPTIONS = [
 
 // Payment status options
 export const PAYMENT_OPTIONS = [
-  { value: true, label: "Tölendi" },
-  { value: false, label: "Kredit" },
+  { value: "true", label: "Tölendi" },
+  { value: "false", label: "Kredit" },
 ];
 

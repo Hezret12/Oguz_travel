@@ -17,11 +17,11 @@ import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
 import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
-import { updateAirwayApi } from "../../../../api/queries/patch";
-import { SOURCE_OPTIONS } from "../../constants";
-import AirwayFields from "../fields/AirwayFields";
+import { updatePackageApi } from "../../../../api/queries/patch";
+import { PARTNER_OPTIONS } from "../../constants";
+import PackageFields from "./PackageFields";
 
-const EditAirwayModal = ({ table, row }) => {
+const EditPackageModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
 
@@ -64,21 +64,17 @@ const EditAirwayModal = ({ table, row }) => {
       net_fare: item.net_fare || item.cost || 0,
       price: item.price || 0,
       currency: item.currency || "USD",
-      source: item.source || SOURCE_OPTIONS[0].value,
-      ticketNumber: item.ticketNumber || "",
-      ticketType: item.ticketType || "",
+      source: item.source || PARTNER_OPTIONS[0].value,
       destinationCountry: item.destinationCountry || "",
-      route: item.route || "",
-      quantity: item.quantity || 1,
       note: item.note || "",
     },
   });
 
   const currency = useWatch({ control, name: "currency" }) || "USD";
 
-  const { mutate: updateAirway } = useUpdate({
-    apiFn: updateAirwayApi,
-    key: ["outbound", "airway"],
+  const { mutate: updatePackage } = useUpdate({
+    apiFn: updatePackageApi,
+    key: ["outbound", "package"],
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);
@@ -94,11 +90,10 @@ const EditAirwayModal = ({ table, row }) => {
       net_fare: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
-      quantity: data.quantity ? Number(data.quantity) : undefined,
     };
     delete payload.cost;
     delete payload.profit;
-    updateAirway(payload);
+    updatePackage(payload);
   };
 
   const employeeOptions = useMemo(
@@ -158,10 +153,10 @@ const EditAirwayModal = ({ table, row }) => {
             />
           </Grid>
           <Grid size={4}>
-            <CustomSelect name="source" control={control} label={t("outbound.source") || "Ulgam"} options={SOURCE_OPTIONS} required />
+            <CustomSelect name="source" control={control} label={t("outbound.partner") || "Hyzmatdaş"} options={PARTNER_OPTIONS} required />
           </Grid>
 
-          <AirwayFields control={control} />
+          <PackageFields control={control} />
 
           <Grid size={6}>
             <CurrencyAmount
@@ -186,4 +181,4 @@ const EditAirwayModal = ({ table, row }) => {
   );
 };
 
-export default EditAirwayModal;
+export default EditPackageModal;

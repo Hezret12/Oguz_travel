@@ -17,11 +17,11 @@ import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
-import { addAirwayApi } from "../../../../api/queries/post";
+import { addRailwayApi } from "../../../../api/queries/post";
 import { SOURCE_OPTIONS } from "../../constants";
-import AirwayFields from "../fields/AirwayFields";
+import RailwayFields from "./RailwayFields";
 
-const AddAirwayModal = ({ open = true, onClose, table }) => {
+const AddRailwayModal = ({ open = true, onClose, table }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
 
@@ -60,6 +60,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
       ticketType: "",
       destinationCountry: "",
       route: "",
+      trainType: "",
       quantity: 1,
       note: "",
     },
@@ -68,9 +69,9 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
   const [selectedClientObj, setSelectedClientObj] = useState(null);
   const currency = useWatch({ control, name: "currency" }) || "USD";
 
-  const { mutate: createAirway } = useCreate({
-    apiFn: addAirwayApi,
-    key: ["outbound", "airway"],
+  const { mutate: createRailway } = useCreate({
+    apiFn: addRailwayApi,
+    key: ["outbound", "railway"],
     onSuccess: () => {
       handleClose();
     },
@@ -88,7 +89,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
       quantity: data.quantity ? Number(data.quantity) : undefined,
     };
     delete payload.profit;
-    createAirway(payload);
+    createRailway(payload);
   };
 
   const employeeOptions = useMemo(
@@ -138,7 +139,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
             <CustomSelect name="source" control={control} label={t("outbound.source") || "Ulgam"} options={SOURCE_OPTIONS} required />
           </Grid>
 
-          <AirwayFields control={control} />
+          <RailwayFields control={control} />
 
           <Grid size={4}>
             <CurrencyAmount
@@ -163,4 +164,4 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
   );
 };
 
-export default AddAirwayModal;
+export default AddRailwayModal;

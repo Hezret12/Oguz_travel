@@ -328,9 +328,9 @@ const Employee = () => {
   return (
     <>
       <PageHeader
-        title={t("pages.employee.title")}
-        pageTitle={`${t("pages.employee.title")} | Oguz Travel`}
-        addButtonText={t("pages.employee.add")}
+        title={t("employee.title")}
+        pageTitle={`${t("employee.title")} | Oguz Travel`}
+        addButtonText={t("employee.add")}
         onAddClick={() => table.setCreatingRow(true)}
         filterButtonText={t("filter")}
         onFilterClick={openDrawer}
@@ -359,7 +359,7 @@ const Employee = () => {
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
-        description={t('deleteConfirm.employee')}
+        description={t("employee.deleteConfirm") || t("deleteConfirm.employee")}
       />
 
       <MaterialReactTable table={table} />

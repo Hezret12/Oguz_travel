@@ -54,7 +54,7 @@ const UserInformationTab = ({
         name="employee_guid"
         control={control}
         label={t("columns.employee")}
-        placeholder={t("pages.users.selectEmployee")}
+        placeholder={t("users.selectEmployee")}
         options={employeeOptions}
         required={!isExternalUser}
         disabled={isEdit || isExternalUser}
@@ -64,7 +64,7 @@ const UserInformationTab = ({
         name="phone_number"
         control={control}
         label={t("columns.phoneNumber")}
-        placeholder={t("pages.users.phoneNumberPlaceholder")}
+        placeholder={t("users.phoneNumberPlaceholder")}
         required
         disabled={!isExternalUser}
       />
@@ -76,7 +76,7 @@ const UserInformationTab = ({
         label={t("columns.password")}
         placeholder={
           isEdit
-            ? (t("pages.users.passwordEditPlaceholder") ??
+            ? (t("users.passwordEditPlaceholder") ??
               "Leave blank to keep current")
             : "******"
         }
@@ -93,13 +93,13 @@ const UserInformationTab = ({
         <CustomCheckbox
           name="isActive"
           control={control}
-          label={t("pages.users.statusActive")}
+          label={t("users.statusActive")}
         />
 
         <CustomCheckbox
           name="isExternalUser"
           control={control}
-          label={t("pages.users.isExternalUser")}
+          label={t("users.isExternalUser")}
         />
       </Box>
     </Box>

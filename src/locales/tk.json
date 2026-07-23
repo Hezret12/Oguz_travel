@@ -158,18 +158,21 @@
   },
   "employee": {
     "title": "Işgärler",
-    "subtitle": "Işgärleň hasabatlaryny we belliklerini dolandyryň.",
+    "subtitle": "Işgärleriň maglumatlaryny we wezipelerini dolandyryň.",
     "add": "Işgär goşmak",
-    "addSuccess": "Isgar ustunlikli gosuldy!",
-    "addError": "Isgari yazdyrmakda yalnyslyk yuze cykdy.",
+    "edit": "Işgär üýtgetmek",
+    "deleteConfirm": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz.",
+    "addSuccess": "Işgär üstünlikli goşuldy!",
+    "addError": "Işgär ýazdyrmakda ýalňyşlyk ýüze çykdy.",
+    "editSuccess": "Işgär üstünlikli üýtgedildi!",
     "validation": {
       "fullNameRequired": "Doly ady zerurdyr",
       "phoneNumberRequired": "Telefon belgisi zerurdyr",
       "phoneNumberLength": "Telefon belgisi takyk 8 sandan ybarat bolmaly",
-      "phoneNumberInvalid": "Nadogry telefon belgisi",
-      "gmailRequired": "El. pocta zerurdyr",
-      "gmailInvalid": "Nadogry el. pocta adresi",
-      "departmentRequired": "Bolum zerurdyr",
+      "phoneNumberInvalid": "Nädogry telefon belgisi",
+      "gmailRequired": "El. poçta zerurdyr",
+      "gmailInvalid": "Nädogry el. poçta adresi",
+      "departmentRequired": "Bölüm zerurdyr",
       "positionRequired": "Wezipe zerurdyr",
       "officeRequired": "Ofis zerurdyr"
     }
@@ -224,6 +227,15 @@
     "tabs": {
       "information": "Maglumat",
       "access": "Giriş"
+    },
+    "validation": {
+      "employeeRequired": "Işgär saýlanmalydyr",
+      "phoneNumberRequired": "Telefon belgisi zerurdyr",
+      "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",
+      "phoneNumberInvalid": "Nädogry telefon belgisi (61/62/63/64/65/71/12 bilen başlamaly we 8 sany bolmaly)",
+      "passwordRequired": "Parol zerurdyr",
+      "passwordTooShort": "Parol gaty gysga (iň az 6 simwol)",
+      "permissionsRequired": "Aşamynda bir hukuk saýlanmalydyr"
     }
   },
   "header": {
@@ -370,5 +382,42 @@
     "transferType": "Transfer görnüşi",
     "carType": "Maşyn görnüşi",
     "note": "Bellik"
+  },
+  "visaIntake": {
+    "title": "Kabul ediji bölümi",
+    "addApplication": "Arza goşmak",
+    "editApplication": "Arzany üýtgetmek",
+    "deleteConfirm": "Siz hakykatdan hem bu arzany pozmak isleýärsiňizmi?",
+    "selectCountry": "Ýurt saýlaň",
+    "fields": {
+      "applicationDate": "Arza senesi",
+      "office": "Ofis",
+      "operator": "Operator",
+      "clientFullName": "Müşderiniň F.I.A.",
+      "birthDate": "Doglan senesi",
+      "passportNumber": "Pasport №",
+      "visaCategory": "Wiza kategoriýasy",
+      "visaKind": "Wiza görnüşi",
+      "multiplicity": "Kratnost (Gaýtalanmaklygy)",
+      "visaDurationDays": "Wiza möhleti (gün)",
+      "formFilledDate": "Anketa doldurylan senesi",
+      "formFilledBy": "Anketa dolduran",
+      "docsSubmittedDate": "Resminama tabşyrylan senesi",
+      "docsSubmittedBy": "Resminama tabşyran",
+      "telexDate": "Teleks senesi",
+      "telexNumber": "Teleks belgisi",
+      "barcode": "Barkod",
+      "visaIssuedDate": "Wiza çykan senesi",
+      "visaReceivedBy": "Wizany alan",
+      "expectedDate": "Garaşylýan sene",
+      "bookingDatetime": "Bron senesi we wagty",
+      "travelDate": "Syýahat senesi",
+      "partner": "Hyzmatdaş",
+      "notes": "Bellikler",
+      "visaQueueInfo": "Wiza we nobat maglumaty",
+      "isProcessed": "Işlenen ýagdaýy",
+      "schengenCountry": "Şengen ýurdy",
+      "queueDate": "Nobat senesi"
+    }
   }
 }

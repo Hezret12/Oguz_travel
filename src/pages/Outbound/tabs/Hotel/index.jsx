@@ -12,10 +12,24 @@ import { getAllHotelsApi } from "../../../../api/queries/getters";
 import { deleteHotelApi } from "../../../../api/queries/delete";
 import StatusChip from "../../../../components/StatusChip";
 import { PAYMENT_STATUS_CONFIG } from "../../../../functions/statusChipConfigs";
-import AddHotelModal from "../../dialogs/Hotel/AddHotelModal";
-import EditHotelModal from "../../dialogs/Hotel/EditHotelModal";
+import { Box, Chip } from "@mui/material";
+import GlobalSearchInput from "../../../../components/GlobalSearchInput";
+import AddHotelModal from "./AddHotelModal";
+import EditHotelModal from "./EditHotelModal";
 
-const HotelTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen, onCloseAdd }) => {
+const HotelTab = ({
+  queryParams,
+  searchQuery,
+  setSearch,
+  setFilter,
+  activeFilters,
+  page,
+  limit,
+  setPage,
+  setPageSize,
+  isAddOpen,
+  onCloseAdd,
+}) => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
 
@@ -25,6 +39,7 @@ const HotelTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen, o
     data: hotelData = [],
     isLoading,
     isFetching,
+    refetch,
     totalItems,
   } = usePagginationGet({
     apiFn: getAllHotelsApi,
@@ -191,9 +206,6 @@ const HotelTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen, o
     ...defaultMrtOptions,
     columns,
     data: listData,
-    enableRowActions: false,
-    enableEditing: true,
-    enableCreatingRow: true,
     state: { isLoading, showSkeletons: isLoading && isFetching },
     rowCount: totalItems,
     manualPagination: true,
@@ -202,6 +214,42 @@ const HotelTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen, o
       setPage(nextPagination.pageIndex + 1);
       setPageSize(nextPagination.pageSize);
     },
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search")}
+          disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
+        />
+
+        {(activeFilters || []).map(([key, value]) => (
+          <Chip
+            key={key}
+            label={`${t(`outbound.${key}`, key)}: ${value}`}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderRadius: "8px",
+              height: "32px",
+              fontWeight: 500,
+            }}
+          />
+        ))}
+      </Box>
+    ),
     renderCreateRowDialogContent: ({ table }) => <AddHotelModal open={true} onClose={onCloseAdd} table={table} />,
     renderEditRowDialogContent: ({ table, row }) => <EditHotelModal table={table} row={row} />,
   });

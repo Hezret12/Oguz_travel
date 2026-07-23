@@ -15,20 +15,15 @@ import CustomDatePicker from "../../../../components/CustomDatePicker";
 import GlobalClientAutocomplete from "../../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useGet } from "../../../../hooks/CRUD/useGet";
-import { useCreate } from "../../../../hooks/CRUD/useCreate";
+import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
 import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
-import { addPackageApi } from "../../../../api/queries/post";
-import { PARTNER_OPTIONS } from "../../constants";
-import PackageFields from "../fields/PackageFields";
+import { updateRailwayApi } from "../../../../api/queries/patch";
+import { SOURCE_OPTIONS } from "../../constants";
+import RailwayFields from "./RailwayFields";
 
-const AddPackageModal = ({ open = true, onClose, table }) => {
+const EditRailwayModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
-
-  const handleClose = () => {
-    if (onClose) onClose();
-    if (table) table.setCreatingRow(null);
-  };
 
   const { data: employees = [] } = useGet({
     apiFn: getAllEmployeeApi,
@@ -40,6 +35,18 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
     key: "offices",
   });
 
+  const item = row?.original || {};
+
+  const initialClient = useMemo(() => {
+    if (item.client) return item.client;
+    if (item.client_guid || item.client_name) {
+      return { guid: item.client_guid || "", fullName: item.client_name || "" };
+    }
+    return null;
+  }, [item]);
+
+  const [selectedClientObj, setSelectedClientObj] = useState(initialClient);
+
   const {
     control,
     handleSubmit,
@@ -48,27 +55,34 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
   } = useForm({
     resolver: yupResolver(addOutbound),
     defaultValues: {
-      request_date: dayjs().format("YYYY-MM-DD"),
-      operator_guid: "",
-      client_name: "",
-      prepared_by: "",
-      net_fare: 0,
-      price: 0,
-      currency: "USD",
-      source: PARTNER_OPTIONS[0].value,
-      destinationCountry: "",
-      note: "",
+      guid: item.guid || "",
+      request_date: item.request_date ? dayjs(item.request_date).format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
+      office_guid: item.office_guid || item.office?.guid || "",
+      operator_guid: item.operator_guid || item.operator?.guid || "",
+      client_name: item.client_guid || item.client?.guid || item.client_name || "",
+      prepared_by: item.prepared_by || item.prepared_by_employee?.guid || "",
+      net_fare: item.net_fare || item.cost || 0,
+      price: item.price || 0,
+      currency: item.currency || "USD",
+      source: item.source || SOURCE_OPTIONS[0].value,
+      ticketNumber: item.ticketNumber || "",
+      ticketType: item.ticketType || "",
+      destinationCountry: item.destinationCountry || "",
+      route: item.route || "",
+      trainType: item.trainType || "",
+      quantity: item.quantity || 1,
+      note: item.note || "",
     },
   });
 
-  const [selectedClientObj, setSelectedClientObj] = useState(null);
   const currency = useWatch({ control, name: "currency" }) || "USD";
 
-  const { mutate: createPackage } = useCreate({
-    apiFn: addPackageApi,
-    key: ["outbound", "package"],
-    onSuccess: () => {
-      handleClose();
+  const { mutate: updateRailway } = useUpdate({
+    apiFn: updateRailwayApi,
+    key: ["outbound", "railway"],
+    idKey: "guid",
+    onSuccessUpdate: () => {
+      table.setEditingRow(null);
     },
   });
 
@@ -81,9 +95,11 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
       net_fare: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
+      quantity: data.quantity ? Number(data.quantity) : undefined,
     };
+    delete payload.cost;
     delete payload.profit;
-    createPackage(payload);
+    updateRailway(payload);
   };
 
   const employeeOptions = useMemo(
@@ -98,6 +114,15 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
     [employees, selectedLang]
   );
 
+  const officeOptions = useMemo(
+    () =>
+      (offices || []).map((off) => ({
+        value: off.guid,
+        label: selectedLang(off.shortName) || selectedLang(off.fullName) || "",
+      })),
+    [offices, selectedLang]
+  );
+
   const currencySymbol = {
     USD: "$",
     EUR: "€",
@@ -106,12 +131,21 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
   }[currency] || currency;
 
   return (
-    <CustomDialog open={open} close={handleClose} widthX={750}>
-      <CustomDialogHeader variant="h5" title={t("outbound.addSale") || "Satyş goşmak"} />
+    <CustomDialog open={true} close={() => table.setEditingRow(null)} widthX={750}>
+      <CustomDialogHeader variant="h5" title={t("outbound.editSale") || "Satyşy üýtgetmek"} />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
-          <Grid size={4}>
+          <Grid size={3}>
             <CustomDatePicker name="request_date" control={control} label={t("outbound.requestDate") || "Arza senesi"} required />
+          </Grid>
+          <Grid size={3}>
+            <CustomSelect name="office_guid" control={control} label={t("outbound.office") || "Ofis"} options={officeOptions} required />
+          </Grid>
+          <Grid size={3}>
+            <CustomSelect name="operator_guid" control={control} label={t("outbound.operator") || "Operator"} options={employeeOptions} required />
+          </Grid>
+          <Grid size={3}>
+            <CustomSelect name="prepared_by" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} options={employeeOptions} required />
           </Grid>
           <Grid size={8}>
             <GlobalClientAutocomplete
@@ -120,42 +154,37 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
               label={t("outbound.clientName") || "Müşderiniň ady"}
               columns={["fullName"]}
               required
+              initialClient={initialClient}
               onClientChange={(client) => setSelectedClientObj(client)}
             />
           </Grid>
-          <Grid size={6}>
-            <CustomSelect name="operator_guid" control={control} label={t("outbound.operator") || "Operator"} options={employeeOptions} required />
-          </Grid>
-          <Grid size={6}>
-            <CustomSelect name="prepared_by" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} options={employeeOptions} required />
-          </Grid>
           <Grid size={4}>
-            <CustomSelect name="source" control={control} label={t("outbound.partner") || "Hyzmatdaş"} options={PARTNER_OPTIONS} required />
+            <CustomSelect name="source" control={control} label={t("outbound.source") || "Ulgam"} options={SOURCE_OPTIONS} required />
           </Grid>
 
-          <PackageFields control={control} />
+          <RailwayFields control={control} />
 
-          <Grid size={4}>
+          <Grid size={6}>
             <CurrencyAmount
               name="net_fare"
               control={control}
-              label={t("outbound.cost") || "Bahasy (alnan)"}
+              label={t("outbound.net_fare") || "Bahasy (alnan)"}
               currency={currency}
               onCurrencyChange={(curr) => setValue("currency", curr)}
               required
             />
           </Grid>
-          <Grid size={4}>
+          <Grid size={6}>
             <CustomTextField name="price" control={control} type="number" label={t("outbound.price") || "Satuw bahasy"} startIcon={currencySymbol} required />
           </Grid>
           <Grid size={12}>
             <CustomTextField name="note" control={control} label={t("outbound.note") || "Bellik"} multiline rows={2} />
           </Grid>
         </Grid>
-        <FooterButton loading={isSubmitting} onCancel={handleClose} type="submit" sx={{ mt: 3 }} />
+        <FooterButton loading={isSubmitting} onCancel={() => table.setEditingRow(null)} type="submit" sx={{ mt: 3 }} />
       </CustomForm>
     </CustomDialog>
   );
 };
 
-export default AddPackageModal;
+export default EditRailwayModal;

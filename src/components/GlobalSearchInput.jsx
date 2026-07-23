@@ -1,4 +1,4 @@
-import { InputAdornment, TextField, Tooltip, CircularProgress } from '@mui/material';
+import { Box, InputAdornment, TextField, Tooltip, CircularProgress } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
@@ -13,7 +13,7 @@ const GlobalSearchInput = ({
   isFetching = false,
 }) => {
   return (
-    <>
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
       <TextField
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -93,7 +93,7 @@ const GlobalSearchInput = ({
           </span>
         </Tooltip>
       )}
-    </>
+    </Box>
   );
 };
 

@@ -132,24 +132,32 @@
       "phoneNumberInvalid": "�������� ����� ��������",
       "passwordRequired": "������ ����������",
       "passwordTooShort": "������ ������� ��������",
-      "passwordMaxLength": "������ ������� �������"
+      "phoneNumberRequired": "  ",
+      "phoneNumberLength": "    8 ",
+      "phoneNumberInvalid": "  ",
+      "passwordRequired": " ",
+      "passwordTooShort": "  ",
+      "passwordMaxLength": "  "
     },
     "employee": {
       "title": "Сотрудники",
       "subtitle": "Управление записями и назначениями сотрудников.",
       "add": "Добавить сотрудника",
-      "addSuccess": "��������� ������� ��������!",
-      "addError": "��������� ������ ��� ���������� ����������.",
+      "edit": "Редактировать сотрудника",
+      "deleteConfirm": "Вы действительно хотите удалить этого сотрудника? Это действие нельзя будет отменить.",
+      "addSuccess": "Сотрудник успешно добавлен!",
+      "addError": "Произошла ошибка при сохранении сотрудника.",
+      "editSuccess": "Сотрудник успешно обновлен!",
       "validation": {
-        "fullNameRequired": "������ ��� �����������",
-        "phoneNumberRequired": "����� �������� ����������",
-        "phoneNumberLength": "����� �������� ������ ��������� 8 ����",
-        "phoneNumberInvalid": "�������� ����� ��������",
-        "gmailRequired": "��. ����� �����������",
-        "gmailInvalid": "�������� ����� ��. �����",
-        "departmentRequired": "����� ����������",
-        "positionRequired": "��������� �����������",
-        "officeRequired": "���� ����������"
+        "fullNameRequired": "Полное имя обязательно",
+        "phoneNumberRequired": "Номер телефона обязателен",
+        "phoneNumberLength": "Номер телефона должен содержать 8 цифр",
+        "phoneNumberInvalid": "Некорректный номер телефона",
+        "gmailRequired": "Эл. почта обязательна",
+        "gmailInvalid": "Некорректный адрес эл. почты",
+        "departmentRequired": "Отдел обязателен",
+        "positionRequired": "Должность обязательна",
+        "officeRequired": "Офис обязателен"
       }
     },
     "deleteConfirm": {

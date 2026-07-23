@@ -19,7 +19,7 @@ import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
 import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
 import { updateHotelApi } from "../../../../api/queries/patch";
 import { SOURCE_OPTIONS, PAYMENT_OPTIONS } from "../../constants";
-import HotelFields from "../fields/HotelFields";
+import HotelFields from "./HotelFields";
 
 const EditHotelModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
@@ -56,7 +56,7 @@ const EditHotelModal = ({ table, row }) => {
     resolver: yupResolver(addOutbound),
     defaultValues: {
       guid: item.guid || "",
-      application_date: item.application_date || item.request_date ? dayjs(item.application_date || item.request_date).format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
+      request_date: item.application_date || item.request_date ? dayjs(item.application_date || item.request_date).format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
       office_guid: item.office_guid || item.office?.guid || "",
       opr_guid: item.opr_guid || item.operator_guid || item.operator?.guid || "",
       client_name: item.client_guid || item.client?.guid || item.client_name || "",
@@ -71,7 +71,7 @@ const EditHotelModal = ({ table, row }) => {
       meal_plan: item.meal_plan || item.mealPlan || "",
       guests_count: item.guests_count ?? item.guestCount ?? null,
       note: item.note || "",
-      is_paid: item.is_paid ?? null,
+      is_paid: item.is_paid != null ? String(item.is_paid) : null,
     },
   });
 
@@ -89,8 +89,8 @@ const EditHotelModal = ({ table, row }) => {
   const onSubmit = (data) => {
     const payload = {
       guid: item.guid,
-      application_date: data.application_date
-        ? new Date(data.application_date).toISOString()
+      application_date: data.request_date
+        ? new Date(data.request_date).toISOString()
         : new Date().toISOString(),
       opr_guid: data.opr_guid || null,
       client_guid:
@@ -109,7 +109,7 @@ const EditHotelModal = ({ table, row }) => {
       currency: data.currency || "USD",
       system: data.source || "",
       note: data.note || "",
-      is_paid: data.is_paid !== null ? Boolean(data.is_paid) : false,
+      is_paid: data.is_paid === "true",
     };
     updateHotel(payload);
   };
@@ -148,7 +148,7 @@ const EditHotelModal = ({ table, row }) => {
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
           <Grid size={3}>
-            <CustomDatePicker name="application_date" control={control} label={t("outbound.requestDate") || "Arza senesi"} required />
+            <CustomDatePicker name="request_date" control={control} label={t("outbound.requestDate") || "Arza senesi"} required />
           </Grid>
           <Grid size={3}>
             <CustomSelect name="office_guid" control={control} label={t("outbound.office") || "Ofis"} options={officeOptions} required />

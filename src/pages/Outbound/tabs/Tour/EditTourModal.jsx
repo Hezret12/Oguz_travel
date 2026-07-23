@@ -17,11 +17,11 @@ import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
 import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
-import { updateRailwayApi } from "../../../../api/queries/patch";
+import { updateTourApi } from "../../../../api/queries/patch";
 import { SOURCE_OPTIONS } from "../../constants";
-import RailwayFields from "../fields/RailwayFields";
+import TourFields from "./TourFields";
 
-const EditRailwayModal = ({ table, row }) => {
+const EditTourModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
 
@@ -65,21 +65,18 @@ const EditRailwayModal = ({ table, row }) => {
       price: item.price || 0,
       currency: item.currency || "USD",
       source: item.source || SOURCE_OPTIONS[0].value,
-      ticketNumber: item.ticketNumber || "",
-      ticketType: item.ticketType || "",
       destinationCountry: item.destinationCountry || "",
-      route: item.route || "",
-      trainType: item.trainType || "",
-      quantity: item.quantity || 1,
+      tourName: item.tourName || "",
+      guestCount: item.guestCount || 1,
       note: item.note || "",
     },
   });
 
   const currency = useWatch({ control, name: "currency" }) || "USD";
 
-  const { mutate: updateRailway } = useUpdate({
-    apiFn: updateRailwayApi,
-    key: ["outbound", "railway"],
+  const { mutate: updateTour } = useUpdate({
+    apiFn: updateTourApi,
+    key: ["outbound", "tour"],
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);
@@ -95,11 +92,11 @@ const EditRailwayModal = ({ table, row }) => {
       net_fare: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
-      quantity: data.quantity ? Number(data.quantity) : undefined,
+      guestCount: data.guestCount ? Number(data.guestCount) : undefined,
     };
     delete payload.cost;
     delete payload.profit;
-    updateRailway(payload);
+    updateTour(payload);
   };
 
   const employeeOptions = useMemo(
@@ -162,7 +159,7 @@ const EditRailwayModal = ({ table, row }) => {
             <CustomSelect name="source" control={control} label={t("outbound.source") || "Ulgam"} options={SOURCE_OPTIONS} required />
           </Grid>
 
-          <RailwayFields control={control} />
+          <TourFields control={control} />
 
           <Grid size={6}>
             <CurrencyAmount
@@ -187,4 +184,4 @@ const EditRailwayModal = ({ table, row }) => {
   );
 };
 
-export default EditRailwayModal;
+export default EditTourModal;

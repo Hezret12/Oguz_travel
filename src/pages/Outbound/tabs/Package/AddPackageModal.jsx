@@ -17,11 +17,11 @@ import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
-import { addRailwayApi } from "../../../../api/queries/post";
-import { SOURCE_OPTIONS } from "../../constants";
-import RailwayFields from "../fields/RailwayFields";
+import { addPackageApi } from "../../../../api/queries/post";
+import { PARTNER_OPTIONS } from "../../constants";
+import PackageFields from "./PackageFields";
 
-const AddRailwayModal = ({ open = true, onClose, table }) => {
+const AddPackageModal = ({ open = true, onClose, table }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
 
@@ -55,13 +55,8 @@ const AddRailwayModal = ({ open = true, onClose, table }) => {
       net_fare: 0,
       price: 0,
       currency: "USD",
-      source: SOURCE_OPTIONS[0].value,
-      ticketNumber: "",
-      ticketType: "",
+      source: PARTNER_OPTIONS[0].value,
       destinationCountry: "",
-      route: "",
-      trainType: "",
-      quantity: 1,
       note: "",
     },
   });
@@ -69,9 +64,9 @@ const AddRailwayModal = ({ open = true, onClose, table }) => {
   const [selectedClientObj, setSelectedClientObj] = useState(null);
   const currency = useWatch({ control, name: "currency" }) || "USD";
 
-  const { mutate: createRailway } = useCreate({
-    apiFn: addRailwayApi,
-    key: ["outbound", "railway"],
+  const { mutate: createPackage } = useCreate({
+    apiFn: addPackageApi,
+    key: ["outbound", "package"],
     onSuccess: () => {
       handleClose();
     },
@@ -86,10 +81,9 @@ const AddRailwayModal = ({ open = true, onClose, table }) => {
       net_fare: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
-      quantity: data.quantity ? Number(data.quantity) : undefined,
     };
     delete payload.profit;
-    createRailway(payload);
+    createPackage(payload);
   };
 
   const employeeOptions = useMemo(
@@ -136,10 +130,10 @@ const AddRailwayModal = ({ open = true, onClose, table }) => {
             <CustomSelect name="prepared_by" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} options={employeeOptions} required />
           </Grid>
           <Grid size={4}>
-            <CustomSelect name="source" control={control} label={t("outbound.source") || "Ulgam"} options={SOURCE_OPTIONS} required />
+            <CustomSelect name="source" control={control} label={t("outbound.partner") || "Hyzmatdaş"} options={PARTNER_OPTIONS} required />
           </Grid>
 
-          <RailwayFields control={control} />
+          <PackageFields control={control} />
 
           <Grid size={4}>
             <CurrencyAmount
@@ -164,4 +158,4 @@ const AddRailwayModal = ({ open = true, onClose, table }) => {
   );
 };
 
-export default AddRailwayModal;
+export default AddPackageModal;

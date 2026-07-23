@@ -10,10 +10,24 @@ import StackedCell from "../../../../components/inputs/StackCell";
 import ColumnActionButtons from "../../../../components/ColumnActionButtons";
 import { getAllRailwaysApi } from "../../../../api/queries/getters";
 import { deleteRailwayApi } from "../../../../api/queries/delete";
-import AddRailwayModal from "../../dialogs/Railway/AddRailwayModal";
-import EditRailwayModal from "../../dialogs/Railway/EditRailwayModal";
+import { Box, Chip } from "@mui/material";
+import GlobalSearchInput from "../../../../components/GlobalSearchInput";
+import AddRailwayModal from "./AddRailwayModal";
+import EditRailwayModal from "./EditRailwayModal";
 
-const RailwayTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen, onCloseAdd }) => {
+const RailwayTab = ({
+  queryParams,
+  searchQuery,
+  setSearch,
+  setFilter,
+  activeFilters,
+  page,
+  limit,
+  setPage,
+  setPageSize,
+  isAddOpen,
+  onCloseAdd,
+}) => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
 
@@ -23,6 +37,7 @@ const RailwayTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen,
     data: railwayData = [],
     isLoading,
     isFetching,
+    refetch,
     totalItems,
   } = usePagginationGet({
     apiFn: getAllRailwaysApi,
@@ -138,9 +153,6 @@ const RailwayTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen,
     ...defaultMrtOptions,
     columns,
     data: listData,
-    enableRowActions: false,
-    enableEditing: true,
-    enableCreatingRow: true,
     state: { isLoading, showSkeletons: isLoading && isFetching },
     rowCount: totalItems,
     manualPagination: true,
@@ -149,6 +161,42 @@ const RailwayTab = ({ queryParams, page, limit, setPage, setPageSize, isAddOpen,
       setPage(nextPagination.pageIndex + 1);
       setPageSize(nextPagination.pageSize);
     },
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search")}
+          disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
+        />
+
+        {(activeFilters || []).map(([key, value]) => (
+          <Chip
+            key={key}
+            label={`${t(`outbound.${key}`, key)}: ${value}`}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderRadius: "8px",
+              height: "32px",
+              fontWeight: 500,
+            }}
+          />
+        ))}
+      </Box>
+    ),
     renderCreateRowDialogContent: ({ table }) => <AddRailwayModal open={true} onClose={onCloseAdd} table={table} />,
     renderEditRowDialogContent: ({ table, row }) => <EditRailwayModal table={table} row={row} />,
   });

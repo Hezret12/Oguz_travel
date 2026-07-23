@@ -168,7 +168,7 @@ const UserAccessTab = ({ control }) => {
               }}
             >
               <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-                {t("pages.users.selected") ?? "Selected"}
+                {t("users.selected") ?? "Selected"}
               </Typography>
               <Typography sx={{ fontSize: 13, fontWeight: 700, color: selectedAccessIds.length ? "primary.main" : "text.disabled" }}>
                 {selectedAccessIds.length} / {allAccessIds.length}
