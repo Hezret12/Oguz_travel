@@ -1,5 +1,8 @@
 import { useMemo, useCallback } from "react";
-import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+} from "material-react-table";
 import { useLocale } from "../../../../hooks/useLocale";
 import { getDefaultMRTOptions } from "../../../../hooks/getDefaultMRTOptions";
 import { usePagginationGet } from "../../../../hooks/usePagginationGet";
@@ -10,8 +13,7 @@ import StackedCell from "../../../../components/inputs/StackCell";
 import ColumnActionButtons from "../../../../components/ColumnActionButtons";
 import { getAllHotelsApi } from "../../../../api/queries/getters";
 import { deleteHotelApi } from "../../../../api/queries/delete";
-import StatusChip from "../../../../components/StatusChip";
-import { PAYMENT_STATUS_CONFIG } from "../../../../functions/statusChipConfigs";
+import PaymentStatusCell from "../../../../components/PaymentStatusCell";
 import { Box, Chip } from "@mui/material";
 import GlobalSearchInput from "../../../../components/GlobalSearchInput";
 import AddHotelModal from "./AddHotelModal";
@@ -33,7 +35,10 @@ const HotelTab = ({
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
 
-  const mergedParams = useMemo(() => ({ ...queryParams, page, limit }), [queryParams, page, limit]);
+  const mergedParams = useMemo(
+    () => ({ ...queryParams, page, limit }),
+    [queryParams, page, limit],
+  );
 
   const {
     data: hotelData = [],
@@ -62,133 +67,143 @@ const HotelTab = ({
 
   const handleDeleteClick = useCallback(
     (item) => deleteDialog.open(item),
-    [deleteDialog]
+    [deleteDialog],
   );
 
   const columns = useMemo(
     () => [
-      { accessorKey: "index_number", id: "index_number", header: "#", size: 60 },
       {
-        id: "request_date",
-        header: t("outbound.requestDate") || "Arza senesi",
-        size: 110,
-        accessorFn: (row) => row.application_date || row.request_date || "",
+        accessorKey: "index_number",
+        id: "index_number",
+        header: "#",
+        size: 60,
       },
       {
-        id: "office",
-        header: t("outbound.office") || "Ofis",
-        size: 130,
-        accessorFn: (row) => row.office?.shortName ?? "",
-        Cell: ({ row }) => {
-          const off = row.original.office;
-          return off ? selectedLang(off.shortName) || selectedLang(off.fullName) || "" : "";
-        },
+        id: "application_date",
+        header: t("outbound.requestDate"),
+        size: 110,
+        accessorFn: (row) => row.application_date || "",
       },
       {
         id: "operator",
-        header: t("outbound.operator") || "Operator",
-        size: 180,
+        header: t("columns.operator"),
+        size: 200,
         accessorFn: (row) => row.operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
             primary={row.original.operator?.fullName}
-            secondary={
-              row.original.operator?.office
-                ? selectedLang(row.original.operator.office.shortName) || selectedLang(row.original.operator.office.fullName)
-                : ""
-            }
+            secondary={selectedLang(row.original.operator.office.fullName)}
           />
         ),
       },
       {
         id: "client_name",
-        header: t("outbound.clientName") || "Müşderiniň ady",
-        size: 160,
+        header: t("outbound.clientName"),
+        size: 210,
         accessorFn: (row) => row.client?.fullName || row.client_name || "",
       },
       {
         id: "prepared_by",
-        header: t("outbound.preparedBy") || "Taýýarlan",
-        size: 180,
-        accessorFn: (row) => row.prepared_by_employee?.fullName ?? "",
+        header: t("columns.operatorTwo"),
+        size: 200,
+        accessorFn: (row) => row.preparedOpr?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.prepared_by_employee?.fullName || row.original.prepared_by}
-            secondary={
-              row.original.prepared_by_employee?.office
-                ? selectedLang(row.original.prepared_by_employee.office.shortName) || selectedLang(row.original.prepared_by_employee.office.fullName)
-                : ""
-            }
+            primary={row.original.preparedOpr?.fullName}
+            secondary={selectedLang(
+              row?.original?.preparedOpr?.office?.fullName,
+            )}
           />
         ),
       },
       {
         id: "destinationCountry",
-        header: t("outbound.destinationCountry") || "Ugur ýurdy",
+        header: t("outbound.destinationCountry"),
         size: 130,
-        accessorFn: (row) => row.destination_country || row.destinationCountry || "",
+        accessorFn: (row) => row.destination_country || "",
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "hotelName",
-        header: t("outbound.hotelName") || "Otel ady",
-        size: 150,
-        accessorFn: (row) => row.hotel_name || row.hotelName || "",
+        header: t("outbound.hotelName"),
+        size: 160,
+        accessorFn: (row) => row.hotel_name || "",
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "roomType",
-        header: t("outbound.roomType") || "Otag görnüşi",
+        header: t("outbound.roomType"),
         size: 120,
-        accessorFn: (row) => row.room_type || row.roomType || "",
+        accessorFn: (row) => row.room_type || "",
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "mealPlan",
-        header: t("outbound.mealPlan") || "Iýmit",
-        size: 90,
-        accessorFn: (row) => row.meal_plan || row.mealPlan || "",
+        header: t("outbound.mealPlan"),
+        size: 100,
+        accessorFn: (row) => row.meal_plan || "",
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "guestCount",
-        header: t("outbound.guestCount") || "Myhman sany",
-        size: 100,
-        accessorFn: (row) => row.guests_count ?? row.guestCount ?? 1,
+        header: t("outbound.guestCount"),
+        size: 60,
+        accessorFn: (row) => row.guests_count,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "net_fare",
-        header: t("outbound.net_fare") || "Alnan baha",
-        size: 110,
-        accessorFn: (row) => row.cost ?? row.net_fare ?? 0,
-        Cell: ({ row, cell }) => `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        header: t("columns.netFare"),
+        size: 120,
+        accessorFn: (row) => row.net_fare ?? 0,
+        Cell: ({ row, cell }) =>
+          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         accessorKey: "price",
         id: "price",
         header: t("outbound.price") || "Satuw baha",
-        size: 110,
-        Cell: ({ row, cell }) => `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        size: 120,
+        Cell: ({ row, cell }) =>
+          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         accessorKey: "profit",
         id: "profit",
         header: t("outbound.profit") || "Peýda",
-        size: 110,
-        Cell: ({ row, cell }) => `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        size: 120,
+        Cell: ({ row, cell }) =>
+          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         id: "source",
-        header: t("outbound.source") || "Ulgam",
+        header: t("outbound.source"),
         size: 120,
-        accessorFn: (row) => row.system || row.source || "",
+        accessorFn: (row) => row.system,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
-        id: "is_paid",
-        header: t("outbound.paymentStatus") || "Töleg ýagdaýy",
+        accessorFn: (row) => {
+          const pct = row.paidPercentage;
+          return typeof pct === "string" ? parseFloat(pct) : pct;
+        },
+        id: "paidPercentage",
+        header: t("outbound.paymentStatus") || t("columns.paymentStatus"),
         size: 110,
-        accessorFn: (row) => (row.is_paid ? "TOLENDI" : "KREDIT"),
         Cell: ({ row }) => (
-          <StatusChip
-            status={row.original.is_paid ? "TOLENDI" : "KREDIT"}
-            config={PAYMENT_STATUS_CONFIG}
-          />
+          <PaymentStatusCell percent={row.original.paidPercentage} />
         ),
       },
       {
@@ -196,10 +211,17 @@ const HotelTab = ({
         header: t("columns.actions") ?? "Amallar",
         size: 120,
         enableSorting: false,
-        Cell: ({ row, table }) => <ColumnActionButtons row={row} table={table} onDelete={handleDeleteClick} showPayment={true} />,
+        Cell: ({ row, table }) => (
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={handleDeleteClick}
+            showPayment={true}
+          />
+        ),
       },
     ],
-    [t, selectedLang, handleDeleteClick]
+    [t, selectedLang, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({
@@ -210,7 +232,10 @@ const HotelTab = ({
     rowCount: totalItems,
     manualPagination: true,
     onPaginationChange: (updater) => {
-      const nextPagination = typeof updater === "function" ? updater({ pageIndex: page - 1, pageSize: limit }) : updater;
+      const nextPagination =
+        typeof updater === "function"
+          ? updater({ pageIndex: page - 1, pageSize: limit })
+          : updater;
       setPage(nextPagination.pageIndex + 1);
       setPageSize(nextPagination.pageSize);
     },
@@ -250,8 +275,12 @@ const HotelTab = ({
         ))}
       </Box>
     ),
-    renderCreateRowDialogContent: ({ table }) => <AddHotelModal open={true} onClose={onCloseAdd} table={table} />,
-    renderEditRowDialogContent: ({ table, row }) => <EditHotelModal table={table} row={row} />,
+    renderCreateRowDialogContent: ({ table }) => (
+      <AddHotelModal open={true} onClose={onCloseAdd} table={table} />
+    ),
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditHotelModal table={table} row={row} />
+    ),
   });
 
   return (
@@ -263,7 +292,9 @@ const HotelTab = ({
         isLoading={isDeleting}
         description={t("deleteConfirm")}
       />
-      {isAddOpen && <AddHotelModal open={isAddOpen} onClose={onCloseAdd} table={table} />}
+      {isAddOpen && (
+        <AddHotelModal open={isAddOpen} onClose={onCloseAdd} table={table} />
+      )}
       <MaterialReactTable table={table} />
     </>
   );

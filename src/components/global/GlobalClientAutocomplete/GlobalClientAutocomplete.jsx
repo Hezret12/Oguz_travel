@@ -98,12 +98,12 @@ const ClientOption = ({ client, columns, query, selected, t }) => (
         "background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease",
     })}
   >
-    {columns.map((column) => {
+    {columns.map((column, colIdx) => {
       const { key, label } = resolveColumn(column, t);
       const value = getColumnValue(client, column, t);
 
       return (
-        <Box key={key} sx={{ minWidth: 0 }}>
+        <Box key={key ? `${key}-${colIdx}` : colIdx} sx={{ minWidth: 0 }}>
           <Typography
             component="span"
             variant="caption"
@@ -214,7 +214,8 @@ const GlobalClientAutocompleteField = ({
         clearOnBlur={false}
         autoHighlight
         popupIcon={<KeyboardArrowDownIcon />}
-        isOptionEqualToValue={(option, value) => option.guid === value.guid}
+        getOptionKey={(option) => option?.guid || option?.id || getClientSummary(option, columns, t)}
+        isOptionEqualToValue={(option, value) => (option?.guid || option?.id) === (value?.guid || value?.id)}
         getOptionLabel={(option) => getClientSummary(option, columns, t)}
         filterOptions={(options) => options}
         noOptionsText={
@@ -277,8 +278,9 @@ const GlobalClientAutocompleteField = ({
         renderOption={(props, option) => {
           const { key, ...optionProps } = props;
           const selected = optionProps["aria-selected"] === "true";
+          const optionKey = option?.guid || option?.id || key;
           return (
-            <li key={key} {...optionProps} style={{ padding: "4px 8px" }}>
+            <li key={optionKey} {...optionProps} style={{ padding: "4px 8px" }}>
               <ClientOption
                 client={option}
                 columns={columns}
@@ -437,7 +439,15 @@ const GlobalAutoCompleteClient = ({
   });
   const clients = useMemo(() => {
     const items = getResponseClients(response);
-    return Array.isArray(items) ? items.map(normalizeClient) : [];
+    if (!Array.isArray(items)) return [];
+    const normalized = items.map(normalizeClient);
+    const seen = new Set();
+    return normalized.filter((client, idx) => {
+      const key = client?.guid || client?.id || `${client?.fullName}-${client?.phone_number}-${idx}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }, [response]);
 
   return (

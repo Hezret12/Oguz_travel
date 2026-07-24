@@ -89,7 +89,7 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
       room_type: data.room_type || "",
       meal_plan: data.meal_plan || "",
       guests_count: data.guests_count !== null && data.guests_count !== "" ? Number(data.guests_count) : null,
-      cost: Number(data.net_fare || 0),
+      net_fare: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
       system: data.source || "",
@@ -137,7 +137,7 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
             />
           </Grid>
           <Grid size={6}>
-            <CustomSelect name="opr_guid" control={control} label={t("outbound.operator") || "Operator"} options={employeeOptions} required />
+            <CustomSelect name="opr_guid" control={control} label={t("columns.operator")} options={employeeOptions} required />
           </Grid>
           <Grid size={6}>
             <CustomSelect name="prepared_opr_guid" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} options={employeeOptions} required />
@@ -152,7 +152,7 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
             <CurrencyAmount
               name="net_fare"
               control={control}
-              label={t("outbound.cost") || "Bahasy (alnan)"}
+              label={t("outbound.net_fare") || "Bahasy (alnan)"}
               currency={currency}
               onCurrencyChange={(curr) => setValue("currency", curr)}
               required
