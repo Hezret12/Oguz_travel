@@ -220,6 +220,16 @@ const CustomSelect = ({
                 }}
                 {...props}
               >
+                {field.value &&
+                  !normalizedOptions.some((opt) => opt.id === field.value) && (
+                    <MenuItem
+                      key={field.value}
+                      value={field.value}
+                      sx={{ display: "none" }}
+                    >
+                      {field.value}
+                    </MenuItem>
+                  )}
                 {normalizedOptions.map((option) => {
                   if (renderOption) {
                     return renderOption(option.raw, option);

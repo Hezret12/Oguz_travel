@@ -90,3 +90,7 @@ export const updateTransferApi = async (data) => {
 export const updatePackageApi = async (data) => {
   return await api.patchPrivate('/package/update-package', data);
 };
+
+export const updateHarPaymentApi = async (data) => {
+  return await api.patchPrivate('/har-payment/update-har-payment', data);
+};

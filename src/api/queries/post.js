@@ -135,3 +135,11 @@ export const addTransPaymentApi = async (data) => {
   return response;
 };
 
+export const addHarPaymentApi = async (data) => {
+  const response = await api.postPrivate(
+    "/har-payment/add-har-payment",
+    data,
+  );
+  return response;
+};
+

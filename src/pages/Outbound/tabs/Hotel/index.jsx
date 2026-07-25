@@ -79,6 +79,8 @@ const HotelTab = ({
         id: "index_number",
         header: "#",
         size: 60,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         id: "application_date",
@@ -88,6 +90,12 @@ const HotelTab = ({
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        id: "client_name",
+        header: t("outbound.clientName"),
+        size: 210,
+        accessorFn: (row) => row.client?.fullName || row.client_name || "",
       },
       {
         id: "operator",
@@ -100,12 +108,6 @@ const HotelTab = ({
             secondary={selectedLang(row.original.operator.office.fullName)}
           />
         ),
-      },
-      {
-        id: "client_name",
-        header: t("outbound.clientName"),
-        size: 210,
-        accessorFn: (row) => row.client?.fullName || row.client_name || "",
       },
       {
         id: "prepared_by",
@@ -198,7 +200,7 @@ const HotelTab = ({
       {
         id: "guestCount",
         header: t("outbound.guestCount"),
-        size: 60,
+        size: 80,
         accessorFn: (row) => row.guests_count,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },

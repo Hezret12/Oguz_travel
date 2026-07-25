@@ -16,7 +16,7 @@ import GlobalClientAutocomplete from "../../../../components/global/GlobalClient
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
-import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
+import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { updateHotelApi } from "../../../../api/queries/patch";
 import { SOURCE_OPTIONS, PAYMENT_OPTIONS } from "../../constants";
 import HotelFields from "./HotelFields";
@@ -25,17 +25,12 @@ const EditHotelModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
 
-  const { data: employees = [] } = useGet({
+  const { data: employees = [], isLoading: isLoadingEmployees } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
   });
 
-  const { data: offices = [] } = useGet({
-    apiFn: getAllOfficeApi,
-    key: "offices",
-  });
-
-  const item = row?.original || {};
+  const item = useMemo(() => row?.original || {}, [row?.original]);
 
   const initialClient = useMemo(() => {
     if (item.client) return item.client;
@@ -55,22 +50,21 @@ const EditHotelModal = ({ table, row }) => {
   } = useForm({
     resolver: yupResolver(addOutbound),
     defaultValues: {
-      guid: item.guid || "",
-      request_date: item.application_date || item.request_date ? dayjs(item.application_date || item.request_date).format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
-      office_guid: item.office_guid || item.office?.guid || "",
-      opr_guid: item.opr_guid || item.operator_guid || item.operator?.guid || "",
-      client_name: item.client_guid || item.client?.guid || item.client_name || "",
-      prepared_opr_guid: item.prepared_opr_guid || item.prepared_by || item.prepared_by_employee?.guid || "",
-      net_fare: item.cost ?? item.net_fare ?? 0,
+      guid: item.guid || '',
+      application_date: item.application_date ? dayjs(item.application_date).format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
+      opr_guid: item.operator?.guid || '',
+      client_name: item.client?.guid || item.client_guid || '',
+      prepared_opr_guid: item.preparedOpr?.guid || '',
+      net_fare: item.net_fare ?? 0,
       price: item.price ?? 0,
-      currency: item.currency || "USD",
-      source: item.system || item.source || null,
-      destination_country: item.destination_country || item.destinationCountry || "",
-      hotel_name: item.hotel_name || item.hotelName || "",
-      room_type: item.room_type || item.roomType || "",
-      meal_plan: item.meal_plan || item.mealPlan || "",
-      guests_count: item.guests_count ?? item.guestCount ?? null,
-      note: item.note || "",
+      currency: item.currency || 'USD',
+      system: item.system || null,
+      destination_country: item.destination_country || '',
+      hotel_name: item.hotel_name || '',
+      room_type: item.room_type || '',
+      meal_plan: item.meal_plan || '',
+      guests_count: item.guests_count ?? null,
+      note: item.note || '',
       is_paid: item.is_paid != null ? String(item.is_paid) : null,
     },
   });
@@ -89,25 +83,25 @@ const EditHotelModal = ({ table, row }) => {
   const onSubmit = (data) => {
     const payload = {
       guid: item.guid,
-      application_date: data.request_date
-        ? new Date(data.request_date).toISOString()
+      application_date: data.application_date
+        ? new Date(data.application_date).toISOString()
         : new Date().toISOString(),
       opr_guid: data.opr_guid || null,
       client_guid:
         selectedClientObj?.guid ||
         (typeof data.client_name === "string" && data.client_name.length > 20
           ? data.client_name
-          : item.client_guid || item.client?.guid || null),
+          : item.client?.guid || item.client_guid || null),
       prepared_opr_guid: data.prepared_opr_guid || null,
       destination_country: data.destination_country || "",
       hotel_name: data.hotel_name || "",
       room_type: data.room_type || "",
       meal_plan: data.meal_plan || "",
       guests_count: data.guests_count !== null && data.guests_count !== "" ? Number(data.guests_count) : null,
-      cost: Number(data.net_fare || 0),
+      net_fare: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
-      system: data.source || "",
+      system: data.system || "",
       note: data.note || "",
       is_paid: data.is_paid === "true",
     };
@@ -126,15 +120,6 @@ const EditHotelModal = ({ table, row }) => {
     [employees, selectedLang]
   );
 
-  const officeOptions = useMemo(
-    () =>
-      (offices || []).map((off) => ({
-        value: off.guid,
-        label: selectedLang(off.shortName) || selectedLang(off.fullName) || "",
-      })),
-    [offices, selectedLang]
-  );
-
   const currencySymbol = {
     USD: "$",
     EUR: "€",
@@ -147,17 +132,13 @@ const EditHotelModal = ({ table, row }) => {
       <CustomDialogHeader variant="h5" title={t("outbound.editSale") || "Satyşy üýtgetmek"} />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
-          <Grid size={3}>
-            <CustomDatePicker name="request_date" control={control} label={t("outbound.requestDate") || "Arza senesi"} required />
-          </Grid>
-          <Grid size={3}>
-            <CustomSelect name="office_guid" control={control} label={t("outbound.office") || "Ofis"} options={officeOptions} required />
-          </Grid>
-          <Grid size={3}>
-            <CustomSelect name="opr_guid" control={control} label={t("outbound.operator") || "Operator"} options={employeeOptions} required />
-          </Grid>
-          <Grid size={3}>
-            <CustomSelect name="prepared_opr_guid" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} options={employeeOptions} required />
+          <Grid size={4}>
+            <CustomDatePicker
+              name="application_date"
+              control={control}
+              label={t("outbound.requestDate") || "Arza senesi"}
+              required
+            />
           </Grid>
           <Grid size={8}>
             <GlobalClientAutocomplete
@@ -170,30 +151,77 @@ const EditHotelModal = ({ table, row }) => {
               onClientChange={(client) => setSelectedClientObj(client)}
             />
           </Grid>
-          <Grid size={4}>
-            <CustomSelect name="source" control={control} label={t("outbound.source") || "Ulgam"} options={SOURCE_OPTIONS} required />
+          <Grid size={6}>
+            <CustomSelect
+              name="opr_guid"
+              control={control}
+              label={t("columns.operator")}
+              options={employeeOptions}
+              isLoading={isLoadingEmployees}
+              required
+            />
+          </Grid>
+          <Grid size={6}>
+            <CustomSelect
+              name="prepared_opr_guid"
+              control={control}
+              label={t("columns.operatorTwo")}
+              options={employeeOptions}
+              isLoading={isLoadingEmployees}
+              required
+            />
           </Grid>
 
-          <HotelFields control={control} />
-
+          <Grid size={4}>
+            <CustomSelect
+              name="is_paid"
+              control={control}
+              label={t("columns.paymentStatus")}
+              options={PAYMENT_OPTIONS}
+              required
+            />
+          </Grid>
           <Grid size={4}>
             <CurrencyAmount
               name="net_fare"
               control={control}
-              label={t("outbound.net_fare") || "Bahasy (alnan)"}
+              label={t("columns.netFare")}
               currency={currency}
               onCurrencyChange={(curr) => setValue("currency", curr)}
               required
             />
           </Grid>
           <Grid size={4}>
-            <CustomTextField name="price" control={control} type="number" label={t("outbound.price") || "Satuw bahasy"} startIcon={currencySymbol} required />
+            <CustomTextField
+              name="price"
+              control={control}
+              type="number"
+              label={t("outbound.price")}
+              startIcon={currencySymbol}
+              required
+            />
           </Grid>
+
           <Grid size={4}>
-            <CustomSelect name="is_paid" control={control} label={t("outbound.paymentStatus") || "Töleg ýagdaýy"} options={PAYMENT_OPTIONS} required />
+            <CustomSelect
+              name="system"
+              control={control}
+              label={t("outbound.system") || "Ulgam"}
+              options={SOURCE_OPTIONS}
+              required
+            />
           </Grid>
+
+          <HotelFields control={control} />
+
           <Grid size={12}>
-            <CustomTextField name="note" control={control} label={t("outbound.note") || "Bellik"} multiline rows={2} />
+            <CustomTextField
+              name="note"
+              control={control}
+              label={t("outbound.note")}
+              multiline
+              rows={2}
+            />
           </Grid>
         </Grid>
         <FooterButton loading={isSubmitting} onCancel={() => table.setEditingRow(null)} type="submit" sx={{ mt: 3 }} />

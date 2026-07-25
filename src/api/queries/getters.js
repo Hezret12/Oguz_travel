@@ -110,3 +110,7 @@ export const getAllTransfersApi = async (params = {}) => {
 export const getAllPackagesApi = async (params = {}) => {
   return await api.getPrivate('/package/get-packages', params);
 };
+
+export const getAllHarPaymentApi = async (params = {}) => {
+  return await api.getPrivate('/har-payment/get-all-har-payment', params);
+};

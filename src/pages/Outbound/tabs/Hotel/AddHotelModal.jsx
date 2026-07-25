@@ -30,7 +30,7 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
     if (table) table.setCreatingRow(null);
   };
 
-  const { data: employees = [] } = useGet({
+  const { data: employees = [], isLoading: isLoadingEmployees } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
   });
@@ -50,14 +50,14 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
       net_fare: 0,
       price: 0,
       currency: "USD",
-      source: null,
+      system: SOURCE_OPTIONS[0].value,
       destination_country: "",
       hotel_name: "",
       room_type: "",
       meal_plan: "",
       guests_count: null,
       note: "",
-      is_paid: null,
+      is_paid: "false",
     },
   });
 
@@ -82,19 +82,22 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
         selectedClientObj?.guid ||
         (typeof data.client_name === "string" && data.client_name.length > 20
           ? data.client_name
-          : data.client_guid || null),
+          : null),
       prepared_opr_guid: data.prepared_opr_guid || null,
       destination_country: data.destination_country || "",
       hotel_name: data.hotel_name || "",
       room_type: data.room_type || "",
       meal_plan: data.meal_plan || "",
-      guests_count: data.guests_count !== null && data.guests_count !== "" ? Number(data.guests_count) : null,
+      guests_count:
+        data.guests_count !== null && data.guests_count !== ""
+          ? Number(data.guests_count)
+          : null,
       net_fare: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
-      system: data.source || "",
+      system: data.system || "",
       note: data.note || "",
-      is_paid: data.is_paid !== null ? Boolean(data.is_paid) : false,
+      is_paid: data.is_paid === "true",
     };
     createHotel(payload);
   };
@@ -103,72 +106,131 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
     () =>
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) || selectedLang(emp.office.fullName) || ""
+          ? selectedLang(emp.office.shortName) ||
+            selectedLang(emp.office.fullName) ||
+            ""
           : "";
-        const label = officeShort ? `${emp.fullName} (${officeShort})` : emp.fullName;
+        const label = officeShort
+          ? `${emp.fullName} (${officeShort})`
+          : emp.fullName;
         return { label, value: emp.guid };
       }),
-    [employees, selectedLang]
+    [employees, selectedLang],
   );
 
-  const currencySymbol = {
-    USD: "$",
-    EUR: "€",
-    TMT: "m",
-    RUB: "₽",
-  }[currency] || currency;
+  const currencySymbol =
+    {
+      USD: "$",
+      EUR: "€",
+      TMT: "m",
+      RUB: "₽",
+    }[currency] || currency;
 
   return (
     <CustomDialog open={open} close={handleClose} widthX={750}>
-      <CustomDialogHeader variant="h5" title={t("outbound.addSale") || "Satyş goşmak"} />
+      <CustomDialogHeader
+        variant="h5"
+        title={t("outbound.addSale") || "Satyş goşmak"}
+      />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
           <Grid size={4}>
-            <CustomDatePicker name="application_date" control={control} label={t("outbound.requestDate") || "Arza senesi"} required />
+            <CustomDatePicker
+              name="application_date"
+              control={control}
+              label={t("outbound.requestDate")}
+              required
+            />
           </Grid>
           <Grid size={8}>
             <GlobalClientAutocomplete
               name="client_name"
               control={control}
-              label={t("outbound.clientName") || "Müşderiniň ady"}
+              label={t("outbound.clientName")}
               columns={["fullName"]}
               required
               onClientChange={(client) => setSelectedClientObj(client)}
             />
           </Grid>
           <Grid size={6}>
-            <CustomSelect name="opr_guid" control={control} label={t("columns.operator")} options={employeeOptions} required />
+            <CustomSelect
+              name="opr_guid"
+              control={control}
+              label={t("columns.operator")}
+              options={employeeOptions}
+              isLoading={isLoadingEmployees}
+              required
+            />
           </Grid>
           <Grid size={6}>
-            <CustomSelect name="prepared_opr_guid" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} options={employeeOptions} required />
+            <CustomSelect
+              name="prepared_opr_guid"
+              control={control}
+              label={t("columns.operatorTwo")}
+              options={employeeOptions}
+              isLoading={isLoadingEmployees}
+              required
+            />
           </Grid>
+
           <Grid size={4}>
-            <CustomSelect name="source" control={control} label={t("outbound.source") || "Ulgam"} options={SOURCE_OPTIONS} required />
+            <CustomSelect
+              name="is_paid"
+              control={control}
+              label={t("columns.paymentStatus")}
+              options={PAYMENT_OPTIONS}
+              required
+            />
           </Grid>
-
-          <HotelFields control={control} />
-
           <Grid size={4}>
             <CurrencyAmount
               name="net_fare"
               control={control}
-              label={t("outbound.net_fare") || "Bahasy (alnan)"}
+              label={t("columns.netFare")}
               currency={currency}
               onCurrencyChange={(curr) => setValue("currency", curr)}
               required
             />
           </Grid>
           <Grid size={4}>
-            <CustomTextField name="price" control={control} type="number" label={t("outbound.price") || "Satuw bahasy"} startIcon={currencySymbol} required />
+            <CustomTextField
+              name="price"
+              control={control}
+              type="number"
+              label={t("outbound.price")}
+              startIcon={currencySymbol}
+              required
+            />
           </Grid>
+
           <Grid size={4}>
-            <CustomSelect name="is_paid" control={control} label={t("outbound.paymentStatus") || "Töleg ýagdaýy"} options={PAYMENT_OPTIONS} required />
+            <CustomSelect
+              name="system"
+              control={control}
+              label={t("outbound.system") || "Ulgam"}
+              options={SOURCE_OPTIONS}
+              required
+            />
           </Grid>
+
+          <HotelFields control={control} />
+
           <Grid size={12}>
-            <CustomTextField name="note" control={control} label={t("outbound.note") || "Bellik"} multiline rows={2} />
+            <CustomTextField
+              name="note"
+              control={control}
+              label={t("outbound.note")}
+              multiline
+              rows={2}
+            />
           </Grid>
         </Grid>
-        <FooterButton loading={isSubmitting} onCancel={handleClose} type="submit" sx={{ mt: 3 }} />
+        <FooterButton
+          loading={isSubmitting}
+          onCancel={handleClose}
+          type="submit"
+          sx={{ mt: 3 }}
+        />
       </CustomForm>
     </CustomDialog>
   );
