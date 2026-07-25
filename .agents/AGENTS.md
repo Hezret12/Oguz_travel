@@ -249,11 +249,25 @@ const {
 
 ---
 
-## 6. Localization
+## 6. Localization & Formatting Helpers
 
 - Use `const { t, selectedLang } = useLocale();` for translations.
 - `selectedLang(obj)` extracts the correct language field from multilingual objects (e.g., `office.shortName`).
 - All user-facing strings must go through `t("key")` with fallback: `t("key") || "Fallback"`.
+
+### `useDateFormat` (`src/functions/generalHelpers.js`)
+```js
+import { useDateFormat } from "path/to/generalHelpers";
+const { formatChange } = useDateFormat();
+
+// For date-only formatting (DD.MM.YYYY):
+Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true })
+
+// For date-time formatting (DD.MM.YYYY HH:mm):
+Cell: ({ cell }) => formatChange(cell.getValue())
+```
+- **ALWAYS** use `useDateFormat` (`formatChange`) for formatting table date cells instead of custom inline date string manipulation.
+- Remember to include `formatChange` in the `columns` `useMemo` dependency array when used inside column definitions.
 
 ---
 

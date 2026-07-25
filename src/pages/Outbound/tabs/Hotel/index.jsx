@@ -16,6 +16,7 @@ import { deleteHotelApi } from "../../../../api/queries/delete";
 import PaymentStatusCell from "../../../../components/PaymentStatusCell";
 import { Box, Chip } from "@mui/material";
 import GlobalSearchInput from "../../../../components/GlobalSearchInput";
+import { useDateFormat } from "../../../../functions/generalHelpers";
 import AddHotelModal from "./AddHotelModal";
 import EditHotelModal from "./EditHotelModal";
 
@@ -33,6 +34,7 @@ const HotelTab = ({
   onCloseAdd,
 }) => {
   const { t, selectedLang } = useLocale();
+  const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
 
   const mergedParams = useMemo(
@@ -82,7 +84,10 @@ const HotelTab = ({
         id: "application_date",
         header: t("outbound.requestDate"),
         size: 110,
-        accessorFn: (row) => row.application_date || "",
+        accessorFn: (row) => row?.application_date,
+        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "operator",
@@ -114,6 +119,48 @@ const HotelTab = ({
               row?.original?.preparedOpr?.office?.fullName,
             )}
           />
+        ),
+      },
+      {
+        accessorKey: "price",
+        id: "price",
+        header: t("outbound.price") || "Satuw baha",
+        size: 120,
+        Cell: ({ row, cell }) =>
+          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+      },
+      {
+        id: "net_fare",
+        header: t("columns.netFare"),
+        size: 120,
+        accessorFn: (row) => row.net_fare ?? 0,
+        Cell: ({ row, cell }) =>
+          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+      },
+      {
+        accessorKey: "profit",
+        id: "profit",
+        header: t("outbound.profit") || "Peýda",
+        size: 120,
+        Cell: ({ row, cell }) =>
+          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+      },
+      {
+        accessorFn: (row) => {
+          const pct = row.paidPercentage;
+          return typeof pct === "string" ? parseFloat(pct) : pct;
+        },
+        id: "paidPercentage",
+        header: t("columns.paymentStatus"),
+        size: 110,
+        Cell: ({ row }) => (
+          <PaymentStatusCell percent={row.original.paidPercentage} />
         ),
       },
       {
@@ -157,36 +204,6 @@ const HotelTab = ({
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        id: "net_fare",
-        header: t("columns.netFare"),
-        size: 120,
-        accessorFn: (row) => row.net_fare ?? 0,
-        Cell: ({ row, cell }) =>
-          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "right" },
-      },
-      {
-        accessorKey: "price",
-        id: "price",
-        header: t("outbound.price") || "Satuw baha",
-        size: 120,
-        Cell: ({ row, cell }) =>
-          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "right" },
-      },
-      {
-        accessorKey: "profit",
-        id: "profit",
-        header: t("outbound.profit") || "Peýda",
-        size: 120,
-        Cell: ({ row, cell }) =>
-          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "right" },
-      },
-      {
         id: "source",
         header: t("outbound.source"),
         size: 120,
@@ -195,20 +212,16 @@ const HotelTab = ({
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorFn: (row) => {
-          const pct = row.paidPercentage;
-          return typeof pct === "string" ? parseFloat(pct) : pct;
-        },
-        id: "paidPercentage",
-        header: t("outbound.paymentStatus") || t("columns.paymentStatus"),
-        size: 110,
-        Cell: ({ row }) => (
-          <PaymentStatusCell percent={row.original.paidPercentage} />
-        ),
+        id: "note",
+        header: t("columns.note"),
+        size: 140,
+        accessorFn: (row) => row?.note || "",
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "actions",
-        header: t("columns.actions") ?? "Amallar",
+        header: t("columns.actions"),
         size: 120,
         enableSorting: false,
         Cell: ({ row, table }) => (
@@ -221,13 +234,20 @@ const HotelTab = ({
         ),
       },
     ],
-    [t, selectedLang, handleDeleteClick],
+    [t, selectedLang, formatChange, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    enableColumnPinning: true,
     columns,
     data: listData,
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
+      },
+    },
     state: { isLoading, showSkeletons: isLoading && isFetching },
     rowCount: totalItems,
     manualPagination: true,
