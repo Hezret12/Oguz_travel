@@ -7,26 +7,26 @@ const TourFields = ({ control }) => {
 
   return (
     <>
-      <Grid size={4}>
+      <Grid size={6}>
         <CustomTextField
-          name="destinationCountry"
+          name="destination_country"
           control={control}
-          label={t("outbound.destinationCountry") || "Ugur ýurdy"}
+          label={t("outbound.destinationCountry")}
         />
       </Grid>
-      <Grid size={5}>
+      <Grid size={6}>
         <CustomTextField
-          name="tourName"
+          name="tour_name"
           control={control}
-          label={t("outbound.tourName") || "Tur ady"}
+          label={t("outbound.tourName")}
         />
       </Grid>
-      <Grid size={3}>
+      <Grid size={6}>
         <CustomTextField
-          name="guestCount"
+          name="guests_count"
           control={control}
           type="number"
-          label={t("outbound.guestCount") || "Myhmanlaryň sany"}
+          label={t("outbound.guestCount")}
         />
       </Grid>
     </>

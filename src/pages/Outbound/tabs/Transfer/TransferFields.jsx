@@ -9,42 +9,42 @@ const TransferFields = ({ control }) => {
 
   return (
     <>
-      <Grid size={4}>
+      <Grid size={6}>
         <CustomTextField
-          name="destinationCountry"
+          name="destination_country"
           control={control}
-          label={t("outbound.destinationCountry") || "Ugur ýurdy"}
+          label={t("outbound.destinationCountry")}
         />
       </Grid>
-      <Grid size={4}>
+      <Grid size={6}>
         <CustomSelect
-          name="transferType"
+          name="transfer_type"
           control={control}
           label={t("outbound.transferType") || "Transfer görnüşi"}
           options={TICKET_TYPE_OPTIONS}
         />
       </Grid>
-      <Grid size={4}>
+      <Grid size={6}>
+        <CustomTextField
+          name="route"
+          control={control}
+          label={t("outbound.route")}
+        />
+      </Grid>
+      <Grid size={6}>
         <CustomSelect
-          name="carType"
+          name="machine_type"
           control={control}
           label={t("outbound.carType") || "Maşyn görnüşi"}
           options={CAR_TYPE_OPTIONS}
         />
       </Grid>
-      <Grid size={8}>
-        <CustomTextField
-          name="route"
-          control={control}
-          label={t("outbound.route") || "Ugur"}
-        />
-      </Grid>
       <Grid size={4}>
         <CustomTextField
-          name="guestCount"
+          name="guests_count"
           control={control}
           type="number"
-          label={t("outbound.guestCount") || "Myhmanlaryň sany"}
+          label={t("outbound.guestCount")}
         />
       </Grid>
     </>
