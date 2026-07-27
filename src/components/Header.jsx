@@ -175,7 +175,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                         color: (theme) =>
                           theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.6)' : '#64748b',
                         transition: 'transform 0.2s',
-                        transform: Boolean(anchorElUser) ? 'rotate(180deg)' : 'none',
+                        transform: anchorElUser ? 'rotate(180deg)' : 'none',
                       }}
                     />
                   </Box>

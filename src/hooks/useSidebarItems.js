@@ -65,7 +65,7 @@ export const useSidebarItems = () => {
       {
         text: t("sidebar.clients"),
         icon: createElement(PeopleIcon),
-        path: "/clients"
+        path: "/clients",
       },
       {
         isGroup: true,
@@ -87,11 +87,6 @@ export const useSidebarItems = () => {
             path: "/visa/package",
             icon: createElement(NoteAddIcon),
           },
-          {
-            text: t("sidebar.visaIntake") || "Kabul ediji",
-            path: "/visa/intake",
-            icon: createElement(AssignmentRoundedIcon),
-          },
         ],
       },
       {
@@ -109,6 +104,11 @@ export const useSidebarItems = () => {
         path: "/settings",
         icon: createElement(SettingsIcon),
       },
+      {
+        text: t("sidebar.visaIntake"),
+        path: "/visa/intake",
+        icon: createElement(AssignmentRoundedIcon),
+      }
     ],
     [t],
   );

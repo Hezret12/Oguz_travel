@@ -444,6 +444,7 @@
     "users": "Users",
     "referalLetters": "Referral Letters",
     "visaApplications": "Visa Applications",
+    "visaIntake": "Visa Intake",
     "visa": {
       "package": "Packages",
       "packageDescription": "Visa packages and individual services",

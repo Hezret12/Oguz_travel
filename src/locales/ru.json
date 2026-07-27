@@ -126,19 +126,6 @@
     "loginFailed": "Ошибка входа. Пожалуйста, проверьте свои учетные данные.",
     "invalidResponse": "Неверный ответ сервера. Пожалуйста, попробуйте снова.",
     "networkError": "Ошибка сети. Пожалуйста, проверьте ваше соединение.",
-    "validation": {
-      "phoneNumberRequired": "����� �������� ����������",
-      "phoneNumberLength": "����� �������� ������ ��������� 8 ����",
-      "phoneNumberInvalid": "�������� ����� ��������",
-      "passwordRequired": "������ ����������",
-      "passwordTooShort": "������ ������� ��������",
-      "phoneNumberRequired": "  ",
-      "phoneNumberLength": "    8 ",
-      "phoneNumberInvalid": "  ",
-      "passwordRequired": " ",
-      "passwordTooShort": "  ",
-      "passwordMaxLength": "  "
-    },
     "employee": {
       "title": "Сотрудники",
       "subtitle": "Управление записями и назначениями сотрудников.",
@@ -448,6 +435,7 @@
     "users": "Пользователи",
     "referalLetters": "Рекомендательные письма",
     "visaApplications": "Визовые анкеты",
+    "visaIntake": "Прием документов",
     "visa": {
       "package": "Пакеты",
       "packageDescription": "Управление визовыми пакетами и услугами",
