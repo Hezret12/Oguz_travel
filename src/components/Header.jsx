@@ -10,11 +10,13 @@ import {
   Box,
   Tooltip,
   Divider,
+  Button,
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -102,12 +104,82 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
 
           {user && (
             <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title={t('header.userMenuTooltip')}>
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar alt={user.name} sx={{ width: 38, height: 38, border: '2px solid #0E8584', bgcolor: 'rgba(14,133,132,0.1)', color: '#0E8584', fontWeight: 600 }}>
-                    {(user.name || '?').charAt(0).toUpperCase()}
-                  </Avatar>
-                </IconButton>
+              <Tooltip title={t('header.userMenuTooltip') || 'User Menu'}>
+                <Button
+                  onClick={handleOpenUserMenu}
+                  sx={{
+                    p: 0.5,
+                    px: 1.2,
+                    borderRadius: '10px',
+                    textTransform: 'none',
+                    textAlign: 'left',
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+                    border: '1px solid',
+                    borderColor: (theme) =>
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                    '&:hover': {
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.07)',
+                      borderColor: (theme) =>
+                        theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)',
+                    },
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar
+                      alt={user.name}
+                      sx={{
+                        width: 34,
+                        height: 34,
+                        border: '2px solid #0E8584',
+                        bgcolor: 'rgba(14,133,132,0.1)',
+                        color: '#0E8584',
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      {(user.name || '?').charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Box sx={{ display: { xs: 'none', sm: 'flex' }, flexDirection: 'column', alignItems: 'flex-start', mr: 0.5 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: '0.825rem',
+                          lineHeight: 1.2,
+                          color: (theme) =>
+                            theme.palette.mode === 'dark' ? '#f1f5f9' : '#1e293b',
+                        }}
+                      >
+                        {user.name}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: 500,
+                          fontSize: '0.70rem',
+                          lineHeight: 1.1,
+                          color: (theme) =>
+                            theme.palette.mode === 'dark' ? '#14B8A6' : '#0E8584',
+                          textTransform: 'capitalize',
+                        }}
+                      >
+                        {user.position || user.position_name || user.role || user.job_title || 'User'}
+                      </Typography>
+                    </Box>
+                    <KeyboardArrowDownIcon
+                      sx={{
+                        fontSize: 16,
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.6)' : '#64748b',
+                        transition: 'transform 0.2s',
+                        transform: Boolean(anchorElUser) ? 'rotate(180deg)' : 'none',
+                      }}
+                    />
+                  </Box>
+                </Button>
               </Tooltip>
               <Menu
                 sx={{ mt: '45px' }}
@@ -155,7 +227,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                             : 'primary.contrastText',
                     }}
                   >
-                    {user.role}
+                    {user.position || user.position_name || user.role}
                   </Box>
                 </Box>
                 <Divider sx={{ my: 1 }} />
