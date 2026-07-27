@@ -128,20 +128,20 @@ const TransferTab = ({
         ),
       },
       {
-        accessorKey: "price",
-        id: "price",
-        header: t("outbound.price"),
+        id: "net_fare",
+        header: t("columns.netFare"),
         size: 120,
+        accessorFn: (row) => row.net_fare ?? 0,
         Cell: ({ row, cell }) =>
           `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
       },
       {
-        id: "net_fare",
-        header: t("columns.netFare"),
+        accessorKey: "price",
+        id: "price",
+        header: t("outbound.price"),
         size: 120,
-        accessorFn: (row) => row.net_fare ?? 0,
         Cell: ({ row, cell }) =>
           `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
         muiTableHeadCellProps: { align: "center" },

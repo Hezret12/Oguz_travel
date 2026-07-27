@@ -279,7 +279,6 @@ const EditTranslateModal = ({ table, row }) => {
                 control={control}
                 label={t("columns.receivedTime") || "Alnan wagty"}
                 type="time"
-                InputLabelProps={{ shrink: true }}
               />
             </Grid>
 
@@ -428,7 +427,6 @@ const EditTranslateModal = ({ table, row }) => {
                 control={control}
                 label={t("columns.completedTime") || "Tabşyrylan wagty"}
                 type="time"
-                InputLabelProps={{ shrink: true }}
               />
             </Grid>
 

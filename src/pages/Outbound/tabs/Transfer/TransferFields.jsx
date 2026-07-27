@@ -9,14 +9,14 @@ const TransferFields = ({ control }) => {
 
   return (
     <>
-      <Grid size={6}>
+      <Grid size={4}>
         <CustomTextField
           name="destination_country"
           control={control}
           label={t("outbound.destinationCountry")}
         />
       </Grid>
-      <Grid size={6}>
+      <Grid size={4}>
         <CustomSelect
           name="transfer_type"
           control={control}
@@ -24,14 +24,14 @@ const TransferFields = ({ control }) => {
           options={TICKET_TYPE_OPTIONS}
         />
       </Grid>
-      <Grid size={6}>
+      <Grid size={4}>
         <CustomTextField
           name="route"
           control={control}
           label={t("outbound.route")}
         />
       </Grid>
-      <Grid size={6}>
+      <Grid size={4}>
         <CustomSelect
           name="machine_type"
           control={control}

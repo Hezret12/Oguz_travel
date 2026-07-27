@@ -203,7 +203,7 @@ const AddTransferModal = ({ open = true, onClose, table }) => {
             />
           </Grid>
 
-          <Grid size={6}>
+          <Grid size={4}>
             <CustomSelect
               name="system"
               control={control}

@@ -16,9 +16,9 @@ import GlobalClientAutocomplete from "../../../../components/global/GlobalClient
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
-import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
+import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { addPackageApi } from "../../../../api/queries/post";
-import { PARTNER_OPTIONS } from "../../constants";
+import { PARTNER_OPTIONS, PAYMENT_OPTIONS } from "../../constants";
 import PackageFields from "./PackageFields";
 
 const AddPackageModal = ({ open = true, onClose, table }) => {
@@ -30,14 +30,9 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
     if (table) table.setCreatingRow(null);
   };
 
-  const { data: employees = [] } = useGet({
+  const { data: employees = [], isLoading: isLoadingEmployees } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
-  });
-
-  const { data: offices = [] } = useGet({
-    apiFn: getAllOfficeApi,
-    key: "offices",
   });
 
   const {
@@ -48,16 +43,17 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
   } = useForm({
     resolver: yupResolver(addOutbound),
     defaultValues: {
-      request_date: dayjs().format("YYYY-MM-DD"),
-      operator_guid: "",
+      application_date: dayjs().format("YYYY-MM-DD"),
+      opr_guid: "",
       client_name: "",
-      prepared_by: "",
+      prepared_opr_guid: "",
+      destination_country: "",
       net_fare: 0,
       price: 0,
       currency: "USD",
-      source: PARTNER_OPTIONS[0].value,
-      destinationCountry: "",
+      partner: PARTNER_OPTIONS[0].value,
       note: "",
+      is_paid: "false",
     },
   });
 
@@ -74,15 +70,24 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
 
   const onSubmit = (data) => {
     const payload = {
-      ...data,
-      client_name: selectedClientObj?.fullName || data.client_name || "",
-      client_guid: selectedClientObj?.guid || (typeof data.client_name === "string" && data.client_name.length > 20 ? data.client_name : undefined),
-      request_date: data.request_date ? dayjs(data.request_date).format("YYYY-MM-DD") : null,
+      application_date: data.application_date
+        ? new Date(data.application_date).toISOString()
+        : new Date().toISOString(),
+      opr_guid: data.opr_guid || null,
+      client_guid:
+        selectedClientObj?.guid ||
+        (typeof data.client_name === "string" && data.client_name.length > 20
+          ? data.client_name
+          : null),
+      prepared_opr_guid: data.prepared_opr_guid || null,
+      destination_country: data.destination_country || "",
       net_fare: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
+      partner: data.partner || "",
+      note: data.note || "",
+      is_paid: data.is_paid === "true",
     };
-    delete payload.profit;
     createPackage(payload);
   };
 
@@ -90,28 +95,41 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
     () =>
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) || selectedLang(emp.office.fullName) || ""
+          ? selectedLang(emp.office.shortName) ||
+            selectedLang(emp.office.fullName) ||
+            ""
           : "";
-        const label = officeShort ? `${emp.fullName} (${officeShort})` : emp.fullName;
+        const label = officeShort
+          ? `${emp.fullName} (${officeShort})`
+          : emp.fullName;
         return { label, value: emp.guid };
       }),
-    [employees, selectedLang]
+    [employees, selectedLang],
   );
 
-  const currencySymbol = {
-    USD: "$",
-    EUR: "€",
-    TMT: "m",
-    RUB: "₽",
-  }[currency] || currency;
+  const currencySymbol =
+    {
+      USD: "$",
+      EUR: "€",
+      TMT: "m",
+      RUB: "₽",
+    }[currency] || currency;
 
   return (
     <CustomDialog open={open} close={handleClose} widthX={750}>
-      <CustomDialogHeader variant="h5" title={t("outbound.addSale") || "Satyş goşmak"} />
+      <CustomDialogHeader
+        variant="h5"
+        title={t("outbound.addSale") || "Satyş goşmak"}
+      />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
           <Grid size={4}>
-            <CustomDatePicker name="request_date" control={control} label={t("outbound.requestDate") || "Arza senesi"} required />
+            <CustomDatePicker
+              name="application_date"
+              control={control}
+              label={t("outbound.requestDate") || "Arza senesi"}
+              required
+            />
           </Grid>
           <Grid size={8}>
             <GlobalClientAutocomplete
@@ -124,35 +142,82 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
             />
           </Grid>
           <Grid size={6}>
-            <CustomSelect name="operator_guid" control={control} label={t("outbound.operator") || "Operator"} options={employeeOptions} required />
+            <CustomSelect
+              name="opr_guid"
+              control={control}
+              label={t("columns.operator")}
+              options={employeeOptions}
+              isLoading={isLoadingEmployees}
+              required
+            />
           </Grid>
           <Grid size={6}>
-            <CustomSelect name="prepared_by" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} options={employeeOptions} required />
+            <CustomSelect
+              name="prepared_opr_guid"
+              control={control}
+              label={t("columns.operatorTwo")}
+              options={employeeOptions}
+              isLoading={isLoadingEmployees}
+              required
+            />
           </Grid>
+
           <Grid size={4}>
-            <CustomSelect name="source" control={control} label={t("outbound.partner") || "Hyzmatdaş"} options={PARTNER_OPTIONS} required />
+            <CustomSelect
+              name="is_paid"
+              control={control}
+              label={t("columns.paymentStatus")}
+              options={PAYMENT_OPTIONS}
+              required
+            />
           </Grid>
-
-          <PackageFields control={control} />
-
           <Grid size={4}>
             <CurrencyAmount
               name="net_fare"
               control={control}
-              label={t("outbound.cost") || "Bahasy (alnan)"}
+              label={t("columns.netFare")}
               currency={currency}
               onCurrencyChange={(curr) => setValue("currency", curr)}
               required
             />
           </Grid>
           <Grid size={4}>
-            <CustomTextField name="price" control={control} type="number" label={t("outbound.price") || "Satuw bahasy"} startIcon={currencySymbol} required />
+            <CustomTextField
+              name="price"
+              control={control}
+              type="number"
+              label={t("outbound.price")}
+              startIcon={currencySymbol}
+              required
+            />
           </Grid>
+
+          <Grid size={6}>
+            <CustomSelect
+              name="partner"
+              control={control}
+              label={t("outbound.partner") || "Hyzmatdaş"}
+              options={PARTNER_OPTIONS}
+              required
+            />
+          </Grid>
+
+          <PackageFields control={control} />
+
           <Grid size={12}>
-            <CustomTextField name="note" control={control} label={t("outbound.note") || "Bellik"} multiline rows={2} />
+            <CustomTextField
+              name="note"
+              control={control}
+              label={t("outbound.note")}
+            />
           </Grid>
         </Grid>
-        <FooterButton loading={isSubmitting} onCancel={handleClose} type="submit" sx={{ mt: 3 }} />
+        <FooterButton
+          loading={isSubmitting}
+          onCancel={handleClose}
+          type="submit"
+          sx={{ mt: 3 }}
+        />
       </CustomForm>
     </CustomDialog>
   );

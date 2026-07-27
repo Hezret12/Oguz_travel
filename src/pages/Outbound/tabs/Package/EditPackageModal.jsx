@@ -16,26 +16,21 @@ import GlobalClientAutocomplete from "../../../../components/global/GlobalClient
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
-import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
+import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { updatePackageApi } from "../../../../api/queries/patch";
-import { PARTNER_OPTIONS } from "../../constants";
+import { PARTNER_OPTIONS, PAYMENT_OPTIONS } from "../../constants";
 import PackageFields from "./PackageFields";
 
 const EditPackageModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
 
-  const { data: employees = [] } = useGet({
+  const { data: employees = [], isLoading: isLoadingEmployees } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
   });
 
-  const { data: offices = [] } = useGet({
-    apiFn: getAllOfficeApi,
-    key: "offices",
-  });
-
-  const item = row?.original || {};
+  const item = useMemo(() => row?.original || {}, [row?.original]);
 
   const initialClient = useMemo(() => {
     if (item.client) return item.client;
@@ -56,17 +51,19 @@ const EditPackageModal = ({ table, row }) => {
     resolver: yupResolver(addOutbound),
     defaultValues: {
       guid: item.guid || "",
-      request_date: item.request_date ? dayjs(item.request_date).format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
-      office_guid: item.office_guid || item.office?.guid || "",
-      operator_guid: item.operator_guid || item.operator?.guid || "",
-      client_name: item.client_guid || item.client?.guid || item.client_name || "",
-      prepared_by: item.prepared_by || item.prepared_by_employee?.guid || "",
-      net_fare: item.net_fare || item.cost || 0,
-      price: item.price || 0,
+      application_date: item.application_date
+        ? dayjs(item.application_date).format("YYYY-MM-DD")
+        : dayjs().format("YYYY-MM-DD"),
+      opr_guid: item.operator?.guid || "",
+      client_name: item.client?.guid || "",
+      prepared_opr_guid: item.preparedOpr?.guid || "",
+      destination_country: item.destination_country || "",
+      net_fare: item.net_fare ?? 0,
+      price: item.price ?? 0,
       currency: item.currency || "USD",
-      source: item.source || PARTNER_OPTIONS[0].value,
-      destinationCountry: item.destinationCountry || "",
+      partner: item.partner || PARTNER_OPTIONS[0].value,
       note: item.note || "",
+      is_paid: item.is_paid != null ? String(item.is_paid) : null,
     },
   });
 
@@ -83,16 +80,25 @@ const EditPackageModal = ({ table, row }) => {
 
   const onSubmit = (data) => {
     const payload = {
-      ...data,
-      client_name: selectedClientObj?.fullName || data.client_name || "",
-      client_guid: selectedClientObj?.guid || (typeof data.client_name === "string" && data.client_name.length > 20 ? data.client_name : undefined),
-      request_date: data.request_date ? dayjs(data.request_date).format("YYYY-MM-DD") : null,
+      guid: item.guid,
+      application_date: data.application_date
+        ? new Date(data.application_date).toISOString()
+        : new Date().toISOString(),
+      opr_guid: data.opr_guid || null,
+      client_guid:
+        selectedClientObj?.guid ||
+        (typeof data.client_name === "string" && data.client_name.length > 20
+          ? data.client_name
+          : item.client?.guid || null),
+      prepared_opr_guid: data.prepared_opr_guid || null,
+      destination_country: data.destination_country || "",
       net_fare: Number(data.net_fare || 0),
       price: Number(data.price || 0),
       currency: data.currency || "USD",
+      partner: data.partner || "",
+      note: data.note || "",
+      is_paid: data.is_paid === "true",
     };
-    delete payload.cost;
-    delete payload.profit;
     updatePackage(payload);
   };
 
@@ -100,46 +106,45 @@ const EditPackageModal = ({ table, row }) => {
     () =>
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) || selectedLang(emp.office.fullName) || ""
+          ? selectedLang(emp.office.shortName) ||
+            selectedLang(emp.office.fullName) ||
+            ""
           : "";
-        const label = officeShort ? `${emp.fullName} (${officeShort})` : emp.fullName;
+        const label = officeShort
+          ? `${emp.fullName} (${officeShort})`
+          : emp.fullName;
         return { label, value: emp.guid };
       }),
-    [employees, selectedLang]
+    [employees, selectedLang],
   );
 
-  const officeOptions = useMemo(
-    () =>
-      (offices || []).map((off) => ({
-        value: off.guid,
-        label: selectedLang(off.shortName) || selectedLang(off.fullName) || "",
-      })),
-    [offices, selectedLang]
-  );
-
-  const currencySymbol = {
-    USD: "$",
-    EUR: "€",
-    TMT: "m",
-    RUB: "₽",
-  }[currency] || currency;
+  const currencySymbol =
+    {
+      USD: "$",
+      EUR: "€",
+      TMT: "m",
+      RUB: "₽",
+    }[currency] || currency;
 
   return (
-    <CustomDialog open={true} close={() => table.setEditingRow(null)} widthX={750}>
-      <CustomDialogHeader variant="h5" title={t("outbound.editSale") || "Satyşy üýtgetmek"} />
+    <CustomDialog
+      open={true}
+      close={() => table.setEditingRow(null)}
+      widthX={750}
+    >
+      <CustomDialogHeader
+        variant="h5"
+        title={t("outbound.editSale") || "Satyşy üýtgetmek"}
+      />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
-          <Grid size={3}>
-            <CustomDatePicker name="request_date" control={control} label={t("outbound.requestDate") || "Arza senesi"} required />
-          </Grid>
-          <Grid size={3}>
-            <CustomSelect name="office_guid" control={control} label={t("outbound.office") || "Ofis"} options={officeOptions} required />
-          </Grid>
-          <Grid size={3}>
-            <CustomSelect name="operator_guid" control={control} label={t("outbound.operator") || "Operator"} options={employeeOptions} required />
-          </Grid>
-          <Grid size={3}>
-            <CustomSelect name="prepared_by" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} options={employeeOptions} required />
+          <Grid size={4}>
+            <CustomDatePicker
+              name="application_date"
+              control={control}
+              label={t("outbound.requestDate") || "Arza senesi"}
+              required
+            />
           </Grid>
           <Grid size={8}>
             <GlobalClientAutocomplete
@@ -152,30 +157,83 @@ const EditPackageModal = ({ table, row }) => {
               onClientChange={(client) => setSelectedClientObj(client)}
             />
           </Grid>
-          <Grid size={4}>
-            <CustomSelect name="source" control={control} label={t("outbound.partner") || "Hyzmatdaş"} options={PARTNER_OPTIONS} required />
+          <Grid size={6}>
+            <CustomSelect
+              name="opr_guid"
+              control={control}
+              label={t("columns.operator")}
+              options={employeeOptions}
+              isLoading={isLoadingEmployees}
+              required
+            />
+          </Grid>
+          <Grid size={6}>
+            <CustomSelect
+              name="prepared_opr_guid"
+              control={control}
+              label={t("columns.operatorTwo")}
+              options={employeeOptions}
+              isLoading={isLoadingEmployees}
+              required
+            />
           </Grid>
 
-          <PackageFields control={control} />
-
-          <Grid size={6}>
+          <Grid size={4}>
+            <CustomSelect
+              name="is_paid"
+              control={control}
+              label={t("columns.paymentStatus")}
+              options={PAYMENT_OPTIONS}
+              required
+            />
+          </Grid>
+          <Grid size={4}>
             <CurrencyAmount
               name="net_fare"
               control={control}
-              label={t("outbound.net_fare") || "Bahasy (alnan)"}
+              label={t("columns.netFare")}
               currency={currency}
               onCurrencyChange={(curr) => setValue("currency", curr)}
               required
             />
           </Grid>
-          <Grid size={6}>
-            <CustomTextField name="price" control={control} type="number" label={t("outbound.price") || "Satuw bahasy"} startIcon={currencySymbol} required />
+          <Grid size={4}>
+            <CustomTextField
+              name="price"
+              control={control}
+              type="number"
+              label={t("outbound.price")}
+              startIcon={currencySymbol}
+              required
+            />
           </Grid>
+
+          <Grid size={6}>
+            <CustomSelect
+              name="partner"
+              control={control}
+              label={t("outbound.partner") || "Hyzmatdaş"}
+              options={PARTNER_OPTIONS}
+              required
+            />
+          </Grid>
+
+          <PackageFields control={control} />
+
           <Grid size={12}>
-            <CustomTextField name="note" control={control} label={t("outbound.note") || "Bellik"} multiline rows={2} />
+            <CustomTextField
+              name="note"
+              control={control}
+              label={t("outbound.note")}
+            />
           </Grid>
         </Grid>
-        <FooterButton loading={isSubmitting} onCancel={() => table.setEditingRow(null)} type="submit" sx={{ mt: 3 }} />
+        <FooterButton
+          loading={isSubmitting}
+          onCancel={() => table.setEditingRow(null)}
+          type="submit"
+          sx={{ mt: 3 }}
+        />
       </CustomForm>
     </CustomDialog>
   );

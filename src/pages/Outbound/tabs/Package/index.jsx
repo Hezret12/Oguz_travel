@@ -1,5 +1,8 @@
 import { useMemo, useCallback } from "react";
-import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+} from "material-react-table";
 import { useLocale } from "../../../../hooks/useLocale";
 import { getDefaultMRTOptions } from "../../../../hooks/getDefaultMRTOptions";
 import { usePagginationGet } from "../../../../hooks/usePagginationGet";
@@ -10,6 +13,8 @@ import StackedCell from "../../../../components/inputs/StackCell";
 import ColumnActionButtons from "../../../../components/ColumnActionButtons";
 import { getAllPackagesApi } from "../../../../api/queries/getters";
 import { deletePackageApi } from "../../../../api/queries/delete";
+import PaymentStatusCell from "../../../../components/PaymentStatusCell";
+import { useDateFormat } from "../../../../functions/generalHelpers";
 import { Box, Chip } from "@mui/material";
 import GlobalSearchInput from "../../../../components/GlobalSearchInput";
 import AddPackageModal from "./AddPackageModal";
@@ -29,9 +34,13 @@ const PackageTab = ({
   onCloseAdd,
 }) => {
   const { t, selectedLang } = useLocale();
+  const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
 
-  const mergedParams = useMemo(() => ({ ...queryParams, page, limit }), [queryParams, page, limit]);
+  const mergedParams = useMemo(
+    () => ({ ...queryParams, page, limit }),
+    [queryParams, page, limit],
+  );
 
   const {
     data: packageData = [],
@@ -60,99 +69,167 @@ const PackageTab = ({
 
   const handleDeleteClick = useCallback(
     (item) => deleteDialog.open(item),
-    [deleteDialog]
+    [deleteDialog],
   );
 
   const columns = useMemo(
     () => [
-      { accessorKey: "index_number", id: "index_number", header: "#", size: 60 },
-      { accessorKey: "request_date", id: "request_date", header: t("outbound.requestDate") || "Arza senesi", size: 110 },
       {
-        id: "office",
-        header: t("outbound.office") || "Ofis",
-        size: 130,
-        accessorFn: (row) => row.office?.shortName ?? "",
-        Cell: ({ row }) => {
-          const off = row.original.office;
-          return off ? selectedLang(off.shortName) || selectedLang(off.fullName) || "" : "";
-        },
+        accessorKey: "index_number",
+        id: "index_number",
+        header: "#",
+        size: 60,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+      },
+      {
+        id: "application_date",
+        header: t("outbound.requestDate"),
+        size: 110,
+        accessorFn: (row) => row?.application_date,
+        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        id: "client_name",
+        header: t("outbound.clientName"),
+        size: 210,
+        accessorFn: (row) => row.client?.fullName || "",
       },
       {
         id: "operator",
-        header: t("outbound.operator") || "Operator",
-        size: 180,
+        header: t("columns.operator"),
+        size: 200,
         accessorFn: (row) => row.operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
             primary={row.original.operator?.fullName}
-            secondary={
-              row.original.operator?.office
-                ? selectedLang(row.original.operator.office.shortName) || selectedLang(row.original.operator.office.fullName)
-                : ""
-            }
+            secondary={selectedLang(
+              row.original.operator?.office?.fullName ||
+                row.original.operator?.office?.shortName,
+            )}
           />
         ),
       },
-      { accessorKey: "client_name", id: "client_name", header: t("outbound.clientName") || "Müşderiniň ady", size: 160 },
       {
         id: "prepared_by",
-        header: t("outbound.preparedBy") || "Taýýarlan",
-        size: 180,
-        accessorFn: (row) => row.prepared_by_employee?.fullName ?? "",
+        header: t("columns.operatorTwo"),
+        size: 200,
+        accessorFn: (row) => row.preparedOpr?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.prepared_by_employee?.fullName || row.original.prepared_by}
-            secondary={
-              row.original.prepared_by_employee?.office
-                ? selectedLang(row.original.prepared_by_employee.office.shortName) || selectedLang(row.original.prepared_by_employee.office.fullName)
-                : ""
-            }
+            primary={row.original.preparedOpr?.fullName}
+            secondary={selectedLang(
+              row?.original?.preparedOpr?.office?.fullName ||
+                row?.original?.preparedOpr?.office?.shortName,
+            )}
           />
         ),
       },
-      { accessorKey: "destinationCountry", id: "destinationCountry", header: t("outbound.destinationCountry") || "Ugur ýurdy", size: 150 },
       {
-        accessorKey: "net_fare",
         id: "net_fare",
-        header: t("outbound.net_fare") || "Alnan baha",
-        size: 110,
-        Cell: ({ row, cell }) => `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        header: t("columns.netFare"),
+        size: 120,
+        accessorFn: (row) => row.net_fare ?? 0,
+        Cell: ({ row, cell }) =>
+          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         accessorKey: "price",
         id: "price",
-        header: t("outbound.price") || "Satuw baha",
-        size: 110,
-        Cell: ({ row, cell }) => `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        header: t("outbound.price"),
+        size: 120,
+        Cell: ({ row, cell }) =>
+          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         accessorKey: "profit",
         id: "profit",
-        header: t("outbound.profit") || "Peýda",
-        size: 110,
-        Cell: ({ row, cell }) => `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        header: t("outbound.profit"),
+        size: 120,
+        Cell: ({ row, cell }) =>
+          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
-      { accessorKey: "source", id: "source", header: t("outbound.partner") || "Hyzmatdaş", size: 120 },
+      {
+        accessorFn: (row) => {
+          const pct = row.paidPercentage;
+          return typeof pct === "string" ? parseFloat(pct) : pct;
+        },
+        id: "paidPercentage",
+        header: t("columns.paymentStatus"),
+        size: 110,
+        Cell: ({ row }) => (
+          <PaymentStatusCell percent={row.original.paidPercentage} />
+        ),
+      },
+      {
+        id: "destination_country",
+        header: t("outbound.destinationCountry"),
+        size: 250,
+        accessorFn: (row) => row.destination_country || "",
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        id: "partner",
+        header: t("outbound.partner") || "Hyzmatdaş",
+        size: 120,
+        accessorFn: (row) => row.partner || "",
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
+        id: "note",
+        header: t("columns.note"),
+        size: 140,
+        accessorFn: (row) => row?.note || "",
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
       {
         id: "actions",
-        header: t("columns.actions") ?? "Amallar",
+        header: t("columns.actions"),
         size: 120,
         enableSorting: false,
-        Cell: ({ row, table }) => <ColumnActionButtons row={row} table={table} onDelete={handleDeleteClick} showPayment={true} />,
+        Cell: ({ row, table }) => (
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={handleDeleteClick}
+            showPayment={true}
+          />
+        ),
       },
     ],
-    [t, selectedLang, handleDeleteClick]
+    [t, selectedLang, formatChange, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    enableColumnPinning: true,
     columns,
     data: listData,
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
+      },
+    },
     state: { isLoading, showSkeletons: isLoading && isFetching },
     rowCount: totalItems,
     manualPagination: true,
     onPaginationChange: (updater) => {
-      const nextPagination = typeof updater === "function" ? updater({ pageIndex: page - 1, pageSize: limit }) : updater;
+      const nextPagination =
+        typeof updater === "function"
+          ? updater({ pageIndex: page - 1, pageSize: limit })
+          : updater;
       setPage(nextPagination.pageIndex + 1);
       setPageSize(nextPagination.pageSize);
     },
@@ -192,8 +269,12 @@ const PackageTab = ({
         ))}
       </Box>
     ),
-    renderCreateRowDialogContent: ({ table }) => <AddPackageModal open={true} onClose={onCloseAdd} table={table} />,
-    renderEditRowDialogContent: ({ table, row }) => <EditPackageModal table={table} row={row} />,
+    renderCreateRowDialogContent: ({ table }) => (
+      <AddPackageModal open={true} onClose={onCloseAdd} table={table} />
+    ),
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditPackageModal table={table} row={row} />
+    ),
   });
 
   return (
@@ -205,7 +286,9 @@ const PackageTab = ({
         isLoading={isDeleting}
         description={t("deleteConfirm")}
       />
-      {isAddOpen && <AddPackageModal open={isAddOpen} onClose={onCloseAdd} table={table} />}
+      {isAddOpen && (
+        <AddPackageModal open={isAddOpen} onClose={onCloseAdd} table={table} />
+      )}
       <MaterialReactTable table={table} />
     </>
   );

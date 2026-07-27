@@ -199,7 +199,7 @@ const AddTourModal = ({ open = true, onClose, table }) => {
             />
           </Grid>
 
-          <Grid size={4}>
+          <Grid size={6}>
             <CustomSelect
               name="system"
               control={control}

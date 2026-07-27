@@ -6,11 +6,11 @@ const PackageFields = ({ control }) => {
   const { t } = useLocale();
 
   return (
-    <Grid size={12}>
+    <Grid size={6}>
       <CustomTextField
-        name="destinationCountry"
+        name="destination_country"
         control={control}
-        label={t("outbound.destinationCountry") || "Ugur ýurdy"}
+        label={t("outbound.destinationCountry")}
       />
     </Grid>
   );

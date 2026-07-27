@@ -79,7 +79,6 @@ const CustomTextField = ({
                     </span>
                   ) : InputProps.endAdornment,
                 },
-                inputLabel: InputLabelProps,
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {

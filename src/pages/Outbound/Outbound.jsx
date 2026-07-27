@@ -78,6 +78,7 @@ const OutboundPage = () => {
               key={tab.key}
               value={tab.key}
               label={t(tab.labelKey) || tab.key}
+              sx={{minWidth: 130}}
             />
           ))}
         </Tabs>

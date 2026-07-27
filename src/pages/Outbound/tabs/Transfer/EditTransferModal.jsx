@@ -219,7 +219,7 @@ const EditTransferModal = ({ table, row }) => {
             />
           </Grid>
 
-          <Grid size={6}>
+          <Grid size={4}>
             <CustomSelect
               name="system"
               control={control}

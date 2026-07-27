@@ -76,7 +76,6 @@ const FilterDate = ({ label, name, value, onChange }) => (
       size="small"
       value={value ?? ""}
       onChange={(e) => onChange(name, e.target.value)}
-      InputLabelProps={{ shrink: true }}
       sx={{
         "& .MuiOutlinedInput-root": {
           borderRadius: "10px",

@@ -215,7 +215,6 @@ const AddTranslateModal = ({ table }) => {
                 control={control}
                 label={t("columns.receivedTime") || "Alnan wagty"}
                 type="time"
-                InputLabelProps={{ shrink: true }}
               />
             </Grid>
 
@@ -336,7 +335,6 @@ const AddTranslateModal = ({ table }) => {
                 control={control}
                 label={t("columns.completedTime") || "Tabşyrylan wagty"}
                 type="time"
-                InputLabelProps={{ shrink: true }}
               />
             </Grid>
 

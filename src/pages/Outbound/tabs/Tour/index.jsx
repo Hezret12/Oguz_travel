@@ -128,20 +128,20 @@ const TourTab = ({
         ),
       },
       {
-        accessorKey: "price",
-        id: "price",
-        header: t("outbound.price"),
+        id: "net_fare",
+        header: t("columns.netFare"),
         size: 120,
+        accessorFn: (row) => row.net_fare ?? 0,
         Cell: ({ row, cell }) =>
           `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
       },
       {
-        id: "net_fare",
-        header: t("columns.netFare"),
+        accessorKey: "price",
+        id: "price",
+        header: t("outbound.price"),
         size: 120,
-        accessorFn: (row) => row.net_fare ?? 0,
         Cell: ({ row, cell }) =>
           `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
         muiTableHeadCellProps: { align: "center" },
@@ -180,10 +180,9 @@ const TourTab = ({
       {
         id: "tour_name",
         header: t("outbound.tourName") || "Tur ady",
-        size: 150,
+        size: 200,
         accessorFn: (row) => row.tour_name || "",
         muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "guests_count",
@@ -207,7 +206,6 @@ const TourTab = ({
         size: 140,
         accessorFn: (row) => row?.note || "",
         muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "actions",
