@@ -32,13 +32,22 @@ const ThemeToggle = ({ variant = 'header' }) => {
     width: 38,
     height: 38,
     borderRadius: '10px',
+    backgroundColor: (theme) =>
+      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+    border: '1px solid',
+    borderColor: (theme) =>
+      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
     color: (theme) =>
-      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : '#334155',
+      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.85)' : '#334155',
     '&:hover': {
       backgroundColor: (theme) =>
         theme.palette.mode === 'dark'
-          ? 'rgba(255,255,255,0.08)'
-          : 'rgba(0,0,0,0.06)',
+          ? 'rgba(255,255,255,0.12)'
+          : 'rgba(0,0,0,0.07)',
+      borderColor: (theme) =>
+        theme.palette.mode === 'dark'
+          ? 'rgba(255,255,255,0.25)'
+          : 'rgba(0,0,0,0.22)',
     },
     transition: 'all 0.2s ease',
   };

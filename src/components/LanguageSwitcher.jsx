@@ -5,35 +5,47 @@ import {
   MenuItem,
   Tooltip,
   useColorScheme,
+  Box,
+  Typography,
 } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
-import { useTranslation } from 'react-i18next';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { useLocale } from '../hooks/useLocale';
 
+import tkmFlag from '../assets/language/tkm.png';
+import rusFlag from '../assets/language/rus.png';
+import usaFlag from '../assets/language/usa.png';
 
-const langLabel = { tk: 'Türkmen', ru: 'Русский', en: 'English' };
+const LANGUAGES = [
+  { code: 'tk', label: 'Türkmençe', shortLabel: 'TK', flag: tkmFlag },
+  { code: 'ru', label: 'Русский', shortLabel: 'RU', flag: rusFlag },
+  { code: 'en', label: 'English', shortLabel: 'EN', flag: usaFlag },
+];
 
 const LanguageSwitcher = ({ variant = 'header' }) => {
-  const { t, i18n } = useTranslation();
+  const { t, currentLanguage, changeLang } = useLocale();
   const { mode } = useColorScheme();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const isDark = mode === 'dark';
+  const isLogin = variant === 'login';
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-    localStorage.setItem('language', lng);
+  const activeLangObj = LANGUAGES.find((l) => l.code === currentLanguage) || LANGUAGES[0];
+
+  const handleSelectLanguage = (lng) => {
+    changeLang(lng);
     setAnchorEl(null);
   };
 
   /* ── Login variant styles ── */
-  const loginTopBtnBg    = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
-  const loginTopBtnBorder= isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)';
-  const loginTopBtnText  = '#ffffff';
-  const loginTextColor   = isDark ? '#ffffff' : '#1a1a2e';
+  const loginTopBtnBg     = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
+  const loginTopBtnBorder = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)';
+  const loginTopBtnText   = '#ffffff';
+  const loginTextColor    = isDark ? '#ffffff' : '#1a1a2e';
 
   const loginButtonSx = {
     height: 36,
-    px: 1.8,
+    px: 1.5,
     borderRadius: '10px',
     backgroundColor: loginTopBtnBg,
     border: `1px solid ${loginTopBtnBorder}`,
@@ -56,21 +68,29 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
     backgroundColor: isDark ? 'rgba(20,40,60,0.95)' : 'rgba(255,255,255,0.97)',
     border: `1px solid ${loginTopBtnBorder}`,
     minWidth: 140,
+    p: 0.5,
   };
 
   const headerButtonSx = {
-    textTransform: 'uppercase',
-    fontWeight: 600,
     borderRadius: '10px',
     height: 38,
     px: 1.5,
+    backgroundColor: (theme) =>
+      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+    border: '1px solid',
+    borderColor: (theme) =>
+      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
     color: (theme) =>
-      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : '#334155',
+      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.85)' : '#334155',
     '&:hover': {
       backgroundColor: (theme) =>
         theme.palette.mode === 'dark'
-          ? 'rgba(255,255,255,0.08)'
-          : 'rgba(0,0,0,0.06)',
+          ? 'rgba(255,255,255,0.12)'
+          : 'rgba(0,0,0,0.07)',
+      borderColor: (theme) =>
+        theme.palette.mode === 'dark'
+          ? 'rgba(255,255,255,0.25)'
+          : 'rgba(0,0,0,0.22)',
     },
     transition: 'all 0.2s ease',
   };
@@ -85,20 +105,36 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
     p: 0.5,
   };
 
-  const isLogin = variant === 'login';
-
   return (
     <>
-      <Tooltip title={t('header.languageTooltip')}>
+      <Tooltip title={t('header.languageTooltip') || 'Language'}>
         <Button
           color={isLogin ? undefined : 'inherit'}
           onClick={(e) => setAnchorEl(e.currentTarget)}
-          startIcon={<LanguageIcon sx={isLogin ? { fontSize: 18 } : {}} />}
+          startIcon={<LanguageIcon sx={{ fontSize: 18 }} />}
+          endIcon={
+            <KeyboardArrowDownIcon
+              sx={{
+                fontSize: 16,
+                transition: 'transform 0.2s',
+                transform: Boolean(anchorEl) ? 'rotate(180deg)' : 'none',
+                opacity: 0.8,
+              }}
+            />
+          }
           sx={isLogin ? loginButtonSx : headerButtonSx}
         >
-          {isLogin
-            ? (langLabel[i18n.language] ?? 'Türkmen')
-            : (i18n.language || 'tk')}
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              textTransform: 'uppercase',
+              color: isLogin ? loginTopBtnText : 'inherit',
+            }}
+          >
+            {activeLangObj.shortLabel}
+          </Typography>
         </Button>
       </Tooltip>
 
@@ -108,27 +144,56 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
         onClose={() => setAnchorEl(null)}
         slotProps={{ paper: { sx: isLogin ? loginMenuPaperSx : headerMenuPaperSx } }}
       >
-        <MenuItem
-          onClick={() => changeLanguage('tk')}
-          sx={isLogin ? { color: loginTextColor, fontSize: '0.875rem' } : {}}
-        >
-          {isLogin ? '🇹🇲 \u00a0 Türkmençe' : 'Türkmençe (TK)'}
-        </MenuItem>
-        <MenuItem
-          onClick={() => changeLanguage('ru')}
-          sx={isLogin ? { color: loginTextColor, fontSize: '0.875rem' } : {}}
-        >
-          {isLogin ? '🇷🇺 \u00a0 Русский' : 'Русский (RU)'}
-        </MenuItem>
-        <MenuItem
-          onClick={() => changeLanguage('en')}
-          sx={isLogin ? { color: loginTextColor, fontSize: '0.875rem' } : {}}
-        >
-          {isLogin ? '🇬🇧 \u00a0 English' : 'English (EN)'}
-        </MenuItem>
+        {LANGUAGES.map((lang) => {
+          const isSelected = activeLangObj.code === lang.code;
+          return (
+            <MenuItem
+              key={lang.code}
+              selected={isSelected}
+              onClick={() => handleSelectLanguage(lang.code)}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.2,
+                py: 0.8,
+                px: 1.5,
+                borderRadius: '8px',
+                my: 0.25,
+                color: isLogin ? loginTextColor : 'inherit',
+                fontSize: '0.875rem',
+                fontWeight: isSelected ? 700 : 500,
+                backgroundColor: isSelected
+                  ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(14,133,132,0.12)')
+                  : 'transparent',
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(14,133,132,0.18)',
+                },
+              }}
+            >
+              <Box
+                component="img"
+                src={lang.flag}
+                alt={lang.label}
+                sx={{
+                  width: 22,
+                  height: 15,
+                  borderRadius: '3px',
+                  objectFit: 'cover',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                  display: 'block',
+                }}
+              />
+              <Typography variant="body2" sx={{ fontWeight: isSelected ? 700 : 500, fontSize: '0.85rem' }}>
+                {lang.label}
+              </Typography>
+            </MenuItem>
+          );
+        })}
       </Menu>
     </>
   );
 };
 
 export default LanguageSwitcher;
+
+
