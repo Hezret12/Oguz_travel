@@ -78,3 +78,7 @@ export const deletePackageApi = async (payload) => {
 export const deleteHarPaymentApi = async (guid) => {
   return await api.deletePrivate('/har-payment/delete-har-payment', guid);
 };
+
+export const deleteTtpPaymentApi = async (guid) => {
+  return await api.deletePrivate('/ttp-payment/delete-ttp-payment', guid);
+};

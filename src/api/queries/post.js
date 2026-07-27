@@ -143,3 +143,11 @@ export const addHarPaymentApi = async (data) => {
   return response;
 };
 
+export const addTtpPaymentApi = async (data) => {
+  const response = await api.postPrivate(
+    "/ttp-payment/add-ttp-payment",
+    data,
+  );
+  return response;
+};
+
