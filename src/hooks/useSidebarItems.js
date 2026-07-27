@@ -106,7 +106,7 @@ export const useSidebarItems = () => {
       },
       {
         text: t("sidebar.visaIntake"),
-        path: "/visa/intake",
+        path: "/intake",
         icon: createElement(AssignmentRoundedIcon),
       }
     ],

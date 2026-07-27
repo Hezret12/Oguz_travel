@@ -47,7 +47,6 @@ const router = createBrowserRouter([
               { path: 'visa/referal-letters', element: <ReferralLetter /> },
               { path: 'visa/package',      element: <PackagePage /> },
               { path: 'translation',       element: <TranslatePage /> },
-              { path: 'visa/intake',       element: <VisaIntakePage /> },
               { path: 'outbound',          element: <OutboundPage /> },
               {
                 path: 'ticket',
@@ -63,6 +62,7 @@ const router = createBrowserRouter([
               { path: 'planner',        element: <PlaceholderPage title="Trip Planner" /> },
               { path: 'search',         element: <PlaceholderPage title="Search Flights" /> },
               { path: 'profile',        element: <PlaceholderPage title="My Profile" /> },
+              { path: 'intake',         element: <VisaIntakePage /> },
               { path: 'logs',           element: <PlaceholderPage title="System Logs" /> },
               { path: 'settings',       element: <PlaceholderPage title="System Settings" /> },
               { path: 'unauthorized',   element: <UnauthorizedPage /> },
