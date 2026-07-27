@@ -20,6 +20,7 @@ import PackagePage from '../pages/Visa/Package/Package';
 import TranslatePage from '../pages/Translate';
 import OutboundPage from '../pages/Outbound/Outbound';
 import VisaIntakePage from '../pages/VisaIntake';
+import TurkishAirlinesReportPage from '../pages/Reports/TurkishAirlinesReport';
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,7 @@ const router = createBrowserRouter([
               { path: 'search',         element: <PlaceholderPage title="Search Flights" /> },
               { path: 'profile',        element: <PlaceholderPage title="My Profile" /> },
               { path: 'intake',         element: <VisaIntakePage /> },
+              { path: 'reports/turkish-airlines', element: <TurkishAirlinesReportPage /> },
               { path: 'logs',           element: <PlaceholderPage title="System Logs" /> },
               { path: 'settings',       element: <PlaceholderPage title="System Settings" /> },
               { path: 'unauthorized',   element: <UnauthorizedPage /> },

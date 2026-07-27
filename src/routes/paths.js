@@ -19,6 +19,10 @@ export const PATHS = {
     ROOT: '/employee',
     USERS: '/employee/users',
   },
+  REPORTS: {
+    ROOT: '/reports',
+    TURKISH_AIRLINES: '/reports/turkish-airlines',
+  },
 };
 
 export function joinPath(...segments) {

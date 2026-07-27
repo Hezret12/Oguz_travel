@@ -12,6 +12,7 @@ import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import TranslateIcon from "@mui/icons-material/Translate";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 
 export const useSidebarItems = () => {
@@ -98,6 +99,22 @@ export const useSidebarItems = () => {
         text: t("outbound.title") || "Outbound",
         path: "/outbound",
         icon: createElement(FlightTakeoffIcon),
+      },
+      {
+        isGroup: true,
+        text: t("sidebar.reports"),
+        icon: createElement(AssessmentIcon),
+        children: [
+          {
+            text: t("sidebar.reportTurkishAirlines"),
+            path: "/reports/turkish-airlines",
+            icon: createElement("img", {
+              src: TurkishAirlinesIcon,
+              alt: "Turkish Airlines",
+              style: { width: 32, height: 30, objectFit: "contain" },
+            }),
+          },
+        ],
       },
       {
         text: t("sidebar.settings"),

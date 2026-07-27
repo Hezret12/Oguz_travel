@@ -445,6 +445,8 @@
     "referalLetters": "Referral Letters",
     "visaApplications": "Visa Applications",
     "visaIntake": "Visa Intake",
+    "reports": "Reports",
+    "reportTurkishAirlines": "Turkish Airlines",
     "visa": {
       "package": "Packages",
       "packageDescription": "Visa packages and individual services",
@@ -558,5 +560,25 @@
     "transferType": "Transfer Type",
     "carType": "Car Type",
     "note": "Note"
+  },
+  "report": {
+    "turkishAirlines": {
+      "title": "Daily Report",
+      "subtitle": "daily turnover by offices",
+      "day": "DAY",
+      "total": "TOTAL",
+      "totalConfirmed": "Totals confirmed",
+      "baseFare": "Base fare",
+      "quotedPrice": "Quoted price",
+      "profit": "Profit",
+      "percentage": "Percentage",
+      "workingDays": "Working days",
+      "monthTotal": "Monthly total",
+      "selectMonth": "Select month",
+      "selectYear": "Select year",
+      "office": "Office",
+      "totalBase": "Total base",
+      "totalQuoted": "Total quoted"
+    }
   }
 }

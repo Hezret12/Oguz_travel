@@ -436,6 +436,8 @@
     "referalLetters": "Рекомендательные письма",
     "visaApplications": "Визовые анкеты",
     "visaIntake": "Прием документов",
+    "reports": "Отчёты",
+    "reportTurkishAirlines": "Turkish Airlines",
     "visa": {
       "package": "Пакеты",
       "packageDescription": "Управление визовыми пакетами и услугами",
@@ -549,5 +551,25 @@
     "transferType": "Тип трансфера",
     "carType": "Класс авто",
     "note": "Примечание"
+  },
+  "report": {
+    "turkishAirlines": {
+      "title": "Ежедневный отчёт",
+      "subtitle": "ежедневный оборот по офисам",
+      "day": "ДЕНЬ",
+      "total": "ИТОГО",
+      "totalConfirmed": "Итоги подтверждены",
+      "baseFare": "Базовая цена",
+      "quotedPrice": "Котировочная цена",
+      "profit": "Прибыль",
+      "percentage": "Процент",
+      "workingDays": "Рабочие дни",
+      "monthTotal": "Итог за месяц",
+      "selectMonth": "Выберите месяц",
+      "selectYear": "Выберите год",
+      "office": "Офис",
+      "totalBase": "Всего базовая",
+      "totalQuoted": "Всего котировочная"
+    }
   }
 }

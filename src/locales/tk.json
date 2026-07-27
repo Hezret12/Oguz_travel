@@ -276,6 +276,8 @@
     "referalLetters": "Ýollanma haty",
     "visaApplications": "Wiza arza",
     "visaIntake": "Kabul ediji",
+    "reports": "Hasabat",
+    "reportTurkishAirlines": "Türk howa ýollary",
     "visa": {
       "package": "Bukjalar",
       "packageDescription": "Bukjalar we aýratyn hyzmatlar",
@@ -418,6 +420,26 @@
       "isProcessed": "Işlenen ýagdaýy",
       "schengenCountry": "Şengen ýurdy",
       "queueDate": "Nobat senesi"
+    }
+  },
+  "report": {
+    "turkishAirlines": {
+      "title": "Günlük hasabat",
+      "subtitle": "ofisler boýunça günlük ciro",
+      "day": "GÜN",
+      "total": "JEMI",
+      "totalConfirmed": "Jemi tassyklandy",
+      "baseFare": "Esasy baha",
+      "quotedPrice": "Aýdylan baha",
+      "profit": "Peýda",
+      "percentage": "Göterim",
+      "workingDays": "Iş günleri",
+      "monthTotal": "Aýlyk jemi",
+      "selectMonth": "Aý saýlaň",
+      "selectYear": "Ýyl saýlaň",
+      "office": "Ofis",
+      "totalBase": "Jemi esasy",
+      "totalQuoted": "Jemi aýdylan"
     }
   }
 }
