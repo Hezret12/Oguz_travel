@@ -58,14 +58,14 @@ const ReportTable = ({
             variant="subtitle1"
             sx={{ fontWeight: 700, color: isDark ? "#FFF" : "#0F172A" }}
           >
-            {t("report.turkishAirlines.dailyReportTable") || "Günlük Detaylı Hasabat Jedveli"}
+            {t("report.turkishAirlines.dailyReportTable")}
           </Typography>
         </Box>
         <Typography
           variant="caption"
           sx={{ color: isDark ? "rgba(255,255,255,0.4)" : "#64748B" }}
         >
-          {daysInMonth} {t("report.turkishAirlines.daysData") || "Günlük Veri"}
+          {daysInMonth} {t("report.turkishAirlines.daysData")}
         </Typography>
       </Box>
 
@@ -86,24 +86,27 @@ const ReportTable = ({
             <TableHead>
               <TableRow>
                 <TableCell
+                  align="center"
                   sx={{
                     ...headerCellSx,
                     position: "sticky",
                     left: 0,
                     zIndex: 3,
                     backgroundColor: bgHeader,
-                    minWidth: 60,
+                    width: 48,
+                    minWidth: 48,
+                    px: 1,
                   }}
                 >
                   {t("report.turkishAirlines.day")}
                 </TableCell>
-                {offices.map(({ short }) => (
+                {offices.map(({ short, full }) => (
                   <TableCell
                     key={short}
                     align="center"
-                    sx={{ ...headerCellSx, minWidth: 90 }}
+                    sx={{ ...headerCellSx, minWidth: 95 }}
                   >
-                    {short}
+                    {full || short}
                   </TableCell>
                 ))}
                 <TableCell
@@ -128,7 +131,7 @@ const ReportTable = ({
                 <TableRow>
                   <TableCell colSpan={offices.length + 2} align="center" sx={{ py: 6 }}>
                     <Typography variant="body2" sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontWeight: 600 }}>
-                      {t("report.turkishAirlines.noData") || t("noData") || "Maglumat tapylmady"}
+                      {t("noData")}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -152,6 +155,7 @@ const ReportTable = ({
                     }}
                   >
                     <TableCell
+                      align="center"
                       sx={{
                         ...bodyCellSx,
                         fontWeight: 700,
@@ -160,6 +164,9 @@ const ReportTable = ({
                         position: "sticky",
                         left: 0,
                         zIndex: 1,
+                        width: 48,
+                        minWidth: 48,
+                        px: 1,
                         backgroundColor:
                           idx % 2 === 1
                             ? isDark
@@ -184,21 +191,31 @@ const ReportTable = ({
 
                       return (
                         <TableCell key={short} align="center" sx={bodyCellSx}>
-                          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 13, lineHeight: 1.2 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "baseline",
+                              justifyContent: "center",
+                              gap: 0.6,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 600, fontSize: 13, lineHeight: 1.2 }}
+                            >
                               {quoted > 0 ? formatNumber(quoted) : "0"}
                             </Typography>
                             {base > 0 && (
                               <Typography
                                 variant="caption"
                                 sx={{
-                                  fontSize: 10.5,
+                                  fontSize: 11,
                                   color: isDark ? "rgba(255,255,255,0.45)" : "#64748B",
                                   fontWeight: 500,
-                                  mt: 0.2,
                                 }}
                               >
-                                {formatNumber(base)}
+                                ({formatNumber(base)})
                               </Typography>
                             )}
                           </Box>
@@ -214,8 +231,8 @@ const ReportTable = ({
                           row.total > 0
                             ? green
                             : isDark
-                            ? "rgba(255,255,255,0.2)"
-                            : "#CBD5E1",
+                              ? "rgba(255,255,255,0.2)"
+                              : "#CBD5E1",
                         fontSize: 13.5,
                         position: "sticky",
                         right: 0,
@@ -257,7 +274,7 @@ const ReportTable = ({
                           px: 1,
                         }}
                       >
-                        {t("report.turkishAirlines.totalSummary") || "JEMI JEMLEME"}
+                        {t("report.turkishAirlines.totalSummary")}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -440,7 +457,7 @@ const ReportTable = ({
                             fontWeight: 600,
                           }}
                         >
-                          {t("report.turkishAirlines.workingDays")}:{" "}
+                          {t("report.turkishAirlines.workingDays")}:
                           {grandTotal.working_days_count}
                         </Typography>
                       )}
