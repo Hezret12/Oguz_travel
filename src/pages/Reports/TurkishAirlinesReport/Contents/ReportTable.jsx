@@ -58,14 +58,14 @@ const ReportTable = ({
             variant="subtitle1"
             sx={{ fontWeight: 700, color: isDark ? "#FFF" : "#0F172A" }}
           >
-            Günlük Detaylı Hasabat Jedveli
+            {t("report.turkishAirlines.dailyReportTable") || "Günlük Detaylı Hasabat Jedveli"}
           </Typography>
         </Box>
         <Typography
           variant="caption"
           sx={{ color: isDark ? "rgba(255,255,255,0.4)" : "#64748B" }}
         >
-          {daysInMonth} Günlük Veri
+          {daysInMonth} {t("report.turkishAirlines.daysData") || "Günlük Veri"}
         </Typography>
       </Box>
 
@@ -124,89 +124,115 @@ const ReportTable = ({
             </TableHead>
 
             <TableBody>
-              {rows.map((row, idx) => (
-                <TableRow
-                  key={row.day}
-                  sx={{
-                    backgroundColor:
-                      idx % 2 === 1
-                        ? isDark
-                          ? "rgba(255,255,255,0.015)"
-                          : "#F8FAFC"
-                        : "transparent",
-                    "&:hover": {
-                      backgroundColor: isDark
-                        ? "rgba(20,184,166,0.08)"
-                        : "rgba(14,133,132,0.05)",
-                    },
-                    transition: "background-color 0.15s ease",
-                  }}
-                >
-                  <TableCell
-                    sx={{
-                      ...bodyCellSx,
-                      fontWeight: 700,
-                      color: teal,
-                      fontSize: 13.5,
-                      position: "sticky",
-                      left: 0,
-                      zIndex: 1,
-                      backgroundColor:
-                        idx % 2 === 1
-                          ? isDark
-                            ? "#021721"
-                            : "#F8FAFC"
-                          : bgSticky,
-                    }}
-                  >
-                    {row.day}
-                  </TableCell>
-                  {offices.map(({ short }) => (
-                    <TableCell
-                      key={short}
-                      align="center"
-                      sx={{
-                        ...bodyCellSx,
-                        color:
-                          row[short] !== null
-                            ? isDark
-                              ? "rgba(255,255,255,0.9)"
-                              : "#1E293B"
-                            : isDark
-                            ? "rgba(255,255,255,0.18)"
-                            : "#CBD5E1",
-                      }}
-                    >
-                      {row[short] !== null ? formatNumber(row[short]) : "—"}
-                    </TableCell>
-                  ))}
-                  <TableCell
-                    align="right"
-                    sx={{
-                      ...bodyCellSx,
-                      fontWeight: 700,
-                      color:
-                        row.total > 0
-                          ? green
-                          : isDark
-                          ? "rgba(255,255,255,0.2)"
-                          : "#CBD5E1",
-                      fontSize: 13.5,
-                      position: "sticky",
-                      right: 0,
-                      zIndex: 1,
-                      backgroundColor:
-                        idx % 2 === 1
-                          ? isDark
-                            ? "#021721"
-                            : "#F8FAFC"
-                          : bgSticky,
-                    }}
-                  >
-                    {row.total > 0 ? formatNumber(row.total) : "0"}
+              {offices.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={offices.length + 2} align="center" sx={{ py: 6 }}>
+                    <Typography variant="body2" sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontWeight: 600 }}>
+                      {t("report.turkishAirlines.noData") || t("noData") || "Maglumat tapylmady"}
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                rows.map((row, idx) => (
+                  <TableRow
+                    key={row.day}
+                    sx={{
+                      backgroundColor:
+                        idx % 2 === 1
+                          ? isDark
+                            ? "rgba(255,255,255,0.015)"
+                            : "#F8FAFC"
+                          : "transparent",
+                      "&:hover": {
+                        backgroundColor: isDark
+                          ? "rgba(20,184,166,0.08)"
+                          : "rgba(14,133,132,0.05)",
+                      },
+                      transition: "background-color 0.15s ease",
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        ...bodyCellSx,
+                        fontWeight: 700,
+                        color: teal,
+                        fontSize: 13.5,
+                        position: "sticky",
+                        left: 0,
+                        zIndex: 1,
+                        backgroundColor:
+                          idx % 2 === 1
+                            ? isDark
+                              ? "#021721"
+                              : "#F8FAFC"
+                            : bgSticky,
+                      }}
+                    >
+                      {row.day}
+                    </TableCell>
+                    {offices.map(({ short }) => {
+                      const cellVal = row[short];
+                      if (!cellVal) {
+                        return (
+                          <TableCell key={short} align="center" sx={bodyCellSx}>
+                            —
+                          </TableCell>
+                        );
+                      }
+                      const quoted = typeof cellVal === "object" ? cellVal.quoted : Number(cellVal) || 0;
+                      const base = typeof cellVal === "object" ? cellVal.base : 0;
+
+                      return (
+                        <TableCell key={short} align="center" sx={bodyCellSx}>
+                          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 13, lineHeight: 1.2 }}>
+                              {quoted > 0 ? formatNumber(quoted) : "0"}
+                            </Typography>
+                            {base > 0 && (
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  fontSize: 10.5,
+                                  color: isDark ? "rgba(255,255,255,0.45)" : "#64748B",
+                                  fontWeight: 500,
+                                  mt: 0.2,
+                                }}
+                              >
+                                {formatNumber(base)}
+                              </Typography>
+                            )}
+                          </Box>
+                        </TableCell>
+                      );
+                    })}
+                    <TableCell
+                      align="right"
+                      sx={{
+                        ...bodyCellSx,
+                        fontWeight: 700,
+                        color:
+                          row.total > 0
+                            ? green
+                            : isDark
+                            ? "rgba(255,255,255,0.2)"
+                            : "#CBD5E1",
+                        fontSize: 13.5,
+                        position: "sticky",
+                        right: 0,
+                        zIndex: 1,
+                        backgroundColor:
+                          idx % 2 === 1
+                            ? isDark
+                              ? "#021721"
+                              : "#F8FAFC"
+                            : bgSticky,
+                      }}
+                    >
+                      {row.total > 0 ? formatNumber(row.total) : "0"}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
 
               {/* ── Summary Footer Rows ── */}
               {footer.length > 0 && (
@@ -231,7 +257,7 @@ const ReportTable = ({
                           px: 1,
                         }}
                       >
-                        JEMI JEMLEME
+                        {t("report.turkishAirlines.totalSummary") || "JEMI JEMLEME"}
                       </Typography>
                     </TableCell>
                   </TableRow>

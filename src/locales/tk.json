@@ -424,13 +424,12 @@
   },
   "report": {
     "turkishAirlines": {
-      "title": "Günlük hasabat",
-      "subtitle": "ofisler boýunça günlük ciro",
-      "day": "GÜN",
-      "total": "JEMI",
+      "title": "Günlik hasabat",
+      "day": "Gün",
+      "total": "Jemi",
       "totalConfirmed": "Jemi tassyklandy",
       "baseFare": "Esasy baha",
-      "quotedPrice": "Aýdylan baha",
+      "quotedPrice": "Satylan baha",
       "profit": "Peýda",
       "percentage": "Göterim",
       "workingDays": "Iş günleri",
@@ -439,7 +438,17 @@
       "selectYear": "Ýyl saýlaň",
       "office": "Ofis",
       "totalBase": "Jemi esasy",
-      "totalQuoted": "Jemi aýdylan"
+      "totalQuoted": "Jemi aýdylan",
+      "noData": "Maglumat tapylmady",
+      "dailyTurnoverChart": "Günlük paýlanyş",
+      "dailyTurnoverSubtitle": "Günlik satyşlaryň paýlanylşy",
+      "statusChart": "Status grafikleri",
+      "statusChartSubtitle": "Aýlyk status paýlanşygy",
+      "officeBreakdown": "Ofisler boýunça",
+      "officeBreakdownSubtitle": "Ofisler boýunça paýlanylşy",
+      "dailyReportTable": "Satyşlaryň günlik paýlanylşy",
+      "daysData": "Türk howa ýollary hasabat",
+      "totalSummary": "Jemi"
     }
   }
 }

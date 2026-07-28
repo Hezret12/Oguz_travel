@@ -56,3 +56,25 @@ export const useUserInfo = () => {
     role: user?.role,
   };
 };
+
+/**
+ * Format a numeric value with locale-aware thousand separators.
+ * Returns "—" for non-numeric/null values.
+ */
+export const formatNumber = (val) => {
+  const num = Number(val);
+  if (!num && num !== 0) return "—";
+  return num.toLocaleString("en-US", { maximumFractionDigits: 0 });
+};
+
+/**
+ * Format a numeric value in a compact human-readable form (e.g., 1.5K, 2.3M).
+ * Returns "0" for non-numeric/null values.
+ */
+export const formatCompact = (val) => {
+  const num = Number(val);
+  if (!num && num !== 0) return "0";
+  if (Math.abs(num) >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+  if (Math.abs(num) >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
+  return String(num);
+};

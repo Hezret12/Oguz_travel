@@ -578,7 +578,17 @@
       "selectYear": "Select year",
       "office": "Office",
       "totalBase": "Total base",
-      "totalQuoted": "Total quoted"
+      "totalQuoted": "Total quoted",
+      "noData": "No data found",
+      "dailyTurnoverChart": "Daily Turnover Chart",
+      "dailyTurnoverSubtitle": "Daily total sales numbers",
+      "statusChart": "Status Chart",
+      "statusChartSubtitle": "Monthly status distribution",
+      "officeBreakdown": "Office Breakdown",
+      "officeBreakdownSubtitle": "Contribution rates to total turnover",
+      "dailyReportTable": "Daily Detailed Report Table",
+      "daysData": "days of data",
+      "totalSummary": "GRAND TOTAL"
     }
   }
 }

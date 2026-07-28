@@ -560,7 +560,7 @@
       "total": "ИТОГО",
       "totalConfirmed": "Итоги подтверждены",
       "baseFare": "Базовая цена",
-      "quotedPrice": "Котировочная цена",
+      "quotedPrice": "Проданная цена",
       "profit": "Прибыль",
       "percentage": "Процент",
       "workingDays": "Рабочие дни",
@@ -569,7 +569,17 @@
       "selectYear": "Выберите год",
       "office": "Офис",
       "totalBase": "Всего базовая",
-      "totalQuoted": "Всего котировочная"
+      "totalQuoted": "Всего проданная",
+      "noData": "Данные не найдены",
+      "dailyTurnoverChart": "График ежедневного оборота",
+      "dailyTurnoverSubtitle": "Ежедневные показатели продаж",
+      "statusChart": "График статусов",
+      "statusChartSubtitle": "Распределение статусов за месяц",
+      "officeBreakdown": "Доля по офисам",
+      "officeBreakdownSubtitle": "Вклад в общий оборот",
+      "dailyReportTable": "Ежедневная подробная таблица отчета",
+      "daysData": "дней данных",
+      "totalSummary": "ОБЩИЙ ИТОГ"
     }
   }
 }

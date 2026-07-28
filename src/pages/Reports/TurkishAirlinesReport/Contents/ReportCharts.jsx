@@ -14,12 +14,13 @@ import { PieChart } from "@mui/x-charts/PieChart";
 import ShowChartRoundedIcon from "@mui/icons-material/ShowChartRounded";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
+import { useLocale } from "../../../../hooks/useLocale";
 
 const ReportCharts = ({
   isLoading,
   isStatusLoading,
   barChartData,
-  officeBreakdown,
+  officeBreakdown = [],
   statusChartData = [],
   formatNumber,
   monthQuoted,
@@ -28,8 +29,11 @@ const ReportCharts = ({
   borderCol,
   paperSx,
 }) => {
+  const { t } = useLocale();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+
+  const noDataText = t("noData");
 
   return (
     <Box
@@ -40,7 +44,7 @@ const ReportCharts = ({
       }}
     >
       {/* 1. Bar Chart: Daily Turnover */}
-      <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 } }}>
+      <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 }, display: "flex", flexDirection: "column" }}>
         <Box
           sx={{
             display: "flex",
@@ -60,18 +64,18 @@ const ReportCharts = ({
                   lineHeight: 1.2,
                 }}
               >
-                Günlük Ciro Graphiği
+                {t("report.turkishAirlines.dailyTurnoverChart")}
               </Typography>
               <Typography
                 variant="caption"
                 sx={{ color: isDark ? "rgba(255,255,255,0.45)" : "#64748B" }}
               >
-                Günlük toplam satış rakamları
+                {t("report.turkishAirlines.dailyTurnoverSubtitle")}
               </Typography>
             </Box>
           </Box>
           <Chip
-            label={`Jemi: ${formatNumber(monthQuoted)}`}
+            label={`${t("report.turkishAirlines.total")}: ${formatNumber(monthQuoted)}`}
             size="small"
             sx={{
               backgroundColor: alpha(teal, 0.12),
@@ -89,7 +93,7 @@ const ReportCharts = ({
             height={260}
             sx={{ borderRadius: 2 }}
           />
-        ) : (
+        ) : barChartData && barChartData.length > 0 && barChartData.some((d) => Number(d.value) > 0) ? (
           <Box sx={{ width: "100%", height: 260 }}>
             <BarChart
               dataset={barChartData}
@@ -111,7 +115,7 @@ const ReportCharts = ({
                   },
                 },
               ]}
-              series={[{ dataKey: "value", color: teal, label: "Ciro" }]}
+              series={[{ dataKey: "value", color: teal, label: t("report.turkishAirlines.total") || "Ciro" }]}
               height={260}
               margin={{ top: 15, bottom: 25, left: 55, right: 15 }}
               slotProps={{ bar: { rx: 4, ry: 4 } }}
@@ -120,6 +124,25 @@ const ReportCharts = ({
                 "& .MuiChartsAxis-tick": { stroke: borderCol },
               }}
             />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              height: 260,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              border: `1px dashed ${borderCol}`,
+              borderRadius: 2,
+              p: 2,
+              textAlign: "center",
+            }}
+          >
+            <ShowChartRoundedIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />
+            <Typography variant="body2" sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontWeight: 600 }}>
+              {noDataText}
+            </Typography>
           </Box>
         )}
       </Paper>
@@ -137,13 +160,13 @@ const ReportCharts = ({
                 lineHeight: 1.2,
               }}
             >
-              Status Graphiği
+              {t("report.turkishAirlines.statusChart") || "Status grafikleri"}
             </Typography>
             <Typography
               variant="caption"
               sx={{ color: isDark ? "rgba(255,255,255,0.45)" : "#64748B" }}
             >
-              Aýlyk status paýlanşygy
+              {t("report.turkishAirlines.statusChartSubtitle") || "Aýlyk status paýlanşygy"}
             </Typography>
           </Box>
         </Box>
@@ -177,10 +200,12 @@ const ReportCharts = ({
                     direction: "row",
                     position: { vertical: "bottom", horizontal: "middle" },
                     padding: 0,
-                    labelStyle: {
-                      fontSize: 11,
-                      fill: isDark ? "rgba(255,255,255,0.7)" : "#475569",
-                    },
+                  },
+                }}
+                sx={{
+                  "& .MuiChartsLegend-label": {
+                    fontSize: "11px !important",
+                    fill: isDark ? "rgba(255,255,255,0.7)" : "#475569",
                   },
                 }}
               />
@@ -227,7 +252,7 @@ const ReportCharts = ({
                         fontSize: 13,
                       }}
                     >
-                      {item.ticketCount} bilet ({item.percentage})
+                      {item.ticketCount} ({item.percentage})
                     </Typography>
                   </Box>
                 ))}
@@ -250,14 +275,14 @@ const ReportCharts = ({
           >
             <PieChartRoundedIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />
             <Typography variant="body2" sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontWeight: 600 }}>
-              Veri Bulunamadı
+              {noDataText}
             </Typography>
           </Box>
         )}
       </Paper>
 
       {/* 3. Office Distribution */}
-      <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 } }}>
+      <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 }, display: "flex", flexDirection: "column" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           <StorefrontRoundedIcon sx={{ color: accent, fontSize: 22 }} />
           <Box>
@@ -269,13 +294,13 @@ const ReportCharts = ({
                 lineHeight: 1.2,
               }}
             >
-              Ofisler Boýunça Paýy
+              {t("report.turkishAirlines.officeBreakdown") || "Ofisler boýunça paýy"}
             </Typography>
             <Typography
               variant="caption"
               sx={{ color: isDark ? "rgba(255,255,255,0.45)" : "#64748B" }}
             >
-              Toplam ciroya katkı oranları
+              {t("report.turkishAirlines.officeBreakdownSubtitle") || "Toplam ciroya katkı oranları"}
             </Typography>
           </Box>
         </Box>
@@ -291,7 +316,7 @@ const ReportCharts = ({
               />
             ))}
           </Box>
-        ) : (
+        ) : officeBreakdown && officeBreakdown.length > 0 ? (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
             {officeBreakdown.map((item) => (
               <Box key={item.office}>
@@ -362,6 +387,25 @@ const ReportCharts = ({
                 />
               </Box>
             ))}
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              height: 260,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              border: `1px dashed ${borderCol}`,
+              borderRadius: 2,
+              p: 2,
+              textAlign: "center",
+            }}
+          >
+            <StorefrontRoundedIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />
+            <Typography variant="body2" sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontWeight: 600 }}>
+              {noDataText}
+            </Typography>
           </Box>
         )}
       </Paper>

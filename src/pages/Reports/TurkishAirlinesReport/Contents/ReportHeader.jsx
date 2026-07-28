@@ -1,7 +1,6 @@
 import { memo } from "react";
-import { Box, Typography, Paper, Chip, alpha, useTheme } from "@mui/material";
+import { Box, Typography, Paper, alpha, useTheme } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
@@ -106,21 +105,7 @@ const ReportHeader = ({
             }}
           />
 
-          <Chip
-            icon={<CheckCircleOutlineIcon sx={{ fontSize: 16 }} />}
-            label={t("report.turkishAirlines.totalConfirmed")}
-            size="small"
-            sx={{
-              py: 2,
-              px: 0.5,
-              backgroundColor: alpha(teal, 0.12),
-              color: teal,
-              fontWeight: 600,
-              fontSize: 12,
-              border: `1px solid ${alpha(teal, 0.3)}`,
-              "& .MuiChip-icon": { color: teal },
-            }}
-          />
+
         </Box>
       </Box>
     </Paper>
