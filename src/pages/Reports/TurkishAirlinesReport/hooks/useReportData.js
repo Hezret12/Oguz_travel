@@ -36,7 +36,7 @@ const selectStatus = (res) => {
 };
 
 const useReportData = (selectedDate) => {
-  const { selectedLang } = useLocale();
+  const { t, currentLanguage, selectedLang } = useLocale();
 
   const yearMonth = selectedDate.format("YYYY-MM");
   const daysInMonth = selectedDate.daysInMonth();
@@ -78,20 +78,27 @@ const useReportData = (selectedDate) => {
           (typeof item.status_name === "string" ? item.status_name : "") ||
           item.status ||
           `Status ${i + 1}`;
+        const key = String(rawName).trim().toUpperCase();
+        const translatedStatus = t(`saleStatus.${key}`) !== `saleStatus.${key}`
+          ? t(`saleStatus.${key}`)
+          : rawName;
+
         const value = Number(item.ticket_count ?? item.count ?? item.value ?? 0) || 0;
+        const percentage = item.percentage || "0.00%";
 
         return {
           id: item.status_guid || i,
-          label: rawName,
+          statusName: translatedStatus,
+          label: `${translatedStatus}: ${value} (${percentage})`,
           value,
           color:
-            STATUS_COLORS[String(rawName).toUpperCase()] ||
+            STATUS_COLORS[key] ||
             OFFICE_COLORS[i % OFFICE_COLORS.length],
-          percentage: item.percentage || "0.00%",
+          percentage,
           ticketCount: value,
         };
       }),
-    [statusList, selectedLang]
+    [statusList, selectedLang, t, currentLanguage]
   );
 
   const { reportIndex, totalsIndex } = useMemo(() => {

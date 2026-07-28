@@ -588,7 +588,17 @@
       "officeBreakdownSubtitle": "Contribution rates to total turnover",
       "dailyReportTable": "Daily Detailed Report Table",
       "daysData": "days of data",
-      "totalSummary": "GRAND TOTAL"
+      "totalSummary": "GRAND TOTAL",
+      "sublabelBase": "Total base fare",
+      "sublabelQuoted": "Monthly turnover total",
+      "sublabelProfit": "Monthly net profit",
+      "sublabelPaid": "Received in cashier",
+      "sublabelCredit": "Pending debt total"
     }
+  },
+  "saleStatus": {
+    "SALE": "Sale",
+    "REISSUE": "Reissue",
+    "REFUND": "Refund"
   }
 }

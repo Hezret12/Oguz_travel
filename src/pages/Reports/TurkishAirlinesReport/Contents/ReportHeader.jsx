@@ -64,7 +64,7 @@ const ReportHeader = ({
                 textTransform: "capitalize",
               }}
             >
-              {monthLabel} • {t("report.turkishAirlines.subtitle")}
+              {monthLabel} • {t("report.turkishAirlines.subTitle")}
             </Typography>
           </Box>
         </Box>

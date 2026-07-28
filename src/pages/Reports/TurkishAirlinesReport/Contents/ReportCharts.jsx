@@ -241,7 +241,7 @@ const ReportCharts = ({
                           fontSize: 13,
                         }}
                       >
-                        {item.label}
+                        {item.statusName || item.label}
                       </Typography>
                     </Box>
                     <Typography

@@ -125,8 +125,8 @@ const ReportSummaryCards = ({
       <SummaryCard
         icon={<ReceiptLongRoundedIcon sx={{ fontSize: 24 }} />}
         value={formatCompact(stats.monthBase)}
-        label={t("columns.baseFare") || "Net baha"}
-        sublabel="Esasy baha jemi"
+        label={t("columns.baseFare")}
+        sublabel={t("report.turkishAirlines.sublabelBase")}
         color={accent}
         paperSx={paperSx}
         isDark={isDark}
@@ -134,8 +134,8 @@ const ReportSummaryCards = ({
       <SummaryCard
         icon={<AttachMoneyIcon sx={{ fontSize: 24 }} />}
         value={formatCompact(stats.monthQuoted)}
-        label={t("columns.quotedFare") || "Satuw bahasy"}
-        sublabel="Aýlyk ciro jemi"
+        label={t("columns.quotedFare")}
+        sublabel={t("report.turkishAirlines.sublabelQuoted")}
         color={teal}
         paperSx={paperSx}
         isDark={isDark}
@@ -143,8 +143,8 @@ const ReportSummaryCards = ({
       <SummaryCard
         icon={<TrendingUpIcon sx={{ fontSize: 24 }} />}
         value={formatCompact(stats.monthProfit)}
-        label={t("columns.profit") || "Peýda"}
-        sublabel="Aýlyk net peýda"
+        label={t("report.turkishAirlines.profit") || t("columns.profit") || "Peýda"}
+        sublabel={t("report.turkishAirlines.sublabelProfit") || "Aýlyk net peýda"}
         color={green}
         paperSx={paperSx}
         isDark={isDark}
@@ -153,7 +153,7 @@ const ReportSummaryCards = ({
         icon={<PriceCheckRoundedIcon sx={{ fontSize: 24 }} />}
         value={formatCompact(stats.monthPaid)}
         label={t("paymentPaid") || "Tölendi"}
-        sublabel="Kassa kabul edilen"
+        sublabel={t("report.turkishAirlines.sublabelPaid") || "Kassa kabul edilen"}
         color="#059669"
         paperSx={paperSx}
         isDark={isDark}
@@ -162,7 +162,7 @@ const ReportSummaryCards = ({
         icon={<PendingActionsRoundedIcon sx={{ fontSize: 24 }} />}
         value={formatCompact(stats.monthCredit)}
         label={t("paymentCredit") || "Kredit (Ödenmedi)"}
-        sublabel="Garaşylýan borç jemi"
+        sublabel={t("report.turkishAirlines.sublabelCredit") || "Garaşylýan borç jemi"}
         color={orange}
         paperSx={paperSx}
         isDark={isDark}

@@ -3,7 +3,6 @@ import { Box } from "@mui/material";
 import { Helmet } from "react-helmet-async";
 import dayjs from "dayjs";
 
-import { useLocale } from "../../../hooks/useLocale";
 import useReportData from "./hooks/useReportData";
 import useReportTheme from "./hooks/useReportTheme";
 import { formatNumber, formatCompact } from "../../../functions/generalHelpers";
@@ -19,7 +18,6 @@ const scrollbarSx = {
 };
 
 const TurkishAirlinesReport = () => {
-  const { t } = useLocale();
   const [selectedDate, setSelectedDate] = useState(dayjs());
 
   const {
@@ -68,7 +66,7 @@ const TurkishAirlinesReport = () => {
       }}
     >
       <Helmet>
-        <title>Turkish Airlines • Oguz Travel</title>
+        <title>Turkish Airlines - Oguz Travel</title>
       </Helmet>
 
       <ReportHeader

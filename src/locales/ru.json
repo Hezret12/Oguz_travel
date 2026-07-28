@@ -579,7 +579,17 @@
       "officeBreakdownSubtitle": "Вклад в общий оборот",
       "dailyReportTable": "Ежедневная подробная таблица отчета",
       "daysData": "дней данных",
-      "totalSummary": "ОБЩИЙ ИТОГ"
+      "totalSummary": "ОБЩИЙ ИТОГ",
+      "sublabelBase": "Итог базовой цены",
+      "sublabelQuoted": "Общий месячный оборот",
+      "sublabelProfit": "Месячная чистая прибыль",
+      "sublabelPaid": "Принято в кассу",
+      "sublabelCredit": "Сумма задолженности"
     }
+  },
+  "saleStatus": {
+    "SALE": "Продажа",
+    "REISSUE": "Переоформление",
+    "REFUND": "Возврат"
   }
 }

@@ -424,7 +424,7 @@
   },
   "report": {
     "turkishAirlines": {
-      "title": "Günlik hasabat",
+      "title": "Hasabat",
       "day": "Gün",
       "total": "Jemi",
       "totalConfirmed": "Jemi tassyklandy",
@@ -448,7 +448,18 @@
       "officeBreakdownSubtitle": "Ofisler boýunça paýlanylşy",
       "dailyReportTable": "Satyşlaryň günlik paýlanylşy",
       "daysData": "Türk howa ýollary hasabat",
-      "totalSummary": "Jemi"
+      "totalSummary": "Jemi",
+      "sublabelBase": "Esasy baha jemi",
+      "sublabelQuoted": "Satylan baha jemi",
+      "sublabelProfit": "Aýlyk peýda",
+      "sublabelPaid": "Kassa kabul edilen",
+      "subTitle": "Türk howa ýollary hasabat",
+      "sublabelCredit": "Garaşylýan borç jemi"
     }
+  },
+  "saleStatus": {
+    "SALE": "Satyldy",
+    "REISSUE": "Üýtgedildi",
+    "REFUND": "Gaýtaryldy"
   }
 }
