@@ -12,7 +12,7 @@ import {
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 import ShowChartRoundedIcon from "@mui/icons-material/ShowChartRounded";
-import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
+import ApartmentIcon from "@mui/icons-material/Apartment";
 import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
 import { useLocale } from "../../../../hooks/useLocale";
 
@@ -284,7 +284,7 @@ const ReportCharts = ({
       {/* 3. Office Distribution */}
       <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 }, display: "flex", flexDirection: "column" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-          <StorefrontRoundedIcon sx={{ color: accent, fontSize: 22 }} />
+          <ApartmentIcon sx={{ color: accent, fontSize: 22 }} />
           <Box>
             <Typography
               variant="subtitle1"
@@ -402,7 +402,7 @@ const ReportCharts = ({
               textAlign: "center",
             }}
           >
-            <StorefrontRoundedIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />
+            <ApartmentIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />
             <Typography variant="body2" sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontWeight: 600 }}>
               {noDataText}
             </Typography>

@@ -98,7 +98,8 @@ const useReportData = (selectedDate) => {
           ticketCount: value,
         };
       }),
-    [statusList, selectedLang, t, currentLanguage]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [statusList, currentLanguage]
   );
 
   const { reportIndex, totalsIndex } = useMemo(() => {
