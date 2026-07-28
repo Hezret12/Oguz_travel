@@ -10,13 +10,17 @@ import {
   useTheme,
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
+import { PieChart } from "@mui/x-charts/PieChart";
 import ShowChartRoundedIcon from "@mui/icons-material/ShowChartRounded";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
+import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
 
 const ReportCharts = ({
   isLoading,
+  isStatusLoading,
   barChartData,
   officeBreakdown,
+  statusChartData = [],
   formatNumber,
   monthQuoted,
   teal,
@@ -31,11 +35,11 @@ const ReportCharts = ({
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: { xs: "1fr", lg: "1.8fr 1fr" },
+        gridTemplateColumns: { xs: "1fr", md: "1fr", lg: "1.3fr 1fr 1fr" },
         gap: 2,
       }}
     >
-      {/* Bar Chart: Daily Turnover */}
+      {/* 1. Bar Chart: Daily Turnover */}
       <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 } }}>
         <Box
           sx={{
@@ -120,7 +124,139 @@ const ReportCharts = ({
         )}
       </Paper>
 
-      {/* Office Distribution */}
+      {/* 2. Pie Chart: Status Breakdown */}
+      <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 }, display: "flex", flexDirection: "column" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+          <PieChartRoundedIcon sx={{ color: teal, fontSize: 22 }} />
+          <Box>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 700,
+                color: isDark ? "#FFF" : "#0F172A",
+                lineHeight: 1.2,
+              }}
+            >
+              Status Graphiği
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: isDark ? "rgba(255,255,255,0.45)" : "#64748B" }}
+            >
+              Aýlyk status paýlanşygy
+            </Typography>
+          </Box>
+        </Box>
+
+        {isStatusLoading ? (
+          <Skeleton
+            variant="rectangular"
+            height={260}
+            sx={{ borderRadius: 2 }}
+          />
+        ) : statusChartData && statusChartData.length > 0 ? (
+          <Box sx={{ width: "100%", height: 260, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+            {statusChartData.some((d) => d.value > 0) ? (
+              <PieChart
+                series={[
+                  {
+                    data: statusChartData,
+                    innerRadius: 35,
+                    outerRadius: 80,
+                    paddingAngle: 3,
+                    cornerRadius: 4,
+                    highlightScope: { faded: "global", highlighted: "item" },
+                    faded: { innerRadius: 30, additionalRadius: -30, color: "gray" },
+                    valueFormatter: (v) => `${v.value} (${v.percentage || ''})`,
+                  },
+                ]}
+                height={260}
+                margin={{ top: 10, bottom: 25, left: 10, right: 10 }}
+                slotProps={{
+                  legend: {
+                    direction: "row",
+                    position: { vertical: "bottom", horizontal: "middle" },
+                    padding: 0,
+                    labelStyle: {
+                      fontSize: 11,
+                      fill: isDark ? "rgba(255,255,255,0.7)" : "#475569",
+                    },
+                  },
+                }}
+              />
+            ) : (
+              <Box sx={{ width: "100%", display: "flex", flexDirection: "column", gap: 1.5, px: 1, py: 2 }}>
+                {statusChartData.map((item) => (
+                  <Box
+                    key={item.id}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      p: 1.2,
+                      borderRadius: 1.5,
+                      backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "#F8FAFC",
+                      border: `1px solid ${borderCol}`,
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: "50%",
+                          backgroundColor: item.color,
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 700,
+                          color: isDark ? "#FFF" : "#0F172A",
+                          fontSize: 13,
+                        }}
+                      >
+                        {item.label}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 700,
+                        color: item.color,
+                        fontSize: 13,
+                      }}
+                    >
+                      {item.ticketCount} bilet ({item.percentage})
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              height: 260,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              border: `1px dashed ${borderCol}`,
+              borderRadius: 2,
+              p: 2,
+              textAlign: "center",
+            }}
+          >
+            <PieChartRoundedIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />
+            <Typography variant="body2" sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontWeight: 600 }}>
+              Veri Bulunamadı
+            </Typography>
+          </Box>
+        )}
+      </Paper>
+
+      {/* 3. Office Distribution */}
       <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 } }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           <StorefrontRoundedIcon sx={{ color: accent, fontSize: 22 }} />
@@ -234,3 +370,4 @@ const ReportCharts = ({
 };
 
 export default memo(ReportCharts);
+

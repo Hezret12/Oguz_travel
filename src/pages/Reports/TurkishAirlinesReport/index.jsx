@@ -4,8 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
-import { useGet } from "../../../hooks/CRUD/useGet";
-import { getTurkishAirlinesReportApi, getAllOfficeApi } from "../../../api/queries/getters";
+import { getTurkishAirlinesReportApi, getTurkishAirlinesStatusMonthApi } from "../../../api/queries/getters";
 
 import ReportHeader from "./Contents/ReportHeader";
 import ReportSummaryCards from "./Contents/ReportSummaryCards";
@@ -41,40 +40,72 @@ const TurkishAirlinesReport = () => {
   const yearMonth = selectedDate.format("YYYY-MM");
   const daysInMonth = selectedDate.daysInMonth();
 
-  /* ── Fetch offices directly via getAllOfficeApi ── */
-  const { data: rawOffices = [] } = useGet({
-    apiFn: getAllOfficeApi,
-    key: "office",
-  });
-
   const { data: response, isLoading } = useQuery({
     queryKey: ["turkishAirlinesReport", { year_month: yearMonth }],
     queryFn: () => getTurkishAirlinesReportApi({ year_month: yearMonth }),
     select: (res) => res?.data ?? {},
   });
 
+  const { data: statusMonthRaw, isLoading: isStatusLoading } = useQuery({
+    queryKey: ["turkishAirlinesStatusMonth", { yearMonth }],
+    queryFn: () => getTurkishAirlinesStatusMonthApi({ yearMonth }),
+    select: (res) => res?.data ?? res ?? {},
+  });
+
+  const statusChartData = useMemo(() => {
+    let list = [];
+    if (Array.isArray(statusMonthRaw)) {
+      list = statusMonthRaw;
+    } else if (Array.isArray(statusMonthRaw?.data)) {
+      list = statusMonthRaw.data;
+    } else if (Array.isArray(statusMonthRaw?.statusList)) {
+      list = statusMonthRaw.statusList;
+    }
+
+    const STATUS_COLOR_MAP = {
+      SALE: "#10B981",
+      REISSUE: "#F59E0B",
+      REFUND: "#EF4444",
+    };
+
+    return list.map((item, index) => {
+      const rawName =
+        selectedLang(item.status_name) ||
+        (typeof item.status_name === "string" ? item.status_name : "") ||
+        item.status ||
+        `Status ${index + 1}`;
+      const nameKey = String(rawName).toUpperCase();
+      const label = rawName;
+      const value = Number(item.ticket_count ?? item.count ?? item.value ?? 0);
+      const color =
+        STATUS_COLOR_MAP[nameKey] || OFFICE_COLORS[index % OFFICE_COLORS.length];
+
+      return {
+        id: item.status_guid || index,
+        label,
+        value: isNaN(value) ? 0 : value,
+        color,
+        percentage: item.percentage || "0.00%",
+        ticketCount: isNaN(value) ? 0 : value,
+      };
+    });
+  }, [statusMonthRaw, selectedLang]);
+
   const reportData = Array.isArray(response?.data) ? response.data : [];
   const dailyTotals = Array.isArray(response?.dailyTotals) ? response.dailyTotals : [];
   const footer = Array.isArray(response?.footer) ? response.footer : [];
   const grandTotal = response?.grandTotal ?? {};
 
+  /* ── Derive offices directly from report footer (shortname & full_name) ── */
   const offices = useMemo(() => {
-    if (Array.isArray(rawOffices) && rawOffices.length > 0) {
-      return rawOffices
-        .map((o) => {
-          const short = selectedLang(o.shortName) || o.shortName || "";
-          const full = selectedLang(o.name || o.fullName || o.shortName) || short;
-          return { short, full };
-        })
-        .filter((o) => Boolean(o.short));
-    }
     return footer
-      .map((f) => ({
-        short: selectedLang(f.office) || "",
-        full: selectedLang(f.office) || "",
-      }))
+      .map((f) => {
+        const short = selectedLang(f.shortname) || selectedLang(f.office) || "";
+        const full = selectedLang(f.full_name) || short;
+        return { short, full };
+      })
       .filter((o) => Boolean(o.short));
-  }, [rawOffices, footer, selectedLang]);
+  }, [footer, selectedLang]);
 
   /* ── Build Daily Rows ── */
   const rows = useMemo(() => {
@@ -153,7 +184,7 @@ const TurkishAirlinesReport = () => {
   const officeBreakdown = useMemo(() => {
     const maxQuoted = Math.max(...footer.map((f) => Number(f.total_quoted) || 0), 1);
     return footer.map((f, i) => ({
-      office: selectedLang(f.office) || "—",
+      office: selectedLang(f.shortname) || selectedLang(f.office) || "—",
       totalQuoted: Number(f.total_quoted) || 0,
       percentage: f.percentage,
       barWidth: Math.min(
@@ -166,7 +197,11 @@ const TurkishAirlinesReport = () => {
 
   const findFooter = useCallback(
     (officeShort) => {
-      return footer.find((f) => selectedLang(f.office) === officeShort);
+      return footer.find(
+        (f) =>
+          selectedLang(f.shortname) === officeShort ||
+          selectedLang(f.office) === officeShort
+      );
     },
     [footer, selectedLang]
   );
@@ -294,8 +329,10 @@ const TurkishAirlinesReport = () => {
       {/* 3. Charts Section */}
       <ReportCharts
         isLoading={isLoading}
+        isStatusLoading={isStatusLoading}
         barChartData={barChartData}
         officeBreakdown={officeBreakdown}
+        statusChartData={statusChartData}
         formatNumber={formatNumber}
         monthQuoted={stats.monthQuoted}
         teal={teal}

@@ -122,3 +122,7 @@ export const getAllTtpPaymentApi = async (params = {}) => {
 export const getTurkishAirlinesReportApi = async (params = {}) => {
   return await api.getPrivate('/turkish-airlines/get-tukish-airlines-report', params);
 };
+
+export const getTurkishAirlinesStatusMonthApi = async (params = {}) => {
+  return await api.getPrivate('/turkish-airlines/get-turkish-status-month', params);
+};
