@@ -5,6 +5,8 @@ export const clientFilterSlice = createFilterSlice({
   defaultFilters: {
     search: '',
     dateOfBirth: '',
+    passportIssueDate: '',
+    passportExpiryDate: '',
     gender: '',
   },
   defaultPageSize: 5,

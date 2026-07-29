@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
-import { Box, Chip } from "@mui/material";
+import { Box, Chip, IconButton } from "@mui/material";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -13,6 +14,7 @@ import ColumnActionButtons from "../../components/ColumnActionButtons";
 import AddClient from "./Contents/AddClient";
 import EditClient from "./Contents/EditClient";
 import ClientFilter from "./Contents/ClientFilter";
+import ClientDocumentModal from "../../components/Dialog/ClientDocumentModal";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
 import {
@@ -37,6 +39,7 @@ const Clients = () => {
   const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
+  const [selectedDocClient, setSelectedDocClient] = useState(null);
 
   const {
     applied,
@@ -105,7 +108,7 @@ const Clients = () => {
               : value;
         return `${t(`columns.${key}`)}: ${label}`;
       }
-      if (key === "dateOfBirth") {
+      if (key === "dateOfBirth" || key === "passportIssueDate" || key === "passportExpiryDate") {
         return `${t(`columns.${key}`)}: ${formatDate(value)}`;
       }
       return `${t(`columns.${key}`)}: ${value}`;
@@ -148,6 +151,13 @@ const Clients = () => {
         size: 150,
       },
       {
+        accessorFn: (row) => row.passportIssueDate || row.passport_issue_date,
+        id: "passportIssueDate",
+        header: t("columns.passportIssueDate"),
+        size: 160,
+        Cell: ({ cell }) => formatDate(cell.getValue()),
+      },
+      {
         accessorFn: (row) => row.passportExpiryDate,
         id: "passportExpiryDate",
         header: t("columns.passportExpiryDate"),
@@ -168,8 +178,8 @@ const Clients = () => {
         Cell: ({ cell }) => (
           <Box sx={{ fontWeight: 500 }}>
             {cell.getValue() === "Women"
-              ? t("pages.clients.genderWomen")
-              : t("pages.clients.genderMen")}
+              ? t("clients.genderWomen")
+              : t("clients.genderMen")}
           </Box>
         ),
       },
@@ -180,11 +190,50 @@ const Clients = () => {
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         Cell: ({ row, table }) => (
-          <ColumnActionButtons
-            row={row}
-            table={table}
-            onDelete={handleDeleteClick}
-          />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+            }}
+          >
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedDocClient(row.original);
+              }}
+              size="small"
+              sx={(theme) => ({
+                borderRadius: "7px",
+                border: `1px solid ${theme.palette.divider}`,
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255,255,255,0.05)"
+                    : "rgba(0,0,0,0.04)",
+                color: "primary.main",
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(255,255,255,0.10)"
+                      : "rgba(0,0,0,0.09)",
+                  borderColor: "primary.main",
+                  transform: "translateY(-1px)",
+                },
+                "&:active": { transform: "scale(0.95)" },
+              })}
+              title={t("clients.documents") || "Belgeler"}
+            >
+              <InsertDriveFileIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+
+            <ColumnActionButtons
+              row={row}
+              table={table}
+              onDelete={handleDeleteClick}
+            />
+          </Box>
         ),
       },
     ],
@@ -223,7 +272,6 @@ const Clients = () => {
     manualPagination: true,
     manualFiltering: true,
     manualSorting: true,
-    enableSorting: true,
     pageCount,
     rowCount: totalItems,
 
@@ -360,6 +408,15 @@ const Clients = () => {
       />
 
       <MaterialReactTable table={table} />
+
+      {selectedDocClient && (
+        <ClientDocumentModal
+          open={Boolean(selectedDocClient)}
+          onClose={() => setSelectedDocClient(null)}
+          client={selectedDocClient}
+          onRefresh={refetch}
+        />
+      )}
     </>
   );
 };

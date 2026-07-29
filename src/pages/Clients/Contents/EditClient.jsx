@@ -34,6 +34,7 @@ const EditClient = ({ table, row, queryParams }) => {
       phone_number: row?.original?.phone_number || null,
       dateOfBirth: row?.original?.dateOfBirth || null,
       passport_number: row?.original?.passport_number || null,
+      passportIssueDate: row?.original?.passportIssueDate || row?.original?.passport_issue_date || null,
       passportExpiryDate: row?.original?.passportExpiryDate || null,
       passportCountryOfIssue: row?.original?.passportCountryOfIssue || null,
       gender: row?.original?.gender || null,
@@ -95,6 +96,14 @@ const EditClient = ({ table, row, queryParams }) => {
 
           <Grid size={6}>
             <CustomDatePicker
+              name="passportIssueDate"
+              control={control}
+              label={t("columns.passportIssueDate")}
+            />
+          </Grid>
+
+          <Grid size={6}>
+            <CustomDatePicker
               name="passportExpiryDate"
               control={control}
               label={t("columns.passportExpiryDate")}
@@ -115,8 +124,8 @@ const EditClient = ({ table, row, queryParams }) => {
               control={control}
               label={t("columns.gender")}
               options={[
-                { label: t("pages.clients.genderWomen"), value: "Female" },
-                { label: t("pages.clients.genderMen"), value: "Male" },
+                { label: t("clients.genderWomen"), value: "Female" },
+                { label: t("clients.genderMen"), value: "Male" },
               ]}
             />
           </Grid>

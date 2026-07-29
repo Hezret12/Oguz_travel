@@ -15,8 +15,10 @@ export const useClientSearch = () => {
       [
         client.clientId,
         client.fullName,
-        client.passportNumber,
-        client.phoneNumber,
+        client.passportNumber || client.passport_number,
+        client.phoneNumber || client.phone_number,
+        client.passportIssueDate || client.passport_issue_date,
+        client.passportExpiryDate,
         client.passportCountryOfIssue,
         client.gender,
       ].some((value) => String(value ?? '').toLowerCase().includes(normalizedQuery)),

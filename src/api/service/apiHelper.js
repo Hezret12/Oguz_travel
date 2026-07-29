@@ -115,4 +115,28 @@ export const api = {
     const res = await axiosInstance.delete(url, { ...config, data: data });
     return res;
   },
+  // Post FormData private (for file upload)
+  postFormDataPrivate: async (url, formData) => {
+    const token = 'Bearer ' + getAccessToken();
+    const res = await axiosInstance.post(url, formData, {
+      headers: {
+        Authorization: token,
+        'Content-Type': 'multipart/form-data',
+        'Accept-Language': i18n.language,
+      },
+    });
+    return res;
+  },
+  // Patch FormData private (for file upload)
+  patchFormDataPrivate: async (url, formData) => {
+    const token = 'Bearer ' + getAccessToken();
+    const res = await axiosInstance.patch(url, formData, {
+      headers: {
+        Authorization: token,
+        'Content-Type': 'multipart/form-data',
+        'Accept-Language': i18n.language,
+      },
+    });
+    return res;
+  },
 };

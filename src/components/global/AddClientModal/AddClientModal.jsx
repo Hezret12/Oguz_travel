@@ -33,6 +33,7 @@ const AddClientModal = () => {
       phone_number: null,
       dateOfBirth: null,
       passport_number: null,
+      passportIssueDate: null,
       passportExpiryDate: null,
       passportCountryOfIssue: null,
       gender: null,
@@ -123,6 +124,14 @@ const AddClientModal = () => {
 
           <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 10px)' } }}>
             <CustomDatePicker
+              name="passportIssueDate"
+              control={control}
+              label={t('columns.passportIssueDate', 'Passport Issue Date')}
+            />
+          </Box>
+
+          <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 10px)' } }}>
+            <CustomDatePicker
               name="passportExpiryDate"
               control={control}
               label={t('columns.passportExpiryDate', 'Passport Expiry Date')}
@@ -133,18 +142,18 @@ const AddClientModal = () => {
             <CustomTextField
               name="passportCountryOfIssue"
               control={control}
-              label={t('columns.passportCountryOfIssue', 'Passport Country of Issue')}
+              label={t('columns.passportCountryOfIssue')}
             />
           </Box>
 
-          <Box sx={{ width: "49%" }}>
+          <Box sx={{ flex: { xs: '1 1 100%', sm: '1 1 calc(50% - 10px)' } }}>
             <CustomSelect
               name="gender"
               control={control}
               label={t('columns.gender', 'Gender')}
               options={[
-                { label: t('pages.clients.genderWomen', 'Women'), value: 'Female' },
-                { label: t('pages.clients.genderMen', 'Men'), value: 'Male' },
+                { label: t('clients.genderWomen', 'Women'), value: 'Female' },
+                { label: t('clients.genderMen', 'Men'), value: 'Male' },
               ]}
             />
           </Box>

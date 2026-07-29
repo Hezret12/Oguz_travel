@@ -32,6 +32,7 @@ const AddClient = ({ table }) => {
       phone_number: null,
       dateOfBirth: null,
       passport_number: null,
+      passportIssueDate: null,
       passportExpiryDate: null,
       passportCountryOfIssue: null,
       gender: null,
@@ -91,6 +92,14 @@ const AddClient = ({ table }) => {
 
           <Grid size={6}>
             <CustomDatePicker
+              name="passportIssueDate"
+              control={control}
+              label={t("columns.passportIssueDate")}
+            />
+          </Grid>
+
+          <Grid size={6}>
+            <CustomDatePicker
               name="passportExpiryDate"
               control={control}
               label={t("columns.passportExpiryDate")}
@@ -111,8 +120,8 @@ const AddClient = ({ table }) => {
               control={control}
               label={t("columns.gender")}
               options={[
-                { label: t("pages.clients.genderWomen"), value: "Female" },
-                { label: t("pages.clients.genderMen"), value: "Male" },
+                { label: t("clients.genderWomen"), value: "Female" },
+                { label: t("clients.genderMen"), value: "Male" },
               ]}
             />
           </Grid>

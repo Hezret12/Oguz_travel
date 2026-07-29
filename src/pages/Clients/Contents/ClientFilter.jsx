@@ -122,8 +122,8 @@ const ClientFilter = ({
   const allText = t("all") ?? "All";
 
   const genderOptions = [
-    { label: t("pages.clients.genderWomen"), value: "Women" },
-    { label: t("pages.clients.genderMen"), value: "Men" },
+    { label: t("clients.genderWomen"), value: "Women" },
+    { label: t("clients.genderMen"), value: "Men" },
   ];
 
   return (
@@ -132,6 +132,18 @@ const ClientFilter = ({
         label={t("columns.dateOfBirth")}
         value={filters.dateOfBirth}
         onChange={(value) => onFilterChange("dateOfBirth", value)}
+      />
+
+      <FilterDatePicker
+        label={t("columns.passportIssueDate")}
+        value={filters.passportIssueDate}
+        onChange={(value) => onFilterChange("passportIssueDate", value)}
+      />
+
+      <FilterDatePicker
+        label={t("columns.passportExpiryDate")}
+        value={filters.passportExpiryDate}
+        onChange={(value) => onFilterChange("passportExpiryDate", value)}
       />
 
       <FilterSelect
