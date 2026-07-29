@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
-import { Box } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -15,13 +15,12 @@ import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import StackedCell from "../../../components/inputs/StackCell";
 import StatusChip from "../../../components/StatusChip";
-import {
-  SALE_STATUS_CONFIG,
-} from "../../../functions/statusChipConfigs";
+import { SALE_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import { usePageFilters } from "../../../hooks/usePageFilters";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import DeleteDialog from "../../../components/DeleteDialog";
+import { PaymentManagementModal } from "../../../components/Dialog/PaymentManagementModal";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { deleteTurkishAirlinesApi } from "../../../api/queries/delete";
@@ -32,8 +31,13 @@ import {
 import {
   getAllTurkishAirlinesApi,
   getAllStatusApi,
+  getAllEmployeeApi,
+  getAllOfficeApi,
 } from "../../../api/queries/getters";
 import PaymentStatusCell from "../../../components/PaymentStatusCell";
+
+import FilterDrawer from "../../../components/FilterDrawer";
+import TurkishAirlinesFilter from "./Contents/TurkishAirlinesFilter";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -44,12 +48,23 @@ const CURRENCY_SYMBOLS = {
 
 const TurkishAirlines = () => {
   const { t, selectedLang } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
+  const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
+  const [paymentModalRow, setPaymentModalRow] = useState(null);
 
-  // Redux filters integration matching B2B
   const {
+    applied,
+    draft,
+    queryParams,
+    isDrawerOpen,
+    openDrawer,
+    closeDrawer,
+    setDraftFilter,
+    setFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
     searchQuery,
     setSearch,
     page,
@@ -57,7 +72,9 @@ const TurkishAirlines = () => {
     setPage,
     setPageSize,
     setSort,
-    queryParams,
+    selectsOpen,
+    openSelect,
+    closeSelect,
   } = usePageFilters({
     actions: turkishAirlinesFilterActions,
     selectors: turkishAirlinesFilterSelectors,
@@ -73,6 +90,70 @@ const TurkishAirlines = () => {
     () =>
       Object.fromEntries((statusList || []).map((s) => [s.guid || s.id, s])),
     [statusList],
+  );
+
+  // Fetch employees for filter chip labels
+  const { data: employeeList } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  const employeeById = useMemo(
+    () =>
+      Object.fromEntries((employeeList || []).map((e) => [e.guid || e.id, e])),
+    [employeeList],
+  );
+
+  // Fetch offices for filter chip labels
+  const { data: officeList } = useGet({
+    apiFn: getAllOfficeApi,
+    key: "offices",
+  });
+
+  const officeById = useMemo(
+    () =>
+      Object.fromEntries((officeList || []).map((o) => [o.guid || o.id, o])),
+    [officeList],
+  );
+
+  const activeFilters = useMemo(
+    () =>
+      Object.entries(applied).filter(
+        ([key, value]) =>
+          key !== "search" &&
+          value !== "" &&
+          value !== null &&
+          value !== undefined,
+      ),
+    [applied],
+  );
+
+  const getFilterLabel = useCallback(
+    (key, value) => {
+      if (key === "status_guid") {
+        return `${t("columns.status")}: ${selectedLang(statusById[value]?.name) || value}`;
+      }
+      if (key === "assignment_opr_guid") {
+        return `${t("columns.operator")}: ${employeeById[value]?.fullName || value}`;
+      }
+      if (key === "receiver_opr_guid") {
+        return `${t("columns.operatorTwo")}: ${employeeById[value]?.fullName || value}`;
+      }
+      if (key === "office_guid") {
+        return `${t("kassa")}: ${selectedLang(officeById[value]?.shortName) || selectedLang(officeById[value]?.fullName) || value}`;
+      }
+      if (key === "is_paid") {
+        return `${t("columns.paymentStatus")}: ${value === "true" ? t("paymentPaid") : t("paymentCredit")}`;
+      }
+      if (key === "datetime") {
+        return `${t("columns.dateTime")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      if (key === "flight_date") {
+        return `${t("columns.flightDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      return `${t(`columns.${key}`, key)}: ${value}`;
+    },
+    [t, selectedLang, statusById, employeeById, officeById, formatChange],
   );
 
   const getStatusKey = useCallback(
@@ -115,8 +196,7 @@ const TurkishAirlines = () => {
       deleteFn: deleteTurkishAirlinesApi,
       queryKey: ["turkish-airlines", queryParams],
       idKey: "guid",
-      apiName: "guid",
-      isPaginated: true,
+      isInfiniteQuery: true,
     });
 
   const deleteDialog = useDeleteDialog({
@@ -151,7 +231,7 @@ const TurkishAirlines = () => {
       {
         id: "operator",
         header: t("columns.operator"),
-        size: 150,
+        size: 190,
         accessorFn: (row) => row.ta_assignment_operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -165,7 +245,7 @@ const TurkishAirlines = () => {
       {
         id: "op2",
         header: t("columns.operatorTwo"),
-        size: 150,
+        size: 190,
         accessorFn: (row) => row.ta_receiver_operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -260,8 +340,14 @@ const TurkishAirlines = () => {
         Cell: ({ row }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          const quoted = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(row.original.quoted_price ?? 0));
-          const total = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(row.original.total_price ?? 0));
+          const quoted = new Intl.NumberFormat("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }).format(Number(row.original.quoted_price ?? 0));
+          const total = new Intl.NumberFormat("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }).format(Number(row.original.total_price ?? 0));
           return (
             <StackedCell
               primary={`${symbol}${quoted}`}
@@ -309,7 +395,7 @@ const TurkishAirlines = () => {
       {
         accessorKey: "route",
         header: t("columns.route"),
-        size: 140,
+        size: 180,
       },
       {
         accessorKey: "class",
@@ -324,6 +410,12 @@ const TurkishAirlines = () => {
           const val = cell.getValue();
           return val ? formatChange(val.split("T")[0], { dateOnly: true }) : "";
         },
+      },
+      {
+        accessorFn: (row) => selectedLang(row?.office?.shortName) ?? "",
+        id: "office_guid",
+        header: t("kassa"),
+        size: 90,
       },
       {
         id: "agent",
@@ -354,6 +446,7 @@ const TurkishAirlines = () => {
             row={row}
             table={table}
             showPayment={true}
+            onPaymentClick={(r) => setPaymentModalRow(r)}
             onDelete={handleDeleteClick}
           />
         ),
@@ -414,14 +507,44 @@ const TurkishAirlines = () => {
       }
     },
     renderTopToolbarCustomActions: () => (
-      <GlobalSearchInput
-        value={searchQuery}
-        onChange={setSearch}
-        placeholder={t("search") ?? "Search..."}
-        disabled={isLoading}
-        onRefetch={refetch}
-        isFetching={isFetching}
-      />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search") ?? "Search..."}
+          disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
+        />
+
+        {activeFilters.map(([key, value]) => (
+          <Chip
+            key={key}
+            label={getFilterLabel(key, value)}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderRadius: "8px",
+              height: "32px",
+              fontWeight: 500,
+              "& .MuiChip-deleteIcon": {
+                color: "primary.main",
+                transition: "all 0.15s ease",
+              },
+            }}
+          />
+        ))}
+      </Box>
     ),
     renderBottomToolbar: ({ table: mrtTable }) => {
       const { pageIndex } = mrtTable.getState().pagination;
@@ -457,11 +580,32 @@ const TurkishAirlines = () => {
       <PageHeader
         title={t("sidebar.ticketTurkishAirlines")}
         addButtonText={t("turkish.add")}
+        filterButtonText={t("filter")}
         pageTitle={`${t("sidebar.ticketTurkishAirlines")} | Oguz Travel`}
         onAddClick={() => {
           table.setCreatingRow(true);
         }}
+        onFilterClick={openDrawer}
       />
+
+      <FilterDrawer
+        open={isDrawerOpen}
+        onClose={cancelFilters}
+        onApply={() => {
+          applyFilters();
+          closeDrawer();
+        }}
+        onReset={resetFilters}
+        onCancel={cancelFilters}
+      >
+        <TurkishAirlinesFilter
+          filters={draft}
+          selectsOpen={selectsOpen}
+          onFilterChange={setDraftFilter}
+          onSelectOpen={openSelect}
+          onSelectClose={closeSelect}
+        />
+      </FilterDrawer>
 
       <DeleteDialog
         open={deleteDialog.isOpen}
@@ -469,6 +613,14 @@ const TurkishAirlines = () => {
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
       />
+
+      {Boolean(paymentModalRow) && (
+        <PaymentManagementModal
+          open={Boolean(paymentModalRow)}
+          onClose={() => setPaymentModalRow(null)}
+          row={paymentModalRow}
+        />
+      )}
 
       <MaterialReactTable table={table} />
     </>

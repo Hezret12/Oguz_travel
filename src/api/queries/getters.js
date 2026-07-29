@@ -126,3 +126,7 @@ export const getTurkishAirlinesReportApi = async (params = {}) => {
 export const getTurkishAirlinesStatusMonthApi = async (params = {}) => {
   return await api.getPrivate('/turkish-airlines/get-turkish-status-month', params);
 };
+
+export const getAllTurkishPaymentApi = async (params = {}) => {
+  return await api.getPrivate('/turkish-payment/getAll-turkish-payment', params);
+};

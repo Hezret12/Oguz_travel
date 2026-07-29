@@ -194,7 +194,7 @@ const ReportTable = ({
                           <Box
                             sx={{
                               display: "flex",
-                              alignItems: "baseline",
+                              alignItems: "center",
                               justifyContent: "center",
                               gap: 0.6,
                               whiteSpace: "nowrap",
@@ -207,16 +207,30 @@ const ReportTable = ({
                               {quoted > 0 ? formatNumber(quoted) : "0"}
                             </Typography>
                             {base > 0 && (
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  fontSize: 11,
-                                  color: isDark ? "rgba(255,255,255,0.45)" : "#64748B",
-                                  fontWeight: 500,
-                                }}
-                              >
-                                ({formatNumber(base)})
-                              </Typography>
+                              <>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    fontSize: 13,
+                                    color: isDark ? "rgba(255,255,255,0.4)" : "#94A3B8",
+                                    fontWeight: 500,
+                                    lineHeight: 1.2,
+                                  }}
+                                >
+                                  |
+                                </Typography>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    fontSize: 13,
+                                    color: "#EF4444",
+                                    fontWeight: 600,
+                                    lineHeight: 1.2,
+                                  }}
+                                >
+                                  {formatNumber(base)}
+                                </Typography>
+                              </>
                             )}
                           </Box>
                         </TableCell>
@@ -295,7 +309,7 @@ const ReportTable = ({
                     {offices.map(({ short }) => {
                       const f = findFooter(short);
                       return (
-                        <TableCell key={short} align="center" sx={footerCellSx}>
+                        <TableCell key={short} align="center" sx={{ ...footerCellSx, color: "#EF4444" }}>
                           {f ? formatNumber(f.total_base) : "—"}
                         </TableCell>
                       );
@@ -304,7 +318,7 @@ const ReportTable = ({
                       align="right"
                       sx={{
                         ...footerCellSx,
-                        color: green,
+                        color: "#EF4444",
                         position: "sticky",
                         right: 0,
                         zIndex: 1,
@@ -357,53 +371,6 @@ const ReportTable = ({
                     </TableCell>
                   </TableRow>
 
-                  {/* Profit */}
-                  <TableRow>
-                    <TableCell
-                      sx={{
-                        ...footerCellSx,
-                        borderTop: "none",
-                        position: "sticky",
-                        left: 0,
-                        zIndex: 1,
-                        backgroundColor: isDark ? "#042533" : "#F0FDF4",
-                      }}
-                    >
-                      {t("report.turkishAirlines.profit")}
-                    </TableCell>
-                    {offices.map(({ short }) => {
-                      const f = findFooter(short);
-                      return (
-                        <TableCell
-                          key={short}
-                          align="center"
-                          sx={{
-                            ...footerCellSx,
-                            borderTop: "none",
-                            color: orange,
-                          }}
-                        >
-                          {f ? formatNumber(f.profit) : "—"}
-                        </TableCell>
-                      );
-                    })}
-                    <TableCell
-                      align="right"
-                      sx={{
-                        ...footerCellSx,
-                        borderTop: "none",
-                        color: green,
-                        fontSize: 14,
-                        position: "sticky",
-                        right: 0,
-                        zIndex: 1,
-                        backgroundColor: isDark ? "#042533" : "#F0FDF4",
-                      }}
-                    >
-                      {formatNumber(grandTotal.month_profit)}
-                    </TableCell>
-                  </TableRow>
-
                   {/* Percentage */}
                   <TableRow>
                     <TableCell
@@ -440,27 +407,16 @@ const ReportTable = ({
                       sx={{
                         ...footerCellSx,
                         borderTop: "none",
+                        color: green,
+                        fontWeight: 700,
+                        fontSize: 13.5,
                         position: "sticky",
                         right: 0,
                         zIndex: 1,
                         backgroundColor: isDark ? "#042533" : "#F0FDF4",
                       }}
                     >
-                      {grandTotal.working_days_count != null && (
-                        <Typography
-                          component="span"
-                          sx={{
-                            fontSize: 11.5,
-                            color: isDark
-                              ? "rgba(255,255,255,0.6)"
-                              : "#475569",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {t("report.turkishAirlines.workingDays")}:
-                          {grandTotal.working_days_count}
-                        </Typography>
-                      )}
+                      100%
                     </TableCell>
                   </TableRow>
                 </>

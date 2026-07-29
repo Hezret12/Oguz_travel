@@ -151,3 +151,11 @@ export const addTtpPaymentApi = async (data) => {
   return response;
 };
 
+export const addTurkishPaymentApi = async (data) => {
+  const response = await api.postPrivate(
+    "/turkish-payment/add-turkish-payment",
+    data,
+  );
+  return response;
+};
+

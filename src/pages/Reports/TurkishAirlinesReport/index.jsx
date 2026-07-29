@@ -19,6 +19,7 @@ const scrollbarSx = {
 
 const TurkishAirlinesReport = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedQuarter, setSelectedQuarter] = useState("");
 
   const {
     isLoading,
@@ -72,6 +73,8 @@ const TurkishAirlinesReport = () => {
       <ReportHeader
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
+        selectedQuarter={selectedQuarter}
+        onQuarterChange={setSelectedQuarter}
         teal={colors.teal}
         borderCol={colors.border}
         paperSx={paperSx}

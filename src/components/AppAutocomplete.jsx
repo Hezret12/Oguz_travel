@@ -44,6 +44,11 @@ const AppAutocomplete = ({
               disabled={disabled}
               options={options}
               getOptionLabel={(option) => option.label || ""}
+              renderOption={(props, option, { index }) => (
+                <li {...props} key={`${option.value || option.label}-${index}`}>
+                  {option.label}
+                </li>
+              )}
               value={selectedValue}
               onChange={(_, newValue) => {
                 onChange(newValue ? newValue.value : "");

@@ -4,9 +4,15 @@ export const turkishAirlinesFilterSlice = createFilterSlice({
   name: 'turkishAirlinesFilters',
   defaultFilters: {
     search: '',
+    datetime: '',
+    assignment_opr_guid: '',
+    receiver_opr_guid: '',
     status_guid: '',
+    flight_date: '',
+    is_paid: '',
+    office_guid: '',
   },
-  defaultPageSize: 5,
+  defaultPageSize: 10,
 });
 
 export const turkishAirlinesFilterActions = turkishAirlinesFilterSlice.actions;

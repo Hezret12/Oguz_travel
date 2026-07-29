@@ -22,10 +22,10 @@ import CustomTextField from "../CustomTextField";
 import CustomDatePicker from "../CustomDatePicker";
 import AppAutocomplete from "../AppAutocomplete";
 import { useLocale } from "../../hooks/useLocale";
-import { getAllPaymentStatusApi, getAllEmployeeApi, getAllTransPaymentApi, getAllHarPaymentApi, getAllTtpPaymentApi } from "../../api/queries/getters";
-import { deleteTicketPaymentApi, deleteTransPaymentApi, deleteHarPaymentApi, deleteTtpPaymentApi } from "../../api/queries/delete";
-import { addPaymentApi, addTransPaymentApi, addHarPaymentApi, addTtpPaymentApi } from "../../api/queries/post";
-import { updateTicketPaymentApi, updateTransPaymentApi, updateHarPaymentApi, updateTtpPaymentApi } from "../../api/queries/patch";
+import { getAllPaymentStatusApi, getAllEmployeeApi, getAllTransPaymentApi, getAllHarPaymentApi, getAllTtpPaymentApi, getAllTurkishPaymentApi } from "../../api/queries/getters";
+import { deleteTicketPaymentApi, deleteTransPaymentApi, deleteHarPaymentApi, deleteTtpPaymentApi, deleteTurkishPaymentApi } from "../../api/queries/delete";
+import { addPaymentApi, addTransPaymentApi, addHarPaymentApi, addTtpPaymentApi, addTurkishPaymentApi } from "../../api/queries/post";
+import { updateTicketPaymentApi, updateTransPaymentApi, updateHarPaymentApi, updateTtpPaymentApi, updateTurkishPaymentApi } from "../../api/queries/patch";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
@@ -109,7 +109,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       "ta_assignment_operator" in ticket ||
       "ta_receiver_operator" in ticket ||
       "base_fare" in ticket ||
-      "ta_guid" in ticket
+      "ta_guid" in ticket ||
+      "turkish_airline_guid" in ticket
     );
   }, [ticket]);
 
@@ -168,6 +169,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     ? getAllHarPaymentApi
     : isTTP
     ? getAllTtpPaymentApi
+    : isTurkish
+    ? getAllTurkishPaymentApi
     : getAllPaymentStatusApi;
 
   const key = isTranslation
@@ -176,6 +179,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     ? "har-payment"
     : isTTP
     ? "ttp-payment"
+    : isTurkish
+    ? "turkish-payment"
     : "payment-status";
 
   const queryParams = useMemo(() => {
@@ -191,7 +196,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       else if (isTransfer) params.transfer_guid = ticket?.guid;
       else if (isPackage) params.package_guid = ticket?.guid;
     } else if (isTurkish) {
-      params.ta_guid = ticket?.guid;
+      params.turkish_airline_guid = ticket?.guid;
     } else {
       params.b2b_guid = ticket?.guid;
     }
@@ -241,9 +246,11 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ? addHarPaymentApi
       : isTTP
       ? addTtpPaymentApi
+      : isTurkish
+      ? addTurkishPaymentApi
       : addPaymentApi,
     key: key,
-    invalidateQueries: [key],
+    invalidateQueries: [key, "turkish-airlines"],
     onSuccess: () => {
       reset({
         amount: "",
@@ -261,9 +268,12 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ? deleteHarPaymentApi
       : isTTP
       ? deleteTtpPaymentApi
+      : isTurkish
+      ? deleteTurkishPaymentApi
       : deleteTicketPaymentApi,
     queryKey: [key, queryParams],
     idKey: "guid",
+    invalidateQueries: [key, "turkish-airlines"],
   });
 
   const { mutate: updatePayment, isPending: updateLoading } = useUpdate({
@@ -273,10 +283,12 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ? updateHarPaymentApi
       : isTTP
       ? updateTtpPaymentApi
+      : isTurkish
+      ? updateTurkishPaymentApi
       : updateTicketPaymentApi,
     key: key,
     idKey: "guid",
-    invalidateQueries: [key],
+    invalidateQueries: [key, "turkish-airlines"],
     onSuccessUpdate: () => {
       handleCancelEdit();
     },
@@ -309,7 +321,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         if (isPackage) return p.package_guid === ticket.guid;
       }
       if (isTurkish) {
-        return p.ta_guid === ticket.guid;
+        return p.turkish_airline_guid === ticket.guid || p.ta_guid === ticket.guid;
       }
       return p.b2b_guid === ticket.guid;
     });
@@ -346,29 +358,40 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     const { amount, paymentDate, description, opr_guid } = data;
     if (!amount || Number(amount) <= 0) return;
 
+    const ticketGuid = ticket?.guid || ticket?.turkish_airline_guid || ticket?.ta_guid;
+    const resolvedOprGuid =
+      opr_guid ||
+      ticket?.assigned_opr_guid ||
+      ticket?.received_opr_guid ||
+      ticket?.ta_assignment_operator?.guid ||
+      ticket?.ta_receiver_operator?.guid ||
+      ticket?.operator?.guid ||
+      employeeOptions?.[0]?.value ||
+      null;
+
     if (editingPayment) {
-      if (ticket.guid && !String(editingPayment.guid).startsWith("p-")) {
+      if (ticketGuid && !String(editingPayment.guid).startsWith("p-")) {
         const payload = {
           guid: editingPayment.guid,
           amount: Number(amount),
           payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
           note: description?.trim() || "",
-          opr_guid: opr_guid || null,
+          opr_guid: resolvedOprGuid,
         };
         if (isTranslation) {
-          payload.translation_guid = ticket.guid;
+          payload.translation_guid = ticketGuid;
         } else if (isHAR) {
-          payload.hotel_guid = isHotel ? ticket.guid : null;
-          payload.airway_guid = isAirway ? ticket.guid : null;
-          payload.railway_guid = isRailway ? ticket.guid : null;
+          payload.hotel_guid = isHotel ? ticketGuid : null;
+          payload.airway_guid = isAirway ? ticketGuid : null;
+          payload.railway_guid = isRailway ? ticketGuid : null;
         } else if (isTTP) {
-          payload.tour_guid = isTour ? ticket.guid : null;
-          payload.transfer_guid = isTransfer ? ticket.guid : null;
-          payload.package_guid = isPackage ? ticket.guid : null;
+          payload.tour_guid = isTour ? ticketGuid : null;
+          payload.transfer_guid = isTransfer ? ticketGuid : null;
+          payload.package_guid = isPackage ? ticketGuid : null;
         } else if (isTurkish) {
-          payload.ta_guid = ticket.guid;
+          payload.turkish_airline_guid = ticketGuid;
         } else {
-          payload.b2b_guid = ticket.guid;
+          payload.b2b_guid = ticketGuid;
         }
         updatePayment(payload);
       } else {
@@ -381,7 +404,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                 amount: Number(amount),
                 payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
                 note: description?.trim() || "",
-                opr_guid: opr_guid || null,
+                opr_guid: resolvedOprGuid,
               }
               : p
           )
@@ -389,27 +412,27 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         handleCancelEdit();
       }
     } else {
-      if (ticket.guid) {
+      if (ticketGuid) {
         const payload = {
           amount: Number(amount),
           payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
           note: description?.trim() || "",
-          opr_guid: opr_guid || null,
+          opr_guid: resolvedOprGuid,
         };
         if (isTranslation) {
-          payload.translation_guid = ticket.guid;
+          payload.translation_guid = ticketGuid;
         } else if (isHAR) {
-          payload.hotel_guid = isHotel ? ticket.guid : null;
-          payload.airway_guid = isAirway ? ticket.guid : null;
-          payload.railway_guid = isRailway ? ticket.guid : null;
+          payload.hotel_guid = isHotel ? ticketGuid : null;
+          payload.airway_guid = isAirway ? ticketGuid : null;
+          payload.railway_guid = isRailway ? ticketGuid : null;
         } else if (isTTP) {
-          payload.tour_guid = isTour ? ticket.guid : null;
-          payload.transfer_guid = isTransfer ? ticket.guid : null;
-          payload.package_guid = isPackage ? ticket.guid : null;
+          payload.tour_guid = isTour ? ticketGuid : null;
+          payload.transfer_guid = isTransfer ? ticketGuid : null;
+          payload.package_guid = isPackage ? ticketGuid : null;
         } else if (isTurkish) {
-          payload.ta_guid = ticket.guid;
+          payload.turkish_airline_guid = ticketGuid;
         } else {
-          payload.b2b_guid = ticket.guid;
+          payload.b2b_guid = ticketGuid;
         }
         createPayment(payload);
       } else {
@@ -419,7 +442,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           amount: Number(amount),
           payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
           note: description?.trim() || "",
-          opr_guid: opr_guid || null,
+          opr_guid: resolvedOprGuid,
         };
 
         setLocalPayments((prev) => [...prev, newPayment]);

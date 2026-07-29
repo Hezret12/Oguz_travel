@@ -1,13 +1,16 @@
 import { memo } from "react";
-import { Box, Typography, Paper, alpha, useTheme } from "@mui/material";
+import { Box, Typography, Paper, FormControl, Select, MenuItem, alpha, useTheme } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 
 const ReportHeader = ({
   selectedDate,
   onDateChange,
+  selectedQuarter,
+  onQuarterChange,
   teal,
   paperSx,
   selectSx,
@@ -105,7 +108,52 @@ const ReportHeader = ({
             }}
           />
 
-
+          {/* Quarter Select (1, 2, 3, 4) */}
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <Select
+              value={selectedQuarter ?? ""}
+              onChange={(e) => onQuarterChange(e.target.value)}
+              displayEmpty
+              IconComponent={KeyboardArrowDownIcon}
+              sx={{
+                ...selectSx,
+                height: 40,
+                fontSize: 13.5,
+                fontWeight: 600,
+                "& .MuiSelect-select": {
+                  py: 1,
+                  px: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                },
+              }}
+              slotProps={{
+                paper: {
+                  sx: {
+                    borderRadius: "12px",
+                    mt: 0.5,
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                  },
+                },
+              }}
+            >
+              <MenuItem value="">
+                <em>{t("report.turkishAirlines.allQuarters") || "Tüm Çeyrekler"}</em>
+              </MenuItem>
+              <MenuItem value={1}>
+                {t("report.turkishAirlines.q1") || "1. Çeyrek (Q1)"}
+              </MenuItem>
+              <MenuItem value={2}>
+                {t("report.turkishAirlines.q2") || "2. Çeyrek (Q2)"}
+              </MenuItem>
+              <MenuItem value={3}>
+                {t("report.turkishAirlines.q3") || "3. Çeyrek (Q3)"}
+              </MenuItem>
+              <MenuItem value={4}>
+                {t("report.turkishAirlines.q4") || "4. Çeyrek (Q4)"}
+              </MenuItem>
+            </Select>
+          </FormControl>
         </Box>
       </Box>
     </Paper>

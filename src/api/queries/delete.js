@@ -82,3 +82,7 @@ export const deleteHarPaymentApi = async (guid) => {
 export const deleteTtpPaymentApi = async (guid) => {
   return await api.deletePrivate('/ttp-payment/delete-ttp-payment', guid);
 };
+
+export const deleteTurkishPaymentApi = async (guid) => {
+  return await api.deletePrivate('/turkish-payment/delete-turkish-payment', guid);
+};

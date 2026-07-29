@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react";
 import { Box } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import { useLocale } from "../../../../hooks/useLocale";
@@ -18,7 +18,11 @@ import CustomDatePicker from "../../../../components/CustomDatePicker";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { addTurkishAirlinesApi } from "../../../../api/queries/post";
 import { useGet } from "../../../../hooks/CRUD/useGet";
-import { getAllEmployeeApi, getAllStatusApi, getAllOfficeApi } from "../../../../api/queries/getters";
+import {
+  getAllEmployeeApi,
+  getAllStatusApi,
+  getAllOfficeApi,
+} from "../../../../api/queries/getters";
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 
 const CURRENCY_SYMBOLS = {
@@ -28,16 +32,18 @@ const CURRENCY_SYMBOLS = {
   RUB: "₽",
 };
 
-
 const AddTurkishAirlinesContent = ({ table }) => {
   const { t, selectedLang } = useLocale();
   const { addTurkishAirlinesTicket } = useValidShema();
   const isAdjustedFareManualRef = useRef(false);
 
-  const paymentOptions = useMemo(() => [
-    { label: t("pages.ticket.payment.paid", "Tolendi"), value: true },
-    { label: t("pages.ticket.payment.credit", "Kredit"), value: false },
-  ], [t]);
+  const paymentOptions = useMemo(
+    () => [
+      { label: t("pages.ticket.payment.paid", "Tolendi"), value: true },
+      { label: t("pages.ticket.payment.credit", "Kredit"), value: false },
+    ],
+    [t],
+  );
 
   // Fetch status options from the API
   const {
@@ -55,7 +61,11 @@ const AddTurkishAirlinesContent = ({ table }) => {
     key: "employees",
   });
 
-  const { data: offices = [], isLoading: isOfficeLoading, isError: isOfficeError } = useGet({
+  const {
+    data: offices = [],
+    isLoading: isOfficeLoading,
+    isError: isOfficeError,
+  } = useGet({
     apiFn: getAllOfficeApi,
     key: "office",
   });
@@ -107,7 +117,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
       returned_price: "",
       currency: "USD",
       is_paid: true,
-      paymentDestination_guid: "",
+      office_guid: "",
       agent: {
         name: "",
         phone_number: "",
@@ -116,15 +126,15 @@ const AddTurkishAirlinesContent = ({ table }) => {
     };
   }, []);
 
-  const { control, handleSubmit, setValue, watch } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues,
     resolver: yupResolver(addTurkishAirlinesTicket),
     mode: "onSubmit",
   });
 
-  const selectedCurrency = watch("currency") || "USD";
+  const selectedCurrency = useWatch({ control, name: "currency" }) || "USD";
   const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
-  const isPaidValue = watch("is_paid");
+  const isPaidValue = useWatch({ control, name: "is_paid" });
 
   const handleTotalAmountChange = (event) => {
     const nextValue = event?.target?.value ?? event ?? "";
@@ -190,7 +200,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
         accepted_price: Number(data.accepted_price || 0),
         returned_price: Number(data.returned_price || 0),
         currency: data.currency || "USD",
-        paymentDestination_guid: data.paymentDestination_guid || null,
+        office_guid: data.office_guid || null,
         note: data.note?.trim() || "",
         is_paid: Boolean(data.is_paid),
       };
@@ -217,10 +227,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
           flexDirection: "column",
         }}
       >
-        <CustomDialogHeader
-          variant="h5"
-          title={t("turkish.addTicket")}
-        />
+        <CustomDialogHeader variant="h5" title={t("turkish.addTicket")} />
 
         <CustomForm handleSubmit={handleSubmit(submitHandler)}>
           <Box
@@ -250,7 +257,8 @@ const AddTurkishAirlinesContent = ({ table }) => {
                   "passportCountryOfIssue",
                   {
                     key: "passportExpiryDate",
-                    label: t("columns.passportExpiryDate") ?? "Passport Expiry Date",
+                    label:
+                      t("columns.passportExpiryDate") ?? "Passport Expiry Date",
                     format: (value) => {
                       if (!value) return "";
                       const dateOnly = value.split("T")[0];
@@ -294,9 +302,17 @@ const AddTurkishAirlinesContent = ({ table }) => {
                   label={t("columns.ticketNo") ?? "TICKET #"}
                 />
 
-                <CustomTextField name="pnr" control={control} label={t("columns.pnr") ?? "PNR"} />
+                <CustomTextField
+                  name="pnr"
+                  control={control}
+                  label={t("columns.pnr") ?? "PNR"}
+                />
 
-                <CustomTextField name="route" control={control} label={t("columns.route") ?? "Route"} />
+                <CustomTextField
+                  name="route"
+                  control={control}
+                  label={t("columns.route") ?? "Route"}
+                />
 
                 <CustomDatePicker
                   name="flight_date"
@@ -332,19 +348,25 @@ const AddTurkishAirlinesContent = ({ table }) => {
                       borderRadius: "7px",
                       minHeight: "44px",
                       backgroundColor: (theme) =>
-                        theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.03)"
+                          : "#ffffff",
                       transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                       pr: 0.5,
                       "&:hover": {
                         backgroundColor: (theme) =>
-                          theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "#ffffff",
+                          theme.palette.mode === "dark"
+                            ? "rgba(255, 255, 255, 0.05)"
+                            : "#ffffff",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "primary.main",
                         },
                       },
                       "&.Mui-focused": {
                         backgroundColor: (theme) =>
-                          theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.02)" : "#ffffff",
+                          theme.palette.mode === "dark"
+                            ? "rgba(255, 255, 255, 0.02)"
+                            : "#ffffff",
                         boxShadow: (theme) =>
                           theme.palette.mode === "dark"
                             ? "0 0 0 3px rgba(59, 130, 246, 0.16)"
@@ -367,14 +389,17 @@ const AddTurkishAirlinesContent = ({ table }) => {
                 />
 
                 <CustomSelect
-                  name="paymentDestination_guid"
+                  name="office_guid"
                   control={control}
                   label={t("kassa")}
                   options={offices}
                   isLoading={isOfficeLoading}
                   isError={isOfficeError}
                   getRowId={(item) => item.guid}
-                  getRowLabel={(item) => selectedLang(item?.shortName) || selectedLang(item?.fullName)}
+                  getRowLabel={(item) =>
+                    selectedLang(item?.shortName) ||
+                    selectedLang(item?.fullName)
+                  }
                 />
 
                 <CustomSelect
@@ -401,8 +426,6 @@ const AddTurkishAirlinesContent = ({ table }) => {
                   startIcon={currencySymbol}
                   disabled={isPaidValue === false}
                 />
-
-
 
                 <Box sx={{ gridColumn: { xs: "1 / -1", md: "span 2" } }}>
                   <AgentAccordion

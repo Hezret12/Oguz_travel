@@ -5,7 +5,7 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import PaymentsRoundedIcon from "@mui/icons-material/PaymentsRounded";
 import { PaymentManagementModal } from "./Dialog/PaymentManagementModal";
 
-const ColumnActionButtons = ({ row, table, onDelete, showPayment = false }) => {
+const ColumnActionButtons = ({ row, table, onDelete, showPayment = false, onPaymentClick }) => {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
   const handleEdit = (e) => {
@@ -37,7 +37,11 @@ const ColumnActionButtons = ({ row, table, onDelete, showPayment = false }) => {
           <IconButton
             onClick={(e) => {
               e.stopPropagation();
-              setIsPaymentOpen(true);
+              if (onPaymentClick) {
+                onPaymentClick(row);
+              } else {
+                setIsPaymentOpen(true);
+              }
             }}
             size="small"
             sx={(theme) => ({
