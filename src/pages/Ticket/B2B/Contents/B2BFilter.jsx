@@ -1,11 +1,16 @@
-import { FormControl, MenuItem, Select, Stack, Typography, TextField } from "@mui/material";
+import { useMemo } from "react";
+import { FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { useGet } from "../../../../hooks/CRUD/useGet";
-import { getAllStatusApi } from "../../../../api/queries/getters";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
+import { useGet } from "../../../../hooks/CRUD/useGet";
+import {
+  getAllEmployeeApi,
+  getAllStatusApi,
+} from "../../../../api/queries/getters";
 
-// ─── Styles ────────────────────────────────────────────────────────────────
 const selectSx = {
   borderRadius: "10px",
   "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
@@ -25,7 +30,6 @@ const menuPaperProps = {
   },
 };
 
-// ─── Generic Filter Select ──────────────────────────────────────────────────
 const FilterSelect = ({
   label,
   name,
@@ -69,8 +73,7 @@ const FilterSelect = ({
   </FormControl>
 );
 
-// ─── Filter Date ──────────────────────────────────────────────────
-const FilterDate = ({ label, name, value, onChange }) => (
+const FilterDatePicker = ({ label, name, value, onChange }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -78,75 +81,142 @@ const FilterDate = ({ label, name, value, onChange }) => (
     >
       {label}
     </Typography>
-    <TextField
-      type="date"
-      size="small"
-      value={value ?? ""}
-      onChange={(e) => onChange(name, e.target.value)}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          borderRadius: "10px",
-          "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-          "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-        }
+    <DatePicker
+      value={value ? dayjs(value) : null}
+      onChange={(newValue) => {
+        onChange(
+          name,
+          newValue && newValue.isValid()
+            ? newValue.format("YYYY-MM-DD")
+            : ""
+        );
+      }}
+      format="DD.MM.YYYY"
+      views={["year", "month", "day"]}
+      slotProps={{
+        textField: {
+          fullWidth: true,
+          size: "small",
+          sx: {
+            "& .MuiInputBase-root": {
+              fontSize: "0.9rem",
+              height: "44px",
+              minHeight: "44px",
+              borderRadius: "10px",
+            },
+          },
+        },
       }}
     />
   </FormControl>
 );
 
-/**
- * Self-contained filter panel for the B2B ticket page.
- */
 const B2BFilter = ({
   filters,
-  selectsOpen,
+  selectsOpen = {},
   onFilterChange,
   onSelectOpen,
   onSelectClose,
 }) => {
   const { t, selectedLang } = useLocale();
 
-  // ── Fetch lookup status ───────────────────────────────────────────────
-  const { data: statusList, isLoading: isStatusLoading } = useGet({
+  // Fetch Employees for operators
+  const { data: employees = [], isLoading: isEmployeeLoading } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  // Fetch Statuses
+  const { data: statuses = [], isLoading: isStatusLoading } = useGet({
     apiFn: getAllStatusApi,
     key: "status",
   });
 
-  const statusOptions = (statusList || []).map((s) => ({
-    value: s.guid,
-    label: selectedLang(s.name),
-  }));
+  const employeeOptions = useMemo(
+    () =>
+      (employees || []).map((emp) => ({
+        label: emp.fullName,
+        value: emp.guid,
+      })),
+    [employees]
+  );
 
-  const paymentTypeOptions = [
-    { value: "credit", label: t("payment_types.credit", "Credit") },
-    { value: "cash", label: t("payment_types.cash", "Cash") },
-  ];
+  const statusOptions = useMemo(
+    () =>
+      (statuses || []).map((st) => ({
+        label: selectedLang(st.name) || st.name || "",
+        value: st.guid,
+      })),
+    [statuses, selectedLang]
+  );
 
-  const allText = t("all") ?? "All";
+  const travelTypeOptions = useMemo(
+    () => [
+      { label: "ONE WAY", value: "0" },
+      { label: "ROUND TRIP", value: "1" },
+    ],
+    []
+  );
+
+  const isPaidOptions = useMemo(
+    () => [
+      { label: t("paymentPaid"), value: "true" },
+      { label: t("paymentCredit"), value: "false" },
+    ],
+    [t]
+  );
+
+  const allText = t("all");
+
+  const handleDateChange = (name, val) => {
+    onFilterChange(name, val);
+  };
 
   return (
     <Stack spacing={2.5}>
-      <FilterDate
-        label={t("columns.issueDate", "Issue Date")}
-        name="issueDate"
-        value={filters.issueDate}
-        onChange={onFilterChange}
+      {/* DateTime */}
+      <FilterDatePicker
+        label={t("columns.dateTime")}
+        name="datetime"
+        value={filters?.datetime}
+        onChange={handleDateChange}
       />
 
-      <FilterDate
-        label={t("columns.flightDate", "Flight Date")}
-        name="flightDate"
-        value={filters.flightDate}
-        onChange={onFilterChange}
-      />
-
+      {/* Operator 1 (Assignment) */}
       <FilterSelect
-        label={t("columns.status", "Status")}
+        label={t("columns.operator")}
+        name="assignment_opr_guid"
+        value={filters?.assignment_opr_guid}
+        options={employeeOptions}
+        isOpen={Boolean(selectsOpen?.assignment_opr_guid)}
+        isLoading={isEmployeeLoading}
+        allText={allText}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
+      />
+
+      {/* Operator 2 (Receiver) */}
+      <FilterSelect
+        label={t("columns.operatorTwo")}
+        name="receiver_opr_guid"
+        value={filters?.receiver_opr_guid}
+        options={employeeOptions}
+        isOpen={Boolean(selectsOpen?.receiver_opr_guid)}
+        isLoading={isEmployeeLoading}
+        allText={allText}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
+      />
+
+      {/* Status */}
+      <FilterSelect
+        label={t("columns.status")}
         name="status_guid"
-        value={filters.status_guid}
+        value={filters?.status_guid}
         options={statusOptions}
-        isOpen={selectsOpen?.status_guid ?? false}
+        isOpen={Boolean(selectsOpen?.status_guid)}
         isLoading={isStatusLoading}
         allText={allText}
         onChange={onFilterChange}
@@ -154,12 +224,34 @@ const B2BFilter = ({
         onClose={onSelectClose}
       />
 
+      {/* Travel Type */}
       <FilterSelect
-        label={t("columns.paymentType", "Payment Type")}
-        name="payment_types"
-        value={filters.payment_types}
-        options={paymentTypeOptions}
-        isOpen={selectsOpen?.payment_types ?? false}
+        label={t("columns.tripType")}
+        name="travel_type"
+        value={filters?.travel_type}
+        options={travelTypeOptions}
+        isOpen={Boolean(selectsOpen?.travel_type)}
+        allText={allText}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
+      />
+
+      {/* Flight Date */}
+      <FilterDatePicker
+        label={t("columns.flightDate")}
+        name="flight_date"
+        value={filters?.flight_date}
+        onChange={handleDateChange}
+      />
+
+      {/* Payment Status (is_paid) */}
+      <FilterSelect
+        label={t("columns.paymentStatus")}
+        name="is_paid"
+        value={filters?.is_paid}
+        options={isPaidOptions}
+        isOpen={Boolean(selectsOpen?.is_paid)}
         allText={allText}
         onChange={onFilterChange}
         onOpen={onSelectOpen}

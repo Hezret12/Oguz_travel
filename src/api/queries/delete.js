@@ -12,7 +12,7 @@ export const deleteClient = async (guid) => {
 };
 
 export const deleteB2BApi = async (guid) => {
-  const response = await api.deletePrivate('/ticket-b2b/delete-ticket-b2b', guid);
+  const response = await api.deletePrivate('/b2b/delete-b2b', guid);
   return response;
 };
 

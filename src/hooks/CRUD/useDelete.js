@@ -24,29 +24,29 @@ export const useDelete = ({
     onSuccess: (resData, guid) => {
       hdlSuccessResMsg(resData);
       const finalKey = Array.isArray(queryKey) ? queryKey : [queryKey];
+      const targetGuids = Array.isArray(guid) ? guid : [guid];
+
       if (isPaginated) {
-        // For paginated queries, invalidate so the current page refetches.
-        // Optimistic removal is unsafe here because removing an item shifts
-        // items across pages, which would cause incorrect counts/gaps.
+        // For paginated queries, invalidate so current page refetches
         queryClient.invalidateQueries({
           queryKey: finalKey,
           refetchType: "active",
         });
       } else if (isInfiniteQuery) {
-        queryClient.setQueryData(finalKey, (old) => {
+        queryClient.setQueriesData({ queryKey: finalKey, exact: false }, (old) => {
           if (!old?.pages) return old;
 
           const updatedPages = old.pages.map((page) => {
-            const pageData = page?.data?.data || [];
+            const pageData = page?.data?.data || page?.data || [];
 
-            const filteredData = pageData.filter(
-              (item) => !guid.includes(item[idKey]),
-            );
+            const filteredData = Array.isArray(pageData)
+              ? pageData.filter((item) => !targetGuids.includes(item?.[idKey]))
+              : pageData;
 
             return {
               ...page,
               data: {
-                ...page.data,
+                ...(page?.data || {}),
                 data: filteredData,
               },
             };
@@ -58,15 +58,40 @@ export const useDelete = ({
           };
         });
       } else {
-        queryClient.setQueryData(finalKey, (prev) => {
-          if (!prev?.data?.data) return prev;
-          return {
-            ...prev,
-            data: {
-              ...prev.data,
-              data: prev.data.data.filter((item) => !guid.includes(item[idKey])),
-            },
-          };
+        queryClient.setQueriesData({ queryKey: finalKey, exact: false }, (prev) => {
+          if (!prev) return prev;
+
+          // Case A: { data: { data: [...], meta: {...} } } (e.g. usePagginationGet)
+          if (Array.isArray(prev?.data?.data)) {
+            return {
+              ...prev,
+              data: {
+                ...prev.data,
+                data: prev.data.data.filter((item) => !targetGuids.includes(item?.[idKey])),
+                ...(prev.data.meta && {
+                  meta: {
+                    ...prev.data.meta,
+                    totalItems: Math.max(0, (prev.data.meta.totalItems || prev.data.data.length) - targetGuids.length),
+                  },
+                }),
+              },
+            };
+          }
+
+          // Case B: { data: [...] } (e.g. useGet)
+          if (Array.isArray(prev?.data)) {
+            return {
+              ...prev,
+              data: prev.data.filter((item) => !targetGuids.includes(item?.[idKey])),
+            };
+          }
+
+          // Case C: Array directly
+          if (Array.isArray(prev)) {
+            return prev.filter((item) => !targetGuids.includes(item?.[idKey]));
+          }
+
+          return prev;
         });
       }
 

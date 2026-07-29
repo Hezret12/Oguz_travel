@@ -34,12 +34,13 @@ import {
 } from "../../../store/slices/filters/b2bFilterSlice";
 import FilterDrawer from "../../../components/FilterDrawer";
 import B2BFilter from "./Contents/B2BFilter";
-import { getAllB2BApi, getAllStatusApi } from "../../../api/queries/getters";
+import { getAllB2BApi, getAllEmployeeApi, getAllStatusApi } from "../../../api/queries/getters";
 import DeleteDialog from "../../../components/DeleteDialog";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { deleteB2BApi } from "../../../api/queries/delete";
 import PaymentStatusCell from "../../../components/PaymentStatusCell";
+import { useDateFormat } from "../../../functions/generalHelpers";
 
 const formatDate = (value) => {
   if (!value) return "";
@@ -57,6 +58,7 @@ const CURRENCY_SYMBOLS = {
 
 const B2B = () => {
   const { t, selectedLang } = useLocale();
+  const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
 
@@ -65,6 +67,7 @@ const B2B = () => {
     draft,
     isDrawerOpen,
     openDrawer,
+    closeDrawer,
     setDraftFilter,
     setFilter,
     applyFilters,
@@ -95,6 +98,46 @@ const B2B = () => {
     () =>
       Object.fromEntries((statusList || []).map((s) => [s.guid || s.id, s])),
     [statusList],
+  );
+
+  // Fetch employees for filter chip labels
+  const { data: employeeList } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  const employeeById = useMemo(
+    () =>
+      Object.fromEntries((employeeList || []).map((e) => [e.guid || e.id, e])),
+    [employeeList],
+  );
+
+  const getFilterLabel = useCallback(
+    (key, value) => {
+      if (key === "status_guid") {
+        return `${t("columns.status")}: ${selectedLang(statusById[value]?.name) || value}`;
+      }
+      if (key === "assignment_opr_guid") {
+        return `${t("columns.operator")}: ${employeeById[value]?.fullName || value}`;
+      }
+      if (key === "receiver_opr_guid") {
+        return `${t("columns.operatorTwo")}: ${employeeById[value]?.fullName || value}`;
+      }
+      if (key === "travel_type") {
+        return `${t("columns.tripType")}: ${value === "1" ? "ROUND TRIP" : "ONE WAY"}`;
+      }
+      if (key === "is_paid") {
+        return `${t("columns.paymentStatus")}: ${value === "true" ? t("paymentPaid") : t("paymentCredit")}`;
+      }
+      if (key === "datetime") {
+        return `${t("columns.dateTime")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      if (key === "flight_date") {
+        return `${t("columns.flightDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      return `${t(`columns.${key}`, key)}: ${value}`;
+    },
+    [t, selectedLang, statusById, employeeById, formatChange],
   );
 
   const getStatusKey = useCallback(
@@ -133,10 +176,8 @@ const B2B = () => {
 
   const { mutate: deleteB2BMutate, isPending: isDeleting } = useDelete({
     deleteFn: deleteB2BApi,
-    queryKey: ["b2b", queryParams],
+    queryKey: "b2b",
     idKey: "guid",
-    apiName: "guid",
-    isPaginated: true,
   });
 
   const deleteDialog = useDeleteDialog({
@@ -487,12 +528,7 @@ const B2B = () => {
         {activeFilters.map(([key, value]) => (
           <Chip
             key={key}
-            label={`${t(`columns.${key}`, key)}: ${key === "status_guid"
-                ? selectedLang(statusById[value]?.name)
-                : key === "payment_types"
-                  ? t(`payment_types.${value}`, value)
-                  : value
-              }`}
+            label={getFilterLabel(key, value)}
             onDelete={() => setFilter(key, "")}
             color="primary"
             variant="outlined"
@@ -559,7 +595,10 @@ const B2B = () => {
       <FilterDrawer
         open={isDrawerOpen}
         onClose={cancelFilters}
-        onApply={applyFilters}
+        onApply={() => {
+          applyFilters();
+          closeDrawer();
+        }}
         onReset={resetFilters}
         onCancel={cancelFilters}
       >

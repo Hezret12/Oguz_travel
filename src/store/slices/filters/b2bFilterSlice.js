@@ -4,12 +4,15 @@ export const b2bFilterSlice = createFilterSlice({
   name: 'b2bFilters',
   defaultFilters: {
     search: '',
-    issueDate: '',
-    flightDate: '',
+    datetime: '',
+    assignment_opr_guid: '',
+    receiver_opr_guid: '',
     status_guid: '',
-    payment_types: '',
+    travel_type: '',
+    flight_date: '',
+    is_paid: '',
   },
-  defaultPageSize: 5,
+  defaultPageSize: 10,
 });
 
 export const b2bFilterActions = b2bFilterSlice.actions;
