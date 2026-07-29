@@ -15,9 +15,13 @@ import FilterDrawer from "../../components/FilterDrawer";
 import DeleteDialog from "../../components/DeleteDialog";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
+import { useGet } from "../../hooks/CRUD/useGet";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
-import { getAllReferralLettersApi } from "../../api/queries/getters";
+import {
+  getAllReferralLettersApi,
+  getAllEmployeeApi,
+} from "../../api/queries/getters";
 import { deleteReferralLetterApi } from "../../api/queries/delete";
 import {
   referralLetterFilterActions,
@@ -27,6 +31,7 @@ import ReferralLetterFilter from "./Contents/ReferralLetterFilter";
 import AddReferralLetterModal from "./AddReferralLetterModal";
 import EditReferralLetterModal from "./EditReferralLetterModal";
 import { useDateFormat } from "../../functions/generalHelpers";
+import { nameColSize } from "../../utils/helperConstant";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -46,6 +51,7 @@ const ReferalLetter = () => {
     draft,
     isDrawerOpen,
     openDrawer,
+    closeDrawer,
     setDraftFilter,
     setFilter,
     applyFilters,
@@ -82,9 +88,8 @@ const ReferalLetter = () => {
 
   const { mutate: deleteReferralLetter, isPending: isDeleting } = useDelete({
     deleteFn: deleteReferralLetterApi,
-    queryKey: ["referralLetters", queryParams],
+    queryKey: "referralLetters",
     idKey: "guid",
-    isPaginated: true,
   });
 
   const deleteDialog = useDeleteDialog({
@@ -94,6 +99,18 @@ const ReferalLetter = () => {
   const handleDeleteClick = useCallback(
     (item) => deleteDialog.open(item),
     [deleteDialog],
+  );
+
+  // Fetch employees for filter chip labels
+  const { data: employeeList } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  const employeeById = useMemo(
+    () =>
+      Object.fromEntries((employeeList || []).map((e) => [e.guid || e.id, e])),
+    [employeeList],
   );
 
   const activeFilters = useMemo(
@@ -108,43 +125,62 @@ const ReferalLetter = () => {
     [applied],
   );
 
+  const getFilterLabel = useCallback(
+    (key, value) => {
+      if (key === "received_opr_guid") {
+        return `${t("columns.operator")}: ${employeeById[value]?.fullName || value}`;
+      }
+      if (key === "departure_date") {
+        return `${t("columns.departureDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      if (key === "return_date") {
+        return `${t("columns.returnDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      if (key === "contract_date") {
+        return `${t("columns.contractDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      return `${t(`columns.${key}`, key)}: ${value}`;
+    },
+    [t, employeeById, formatChange],
+  );
+
   const columns = useMemo(
     () => [
       {
-        id: "rowNumber",
+        accessorKey: "index_number",
+        id: "index_number",
         header: "№",
         size: 60,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => row.index + 1,
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         id: "operator",
         header: t("columns.operator"),
-        size: 160,
-        accessorFn: (row) => row.refferaloperator?.fullName,
+        size: 190,
+        accessorFn: (row) => row.refferaloperator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
             primary={row?.original?.refferaloperator?.fullName}
-            secondary={selectedLang(row?.original.refferaloperator?.shortName)}
+            secondary={selectedLang(row?.original?.refferaloperator?.shortName)}
           />
         ),
       },
       {
         header: t("columns.client"),
         id: "fullName",
-        size: 200,
-        accessorFn: (row) => row.client.fullName,
+        size: nameColSize,
+        accessorFn: (row) => row.client?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
-            primary={row.original.client.fullName}
-            secondary={row.original.yolagcyTel}
+            primary={row.original?.client?.fullName}
+            secondary={row.original?.yolagcyTel}
           />
         ),
       },
       {
-        accessorFn: (row) => row.client.gender,
+        accessorFn: (row) => row.client?.gender ?? "",
         id: "gender",
         header: t("columns.gender"),
         size: 90,
@@ -158,14 +194,14 @@ const ReferalLetter = () => {
         },
       },
       {
-        accessorFn: (row) => row.client.dateOfBirth,
+        accessorFn: (row) => row.client?.dateOfBirth ?? "",
         id: "dateOfBirth",
         header: t("columns.dateOfBirth"),
         size: 110,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
-        accessorFn: (row) => row.client.passport_number,
+        accessorFn: (row) => row.client?.passport_number ?? "",
         id: "passport_number",
         header: t("columns.passportNumber") ?? "Passport №",
         size: 110,
@@ -237,7 +273,7 @@ const ReferalLetter = () => {
       {
         accessorKey: "contract_number",
         id: "contract_number",
-        header: t("columns.contractNo") ?? "şertnama №",
+        header: t("columns.contract_number"),
         size: 110,
       },
       {
@@ -267,7 +303,7 @@ const ReferalLetter = () => {
       },
       {
         id: "actions",
-        header: t("columns.actions") ?? "Actions",
+        header: t("columns.actions"),
         size: 110,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
@@ -287,6 +323,13 @@ const ReferalLetter = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
+      },
+    },
     columns,
     data: referralLetters || [],
     state: {
@@ -385,7 +428,7 @@ const ReferalLetter = () => {
         {activeFilters.map(([key, value]) => (
           <Chip
             key={key}
-            label={`${t(`columns.${key}`, key)}: ${value}`}
+            label={getFilterLabel(key, value)}
             onDelete={() => setFilter(key, "")}
             color="primary"
             variant="outlined"
@@ -464,7 +507,10 @@ const ReferalLetter = () => {
       <FilterDrawer
         open={isDrawerOpen}
         onClose={cancelFilters}
-        onApply={applyFilters}
+        onApply={() => {
+          applyFilters();
+          closeDrawer();
+        }}
         onReset={resetFilters}
         onCancel={cancelFilters}
       >

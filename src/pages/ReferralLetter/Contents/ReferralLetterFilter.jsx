@@ -1,7 +1,12 @@
-import { FormControl, MenuItem, Select, Stack, Typography, TextField } from "@mui/material";
+import { useMemo } from "react";
+import { FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
+import { useGet } from "../../../hooks/CRUD/useGet";
+import { getAllEmployeeApi } from "../../../api/queries/getters";
 
 const selectSx = {
   borderRadius: "10px",
@@ -28,6 +33,7 @@ const FilterSelect = ({
   value,
   options = [],
   isOpen,
+  isLoading,
   allText,
   onChange,
   onOpen,
@@ -48,6 +54,7 @@ const FilterSelect = ({
       onClose={() => onClose?.(name)}
       IconComponent={isOpen ? KeyboardArrowUpIcon : KeyboardArrowDownIcon}
       displayEmpty
+      disabled={isLoading}
       sx={selectSx}
       slotProps={menuPaperProps}
     >
@@ -63,7 +70,7 @@ const FilterSelect = ({
   </FormControl>
 );
 
-const FilterDate = ({ label, name, value, onChange }) => (
+const FilterDatePicker = ({ label, name, value, onChange }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -71,17 +78,30 @@ const FilterDate = ({ label, name, value, onChange }) => (
     >
       {label}
     </Typography>
-    <TextField
-      type="date"
-      size="small"
-      value={value ?? ""}
-      onChange={(e) => onChange(name, e.target.value)}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          borderRadius: "10px",
-          "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-          "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
+    <DatePicker
+      value={value ? dayjs(value) : null}
+      onChange={(newValue) => {
+        onChange(
+          name,
+          newValue && newValue.isValid()
+            ? newValue.format("YYYY-MM-DD")
+            : ""
+        );
+      }}
+      format="DD.MM.YYYY"
+      views={["year", "month", "day"]}
+      slotProps={{
+        textField: {
+          fullWidth: true,
+          size: "small",
+          sx: {
+            "& .MuiInputBase-root": {
+              fontSize: "0.9rem",
+              height: "44px",
+              minHeight: "44px",
+              borderRadius: "10px",
+            },
+          },
         },
       }}
     />
@@ -90,48 +110,72 @@ const FilterDate = ({ label, name, value, onChange }) => (
 
 const ReferralLetterFilter = ({
   filters,
-  selectsOpen,
+  selectsOpen = {},
   onFilterChange,
   onSelectOpen,
   onSelectClose,
 }) => {
   const { t } = useLocale();
 
-  const currencyOptions = [
-    { value: "TMT", label: "TMT (m)" },
-    { value: "USD", label: "USD ($)" },
-    { value: "EUR", label: "EUR (€)" },
-    { value: "RUB", label: "RUB (₽)" },
-  ];
+  // Fetch employees for operator select
+  const { data: employees = [], isLoading: isEmployeeLoading } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
 
-  const allText = t("all") ?? "All";
+  const employeeOptions = useMemo(
+    () =>
+      (employees || []).map((emp) => ({
+        label: emp.fullName,
+        value: emp.guid,
+      })),
+    [employees]
+  );
+
+  const allText = t("all");
+
+  const handleDateChange = (name, val) => {
+    onFilterChange(name, val);
+  };
 
   return (
     <Stack spacing={2.5}>
+      {/* Operator (received_opr_guid) */}
       <FilterSelect
-        label={t("columns.currency", "Currency")}
-        name="currency"
-        value={filters.currency}
-        options={currencyOptions}
-        isOpen={selectsOpen?.currency ?? false}
+        label={t("columns.operator")}
+        name="received_opr_guid"
+        value={filters?.received_opr_guid}
+        options={employeeOptions}
+        isOpen={Boolean(selectsOpen?.received_opr_guid)}
+        isLoading={isEmployeeLoading}
         allText={allText}
         onChange={onFilterChange}
         onOpen={onSelectOpen}
         onClose={onSelectClose}
       />
 
-      <FilterDate
-        label={t("columns.departureDate", "Departure Date")}
+      {/* Departure Date */}
+      <FilterDatePicker
+        label={t("columns.departureDate")}
         name="departure_date"
-        value={filters.departure_date}
-        onChange={onFilterChange}
+        value={filters?.departure_date}
+        onChange={handleDateChange}
       />
 
-      <FilterDate
-        label={t("columns.returnDate", "Return Date")}
-        name="returned_date"
-        value={filters.returned_date}
-        onChange={onFilterChange}
+      {/* Return Date */}
+      <FilterDatePicker
+        label={t("columns.returnDate")}
+        name="return_date"
+        value={filters?.return_date}
+        onChange={handleDateChange}
+      />
+
+      {/* Contract Date */}
+      <FilterDatePicker
+        label={t("columns.contractDate")}
+        name="contract_date"
+        value={filters?.contract_date}
+        onChange={handleDateChange}
       />
     </Stack>
   );

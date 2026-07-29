@@ -37,7 +37,7 @@ export const deleteVisaPackageApi = async (guid) => {
 };
 
 export const deleteReferralLetterApi = async (guid) => {
-  const response = await api.deletePrivate('/referral-letter/delete-referral-letter', guid);
+  const response = await api.deletePrivate('/refferal-letter/delete-refferal-letter', guid);
   return response;
 };
 

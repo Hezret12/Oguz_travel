@@ -4,11 +4,12 @@ export const referralLetterFilterSlice = createFilterSlice({
   name: 'referralLetterFilters',
   defaultFilters: {
     search: '',
-    currency: '',
+    received_opr_guid: '',
     departure_date: '',
-    returned_date: '',
+    return_date: '',
+    contract_date: '',
   },
-  defaultPageSize: 20,
+  defaultPageSize: 10,
 });
 
 export const referralLetterFilterActions = referralLetterFilterSlice.actions;

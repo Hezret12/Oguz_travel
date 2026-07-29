@@ -79,16 +79,16 @@ export const useSidebarItems = () => {
             icon: createElement(ContactEmergencyIcon),
           },
           {
-            text: t("sidebar.referalLetters"),
-            path: "/visa/referal-letters",
-            icon: createElement(NoteAddIcon),
-          },
-          {
             text: t("sidebar.visa.package"),
             path: "/visa/package",
             icon: createElement(NoteAddIcon),
           },
         ],
+      },
+      {
+        text: t("sidebar.referalLetters"),
+        path: "/visa/referal-letters",
+        icon: createElement(NoteAddIcon),
       },
       {
         text: t("translation") || "Terjime",
