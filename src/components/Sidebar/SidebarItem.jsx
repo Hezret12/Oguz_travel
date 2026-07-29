@@ -60,7 +60,7 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
       <ListItemIcon
         sx={{
           minWidth: 'auto',
-          color: isActive ? t.iconActive : t.icon,
+          color: isActive ? t.iconActive : (item.iconColor || t.icon),
           fontSize: 20,
           display: 'flex',
           alignItems: 'center',
@@ -137,7 +137,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
       <ListItemIcon
         sx={{
           minWidth: 'auto',
-          color: hasActiveChild ? t.iconActive : t.icon,
+          color: hasActiveChild ? t.iconActive : (item.iconColor || t.icon),
           fontSize: 20,
           display: 'flex',
           alignItems: 'center',
@@ -223,7 +223,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                 <ListItemIcon
                   sx={{
                     minWidth: 'auto',
-                    color: isChildActive ? t.iconActive : t.icon,
+                    color: isChildActive ? t.iconActive : (child.iconColor || t.icon),
                     fontSize: 17,
                     display: 'flex',
                     alignItems: 'center',
