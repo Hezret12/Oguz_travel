@@ -114,6 +114,7 @@
     "completedTime": "Completed Time",
     "completedPageCount": "Completed Page Count",
     "translator": "Translator",
+    "translation": "Translation",
     "direction": "Direction (e.g. TK -> RU)",
     "pageCount": "Page Count",
     "correctionStatus": "Correction Status"
@@ -466,6 +467,7 @@
     "employees": "Employees",
     "users": "Users",
     "referalLetters": "Referral Letters",
+    "translation": "Translation",
     "visaApplications": "Visa Applications",
     "visaIntake": "Visa Intake",
     "reports": "Reports",

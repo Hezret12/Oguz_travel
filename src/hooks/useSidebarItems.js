@@ -1,7 +1,6 @@
 import { useMemo, createElement } from "react";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
-import SettingsIcon from "@mui/icons-material/Settings";
 import GroupIcon from "@mui/icons-material/Group";
 import { useTranslation } from "react-i18next";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
@@ -91,7 +90,7 @@ export const useSidebarItems = () => {
         icon: createElement(NoteAddIcon),
       },
       {
-        text: t("translation") || "Terjime",
+        text: t("sidebar.translation"),
         path: "/translation",
         icon: createElement(TranslateIcon),
       },
@@ -115,11 +114,6 @@ export const useSidebarItems = () => {
             }),
           },
         ],
-      },
-      {
-        text: t("sidebar.settings"),
-        path: "/settings",
-        icon: createElement(SettingsIcon),
       },
       {
         text: t("sidebar.visaIntake"),

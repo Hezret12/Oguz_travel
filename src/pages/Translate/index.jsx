@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
@@ -26,12 +26,19 @@ import GlobalSearchInput from "../../components/GlobalSearchInput";
 import PaymentStatusCell from "../../components/PaymentStatusCell";
 import StatusChip from "../../components/StatusChip";
 import { TRANSLATION_STATUS_CONFIG } from "../../functions/statusChipConfigs";
+import { nameColSize } from "../../utils/helperConstant";
+import DeleteDialog from "../../components/DeleteDialog";
+import { useDeleteDialog } from "../../hooks/useDeleteDialog";
+import { useDelete } from "../../hooks/CRUD/useDelete";
+import { deleteTranslationApi } from "../../api/queries/delete";
+import { PaymentManagementModal } from "../../components/Dialog/PaymentManagementModal";
 
 const TranslatePage = () => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
+  const [paymentModalRow, setPaymentModalRow] = useState(null);
 
   const {
     applied,
@@ -74,6 +81,21 @@ const TranslatePage = () => {
 
   const translations = useMemo(() => translationsData?.data ?? translationsData ?? [], [translationsData]);
 
+  const { mutate: deleteTranslation, isPending: isDeleting } = useDelete({
+    deleteFn: deleteTranslationApi,
+    queryKey: "translations",
+    idKey: "guid",
+  });
+
+  const deleteDialog = useDeleteDialog({
+    onConfirm: (item) => deleteTranslation(item.guid),
+  });
+
+  const handleDeleteClick = useCallback(
+    (item) => deleteDialog.open(item),
+    [deleteDialog],
+  );
+
   const activeFilters = useMemo(
     () =>
       Object.entries(applied).filter(
@@ -112,7 +134,7 @@ const TranslatePage = () => {
       {
         id: "operator",
         header: t("columns.operator"),
-        size: 190,
+        size: 200,
         accessorFn: (row) => row.operator?.fullName,
         Cell: ({ row }) => (
           <StackedCell
@@ -126,7 +148,7 @@ const TranslatePage = () => {
       {
         id: "client",
         header: t("columns.client"),
-        size: 200,
+        size: nameColSize,
         accessorFn: (row) => row.client?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -139,7 +161,7 @@ const TranslatePage = () => {
         id: "translator",
         accessorFn: (row) => row.translator?.fullName,
         header: t("columns.translator"),
-        size: 130,
+        size: 170,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
@@ -179,8 +201,6 @@ const TranslatePage = () => {
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
-          const val = row.original.is_paid;
-
           return <PaymentStatusCell percent={row?.original.paidPercentage} />;
         },
       },
@@ -252,11 +272,13 @@ const TranslatePage = () => {
             row={row}
             table={table}
             showPayment={true}
+            onPaymentClick={(r) => setPaymentModalRow(r)}
+            onDelete={() => handleDeleteClick(row.original)}
           />
         ),
       },
     ],
-    [t, selectedLang, formatChange],
+    [t, selectedLang, formatChange, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({
@@ -416,10 +438,10 @@ const TranslatePage = () => {
   return (
     <>
       <PageHeader
-        title={t("translation") || "Terjime"}
-        pageTitle={`${t("translation") || "Terjime"} | Oguz Travel`}
-        addButtonText={t("addTranslation") || "Terjime goşmak"}
-        filterButtonText={t("filter") || "Filter"}
+        title={t("sidebar.translation")}
+        pageTitle={`${t("sidebar.translation")} | Oguz Travel`}
+        addButtonText={t("addTranslation")}
+        filterButtonText={t("filter")}
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}
       />
@@ -439,6 +461,24 @@ const TranslatePage = () => {
           onSelectClose={closeSelect}
         />
       </FilterDrawer>
+
+      <DeleteDialog
+        open={deleteDialog.isOpen}
+        onClose={deleteDialog.close}
+        onConfirm={deleteDialog.confirm}
+        isLoading={isDeleting}
+      />
+
+      {Boolean(paymentModalRow) && (
+        <PaymentManagementModal
+          open={Boolean(paymentModalRow)}
+          onClose={() => {
+            setPaymentModalRow(null);
+            refetch();
+          }}
+          row={paymentModalRow}
+        />
+      )}
 
       <MaterialReactTable table={table} />
     </>

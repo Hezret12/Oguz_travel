@@ -114,6 +114,7 @@
     "completedTime": "Время сдачи",
     "completedPageCount": "Количество сданных страниц",
     "translator": "Переводчик",
+    "translation": "Перевод",
     "direction": "Направление (Напр.: TK -> RU)",
     "pageCount": "Количество страниц",
     "correctionStatus": "Статус исправления"
@@ -457,6 +458,7 @@
     "employees": "Сотрудники",
     "users": "Пользователи",
     "referalLetters": "Рекомендательные письма",
+    "translation": "Перевод",
     "visaApplications": "Визовые анкеты",
     "visaIntake": "Прием документов",
     "reports": "Отчёты",

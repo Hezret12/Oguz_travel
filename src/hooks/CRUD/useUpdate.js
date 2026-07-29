@@ -17,16 +17,31 @@ export const useUpdate = ({
       const updatedItem = res.data?.data || res.data;
       const message = res.data?.message || res.message;
 
-      return { updatedItem, message };
+      return { updatedItem, message, variables };
     },
 
-    onSuccess: ({ updatedItem, message }) => {
+    onSuccess: ({ updatedItem, message, variables }) => {
       const finalKey = Array.isArray(key) ? key : [key];
 
-      const mergeItem = (oldItem) =>
-        oldItem?.[idKey] === updatedItem[idKey]
-          ? { ...oldItem, ...updatedItem }
-          : oldItem;
+      const itemPayload =
+        updatedItem && typeof updatedItem === "object" && updatedItem[idKey]
+          ? { ...(variables || {}), ...updatedItem }
+          : variables;
+
+      const targetId = itemPayload?.[idKey] || variables?.[idKey];
+
+      const mergeItem = (oldItem) => {
+        if (!oldItem || !targetId || oldItem[idKey] !== targetId) return oldItem;
+
+        return {
+          ...oldItem,
+          ...itemPayload,
+          // Preserve existing relation objects if updated payload/response only has flat GUIDs
+          ...(oldItem.client && !itemPayload.client && { client: oldItem.client }),
+          ...(oldItem.operator && !itemPayload.operator && { operator: oldItem.operator }),
+          ...(oldItem.translator && !itemPayload.translator && { translator: oldItem.translator }),
+        };
+      };
 
       queryClient.setQueriesData(
         { queryKey: finalKey, exact: false },

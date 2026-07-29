@@ -110,9 +110,7 @@ const EditTranslateModal = ({ table, row }) => {
     apiFn: updateTranslationApi,
     key: "translations",
     idKey: "guid",
-    invalidateQueries: ["translations"],
     onSuccessUpdate: () => {
-      queryClient.invalidateQueries({ queryKey: ["translations"] });
       table.setEditingRow(null);
     },
   });

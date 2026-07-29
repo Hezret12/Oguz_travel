@@ -3,7 +3,6 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import ErrorBoundary from '../components/ErrorBoundary';
 import ScrollToTop from '../components/ScrollToTop';
 import ProtectedRoute from '../components/ProtectedRoute';
-import PlaceholderPage from '../components/PlaceholderPage';
 import LoginPage from '../pages/Login';
 import DashboardPage from '../pages/AdminDashboard';
 import EmployeePage from '../pages/Employee';
@@ -58,15 +57,8 @@ const router = createBrowserRouter([
                   { path: 'turkish-airlines', element: <TicketTurkishAirlinesPage /> },
                 ],
               },
-              { path: 'agents',         element: <PlaceholderPage title="Agents Directory" /> },
-              { path: 'bookings',       element: <PlaceholderPage title="All Bookings" /> },
-              { path: 'planner',        element: <PlaceholderPage title="Trip Planner" /> },
-              { path: 'search',         element: <PlaceholderPage title="Search Flights" /> },
-              { path: 'profile',        element: <PlaceholderPage title="My Profile" /> },
               { path: 'intake',         element: <VisaIntakePage /> },
               { path: 'reports/turkish-airlines', element: <TurkishAirlinesReportPage /> },
-              { path: 'logs',           element: <PlaceholderPage title="System Logs" /> },
-              { path: 'settings',       element: <PlaceholderPage title="System Settings" /> },
               { path: 'unauthorized',   element: <UnauthorizedPage /> },
             ],
           },

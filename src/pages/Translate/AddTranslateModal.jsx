@@ -371,7 +371,7 @@ const AddTranslateModal = ({ table }) => {
           </Grid>
 
           <FooterButton
-            loading={isSubmitting}
+            loading={isCreatingTranslation}
             onCancel={() => table.setCreatingRow(null)}
             type="submit"
             sx={{ mt: 3 }}
