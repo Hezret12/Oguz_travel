@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import "./App.css";
 import { RouterProvider } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import routes from "./routes/index";
+import OguzTravelLogo from "./layouts/Logo";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import GlobalModal from "./components/GlobalModal";
@@ -59,8 +61,63 @@ dayjs.updateLocale("tr", {
 dayjs.locale("tr");
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+  const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    let minTimePassed = false;
+    let isAppLoaded = document.readyState === "complete";
+
+    const tryFinish = () => {
+      if (minTimePassed && isAppLoaded) {
+        setFadeOut(true);
+        setTimeout(() => setShowSplash(false), 400);
+      }
+    };
+
+    // 1. Min duration gate: Ensure 1 full logo animation cycle plays (1.4s)
+    const minTimer = setTimeout(() => {
+      minTimePassed = true;
+      tryFinish();
+    }, 1400);
+
+    // 2. App load gate: Ensure assets and initial DOM/chunks are loaded
+    const handleLoad = () => {
+      isAppLoaded = true;
+      tryFinish();
+    };
+
+    if (!isAppLoaded) {
+      window.addEventListener("load", handleLoad);
+    }
+
+    return () => {
+      clearTimeout(minTimer);
+      window.removeEventListener("load", handleLoad);
+    };
+  }, []);
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="tr">
+      {showSplash && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 99999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background:
+              "linear-gradient(145deg, #f0fdfa 0%, #e0f7f5 50%, #d0f0ee 100%)",
+            opacity: fadeOut ? 0 : 1,
+            transition: "opacity 0.35s ease-out",
+            pointerEvents: fadeOut ? "none" : "auto",
+          }}
+        >
+          <OguzTravelLogo autoPlay style={{ width: 400, maxWidth: "90vw" }} />
+        </div>
+      )}
       <RouterProvider router={routes} />
       <GlobalModal />
       <AddClientModal />
