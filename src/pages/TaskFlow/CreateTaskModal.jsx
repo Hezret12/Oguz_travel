@@ -1,58 +1,71 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Box,
+  Typography,
   IconButton,
   Button,
   TextField,
-  Typography,
-  Box,
-  MenuItem,
-  Select,
-  FormControl,
-  InputAdornment,
   Checkbox,
-  Chip,
-  OutlinedInput,
-  useTheme,
+  Grid,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import AddIcon from "@mui/icons-material/Add";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+
+import { CustomDialog } from "../../components/Dialog/CustomDialog";
+import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
+import FooterButton from "../../components/Dialog/FooterButton";
+import CustomTextField from "../../components/CustomTextField";
+import CustomSelect from "../../components/CustomSelect";
+import AppAutocomplete from "../../components/AppAutocomplete";
 
 const EMPLOYEES = [
-  { id: "1", name: "Alex Rivard", initials: "AR", color: "#F59E0B" },
-  { id: "2", name: "Amelie Chen", initials: "AC", color: "#EC4899" },
-  { id: "3", name: "Kevin Taylor", initials: "KT", color: "#8B5CF6" },
-  { id: "4", name: "David Wright", initials: "DW", color: "#10B981" },
-  { id: "5", name: "Tom Cooper", initials: "TC", color: "#06B6D4" },
-  { id: "6", name: "Jessica Wong", initials: "JW", color: "#F43F5E" },
-  { id: "7", name: "Beth Young", initials: "BY", color: "#3B82F6" },
-  { id: "8", name: "Mark White", initials: "MW", color: "#6366F1" },
+  { value: "1", label: "Alex Rivard (RI)", color: "#F59E0B", initials: "RI", name: "Alex Rivard" },
+  { value: "2", label: "Amelie Chen (AC)", color: "#EC4899", initials: "AC", name: "Amelie Chen" },
+  { value: "3", label: "Kevin Taylor (KT)", color: "#8B5CF6", initials: "KT", name: "Kevin Taylor" },
+  { value: "4", label: "David Wright (DW)", color: "#10B981", initials: "DW", name: "David Wright" },
+  { value: "5", label: "Tom Cooper (TC)", color: "#06B6D4", initials: "TC", name: "Tom Cooper" },
+  { value: "6", label: "Jessica Wong (JW)", color: "#F43F5E", initials: "JW", name: "Jessica Wong" },
+  { value: "7", label: "Alice Green (AG)", color: "#A855F7", initials: "AG", name: "Alice Green" },
+  { value: "8", label: "Mark White (MW)", color: "#F59E0B", initials: "MW", name: "Mark White" },
+  { value: "9", label: "Beth Young (BY)", color: "#E11D48", initials: "BY", name: "Beth Young" },
+];
+
+const PRIORITY_OPTIONS = [
+  { value: "Urgent", label: "Urgent" },
+  { value: "High", label: "High" },
+  { value: "Medium", label: "Medium / Normal" },
+  { value: "Low", label: "Low" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "To Do", label: "TO DO" },
+  { value: "In Progress", label: "IN PROGRESS" },
+  { value: "Completed", label: "COMPLETED" },
 ];
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+  const { control, handleSubmit, reset } = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+      assignee_id: "",
+      priority: "Medium",
+      status: "To Do",
+      dueDate: "Jul 30",
+    },
+  });
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [todoList, setTodoList] = useState([]);
   const [newItemText, setNewItemText] = useState("");
   const [isAddingTodo, setIsAddingTodo] = useState(false);
-  const [selectedEmployees, setSelectedEmployees] = useState([]);
-  const [priority, setPriority] = useState("Medium");
-  const [status, setStatus] = useState("To Do");
-  const [dueDate, setDueDate] = useState("");
-
-  const [errors, setErrors] = useState({});
 
   const handleAddTodoItem = () => {
     if (!newItemText.trim()) return;
-    setTodoList([...todoList, { id: Date.now(), text: newItemText.trim(), done: false }]);
+    setTodoList([
+      ...todoList,
+      { id: Date.now(), text: newItemText.trim(), done: false },
+    ]);
     setNewItemText("");
     setIsAddingTodo(false);
   };
@@ -67,553 +80,233 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     setTodoList(todoList.filter((item) => item.id !== id));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newErrors = {};
-    if (!title.trim()) newErrors.title = "Task title is required";
-    if (selectedEmployees.length === 0) newErrors.employees = "Assign at least one employee";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    const assignedObjs = EMPLOYEES.filter((emp) => selectedEmployees.includes(emp.id));
-
-    onCreateTask({
-      id: `task-${title.toLowerCase().replace(/[^a-z0-9]/g, "")}-${selectedEmployees.join("") || "1"}`,
-      title,
-      description,
-      todoList,
-      assignees: assignedObjs,
-      priority,
-      status,
-      dueDate: dueDate || "Jul 30",
-    });
-
-    handleReset();
-    onClose();
-  };
-
-  const handleReset = () => {
-    setTitle("");
-    setDescription("");
+  const handleCloseDialog = () => {
+    reset();
     setTodoList([]);
     setNewItemText("");
     setIsAddingTodo(false);
-    setSelectedEmployees([]);
-    setPriority("Medium");
-    setStatus("To Do");
-    setDueDate("");
-    setErrors({});
+    onClose();
+  };
+
+  const onSubmit = (data) => {
+    const assignedEmp = EMPLOYEES.find((emp) => emp.value === data.assignee_id);
+    const assignees = assignedEmp
+      ? [
+          {
+            id: assignedEmp.value,
+            name: assignedEmp.name,
+            initials: assignedEmp.initials,
+            color: assignedEmp.color,
+          },
+        ]
+      : [
+          {
+            id: "1",
+            name: "Alex Rivard",
+            initials: "RI",
+            color: "#F59E0B",
+          },
+        ];
+
+    onCreateTask({
+      id: `task-${Date.now()}`,
+      title: data.title,
+      description: data.description,
+      todoList,
+      assignees,
+      priority: data.priority || "Medium",
+      status: data.status || "To Do",
+      dueDate: data.dueDate || "Jul 30",
+    });
+
+    handleCloseDialog();
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={() => {
-        handleReset();
-        onClose();
-      }}
-      maxWidth="md"
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: "16px",
-          padding: "8px 12px",
-          backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
-          backgroundImage: "none",
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.08)",
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          fontWeight: 700,
-          fontSize: "1.25rem",
-          color: isDark ? "#F8FAFC" : "#0F172A",
-          pb: 1,
-        }}
-      >
-        Create Task
-        <IconButton
-          onClick={() => {
-            handleReset();
-            onClose();
-          }}
-          size="small"
-          sx={{ color: isDark ? "#94A3B8" : "#64748B" }}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </DialogTitle>
+    <CustomDialog open={open} close={handleCloseDialog} widthX={750}>
+      <CustomDialogHeader variant="h5" title="Create New Task" />
 
-      <form onSubmit={handleSubmit}>
-        <DialogContent sx={{ py: 2 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-            {/* Task Title */}
-            <Box>
-              <Typography
-                component="label"
-                sx={{
-                  display: "block",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  mb: 0.8,
-                  color: isDark ? "#E2E8F0" : "#334155",
-                }}
-              >
-                Task Title <span style={{ color: "#EF4444" }}>*</span>
-              </Typography>
-              <TextField
-                fullWidth
-                size="small"
-                placeholder="Enter task title..."
-                value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  if (errors.title) setErrors({ ...errors, title: null });
-                }}
-                error={Boolean(errors.title)}
-                helperText={errors.title}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "8px",
-                    bgcolor: isDark ? "#1E293B" : "#FFFFFF",
-                  },
-                }}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
+          {/* Task Title */}
+          <CustomTextField
+            name="title"
+            control={control}
+            label="Task Title"
+            placeholder="Enter task title..."
+            required
+            rules={{ required: "Task title is required" }}
+          />
+
+          {/* Description & To-Do List side by side */}
+          <Grid container spacing={2.5}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <CustomTextField
+                name="description"
+                control={control}
+                label="Description"
+                placeholder="Enter task description..."
+                multiline
+                rows={4}
               />
-            </Box>
+            </Grid>
 
-            {/* Description & To-Do List side by side */}
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                gap: 2.5,
-              }}
-            >
-              {/* Description */}
-              <Box>
-                <Typography
-                  component="label"
-                  sx={{
-                    display: "block",
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    mb: 0.8,
-                    color: isDark ? "#E2E8F0" : "#334155",
-                  }}
-                >
-                  Description
-                </Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={4}
-                  placeholder="Enter task description..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "8px",
-                      bgcolor: isDark ? "#1E293B" : "#FFFFFF",
-                    },
-                  }}
-                />
-              </Box>
-
-              {/* To-Do List */}
-              <Box>
-                <Typography
-                  component="label"
-                  sx={{
-                    display: "block",
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    mb: 0.8,
-                    color: isDark ? "#E2E8F0" : "#334155",
-                  }}
-                >
-                  To-Do List
-                </Typography>
-                <Box
-                  sx={{
-                    border: `1px solid ${isDark ? "#334155" : "#E2E8F0"}`,
-                    borderRadius: "8px",
-                    p: 1.5,
-                    height: 124,
-                    overflowY: "auto",
-                    bgcolor: isDark ? "#1E293B" : "#FFFFFF",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  {todoList.length === 0 && !isAddingTodo && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        pt: 0.5,
-                      }}
-                    >
-                      <Button
-                        startIcon={<AddIcon />}
-                        onClick={() => setIsAddingTodo(true)}
-                        sx={{
-                          textTransform: "none",
-                          fontWeight: 600,
-                          color: "#2563EB",
-                          p: 0,
-                          "&:hover": { bgcolor: "transparent", textDecoration: "underline" },
-                        }}
-                      >
-                        Add item
-                      </Button>
-                    </Box>
-                  )}
-
-                  {todoList.map((item) => (
-                    <Box
-                      key={item.id}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        py: 0.3,
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Checkbox
-                          size="small"
-                          checked={item.done}
-                          onChange={() => handleToggleTodo(item.id)}
-                          sx={{ p: 0.5, color: "#2563EB" }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            textDecoration: item.done ? "line-through" : "none",
-                            color: item.done
-                              ? isDark
-                                ? "#64748B"
-                                : "#94A3B8"
-                              : isDark
-                              ? "#F8FAFC"
-                              : "#1E293B",
-                            ml: 0.5,
-                          }}
-                        >
-                          {item.text}
-                        </Typography>
-                      </Box>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteTodo(item.id)}
-                        sx={{ p: 0.2 }}
-                      >
-                        <DeleteOutlineIcon fontSize="small" sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-                  ))}
-
-                  {isAddingTodo && (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                      <TextField
-                        size="small"
-                        autoFocus
-                        placeholder="New item..."
-                        value={newItemText}
-                        onChange={(e) => setNewItemText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleAddTodoItem();
-                          }
-                        }}
-                        sx={{ flexGrow: 1 }}
-                      />
-                      <Button
-                        size="small"
-                        variant="contained"
-                        onClick={handleAddTodoItem}
-                        sx={{ bgcolor: "#2563EB" }}
-                      >
-                        Add
-                      </Button>
-                    </Box>
-                  )}
-
-                  {todoList.length > 0 && !isAddingTodo && (
-                    <Button
-                      startIcon={<AddIcon />}
-                      onClick={() => setIsAddingTodo(true)}
-                      size="small"
-                      sx={{
-                        textTransform: "none",
-                        fontWeight: 600,
-                        color: "#2563EB",
-                        alignSelf: "flex-start",
-                        mt: 1,
-                        p: 0,
-                      }}
-                    >
-                      Add item
-                    </Button>
-                  )}
-                </Box>
-              </Box>
-            </Box>
-
-            {/* Assign Employee */}
-            <Box>
+            {/* To-Do Checklist */}
+            <Grid size={{ xs: 12, md: 6 }}>
               <Typography
-                component="label"
+                variant="body2"
+                sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}
+              >
+                To-Do List
+              </Typography>
+              <Box
                 sx={{
-                  display: "block",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  mb: 0.8,
-                  color: isDark ? "#E2E8F0" : "#334155",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: "7px",
+                  p: 1.5,
+                  height: 124,
+                  overflowY: "auto",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.03)"
+                      : "#ffffff",
                 }}
               >
-                Assign Employee <span style={{ color: "#EF4444" }}>*</span>
-              </Typography>
-              <FormControl fullWidth size="small" error={Boolean(errors.employees)}>
-                <Select
-                  multiple
-                  displayEmpty
-                  value={selectedEmployees}
-                  onChange={(e) => {
-                    setSelectedEmployees(e.target.value);
-                    if (errors.employees) setErrors({ ...errors, employees: null });
-                  }}
-                  input={
-                    <OutlinedInput
-                      sx={{
-                        borderRadius: "8px",
-                        bgcolor: isDark ? "#1E293B" : "#FFFFFF",
-                      }}
-                    />
-                  }
-                  renderValue={(selected) => {
-                    if (selected.length === 0) {
-                      return (
-                        <Typography sx={{ color: isDark ? "#64748B" : "#94A3B8", fontSize: "0.875rem" }}>
-                          Select employees...
-                        </Typography>
-                      );
-                    }
-                    return (
-                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                        {selected.map((val) => {
-                          const emp = EMPLOYEES.find((e) => e.id === val);
-                          return (
-                            <Chip
-                              key={val}
-                              label={emp?.name || val}
-                              size="small"
-                              sx={{
-                                height: 24,
-                                bgcolor: "#EFF6FF",
-                                color: "#2563EB",
-                                fontWeight: 600,
-                              }}
-                            />
-                          );
-                        })}
-                      </Box>
-                    );
-                  }}
-                >
-                  {EMPLOYEES.map((emp) => (
-                    <MenuItem key={emp.id} value={emp.id}>
-                      <Checkbox checked={selectedEmployees.indexOf(emp.id) > -1} size="small" />
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: 1 }}>
-                        <Box
-                          sx={{
-                            width: 24,
-                            height: 24,
-                            borderRadius: "50%",
-                            bgcolor: emp.color,
-                            color: "#fff",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "0.7rem",
-                            fontWeight: 700,
-                          }}
-                        >
-                          {emp.initials}
-                        </Box>
-                        <Typography variant="body2">{emp.name}</Typography>
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.employees && (
-                  <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                    {errors.employees}
+                {todoList.length === 0 && !isAddingTodo && (
+                  <Typography variant="caption" color="text.secondary">
+                    No subtasks added yet.
                   </Typography>
                 )}
-              </FormControl>
-            </Box>
 
-            {/* Priority, Status, Due Date */}
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" },
-                gap: 2,
-              }}
-            >
-              {/* Priority */}
-              <Box>
-                <Typography
-                  component="label"
-                  sx={{
-                    display: "block",
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    mb: 0.8,
-                    color: isDark ? "#E2E8F0" : "#334155",
-                  }}
-                >
-                  Priority
-                </Typography>
-                <FormControl fullWidth size="small">
-                  <Select
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value)}
+                {todoList.map((item) => (
+                  <Box
+                    key={item.id}
                     sx={{
-                      borderRadius: "8px",
-                      bgcolor: isDark ? "#1E293B" : "#FFFFFF",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      py: 0.2,
                     }}
                   >
-                    <MenuItem value="Low">Low</MenuItem>
-                    <MenuItem value="Medium">Medium</MenuItem>
-                    <MenuItem value="High">High</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <Checkbox
+                        size="small"
+                        checked={item.done}
+                        onChange={() => handleToggleTodo(item.id)}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontSize: "0.8125rem",
+                          textDecoration: item.done ? "line-through" : "none",
+                          color: item.done ? "text.disabled" : "text.primary",
+                        }}
+                      >
+                        {item.text}
+                      </Typography>
+                    </Box>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDeleteTodo(item.id)}
+                    >
+                      <DeleteOutlinedIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </Box>
+                ))}
 
-              {/* Status */}
-              <Box>
-                <Typography
-                  component="label"
-                  sx={{
-                    display: "block",
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    mb: 0.8,
-                    color: isDark ? "#E2E8F0" : "#334155",
-                  }}
-                >
-                  Status
-                </Typography>
-                <FormControl fullWidth size="small">
-                  <Select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    sx={{
-                      borderRadius: "8px",
-                      bgcolor: isDark ? "#1E293B" : "#FFFFFF",
-                    }}
+                {isAddingTodo && (
+                  <Box
+                    sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
                   >
-                    <MenuItem value="To Do">To Do</MenuItem>
-                    <MenuItem value="In Progress">In Progress</MenuItem>
-                    <MenuItem value="Completed">Completed</MenuItem>
-                    <MenuItem value="Cancelled">Cancelled</MenuItem>
-                  </Select>
-                </FormControl>
+                    <TextField
+                      size="small"
+                      autoFocus
+                      placeholder="Subtask name..."
+                      value={newItemText}
+                      onChange={(e) => setNewItemText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddTodoItem();
+                        }
+                      }}
+                      sx={{ "& .MuiOutlinedInput-input": { py: 0.5 } }}
+                    />
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={handleAddTodoItem}
+                      sx={{ textTransform: "none" }}
+                    >
+                      Add
+                    </Button>
+                  </Box>
+                )}
               </Box>
 
-              {/* Due Date */}
-              <Box>
-                <Typography
-                  component="label"
-                  sx={{
-                    display: "block",
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    mb: 0.8,
-                    color: isDark ? "#E2E8F0" : "#334155",
-                  }}
-                >
-                  Due Date
-                </Typography>
-                <TextField
-                  fullWidth
+              {!isAddingTodo && (
+                <Button
                   size="small"
-                  placeholder="дд.мм.гггг"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <CalendarTodayIcon sx={{ fontSize: 18, color: isDark ? "#64748B" : "#94A3B8" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "8px",
-                      bgcolor: isDark ? "#1E293B" : "#FFFFFF",
-                    },
-                  }}
-                />
-              </Box>
-            </Box>
-          </Box>
-        </DialogContent>
+                  startIcon={<AddIcon />}
+                  onClick={() => setIsAddingTodo(true)}
+                  sx={{ mt: 1, textTransform: "none", fontSize: "0.8125rem" }}
+                >
+                  Add subtask
+                </Button>
+              )}
+            </Grid>
+          </Grid>
 
-        <DialogActions sx={{ px: 3, pb: 2, pt: 1, gap: 1.5 }}>
-          <Button
-            onClick={() => {
-              handleReset();
-              onClose();
-            }}
-            variant="outlined"
-            sx={{
-              borderColor: isDark ? "#475569" : "#CBD5E1",
-              color: isDark ? "#CBD5E1" : "#475569",
-              textTransform: "none",
-              fontWeight: 600,
-              borderRadius: "8px",
-              px: 2.5,
-              py: 0.8,
-              "&:hover": {
-                borderColor: isDark ? "#64748B" : "#94A3B8",
-                bgcolor: isDark ? "rgba(255,255,255,0.05)" : "#F8FAFC",
-              },
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
+          {/* Form Controls: Assignee, Priority, Status, Due Date */}
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <AppAutocomplete
+                name="assignee_id"
+                control={control}
+                label="Assign Employee"
+                options={EMPLOYEES}
+                placeholder="Select employee..."
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <CustomSelect
+                name="priority"
+                control={control}
+                label="Priority"
+                options={PRIORITY_OPTIONS}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <CustomSelect
+                name="status"
+                control={control}
+                label="Status"
+                options={STATUS_OPTIONS}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <CustomTextField
+                name="dueDate"
+                control={control}
+                label="Due Date"
+                placeholder="Jul 30"
+              />
+            </Grid>
+          </Grid>
+
+          {/* Dialog Action Buttons */}
+          <FooterButton
+            onCancel={handleCloseDialog}
+            saveText="Create Task"
+            cancelText="Cancel"
             type="submit"
-            variant="contained"
-            disableElevation
-            sx={{
-              bgcolor: "#2563EB",
-              color: "#FFFFFF",
-              textTransform: "none",
-              fontWeight: 600,
-              borderRadius: "8px",
-              px: 3,
-              py: 0.8,
-              "&:hover": {
-                bgcolor: "#1D4ED8",
-              },
-            }}
-          >
-            Create Task
-          </Button>
-        </DialogActions>
+          />
+        </Box>
       </form>
-    </Dialog>
+    </CustomDialog>
   );
 }
