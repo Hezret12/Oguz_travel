@@ -115,8 +115,7 @@ function App() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background:
-              "linear-gradient(145deg, #f0fdfa 0%, #e0f7f5 50%, #d0f0ee 100%)",
+            background: "#fff",
             opacity: fadeOut ? 0 : 1,
             transition: "opacity 0.35s ease-out",
             pointerEvents: fadeOut ? "none" : "auto",
