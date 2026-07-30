@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import { RouterProvider } from "react-router-dom";
+import AppRouter from "./routes/index";
 import { Toaster } from "react-hot-toast";
-import routes from "./routes/index";
 import OguzTravelLogo from "./layouts/Logo";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -126,7 +125,7 @@ function App() {
           <OguzTravelLogo autoPlay style={{ width: 400, maxWidth: "90vw" }} />
         </div>
       )}
-      <RouterProvider router={routes} />
+      <AppRouter />
       <GlobalModal />
       <AddClientModal />
       <Toaster position="top-center" toastOptions={{ duration: 4000 }} />

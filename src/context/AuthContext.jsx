@@ -1,17 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import {
-  clearSession,
-  getRoleHomePath,
-  getStoredSession,
-  normalizeUser,
-  persistSession,
-} from '../utils/auth';
+import { createContext, useCallback, useMemo, useState } from 'react';
+import { clearSession, getStoredSession, normalizeUser, persistSession } from '../utils/auth';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => getStoredSession()?.user ?? null);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   const login = useCallback((sessionData) => {
     const {
@@ -76,14 +70,4 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-
-  return context;
-}
-
-// export removed to fix fast refresh
+export { useAuth } from './useAuth';

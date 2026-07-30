@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
-import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
 import { Box, CircularProgress } from '@mui/material';
 import ErrorBoundary from '../components/ErrorBoundary';
 import ScrollToTop from '../components/ScrollToTop';
@@ -159,4 +159,6 @@ const router = createBrowserRouter([
   },
 ]);
 
-export default router;
+export default function AppRouter() {
+  return <RouterProvider router={router} />;
+}
