@@ -17,6 +17,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import StatusChip from "../../../components/StatusChip";
 import { TASK_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
+import { useLocale } from "../../../hooks/useLocale";
 
 const getPriorityBadgeProps = (priority) => {
   switch (priority) {
@@ -34,6 +35,7 @@ const getPriorityBadgeProps = (priority) => {
 };
 
 function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
+  const { t } = useLocale();
   const [activeTaskMenu, setActiveTaskMenu] = useState(null);
   const [taskMenuAnchor, setTaskMenuAnchor] = useState(null);
 
@@ -42,11 +44,26 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
     setActiveTaskMenu(null);
   };
 
+  const getPriorityLabel = (priority) => {
+    switch (priority?.toLowerCase()) {
+      case "urgent":
+        return t("task.priorityUrgent", "Urgent");
+      case "high":
+        return t("task.priorityHigh", "High");
+      case "medium":
+        return t("task.priorityMedium", "Medium / Normal");
+      case "low":
+        return t("task.priorityLow", "Low");
+      default:
+        return priority;
+    }
+  };
+
   const columns = useMemo(
     () => [
       {
         accessorKey: "title",
-        header: "Task Title",
+        header: t("task.title", "Task Title"),
         size: 260,
         Cell: ({ row }) => (
           <Box>
@@ -72,7 +89,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: t("columns.status", "Status"),
         size: 150,
         Cell: ({ cell }) => (
           <StatusChip status={cell.getValue()} config={TASK_STATUS_CONFIG} size="small" />
@@ -80,14 +97,14 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
       },
       {
         accessorKey: "priority",
-        header: "Priority",
+        header: t("task.priority", "Priority"),
         size: 130,
         Cell: ({ cell }) => {
           const val = cell.getValue();
           const props = getPriorityBadgeProps(val);
           return (
             <Chip
-              label={val}
+              label={getPriorityLabel(val)}
               size="small"
               sx={{
                 fontWeight: 600,
@@ -102,7 +119,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
       },
       {
         accessorKey: "assignees",
-        header: "Assignees",
+        header: t("task.assignees", "Assignees"),
         size: 150,
         enableSorting: false,
         Cell: ({ row }) => {
@@ -130,12 +147,12 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
       },
       {
         accessorKey: "dueDate",
-        header: "Due Date",
+        header: t("task.dueDate", "Due Date"),
         size: 130,
       },
       {
         id: "actions",
-        header: "Actions",
+        header: t("columns.actions", "Actions"),
         size: 90,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
@@ -153,7 +170,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         ),
       },
     ],
-    []
+    [t]
   );
 
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -206,7 +223,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
             handleMenuClose();
           }}
         >
-          Move to To Do
+          {t("task.moveToToDo", "Move to To Do")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -214,7 +231,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
             handleMenuClose();
           }}
         >
-          Move to In Progress
+          {t("task.moveToInProgress", "Move to In Progress")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -222,7 +239,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
             handleMenuClose();
           }}
         >
-          Move to Completed
+          {t("task.moveToCompleted", "Move to Completed")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -231,7 +248,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
           }}
           sx={{ color: "error.main" }}
         >
-          Delete Task
+          {t("task.deleteTask", "Delete Task")}
         </MenuItem>
       </Menu>
     </Box>
@@ -239,3 +256,4 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
 }
 
 export default memo(TaskListTable);
+

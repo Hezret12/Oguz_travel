@@ -17,6 +17,8 @@ import AddIcon from "@mui/icons-material/Add";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
+import { useLocale } from "../../../hooks/useLocale";
+
 const getPriorityBadgeProps = (priority) => {
   switch (priority) {
     case "Urgent":
@@ -39,6 +41,7 @@ function TaskBoardView({
   onDeleteTask,
   onOpenCreateModal,
 }) {
+  const { t } = useLocale();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
@@ -48,6 +51,21 @@ function TaskBoardView({
   const handleMenuClose = () => {
     setTaskMenuAnchor(null);
     setActiveTaskMenu(null);
+  };
+
+  const getPriorityLabel = (priority) => {
+    switch (priority?.toLowerCase()) {
+      case "urgent":
+        return t("task.priorityUrgent", "Urgent");
+      case "high":
+        return t("task.priorityHigh", "High");
+      case "medium":
+        return t("task.priorityMedium", "Medium / Normal");
+      case "low":
+        return t("task.priorityLow", "Low");
+      default:
+        return priority;
+    }
   };
 
   return (
@@ -202,7 +220,7 @@ function TaskBoardView({
                             }}
                           >
                             <Chip
-                              label={task.priority}
+                              label={getPriorityLabel(task.priority)}
                               size="small"
                               sx={{
                                 height: 22,
@@ -277,7 +295,7 @@ function TaskBoardView({
             handleMenuClose();
           }}
         >
-          Move to To Do
+          {t("task.moveToToDo", "Move to To Do")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -285,7 +303,7 @@ function TaskBoardView({
             handleMenuClose();
           }}
         >
-          Move to In Progress
+          {t("task.moveToInProgress", "Move to In Progress")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -293,7 +311,7 @@ function TaskBoardView({
             handleMenuClose();
           }}
         >
-          Move to Completed
+          {t("task.moveToCompleted", "Move to Completed")}
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -302,7 +320,7 @@ function TaskBoardView({
           }}
           sx={{ color: "error.main" }}
         >
-          Delete Task
+          {t("task.deleteTask", "Delete Task")}
         </MenuItem>
       </Menu>
     </Box>

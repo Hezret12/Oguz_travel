@@ -19,6 +19,8 @@ import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import BlockIcon from "@mui/icons-material/Block";
+
+import { useLocale } from "../../../hooks/useLocale";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 
 function TaskFlowHeader({
@@ -32,6 +34,7 @@ function TaskFlowHeader({
   filterPriority,
   setFilterPriority,
 }) {
+  const { t } = useLocale();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
@@ -60,7 +63,7 @@ function TaskFlowHeader({
           <GlobalSearchInput
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Search tasks..."
+            placeholder={t("task.searchTasks", "Search tasks...")}
           />
 
           {/* Status Select Filter */}
@@ -75,7 +78,7 @@ function TaskFlowHeader({
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <BlockIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        All Statuses
+                        {t("task.allStatuses", "All Statuses")}
                       </Typography>
                     </Box>
                   );
@@ -90,7 +93,7 @@ function TaskFlowHeader({
                         variant="body2"
                         sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
                       >
-                        TO DO
+                        {t("task.statusToDo", "TO DO")}
                       </Typography>
                     </Box>
                   );
@@ -105,7 +108,7 @@ function TaskFlowHeader({
                         variant="body2"
                         sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
                       >
-                        IN PROGRESS
+                        {t("task.statusInProgress", "IN PROGRESS")}
                       </Typography>
                     </Box>
                   );
@@ -120,7 +123,7 @@ function TaskFlowHeader({
                         variant="body2"
                         sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
                       >
-                        COMPLETED
+                        {t("task.statusCompleted", "COMPLETED")}
                       </Typography>
                     </Box>
                   );
@@ -144,7 +147,7 @@ function TaskFlowHeader({
                   bgcolor: "transparent",
                 }}
               >
-                Not started
+                {t("task.notStarted", "Not started")}
               </ListSubheader>
               <MenuItem value="to do">
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
@@ -155,7 +158,7 @@ function TaskFlowHeader({
                     variant="body2"
                     sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
                   >
-                    TO DO
+                    {t("task.statusToDo", "TO DO")}
                   </Typography>
                 </Box>
               </MenuItem>
@@ -171,7 +174,7 @@ function TaskFlowHeader({
                   bgcolor: "transparent",
                 }}
               >
-                Active
+                {t("task.active", "Active")}
               </ListSubheader>
               <MenuItem value="in progress">
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
@@ -182,7 +185,7 @@ function TaskFlowHeader({
                     variant="body2"
                     sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
                   >
-                    IN PROGRESS
+                    {t("task.statusInProgress", "IN PROGRESS")}
                   </Typography>
                 </Box>
               </MenuItem>
@@ -195,7 +198,7 @@ function TaskFlowHeader({
                     variant="body2"
                     sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
                   >
-                    COMPLETED
+                    {t("task.statusCompleted", "COMPLETED")}
                   </Typography>
                 </Box>
               </MenuItem>
@@ -213,7 +216,7 @@ function TaskFlowHeader({
                 >
                   <BlockIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    All Statuses
+                    {t("task.allStatuses", "All Statuses")}
                   </Typography>
                 </Box>
               </MenuItem>
@@ -232,7 +235,7 @@ function TaskFlowHeader({
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <BlockIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        All Priorities
+                        {t("task.allPriorities", "All Priorities")}
                       </Typography>
                     </Box>
                   );
@@ -244,7 +247,7 @@ function TaskFlowHeader({
                         sx={{ color: "#DC2626", fontSize: 18 }}
                       />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        Urgent
+                        {t("task.priorityUrgent", "Urgent")}
                       </Typography>
                     </Box>
                   );
@@ -256,7 +259,7 @@ function TaskFlowHeader({
                         sx={{ color: "#2563EB", fontSize: 18 }}
                       />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        High
+                        {t("task.priorityHigh", "High")}
                       </Typography>
                     </Box>
                   );
@@ -268,7 +271,7 @@ function TaskFlowHeader({
                         sx={{ color: "#F59E0B", fontSize: 18 }}
                       />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        Normal / Medium
+                        {t("task.priorityMedium", "Normal / Medium")}
                       </Typography>
                     </Box>
                   );
@@ -280,7 +283,7 @@ function TaskFlowHeader({
                         sx={{ color: "#64748B", fontSize: 18 }}
                       />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        Low
+                        {t("task.priorityLow", "Low")}
                       </Typography>
                     </Box>
                   );
@@ -304,13 +307,13 @@ function TaskFlowHeader({
                   bgcolor: "transparent",
                 }}
               >
-                Task Priority
+                {t("task.taskPriority", "Task Priority")}
               </ListSubheader>
               <MenuItem value="urgent">
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
                   <FlagRoundedIcon sx={{ color: "#DC2626", fontSize: 18 }} />
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    Urgent
+                    {t("task.priorityUrgent", "Urgent")}
                   </Typography>
                 </Box>
               </MenuItem>
@@ -318,7 +321,7 @@ function TaskFlowHeader({
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
                   <FlagRoundedIcon sx={{ color: "#2563EB", fontSize: 18 }} />
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    High
+                    {t("task.priorityHigh", "High")}
                   </Typography>
                 </Box>
               </MenuItem>
@@ -326,7 +329,7 @@ function TaskFlowHeader({
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
                   <FlagRoundedIcon sx={{ color: "#F59E0B", fontSize: 18 }} />
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    Normal / Medium
+                    {t("task.priorityMedium", "Normal / Medium")}
                   </Typography>
                 </Box>
               </MenuItem>
@@ -334,7 +337,7 @@ function TaskFlowHeader({
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
                   <FlagRoundedIcon sx={{ color: "#64748B", fontSize: 18 }} />
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    Low
+                    {t("task.priorityLow", "Low")}
                   </Typography>
                 </Box>
               </MenuItem>
@@ -352,7 +355,7 @@ function TaskFlowHeader({
                 >
                   <BlockIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    Clear / All
+                    {t("task.allPriorities", "All Priorities")}
                   </Typography>
                 </Box>
               </MenuItem>
@@ -407,7 +410,7 @@ function TaskFlowHeader({
                       : "#64748B",
               }}
             >
-              Board
+              {t("task.board", "Board")}
             </Button>
             <Button
               size="small"
@@ -436,7 +439,7 @@ function TaskFlowHeader({
                       : "#64748B",
               }}
             >
-              List
+              {t("task.list", "List")}
             </Button>
           </Paper>
 
@@ -461,7 +464,7 @@ function TaskFlowHeader({
               },
             }}
           >
-            New Task
+            {t("task.newTask", "New Task")}
           </Button>
         </Box>
       </Box>
@@ -470,3 +473,4 @@ function TaskFlowHeader({
 }
 
 export default memo(TaskFlowHeader);
+

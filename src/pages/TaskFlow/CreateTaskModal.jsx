@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
   Box,
@@ -12,6 +12,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
+import { useLocale } from "../../hooks/useLocale";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import FooterButton from "../../components/Dialog/FooterButton";
@@ -31,20 +32,9 @@ const EMPLOYEES = [
   { value: "9", label: "Beth Young (BY)", color: "#E11D48", initials: "BY", name: "Beth Young" },
 ];
 
-const PRIORITY_OPTIONS = [
-  { value: "Urgent", label: "Urgent" },
-  { value: "High", label: "High" },
-  { value: "Medium", label: "Medium / Normal" },
-  { value: "Low", label: "Low" },
-];
-
-const STATUS_OPTIONS = [
-  { value: "To Do", label: "TO DO" },
-  { value: "In Progress", label: "IN PROGRESS" },
-  { value: "Completed", label: "COMPLETED" },
-];
-
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
+  const { t } = useLocale();
+
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       title: "",
@@ -55,6 +45,25 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       dueDate: "Jul 30",
     },
   });
+
+  const priorityOptions = useMemo(
+    () => [
+      { value: "Urgent", label: t("task.priorityUrgent", "Urgent") },
+      { value: "High", label: t("task.priorityHigh", "High") },
+      { value: "Medium", label: t("task.priorityMedium", "Medium / Normal") },
+      { value: "Low", label: t("task.priorityLow", "Low") },
+    ],
+    [t]
+  );
+
+  const statusOptions = useMemo(
+    () => [
+      { value: "To Do", label: t("task.statusToDo", "TO DO") },
+      { value: "In Progress", label: t("task.statusInProgress", "IN PROGRESS") },
+      { value: "Completed", label: t("task.statusCompleted", "COMPLETED") },
+    ],
+    [t]
+  );
 
   const [todoList, setTodoList] = useState([]);
   const [newItemText, setNewItemText] = useState("");
@@ -124,7 +133,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
   return (
     <CustomDialog open={open} close={handleCloseDialog} widthX={750}>
-      <CustomDialogHeader variant="h5" title="Create New Task" />
+      <CustomDialogHeader variant="h5" title={t("task.createNewTask", "Create New Task")} />
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
@@ -132,10 +141,10 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
           <CustomTextField
             name="title"
             control={control}
-            label="Task Title"
-            placeholder="Enter task title..."
+            label={t("task.title", "Task Title")}
+            placeholder={t("task.enterTitle", "Enter task title...")}
             required
-            rules={{ required: "Task title is required" }}
+            rules={{ required: t("validation.required", "Task title is required") }}
           />
 
           {/* Description & To-Do List side by side */}
@@ -144,8 +153,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               <CustomTextField
                 name="description"
                 control={control}
-                label="Description"
-                placeholder="Enter task description..."
+                label={t("columns.description", "Description")}
+                placeholder={t("task.enterDescription", "Enter task description...")}
                 multiline
                 rows={4}
               />
@@ -157,7 +166,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 variant="body2"
                 sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}
               >
-                To-Do List
+                {t("task.todoList", "To-Do List")}
               </Typography>
               <Box
                 sx={{
@@ -175,7 +184,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               >
                 {todoList.length === 0 && !isAddingTodo && (
                   <Typography variant="caption" color="text.secondary">
-                    No subtasks added yet.
+                    {t("task.noSubtasks", "No subtasks added yet.")}
                   </Typography>
                 )}
 
@@ -222,7 +231,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                     <TextField
                       size="small"
                       autoFocus
-                      placeholder="Subtask name..."
+                      placeholder={t("task.subtaskName", "Subtask name...")}
                       value={newItemText}
                       onChange={(e) => setNewItemText(e.target.value)}
                       onKeyDown={(e) => {
@@ -239,7 +248,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                       onClick={handleAddTodoItem}
                       sx={{ textTransform: "none" }}
                     >
-                      Add
+                      {t("task.add", "Add")}
                     </Button>
                   </Box>
                 )}
@@ -252,7 +261,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                   onClick={() => setIsAddingTodo(true)}
                   sx={{ mt: 1, textTransform: "none", fontSize: "0.8125rem" }}
                 >
-                  Add subtask
+                  {t("task.addSubtask", "Add subtask")}
                 </Button>
               )}
             </Grid>
@@ -264,9 +273,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               <AppAutocomplete
                 name="assignee_id"
                 control={control}
-                label="Assign Employee"
+                label={t("task.assignEmployee", "Assign Employee")}
                 options={EMPLOYEES}
-                placeholder="Select employee..."
+                placeholder={t("task.selectEmployee", "Select employee...")}
               />
             </Grid>
 
@@ -274,8 +283,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               <CustomSelect
                 name="priority"
                 control={control}
-                label="Priority"
-                options={PRIORITY_OPTIONS}
+                label={t("task.priority", "Priority")}
+                options={priorityOptions}
               />
             </Grid>
 
@@ -283,8 +292,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               <CustomSelect
                 name="status"
                 control={control}
-                label="Status"
-                options={STATUS_OPTIONS}
+                label={t("columns.status", "Status")}
+                options={statusOptions}
               />
             </Grid>
 
@@ -292,7 +301,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               <CustomTextField
                 name="dueDate"
                 control={control}
-                label="Due Date"
+                label={t("task.dueDate", "Due Date")}
                 placeholder="Jul 30"
               />
             </Grid>
@@ -301,8 +310,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
           {/* Dialog Action Buttons */}
           <FooterButton
             onCancel={handleCloseDialog}
-            saveText="Create Task"
-            cancelText="Cancel"
+            saveText={t("task.createTask", "Create Task")}
+            cancelText={t("cancel", "Cancel")}
             type="submit"
           />
         </Box>
@@ -310,3 +319,4 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     </CustomDialog>
   );
 }
+

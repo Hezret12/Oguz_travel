@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { useLocale } from "../../../hooks/useLocale";
 
 const selectSx = {
   borderRadius: "10px",
@@ -69,37 +71,47 @@ export default function TaskFilter({
   openSelect,
   closeSelect,
 }) {
-  const statusOptions = [
-    { label: "To Do", value: "To Do" },
-    { label: "In Progress", value: "In Progress" },
-    { label: "Completed", value: "Completed" },
-    { label: "Cancelled", value: "Cancelled" },
-  ];
+  const { t } = useLocale();
 
-  const priorityOptions = [
-    { label: "High", value: "High" },
-    { label: "Medium", value: "Medium" },
-    { label: "Low", value: "Low" },
-  ];
+  const statusOptions = useMemo(
+    () => [
+      { label: t("task.statusToDo", "TO DO"), value: "To Do" },
+      { label: t("task.statusInProgress", "IN PROGRESS"), value: "In Progress" },
+      { label: t("task.statusCompleted", "COMPLETED"), value: "Completed" },
+      { label: t("task.statusCancelled", "Cancelled"), value: "Cancelled" },
+    ],
+    [t]
+  );
+
+  const priorityOptions = useMemo(
+    () => [
+      { label: t("task.priorityHigh", "High"), value: "High" },
+      { label: t("task.priorityMedium", "Medium"), value: "Medium" },
+      { label: t("task.priorityLow", "Low"), value: "Low" },
+    ],
+    [t]
+  );
 
   return (
     <Stack spacing={2.5}>
       <FilterSelect
-        label="Status"
+        label={t("columns.status", "Status")}
         name="status"
         value={draft.status}
         options={statusOptions}
         isOpen={Boolean(selectsOpen.status)}
+        allText={t("all", "Hemmesi")}
         onChange={setFilter}
         onOpen={openSelect}
         onClose={closeSelect}
       />
       <FilterSelect
-        label="Priority"
+        label={t("task.priority", "Priority")}
         name="priority"
         value={draft.priority}
         options={priorityOptions}
         isOpen={Boolean(selectsOpen.priority)}
+        allText={t("all", "Hemmesi")}
         onChange={setFilter}
         onOpen={openSelect}
         onClose={closeSelect}
@@ -107,3 +119,4 @@ export default function TaskFilter({
     </Stack>
   );
 }
+

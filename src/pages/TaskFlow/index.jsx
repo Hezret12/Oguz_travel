@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { Box, useTheme } from "@mui/material";
+import { useLocale } from "../../hooks/useLocale";
 
 import CreateTaskModal from "./CreateTaskModal";
 import TaskFlowHeader from "./Contents/TaskFlowHeader";
@@ -305,33 +306,37 @@ const INITIAL_TASKS = [
   },
 ];
 
-const COLUMNS = [
-  {
-    id: "To Do",
-    title: "TO DO",
-    color: "#64748B",
-    bgLight: "#F8FAFC",
-    borderLight: "#E2E8F0",
-  },
-  {
-    id: "In Progress",
-    title: "IN PROGRESS",
-    color: "#2563EB",
-    bgLight: "#EFF6FF",
-    borderLight: "#BFDBFE",
-  },
-  {
-    id: "Completed",
-    title: "COMPLETED",
-    color: "#16A34A",
-    bgLight: "#F0FDF4",
-    borderLight: "#BBF7D0",
-  },
-];
-
 export default function TaskFlow() {
+  const { t } = useLocale();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+
+  const columns = useMemo(
+    () => [
+      {
+        id: "To Do",
+        title: t("task.statusToDo", "TO DO"),
+        color: "#64748B",
+        bgLight: "#F8FAFC",
+        borderLight: "#E2E8F0",
+      },
+      {
+        id: "In Progress",
+        title: t("task.statusInProgress", "IN PROGRESS"),
+        color: "#2563EB",
+        bgLight: "#EFF6FF",
+        borderLight: "#BFDBFE",
+      },
+      {
+        id: "Completed",
+        title: t("task.statusCompleted", "COMPLETED"),
+        color: "#16A34A",
+        bgLight: "#F0FDF4",
+        borderLight: "#BBF7D0",
+      },
+    ],
+    [t]
+  );
 
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [searchQuery, setSearchQuery] = useState("");
@@ -408,7 +413,7 @@ export default function TaskFlow() {
         {viewMode === "board" ? (
           <TaskBoardView
             tasks={filteredTasks}
-            columns={COLUMNS}
+            columns={columns}
             onMoveTaskStatus={handleMoveTaskStatus}
             onDeleteTask={handleDeleteTask}
             onOpenCreateModal={() => setIsModalOpen(true)}
