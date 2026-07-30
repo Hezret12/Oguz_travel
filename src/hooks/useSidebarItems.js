@@ -26,6 +26,12 @@ export const useSidebarItems = () => {
         iconColor: "#3B82F6", // Sky Blue
       },
       {
+        text: t("sidebar.tasks", "Tasks"),
+        path: "/tasks",
+        icon: createElement(AssignmentRoundedIcon),
+        iconColor: "#2563EB", // TaskFlow Blue
+      },
+      {
         isGroup: true,
         text: t("sidebar.employee"),
         icon: createElement(PersonRoundedIcon),

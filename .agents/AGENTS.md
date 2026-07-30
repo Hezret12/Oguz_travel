@@ -311,3 +311,10 @@ src/pages/<Feature>/
 - **Always verify hook parameter names** by reading the hook source before using them. The three CRUD hooks have **different** parameter names.
 - **Always preserve necessary imports & clean up unused imports**: Remove any unused component, icon, or constant imports after refactoring to keep the codebase clean and warning-free.
 - **All form option values must be consistent types** — if the backend expects strings, use string values in `statusOptions` / `paymentOptions`.
+
+---
+
+## 11. MUI Grid Component Prop Usage
+
+- **ALWAYS** use the `size` prop syntax on `<Grid>` items (e.g., `<Grid size={{ xs: 12, sm: 6, lg: 4 }}>`) instead of legacy `item xs={12} sm={6}` props.
+

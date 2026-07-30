@@ -6,9 +6,7 @@ import ScrollToTop from '../components/ScrollToTop';
 import ProtectedRoute from '../components/ProtectedRoute';
 import DashboardLayout from '../layouts/DashboardLayout';
 
-/**
- * Resilient lazy loader with automatic retry on new production deployments (ChunkLoadError recovery)
- */
+
 function lazyRetry(componentImport) {
   return lazy(() =>
     componentImport().catch((error) => {
@@ -46,6 +44,7 @@ const TranslatePage = lazyRetry(() => import('../pages/Translate'));
 const OutboundPage = lazyRetry(() => import('../pages/Outbound/Outbound'));
 const VisaIntakePage = lazyRetry(() => import('../pages/VisaIntake'));
 const TurkishAirlinesReportPage = lazyRetry(() => import('../pages/Reports/TurkishAirlinesReport'));
+const TaskFlowPage = lazyRetry(() => import('../pages/TaskFlow'));
 
 function PageLoader() {
   const [visible, setVisible] = useState(false);
@@ -106,6 +105,7 @@ const TicketB2B = Loadable(TicketB2BPage);
 const TicketTurkish = Loadable(TicketTurkishAirlinesPage);
 const Intake = Loadable(VisaIntakePage);
 const TurkishReport = Loadable(TurkishAirlinesReportPage);
+const TaskFlow = Loadable(TaskFlowPage);
 const Unauthorized = Loadable(UnauthorizedPage);
 const NotFound = Loadable(NotFoundPage);
 const Login = Loadable(LoginPage);
@@ -130,6 +130,7 @@ const router = createBrowserRouter([
             element: <Layout />,
             children: [
               { index: true, element: <Dashboard /> },
+              { path: 'tasks', element: <TaskFlow /> },
               { path: 'employee', element: <Employee /> },
               { path: 'employee/users', element: <Users /> },
               { path: 'clients', element: <Clients /> },

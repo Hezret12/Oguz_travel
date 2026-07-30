@@ -47,3 +47,9 @@ export const PROCESSED_STATUS_CONFIG = {
   TRUE: { label: "Işlenen", color: "#16a34a", icon: CheckCircleRoundedIcon },
   FALSE: { label: "Işlenmedik", color: "#dc2626", icon: CancelRoundedIcon },
 };
+
+export const TASK_STATUS_CONFIG = {
+  "TO DO": { label: "TO DO", color: "#64748b", icon: ScheduleRoundedIcon },
+  "IN PROGRESS": { label: "IN PROGRESS", color: "#2563eb", icon: AutorenewRoundedIcon },
+  COMPLETED: { label: "COMPLETED", color: "#16a34a", icon: CheckCircleRoundedIcon },
+};
