@@ -163,10 +163,18 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
     columns,
     data: tasks,
     enablePagination: true,
+    enableStickyHeader: true,
     enableTopToolbar: false,
     enableBottomToolbar: true,
     initialState: {
       pagination: { pageIndex: 0, pageSize: 10 },
+    },
+    muiTableContainerProps: {
+      sx: {
+        flexGrow: 1,
+        maxHeight: "calc(100vh - 200px)",
+        overflowY: "auto",
+      },
     },
     muiTablePaperProps: {
       elevation: 0,
@@ -175,12 +183,15 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         border: "1px solid",
         borderColor: "divider",
         overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
       },
     },
   });
 
   return (
-    <Box>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <MaterialReactTable table={table} />
 
       {/* Task Context Menu */}
