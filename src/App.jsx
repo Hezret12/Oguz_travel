@@ -91,8 +91,16 @@ function App() {
       window.addEventListener("load", handleLoad);
     }
 
+    // 3. Production Safety Net: Max 6s fallback limit (prevents freezing on bad network)
+    const maxSafetyTimer = setTimeout(() => {
+      isAppLoaded = true;
+      minTimePassed = true;
+      tryFinish();
+    }, 6000);
+
     return () => {
       clearTimeout(minTimer);
+      clearTimeout(maxSafetyTimer);
       window.removeEventListener("load", handleLoad);
     };
   }, []);
