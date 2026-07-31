@@ -19,48 +19,64 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
 import AppAutocomplete from "../../components/AppAutocomplete";
+import { useDispatch } from "react-redux";
+import { addCustomNotification } from "../../store/slices/notificationSlice";
+import dayjs from "dayjs";
+import { useGet } from "../../hooks/CRUD/useGet";
+import { getAllEmployeeApi } from "../../api/queries/getters";
 
-const EMPLOYEES = [
-  { value: "1", label: "Alex Rivard (RI)", color: "#F59E0B", initials: "RI", name: "Alex Rivard" },
-  { value: "2", label: "Amelie Chen (AC)", color: "#EC4899", initials: "AC", name: "Amelie Chen" },
-  { value: "3", label: "Kevin Taylor (KT)", color: "#8B5CF6", initials: "KT", name: "Kevin Taylor" },
-  { value: "4", label: "David Wright (DW)", color: "#10B981", initials: "DW", name: "David Wright" },
-  { value: "5", label: "Tom Cooper (TC)", color: "#06B6D4", initials: "TC", name: "Tom Cooper" },
-  { value: "6", label: "Jessica Wong (JW)", color: "#F43F5E", initials: "JW", name: "Jessica Wong" },
-  { value: "7", label: "Alice Green (AG)", color: "#A855F7", initials: "AG", name: "Alice Green" },
-  { value: "8", label: "Mark White (MW)", color: "#F59E0B", initials: "MW", name: "Mark White" },
-  { value: "9", label: "Beth Young (BY)", color: "#E11D48", initials: "BY", name: "Beth Young" },
-];
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
+  const dispatch = useDispatch();
+
+  const { data: employeesData } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  const employeeOptions = useMemo(() => {
+    const apiList = Array.isArray(employeesData)
+      ? employeesData.map((emp) => {
+        const posName = selectedLang(emp.position?.name) || emp.position_name || "";
+        return {
+          value: emp.guid || emp.id,
+          label: `${emp.fullName}${posName ? ` (${posName})` : ""}`,
+          name: emp.fullName,
+          initials: emp.fullName?.slice(0, 2)?.toUpperCase() || "EM",
+          color: "#0E8584",
+        };
+      })
+      : [];
+    return [...apiList, ...EMPLOYEES];
+  }, [employeesData, selectedLang]);
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      title: "",
-      description: "",
-      assignee_id: "",
-      priority: "Medium",
-      status: "To Do",
-      dueDate: "Jul 30",
+      title: null,
+      description: null,
+      assignee_guid: null,
+      priority: null,
+      status: null,
+      dueDate: null,
     },
   });
 
   const priorityOptions = useMemo(
     () => [
-      { value: "Urgent", label: t("task.priorityUrgent", "Urgent") },
-      { value: "High", label: t("task.priorityHigh", "High") },
-      { value: "Medium", label: t("task.priorityMedium", "Medium / Normal") },
-      { value: "Low", label: t("task.priorityLow", "Low") },
+      { value: "urgent", label: t("task.priorityUrgent", "Urgent") },
+      { value: "high", label: t("task.priorityHigh", "High") },
+      { value: "medium", label: t("task.priorityMedium", "Medium / Normal") },
+      { value: "low", label: t("task.priorityLow", "Low") },
     ],
     [t]
   );
 
   const statusOptions = useMemo(
     () => [
-      { value: "To Do", label: t("task.statusToDo", "TO DO") },
-      { value: "In Progress", label: t("task.statusInProgress", "IN PROGRESS") },
-      { value: "Completed", label: t("task.statusCompleted", "COMPLETED") },
+      { value: "todo", label: t("task.statusToDo", "To Do") },
+      { value: "inprogress", label: t("task.statusInProgress", "In Progress") },
+      { value: "completed", label: t("task.statusCompleted", "Completed") },
     ],
     [t]
   );
@@ -73,7 +89,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     if (!newItemText.trim()) return;
     setTodoList([
       ...todoList,
-      { id: Date.now(), text: newItemText.trim(), done: false },
+      { id: Date.now().toString(), text: newItemText.trim(), done: false },
     ]);
     setNewItemText("");
     setIsAddingTodo(false);
@@ -98,24 +114,39 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   };
 
   const onSubmit = (data) => {
-    const assignedEmp = EMPLOYEES.find((emp) => emp.value === data.assignee_id);
+    const assignedEmp = employeeOptions.find((emp) => emp.value === data.assignee_id);
     const assignees = assignedEmp
       ? [
-          {
-            id: assignedEmp.value,
-            name: assignedEmp.name,
-            initials: assignedEmp.initials,
-            color: assignedEmp.color,
-          },
-        ]
+        {
+          id: assignedEmp.value,
+          name: assignedEmp.name,
+          initials: assignedEmp.initials,
+          color: assignedEmp.color,
+        },
+      ]
       : [
-          {
-            id: "1",
-            name: "Alex Rivard",
-            initials: "RI",
-            color: "#F59E0B",
-          },
-        ];
+        {
+          id: "1",
+          name: "Alex Rivard",
+          initials: "RI",
+          color: "#F59E0B",
+        },
+      ];
+
+    const now = dayjs();
+    dispatch(
+      addCustomNotification({
+        id: `notif-task-${now.valueOf()}`,
+        title: `Täze Ýumuş: ${data.title}`,
+        description: `${assignedEmp ? assignedEmp.name : "Işgär"}-a täze ýumuş bellenildi: "${data.title}"`,
+        sender: "Task Manager",
+        senderRole: "System",
+        avatarBg: "#6366F1",
+        date: now.toISOString(),
+        isRead: false,
+        type: "task",
+      })
+    );
 
     onCreateTask({
       id: `task-${Date.now()}`,
@@ -274,7 +305,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 name="assignee_id"
                 control={control}
                 label={t("task.assignEmployee", "Assign Employee")}
-                options={EMPLOYEES}
+                options={employeeOptions}
                 placeholder={t("task.selectEmployee", "Select employee...")}
               />
             </Grid>

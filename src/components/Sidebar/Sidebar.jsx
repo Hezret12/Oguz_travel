@@ -55,7 +55,7 @@ const SidebarPanel = ({
   i18n,
 }) => (
   <>
-    <Box
+    {/* <Box
       sx={{
         display: "flex",
         alignItems: "center",
@@ -78,7 +78,7 @@ const SidebarPanel = ({
           mx: "auto",
         }}
       />
-    </Box>
+    </Box> */}
 
     <Divider
       sx={{
