@@ -6,6 +6,7 @@ import CustomSelect from "../../components/CustomSelect";
 import { useForm } from "react-hook-form";
 import { Box, Stack } from "@mui/material";
 import { useLocale } from "../../hooks/useLocale";
+import dayjs from "dayjs";
 
 const TYPE_OPTIONS = [
   { label: "Bilet (Ticket)", value: "ticket" },
@@ -28,8 +29,9 @@ const AddNotificationModal = ({ open, close, onAdd }) => {
   });
 
   const onSubmit = (data) => {
+    const now = dayjs();
     const newNotification = {
-      id: `notif-${Date.now()}`,
+      id: `notif-${now.valueOf()}`,
       title: data.title,
       description: data.description,
       sender: data.sender || "System Admin",
@@ -44,7 +46,7 @@ const AddNotificationModal = ({ open, close, onAdd }) => {
           : data.type === "translation"
           ? "#F59E0B"
           : "#EC4899",
-      date: new Date().toISOString(),
+      date: now.toISOString(),
       isRead: false,
       type: data.type,
     };

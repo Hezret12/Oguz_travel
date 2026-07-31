@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import dayjs from 'dayjs';
 
 const INITIAL_NOTIFICATIONS = [
   {
@@ -95,10 +96,11 @@ const notificationSlice = createSlice({
 
       const positionGuid = employee?.position_guid || employee?.position?.guid || 'pos-default';
       const positionName = employee?.position?.name || employee?.position_name || 'Agent';
+      const now = dayjs();
 
       // 1. Create Comment tied to the Position (so new replacement employees see it!)
       const newComment = {
-        id: `comment-${Date.now()}`,
+        id: `comment-${now.valueOf()}`,
         employee_guid: employee?.guid,
         position_guid: positionGuid,
         position_name: positionName,
@@ -106,14 +108,14 @@ const notificationSlice = createSlice({
         author: author || 'Dawut Kakabaýew',
         authorRole: authorRole || 'Manager',
         text: commentText,
-        createdAt: new Date().toISOString(),
+        createdAt: now.toISOString(),
       };
 
       state.comments.unshift(newComment);
 
       // 2. Create Notification sent to that Employee / Position
       const newNotification = {
-        id: `notif-${Date.now()}`,
+        id: `notif-${now.valueOf()}`,
         title: `Täze Kommentariýa: ${positionName}`,
         description: `${author || 'Manager'}: "${commentText}"`,
         sender: author || 'Manager',
@@ -122,7 +124,7 @@ const notificationSlice = createSlice({
         targetPositionGuid: positionGuid,
         positionName: positionName,
         avatarBg: '#6366F1',
-        date: new Date().toISOString(),
+        date: now.toISOString(),
         isRead: false,
         type: 'task',
       };

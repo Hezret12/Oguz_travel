@@ -220,44 +220,33 @@ const NotificationPage = () => {
             )}
           </Box>
         }
-        action={
-          <Stack direction="row" spacing={1.5}>
-            {unreadCount > 0 && (
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<DoneAllIcon />}
-                onClick={handleMarkAllAsRead}
-                sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
-              >
-                {t("notifications.markAllAsRead") || "Ählisini okaldy etmek"}
-              </Button>
-            )}
+        addButtonText={t("notifications.createNotification") || "Täze Bildiriş Döret"}
+        onAddClick={() => setIsAddModalOpen(true)}
+      >
+        {unreadCount > 0 && (
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<DoneAllIcon />}
+            onClick={handleMarkAllAsRead}
+            sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, height: 40 }}
+          >
+            {t("notifications.markAllAsRead") || "Ählisini okaldy etmek"}
+          </Button>
+        )}
 
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={() => setIsAddModalOpen(true)}
-              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
-            >
-              {t("notifications.createNotification") || "Täze Bildiriş Döret"}
-            </Button>
-
-            {notifications.length > 0 && (
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<DeleteSweepIcon />}
-                onClick={handleClearAll}
-                sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
-              >
-                {t("notifications.clearAll") || "Ählisini arassala"}
-              </Button>
-            )}
-          </Stack>
-        }
-      />
+        {notifications.length > 0 && (
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteSweepIcon />}
+            onClick={handleClearAll}
+            sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, height: 40 }}
+          >
+            {t("notifications.clearAll") || "Ählisini arassala"}
+          </Button>
+        )}
+      </PageHeader>
 
       {/* Control Bar: GlobalSearchInput, FilterDrawer Button, and Tabs */}
       <Paper
