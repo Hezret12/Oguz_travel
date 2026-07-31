@@ -170,6 +170,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [t]
   );
 

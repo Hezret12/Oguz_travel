@@ -36,29 +36,27 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   });
 
   const employeeOptions = useMemo(() => {
-    const apiList = Array.isArray(employeesData)
-      ? employeesData.map((emp) => {
-        const posName = selectedLang(emp.position?.name) || emp.position_name || "";
-        return {
-          value: emp.guid || emp.id,
-          label: `${emp.fullName}${posName ? ` (${posName})` : ""}`,
-          name: emp.fullName,
-          initials: emp.fullName?.slice(0, 2)?.toUpperCase() || "EM",
-          color: "#0E8584",
-        };
-      })
-      : [];
-    return [...apiList, ...EMPLOYEES];
+    if (!Array.isArray(employeesData)) return [];
+    return employeesData.map((emp) => {
+      const posName = selectedLang(emp.position?.name) || emp.position_name || "";
+      return {
+        value: emp.guid || emp.id,
+        label: `${emp.fullName}${posName ? ` (${posName})` : ""}`,
+        name: emp.fullName,
+        initials: emp.fullName?.slice(0, 2)?.toUpperCase() || "EM",
+        color: "#0E8584",
+      };
+    });
   }, [employeesData, selectedLang]);
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      title: null,
-      description: null,
-      assignee_guid: null,
-      priority: null,
-      status: null,
-      dueDate: null,
+      title: "",
+      description: "",
+      assignee_guid: "",
+      priority: "medium",
+      status: "todo",
+      dueDate: "",
     },
   });
 
@@ -114,7 +112,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   };
 
   const onSubmit = (data) => {
-    const assignedEmp = employeeOptions.find((emp) => emp.value === data.assignee_id);
+    const assignedEmp = employeeOptions.find(
+      (emp) => emp.value === (data.assignee_guid || data.assignee_id)
+    );
     const assignees = assignedEmp
       ? [
         {
@@ -302,7 +302,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <AppAutocomplete
-                name="assignee_id"
+                name="assignee_guid"
                 control={control}
                 label={t("task.assignEmployee", "Assign Employee")}
                 options={employeeOptions}
