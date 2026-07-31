@@ -42,8 +42,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import PaymentIcon from "@mui/icons-material/Payment";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import TranslateIcon from "@mui/icons-material/Translate";
 import DnsIcon from "@mui/icons-material/Dns";
 import PersonIcon from "@mui/icons-material/Person";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -56,10 +54,6 @@ const getTypeIcon = (type) => {
       return <ConfirmationNumberIcon sx={{ fontSize: 22 }} />;
     case "payment":
       return <PaymentIcon sx={{ fontSize: 22 }} />;
-    case "task":
-      return <AssignmentIcon sx={{ fontSize: 22 }} />;
-    case "translation":
-      return <TranslateIcon sx={{ fontSize: 22 }} />;
     case "system":
     default:
       return <DnsIcon sx={{ fontSize: 22 }} />;
@@ -611,14 +605,8 @@ const NotificationPage = () => {
 
                             {/* Mark Read/Unread Action Button */}
                             <Tooltip
-                              title={
-                                isRead
-                                  ? t("notifications.markAsUnread") ||
-                                    "Okalmadyk diýip bellemek"
-                                  : t("notifications.markAsRead") ||
-                                    "Okaldy diýip bellemek"
-                              }
-                            >
+                              title={isRead ? t("notifications.markAsUnread") : t("notifications.markAsRead")
+                              }>
                               <IconButton
                                 size="small"
                                 onClick={() => handleToggleRead(id)}
@@ -651,7 +639,7 @@ const NotificationPage = () => {
                             </Tooltip>
 
                             {/* Delete Action Button */}
-                            <Tooltip title={t("delete") || "Pozmak"}>
+                            <Tooltip title={t("delete")}>
                               <IconButton
                                 size="small"
                                 onClick={() => handleDelete(id)}

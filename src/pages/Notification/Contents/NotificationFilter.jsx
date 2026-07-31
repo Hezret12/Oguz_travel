@@ -52,14 +52,14 @@ const NotificationFilter = ({ appliedFilters, onApply, onReset }) => {
     <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ p: 1 }}>
       <Stack spacing={2.5}>
         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary", mb: -1 }}>
-          {t("filter") || "Süzgüç"}
+          {t("filter")}
         </Typography>
 
         {/* Read/Unread Status Filter */}
         <CustomSelect
           name="status"
           control={control}
-          label={t("notifications.statusFilter") || "Status (Okaldy / Okalmadyk)"}
+          label={t("notifications.statusFilter")}
           options={STATUS_OPTIONS}
         />
 
@@ -67,7 +67,7 @@ const NotificationFilter = ({ appliedFilters, onApply, onReset }) => {
         <CustomSelect
           name="type"
           control={control}
-          label={t("notifications.typeFilter") || "Kategoriýa / Görnüşi"}
+          label={t("notifications.typeFilter")}
           options={TYPE_OPTIONS}
         />
 
@@ -75,7 +75,7 @@ const NotificationFilter = ({ appliedFilters, onApply, onReset }) => {
         <CustomTextField
           name="sender"
           control={control}
-          label={t("notifications.senderFilter") || "Ugradan adam (Sender)"}
+          label={t("notifications.senderFilter")}
           placeholder="Ugradanyň ady..."
         />
 
@@ -83,14 +83,14 @@ const NotificationFilter = ({ appliedFilters, onApply, onReset }) => {
         <CustomDatePicker
           name="startDate"
           control={control}
-          label={t("notifications.startDate") || "Başlanýan senesi"}
+          label={t("notifications.startDate")}
         />
 
         {/* End Date */}
         <CustomDatePicker
           name="endDate"
           control={control}
-          label={t("notifications.endDate") || "Gutarýan senesi"}
+          label={t("notifications.endDate")}
         />
 
         {/* Actions */}
@@ -113,7 +113,7 @@ const NotificationFilter = ({ appliedFilters, onApply, onReset }) => {
             fullWidth
             sx={{ borderRadius: "10px", py: 1, textTransform: "none", fontWeight: 600 }}
           >
-            {t("apply") || "Ulanmak"}
+            {t("apply")}
           </Button>
         </Box>
       </Stack>
