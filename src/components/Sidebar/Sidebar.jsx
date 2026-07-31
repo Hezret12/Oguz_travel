@@ -6,13 +6,13 @@ import SidebarItem from "./SidebarItem";
 import SidebarFooter from "./SidebarFooter";
 import { useAuth } from "../../context/AuthContext";
 import { useNavItems } from "../../hooks/useSidebarItems";
+import OguzLogo from "../../assets/icons/OguzLogo";
 
 const SIDEBAR_W = 280;
 const SIDEBAR_CW = 68;
 
 const LOGO_DARK = "/logo/oguz_logo.svg";
 const LOGO_LIGHT = "/logo/logo_white.png";
-
 
 if (typeof window !== "undefined") {
   [LOGO_DARK, LOGO_LIGHT].forEach((src) => {
@@ -42,53 +42,6 @@ const sidebarSurfaceStyles = (isDark, width) => ({
   fontFamily: "'Inter', sans-serif",
 });
 
-
-const SidebarLogo = ({ collapsed, isDark }) => {
-  const size = collapsed ? 36 : 130;
-
-  const imgSx = (visible) => ({
-    position: "absolute",
-    width: size,
-    height: "auto",
-    objectFit: "contain",
-    opacity: visible ? 1 : 0,
-    transition: "opacity 0.2s ease, width 0.3s ease",
-  });
-
-  return (
-    <Box
-      sx={{
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: collapsed ? "16px 0" : "16px 20px",
-        transition: "all 0.3s ease",
-        overflow: "hidden",
-        minHeight: 64,
-        my: 1
-      }}
-    >
-      <Box
-        component="img"
-        src={LOGO_DARK}
-        alt="Oguz Travel"
-        loading="eager"
-        decoding="async"
-        sx={imgSx(isDark)}
-      />
-      <Box
-        component="img"
-        src={LOGO_LIGHT}
-        alt="Oguz Travel"
-        loading="eager"
-        decoding="async"
-        sx={imgSx(!isDark)}
-      />
-    </Box>
-  );
-};
-
 const SidebarPanel = ({
   collapsed,
   isDark,
@@ -102,7 +55,30 @@ const SidebarPanel = ({
   i18n,
 }) => (
   <>
-    {/* <SidebarLogo collapsed={collapsed} isDark={isDark} /> */}
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        py: 1.5,
+        px: collapsed ? 1 : 2,
+        minHeight: 64,
+        overflow: "hidden",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+      }}
+    >
+      <OguzLogo
+        width={collapsed ? 44 : 160}
+        height={collapsed ? 36 : 70}
+        sx={{
+          maxWidth: "100%",
+          height: "auto",
+          display: "block",
+          mx: "auto",
+        }}
+      />
+    </Box>
 
     <Divider
       sx={{
@@ -154,7 +130,7 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
       .map((item) => {
         if (item.isGroup && item.children) {
           const allowedChildren = item.children.filter((child) =>
-            user.permissions.includes(child.path)
+            user.permissions.includes(child.path),
           );
           if (allowedChildren.length === 0) return null;
           return { ...item, children: allowedChildren };
