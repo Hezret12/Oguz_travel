@@ -5,14 +5,11 @@ import {
   IconButton,
   Badge,
   Popover,
-  Divider,
   Tooltip,
   Button,
   Chip,
   Avatar,
   Stack,
-  Tabs,
-  Tab,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -26,7 +23,9 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import ChatBubbleOutlinedIcon from '@mui/icons-material/ChatBubbleOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import NotificationsOffOutlinedIcon from '@mui/icons-material/NotificationsOffOutlined';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useNavigate } from 'react-router-dom';
+import { PATHS } from '../routes/paths';
 import { useLocale } from '../hooks/useLocale';
 import { useDateFormat } from '../functions/generalHelpers';
 import { useSelector, useDispatch } from 'react-redux';
@@ -34,67 +33,8 @@ import {
   toggleNotificationRead,
   markAllNotificationsAsRead,
   deleteNotification,
-  clearAllNotifications,
 } from '../store/slices/notificationSlice';
 
-// Initial Mock Notifications Data
-const INITIAL_NOTIFICATIONS = [
-  {
-    id: 'notif-1',
-    title: 'Täze Bilet Sargydy',
-    description: 'Stambul - Aşgabat ugry boýunça täze bilet sargydy girizildi. Müşdere tassyklama ugradyldy.',
-    sender: 'Merjen Atayeva',
-    senderRole: 'Agent',
-    avatarBg: '#0E8584',
-    date: '2026-07-31T12:15:00',
-    isRead: false,
-    type: 'ticket',
-  },
-  {
-    id: 'notif-2',
-    title: 'Töleg Tassyklandy',
-    description: 'Müşderi B2B bilet sargydy üçin 2,450 TMT möçberinde töleg geçirdi.',
-    sender: 'Maliýe Bölümi',
-    senderRole: 'Finance',
-    avatarBg: '#10B981',
-    date: '2026-07-31T11:30:00',
-    isRead: false,
-    type: 'payment',
-  },
-  {
-    id: 'notif-3',
-    title: 'Täze Tabşyryk Bellenildi',
-    description: 'Viza resminamalaryny barlaň we konsullyk barlagy üçin taýýarlaň.',
-    sender: 'Dawut Kakabaýew',
-    senderRole: 'Manager',
-    avatarBg: '#6366F1',
-    date: '2026-07-31T09:45:00',
-    isRead: false,
-    type: 'task',
-  },
-  {
-    id: 'notif-4',
-    title: 'Terjime Taýýar Boldy',
-    description: 'Pasport we şahsyýetnamanyň iňlis diline terjimesi üstünlikli tamamlandy.',
-    sender: 'Gülşat Rejepowa',
-    senderRole: 'Translator',
-    avatarBg: '#F59E0B',
-    date: '2026-07-30T16:20:00',
-    isRead: true,
-    type: 'translation',
-  },
-  {
-    id: 'notif-5',
-    title: 'Ulgam Täzelenmesi',
-    description: 'Oguz Travel ulgamynda täze serwer durnuklylygy we awtomatiki bilet gözlegi girizildi.',
-    sender: 'Oguz Admin',
-    senderRole: 'System',
-    avatarBg: '#EC4899',
-    date: '2026-07-29T14:10:00',
-    isRead: true,
-    type: 'system',
-  },
-];
 
 const getTypeIcon = (type) => {
   switch (type) {
@@ -110,11 +50,11 @@ const NotificationPopover = () => {
   const { t } = useLocale();
   const theme = useTheme();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { formatChange } = useDateFormat();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const notifications = useSelector((state) => state.notifications.notifications);
-  const [filterTab, setFilterTab] = useState('all'); // 'all' | 'unread'
 
   const isDark = theme.palette.mode === 'dark';
 
@@ -126,17 +66,17 @@ const NotificationPopover = () => {
     setAnchorEl(null);
   };
 
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => !n.isRead).length,
+  const handleViewAll = () => {
+    handleClose();
+    navigate(PATHS.NOTIFICATIONS);
+  };
+
+  const unreadNotifications = useMemo(
+    () => notifications.filter((n) => !n.isRead && !n.is_read),
     [notifications]
   );
 
-  const filteredNotifications = useMemo(() => {
-    if (filterTab === 'unread') {
-      return notifications.filter((n) => !n.isRead);
-    }
-    return notifications;
-  }, [notifications, filterTab]);
+  const unreadCount = unreadNotifications.length;
 
   const handleToggleRead = (id) => {
     dispatch(toggleNotificationRead(id));
@@ -148,10 +88,6 @@ const NotificationPopover = () => {
 
   const handleDelete = (id) => {
     dispatch(deleteNotification(id));
-  };
-
-  const handleClearAll = () => {
-    dispatch(clearAllNotifications());
   };
 
   const isOpen = Boolean(anchorEl);
@@ -258,11 +194,11 @@ const NotificationPopover = () => {
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="h6" sx={{ fontSize: '1.05rem', fontWeight: 700 }}>
-              {t('notifications.title') || 'Bildirişler'}
+              {t('notifications.title')}
             </Typography>
             {unreadCount > 0 && (
               <Chip
-                label={`${unreadCount} ${t('notifications.new') || 'täze'}`}
+                label={`${unreadCount} ${t('notifications.new')}`}
                 size="small"
                 sx={{
                   height: 20,
@@ -277,7 +213,7 @@ const NotificationPopover = () => {
           </Box>
 
           {unreadCount > 0 && (
-            <Tooltip title={t('notifications.markAllAsRead') || 'Ählisini okaldy etmek'}>
+            <Tooltip title={t('notifications.markAllAsRead')}>
               <Button
                 size="small"
                 onClick={handleMarkAllAsRead}
@@ -295,66 +231,10 @@ const NotificationPopover = () => {
                   },
                 }}
               >
-                {t('notifications.readAll') || 'Ählisini oka'}
+                {t('notifications.readAll')}
               </Button>
             </Tooltip>
           )}
-        </Box>
-
-        {/* Filter Tabs */}
-        <Box
-          sx={{
-            px: 2,
-            pt: 0.5,
-            borderBottom: '1px solid',
-            borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
-          }}
-        >
-          <Tabs
-            value={filterTab}
-            onChange={(e, val) => setFilterTab(val)}
-            sx={{
-              minHeight: 36,
-              '& .MuiTabs-indicator': {
-                backgroundColor: isDark ? '#14B8A6' : '#0E8584',
-                height: 2.5,
-                borderRadius: '3px 3px 0 0',
-              },
-            }}
-          >
-            <Tab
-              disableRipple
-              value="all"
-              label={`${t('notifications.all') || 'Ählisi'} (${notifications.length})`}
-              sx={{
-                minHeight: 36,
-                py: 0.5,
-                px: 1,
-                fontSize: '0.80rem',
-                fontWeight: filterTab === 'all' ? 700 : 500,
-                textTransform: 'none',
-                color: filterTab === 'all'
-                  ? (isDark ? '#14B8A6' : '#0E8584')
-                  : 'text.secondary',
-              }}
-            />
-            <Tab
-              disableRipple
-              value="unread"
-              label={`${t('notifications.unread') || 'Okalmadyklar'} (${unreadCount})`}
-              sx={{
-                minHeight: 36,
-                py: 0.5,
-                px: 1,
-                fontSize: '0.80rem',
-                fontWeight: filterTab === 'unread' ? 700 : 500,
-                textTransform: 'none',
-                color: filterTab === 'unread'
-                  ? (isDark ? '#14B8A6' : '#0E8584')
-                  : 'text.secondary',
-              }}
-            />
-          </Tabs>
         </Box>
 
         {/* Notification List Container */}
@@ -373,7 +253,7 @@ const NotificationPopover = () => {
             },
           }}
         >
-          {filteredNotifications.length === 0 ? (
+          {unreadNotifications.length === 0 ? (
             /* Empty State */
             <Box
               sx={{
@@ -398,18 +278,16 @@ const NotificationPopover = () => {
                 <NotificationsOffOutlinedIcon sx={{ fontSize: 30 }} />
               </Avatar>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
-                {filterTab === 'unread'
-                  ? (t('notifications.noUnread') || 'Täze okalmadyk bildiriş ýok')
-                  : (t('notifications.empty') || 'Bildiriş tapylmady')}
+                {t('notifications.noUnread')}
               </Typography>
               <Typography variant="caption" color="text.disabled">
-                {t('notifications.emptyDesc') || 'Täze bildirişler geleninde bärik çykar.'}
+                {t('notifications.emptyDesc')}
               </Typography>
             </Box>
           ) : (
             /* List Items */
             <Stack spacing={0.8}>
-              {filteredNotifications.map((item) => {
+              {unreadNotifications.map((item) => {
                 const { id, title, description, sender, senderRole, avatarBg, date, isRead, type } = item;
 
                 return (
@@ -568,8 +446,8 @@ const NotificationPopover = () => {
                         <Tooltip
                           title={
                             isRead
-                              ? t('notifications.markAsUnread') || 'Okalmadyk diýip bellemek'
-                              : t('notifications.markAsRead') || 'Okaldy diýip bellemek'
+                              ? t('notifications.markAsUnread')
+                              : t('notifications.markAsRead')
                           }
                         >
                           <IconButton
@@ -628,40 +506,38 @@ const NotificationPopover = () => {
         </Box>
 
         {/* Footer Bar */}
-        {notifications.length > 0 && (
-          <Box
+        <Box
+          sx={{
+            p: 1.2,
+            px: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderTop: '1px solid',
+            borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+            backgroundColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(248, 250, 252, 0.8)',
+          }}
+        >
+          <Button
+            fullWidth
+            size="small"
+            onClick={handleViewAll}
+            endIcon={<ArrowForwardIcon sx={{ fontSize: '16px !important' }} />}
             sx={{
-              p: 1.2,
-              px: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justify: 'space-between',
-              borderTop: '1px solid',
-              borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
-              backgroundColor: isDark ? 'rgba(30, 41, 59, 0.4)' : 'rgba(248, 250, 252, 0.6)',
+              fontSize: '0.80rem',
+              fontWeight: 600,
+              textTransform: 'none',
+              borderRadius: '8px',
+              color: isDark ? '#14B8A6' : '#0E8584',
+              py: 0.5,
+              '&:hover': {
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+              },
             }}
           >
-            <Typography variant="caption" color="text.disabled">
-              {notifications.length} {t('notifications.totalCount') || 'bildiriş bar'}
-            </Typography>
-
-            <Button
-              size="small"
-              onClick={handleClearAll}
-              color="error"
-              sx={{
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                textTransform: 'none',
-                py: 0.2,
-                px: 1,
-                borderRadius: '6px',
-              }}
-            >
-              {t('notifications.clearAll') || 'Ählisini arassala'}
-            </Button>
-          </Box>
-        )}
+            {t('notifications.viewAll') || 'Ählisini Gör'}
+          </Button>
+        </Box>
       </Popover>
     </>
   );

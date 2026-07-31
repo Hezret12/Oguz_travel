@@ -700,6 +700,7 @@
     "endDate": "End Date",
     "searchPlaceholder": "Search notification by title, content or sender...",
     "commentAdded": "Comment saved and notification sent to employee!",
-    "saveAndSend": "Save & Send Notification"
+    "saveAndSend": "Save & Send Notification",
+    "viewAll": "View All Notifications"
   }
 }
