@@ -6,6 +6,8 @@ import dayjs from "dayjs";
 import useReportData from "./hooks/useReportData";
 import useReportTheme from "./hooks/useReportTheme";
 import { formatNumber, formatCompact } from "../../../functions/generalHelpers";
+import { useQuery } from "@tanstack/react-query";
+import { getTurkishQuarterApi } from "../../../api/queries/getters";
 
 import ReportHeader from "./Contents/ReportHeader";
 import ReportSummaryCards from "./Contents/ReportSummaryCards";
@@ -17,9 +19,19 @@ const scrollbarSx = {
   "&::-webkit-scrollbar-thumb": { borderRadius: 3 },
 };
 
+const getCurrentQuarter = () => Math.floor(new Date().getMonth() / 3) + 1;
+
 const TurkishAirlinesReport = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [selectedQuarter, setSelectedQuarter] = useState("");
+  const [selectedQuarter, setSelectedQuarter] = useState(getCurrentQuarter());
+
+  const { data: quarterRes } = useQuery({
+    queryKey: ["turkish-quarter", selectedQuarter],
+    queryFn: () => getTurkishQuarterApi({ quarter: selectedQuarter }),
+  });
+
+  const quarterData = quarterRes?.data || {};
+  const achievementPercentage = quarterData?.achievement_percentage || "0%";
 
   const {
     isLoading,
@@ -83,6 +95,7 @@ const TurkishAirlinesReport = () => {
 
       <ReportSummaryCards
         stats={stats}
+        achievementPercentage={achievementPercentage}
         formatCompact={formatCompact}
         paperSx={paperSx}
         teal={colors.teal}
@@ -99,6 +112,7 @@ const TurkishAirlinesReport = () => {
         statusChartData={statusChartData}
         formatNumber={formatNumber}
         monthQuoted={stats.monthQuoted}
+        selectedQuarter={selectedQuarter}
         teal={colors.teal}
         accent={colors.accent}
         borderCol={colors.border}

@@ -5,6 +5,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import PriceCheckRoundedIcon from "@mui/icons-material/PriceCheckRounded";
 import PendingActionsRoundedIcon from "@mui/icons-material/PendingActionsRounded";
+import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
 import { useLocale } from "../../../../hooks/useLocale";
 
 const SummaryCard = memo(
@@ -98,6 +99,7 @@ SummaryCard.displayName = "SummaryCard";
 
 const ReportSummaryCards = ({
   stats,
+  achievementPercentage = "0%",
   formatCompact,
   paperSx,
   teal,
@@ -150,10 +152,10 @@ const ReportSummaryCards = ({
         isDark={isDark}
       />
       <SummaryCard
-        icon={<PriceCheckRoundedIcon sx={{ fontSize: 24 }} />}
-        value={formatCompact(stats.monthPaid)}
-        label={t("paymentPaid") || "Tölendi"}
-        sublabel={t("report.turkishAirlines.sublabelPaid") || "Kassa kabul edilen"}
+        icon={<EmojiEventsRoundedIcon sx={{ fontSize: 24 }} />}
+        value={achievementPercentage}
+        label={t("report.turkishAirlines.achievementRate") || "Çäryek Maksady"}
+        sublabel={t("report.turkishAirlines.achievementSublabel") || "Geçen çäryek temasy"}
         color="#059669"
         paperSx={paperSx}
         isDark={isDark}

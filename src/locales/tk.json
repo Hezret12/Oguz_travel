@@ -447,7 +447,8 @@
   },
   "report": {
     "turkishAirlines": {
-      "title": "Hasabat",
+      "title": "Turkish Airlines Hasabaty",
+      "subTitle": "Aýlyk satylgy we ciro derňewi",
       "day": "Gün",
       "total": "Jemi",
       "totalConfirmed": "Jemi tassyklandy",
@@ -476,8 +477,15 @@
       "sublabelQuoted": "Satylan baha jemi",
       "sublabelProfit": "Aýlyk peýda",
       "sublabelPaid": "Kassa kabul edilen",
-      "subTitle": "Türk howa ýollary hasabat",
-      "sublabelCredit": "Garaşylýan borç jemi"
+      "sublabelCredit": "Garaşylýan borç jemi",
+      "allQuarters": "Ähli Çäryekler",
+      "q1": "1-nji Çäryek (Q1: Ýan - Mar)",
+      "q2": "2-nji Çäryek (Q2: Apr - Iýun)",
+      "q3": "3-nji Çäryek (Q3: Iýul - Sen)",
+      "q4": "4-nji Çäryek (Q4: Okt - Dek)",
+      "quarterReport": "Çäryeklik Deňeşdirme we Maksat Hasabaty",
+      "achievementRate": "Çäryek Maksady",
+      "achievementSublabel": "Geçen çäryek temasy"
     }
   },
   "saleStatus": {

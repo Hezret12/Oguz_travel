@@ -137,9 +137,6 @@ const ReportHeader = ({
                 },
               }}
             >
-              <MenuItem value="">
-                <em>{t("report.turkishAirlines.allQuarters") || "Tüm Çeyrekler"}</em>
-              </MenuItem>
               <MenuItem value={1}>
                 {t("report.turkishAirlines.q1") || "1. Çeyrek (Q1)"}
               </MenuItem>

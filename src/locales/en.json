@@ -593,8 +593,8 @@
   },
   "report": {
     "turkishAirlines": {
-      "title": "Daily Report",
-      "subtitle": "daily turnover by offices",
+      "title": "Turkish Airlines Report",
+      "subTitle": "Monthly sales and turnover analysis",
       "day": "DAY",
       "total": "TOTAL",
       "totalConfirmed": "Totals confirmed",
@@ -623,7 +623,15 @@
       "sublabelQuoted": "Monthly turnover total",
       "sublabelProfit": "Monthly net profit",
       "sublabelPaid": "Received in cashier",
-      "sublabelCredit": "Pending debt total"
+      "sublabelCredit": "Pending debt total",
+      "allQuarters": "All Quarters",
+      "q1": "1st Quarter (Q1: Jan - Mar)",
+      "q2": "2nd Quarter (Q2: Apr - Jun)",
+      "q3": "3rd Quarter (Q3: Jul - Sep)",
+      "q4": "4th Quarter (Q4: Oct - Dec)",
+      "quarterReport": "Quarterly Comparison & Target Report",
+      "achievementRate": "Quarter Goal",
+      "achievementSublabel": "Last quarter theme"
     }
   },
   "saleStatus": {

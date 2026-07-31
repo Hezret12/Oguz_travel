@@ -4,13 +4,14 @@ import {
   Box,
   Typography,
   IconButton,
-  Button,
-  TextField,
-  Checkbox,
   Grid,
+  Chip,
+  useTheme,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import InsertDriveFileOutlinedIcon from "@mui/icons-material/InsertDriveFileOutlined";
 
 import { useLocale } from "../../hooks/useLocale";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
@@ -24,10 +25,13 @@ import { addCustomNotification } from "../../store/slices/notificationSlice";
 import dayjs from "dayjs";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllEmployeeApi } from "../../api/queries/getters";
+import CustomDatePicker from "../../components/CustomDatePicker";
 
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const { t, selectedLang } = useLocale();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const dispatch = useDispatch();
 
   const { data: employeesData } = useGet({
@@ -62,10 +66,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
   const priorityOptions = useMemo(
     () => [
-      { value: "urgent", label: t("task.priorityUrgent", "Urgent") },
-      { value: "high", label: t("task.priorityHigh", "High") },
-      { value: "medium", label: t("task.priorityMedium", "Medium / Normal") },
-      { value: "low", label: t("task.priorityLow", "Low") },
+      { value: "urgent", label: t("task.priorityUrgent") },
+      { value: "medium", label: t("task.priorityMedium") },
     ],
     [t]
   );
@@ -79,35 +81,29 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     [t]
   );
 
-  const [todoList, setTodoList] = useState([]);
-  const [newItemText, setNewItemText] = useState("");
-  const [isAddingTodo, setIsAddingTodo] = useState(false);
+  const [attachments, setAttachments] = useState([]);
 
-  const handleAddTodoItem = () => {
-    if (!newItemText.trim()) return;
-    setTodoList([
-      ...todoList,
-      { id: Date.now().toString(), text: newItemText.trim(), done: false },
-    ]);
-    setNewItemText("");
-    setIsAddingTodo(false);
+  const handleFileSelect = (e) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    if (selectedFiles.length === 0) return;
+
+    const newFiles = selectedFiles.map((file) => ({
+      id: `file-${dayjs().valueOf()}-${Math.random().toString(36).substr(2, 5)}`,
+      name: file.name,
+      size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+      file,
+    }));
+
+    setAttachments((prev) => [...prev, ...newFiles]);
   };
 
-  const handleToggleTodo = (id) => {
-    setTodoList(
-      todoList.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
-    );
-  };
-
-  const handleDeleteTodo = (id) => {
-    setTodoList(todoList.filter((item) => item.id !== id));
+  const handleRemoveFile = (id) => {
+    setAttachments((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleCloseDialog = () => {
     reset();
-    setTodoList([]);
-    setNewItemText("");
-    setIsAddingTodo(false);
+    setAttachments([]);
     onClose();
   };
 
@@ -149,191 +145,243 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     );
 
     onCreateTask({
-      id: `task-${Date.now()}`,
+      id: `task-${now.valueOf()}`,
       title: data.title,
       description: data.description,
-      todoList,
+      attachments,
       assignees,
-      priority: data.priority || "Medium",
-      status: data.status || "To Do",
-      dueDate: data.dueDate || "Jul 30",
+      priority: data.priority || "medium",
+      status: data.status || "todo",
+      dueDate: data.dueDate || "",
     });
 
     handleCloseDialog();
   };
 
   return (
-    <CustomDialog open={open} close={handleCloseDialog} widthX={750}>
-      <CustomDialogHeader variant="h5" title={t("task.createNewTask", "Create New Task")} />
+    <CustomDialog open={open} close={handleCloseDialog} widthX={720}>
+      <CustomDialogHeader
+        title={t("task.createTask")}
+        onClose={handleCloseDialog}
+      />
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
-          {/* Task Title */}
+          {/* Title */}
           <CustomTextField
             name="title"
             control={control}
-            label={t("task.title", "Task Title")}
-            placeholder={t("task.enterTitle", "Enter task title...")}
+            label={t("task.taskTitle")}
+            placeholder={t("task.enterTaskTitle")}
             required
-            rules={{ required: t("validation.required", "Task title is required") }}
           />
 
-          {/* Description & To-Do List side by side */}
+          {/* Description & File Upload Side by Side */}
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, md: 6 }}>
               <CustomTextField
                 name="description"
                 control={control}
-                label={t("columns.description", "Description")}
-                placeholder={t("task.enterDescription", "Enter task description...")}
+                label={t("columns.description")}
+                placeholder={t("task.enterDescription")}
                 multiline
-                rows={4}
+                rows={5.3}
               />
             </Grid>
 
-            {/* To-Do Checklist */}
+            {/* Attachments / File Upload */}
             <Grid size={{ xs: 12, md: 6 }}>
-              <Typography
-                variant="body2"
-                sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}
-              >
-                {t("task.todoList", "To-Do List")}
-              </Typography>
-              <Box
-                sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: "7px",
-                  p: 1.5,
-                  height: 124,
-                  overflowY: "auto",
-                  bgcolor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.03)"
-                      : "#ffffff",
-                }}
-              >
-                {todoList.length === 0 && !isAddingTodo && (
-                  <Typography variant="caption" color="text.secondary">
-                    {t("task.noSubtasks", "No subtasks added yet.")}
-                  </Typography>
-                )}
-
-                {todoList.map((item) => (
-                  <Box
-                    key={item.id}
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.75 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
+                  {t("task.attachments") || "Faýllar (Attachments)"}
+                </Typography>
+                {attachments.length > 0 && (
+                  <Chip
+                    label={`${attachments.length} faýl`}
+                    size="small"
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      py: 0.2,
+                      height: 20,
+                      fontSize: "0.72rem",
+                      fontWeight: 700,
+                      backgroundColor: isDark ? "rgba(20, 184, 166, 0.2)" : "rgba(14, 133, 132, 0.12)",
+                      color: isDark ? "#14B8A6" : "#0E8584",
+                      borderRadius: "6px",
                     }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <Checkbox
-                        size="small"
-                        checked={item.done}
-                        onChange={() => handleToggleTodo(item.id)}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontSize: "0.8125rem",
-                          textDecoration: item.done ? "line-through" : "none",
-                          color: item.done ? "text.disabled" : "text.primary",
-                        }}
-                      >
-                        {item.text}
-                      </Typography>
-                    </Box>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteTodo(item.id)}
-                    >
-                      <DeleteOutlinedIcon sx={{ fontSize: 16 }} />
-                    </IconButton>
-                  </Box>
-                ))}
-
-                {isAddingTodo && (
-                  <Box
-                    sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
-                  >
-                    <TextField
-                      size="small"
-                      autoFocus
-                      placeholder={t("task.subtaskName", "Subtask name...")}
-                      value={newItemText}
-                      onChange={(e) => setNewItemText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddTodoItem();
-                        }
-                      }}
-                      sx={{ "& .MuiOutlinedInput-input": { py: 0.5 } }}
-                    />
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={handleAddTodoItem}
-                      sx={{ textTransform: "none" }}
-                    >
-                      {t("task.add", "Add")}
-                    </Button>
-                  </Box>
+                  />
                 )}
               </Box>
 
-              {!isAddingTodo && (
-                <Button
-                  size="small"
-                  startIcon={<AddIcon />}
-                  onClick={() => setIsAddingTodo(true)}
-                  sx={{ mt: 1, textTransform: "none", fontSize: "0.8125rem" }}
+              <Box
+                sx={{
+                  border: "1.5px dashed",
+                  borderColor: isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(14, 133, 132, 0.3)",
+                  borderRadius: "12px",
+                  p: 1.5,
+                  height: 160,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  bgcolor: isDark ? "rgba(255, 255, 255, 0.02)" : "#FAFAFA",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    borderColor: isDark ? "#14B8A6" : "#0E8584",
+                    bgcolor: isDark ? "rgba(20, 184, 166, 0.04)" : "rgba(14, 133, 132, 0.02)",
+                  },
+                }}
+              >
+                {/* Uploaded Files Scrollable List or Dropzone Empty State */}
+                <Box
+                  sx={{
+                    flex: 1,
+                    overflowY: "auto",
+                    pr: 0.5,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 0.75,
+                    "&::-webkit-scrollbar": { width: "4px" },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)",
+                      borderRadius: "4px",
+                    },
+                  }}
                 >
-                  {t("task.addSubtask", "Add subtask")}
-                </Button>
-              )}
+                  {attachments.length === 0 ? (
+                    <Box
+                      component="label"
+                      htmlFor="task-file-input"
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: "100%",
+                        cursor: "pointer",
+                        textAlign: "center",
+                        py: 2,
+                      }}
+                    >
+                      <CloudUploadOutlinedIcon
+                        sx={{ fontSize: 32, color: isDark ? "#14B8A6" : "#0E8584", mb: 0.5 }}
+                      />
+                      <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.8125rem" }}>
+                        {t("task.dragDropHint") || "Faýly saýlamak üçin basyň ýa-da süýräň"}
+                      </Typography>
+                      <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.72rem", mt: 0.25 }}>
+                        PDF, DOCX, PNG, JPG (Max 10MB)
+                      </Typography>
+                    </Box>
+                  ) : (
+                    attachments.map((item) => (
+                      <Box
+                        key={item.id}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          px: 1.25,
+                          py: 0.6,
+                          borderRadius: "8px",
+                          backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#ffffff",
+                          border: "1px solid",
+                          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: 1, overflow: "hidden" }}>
+                          <InsertDriveFileOutlinedIcon
+                            sx={{ fontSize: 20, color: isDark ? "#14B8A6" : "#0E8584" }}
+                          />
+                          <Box sx={{ overflow: "hidden" }}>
+                            <Typography variant="body2" noWrap sx={{ fontSize: "0.8125rem", fontWeight: 500 }}>
+                              {item.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
+                              {item.size}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRemoveFile(item.id)}
+                          sx={{ p: 0.3 }}
+                        >
+                          <DeleteOutlinedIcon sx={{ fontSize: 16, color: "error.main" }} />
+                        </IconButton>
+                      </Box>
+                    ))
+                  )}
+                </Box>
+
+                {/* Bottom Add File Action (When files exist) */}
+                {attachments.length > 0 && (
+                  <Box
+                    component="label"
+                    htmlFor="task-file-input"
+                    sx={{
+                      pt: 0.75,
+                      borderTop: "1px solid",
+                      borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 0.5,
+                      cursor: "pointer",
+                      color: isDark ? "#14B8A6" : "#0E8584",
+                      fontSize: "0.78rem",
+                      fontWeight: 600,
+                      "&:hover": { textDecoration: "underline" },
+                    }}
+                  >
+                    <AddIcon fontSize="small" />
+                    {t("task.addMoreFiles") || "Täze faýl goşmak..."}
+                  </Box>
+                )}
+
+                {/* Hidden native file input */}
+                <input
+                  id="task-file-input"
+                  type="file"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={handleFileSelect}
+                />
+              </Box>
             </Grid>
           </Grid>
 
-          {/* Form Controls: Assignee, Priority, Status, Due Date */}
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <AppAutocomplete
                 name="assignee_guid"
                 control={control}
-                label={t("task.assignEmployee", "Assign Employee")}
+                label={t("task.assignEmployee")}
                 options={employeeOptions}
-                placeholder={t("task.selectEmployee", "Select employee...")}
+                placeholder={t("task.selectEmployee")}
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <CustomSelect
                 name="priority"
                 control={control}
-                label={t("task.priority", "Priority")}
+                label={t("task.priority")}
                 options={priorityOptions}
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <CustomSelect
                 name="status"
                 control={control}
-                label={t("columns.status", "Status")}
+                label={t("columns.status")}
                 options={statusOptions}
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <CustomTextField
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+              <CustomDatePicker
                 name="dueDate"
                 control={control}
-                label={t("task.dueDate", "Due Date")}
-                placeholder="Jul 30"
+                label={t("task.dueDate")}
               />
             </Grid>
           </Grid>
@@ -341,8 +389,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
           {/* Dialog Action Buttons */}
           <FooterButton
             onCancel={handleCloseDialog}
-            saveText={t("task.createTask", "Create Task")}
-            cancelText={t("cancel", "Cancel")}
+            saveText={t("task.createTask")}
+            cancelText={t("cancel")}
             type="submit"
           />
         </Box>
