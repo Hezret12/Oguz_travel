@@ -10,10 +10,12 @@ import visaFiltersReducer from './slices/filters/visaFilterSlice';
 import translateFiltersReducer from './slices/filters/translateFilterSlice';
 import outboundFiltersReducer from './slices/filters/outboundFilterSlice';
 import visaIntakeFiltersReducer from './slices/filters/visaIntakeFilterSlice';
+import notificationsReducer from './slices/notificationSlice';
 
 const store = configureStore({
   reducer: {
     modal:           modalReducer,
+    notifications:   notificationsReducer,
     employeeFilters: employeeFiltersReducer,
     clientFilters: clientFiltersReducer,
     b2bFilters:      b2bFiltersReducer,

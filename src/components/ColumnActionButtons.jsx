@@ -3,9 +3,18 @@ import { Box, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import PaymentsRoundedIcon from "@mui/icons-material/PaymentsRounded";
+import ChatBubbleOutlinedIcon from "@mui/icons-material/ChatBubbleOutlined";
 import { PaymentManagementModal } from "./Dialog/PaymentManagementModal";
 
-const ColumnActionButtons = ({ row, table, onDelete, showPayment = false, onPaymentClick }) => {
+const ColumnActionButtons = ({
+  row,
+  table,
+  onDelete,
+  showPayment = false,
+  onPaymentClick,
+  showComment = false,
+  onCommentClick,
+}) => {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
   const handleEdit = (e) => {
@@ -65,6 +74,41 @@ const ColumnActionButtons = ({ row, table, onDelete, showPayment = false, onPaym
             })}
           >
             <PaymentsRoundedIcon sx={{ fontSize: 16 }} />
+          </IconButton>
+        )}
+
+        {/* Comment / Notification button */}
+        {showComment && (
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onCommentClick) {
+                onCommentClick(row.original);
+              }
+            }}
+            size="small"
+            title="Kommentariýa Ýaz / Gör"
+            sx={(theme) => ({
+              borderRadius: "7px",
+              border: `1px solid ${theme.palette.divider}`,
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(20,184,166,0.12)"
+                  : "rgba(14,133,132,0.08)",
+              color: theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
+              transition: "all 0.15s ease",
+              "&:hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(20,184,166,0.22)"
+                    : "rgba(14,133,132,0.18)",
+                borderColor: theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
+                transform: "translateY(-1px)",
+              },
+              "&:active": { transform: "scale(0.95)" },
+            })}
+          >
+            <ChatBubbleOutlinedIcon sx={{ fontSize: 16 }} />
           </IconButton>
         )}
 

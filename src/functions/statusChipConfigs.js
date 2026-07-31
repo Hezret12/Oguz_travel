@@ -53,3 +53,8 @@ export const TASK_STATUS_CONFIG = {
   "IN PROGRESS": { label: "IN PROGRESS", color: "#2563eb", icon: AutorenewRoundedIcon },
   COMPLETED: { label: "COMPLETED", color: "#16a34a", icon: CheckCircleRoundedIcon },
 };
+
+export const NOTIFICATION_STATUS_CONFIG = {
+  TRUE: { label: "Okaldy", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  FALSE: { label: "Okalmadyk", color: "#d97706", icon: ScheduleRoundedIcon },
+};

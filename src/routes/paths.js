@@ -15,6 +15,7 @@ export const PATHS = {
   PLANNER: '/planner',
   SEARCH: '/search',
   PROFILE: '/profile',
+  NOTIFICATIONS: '/notifications',
   EMPLOYEE: {
     ROOT: '/employee',
     USERS: '/employee/users',

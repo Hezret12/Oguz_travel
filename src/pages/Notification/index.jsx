@@ -1,0 +1,722 @@
+import { useState, useMemo } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  Chip,
+  Avatar,
+  Paper,
+  Stack,
+  IconButton,
+  Tooltip,
+  Grid,
+  Tabs,
+  Tab,
+  useTheme,
+  alpha,
+} from "@mui/material";
+import PageHeader from "../../components/PageHeader";
+import GlobalSearchInput from "../../components/GlobalSearchInput";
+import FilterDrawer from "../../components/FilterDrawer";
+import Pagination from "../../components/Pagination";
+import NotificationFilter from "./Contents/NotificationFilter";
+import AddNotificationModal from "./AddNotificationModal";
+import StatusChip from "../../components/StatusChip";
+import { NOTIFICATION_STATUS_CONFIG } from "../../functions/statusChipConfigs";
+import { useLocale } from "../../hooks/useLocale";
+import { useDateFormat } from "../../functions/generalHelpers";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  toggleNotificationRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  clearAllNotifications,
+  addCustomNotification,
+} from "../../store/slices/notificationSlice";
+import dayjs from "dayjs";
+
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import NotificationsOffOutlinedIcon from "@mui/icons-material/NotificationsOffOutlined";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
+import PaymentIcon from "@mui/icons-material/Payment";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import TranslateIcon from "@mui/icons-material/Translate";
+import DnsIcon from "@mui/icons-material/Dns";
+import PersonIcon from "@mui/icons-material/Person";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AddIcon from "@mui/icons-material/Add";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+
+// Initial Mock Notifications Data for Page
+const INITIAL_NOTIFICATIONS = [
+  {
+    id: "notif-1",
+    title: "Täze Bilet Sargydy",
+    description: "Stambul - Aşgabat ugry boýunça täze bilet sargydy girizildi. Müşdere tassyklama ugradyldy.",
+    sender: "Merjen Atayeva",
+    senderRole: "Agent",
+    avatarBg: "#0E8584",
+    date: "2026-07-31T12:15:00",
+    isRead: false,
+    type: "ticket",
+  },
+  {
+    id: "notif-2",
+    title: "Töleg Tassyklandy",
+    description: "Müşderi B2B bilet sargydy üçin 2,450 TMT möçberinde töleg geçirdi.",
+    sender: "Maliýe Bölümi",
+    senderRole: "Finance",
+    avatarBg: "#10B981",
+    date: "2026-07-31T11:30:00",
+    isRead: false,
+    type: "payment",
+  },
+  {
+    id: "notif-3",
+    title: "Täze Tabşyryk Bellenildi",
+    description: "Viza resminamalaryny barlaň we konsullyk barlagy üçin taýýarlaň.",
+    sender: "Dawut Kakabaýew",
+    senderRole: "Manager",
+    avatarBg: "#6366F1",
+    date: "2026-07-31T09:45:00",
+    isRead: false,
+    type: "task",
+  },
+  {
+    id: "notif-4",
+    title: "Terjime Taýýar Boldy",
+    description: "Pasport we şahsyýetnamanyň iňlis diline terjimesi üstünlikli tamamlandy.",
+    sender: "Gülşat Rejepowa",
+    senderRole: "Translator",
+    avatarBg: "#F59E0B",
+    date: "2026-07-30T16:20:00",
+    isRead: true,
+    type: "translation",
+  },
+  {
+    id: "notif-5",
+    title: "Ulgam Täzelenmesi",
+    description: "Oguz Travel ulgamynda täze serwer durnuklylygy we awtomatiki bilet gözlegi girizildi.",
+    sender: "Oguz Admin",
+    senderRole: "System",
+    avatarBg: "#EC4899",
+    date: "2026-07-29T14:10:00",
+    isRead: true,
+    type: "system",
+  },
+  {
+    id: "notif-6",
+    title: "Konsullyk Viza Tassyklamasy",
+    description: "Müşderi ID #4092 üçin Şengen vizasy kabul edildi we pasport taýýar boldy.",
+    sender: "Arslan Berdiýew",
+    senderRole: "Visa Specialist",
+    avatarBg: "#6366F1",
+    date: "2026-07-28T10:00:00",
+    isRead: true,
+    type: "task",
+  },
+];
+
+const getTypeIcon = (type) => {
+  switch (type) {
+    case "ticket":
+      return <ConfirmationNumberIcon sx={{ fontSize: 22 }} />;
+    case "payment":
+      return <PaymentIcon sx={{ fontSize: 22 }} />;
+    case "task":
+      return <AssignmentIcon sx={{ fontSize: 22 }} />;
+    case "translation":
+      return <TranslateIcon sx={{ fontSize: 22 }} />;
+    case "system":
+    default:
+      return <DnsIcon sx={{ fontSize: 22 }} />;
+  }
+};
+
+const NotificationPage = () => {
+  const { t } = useLocale();
+  const theme = useTheme();
+  const dispatch = useDispatch();
+  const { formatChange } = useDateFormat();
+  const isDark = theme.palette.mode === "dark";
+
+  // Data from Redux
+  const notifications = useSelector((state) => state.notifications.notifications);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all"); // 'all' | 'unread' | 'read'
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  // Filter Drawer State
+  const [appliedFilters, setAppliedFilters] = useState({
+    status: "all",
+    type: "all",
+    startDate: null,
+    endDate: null,
+    sender: "",
+  });
+
+  // Calculate unread & total count
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.isRead).length,
+    [notifications]
+  );
+
+  // Filter logic
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter((item) => {
+      // Search Query
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesTitle = item.title.toLowerCase().includes(q);
+        const matchesDesc = item.description.toLowerCase().includes(q);
+        const matchesSender = item.sender.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesDesc && !matchesSender) return false;
+      }
+
+      // Tab Status
+      if (activeTab === "unread" && item.isRead) return false;
+      if (activeTab === "read" && !item.isRead) return false;
+
+      // Drawer Status Filter
+      if (appliedFilters.status === "unread" && item.isRead) return false;
+      if (appliedFilters.status === "read" && !item.isRead) return false;
+
+      // Type Filter
+      if (appliedFilters.type !== "all" && item.type !== appliedFilters.type)
+        return false;
+
+      // Sender Filter
+      if (
+        appliedFilters.sender &&
+        !item.sender.toLowerCase().includes(appliedFilters.sender.toLowerCase())
+      ) {
+        return false;
+      }
+
+      // Date Range Filter
+      if (appliedFilters.startDate) {
+        const itemDate = dayjs(item.date);
+        if (itemDate.isBefore(dayjs(appliedFilters.startDate), "day"))
+          return false;
+      }
+      if (appliedFilters.endDate) {
+        const itemDate = dayjs(item.date);
+        if (itemDate.isAfter(dayjs(appliedFilters.endDate), "day")) return false;
+      }
+
+      return true;
+    });
+  }, [notifications, searchQuery, activeTab, appliedFilters]);
+
+  // Paginated notifications
+  const paginatedNotifications = useMemo(() => {
+    const startIndex = (page - 1) * limit;
+    return filteredNotifications.slice(startIndex, startIndex + limit);
+  }, [filteredNotifications, page, limit]);
+
+  // Handlers
+  const handleToggleRead = (id) => {
+    dispatch(toggleNotificationRead(id));
+  };
+
+  const handleMarkAllAsRead = () => {
+    dispatch(markAllNotificationsAsRead());
+  };
+
+  const handleDelete = (id) => {
+    dispatch(deleteNotification(id));
+  };
+
+  const handleClearAll = () => {
+    dispatch(clearAllNotifications());
+  };
+
+  const handleAddNotification = (newNotif) => {
+    dispatch(addCustomNotification(newNotif));
+  };
+
+  const handleApplyFilters = (filters) => {
+    setAppliedFilters(filters);
+    setIsDrawerOpen(false);
+    setPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setAppliedFilters({
+      status: "all",
+      type: "all",
+      startDate: null,
+      endDate: null,
+      sender: "",
+    });
+    setPage(1);
+  };
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        gap: 2,
+        overflow: "hidden",
+      }}
+    >
+      {/* Page Header */}
+      <PageHeader
+        title={
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <NotificationsActiveIcon sx={{ color: isDark ? "#14B8A6" : "#0E8584" }} />
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {t("notifications.title") || "Bildirişler Ulgamy"}
+            </Typography>
+            {unreadCount > 0 && (
+              <Chip
+                label={`${unreadCount} ${t("notifications.new") || "täze"}`}
+                size="small"
+                color="error"
+                sx={{ fontWeight: 700, borderRadius: "8px", height: 24 }}
+              />
+            )}
+          </Box>
+        }
+        action={
+          <Stack direction="row" spacing={1.5}>
+            {unreadCount > 0 && (
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<DoneAllIcon />}
+                onClick={handleMarkAllAsRead}
+                sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
+              >
+                {t("notifications.markAllAsRead") || "Ählisini okaldy etmek"}
+              </Button>
+            )}
+
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={() => setIsAddModalOpen(true)}
+              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
+            >
+              {t("notifications.createNotification") || "Täze Bildiriş Döret"}
+            </Button>
+
+            {notifications.length > 0 && (
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteSweepIcon />}
+                onClick={handleClearAll}
+                sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
+              >
+                {t("notifications.clearAll") || "Ählisini arassala"}
+              </Button>
+            )}
+          </Stack>
+        }
+      />
+
+      {/* Control Bar: GlobalSearchInput, FilterDrawer Button, and Tabs */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 1.5,
+          borderRadius: "16px",
+          border: "1px solid",
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+          backgroundColor: isDark ? "rgba(15, 23, 42, 0.6)" : "#FFFFFF",
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { xs: "stretch", md: "center" },
+          justifyContent: "space-between",
+          gap: 2,
+        }}
+      >
+        {/* Search & Filter Button Group */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexGrow: 1 }}>
+          <Box sx={{ flexGrow: 1, maxWidth: { sm: 400 } }}>
+            <GlobalSearchInput
+              value={searchQuery}
+              onChange={(val) => {
+                setSearchQuery(val);
+                setPage(1);
+              }}
+              placeholder={t("notifications.searchPlaceholder") || "Bildiriş ady, mazmuny ýa-da ugradan boýunça gözle..."}
+            />
+          </Box>
+
+          <Button
+            variant="outlined"
+            onClick={() => setIsDrawerOpen(true)}
+            startIcon={<FilterListIcon />}
+            sx={{
+              borderRadius: "10px",
+              height: 40,
+              px: 2,
+              borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+              color: isDark ? "#F1F5F9" : "#334155",
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            {t("filter") || "Süzgüç"}
+          </Button>
+        </Box>
+
+        {/* Quick Status Tabs */}
+        <Tabs
+          value={activeTab}
+          onChange={(e, val) => {
+            setActiveTab(val);
+            setPage(1);
+          }}
+          sx={{
+            minHeight: 40,
+            "& .MuiTabs-indicator": {
+              backgroundColor: isDark ? "#14B8A6" : "#0E8584",
+              height: 3,
+              borderRadius: "3px",
+            },
+          }}
+        >
+          <Tab
+            value="all"
+            label={`${t("notifications.all") || "Ählisi"} (${notifications.length})`}
+            sx={{ textTransform: "none", fontWeight: 700, fontSize: "0.85rem", minHeight: 40 }}
+          />
+          <Tab
+            value="unread"
+            label={`${t("notifications.unread") || "Okalmadyklar"} (${unreadCount})`}
+            sx={{ textTransform: "none", fontWeight: 700, fontSize: "0.85rem", minHeight: 40 }}
+          />
+          <Tab
+            value="read"
+            label={`${t("notifications.read") || "Okalanlar"} (${notifications.length - unreadCount})`}
+            sx={{ textTransform: "none", fontWeight: 700, fontSize: "0.85rem", minHeight: 40 }}
+          />
+        </Tabs>
+      </Paper>
+
+      {/* Main Notifications List Container */}
+      <Box sx={{ flexGrow: 1, overflowY: "auto", pr: 0.5 }}>
+        {filteredNotifications.length === 0 ? (
+          /* Empty State */
+          <Paper
+            elevation={0}
+            sx={{
+              py: 8,
+              px: 3,
+              borderRadius: "16px",
+              border: "1px solid",
+              borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+              backgroundColor: isDark ? "rgba(15, 23, 42, 0.4)" : "#FFFFFF",
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Avatar
+              sx={{
+                width: 72,
+                height: 72,
+                mb: 2,
+                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                color: "text.disabled",
+              }}
+            >
+              <NotificationsOffOutlinedIcon sx={{ fontSize: 40 }} />
+            </Avatar>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: "text.secondary", mb: 0.8 }}>
+              {t("notifications.empty") || "Hiç hili bildiriş tapylmady"}
+            </Typography>
+            <Typography variant="body2" color="text.disabled" sx={{ maxWidth: 420 }}>
+              {t("notifications.emptyDesc") || "Gözleg maglumatlaryňyza ýa-da süzgüç şertleriňize gabat gelýän bildiriş ýok."}
+            </Typography>
+          </Paper>
+        ) : (
+          /* Notifications Grid Cards */
+          <Grid container spacing={2}>
+            {paginatedNotifications.map((item) => {
+              const { id, title, description, sender, senderRole, avatarBg, date, isRead, type } = item;
+
+              return (
+                <Grid key={id} size={{ xs: 12, md: 6, lg: 6 }}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2.2,
+                      borderRadius: "16px",
+                      position: "relative",
+                      transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                      backgroundColor: isRead
+                        ? isDark
+                          ? "rgba(30, 41, 59, 0.4)"
+                          : "#FFFFFF"
+                        : isDark
+                        ? "rgba(20, 184, 166, 0.1)"
+                        : "rgba(14, 133, 132, 0.04)",
+                      border: "1px solid",
+                      borderColor: isRead
+                        ? isDark
+                          ? "rgba(255,255,255,0.08)"
+                          : "#E2E8F0"
+                        : isDark
+                        ? "rgba(20, 184, 166, 0.25)"
+                        : "rgba(14, 133, 132, 0.2)",
+                      "&:hover": {
+                        transform: "translateY(-2px)",
+                        boxShadow: isDark
+                          ? "0 12px 24px rgba(0,0,0,0.4)"
+                          : "0 10px 20px rgba(0,0,0,0.06)",
+                        borderColor: isDark ? "rgba(20, 184, 166, 0.4)" : "#0E8584",
+                      },
+                    }}
+                  >
+                    <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+                      {/* Icon Avatar */}
+                      <Avatar
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          backgroundColor: alpha(avatarBg || "#0E8584", 0.15),
+                          color: avatarBg || "#0E8584",
+                          borderRadius: "12px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {getTypeIcon(type)}
+                      </Avatar>
+
+                      {/* Content Area */}
+                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                        {/* Title & Status Chip Header */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justify: "space-between",
+                            gap: 1,
+                            mb: 0.8,
+                          }}
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontWeight: isRead ? 600 : 700,
+                              fontSize: "0.95rem",
+                              color: isDark ? "#F1F5F9" : "#1E293B",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            {!isRead && (
+                              <Box
+                                component="span"
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: "50%",
+                                  backgroundColor: isDark ? "#14B8A6" : "#0E8584",
+                                  display: "inline-block",
+                                  flexShrink: 0,
+                                }}
+                              />
+                            )}
+                            {title}
+                          </Typography>
+
+                          <StatusChip
+                            status={isRead ? "TRUE" : "FALSE"}
+                            config={NOTIFICATION_STATUS_CONFIG}
+                            size="small"
+                          />
+                        </Box>
+
+                        {/* Description */}
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: "0.84rem",
+                            color: isDark ? "rgba(255,255,255,0.75)" : "#475569",
+                            lineHeight: 1.5,
+                            mb: 1.8,
+                          }}
+                        >
+                          {description}
+                        </Typography>
+
+                        {/* Metadata Footer: Sender, Role & Date */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justify: "space-between",
+                            flexWrap: "wrap",
+                            gap: 1,
+                            pt: 1,
+                            borderTop: "1px dashed",
+                            borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                          }}
+                        >
+                          {/* Sender Info */}
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                            <PersonIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                fontSize: "0.78rem",
+                                fontWeight: 600,
+                                color: isDark ? "#CBD5E1" : "#334155",
+                              }}
+                            >
+                              {sender}
+                            </Typography>
+                            {senderRole && (
+                              <Chip
+                                label={senderRole}
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: "0.65rem",
+                                  fontWeight: 600,
+                                  backgroundColor: isDark
+                                    ? "rgba(255,255,255,0.1)"
+                                    : "rgba(0,0,0,0.06)",
+                                  color: "text.secondary",
+                                  borderRadius: "4px",
+                                }}
+                              />
+                            )}
+                          </Box>
+
+                          {/* Date & Actions */}
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                              <AccessTimeIcon sx={{ fontSize: 14, color: "text.disabled" }} />
+                              <Typography
+                                variant="caption"
+                                sx={{ fontSize: "0.75rem", color: "text.disabled", fontWeight: 500 }}
+                              >
+                                {formatChange(date)}
+                              </Typography>
+                            </Box>
+
+                            {/* Mark Read/Unread Action Button */}
+                            <Tooltip
+                              title={
+                                isRead
+                                  ? t("notifications.markAsUnread") || "Okalmadyk diýip bellemek"
+                                  : t("notifications.markAsRead") || "Okaldy diýip bellemek"
+                              }
+                            >
+                              <IconButton
+                                size="small"
+                                onClick={() => handleToggleRead(id)}
+                                sx={{
+                                  width: 32,
+                                  height: 32,
+                                  color: isRead
+                                    ? "text.disabled"
+                                    : isDark
+                                    ? "#14B8A6"
+                                    : "#0E8584",
+                                  backgroundColor: !isRead
+                                    ? alpha(theme.palette.primary.main, 0.12)
+                                    : "transparent",
+                                  "&:hover": {
+                                    backgroundColor: isDark
+                                      ? "rgba(255,255,255,0.12)"
+                                      : "rgba(0,0,0,0.06)",
+                                  },
+                                }}
+                              >
+                                {isRead ? (
+                                  <CheckCircleIcon sx={{ fontSize: 20 }} />
+                                ) : (
+                                  <CheckCircleOutlinedIcon sx={{ fontSize: 20 }} />
+                                )}
+                              </IconButton>
+                            </Tooltip>
+
+                            {/* Delete Action Button */}
+                            <Tooltip title={t("delete") || "Pozmak"}>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDelete(id)}
+                                sx={{
+                                  width: 32,
+                                  height: 32,
+                                  color: "text.disabled",
+                                  "&:hover": {
+                                    color: "error.main",
+                                    backgroundColor: alpha(theme.palette.error.main, 0.12),
+                                  },
+                                }}
+                              >
+                                <DeleteOutlinedIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Box>
+                  </Paper>
+                </Grid>
+              );
+            })}
+          </Grid>
+        )}
+      </Box>
+
+      {/* Pagination Footer */}
+      {filteredNotifications.length > 0 && (
+        <Pagination
+          totalItems={filteredNotifications.length}
+          page={page}
+          limit={limit}
+          setPage={setPage}
+          setPageSize={setLimit}
+        />
+      )}
+
+      {/* Filter Drawer */}
+      <FilterDrawer
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onApply={handleApplyFilters}
+        onReset={handleResetFilters}
+      >
+        <NotificationFilter
+          appliedFilters={appliedFilters}
+          onApply={handleApplyFilters}
+          onReset={handleResetFilters}
+        />
+      </FilterDrawer>
+
+      {/* Add Notification Modal */}
+      <AddNotificationModal
+        open={isAddModalOpen}
+        close={() => setIsAddModalOpen(false)}
+        onAdd={handleAddNotification}
+      />
+    </Box>
+  );
+};
+
+export default NotificationPage;

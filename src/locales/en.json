@@ -664,5 +664,21 @@
     "moveToCompleted": "Move to Completed",
     "deleteTask": "Delete Task",
     "assignees": "Assignees"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "new": "new",
+    "all": "All",
+    "unread": "Unread",
+    "markAsRead": "Mark as read",
+    "markAsUnread": "Mark as unread",
+    "markAllAsRead": "Mark all as read",
+    "readAll": "Mark all read",
+    "delete": "Delete notification",
+    "clearAll": "Clear all",
+    "empty": "No notifications",
+    "noUnread": "No unread notifications",
+    "emptyDesc": "New notifications will appear here when they arrive.",
+    "totalCount": "notifications total"
   }
 }

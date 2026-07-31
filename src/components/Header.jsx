@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import ThemeToggle from './ThemeToggle';
+import NotificationPopover from './NotificationPopover';
 
 
 const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => {
@@ -97,8 +98,9 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
           )}
         </IconButton>
 
-        {/* Right side items: Language switcher, Dark/Light mode toggle, User menu */}
+        {/* Right side items: Notifications, Language switcher, Dark/Light mode toggle, User menu */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <NotificationPopover />
           <LanguageSwitcher />
           <ThemeToggle />
 

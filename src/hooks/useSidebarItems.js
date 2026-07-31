@@ -12,6 +12,7 @@ import TranslateIcon from "@mui/icons-material/Translate";
 import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 
 export const useSidebarItems = () => {
@@ -30,6 +31,12 @@ export const useSidebarItems = () => {
         path: "/tasks",
         icon: createElement(AssignmentRoundedIcon),
         iconColor: "#2563EB", // TaskFlow Blue
+      },
+      {
+        text: t("notifications.title", "Bildirişler"),
+        path: "/notifications",
+        icon: createElement(NotificationsActiveIcon),
+        iconColor: "#14B8A6", // Teal
       },
       {
         isGroup: true,
