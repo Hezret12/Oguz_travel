@@ -74,7 +74,9 @@ const NotificationPage = () => {
   const isDark = theme.palette.mode === "dark";
 
   // Data from Redux
-  const notifications = useSelector((state) => state.notifications.notifications);
+  const notifications = useSelector(
+    (state) => state.notifications.notifications,
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all"); // 'all' | 'unread' | 'read'
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -96,7 +98,7 @@ const NotificationPage = () => {
   // Calculate unread & total count
   const unreadCount = useMemo(
     () => notifications.filter((n) => !n.isRead).length,
-    [notifications]
+    [notifications],
   );
 
   // Filter logic
@@ -139,7 +141,8 @@ const NotificationPage = () => {
       }
       if (appliedFilters.endDate) {
         const itemDate = dayjs(item.date);
-        if (itemDate.isAfter(dayjs(appliedFilters.endDate), "day")) return false;
+        if (itemDate.isAfter(dayjs(appliedFilters.endDate), "day"))
+          return false;
       }
 
       return true;
@@ -204,7 +207,9 @@ const NotificationPage = () => {
       <PageHeader
         title={
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <NotificationsActiveIcon sx={{ color: isDark ? "#14B8A6" : "#0E8584" }} />
+            <NotificationsActiveIcon
+              sx={{ color: isDark ? "#14B8A6" : "#0E8584" }}
+            />
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
               {t("notifications.title") || "Bildirişler Ulgamy"}
             </Typography>
@@ -218,7 +223,9 @@ const NotificationPage = () => {
             )}
           </Box>
         }
-        addButtonText={t("notifications.createNotification") || "Täze Bildiriş Döret"}
+        addButtonText={
+          t("notifications.createNotification") || "Täze Bildiriş Döret"
+        }
         onAddClick={() => setIsAddModalOpen(true)}
       >
         {unreadCount > 0 && (
@@ -227,7 +234,12 @@ const NotificationPage = () => {
             color="primary"
             startIcon={<DoneAllIcon />}
             onClick={handleMarkAllAsRead}
-            sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, height: 40 }}
+            sx={{
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 600,
+              height: 40,
+            }}
           >
             {t("notifications.markAllAsRead") || "Ählisini okaldy etmek"}
           </Button>
@@ -239,9 +251,14 @@ const NotificationPage = () => {
             color="error"
             startIcon={<DeleteSweepIcon />}
             onClick={handleClearAll}
-            sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600, height: 40 }}
+            sx={{
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 600,
+              height: 40,
+            }}
           >
-            {t("notifications.clearAll") || "Ählisini arassala"}
+            {t("notifications.clearAll")}
           </Button>
         )}
       </PageHeader>
@@ -282,7 +299,9 @@ const NotificationPage = () => {
               borderRadius: "10px",
               height: 40,
               px: 2,
-              borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+              borderColor: isDark
+                ? "rgba(255,255,255,0.15)"
+                : "rgba(0,0,0,0.12)",
               color: isDark ? "#F1F5F9" : "#334155",
               textTransform: "none",
               fontWeight: 600,
@@ -292,7 +311,6 @@ const NotificationPage = () => {
           </Button>
         </Box>
 
-        {/* Quick Status Tabs */}
         <Tabs
           value={activeTab}
           onChange={(e, val) => {
@@ -302,7 +320,6 @@ const NotificationPage = () => {
           sx={{
             minHeight: 40,
             "& .MuiTabs-indicator": {
-              backgroundColor: isDark ? "#14B8A6" : "#0E8584",
               height: 3,
               borderRadius: "3px",
             },
@@ -310,26 +327,39 @@ const NotificationPage = () => {
         >
           <Tab
             value="all"
-            label={`${t("notifications.all") || "Ählisi"} (${notifications.length})`}
-            sx={{ textTransform: "none", fontWeight: 700, fontSize: "0.85rem", minHeight: 40 }}
+            label={`${t("notifications.all")} (${notifications.length})`}
+            sx={{
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: "0.85rem",
+              minHeight: 40,
+            }}
           />
           <Tab
             value="unread"
-            label={`${t("notifications.unread") || "Okalmadyklar"} (${unreadCount})`}
-            sx={{ textTransform: "none", fontWeight: 700, fontSize: "0.85rem", minHeight: 40 }}
+            label={`${t("notifications.unread")} (${unreadCount})`}
+            sx={{
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: "0.85rem",
+              minHeight: 40,
+            }}
           />
           <Tab
             value="read"
-            label={`${t("notifications.read") || "Okalanlar"} (${notifications.length - unreadCount})`}
-            sx={{ textTransform: "none", fontWeight: 700, fontSize: "0.85rem", minHeight: 40 }}
+            label={`${t("notifications.read")} (${notifications.length - unreadCount})`}
+            sx={{
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: "0.85rem",
+              minHeight: 40,
+            }}
           />
         </Tabs>
       </Paper>
 
-      {/* Main Notifications List Container */}
       <Box sx={{ flexGrow: 1, overflowY: "auto", pr: 0.5 }}>
         {filteredNotifications.length === 0 ? (
-          /* Empty State */
           <Paper
             elevation={0}
             sx={{
@@ -351,24 +381,43 @@ const NotificationPage = () => {
                 width: 72,
                 height: 72,
                 mb: 2,
-                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                backgroundColor: isDark
+                  ? "rgba(255,255,255,0.05)"
+                  : "rgba(0,0,0,0.04)",
                 color: "text.disabled",
               }}
             >
               <NotificationsOffOutlinedIcon sx={{ fontSize: 40 }} />
             </Avatar>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: "text.secondary", mb: 0.8 }}>
-              {t("notifications.empty") || "Hiç hili bildiriş tapylmady"}
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, color: "text.secondary", mb: 0.8 }}
+            >
+              {t("notifications.empty")}
             </Typography>
-            <Typography variant="body2" color="text.disabled" sx={{ maxWidth: 420 }}>
-              {t("notifications.emptyDesc") || "Gözleg maglumatlaryňyza ýa-da süzgüç şertleriňize gabat gelýän bildiriş ýok."}
+            <Typography
+              variant="body2"
+              color="text.disabled"
+              sx={{ maxWidth: 420 }}
+            >
+              {t("notifications.emptyDesc")}
             </Typography>
           </Paper>
         ) : (
           /* Notifications Grid Cards */
           <Grid container spacing={2}>
             {paginatedNotifications.map((item) => {
-              const { id, title, description, sender, senderRole, avatarBg, date, isRead, type } = item;
+              const {
+                id,
+                title,
+                description,
+                sender,
+                senderRole,
+                avatarBg,
+                date,
+                isRead,
+                type,
+              } = item;
 
               return (
                 <Grid key={id} size={{ xs: 12, md: 6, lg: 6 }}>
@@ -379,32 +428,28 @@ const NotificationPage = () => {
                       borderRadius: "16px",
                       position: "relative",
                       transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                      backgroundColor: isRead
-                        ? isDark
-                          ? "rgba(30, 41, 59, 0.4)"
-                          : "#FFFFFF"
-                        : isDark
-                        ? "rgba(20, 184, 166, 0.1)"
-                        : "rgba(14, 133, 132, 0.04)",
                       border: "1px solid",
                       borderColor: isRead
                         ? isDark
                           ? "rgba(255,255,255,0.08)"
                           : "#E2E8F0"
                         : isDark
-                        ? "rgba(20, 184, 166, 0.25)"
-                        : "rgba(14, 133, 132, 0.2)",
+                          ? "rgba(20, 184, 166, 0.25)"
+                          : "rgba(14, 133, 132, 0.2)",
                       "&:hover": {
                         transform: "translateY(-2px)",
                         boxShadow: isDark
                           ? "0 12px 24px rgba(0,0,0,0.4)"
                           : "0 10px 20px rgba(0,0,0,0.06)",
-                        borderColor: isDark ? "rgba(20, 184, 166, 0.4)" : "#0E8584",
+                        borderColor: isDark
+                          ? "rgba(20, 184, 166, 0.4)"
+                          : "#0E8584",
                       },
                     }}
                   >
-                    <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-                      {/* Icon Avatar */}
+                    <Box
+                      sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}
+                    >
                       <Avatar
                         sx={{
                           width: 44,
@@ -435,7 +480,6 @@ const NotificationPage = () => {
                             sx={{
                               fontWeight: isRead ? 600 : 700,
                               fontSize: "0.95rem",
-                              color: isDark ? "#F1F5F9" : "#1E293B",
                               display: "flex",
                               alignItems: "center",
                               gap: 1,
@@ -448,7 +492,9 @@ const NotificationPage = () => {
                                   width: 8,
                                   height: 8,
                                   borderRadius: "50%",
-                                  backgroundColor: isDark ? "#14B8A6" : "#0E8584",
+                                  backgroundColor: isDark
+                                    ? "#14B8A6"
+                                    : "#0E8584",
                                   display: "inline-block",
                                   flexShrink: 0,
                                 }}
@@ -469,7 +515,9 @@ const NotificationPage = () => {
                           variant="body2"
                           sx={{
                             fontSize: "0.84rem",
-                            color: isDark ? "rgba(255,255,255,0.75)" : "#475569",
+                            color: isDark
+                              ? "rgba(255,255,255,0.75)"
+                              : "#475569",
                             lineHeight: 1.5,
                             mb: 1.8,
                           }}
@@ -487,12 +535,22 @@ const NotificationPage = () => {
                             gap: 1,
                             pt: 1,
                             borderTop: "1px dashed",
-                            borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+                            borderColor: isDark
+                              ? "rgba(255,255,255,0.08)"
+                              : "rgba(0,0,0,0.06)",
                           }}
                         >
                           {/* Sender Info */}
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                            <PersonIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.8,
+                            }}
+                          >
+                            <PersonIcon
+                              sx={{ fontSize: 16, color: "text.secondary" }}
+                            />
                             <Typography
                               variant="caption"
                               sx={{
@@ -522,12 +580,30 @@ const NotificationPage = () => {
                           </Box>
 
                           {/* Date & Actions */}
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                              <AccessTimeIcon sx={{ fontSize: 14, color: "text.disabled" }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.5,
+                              }}
+                            >
+                              <AccessTimeIcon
+                                sx={{ fontSize: 14, color: "text.disabled" }}
+                              />
                               <Typography
                                 variant="caption"
-                                sx={{ fontSize: "0.75rem", color: "text.disabled", fontWeight: 500 }}
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  color: "text.disabled",
+                                  fontWeight: 500,
+                                }}
                               >
                                 {formatChange(date)}
                               </Typography>
@@ -537,8 +613,10 @@ const NotificationPage = () => {
                             <Tooltip
                               title={
                                 isRead
-                                  ? t("notifications.markAsUnread") || "Okalmadyk diýip bellemek"
-                                  : t("notifications.markAsRead") || "Okaldy diýip bellemek"
+                                  ? t("notifications.markAsUnread") ||
+                                    "Okalmadyk diýip bellemek"
+                                  : t("notifications.markAsRead") ||
+                                    "Okaldy diýip bellemek"
                               }
                             >
                               <IconButton
@@ -550,8 +628,8 @@ const NotificationPage = () => {
                                   color: isRead
                                     ? "text.disabled"
                                     : isDark
-                                    ? "#14B8A6"
-                                    : "#0E8584",
+                                      ? "#14B8A6"
+                                      : "#0E8584",
                                   backgroundColor: !isRead
                                     ? alpha(theme.palette.primary.main, 0.12)
                                     : "transparent",
@@ -565,7 +643,9 @@ const NotificationPage = () => {
                                 {isRead ? (
                                   <CheckCircleIcon sx={{ fontSize: 20 }} />
                                 ) : (
-                                  <CheckCircleOutlinedIcon sx={{ fontSize: 20 }} />
+                                  <CheckCircleOutlinedIcon
+                                    sx={{ fontSize: 20 }}
+                                  />
                                 )}
                               </IconButton>
                             </Tooltip>
@@ -581,7 +661,10 @@ const NotificationPage = () => {
                                   color: "text.disabled",
                                   "&:hover": {
                                     color: "error.main",
-                                    backgroundColor: alpha(theme.palette.error.main, 0.12),
+                                    backgroundColor: alpha(
+                                      theme.palette.error.main,
+                                      0.12,
+                                    ),
                                   },
                                 }}
                               >
