@@ -167,6 +167,10 @@
     "addSuccess": "Işgär üstünlikli goşuldy!",
     "addError": "Işgär ýazdyrmakda ýalňyşlyk ýüze çykdy.",
     "editSuccess": "Işgär üstünlikli üýtgedildi!",
+    "comments": "Kommentariýalar",
+    "commentHistory": "Wezipe boýunça kommentariýalar sanawy",
+    "addComment": "Täze kommentariýa ýazmak (Notification ugradar)",
+    "sendComment": "Kommentariýa Ýaz & Notification Ugrat",
     "validation": {
       "fullNameRequired": "Doly ady zerurdyr",
       "phoneNumberRequired": "Telefon belgisi zerurdyr",
@@ -524,6 +528,7 @@
     "new": "täze",
     "all": "Ählisi",
     "unread": "Okalmadyklar",
+    "read": "Okalanlar",
     "markAsRead": "Okaldy diýip bellemek",
     "markAsUnread": "Okalmadyk diýip bellemek",
     "markAllAsRead": "Ählisini okaldy diýip bellemek",
@@ -533,6 +538,22 @@
     "empty": "Bildiriş tapylmady",
     "noUnread": "Täze okalmadyk bildiriş ýok",
     "emptyDesc": "Täze bildirişler geleninde bärik çykar.",
-    "totalCount": "bildiriş bar"
+    "totalCount": "bildiriş bar",
+    "createNotification": "Täze Bildiriş Döretmek",
+    "selectRecipients": "Gönderilecek Işgärler",
+    "selectEmployeesPlaceholder": "Işgärleri saýlaň...",
+    "notificationTitle": "Bildiriş ady",
+    "description": "Bildiriş düşündirişi",
+    "type": "Bildiriş görnüşi",
+    "sender": "Ugradan adam",
+    "senderRole": "Wezipesi",
+    "statusFilter": "Status (Okaldy / Okalmadyk)",
+    "typeFilter": "Kategoriýa / Görnüşi",
+    "senderFilter": "Ugradan adam",
+    "startDate": "Başlanýan senesi",
+    "endDate": "Gutarýan senesi",
+    "searchPlaceholder": "Bildiriş ady, mazmuny ýa-da ugradan boýunça gözle...",
+    "commentAdded": "Kommentariýa ýazyldy we işgäre bildiriş ugradyldy!",
+    "saveAndSend": "Ýatda sakla & Ugrat"
   }
 }

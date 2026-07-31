@@ -12,6 +12,7 @@ const AppAutocomplete = ({
   fullWidth = true,
   size = "medium",
   disabled = false,
+  multiple = false,
   popupIcon = <KeyboardArrowDownIcon />,
   ...props
 }) => {
@@ -21,7 +22,9 @@ const AppAutocomplete = ({
       control={control}
       render={({ field: { onChange, value, ref }, fieldState: { error } }) => {
         const hasError = Boolean(error);
-        const selectedValue = options.find((opt) => opt.value === value) || null;
+        const selectedValue = multiple
+          ? options.filter((opt) => Array.isArray(value) && value.includes(opt.value))
+          : options.find((opt) => opt.value === value) || null;
 
         return (
           <Box sx={{ width: fullWidth ? "100%" : "auto" }}>
@@ -41,6 +44,7 @@ const AppAutocomplete = ({
             )}
             <Autocomplete
               id={`${name}-autocomplete`}
+              multiple={multiple}
               disabled={disabled}
               options={options}
               getOptionLabel={(option) => option.label || ""}
@@ -51,7 +55,11 @@ const AppAutocomplete = ({
               )}
               value={selectedValue}
               onChange={(_, newValue) => {
-                onChange(newValue ? newValue.value : "");
+                if (multiple) {
+                  onChange(Array.isArray(newValue) ? newValue.map((v) => v.value) : []);
+                } else {
+                  onChange(newValue ? newValue.value : "");
+                }
               }}
               isOptionEqualToValue={(option, val) => option.value === (val?.value ?? val)}
               popupIcon={popupIcon}

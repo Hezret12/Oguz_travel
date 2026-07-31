@@ -1,54 +1,69 @@
+import { useMemo } from "react";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import FooterButton from "../../components/Dialog/FooterButton";
 import CustomTextField from "../../components/CustomTextField";
-import CustomSelect from "../../components/CustomSelect";
+import AppAutocomplete from "../../components/AppAutocomplete";
 import { useForm } from "react-hook-form";
 import { Box, Stack } from "@mui/material";
 import { useLocale } from "../../hooks/useLocale";
 import dayjs from "dayjs";
-
-const TYPE_OPTIONS = [
-  { label: "Bilet (Ticket)", value: "ticket" },
-  { label: "Töleg (Payment)", value: "payment" },
-  { label: "Tabşyryk (Task)", value: "task" },
-  { label: "Terjime (Translation)", value: "translation" },
-  { label: "Ulgam (System)", value: "system" },
-];
+import { useGet } from "../../hooks/CRUD/useGet";
+import { getAllEmployeeApi } from "../../api/queries/getters";
 
 const AddNotificationModal = ({ open, close, onAdd }) => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
+
+  const { data: employeesData } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  const employeeOptions = useMemo(() => {
+    if (!Array.isArray(employeesData)) return [];
+    return employeesData.map((emp) => {
+      const posName =
+        selectedLang(emp.position?.name) || emp.position_name || "";
+      const deptName = selectedLang(emp.department?.name) || "";
+      return {
+        label: `${emp.fullName}${posName ? ` — ${posName}` : ""}${deptName ? ` (${deptName})` : ""}`,
+        value: emp.guid || emp.id,
+        raw: emp,
+      };
+    });
+  }, [employeesData, selectedLang]);
+
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       title: "",
       description: "",
-      sender: "",
-      senderRole: "Agent",
+      recipient_guids: [],
       type: "ticket",
+      sender: "System Admin",
+      senderRole: "Admin",
     },
   });
 
   const onSubmit = (data) => {
     const now = dayjs();
+    const selectedEmps = employeeOptions.filter((opt) =>
+      data.recipient_guids?.includes(opt.value),
+    );
+
+    const recipientNames =
+      selectedEmps.length > 0
+        ? selectedEmps.map((opt) => opt.raw.fullName).join(", ")
+        : "Ähli Işgärler";
+
     const newNotification = {
       id: `notif-${now.valueOf()}`,
       title: data.title,
-      description: data.description,
-      sender: data.sender || "System Admin",
-      senderRole: data.senderRole || "Admin",
-      avatarBg:
-        data.type === "ticket"
-          ? "#0E8584"
-          : data.type === "payment"
-          ? "#10B981"
-          : data.type === "task"
-          ? "#6366F1"
-          : data.type === "translation"
-          ? "#F59E0B"
-          : "#EC4899",
+      description: `${data.description}${
+        selectedEmps.length > 0 ? ` (Ugradyldy: ${recipientNames})` : ""
+      }`,
+      recipientGuids: data.recipient_guids,
       date: now.toISOString(),
       isRead: false,
-      type: data.type,
     };
 
     onAdd?.(newNotification);
@@ -57,56 +72,37 @@ const AddNotificationModal = ({ open, close, onAdd }) => {
   };
 
   return (
-    <CustomDialog open={open} close={close} widthX={550}>
-      <CustomDialogHeader title={t("notifications.createNotification") || "Täze Bildiriş Döretmek"} />
+    <CustomDialog open={open} close={close} widthX={600}>
+      <CustomDialogHeader variant={'h6'} title={t("notifications.createNotification")} />
 
       <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ p: 2.5 }}>
-        <Stack spacing={2}>
+        <Stack spacing={2.5}>
           <CustomTextField
             name="title"
             control={control}
-            label={t("notifications.title") || "Bildiriş ady"}
-            placeholder="Mes: Stambul reysine täze bilet sargydy..."
+            label={t("notifications.title")}
             required
           />
 
           <CustomTextField
             name="description"
             control={control}
-            label={t("notifications.description") || "Bildiriş düşündirişi"}
-            placeholder="Bildiriş barada giňişleýin maglumat..."
+            label={t("notifications.description")}
             multiline
             rows={3}
             required
           />
 
-          <CustomSelect
-            name="type"
+          <AppAutocomplete
+            name="recipient_guids"
             control={control}
-            label={t("notifications.type") || "Bildiriş görnüşi (Type)"}
-            options={TYPE_OPTIONS}
+            label={t("notifications.selectRecipients")}
+            options={employeeOptions}
+            multiple={true}
             required
           />
 
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <CustomTextField
-              name="sender"
-              control={control}
-              label={t("notifications.sender") || "Ugradan adam (Sender)"}
-              placeholder="Mes: Merjen Atayeva"
-              required
-            />
-
-            <CustomTextField
-              name="senderRole"
-              control={control}
-              label={t("notifications.senderRole") || "Wezipesi (Role)"}
-              placeholder="Mes: Agent, Manager, Finance..."
-              required
-            />
-          </Stack>
-
-          <FooterButton onCancel={close} saveText={t("save") || "Ýatda sakla"} />
+          <FooterButton onCancel={close} saveText={t("save")} />
         </Stack>
       </Box>
     </CustomDialog>

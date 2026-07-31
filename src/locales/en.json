@@ -152,6 +152,10 @@
       "addSuccess": "Employee added successfully!",
       "addError": "An error occurred while saving the employee.",
       "editSuccess": "Employee updated successfully!",
+      "comments": "Comments",
+      "commentHistory": "Position Comments History",
+      "addComment": "Write New Comment (Sends Notification)",
+      "sendComment": "Write Comment & Send Notification",
       "validation": {
         "fullNameRequired": "Full name is required",
         "phoneNumberRequired": "Phone number is required",
@@ -670,6 +674,7 @@
     "new": "new",
     "all": "All",
     "unread": "Unread",
+    "read": "Read",
     "markAsRead": "Mark as read",
     "markAsUnread": "Mark as unread",
     "markAllAsRead": "Mark all as read",
@@ -679,6 +684,22 @@
     "empty": "No notifications",
     "noUnread": "No unread notifications",
     "emptyDesc": "New notifications will appear here when they arrive.",
-    "totalCount": "notifications total"
+    "totalCount": "notifications total",
+    "createNotification": "Create New Notification",
+    "selectRecipients": "Recipient Employees",
+    "selectEmployeesPlaceholder": "Select target employees...",
+    "notificationTitle": "Notification Title",
+    "description": "Notification Description",
+    "type": "Notification Type",
+    "sender": "Sender Name",
+    "senderRole": "Sender Position / Role",
+    "statusFilter": "Status (Read / Unread)",
+    "typeFilter": "Category / Type",
+    "senderFilter": "Sender Name",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "searchPlaceholder": "Search notification by title, content or sender...",
+    "commentAdded": "Comment saved and notification sent to employee!",
+    "saveAndSend": "Save & Send Notification"
   }
 }
