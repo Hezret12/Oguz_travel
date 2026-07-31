@@ -6,7 +6,6 @@ import {
   Chip,
   Avatar,
   Paper,
-  Stack,
   IconButton,
   Tooltip,
   Grid,
@@ -48,7 +47,6 @@ import TranslateIcon from "@mui/icons-material/Translate";
 import DnsIcon from "@mui/icons-material/Dns";
 import PersonIcon from "@mui/icons-material/Person";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 
@@ -265,15 +263,14 @@ const NotificationPage = () => {
         }}
       >
         {/* Search & Filter Button Group */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexGrow: 1 }}>
-          <Box sx={{ flexGrow: 1, maxWidth: { sm: 400 } }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, justifyContent: 'center' }}>
+          <Box sx={{ maxWidth: { sm: 400 } }}>
             <GlobalSearchInput
               value={searchQuery}
               onChange={(val) => {
                 setSearchQuery(val);
                 setPage(1);
               }}
-              placeholder={t("notifications.searchPlaceholder") || "Bildiriş ady, mazmuny ýa-da ugradan boýunça gözle..."}
             />
           </Box>
 
@@ -291,7 +288,7 @@ const NotificationPage = () => {
               fontWeight: 600,
             }}
           >
-            {t("filter") || "Süzgüç"}
+            {t("filter")}
           </Button>
         </Box>
 
