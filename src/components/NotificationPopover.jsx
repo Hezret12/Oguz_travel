@@ -22,11 +22,8 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
-import PaymentIcon from '@mui/icons-material/Payment';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import TranslateIcon from '@mui/icons-material/Translate';
-import DnsIcon from '@mui/icons-material/Dns';
+import ChatBubbleOutlinedIcon from '@mui/icons-material/ChatBubbleOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NotificationsOffOutlinedIcon from '@mui/icons-material/NotificationsOffOutlined';
@@ -101,17 +98,11 @@ const INITIAL_NOTIFICATIONS = [
 
 const getTypeIcon = (type) => {
   switch (type) {
-    case 'ticket':
-      return <ConfirmationNumberIcon sx={{ fontSize: 20 }} />;
-    case 'payment':
-      return <PaymentIcon sx={{ fontSize: 20 }} />;
+    case 'comment':
+      return <ChatBubbleOutlinedIcon sx={{ fontSize: 20 }} />;
     case 'task':
-      return <AssignmentIcon sx={{ fontSize: 20 }} />;
-    case 'translation':
-      return <TranslateIcon sx={{ fontSize: 20 }} />;
-    case 'system':
     default:
-      return <DnsIcon sx={{ fontSize: 20 }} />;
+      return <AssignmentIcon sx={{ fontSize: 20 }} />;
   }
 };
 

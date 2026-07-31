@@ -40,9 +40,8 @@ import DoneAllIcon from "@mui/icons-material/DoneAll";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
-import PaymentIcon from "@mui/icons-material/Payment";
-import DnsIcon from "@mui/icons-material/Dns";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import ChatBubbleOutlinedIcon from "@mui/icons-material/ChatBubbleOutlined";
 import PersonIcon from "@mui/icons-material/Person";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -50,13 +49,11 @@ import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 
 const getTypeIcon = (type) => {
   switch (type) {
-    case "ticket":
-      return <ConfirmationNumberIcon sx={{ fontSize: 22 }} />;
-    case "payment":
-      return <PaymentIcon sx={{ fontSize: 22 }} />;
-    case "system":
+    case "comment":
+      return <ChatBubbleOutlinedIcon sx={{ fontSize: 22 }} />;
+    case "task":
     default:
-      return <DnsIcon sx={{ fontSize: 22 }} />;
+      return <AssignmentIcon sx={{ fontSize: 22 }} />;
   }
 };
 

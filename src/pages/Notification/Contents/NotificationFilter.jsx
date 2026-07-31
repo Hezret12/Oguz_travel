@@ -13,11 +13,8 @@ const STATUS_OPTIONS = [
 
 const TYPE_OPTIONS = [
   { label: "Ählisi (All)", value: "all" },
-  { label: "Bilet (Ticket)", value: "ticket" },
-  { label: "Töleg (Payment)", value: "payment" },
   { label: "Tabşyryk (Task)", value: "task" },
-  { label: "Terjime (Translation)", value: "translation" },
-  { label: "Ulgam (System)", value: "system" },
+  { label: "Kommentariýa (Comment)", value: "comment" },
 ];
 
 const NotificationFilter = ({ appliedFilters, onApply, onReset }) => {

@@ -184,12 +184,15 @@ const Employee = () => {
             table={table}
             onDelete={handleDeleteClick}
             showComment={true}
-            onCommentClick={(employeeData) => setCommentModalEmployee(employeeData)}
+            onCommentClick={(employeeData) =>
+              setCommentModalEmployee(employeeData)
+            }
           />
         ),
       },
     ],
-    [t],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedLang, t],
   );
 
   const activeFilters = useMemo(
@@ -269,7 +272,9 @@ const Employee = () => {
         />
 
         {activeFilters.map(([key, value]) => {
-          const labelKey = key.endsWith("_guid") ? key.replace("_guid", "") : key;
+          const labelKey = key.endsWith("_guid")
+            ? key.replace("_guid", "")
+            : key;
           const displayValue = getFilterValueName(key, value);
           return (
             <Chip

@@ -10,6 +10,12 @@ import { useLocale } from "../../hooks/useLocale";
 import dayjs from "dayjs";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllEmployeeApi } from "../../api/queries/getters";
+import CustomSelect from "../../components/CustomSelect";
+
+const TYPE_OPTIONS = [
+  { label: "Tabşyryk (Task)", value: "task" },
+  { label: "Kommentariýa (Comment)", value: "comment" },
+];
 
 const AddNotificationModal = ({ open, close, onAdd }) => {
   const { t, selectedLang } = useLocale();
@@ -38,7 +44,7 @@ const AddNotificationModal = ({ open, close, onAdd }) => {
       title: "",
       description: "",
       recipient_guids: [],
-      type: "ticket",
+      type: "task",
       sender: "System Admin",
       senderRole: "Admin",
     },
@@ -61,9 +67,14 @@ const AddNotificationModal = ({ open, close, onAdd }) => {
       description: `${data.description}${
         selectedEmps.length > 0 ? ` (Ugradyldy: ${recipientNames})` : ""
       }`,
+      sender: data.sender || "System Admin",
+      senderRole: data.senderRole || "Admin",
       recipientGuids: data.recipient_guids,
+      recipientNames: recipientNames,
+      avatarBg: data.type === "comment" ? "#10B981" : "#6366F1",
       date: now.toISOString(),
       isRead: false,
+      type: data.type || "task",
     };
 
     onAdd?.(newNotification);
@@ -73,10 +84,19 @@ const AddNotificationModal = ({ open, close, onAdd }) => {
 
   return (
     <CustomDialog open={open} close={close} widthX={600}>
-      <CustomDialogHeader variant={'h6'} title={t("notifications.createNotification")} />
+      <CustomDialogHeader variant={"h6"} title={t("notifications.createNotification")} />
 
       <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ p: 2.5 }}>
         <Stack spacing={2.5}>
+          <AppAutocomplete
+            name="recipient_guids"
+            control={control}
+            label={t("notifications.selectRecipients")}
+            options={employeeOptions}
+            multiple={true}
+            required
+          />
+
           <CustomTextField
             name="title"
             control={control}
@@ -93,12 +113,11 @@ const AddNotificationModal = ({ open, close, onAdd }) => {
             required
           />
 
-          <AppAutocomplete
-            name="recipient_guids"
+          <CustomSelect
+            name="type"
             control={control}
-            label={t("notifications.selectRecipients")}
-            options={employeeOptions}
-            multiple={true}
+            label={t("notifications.typeFilter") || "Görnüşi (Type)"}
+            options={TYPE_OPTIONS}
             required
           />
 
