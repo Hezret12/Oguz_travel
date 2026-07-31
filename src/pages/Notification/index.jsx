@@ -263,7 +263,7 @@ const NotificationPage = () => {
         }}
       >
         {/* Search & Filter Button Group */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, justifyContent: 'center' }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Box sx={{ maxWidth: { sm: 400 } }}>
             <GlobalSearchInput
               value={searchQuery}

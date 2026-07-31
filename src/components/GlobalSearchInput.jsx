@@ -11,9 +11,10 @@ const GlobalSearchInput = ({
   disabled = false,
   onRefetch,
   isFetching = false,
+  sx,
 }) => {
   return (
-    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, ...sx }}>
       <TextField
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -24,11 +25,11 @@ const GlobalSearchInput = ({
         sx={{
           minWidth: 260,
           '& .MuiOutlinedInput-root': {
-            borderRadius: 2,
+            borderRadius: '10px',
+            height: 40,
             fontSize: '0.875rem',
-            mt: 0.5,
-            ml: 1,
-            p: 1
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : '#ffffff',
           },
         }}
         slotProps={{
@@ -62,10 +63,9 @@ const GlobalSearchInput = ({
               disabled={isFetching}
               size="small"
               sx={{
-                mt: 0.5,
-                width: 36,
-                height: 36,
-                borderRadius: '8px',
+                width: 40,
+                height: 40,
+                borderRadius: '10px',
                 border: (theme) =>
                   `1px solid ${
                     theme.palette.mode === 'dark'
