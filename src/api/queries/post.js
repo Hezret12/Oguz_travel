@@ -159,3 +159,7 @@ export const addTurkishPaymentApi = async (data) => {
   return response;
 };
 
+export const addEmployeeCommentApi = async (data) => {
+  return await api.postPrivate("/employee-comment/add-comment", data);
+};
+

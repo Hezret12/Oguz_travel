@@ -134,3 +134,7 @@ export const getAllTurkishPaymentApi = async (params = {}) => {
 export const getTurkishQuarterApi = async (params = {}) => {
   return await api.getPrivate('/turkish-airlines/get-turkish-quarter', params);
 };
+
+export const getEmployeeCommentsApi = async (params = {}) => {
+  return await api.getPrivate('/employee-comment/get-comments', params);
+};

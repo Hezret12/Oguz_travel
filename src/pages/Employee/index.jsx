@@ -368,7 +368,7 @@ const Employee = () => {
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
-        description={t("employee.deleteConfirm") || t("deleteConfirm.employee")}
+        description={t("employee.deleteConfirm")}
       />
 
       <MaterialReactTable table={table} />

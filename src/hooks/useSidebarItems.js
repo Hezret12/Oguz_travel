@@ -31,12 +31,12 @@ export const useSidebarItems = () => {
         icon: createElement(LayoutDashboard, { size: 20, strokeWidth: 2.2 }),
       },
       {
-        text: t("sidebar.tasks", "Tasks"),
+        text: t("sidebar.tasks"),
         path: "/tasks",
         icon: createElement(CheckSquare, { size: 20, strokeWidth: 2.2 }),
       },
       {
-        text: t("notifications.title", "Bildirişler"),
+        text: t("sidebar.notifications"),
         path: "/notifications",
         icon: createElement(Bell, { size: 20, strokeWidth: 2.2 }),
       },
@@ -59,16 +59,16 @@ export const useSidebarItems = () => {
       },
       {
         isGroup: true,
-        text: t("sidebar.ticket", "Ticket"),
+        text: t("sidebar.ticket"),
         icon: createElement(Ticket, { size: 20, strokeWidth: 2.2 }),
         children: [
           {
-            text: t("sidebar.ticketB2B", "B2B"),
+            text: t("sidebar.ticketB2B"),
             path: "/ticket/b2b",
             icon: createElement(Building2, { size: 18, strokeWidth: 2.2 }),
           },
           {
-            text: t("sidebar.ticketTurkishAirlines", "Turkish Airlines"),
+            text: t("sidebar.ticketTurkishAirlines"),
             path: "/ticket/turkish-airlines",
             icon: createElement("img", {
               src: TurkishAirlinesIcon,
@@ -111,7 +111,7 @@ export const useSidebarItems = () => {
         icon: createElement(Languages, { size: 20, strokeWidth: 2.2 }),
       },
       {
-        text: t("outbound.title") || "Outbound",
+        text: t("sidebar.outbound"),
         path: "/outbound",
         icon: createElement(PlaneTakeoff, { size: 20, strokeWidth: 2.2 }),
       },

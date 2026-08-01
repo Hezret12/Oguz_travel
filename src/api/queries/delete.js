@@ -94,3 +94,7 @@ export const deleteTranslationApi = async (guid) => {
 export const deleteTranslatorApi = async (guid) => {
   return await api.deletePrivate('/translator/delete-translator', guid);
 };
+
+export const deleteEmployeeCommentApi = async (guid) => {
+  return await api.deletePrivate('/employee-comment/delete-comment', guid);
+};

@@ -132,6 +132,11 @@ const notificationSlice = createSlice({
       state.notifications.unshift(newNotification);
     },
 
+    deleteComment: (state, action) => {
+      const commentId = action.payload;
+      state.comments = state.comments.filter((c) => c.id !== commentId);
+    },
+
     toggleNotificationRead: (state, action) => {
       const id = action.payload;
       const notif = state.notifications.find((n) => n.id === id);
@@ -163,6 +168,7 @@ const notificationSlice = createSlice({
 
 export const {
   addCommentAndNotification,
+  deleteComment,
   toggleNotificationRead,
   markAllNotificationsAsRead,
   deleteNotification,

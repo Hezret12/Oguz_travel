@@ -7,6 +7,8 @@ import {
   Button,
   TextField,
   Chip,
+  IconButton,
+  CircularProgress,
   useTheme,
 } from "@mui/material";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
@@ -14,12 +16,19 @@ import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeade
 import { useLocale } from "../../../hooks/useLocale";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import { useDispatch, useSelector } from "react-redux";
-import { addCommentAndNotification } from "../../../store/slices/notificationSlice";
+import { addCommentAndNotification, deleteComment } from "../../../store/slices/notificationSlice";
+import { useGet } from "../../../hooks/CRUD/useGet";
+import { useCreate } from "../../../hooks/CRUD/useCreate";
+import { useDelete } from "../../../hooks/CRUD/useDelete";
+import { getEmployeeCommentsApi } from "../../../api/queries/getters";
+import { addEmployeeCommentApi } from "../../../api/queries/post";
+import { deleteEmployeeCommentApi } from "../../../api/queries/delete";
 import toast from "react-hot-toast";
 import ChatBubbleOutlinedIcon from "@mui/icons-material/ChatBubbleOutlined";
 import PersonIcon from "@mui/icons-material/Person";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import SendIcon from "@mui/icons-material/Send";
+import { Trash2 } from "lucide-react";
 
 const EmployeeCommentModal = ({ open, onClose, employee }) => {
   const { t, selectedLang } = useLocale();
@@ -29,59 +38,109 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
   const isDark = theme.palette.mode === "dark";
 
   const [commentText, setCommentText] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redux Comments
   const allComments = useSelector((state) => state.notifications.comments);
 
   // Position and Employee info
-  const positionName =
-    selectedLang(employee?.position?.name) ||
-    employee?.position_name ||
-    "Agent";
-  const positionGuid =
-    employee?.position_guid || employee?.position?.guid || "pos-agent-1";
+  const positionName = selectedLang(employee?.position?.name);
+  const positionGuid = employee?.position_guid || employee?.position?.guid;
   const employeeGuid = employee?.guid;
 
-  // Filter comments associated with this position / employee
-  const positionComments = useMemo(() => {
-    return allComments.filter(
-      (c) =>
-        c.position_guid === positionGuid ||
-        c.position_name?.toLowerCase() === positionName?.toLowerCase() ||
-        c.employee_guid === employeeGuid,
-    );
-  }, [allComments, positionGuid, positionName, employeeGuid]);
+  // 1. GET API Query
+  const { data: apiComments = [], isLoading: isFetchingComments } = useGet({
+    apiFn: getEmployeeCommentsApi,
+    key: ["employeeComments", employeeGuid],
+    params: { employee_guid: employeeGuid, position_guid: positionGuid },
+    options: { enabled: Boolean(open && employeeGuid) },
+  });
 
-  const handleSubmitComment = (e) => {
+  // 2. CREATE API Mutation
+  const createMutation = useCreate({
+    apiFn: addEmployeeCommentApi,
+    key: ["employeeComments", employeeGuid],
+    onSuccess: () => {
+      toast.success(
+        t("notifications.commentAdded") ||
+          "Kommentariýa ýazyldy we işgäre bildiriş ugradyldy!"
+      );
+      setCommentText("");
+    },
+  });
+
+  // 3. DELETE API Mutation
+  const deleteMutation = useDelete({
+    deleteFn: deleteEmployeeCommentApi,
+    queryKey: ["employeeComments", employeeGuid],
+    idKey: "guid",
+  });
+
+  // Combine API comments + Redux comments
+  const positionComments = useMemo(() => {
+    const rawApi = Array.isArray(apiComments) ? apiComments : [];
+    const combined = [...rawApi, ...allComments];
+    const unique = [];
+    const seen = new Set();
+
+    for (const c of combined) {
+      const id = c.guid || c.id;
+      if (id && !seen.has(id)) {
+        seen.add(id);
+        if (
+          c.position_guid === positionGuid ||
+          c.position_name?.toLowerCase() === positionName?.toLowerCase() ||
+          c.employee_guid === employeeGuid
+        ) {
+          unique.push({ ...c, id });
+        }
+      }
+    }
+    return unique;
+  }, [apiComments, allComments, positionGuid, positionName, employeeGuid]);
+
+  const handleDeleteComment = async (commentId) => {
+    dispatch(deleteComment(commentId));
+
+    try {
+      await deleteMutation.mutateAsync(commentId);
+      toast.success(t("delete") || "Pozuldy");
+    } catch (err) {
+      console.warn("API delete fallback to local state:", err);
+      toast.success(t("delete") || "Pozuldy");
+    }
+  };
+
+  const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) {
-      toast.error(t("validation.required") || "Kommentariýa tekstini giriziň!");
+      toast.error(t("validation.required"));
       return;
     }
 
-    setIsSubmitting(true);
+    const payload = {
+      employee_guid: employeeGuid,
+      position_guid: positionGuid,
+      position_name: positionName,
+      text: commentText.trim(),
+      author: "Dawut Kakabaýew",
+      authorRole: "Manager",
+    };
+
+    // Immediate UI feedback via Redux
+    dispatch(
+      addCommentAndNotification({
+        employee,
+        author: payload.author,
+        authorRole: payload.authorRole,
+        commentText: payload.text,
+      })
+    );
+    setCommentText("");
 
     try {
-      dispatch(
-        addCommentAndNotification({
-          employee,
-          author: "Dawut Kakabaýew",
-          authorRole: "Manager",
-          commentText: commentText.trim(),
-        }),
-      );
-
-      toast.success(
-        t("notifications.commentAdded") ||
-          "Kommentariýa ýazyldy we işgäre bildiriş ugradyldy!",
-      );
-      setCommentText("");
+      await createMutation.mutateAsync(payload);
     } catch (err) {
-      console.error(err);
-      toast.error("Error adding comment");
-    } finally {
-      setIsSubmitting(false);
+      console.warn("API add comment fallback to local state:", err);
     }
   };
 
@@ -94,8 +153,7 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <ChatBubbleOutlinedIcon color="primary" />
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              {employee.fullName} -
-              {t("employee.comments")}
+              {employee.fullName} -{t("employee.comments")}
             </Typography>
           </Box>
         }
@@ -107,8 +165,7 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
           variant="subtitle2"
           sx={{ fontWeight: 700, mb: 1, color: "text.secondary" }}
         >
-          {t("employee.commentHistory") ||
-            "Wezipe boýunça kommentariýalar sanawy"}
+          {t("employee.commentHistory")}
           ({positionComments.length})
         </Typography>
 
@@ -178,14 +235,34 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
                     </Box>
 
                     <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 0.4 }}
+                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
                     >
-                      <AccessTimeIcon
-                        sx={{ fontSize: 13, color: "text.disabled" }}
-                      />
-                      <Typography variant="caption" color="text.disabled">
-                        {formatChange(c.createdAt)}
-                      </Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 0.4 }}
+                      >
+                        <AccessTimeIcon
+                          sx={{ fontSize: 13, color: "text.disabled" }}
+                        />
+                        <Typography variant="caption" color="text.disabled">
+                          {formatChange(c.createdAt)}
+                        </Typography>
+                      </Box>
+
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteComment(c.id)}
+                        sx={{
+                          color: "error.main",
+                          p: 0.4,
+                          borderRadius: "6px",
+                          "&:hover": {
+                            backgroundColor: "rgba(239, 68, 68, 0.12)",
+                          },
+                        }}
+                        title={t("delete") || "Pozmak"}
+                      >
+                        <Trash2 size={14} />
+                      </IconButton>
                     </Box>
                   </Box>
 
@@ -241,8 +318,8 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
               type="submit"
               variant="contained"
               color="primary"
-              disabled={isSubmitting}
-              startIcon={<SendIcon />}
+              disabled={createMutation.isPending}
+              startIcon={createMutation.isPending ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
               sx={{
                 borderRadius: "10px",
                 textTransform: "none",

@@ -455,6 +455,8 @@
     "ticketTurkishAirlines": "Turkish Airlines",
     "adminDashboard": "Admin Dashboard",
     "tasks": "Tasks",
+    "notifications": "Notifications",
+    "outbound": "Outbound",
     "agentsDirectory": "Agents Directory",
     "allBookings": "All Bookings",
     "systemLogs": "System Logs",
