@@ -7,329 +7,56 @@ import TaskFlowHeader from "./Contents/TaskFlowHeader";
 import TaskBoardView from "./Contents/TaskBoardView";
 import TaskListTable from "./Contents/TaskListTable";
 
-// Initial Task Data based on image_0.png
-const INITIAL_TASKS = [
-  // TO DO
-  {
-    id: "task-1",
-    title: "Website accessibility compliance review",
-    description:
-      "Ensure all UI components meet WCAG 2.1 AA accessibility standards...",
-    status: "To Do",
-    priority: "Medium",
-    dueDate: "Jul 30",
-    assignees: [
-      { id: "1", name: "Alex Rivard", initials: "RI", color: "#F59E0B" },
-      { id: "2", name: "Amelie Chen", initials: "AC", color: "#EC4899" },
-    ],
-  },
-  {
-    id: "task-2",
-    title: "Onboard new sales hires",
-    description:
-      "Prepare onboarding materials and schedule training sessions for 3 new...",
-    status: "To Do",
-    priority: "Medium",
-    dueDate: "Aug 17",
-    assignees: [
-      { id: "7", name: "Alice Green", initials: "AG", color: "#A855F7" },
-    ],
-  },
-  {
-    id: "task-3",
-    title: "Annual security audit preparation",
-    description:
-      "Gather all compliance documentation and prepare for the external security...",
-    status: "To Do",
-    priority: "High",
-    dueDate: "Aug 30",
-    assignees: [
-      { id: "4", name: "David Wright", initials: "DW", color: "#10B981" },
-    ],
-  },
-  {
-    id: "task-11",
-    title: "Setup Redis caching layer",
-    description:
-      "Implement distributed Redis cache for frequent API endpoints to reduce load...",
-    status: "To Do",
-    priority: "Urgent",
-    dueDate: "Aug 2",
-    assignees: [
-      { id: "4", name: "David Wright", initials: "DW", color: "#10B981" },
-    ],
-  },
-  {
-    id: "task-12",
-    title: "Optimize database query indexes",
-    description:
-      "Analyze slow query logs and add composite indexes to PostgreSQL tables...",
-    status: "To Do",
-    priority: "High",
-    dueDate: "Aug 5",
-    assignees: [
-      { id: "1", name: "Alex Rivard", initials: "RI", color: "#F59E0B" },
-    ],
-  },
-  {
-    id: "task-13",
-    title: "Design landing page hero section",
-    description:
-      "Figma mockups for the new interactive marketing hero section with animations...",
-    status: "To Do",
-    priority: "Medium",
-    dueDate: "Aug 10",
-    assignees: [
-      { id: "2", name: "Amelie Chen", initials: "AC", color: "#EC4899" },
-    ],
-  },
-  {
-    id: "task-14",
-    title: "Draft privacy policy update",
-    description:
-      "Review new GDPR and CCPA guidelines with legal counsel and update site text...",
-    status: "To Do",
-    priority: "Low",
-    dueDate: "Aug 15",
-    assignees: [
-      { id: "3", name: "Kevin Taylor", initials: "KT", color: "#8B5CF6" },
-    ],
-  },
-  {
-    id: "task-15",
-    title: "Configure CI/CD deployment pipeline",
-    description:
-      "Setup GitHub Actions workflows for automated staging deployment and tests...",
-    status: "To Do",
-    priority: "High",
-    dueDate: "Aug 18",
-    assignees: [
-      { id: "5", name: "Tom Cooper", initials: "TC", color: "#06B6D4" },
-    ],
-  },
+import { useGet } from "../../hooks/CRUD/useGet";
+import { useUpdate } from "../../hooks/CRUD/useUpdate";
+import { useDelete } from "../../hooks/CRUD/useDelete";
+import { getAllNotificationsApi } from "../../api/queries/getters";
+import { updateTaskApi } from "../../api/queries/patch";
+import { deleteTaskApi } from "../../api/queries/delete";
 
-  // IN PROGRESS
-  {
-    id: "task-4",
-    title: "Mobile app push notifications",
-    description:
-      "Integrate Firebase Cloud Messaging for push notifications on iOS and Android...",
-    status: "In Progress",
-    priority: "Medium",
-    dueDate: "Aug 12",
-    assignees: [
-      { id: "5", name: "Tom Cooper", initials: "TC", color: "#06B6D4" },
-    ],
-  },
-  {
-    id: "task-5",
-    title: "Customer feedback dashboard",
-    description:
-      "Build a dashboard to visualize customer satisfaction scores and feedback trend...",
-    status: "In Progress",
-    priority: "Medium",
-    dueDate: "Aug 8",
-    assignees: [
-      { id: "3", name: "Kevin Taylor", initials: "KT", color: "#8B5CF6" },
-    ],
-  },
-  {
-    id: "task-6",
-    title: "Design social media graphics pack",
-    description:
-      "Create a set of branded social media graphics for the upcoming product...",
-    status: "In Progress",
-    priority: "Medium",
-    dueDate: "Aug 6",
-    assignees: [
-      { id: "8", name: "Mark White", initials: "MW", color: "#F59E0B" },
-    ],
-  },
-  {
-    id: "task-16",
-    title: "Refactor authentication state management",
-    description:
-      "Migrate auth context tokens to secure HTTP-only cookies with auto refresh...",
-    status: "In Progress",
-    priority: "Urgent",
-    dueDate: "Aug 3",
-    assignees: [
-      { id: "1", name: "Alex Rivard", initials: "RI", color: "#F59E0B" },
-      { id: "6", name: "Jessica Wong", initials: "JW", color: "#F43F5E" },
-    ],
-  },
-  {
-    id: "task-17",
-    title: "Implement React Query optimistic updates",
-    description:
-      "Enhance UX by optimistically updating UI before server mutation responds...",
-    status: "In Progress",
-    priority: "High",
-    dueDate: "Aug 7",
-    assignees: [
-      { id: "7", name: "Alice Green", initials: "AG", color: "#A855F7" },
-    ],
-  },
-  {
-    id: "task-18",
-    title: "Build real-time notifications service",
-    description:
-      "WebSocket connection handler for instantaneous user alerts and badge counts...",
-    status: "In Progress",
-    priority: "Medium",
-    dueDate: "Aug 9",
-    assignees: [
-      { id: "8", name: "Mark White", initials: "MW", color: "#F59E0B" },
-    ],
-  },
-  {
-    id: "task-19",
-    title: "Dark mode theme contrast audit",
-    description:
-      "Adjust slate color palettes for WCAG high contrast compatibility across pages...",
-    status: "In Progress",
-    priority: "Low",
-    dueDate: "Aug 11",
-    assignees: [
-      { id: "9", name: "Beth Young", initials: "BY", color: "#E11D48" },
-    ],
-  },
-  {
-    id: "task-20",
-    title: "Upgrade React 19 dependencies",
-    description:
-      "Test compatibility of third-party libraries and refactor deprecated APIs...",
-    status: "In Progress",
-    priority: "High",
-    dueDate: "Aug 14",
-    assignees: [
-      { id: "4", name: "David Wright", initials: "DW", color: "#10B981" },
-    ],
-  },
-
-  // COMPLETED
-  {
-    id: "task-7",
-    title: "Fix payment gateway integration bug",
-    description:
-      "Users are experiencing failed transactions on checkout. Investigate...",
-    status: "Completed",
-    priority: "High",
-    dueDate: "Jul 25",
-    assignees: [
-      { id: "6", name: "Jessica Wong", initials: "JW", color: "#F43F5E" },
-    ],
-  },
-  {
-    id: "task-8",
-    title: "Update employee handbook",
-    description:
-      "Revise the employee handbook with updated remote work policies and new...",
-    status: "Completed",
-    priority: "Low",
-    dueDate: "Jul 20",
-    assignees: [
-      { id: "7", name: "Alice Green", initials: "AG", color: "#A855F7" },
-    ],
-  },
-  {
-    id: "task-9",
-    title: "Review and close Q2 financials",
-    description:
-      "Finalize Q2 financial statements, reconcile accounts, and prepare the...",
-    status: "Completed",
-    priority: "High",
-    dueDate: "Jul 22",
-    assignees: [
-      { id: "9", name: "Beth Young", initials: "BY", color: "#E11D48" },
-    ],
-  },
-  {
-    id: "task-21",
-    title: "Migrate legacy user data schemas",
-    description:
-      "Successfully converted all legacy DB records to unified UUID schema without downtime...",
-    status: "Completed",
-    priority: "Urgent",
-    dueDate: "Jul 15",
-    assignees: [
-      { id: "5", name: "Tom Cooper", initials: "TC", color: "#06B6D4" },
-    ],
-  },
-  {
-    id: "task-22",
-    title: "Audit third-party npm packages",
-    description:
-      "Removed unused packages and resolved security vulnerabilities from npm audit report...",
-    status: "Completed",
-    priority: "High",
-    dueDate: "Jul 18",
-    assignees: [
-      { id: "3", name: "Kevin Taylor", initials: "KT", color: "#8B5CF6" },
-    ],
-  },
-  {
-    id: "task-23",
-    title: "Add export to Excel feature",
-    description:
-      "Integrated xlsx library for downloading formatted data tables with one click...",
-    status: "Completed",
-    priority: "Medium",
-    dueDate: "Jul 21",
-    assignees: [
-      { id: "2", name: "Amelie Chen", initials: "AC", color: "#EC4899" },
-    ],
-  },
-  {
-    id: "task-24",
-    title: "Setup error monitoring with Sentry",
-    description:
-      "Configured Sentry SDK for client and server exception logging and stack tracing...",
-    status: "Completed",
-    priority: "High",
-    dueDate: "Jul 24",
-    assignees: [
-      { id: "1", name: "Alex Rivard", initials: "RI", color: "#F59E0B" },
-    ],
-  },
-  {
-    id: "task-25",
-    title: "Clean up obsolete CSS stylesheets",
-    description:
-      "Removed legacy stylesheet files and unified design tokens into theme system...",
-    status: "Completed",
-    priority: "Low",
-    dueDate: "Jul 28",
-    assignees: [
-      { id: "7", name: "Alice Green", initials: "AG", color: "#A855F7" },
-    ],
-  },
-];
 
 export default function TaskFlow() {
   const { t } = useLocale();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
+  const { data: apiTasksResponse, refetch } = useGet({
+    apiFn: getAllNotificationsApi,
+    key: "tasks",
+    params: { isMessage: false },
+  });
+
+  const updateTaskMutation = useUpdate({
+    apiFn: updateTaskApi,
+    key: "tasks",
+    idKey: "guid",
+  });
+
+  const deleteTaskMutation = useDelete({
+    deleteFn: deleteTaskApi,
+    queryKey: "tasks",
+    idKey: "guid",
+  });
+
   const columns = useMemo(
     () => [
       {
         id: "To Do",
-        title: t("task.statusToDo", "TO DO"),
+        title: t("task.statusToDo"),
         color: "#64748B",
         bgLight: "#F8FAFC",
         borderLight: "#E2E8F0",
       },
       {
         id: "In Progress",
-        title: t("task.statusInProgress", "IN PROGRESS"),
+        title: t("task.statusInProgress"),
         color: "#2563EB",
         bgLight: "#EFF6FF",
         borderLight: "#BFDBFE",
       },
       {
         id: "Completed",
-        title: t("task.statusCompleted", "COMPLETED"),
+        title: t("task.statusCompleted"),
         color: "#16A34A",
         bgLight: "#F0FDF4",
         borderLight: "#BBF7D0",
@@ -338,42 +65,44 @@ export default function TaskFlow() {
     [t]
   );
 
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("board"); // 'board' | 'list'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
 
-  // Filter tasks
-  const filteredTasks = useMemo(() => {
-    return tasks.filter((t) => {
-      const matchesSearch =
-        t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus =
-        filterStatus === "all" ||
-        t.status.toLowerCase() === filterStatus.toLowerCase();
-      const matchesPriority =
-        filterPriority === "all" ||
-        t.priority.toLowerCase() === filterPriority.toLowerCase();
-      return matchesSearch && matchesStatus && matchesPriority;
-    });
-  }, [tasks, searchQuery, filterStatus, filterPriority]);
 
-  const handleCreateTask = useCallback((newTask) => {
-    setTasks((prev) => [newTask, ...prev]);
-  }, []);
 
-  const handleMoveTaskStatus = useCallback((taskId, newStatus) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
-    );
-  }, []);
+  const handleCreateTask = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
-  const handleDeleteTask = useCallback((taskId) => {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
-  }, []);
+  const handleMoveTaskStatus = useCallback(async (taskId, newStatus) => {
+    const statusMap = {
+      "To Do": "todo",
+      "In Progress": "inprogress",
+      "Completed": "completed",
+    };
+
+    try {
+      await updateTaskMutation.mutateAsync({
+        guid: taskId,
+        status: statusMap[newStatus] || newStatus.toLowerCase(),
+      });
+      refetch();
+    } catch (err) {
+      console.warn("API update task status error:", err);
+    }
+  }, [updateTaskMutation, refetch]);
+
+  const handleDeleteTask = useCallback(async (taskId) => {
+    try {
+      await deleteTaskMutation.mutateAsync(taskId);
+      refetch();
+    } catch (err) {
+      console.warn("API delete task error:", err);
+    }
+  }, [deleteTaskMutation, refetch]);
 
   return (
     <Box
@@ -412,7 +141,7 @@ export default function TaskFlow() {
       >
         {viewMode === "board" ? (
           <TaskBoardView
-            tasks={filteredTasks}
+            tasks={[]}
             columns={columns}
             onMoveTaskStatus={handleMoveTaskStatus}
             onDeleteTask={handleDeleteTask}
@@ -420,7 +149,7 @@ export default function TaskFlow() {
           />
         ) : (
           <TaskListTable
-            tasks={filteredTasks}
+            tasks={[]}
             onMoveTaskStatus={handleMoveTaskStatus}
             onDeleteTask={handleDeleteTask}
           />

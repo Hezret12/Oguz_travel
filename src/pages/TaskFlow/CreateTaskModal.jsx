@@ -1,10 +1,6 @@
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import {
-  Box,
-  Grid,
-} from "@mui/material";
-
+import { Box, Grid } from "@mui/material";
 
 import { useLocale } from "../../hooks/useLocale";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
@@ -18,18 +14,18 @@ import { addCustomNotification } from "../../store/slices/notificationSlice";
 import dayjs from "dayjs";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { useCreate } from "../../hooks/CRUD/useCreate";
-import { getAllEmployeeApi } from "../../api/queries/getters";
+import { getAllUsersApi } from "../../api/queries/getters";
 import { addTaskApi } from "../../api/queries/post";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import toast from "react-hot-toast";
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const dispatch = useDispatch();
 
-  const { data: employeesData } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
+  const { data: usersData } = useGet({
+    apiFn: getAllUsersApi,
+    key: "users",
   });
 
   const createMutation = useCreate({
@@ -42,19 +38,20 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   });
 
   const employeeOptions = useMemo(() => {
-    if (!Array.isArray(employeesData)) return [];
-    return employeesData.map((emp) => {
-      const posName =
-        selectedLang(emp.position?.name) || emp.position_name || "";
+    const list = Array.isArray(usersData) ? usersData : (usersData?.data || []);
+    return list.map((usr) => {
+      const emp = usr.employee || usr;
+      const assigneeGuid = usr.employee_guid || emp.guid || usr.guid;
+      const fullName = emp.fullName || usr.phone_number || "User";
       return {
-        value: emp.guid || emp.id,
-        label: `${emp.fullName}${posName ? ` (${posName})` : ""}`,
-        name: emp.fullName,
-        initials: emp.fullName?.slice(0, 2)?.toUpperCase() || "EM",
+        value: assigneeGuid,
+        label: fullName,
+        name: fullName,
+        initials: fullName.slice(0, 2).toUpperCase(),
         color: "#0E8584",
       };
     });
-  }, [employeesData, selectedLang]);
+  }, [usersData]);
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -77,9 +74,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
   const statusOptions = useMemo(
     () => [
-      { value: "todo", label: t("task.statusToDo", "To Do") },
-      { value: "inprogress", label: t("task.statusInProgress", "In Progress") },
-      { value: "completed", label: t("task.statusCompleted", "Completed") },
+      { value: "todo", label: t("task.statusToDo") },
+      { value: "inprogress", label: t("task.statusInProgress") },
+      { value: "completed", label: t("task.statusCompleted") },
     ],
     [t],
   );
@@ -141,12 +138,12 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     });
 
     const payload = {
-      title: data.title,
-      description: data.description,
       assignee_guid: data.assignee_guid,
+      title: data.title,
+      description: data.description || "",
       priority: data.priority || "medium",
       status: data.status || "todo",
-      due_date: data.dueDate || "",
+      due_date: data.dueDate ? new Date(data.dueDate).toISOString() : new Date().toISOString(),
     };
 
     try {

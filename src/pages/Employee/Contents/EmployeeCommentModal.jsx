@@ -106,13 +106,20 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
     e.preventDefault();
     if (!commentText.trim()) return;
 
+    const targetGuid = employeeGuid || employee?.employee_guid || employee?.employee?.guid;
+
     const payload = {
-      employee_guid: employeeGuid,
+      employee_guid: targetGuid,
       position_guid: positionGuid,
       position_name: positionName,
       text: commentText.trim(),
       author: "Hezret Meretgylyjov",
       authorRole: "Manager",
+    };
+
+    const messagePayload = {
+      assignee_guid: targetGuid,
+      description: commentText.trim(),
     };
 
     dispatch(
@@ -126,9 +133,12 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
     setCommentText("");
 
     try {
-      await createMutation.mutateAsync(payload);
+      await Promise.allSettled([
+        createMutation.mutateAsync(payload),
+        messageMutation.mutateAsync(messagePayload),
+      ]);
     } catch (err) {
-      console.warn("API add comment fallback to local state:", err);
+      console.warn("API add comment / message fallback to local state:", err);
     }
   };
 
