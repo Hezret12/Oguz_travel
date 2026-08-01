@@ -1,22 +1,21 @@
 import { memo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Tooltip, ListItemButton, ListItemIcon, ListItemText, Collapse, List, Box } from '@mui/material';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 // ── Shared palette helper ──
 const getTokens = (isDark) => ({
-  text: isDark ? 'rgba(255,255,255,0.65)' : '#111827',
-  textActive: isDark ? '#ffffff' : '#030712',
-  icon: isDark ? 'rgba(255,255,255,0.5)' : '#334155',
-  iconActive: isDark ? '#14B8A6' : '#0E8584',
-  activeBg: isDark ? 'rgba(20,184,166,0.13)' : 'rgba(14,133,132,0.08)',
-  activeHoverBg: isDark ? 'rgba(20,184,166,0.16)' : 'rgba(14,133,132,0.12)',
-  hoverBg: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)',
-  borderActive: isDark ? '#14B8A6' : '#0E8584',
-  borderHover: isDark ? 'rgba(20,184,166,0.4)' : 'rgba(14,133,132,0.25)',
-  shadow: isDark ? '0 2px 12px rgba(20,184,166,0.15)' : '0 2px 8px rgba(14,133,132,0.08)',
-  expandIcon: isDark ? 'rgba(255,255,255,0.4)' : '#334155',
+  text: isDark ? 'rgba(255,255,255,0.88)' : '#334155',
+  textActive: isDark ? '#ffffff' : '#0F172A',
+  icon: isDark ? 'rgba(255,255,255,0.85)' : '#475569',
+  iconActive: isDark ? '#2DD4BF' : '#0D9488',
+  activeBg: isDark ? 'rgba(20,184,166,0.16)' : 'rgba(13,148,136,0.10)',
+  activeHoverBg: isDark ? 'rgba(20,184,166,0.22)' : 'rgba(13,148,136,0.14)',
+  hoverBg: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+  borderActive: isDark ? '#2DD4BF' : '#0D9488',
+  borderHover: isDark ? 'rgba(20,184,166,0.5)' : 'rgba(13,148,136,0.3)',
+  shadow: isDark ? '0 2px 12px rgba(20,184,166,0.2)' : '0 2px 8px rgba(13,148,136,0.12)',
+  expandIcon: isDark ? 'rgba(255,255,255,0.75)' : '#64748B',
 });
 
 const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
@@ -80,7 +79,7 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
               noWrap: true,
               sx: {
                 fontSize: 13.5,
-                fontWeight: isActive ? 600 : 500,
+                fontWeight: isActive ? 650 : 550,
                 fontFamily: "'Inter', sans-serif",
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -158,7 +157,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                 noWrap: true,
                 sx: {
                   fontSize: 13.5,
-                  fontWeight: hasActiveChild ? 600 : 500,
+                  fontWeight: hasActiveChild ? 650 : 550,
                   fontFamily: "'Inter', sans-serif",
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -170,8 +169,8 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
           />
           <Box sx={{ color: t.expandIcon, display: 'flex', alignItems: 'center' }}>
             {isExpanded
-              ? <ExpandLessIcon sx={{ fontSize: 16 }} />
-              : <ExpandMoreIcon sx={{ fontSize: 16 }} />}
+              ? <ChevronUp size={15} />
+              : <ChevronDown size={15} />}
           </Box>
         </>
       )}
@@ -242,7 +241,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                       noWrap: true,
                       sx: {
                         fontSize: 13,
-                        fontWeight: isChildActive ? 600 : 500,
+                        fontWeight: isChildActive ? 650 : 550,
                         fontFamily: "'Inter', sans-serif",
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',

@@ -1,18 +1,23 @@
 import { useMemo, createElement } from "react";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import PeopleIcon from "@mui/icons-material/People";
-import GroupIcon from "@mui/icons-material/Group";
 import { useTranslation } from "react-i18next";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
-import ContactEmergencyRoundedIcon from "@mui/icons-material/ContactEmergencyRounded";
-import ConfirmationNumberRoundedIcon from "@mui/icons-material/ConfirmationNumberRounded";
-import ContactEmergencyIcon from "@mui/icons-material/ContactEmergency";
-import NoteAddIcon from "@mui/icons-material/NoteAdd";
-import TranslateIcon from "@mui/icons-material/Translate";
-import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
-import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import AssessmentIcon from "@mui/icons-material/Assessment";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import {
+  LayoutDashboard,
+  CheckSquare,
+  Bell,
+  UserCog,
+  UserCheck,
+  Users,
+  Ticket,
+  Building2,
+  Contact2,
+  FileText,
+  Package,
+  FileCheck,
+  Languages,
+  PlaneTakeoff,
+  BarChart3,
+  ClipboardCheck,
+} from "lucide-react";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 
 export const useSidebarItems = () => {
@@ -23,52 +28,44 @@ export const useSidebarItems = () => {
       {
         text: t("sidebar.adminDashboard"),
         path: "/",
-        icon: createElement(DashboardIcon),
-        iconColor: "#3B82F6", // Sky Blue
+        icon: createElement(LayoutDashboard, { size: 20, strokeWidth: 2.2 }),
       },
       {
         text: t("sidebar.tasks", "Tasks"),
         path: "/tasks",
-        icon: createElement(AssignmentRoundedIcon),
-        iconColor: "#2563EB", // TaskFlow Blue
+        icon: createElement(CheckSquare, { size: 20, strokeWidth: 2.2 }),
       },
       {
         text: t("notifications.title", "Bildirişler"),
         path: "/notifications",
-        icon: createElement(NotificationsActiveIcon),
-        iconColor: "#14B8A6", // Teal
+        icon: createElement(Bell, { size: 20, strokeWidth: 2.2 }),
       },
       {
         isGroup: true,
         text: t("sidebar.employee"),
-        icon: createElement(PersonRoundedIcon),
-        iconColor: "#8B5CF6", // Purple
+        icon: createElement(UserCog, { size: 20, strokeWidth: 2.2 }),
         children: [
           {
             text: t("sidebar.employees"),
             path: "/employee",
-            icon: createElement(ContactEmergencyRoundedIcon),
-            iconColor: "#8B5CF6",
+            icon: createElement(UserCheck, { size: 18, strokeWidth: 2.2 }),
           },
           {
             text: t("sidebar.users"),
             path: "/employee/users",
-            icon: createElement(GroupIcon),
-            iconColor: "#A855F7",
+            icon: createElement(Users, { size: 18, strokeWidth: 2.2 }),
           },
         ],
       },
       {
         isGroup: true,
         text: t("sidebar.ticket", "Ticket"),
-        icon: createElement(ConfirmationNumberRoundedIcon),
-        iconColor: "#10B981", // Emerald Green
+        icon: createElement(Ticket, { size: 20, strokeWidth: 2.2 }),
         children: [
           {
             text: t("sidebar.ticketB2B", "B2B"),
             path: "/ticket/b2b",
-            icon: createElement(ConfirmationNumberRoundedIcon),
-            iconColor: "#10B981",
+            icon: createElement(Building2, { size: 18, strokeWidth: 2.2 }),
           },
           {
             text: t("sidebar.ticketTurkishAirlines", "Turkish Airlines"),
@@ -76,61 +73,52 @@ export const useSidebarItems = () => {
             icon: createElement("img", {
               src: TurkishAirlinesIcon,
               alt: "Turkish Airlines",
-              style: { width: 32, height: 30, objectFit: "contain" },
+              style: { width: 30, height: 28, objectFit: "contain" },
             }),
-            iconColor: "#E11D48",
           },
         ],
       },
       {
         text: t("sidebar.clients"),
-        icon: createElement(PeopleIcon),
+        icon: createElement(Contact2, { size: 20, strokeWidth: 2.2 }),
         path: "/clients",
-        iconColor: "#06B6D4", // Cyan
       },
       {
         isGroup: true,
         text: t("sidebar.visaApplications"),
-        icon: createElement(ContactEmergencyIcon),
-        iconColor: "#6366F1", // Indigo
+        icon: createElement(FileText, { size: 20, strokeWidth: 2.2 }),
         children: [
           {
             text: t("sidebar.visaApplications"),
             path: "/visa/applications",
-            icon: createElement(ContactEmergencyIcon),
-            iconColor: "#6366F1",
+            icon: createElement(FileText, { size: 18, strokeWidth: 2.2 }),
           },
           {
             text: t("sidebar.visa.package"),
             path: "/visa/package",
-            icon: createElement(NoteAddIcon),
-            iconColor: "#818CF8",
+            icon: createElement(Package, { size: 18, strokeWidth: 2.2 }),
           },
         ],
       },
       {
         text: t("sidebar.referalLetters"),
         path: "/visa/referal-letters",
-        icon: createElement(NoteAddIcon),
-        iconColor: "#F59E0B", // Amber Gold
+        icon: createElement(FileCheck, { size: 20, strokeWidth: 2.2 }),
       },
       {
         text: t("sidebar.translation"),
         path: "/translation",
-        icon: createElement(TranslateIcon),
-        iconColor: "#14B8A6", // Teal
+        icon: createElement(Languages, { size: 20, strokeWidth: 2.2 }),
       },
       {
         text: t("outbound.title") || "Outbound",
         path: "/outbound",
-        icon: createElement(FlightTakeoffIcon),
-        iconColor: "#EC4899", // Pink
+        icon: createElement(PlaneTakeoff, { size: 20, strokeWidth: 2.2 }),
       },
       {
         isGroup: true,
         text: t("sidebar.reports"),
-        icon: createElement(AssessmentIcon),
-        iconColor: "#F97316", // Orange
+        icon: createElement(BarChart3, { size: 20, strokeWidth: 2.2 }),
         children: [
           {
             text: t("sidebar.reportTurkishAirlines"),
@@ -138,17 +126,15 @@ export const useSidebarItems = () => {
             icon: createElement("img", {
               src: TurkishAirlinesIcon,
               alt: "Turkish Airlines",
-              style: { width: 32, height: 30, objectFit: "contain" },
+              style: { width: 30, height: 28, objectFit: "contain" },
             }),
-            iconColor: "#E11D48",
           },
         ],
       },
       {
         text: t("sidebar.visaIntake"),
         path: "/intake",
-        icon: createElement(AssignmentRoundedIcon),
-        iconColor: "#3B82F6", // Blue
+        icon: createElement(ClipboardCheck, { size: 20, strokeWidth: 2.2 }),
       }
     ],
     [t],
