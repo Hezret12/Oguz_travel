@@ -170,6 +170,7 @@
     "comments": "Kommentariýalar",
     "commentHistory": "Wezipe boýunça kommentariýalar sanawy",
     "addComment": "Täze kommentariýa ýazmak",
+    "commentPlaceholder": "Komment ýaz...",
     "sendComment": "Kommentariýa ýaz & Bildiriş ugrat",
     "validation": {
       "fullNameRequired": "Doly ady zerurdyr",

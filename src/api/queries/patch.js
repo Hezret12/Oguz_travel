@@ -102,3 +102,7 @@ export const updateTtpPaymentApi = async (data) => {
 export const updateTurkishPaymentApi = async (data) => {
   return await api.patchPrivate('/turkish-payment/update-turkish-payment', data);
 };
+
+export const updateTaskApi = async (data) => {
+  return await api.patchPrivate('/task/update-task', data);
+};

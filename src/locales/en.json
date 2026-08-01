@@ -155,6 +155,7 @@
       "comments": "Comments",
       "commentHistory": "Position Comments History",
       "addComment": "Write New Comment (Sends Notification)",
+      "commentPlaceholder": "Write a comment...",
       "sendComment": "Write Comment & Send Notification",
       "validation": {
         "fullNameRequired": "Full name is required",

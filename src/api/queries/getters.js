@@ -138,3 +138,7 @@ export const getTurkishQuarterApi = async (params = {}) => {
 export const getEmployeeCommentsApi = async (params = {}) => {
   return await api.getPrivate('/employee-comment/get-comments', params);
 };
+
+export const getAllTasksApi = async (params = {}) => {
+  return await api.getPrivate('/task/get-tasks', params);
+};

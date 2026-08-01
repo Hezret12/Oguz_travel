@@ -163,3 +163,7 @@ export const addEmployeeCommentApi = async (data) => {
   return await api.postPrivate("/employee-comment/add-comment", data);
 };
 
+export const addTaskApi = async (data) => {
+  return await api.postPrivate("/task/add-task", data);
+};
+

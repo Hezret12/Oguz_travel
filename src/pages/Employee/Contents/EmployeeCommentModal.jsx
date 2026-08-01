@@ -3,11 +3,10 @@ import {
   Box,
   Typography,
   Stack,
-  Paper,
-  Button,
+  Avatar,
   TextField,
-  Chip,
   IconButton,
+  Divider,
   CircularProgress,
   useTheme,
 } from "@mui/material";
@@ -24,11 +23,7 @@ import { getEmployeeCommentsApi } from "../../../api/queries/getters";
 import { addEmployeeCommentApi } from "../../../api/queries/post";
 import { deleteEmployeeCommentApi } from "../../../api/queries/delete";
 import toast from "react-hot-toast";
-import ChatBubbleOutlinedIcon from "@mui/icons-material/ChatBubbleOutlined";
-import PersonIcon from "@mui/icons-material/Person";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import SendIcon from "@mui/icons-material/Send";
-import { Trash2 } from "lucide-react";
+import { MessageSquare, Send, Trash2 } from "lucide-react";
 
 const EmployeeCommentModal = ({ open, onClose, employee }) => {
   const { t, selectedLang } = useLocale();
@@ -48,7 +43,7 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
   const employeeGuid = employee?.guid;
 
   // 1. GET API Query
-  const { data: apiComments = [], isLoading: isFetchingComments } = useGet({
+  const { data: apiComments = [] } = useGet({
     apiFn: getEmployeeCommentsApi,
     key: ["employeeComments", employeeGuid],
     params: { employee_guid: employeeGuid, position_guid: positionGuid },
@@ -60,10 +55,7 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
     apiFn: addEmployeeCommentApi,
     key: ["employeeComments", employeeGuid],
     onSuccess: () => {
-      toast.success(
-        t("notifications.commentAdded") ||
-          "Kommentariýa ýazyldy we işgäre bildiriş ugradyldy!"
-      );
+      toast.success(t("notifications.commentAdded") || "Kommentariýa ýazyldy!");
       setCommentText("");
     },
   });
@@ -112,21 +104,17 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();
-    if (!commentText.trim()) {
-      toast.error(t("validation.required"));
-      return;
-    }
+    if (!commentText.trim()) return;
 
     const payload = {
       employee_guid: employeeGuid,
       position_guid: positionGuid,
       position_name: positionName,
       text: commentText.trim(),
-      author: "Dawut Kakabaýew",
+      author: "Hezret Meretgylyjov",
       authorRole: "Manager",
     };
 
-    // Immediate UI feedback via Redux
     dispatch(
       addCommentAndNotification({
         employee,
@@ -147,189 +135,222 @@ const EmployeeCommentModal = ({ open, onClose, employee }) => {
   if (!employee) return null;
 
   return (
-    <CustomDialog open={open} close={onClose} widthX={650}>
+    <CustomDialog open={open} close={onClose} widthX={520}>
+      {/* CustomDialogHeader integrates seamlessly with CustomDialog built-in divider and close button */}
       <CustomDialogHeader
         title={
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <ChatBubbleOutlinedIcon color="primary" />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              {employee.fullName} -{t("employee.comments")}
-            </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, width: "100%" }}>
+            <Box
+              sx={{
+                width: 34,
+                height: 34,
+                borderRadius: "10px",
+                backgroundColor: isDark ? "rgba(20,184,166,0.15)" : "rgba(14,133,132,0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: isDark ? "#2DD4BF" : "#0D9488",
+              }}
+            >
+              <MessageSquare size={18} strokeWidth={2} />
+            </Box>
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "1.05rem",
+                  lineHeight: 1.2,
+                  fontFamily: "'Inter', sans-serif",
+                  color: isDark ? "#ffffff" : "#0F172A",
+                }}
+              >
+                {t("employee.comments") || "Kommentariýalar"}
+              </Typography>
+            </Box>
           </Box>
         }
       />
 
-      <Box sx={{ p: 2.5, pt: 1.5 }}>
-        {/* Existing Comments List */}
-        <Typography
-          variant="subtitle2"
-          sx={{ fontWeight: 700, mb: 1, color: "text.secondary" }}
-        >
-          {t("employee.commentHistory")}
-          ({positionComments.length})
-        </Typography>
-
+      {/* Body */}
+      <Box sx={{ pt: 1 }}>
+        {/* Comment List */}
         <Box
           sx={{
-            maxHeight: 220,
+            maxHeight: 280,
             overflowY: "auto",
-            mb: 2.5,
-            p: 1,
-            borderRadius: "12px",
-            backgroundColor: isDark ? "rgba(15, 23, 42, 0.5)" : "#F8FAFC",
-            border: "1px solid",
-            borderColor: isDark ? "rgba(255,255,255,0.06)" : "#E2E8F0",
+            pr: 0.5,
+            mb: 2,
+            "&::-webkit-scrollbar": { width: 5 },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "#CBD5E1",
+              borderRadius: 3,
+            },
           }}
         >
           {positionComments.length === 0 ? (
             <Typography
               variant="body2"
-              color="text.disabled"
-              sx={{ p: 2, textAlign: "center" }}
+              color="text.secondary"
+              sx={{ py: 4, textAlign: "center" }}
             >
-              Heniz bu wezipe üçin kommentariýa ýazylmady. Ýokarky görnüşde täze
-              kommentariýa goşuň.
+              Komment ýazylmady.
             </Typography>
           ) : (
-            <Stack spacing={1.5}>
-              {positionComments.map((c) => (
-                <Paper
-                  key={c.id}
-                  elevation={0}
-                  sx={{
-                    p: 1.5,
-                    borderRadius: "10px",
-                    backgroundColor: isDark
-                      ? "rgba(30, 41, 59, 0.7)"
-                      : "#FFFFFF",
-                    border: "1px solid",
-                    borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      mb: 0.5,
-                    }}
-                  >
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 0.8 }}
+            <Stack spacing={2}>
+              {positionComments.map((c) => {
+                const initial = c.author ? c.author.charAt(0).toUpperCase() : "H";
+                return (
+                  <Box key={c.id} sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
+                    {/* User Avatar */}
+                    <Avatar
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        bgcolor: isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0",
+                        color: isDark ? "#ffffff" : "#1E293B",
+                        fontWeight: 700,
+                        fontSize: "0.88rem",
+                      }}
                     >
-                      <PersonIcon
-                        sx={{ fontSize: 15, color: "primary.main" }}
-                      />
-                      <Typography
-                        variant="subtitle2"
-                        sx={{ fontSize: "0.82rem", fontWeight: 700 }}
-                      >
-                        {c.author}
-                      </Typography>
-                      {c.authorRole && (
-                        <Chip
-                          label={c.authorRole}
-                          size="small"
-                          sx={{ height: 16, fontSize: "0.62rem", px: 0.3 }}
-                        />
-                      )}
-                    </Box>
+                      {initial}
+                    </Avatar>
 
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                    >
+                    {/* Speech Bubble & Date */}
+                    <Box sx={{ flex: 1 }}>
                       <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 0.4 }}
+                        sx={{
+                          position: "relative",
+                          p: "10px 14px",
+                          borderRadius: "14px",
+                          backgroundColor: isDark ? "rgba(30, 41, 59, 0.7)" : "#F3F4F6",
+                          border: "1px solid",
+                          borderColor: isDark ? "rgba(255,255,255,0.06)" : "transparent",
+                        }}
                       >
-                        <AccessTimeIcon
-                          sx={{ fontSize: 13, color: "text.disabled" }}
-                        />
-                        <Typography variant="caption" color="text.disabled">
-                          {formatChange(c.createdAt)}
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: "0.88rem",
+                              color: isDark ? "#ffffff" : "#0F172A",
+                              fontFamily: "'Inter', sans-serif",
+                            }}
+                          >
+                            {c.author}
+                          </Typography>
+
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteComment(c.id)}
+                            sx={{
+                              color: "error.main",
+                              p: 0.3,
+                              opacity: 0.7,
+                              "&:hover": { opacity: 1, backgroundColor: "rgba(239,68,68,0.1)" },
+                            }}
+                            title={t("delete") || "Pozmak"}
+                          >
+                            <Trash2 size={13} />
+                          </IconButton>
+                        </Box>
+
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: "0.84rem",
+                            color: isDark ? "#E2E8F0" : "#334155",
+                            mt: 0.3,
+                            wordBreak: "break-word",
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
+                          {c.text}
                         </Typography>
                       </Box>
 
-                      <IconButton
-                        size="small"
-                        onClick={() => handleDeleteComment(c.id)}
+                      {/* Date Timestamp */}
+                      <Typography
+                        variant="caption"
                         sx={{
-                          color: "error.main",
-                          p: 0.4,
-                          borderRadius: "6px",
-                          "&:hover": {
-                            backgroundColor: "rgba(239, 68, 68, 0.12)",
-                          },
+                          display: "block",
+                          mt: 0.4,
+                          ml: 1,
+                          fontSize: "0.72rem",
+                          color: isDark ? "rgba(255,255,255,0.4)" : "#94A3B8",
+                          fontFamily: "'Inter', sans-serif",
                         }}
-                        title={t("delete") || "Pozmak"}
                       >
-                        <Trash2 size={14} />
-                      </IconButton>
+                        {formatChange(c.createdAt, { dateTime: true })}
+                      </Typography>
                     </Box>
                   </Box>
-
-                  <Typography
-                    variant="body2"
-                    sx={{ fontSize: "0.82rem", color: "text.primary" }}
-                  >
-                    {c.text}
-                  </Typography>
-                </Paper>
-              ))}
+                );
+              })}
             </Stack>
           )}
         </Box>
 
-        {/* Add Comment Form */}
-        <Box component="form" onSubmit={handleSubmitComment}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-            {t("employee.addComment") ||
-              "Täze kommentariýa ýazmak (Notification ugradar)"}
-          </Typography>
+        <Divider sx={{ mb: 2, borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0" }} />
 
+        {/* Input & Send Form */}
+        <Box
+          component="form"
+          onSubmit={handleSubmitComment}
+          sx={{ display: "flex", gap: 1.2, alignItems: "flex-end" }}
+        >
           <TextField
             fullWidth
             multiline
-            rows={3}
+            minRows={2}
+            maxRows={4}
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
-            placeholder="Işgär barada kommentariýa ýazyň..."
+            placeholder={t("employee.commentPlaceholder") || "Komment ýaz..."}
             sx={{
-              mb: 2,
               "& .MuiOutlinedInput-root": {
                 borderRadius: "12px",
+                backgroundColor: isDark ? "rgba(15, 23, 42, 0.4)" : "#FFFFFF",
+                fontSize: "0.9rem",
+                padding: "10px 14px",
+                borderColor: isDark ? "rgba(255,255,255,0.15)" : "#E2E8F0",
+                "&:hover fieldset": {
+                  borderColor: isDark ? "#2DD4BF" : "#0D9488",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: isDark ? "#2DD4BF" : "#0D9488",
+                },
               },
             }}
           />
 
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
-            <Button
-              variant="outlined"
-              color="inherit"
-              onClick={onClose}
-              sx={{
-                borderRadius: "10px",
-                textTransform: "none",
-                fontWeight: 600,
-              }}
-            >
-              {t("cancel") || "Ýatyr"}
-            </Button>
-
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              disabled={createMutation.isPending}
-              startIcon={createMutation.isPending ? <CircularProgress size={16} color="inherit" /> : <SendIcon />}
-              sx={{
-                borderRadius: "10px",
-                textTransform: "none",
-                fontWeight: 600,
-              }}
-            >
-              {t("employee.sendComment") ||
-                "Kommentariýa Ýaz & Notification Ugrat"}
-            </Button>
-          </Box>
+          <IconButton
+            type="submit"
+            disabled={createMutation.isPending || !commentText.trim()}
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "12px",
+              backgroundColor: isDark ? "#0D9488" : "#71717A",
+              color: "#ffffff",
+              flexShrink: 0,
+              mb: "2px",
+              "&:hover": {
+                backgroundColor: isDark ? "#0F766E" : "#52525B",
+              },
+              "&.Mui-disabled": {
+                backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#E2E8F0",
+                color: isDark ? "rgba(255,255,255,0.3)" : "#94A3B8",
+              },
+            }}
+          >
+            {createMutation.isPending ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <Send size={18} />
+            )}
+          </IconButton>
         </Box>
       </Box>
     </CustomDialog>
