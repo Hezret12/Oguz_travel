@@ -49,9 +49,9 @@ export const PROCESSED_STATUS_CONFIG = {
 };
 
 export const TASK_STATUS_CONFIG = {
-  "TO DO": { label: "TO DO", color: "#64748b", icon: ScheduleRoundedIcon },
-  "IN PROGRESS": { label: "IN PROGRESS", color: "#2563eb", icon: AutorenewRoundedIcon },
-  COMPLETED: { label: "COMPLETED", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  1: { label: "To Do", color: "#64748b", icon: ScheduleRoundedIcon },
+  2: { label: "In Progress", color: "#2563eb", icon: AutorenewRoundedIcon },
+  3: { label: "Completed", color: "#16a34a", icon: CheckCircleRoundedIcon },
 };
 
 export const NOTIFICATION_STATUS_CONFIG = {

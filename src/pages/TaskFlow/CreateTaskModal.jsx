@@ -32,19 +32,28 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     apiFn: addTaskApi,
     key: "tasks",
     onSuccess: () => {
-      toast.success(t("task.addSuccess") || "Ýumuş üstünlikli döredildi!");
+      toast.success(t("task.addSuccess"));
       handleCloseDialog();
     },
   });
 
   const employeeOptions = useMemo(() => {
-    const list = Array.isArray(usersData) ? usersData : (usersData?.data || []);
+    const list = Array.isArray(usersData)
+      ? usersData
+      : Array.isArray(usersData?.data)
+        ? usersData.data
+        : Array.isArray(usersData?.data?.data)
+          ? usersData.data.data
+          : [];
+
     return list.map((usr) => {
-      const emp = usr.employee || usr;
-      const assigneeGuid = usr.employee_guid || emp.guid || usr.guid;
-      const fullName = emp.fullName || usr.phone_number || "User";
+      const emp = usr?.employee || usr;
+      const assigneeGuid = usr?.employee_guid || emp?.guid || usr?.guid;
+      const fullName = emp?.fullName || usr?.fullName || emp?.phone_number || usr?.phone_number || "User";
       return {
         value: assigneeGuid,
+        userGuid: usr?.guid,
+        employeeGuid: usr?.employee_guid || emp?.guid,
         label: fullName,
         name: fullName,
         initials: fullName.slice(0, 2).toUpperCase(),
@@ -57,7 +66,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     defaultValues: {
       title: "",
       description: "",
-      assignee_guid: "",
+      assignee_guid: [],
       priority: "medium",
       status: "todo",
       dueDate: "",
@@ -74,9 +83,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
   const statusOptions = useMemo(
     () => [
-      { value: "todo", label: t("task.statusToDo") },
-      { value: "inprogress", label: t("task.statusInProgress") },
-      { value: "completed", label: t("task.statusCompleted") },
+      { value: 1, label: t("task.statusToDo") },
+      { value: 2, label: t("task.statusInProgress") },
+      { value: 3, label: t("task.statusCompleted") },
     ],
     [t],
   );
@@ -90,33 +99,34 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   };
 
   const onSubmit = async (data) => {
-    const assignedEmp = employeeOptions.find(
-      (emp) => emp.value === (data.assignee_guid || data.assignee_id),
+    const selectedGuids = Array.isArray(data.assignee_guid)
+      ? data.assignee_guid
+      : data.assignee_guid
+        ? [data.assignee_guid]
+        : [];
+
+    const assignedEmps = employeeOptions.filter(
+      (emp) =>
+        selectedGuids.includes(emp.value) ||
+        selectedGuids.includes(emp.userGuid) ||
+        selectedGuids.includes(emp.employeeGuid),
     );
-    const assignees = assignedEmp
-      ? [
-          {
-            id: assignedEmp.value,
-            name: assignedEmp.name,
-            initials: assignedEmp.initials,
-            color: assignedEmp.color,
-          },
-        ]
-      : [
-          {
-            id: "1",
-            name: "Alex Rivard",
-            initials: "RI",
-            color: "#F59E0B",
-          },
-        ];
+
+    const assignees = assignedEmps.map((emp) => ({
+      id: emp.value,
+      name: emp.name,
+      initials: emp.initials,
+      color: emp.color,
+    }));
+
+    const assignedNames = assignedEmps.map((e) => e.name).join(", ");
 
     const now = dayjs();
     dispatch(
       addCustomNotification({
         id: `notif-task-${now.valueOf()}`,
         title: `Täze Ýumuş: ${data.title}`,
-        description: `${assignedEmp ? assignedEmp.name : "Işgär"}-a täze ýumuş bellenildi: "${data.title}"`,
+        description: `${assignedNames || "Işgär"}-a täze ýumuş bellenildi: "${data.title}"`,
         sender: "Task Manager",
         senderRole: "System",
         avatarBg: "#6366F1",
@@ -133,17 +143,20 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       attachments,
       assignees,
       priority: data.priority || "medium",
-      status: data.status || "todo",
+      status: data.status || null,
       dueDate: data.dueDate || "",
     });
 
     const payload = {
-      assignee_guid: data.assignee_guid,
+      assignee_guid: selectedGuids.length === 1 ? selectedGuids[0] : selectedGuids,
+      assignee_guids: selectedGuids,
       title: data.title,
       description: data.description || "",
       priority: data.priority || "medium",
-      status: data.status || "todo",
-      due_date: data.dueDate ? new Date(data.dueDate).toISOString() : new Date().toISOString(),
+      status: data.status || null,
+      due_date: data.dueDate
+        ? new Date(data.dueDate).toISOString()
+        : new Date().toISOString(),
     };
 
     try {
@@ -182,17 +195,19 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
           />
 
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid size={{ xs: 12 }}>
               <AppAutocomplete
                 name="assignee_guid"
                 control={control}
                 label={t("task.assignEmployee")}
                 options={employeeOptions}
                 placeholder={t("task.selectEmployee")}
+                multiple
+                maxChips={3}
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <CustomSelect
                 name="priority"
                 control={control}
@@ -201,7 +216,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <CustomSelect
                 name="status"
                 control={control}
@@ -210,7 +225,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <CustomDatePicker
                 name="dueDate"
                 control={control}

@@ -140,7 +140,7 @@ export const getEmployeeCommentsApi = async (params = {}) => {
 };
 
 export const getAllTasksApi = async (params = {}) => {
-  return await api.getPrivate('/messages/get-all-notification', params);
+  return await api.getPrivate('/messages/get-all-tasks', params);
 };
 
 export const getAllNotificationsApi = async (params = {}) => {

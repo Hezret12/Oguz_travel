@@ -20,17 +20,12 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useLocale } from "../../../hooks/useLocale";
 
 const getPriorityBadgeProps = (priority) => {
-  switch (priority) {
-    case "Urgent":
+  switch (priority?.toLowerCase()) {
+    case "urgent":
       return { bg: "#FEE2E2", color: "#DC2626" };
-    case "High":
-      return { bg: "#FFEDD5", color: "#EA580C" };
-    case "Medium":
-      return { bg: "#DBEAFE", color: "#2563EB" };
-    case "Low":
-      return { bg: "#F1F5F9", color: "#475569" };
+    case "medium":
     default:
-      return { bg: "#F1F5F9", color: "#475569" };
+      return { bg: "#DBEAFE", color: "#2563EB" };
   }
 };
 
@@ -57,14 +52,9 @@ function TaskBoardView({
     switch (priority?.toLowerCase()) {
       case "urgent":
         return t("task.priorityUrgent", "Urgent");
-      case "high":
-        return t("task.priorityHigh", "High");
       case "medium":
-        return t("task.priorityMedium", "Medium / Normal");
-      case "low":
-        return t("task.priorityLow", "Low");
       default:
-        return priority;
+        return t("task.priorityMedium", "Medium");
     }
   };
 
@@ -72,7 +62,9 @@ function TaskBoardView({
     <Box>
       <Grid container spacing={3}>
         {columns.map((col) => {
-          const colTasks = tasks.filter((t) => t.status === col.id);
+          const colTasks = tasks.filter(
+            (t) => t.status === col.id || t.statusId === col.id,
+          );
 
           return (
             <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={col.id}>
@@ -143,11 +135,33 @@ function TaskBoardView({
                 {/* Task Cards Stack */}
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2, flexGrow: 1 }}>
                   {colTasks.map((task) => {
+                    const taskId = task.guid || task.id;
                     const priorityProps = getPriorityBadgeProps(task.priority);
+
+                    let formattedDate = "";
+                    const rawDate = task.due_date || task.dueDate;
+                    if (rawDate) {
+                      const d = new Date(rawDate);
+                      if (!isNaN(d.getTime())) {
+                        formattedDate = d.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        });
+                      }
+                    }
+
+                    let assigneesList = [];
+                    if (Array.isArray(task.assignees) && task.assignees.length > 0) {
+                      assigneesList = task.assignees;
+                    } else if (Array.isArray(task.users) && task.users.length > 0) {
+                      assigneesList = task.users;
+                    } else if (task.employee || task.empluser || task.admuser) {
+                      assigneesList = [task.employee || task.empluser || task.admuser];
+                    }
 
                     return (
                       <Card
-                        key={task.id}
+                        key={taskId}
                         elevation={0}
                         sx={{
                           borderRadius: "12px",
@@ -178,13 +192,13 @@ function TaskBoardView({
                                 lineHeight: 1.3,
                               }}
                             >
-                              {task.title}
+                              {task.title || task.description || "Task"}
                             </Typography>
                             <IconButton
                               size="small"
                               onClick={(e) => {
                                 setTaskMenuAnchor(e.currentTarget);
-                                setActiveTaskMenu(task.id);
+                                setActiveTaskMenu(taskId);
                               }}
                               sx={{ color: isDark ? "#64748B" : "#94A3B8", p: 0.2 }}
                             >
@@ -231,23 +245,25 @@ function TaskBoardView({
                                 borderRadius: "6px",
                               }}
                             />
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 0.5,
-                                color: isDark ? "#64748B" : "#94A3B8",
-                                fontSize: "0.75rem",
-                                fontWeight: 500,
-                              }}
-                            >
-                              <CalendarTodayIcon sx={{ fontSize: 13 }} />
-                              <span>{task.dueDate}</span>
-                            </Box>
+                            {formattedDate && (
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                  color: isDark ? "#64748B" : "#94A3B8",
+                                  fontSize: "0.75rem",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                <CalendarTodayIcon sx={{ fontSize: 13 }} />
+                                <span>{formattedDate}</span>
+                              </Box>
+                            )}
                           </Box>
 
                           {/* Assignee Avatars */}
-                          {task.assignees && task.assignees.length > 0 && (
+                          {assigneesList.length > 0 && (
                             <Box sx={{ display: "flex", justifyContent: "flex-start", pt: 0.5 }}>
                               <AvatarGroup
                                 max={4}
@@ -261,14 +277,25 @@ function TaskBoardView({
                                   },
                                 }}
                               >
-                                {task.assignees.map((a, idx) => (
-                                  <Avatar
-                                    key={idx}
-                                    sx={{ bgcolor: a.color || "#2563EB", color: "#fff" }}
-                                  >
-                                    {a.initials}
-                                  </Avatar>
-                                ))}
+                                {assigneesList.map((a, idx) => {
+                                  const name =
+                                    a.name ||
+                                    a.fullName ||
+                                    a.employee?.fullName ||
+                                    a.phone_number ||
+                                    "User";
+                                  const initials =
+                                    a.initials || name.slice(0, 2).toUpperCase();
+                                  return (
+                                    <Avatar
+                                      key={idx}
+                                      sx={{ bgcolor: a.color || "#2563EB", color: "#fff" }}
+                                      title={name}
+                                    >
+                                      {initials}
+                                    </Avatar>
+                                  );
+                                })}
                               </AvatarGroup>
                             </Box>
                           )}
@@ -291,7 +318,7 @@ function TaskBoardView({
       >
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, "To Do");
+            onMoveTaskStatus(activeTaskMenu, 1);
             handleMenuClose();
           }}
         >
@@ -299,7 +326,7 @@ function TaskBoardView({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, "In Progress");
+            onMoveTaskStatus(activeTaskMenu, 2);
             handleMenuClose();
           }}
         >
@@ -307,7 +334,7 @@ function TaskBoardView({
         </MenuItem>
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, "Completed");
+            onMoveTaskStatus(activeTaskMenu, 3);
             handleMenuClose();
           }}
         >

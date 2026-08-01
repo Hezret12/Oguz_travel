@@ -83,7 +83,7 @@ function TaskFlowHeader({
                     </Box>
                   );
                 }
-                if (selected === "to do") {
+                if (selected === 1 || selected === "1" || selected === "to do") {
                   return (
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <RadioButtonUncheckedIcon
@@ -98,7 +98,7 @@ function TaskFlowHeader({
                     </Box>
                   );
                 }
-                if (selected === "in progress") {
+                if (selected === 2 || selected === "2" || selected === "in progress") {
                   return (
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <RadioButtonCheckedIcon
@@ -113,7 +113,7 @@ function TaskFlowHeader({
                     </Box>
                   );
                 }
-                if (selected === "completed") {
+                if (selected === 3 || selected === "3" || selected === "completed") {
                   return (
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <CheckCircleRoundedIcon
@@ -149,7 +149,7 @@ function TaskFlowHeader({
               >
                 {t("task.notStarted", "Not started")}
               </ListSubheader>
-              <MenuItem value="to do">
+              <MenuItem value={1}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
                   <RadioButtonUncheckedIcon
                     sx={{ color: "#64748B", fontSize: 18 }}
@@ -176,7 +176,7 @@ function TaskFlowHeader({
               >
                 {t("task.active", "Active")}
               </ListSubheader>
-              <MenuItem value="in progress">
+              <MenuItem value={2}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
                   <RadioButtonCheckedIcon
                     sx={{ color: "#2563EB", fontSize: 18 }}
@@ -189,7 +189,7 @@ function TaskFlowHeader({
                   </Typography>
                 </Box>
               </MenuItem>
-              <MenuItem value="completed">
+              <MenuItem value={3}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
                   <CheckCircleRoundedIcon
                     sx={{ color: "#16A34A", fontSize: 18 }}
@@ -252,18 +252,6 @@ function TaskFlowHeader({
                     </Box>
                   );
                 }
-                if (selected === "high") {
-                  return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <FlagRoundedIcon
-                        sx={{ color: "#2563EB", fontSize: 18 }}
-                      />
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {t("task.priorityHigh", "High")}
-                      </Typography>
-                    </Box>
-                  );
-                }
                 if (selected === "medium") {
                   return (
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -271,19 +259,7 @@ function TaskFlowHeader({
                         sx={{ color: "#F59E0B", fontSize: 18 }}
                       />
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {t("task.priorityMedium", "Normal / Medium")}
-                      </Typography>
-                    </Box>
-                  );
-                }
-                if (selected === "low") {
-                  return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <FlagRoundedIcon
-                        sx={{ color: "#64748B", fontSize: 18 }}
-                      />
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {t("task.priorityLow", "Low")}
+                        {t("task.priorityMedium", "Medium")}
                       </Typography>
                     </Box>
                   );
@@ -317,27 +293,11 @@ function TaskFlowHeader({
                   </Typography>
                 </Box>
               </MenuItem>
-              <MenuItem value="high">
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                  <FlagRoundedIcon sx={{ color: "#2563EB", fontSize: 18 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {t("task.priorityHigh", "High")}
-                  </Typography>
-                </Box>
-              </MenuItem>
               <MenuItem value="medium">
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
                   <FlagRoundedIcon sx={{ color: "#F59E0B", fontSize: 18 }} />
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {t("task.priorityMedium", "Normal / Medium")}
-                  </Typography>
-                </Box>
-              </MenuItem>
-              <MenuItem value="low">
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                  <FlagRoundedIcon sx={{ color: "#64748B", fontSize: 18 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {t("task.priorityLow", "Low")}
+                    {t("task.priorityMedium", "Medium")}
                   </Typography>
                 </Box>
               </MenuItem>

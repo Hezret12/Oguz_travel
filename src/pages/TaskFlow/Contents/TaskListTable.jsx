@@ -20,17 +20,12 @@ import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 
 const getPriorityBadgeProps = (priority) => {
-  switch (priority) {
-    case "Urgent":
+  switch (priority?.toLowerCase()) {
+    case "urgent":
       return { bg: "#FEE2E2", color: "#DC2626" };
-    case "High":
-      return { bg: "#FFEDD5", color: "#EA580C" };
-    case "Medium":
-      return { bg: "#DBEAFE", color: "#2563EB" };
-    case "Low":
-      return { bg: "#F1F5F9", color: "#475569" };
+    case "medium":
     default:
-      return { bg: "#F1F5F9", color: "#475569" };
+      return { bg: "#DBEAFE", color: "#2563EB" };
   }
 };
 
@@ -48,14 +43,9 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
     switch (priority?.toLowerCase()) {
       case "urgent":
         return t("task.priorityUrgent", "Urgent");
-      case "high":
-        return t("task.priorityHigh", "High");
       case "medium":
-        return t("task.priorityMedium", "Medium / Normal");
-      case "low":
-        return t("task.priorityLow", "Low");
       default:
-        return priority;
+        return t("task.priorityMedium", "Medium");
     }
   };
 
@@ -68,7 +58,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         Cell: ({ row }) => (
           <Box>
             <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: "0.9rem" }}>
-              {row.original.title}
+              {row.original.title || row.original.description || "Task"}
             </Typography>
             {row.original.description && (
               <Typography
@@ -118,37 +108,71 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         },
       },
       {
-        accessorKey: "assignees",
+        id: "assignees",
         header: t("task.assignees", "Assignees"),
         size: 150,
         enableSorting: false,
         Cell: ({ row }) => {
-          const assignees = row.original.assignees || [];
-          if (assignees.length === 0) return <Typography variant="caption" color="text.secondary">—</Typography>;
+          const item = row.original;
+          let assigneesList = [];
+          if (Array.isArray(item.assignees) && item.assignees.length > 0) {
+            assigneesList = item.assignees;
+          } else if (Array.isArray(item.users) && item.users.length > 0) {
+            assigneesList = item.users;
+          } else if (item.employee || item.empluser || item.admuser) {
+            assigneesList = [item.employee || item.empluser || item.admuser];
+          }
+
+          if (assigneesList.length === 0)
+            return (
+              <Typography variant="caption" color="text.secondary">
+                —
+              </Typography>
+            );
+
           return (
             <AvatarGroup max={3} sx={{ justifyContent: "flex-start" }}>
-              {assignees.map((a, i) => (
-                <Avatar
-                  key={i}
-                  sx={{
-                    width: 26,
-                    height: 26,
-                    fontSize: "0.68rem",
-                    fontWeight: 700,
-                    bgcolor: a.color || "#2563EB",
-                  }}
-                >
-                  {a.initials}
-                </Avatar>
-              ))}
+              {assigneesList.map((a, i) => {
+                const name =
+                  a.name ||
+                  a.fullName ||
+                  a.employee?.fullName ||
+                  a.phone_number ||
+                  "User";
+                const initials =
+                  a.initials || name.slice(0, 2).toUpperCase();
+                return (
+                  <Avatar
+                    key={i}
+                    sx={{
+                      width: 26,
+                      height: 26,
+                      fontSize: "0.68rem",
+                      fontWeight: 700,
+                      bgcolor: a.color || "#2563EB",
+                    }}
+                    title={name}
+                  >
+                    {initials}
+                  </Avatar>
+                );
+              })}
             </AvatarGroup>
           );
         },
       },
       {
-        accessorKey: "dueDate",
+        id: "dueDate",
         header: t("task.dueDate", "Due Date"),
         size: 130,
+        Cell: ({ row }) => {
+          const rawDate = row.original.due_date || row.original.dueDate;
+          if (!rawDate) return "—";
+          const d = new Date(rawDate);
+          return !isNaN(d.getTime())
+            ? d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+            : rawDate;
+        },
       },
       {
         id: "actions",
@@ -162,7 +186,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
             size="small"
             onClick={(e) => {
               setTaskMenuAnchor(e.currentTarget);
-              setActiveTaskMenu(row.original.id);
+              setActiveTaskMenu(row.original.guid || row.original.id);
             }}
           >
             <MoreVertIcon fontSize="small" />
@@ -220,7 +244,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
       >
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, "To Do");
+            onMoveTaskStatus(activeTaskMenu, 1);
             handleMenuClose();
           }}
         >
@@ -228,7 +252,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, "In Progress");
+            onMoveTaskStatus(activeTaskMenu, 2);
             handleMenuClose();
           }}
         >
@@ -236,7 +260,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, "Completed");
+            onMoveTaskStatus(activeTaskMenu, 3);
             handleMenuClose();
           }}
         >
