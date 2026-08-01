@@ -28,6 +28,7 @@ import DevLoginHelper from '../../components/DevLoginHelper';
 import eyeIcon from '../../assets/icons/eye.svg';
 import closeEyeIcon from '../../assets/icons/closeEye.svg';
 import PhoneNumberField from '../../components/inputs/PhoneNumber';
+import OguzLogo from '../../assets/icons/OguzLogo';
 
 
 export default function Login() {
@@ -234,11 +235,13 @@ export default function Login() {
             pt: { xs: '10px', sm: '20px' },
           }}
         >
-          <Box
-            component="img"
-            src="/logo/oguz_logo.svg"
-            alt="Oguz Travel Logo"
-            sx={{ width: { xs: 180, sm: 240 }, height: 'auto', display: 'block' }}
+          <OguzLogo
+            sx={{
+              width: { xs: 180, sm: 240 },
+              height: 'auto',
+              display: 'block',
+              '& path': { fill: '#FFFFFF !important' },
+            }}
           />
         </Box>
 
