@@ -12,8 +12,17 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import StatusChip from "../../../components/StatusChip";
 import { TASK_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
@@ -29,14 +38,14 @@ const getPriorityBadgeProps = (priority) => {
   }
 };
 
-function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
+function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask }) {
   const { t } = useLocale();
-  const [activeTaskMenu, setActiveTaskMenu] = useState(null);
+  const [activeTask, setActiveTask] = useState(null);
   const [taskMenuAnchor, setTaskMenuAnchor] = useState(null);
 
   const handleMenuClose = () => {
     setTaskMenuAnchor(null);
-    setActiveTaskMenu(null);
+    setActiveTask(null);
   };
 
   const getPriorityLabel = (priority) => {
@@ -56,7 +65,10 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         header: t("task.title", "Task Title"),
         size: 260,
         Cell: ({ row }) => (
-          <Box>
+          <Box
+            sx={{ cursor: "pointer", "&:hover": { color: "primary.main" } }}
+            onClick={() => onEditTask?.(row.original)}
+          >
             <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: "0.9rem" }}>
               {row.original.title || row.original.description || "Task"}
             </Typography>
@@ -115,7 +127,11 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         Cell: ({ row }) => {
           const item = row.original;
           let assigneesList = [];
-          if (Array.isArray(item.assignees) && item.assignees.length > 0) {
+          if (Array.isArray(item.empltaskAssignee) && item.empltaskAssignee.length > 0) {
+            assigneesList = item.empltaskAssignee;
+          } else if (Array.isArray(item.emplTaskAssignee) && item.emplTaskAssignee.length > 0) {
+            assigneesList = item.emplTaskAssignee;
+          } else if (Array.isArray(item.assignees) && item.assignees.length > 0) {
             assigneesList = item.assignees;
           } else if (Array.isArray(item.users) && item.users.length > 0) {
             assigneesList = item.users;
@@ -134,27 +150,30 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
             <AvatarGroup max={3} sx={{ justifyContent: "flex-start" }}>
               {assigneesList.map((a, i) => {
                 const name =
-                  a.name ||
-                  a.fullName ||
+                  a.user?.employee?.fullName ||
                   a.employee?.fullName ||
+                  a.user?.fullName ||
+                  a.fullName ||
+                  a.name ||
+                  a.user?.phone_number ||
                   a.phone_number ||
                   "User";
                 const initials =
-                  a.initials || name.slice(0, 2).toUpperCase();
+                  a.initials || (name ? name.slice(0, 2).toUpperCase() : "US");
                 return (
-                  <Avatar
-                    key={i}
-                    sx={{
-                      width: 26,
-                      height: 26,
-                      fontSize: "0.68rem",
-                      fontWeight: 700,
-                      bgcolor: a.color || "#2563EB",
-                    }}
-                    title={name}
-                  >
-                    {initials}
-                  </Avatar>
+                  <Tooltip key={i} title={name} arrow placement="top">
+                    <Avatar
+                      sx={{
+                        width: 26,
+                        height: 26,
+                        fontSize: "0.68rem",
+                        fontWeight: 700,
+                        bgcolor: a.color || "#2563EB",
+                      }}
+                    >
+                      {initials}
+                    </Avatar>
+                  </Tooltip>
                 );
               })}
             </AvatarGroup>
@@ -186,7 +205,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
             size="small"
             onClick={(e) => {
               setTaskMenuAnchor(e.currentTarget);
-              setActiveTaskMenu(row.original.guid || row.original.id);
+              setActiveTask(row.original);
             }}
           >
             <MoreVertIcon fontSize="small" />
@@ -195,7 +214,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t]
+    [t, onEditTask]
   );
 
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -241,39 +260,131 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onDeleteTask }) {
         anchorEl={taskMenuAnchor}
         open={Boolean(taskMenuAnchor)}
         onClose={handleMenuClose}
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "12px",
+              minWidth: 180,
+              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.15)",
+            },
+          },
+        }}
       >
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, 1);
+            if (activeTask) onEditTask?.(activeTask);
             handleMenuClose();
           }}
+          sx={{ py: 1, px: 2 }}
         >
-          {t("task.moveToToDo", "Move to To Do")}
+          <ListItemIcon>
+            <EditOutlinedIcon fontSize="small" sx={{ color: "#2563EB" }} />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+          >
+            {t("task.editTask", "Düzelt")}
+          </ListItemText>
         </MenuItem>
+
+        <Divider sx={{ my: 0.5 }} />
+
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, 2);
+            if (activeTask)
+              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 1);
             handleMenuClose();
           }}
+          selected={Number(activeTask?.status) === 1}
+          sx={{ py: 0.8, px: 2 }}
         >
-          {t("task.moveToInProgress", "Move to In Progress")}
+          <ListItemIcon>
+            <RadioButtonUncheckedIcon
+              fontSize="small"
+              sx={{ color: "#64748B" }}
+            />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{
+              fontSize: "0.8125rem",
+              fontWeight: Number(activeTask?.status) === 1 ? 700 : 500,
+            }}
+          >
+            {t("task.statusToDo", "TO DO")}
+          </ListItemText>
         </MenuItem>
+
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, 3);
+            if (activeTask)
+              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 2);
             handleMenuClose();
           }}
+          selected={Number(activeTask?.status) === 2}
+          sx={{ py: 0.8, px: 2 }}
         >
-          {t("task.moveToCompleted", "Move to Completed")}
+          <ListItemIcon>
+            <RadioButtonCheckedIcon
+              fontSize="small"
+              sx={{ color: "#2563EB" }}
+            />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{
+              fontSize: "0.8125rem",
+              fontWeight: Number(activeTask?.status) === 2 ? 700 : 500,
+            }}
+          >
+            {t("task.statusInProgress", "IN PROGRESS")}
+          </ListItemText>
         </MenuItem>
+
         <MenuItem
           onClick={() => {
-            onDeleteTask(activeTaskMenu);
+            if (activeTask)
+              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 3);
             handleMenuClose();
           }}
-          sx={{ color: "error.main" }}
+          selected={Number(activeTask?.status) === 3}
+          sx={{ py: 0.8, px: 2 }}
         >
-          {t("task.deleteTask", "Delete Task")}
+          <ListItemIcon>
+            <CheckCircleRoundedIcon
+              fontSize="small"
+              sx={{ color: "#16A34A" }}
+            />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{
+              fontSize: "0.8125rem",
+              fontWeight: Number(activeTask?.status) === 3 ? 700 : 500,
+            }}
+          >
+            {t("task.statusCompleted", "COMPLETED")}
+          </ListItemText>
+        </MenuItem>
+
+        <Divider sx={{ my: 0.5 }} />
+
+        <MenuItem
+          onClick={() => {
+            if (activeTask) onDeleteTask?.(activeTask.guid || activeTask.id);
+            handleMenuClose();
+          }}
+          sx={{ py: 1, px: 2, color: "error.main" }}
+        >
+          <ListItemIcon>
+            <DeleteOutlinedIcon fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              color: "error.main",
+            }}
+          >
+            {t("task.deleteTask", "Poz")}
+          </ListItemText>
         </MenuItem>
       </Menu>
     </Box>

@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback } from "react";
 import { Box, useTheme } from "@mui/material";
 import { useLocale } from "../../hooks/useLocale";
+import { useDebounce } from "../../hooks/useDebounce";
 
 import CreateTaskModal from "./CreateTaskModal";
+import EditTaskModal from "./EditTaskModal";
 import TaskFlowHeader from "./Contents/TaskFlowHeader";
 import TaskBoardView from "./Contents/TaskBoardView";
 import TaskListTable from "./Contents/TaskListTable";
@@ -21,17 +23,47 @@ export default function TaskFlow() {
 
   const [viewMode, setViewMode] = useState("board"); // 'board' | 'list'
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 400);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
+  const [dueDate, setDueDate] = useState("");
 
   const isCardView = viewMode === "board";
 
-  // API Fetch for tasks
+  // Build params for API filtering (debounced search, priority, status, due_date)
+  const queryParams = useMemo(() => {
+    const params = {
+      page: 1,
+      limit: 10,
+      type: !isCardView,
+    };
+
+    if (debouncedSearch && debouncedSearch.trim()) {
+      params.search = debouncedSearch.trim();
+    }
+    if (filterStatus && filterStatus !== "all") {
+      params.status = Number(filterStatus) || filterStatus;
+    }
+    if (filterPriority && filterPriority !== "all") {
+      params.priority = filterPriority;
+    }
+    if (dueDate) {
+      params.due_date = dueDate;
+    }
+
+    return params;
+  }, [isCardView, debouncedSearch, filterStatus, filterPriority, dueDate]);
+
+  // API Fetch for tasks with server-side query params
   const { data: apiTasksResponse, refetch } = useGet({
     apiFn: getAllTasksApi,
     key: "tasks",
-    params: { page: 1, limit: 10, type: isCardView },
+    params: queryParams,
   });
 
   const updateTaskMutation = useUpdate({
@@ -73,52 +105,45 @@ export default function TaskFlow() {
     [t]
   );
 
-  // Get raw tasks list directly from API
+  // Get raw tasks list directly from API (supports both 1D flat array and 3-indexed 2D array: 0=ToDo, 1=InProgress, 2=Completed)
   const tasksList = useMemo(() => {
-    return Array.isArray(apiTasksResponse)
-      ? apiTasksResponse
-      : Array.isArray(apiTasksResponse?.data)
-      ? apiTasksResponse.data
-      : Array.isArray(apiTasksResponse?.data?.data)
-      ? apiTasksResponse.data.data
-      : [];
-  }, [apiTasksResponse]);
+    let rawData = apiTasksResponse;
 
-  // Filter tasks directly
-  const filteredTasks = useMemo(() => {
-    return tasksList.filter((task) => {
-      const title = String(task.title || task.description || "").toLowerCase();
-      const desc = String(task.description || "").toLowerCase();
-      const query = searchQuery.toLowerCase();
-      const matchesSearch = title.includes(query) || desc.includes(query);
-
-      const statusVal = String(task.status ?? 1).toLowerCase();
-      let matchesStatus = filterStatus === "all";
-      if (!matchesStatus) {
-        const filterStr = String(filterStatus).toLowerCase();
-        if (filterStr === "1" || filterStr === "to do") {
-          matchesStatus = statusVal === "1" || statusVal.includes("todo") || statusVal.includes("togo");
-        } else if (filterStr === "2" || filterStr === "in progress") {
-          matchesStatus = statusVal === "2" || statusVal.includes("progress");
-        } else if (filterStr === "3" || filterStr === "completed") {
-          matchesStatus = statusVal === "3" || statusVal.includes("complete");
-        } else {
-          matchesStatus = statusVal === filterStr;
-        }
+    if (!Array.isArray(rawData)) {
+      if (Array.isArray(rawData?.data)) {
+        rawData = rawData.data;
+      } else if (Array.isArray(rawData?.data?.data)) {
+        rawData = rawData.data.data;
+      } else {
+        return [];
       }
+    }
 
-      const priorityVal = String(task.priority || "medium").toLowerCase();
-      const matchesPriority =
-        filterPriority === "all" ||
-        priorityVal.includes(String(filterPriority).toLowerCase());
+    if (!Array.isArray(rawData) || rawData.length === 0) return [];
 
-      return matchesSearch && matchesStatus && matchesPriority;
-    });
-  }, [tasksList, searchQuery, filterStatus, filterPriority]);
+    // Check if response is a 2D array grouped by status: index 0 = To Do (status 1), index 1 = In Progress (status 2), index 2 = Completed (status 3)
+    if (Array.isArray(rawData[0])) {
+      return rawData.flatMap((statusGroup, index) => {
+        if (!Array.isArray(statusGroup)) return [];
+        const expectedStatus = index + 1;
+        return statusGroup.map((task) => ({
+          ...task,
+          status: task.status ?? expectedStatus,
+        }));
+      });
+    }
+
+    return rawData;
+  }, [apiTasksResponse]);
 
   const handleCreateTask = useCallback(() => {
     refetch();
   }, [refetch]);
+
+  const handleEditTask = useCallback((task) => {
+    setEditingTask(task);
+    setIsEditModalOpen(true);
+  }, []);
 
   const handleMoveTaskStatus = useCallback(
     async (taskId, newStatus) => {
@@ -171,6 +196,8 @@ export default function TaskFlow() {
         setFilterStatus={setFilterStatus}
         filterPriority={filterPriority}
         setFilterPriority={setFilterPriority}
+        dueDate={dueDate}
+        setDueDate={setDueDate}
       />
 
       {/* Scrollable Content Area below Fixed Header */}
@@ -178,22 +205,24 @@ export default function TaskFlow() {
         sx={{
           flexGrow: 1,
           minHeight: 0,
-          overflowY: viewMode === "board" ? "auto" : "hidden",
+          overflow: "hidden",
           pr: 0.5,
         }}
       >
         {viewMode === "board" ? (
           <TaskBoardView
-            tasks={filteredTasks}
+            tasks={tasksList}
             columns={columns}
             onMoveTaskStatus={handleMoveTaskStatus}
+            onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}
             onOpenCreateModal={() => setIsModalOpen(true)}
           />
         ) : (
           <TaskListTable
-            tasks={filteredTasks}
+            tasks={tasksList}
             onMoveTaskStatus={handleMoveTaskStatus}
+            onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}
           />
         )}
@@ -204,6 +233,16 @@ export default function TaskFlow() {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreateTask={handleCreateTask}
+      />
+
+      {/* Edit Task Modal */}
+      <EditTaskModal
+        open={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingTask(null);
+        }}
+        task={editingTask}
       />
     </Box>
   );

@@ -11,11 +11,19 @@ import {
   CardContent,
   Menu,
   MenuItem,
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Tooltip,
   useTheme,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 
 import { useLocale } from "../../../hooks/useLocale";
 
@@ -33,19 +41,19 @@ function TaskBoardView({
   tasks = [],
   columns = [],
   onMoveTaskStatus,
+  onEditTask,
   onDeleteTask,
-  onOpenCreateModal,
 }) {
   const { t } = useLocale();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  const [activeTaskMenu, setActiveTaskMenu] = useState(null);
+  const [activeTask, setActiveTask] = useState(null);
   const [taskMenuAnchor, setTaskMenuAnchor] = useState(null);
 
   const handleMenuClose = () => {
     setTaskMenuAnchor(null);
-    setActiveTaskMenu(null);
+    setActiveTask(null);
   };
 
   const getPriorityLabel = (priority) => {
@@ -60,10 +68,13 @@ function TaskBoardView({
 
   return (
     <Box>
-      <Grid container spacing={3}>
+      <Grid container spacing={2.5}>
         {columns.map((col) => {
           const colTasks = tasks.filter(
-            (t) => t.status === col.id || t.statusId === col.id,
+            (t) =>
+              t.status === col.id ||
+              Number(t.status) === col.id ||
+              t.statusId === col.id,
           );
 
           return (
@@ -72,11 +83,13 @@ function TaskBoardView({
                 sx={{
                   bgcolor: isDark ? "#0F172A" : col.bgLight,
                   border: `1px solid ${isDark ? "#1E293B" : col.borderLight}`,
-                  borderRadius: "16px",
-                  p: 2,
-                  minHeight: 540,
+                  borderRadius: "12px",
+                  p: 1.5,
+                  height: "calc(100vh - 210px)",
+                  minHeight: 580,
                   display: "flex",
                   flexDirection: "column",
+                  boxSizing: "border-box",
                 }}
               >
                 {/* Column Header */}
@@ -85,7 +98,7 @@ function TaskBoardView({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    mb: 2,
+                    mb: 1.5,
                     px: 0.5,
                   }}
                 >
@@ -102,9 +115,10 @@ function TaskBoardView({
                       variant="subtitle2"
                       sx={{
                         fontWeight: 700,
-                        fontSize: "0.8125rem",
-                        letterSpacing: "0.05em",
+                        fontSize: "0.8rem",
+                        letterSpacing: "0.04em",
                         color: isDark ? "#F8FAFC" : "#1E293B",
+                        textTransform: "uppercase",
                       }}
                     >
                       {col.title}
@@ -113,8 +127,8 @@ function TaskBoardView({
                       label={colTasks.length}
                       size="small"
                       sx={{
-                        height: 20,
-                        fontSize: "0.75rem",
+                        height: 18,
+                        fontSize: "0.7rem",
                         fontWeight: 700,
                         bgcolor: isDark ? "#1E293B" : "#FFFFFF",
                         color: col.color,
@@ -122,18 +136,29 @@ function TaskBoardView({
                       }}
                     />
                   </Box>
-
-                  <IconButton
-                    size="small"
-                    onClick={onOpenCreateModal}
-                    sx={{ color: isDark ? "#94A3B8" : "#64748B" }}
-                  >
-                    <AddIcon fontSize="small" />
-                  </IconButton>
                 </Box>
 
-                {/* Task Cards Stack */}
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2, flexGrow: 1 }}>
+                {/* Task Cards Stack with Smooth Internal Scrollbar */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1.25,
+                    flexGrow: 1,
+                    overflowY: "auto",
+                    pr: 0.5,
+                    "&::-webkit-scrollbar": {
+                      width: "4px",
+                    },
+                    "&::-webkit-scrollbar-track": {
+                      backgroundColor: "transparent",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: isDark ? "#334155" : "#CBD5E1",
+                      borderRadius: "4px",
+                    },
+                  }}
+                >
                   {colTasks.map((task) => {
                     const taskId = task.guid || task.id;
                     const priorityProps = getPriorityBadgeProps(task.priority);
@@ -151,12 +176,30 @@ function TaskBoardView({
                     }
 
                     let assigneesList = [];
-                    if (Array.isArray(task.assignees) && task.assignees.length > 0) {
+                    if (
+                      Array.isArray(task.empltaskAssignee) &&
+                      task.empltaskAssignee.length > 0
+                    ) {
+                      assigneesList = task.empltaskAssignee;
+                    } else if (
+                      Array.isArray(task.emplTaskAssignee) &&
+                      task.emplTaskAssignee.length > 0
+                    ) {
+                      assigneesList = task.emplTaskAssignee;
+                    } else if (
+                      Array.isArray(task.assignees) &&
+                      task.assignees.length > 0
+                    ) {
                       assigneesList = task.assignees;
-                    } else if (Array.isArray(task.users) && task.users.length > 0) {
+                    } else if (
+                      Array.isArray(task.users) &&
+                      task.users.length > 0
+                    ) {
                       assigneesList = task.users;
                     } else if (task.employee || task.empluser || task.admuser) {
-                      assigneesList = [task.employee || task.empluser || task.admuser];
+                      assigneesList = [
+                        task.employee || task.empluser || task.admuser,
+                      ];
                     }
 
                     return (
@@ -164,141 +207,177 @@ function TaskBoardView({
                         key={taskId}
                         elevation={0}
                         sx={{
-                          borderRadius: "12px",
+                          borderRadius: "10px",
                           border: `1px solid ${isDark ? "#1E293B" : "#E2E8F0"}`,
+                          borderLeft: `3.5px solid ${col.color}`,
                           bgcolor: isDark ? "#1E293B" : "#FFFFFF",
-                          transition: "all 0.2s ease-in-out",
+                          height: 145,
+                          display: "flex",
+                          flexDirection: "column",
+                          transition: "all 0.15s ease-in-out",
                           "&:hover": {
-                            boxShadow: "0 8px 16px -4px rgba(0, 0, 0, 0.08)",
+                            boxShadow: "0 4px 12px -2px rgba(0, 0, 0, 0.08)",
                             borderColor: isDark ? "#475569" : "#CBD5E1",
                           },
                         }}
                       >
-                        <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "flex-start",
-                              mb: 1,
-                            }}
-                          >
-                            <Typography
-                              variant="subtitle1"
+                        <CardContent
+                          sx={{
+                            p: 1.5,
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-between",
+                            boxSizing: "border-box",
+                            "&:last-child": { pb: 1.5 },
+                          }}
+                        >
+                          <Box>
+                            <Box
                               sx={{
-                                fontWeight: 700,
-                                fontSize: "0.9375rem",
-                                color: isDark ? "#F8FAFC" : "#0F172A",
-                                lineHeight: 1.3,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "flex-start",
+                                mb: 0.5,
                               }}
                             >
-                              {task.title || task.description || "Task"}
-                            </Typography>
-                            <IconButton
-                              size="small"
-                              onClick={(e) => {
-                                setTaskMenuAnchor(e.currentTarget);
-                                setActiveTaskMenu(taskId);
-                              }}
-                              sx={{ color: isDark ? "#64748B" : "#94A3B8", p: 0.2 }}
-                            >
-                              <MoreVertIcon fontSize="small" />
-                            </IconButton>
+                              <Typography
+                                variant="subtitle1"
+                                sx={{
+                                  fontWeight: 650,
+                                  fontSize: "0.85rem",
+                                  color: isDark ? "#F8FAFC" : "#0F172A",
+                                  lineHeight: 1.3,
+                                  cursor: "pointer",
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                  "&:hover": { color: "primary.main" },
+                                }}
+                                onClick={() => onEditTask?.(task)}
+                              >
+                                {task.title || task.description || "Task"}
+                              </Typography>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  setTaskMenuAnchor(e.currentTarget);
+                                  setActiveTask(task);
+                                }}
+                                sx={{
+                                  color: isDark ? "#64748B" : "#94A3B8",
+                                  p: 0.1,
+                                  ml: 0.5,
+                                }}
+                              >
+                                <MoreVertIcon sx={{ fontSize: 16 }} />
+                              </IconButton>
+                            </Box>
+
+                            {task.description && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: isDark ? "#94A3B8" : "#64748B",
+                                  fontSize: "0.775rem",
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 1,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                  lineHeight: 1.35,
+                                }}
+                              >
+                                {task.description}
+                              </Typography>
+                            )}
                           </Box>
 
-                          {task.description && (
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: isDark ? "#94A3B8" : "#64748B",
-                                fontSize: "0.8125rem",
-                                mb: 2,
-                                display: "-webkit-box",
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: "vertical",
-                                overflow: "hidden",
-                                lineHeight: 1.4,
-                              }}
-                            >
-                              {task.description}
-                            </Typography>
-                          )}
-
-                          {/* Card Footer: Priority Pill & Date */}
+                          {/* Card Footer: Priority Pill & Date & Assignees */}
                           <Box
                             sx={{
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "space-between",
-                              mb: 1.5,
+                              pt: 0.5,
                             }}
                           >
-                            <Chip
-                              label={getPriorityLabel(task.priority)}
-                              size="small"
-                              sx={{
-                                height: 22,
-                                fontSize: "0.75rem",
-                                fontWeight: 600,
-                                bgcolor: priorityProps.bg,
-                                color: priorityProps.color,
-                                borderRadius: "6px",
-                              }}
-                            />
-                            {formattedDate && (
-                              <Box
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <Chip
+                                label={getPriorityLabel(task.priority)}
+                                size="small"
                                 sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 0.5,
-                                  color: isDark ? "#64748B" : "#94A3B8",
-                                  fontSize: "0.75rem",
-                                  fontWeight: 500,
+                                  height: 20,
+                                  fontSize: "0.7rem",
+                                  fontWeight: 600,
+                                  bgcolor: priorityProps.bg,
+                                  color: priorityProps.color,
+                                  borderRadius: "5px",
+                                  px: 0.5,
                                 }}
-                              >
-                                <CalendarTodayIcon sx={{ fontSize: 13 }} />
-                                <span>{formattedDate}</span>
-                              </Box>
-                            )}
-                          </Box>
+                              />
+                              {formattedDate && (
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 0.3,
+                                    color: isDark ? "#64748B" : "#94A3B8",
+                                    fontSize: "0.725rem",
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  <CalendarTodayIcon sx={{ fontSize: 11 }} />
+                                  <span>{formattedDate}</span>
+                                </Box>
+                              )}
+                            </Box>
 
-                          {/* Assignee Avatars */}
-                          {assigneesList.length > 0 && (
-                            <Box sx={{ display: "flex", justifyContent: "flex-start", pt: 0.5 }}>
+                            {/* Assignee Avatars */}
+                            {assigneesList.length > 0 && (
                               <AvatarGroup
-                                max={4}
+                                max={3}
                                 sx={{
                                   "& .MuiAvatar-root": {
-                                    width: 24,
-                                    height: 24,
-                                    fontSize: "0.65rem",
+                                    width: 22,
+                                    height: 22,
+                                    fontSize: "0.6rem",
                                     fontWeight: 700,
-                                    border: `2px solid ${isDark ? "#1E293B" : "#FFFFFF"}`,
+                                    border: `1.5px solid ${isDark ? "#1E293B" : "#FFFFFF"}`,
                                   },
                                 }}
                               >
                                 {assigneesList.map((a, idx) => {
                                   const name =
-                                    a.name ||
-                                    a.fullName ||
+                                    a.user?.employee?.fullName ||
                                     a.employee?.fullName ||
+                                    a.user?.fullName ||
+                                    a.fullName ||
+                                    a.name ||
+                                    a.user?.phone_number ||
                                     a.phone_number ||
                                     "User";
                                   const initials =
-                                    a.initials || name.slice(0, 2).toUpperCase();
+                                    a.initials ||
+                                    (name
+                                      ? name.slice(0, 2).toUpperCase()
+                                      : "US");
                                   return (
-                                    <Avatar
-                                      key={idx}
-                                      sx={{ bgcolor: a.color || "#2563EB", color: "#fff" }}
-                                      title={name}
-                                    >
-                                      {initials}
-                                    </Avatar>
+                                    <Tooltip key={idx} title={name} arrow placement="top">
+                                      <Avatar
+                                        sx={{
+                                          bgcolor: a.color || "#2563EB",
+                                          color: "#fff",
+                                        }}
+                                      >
+                                        {initials}
+                                      </Avatar>
+                                    </Tooltip>
                                   );
                                 })}
                               </AvatarGroup>
-                            </Box>
-                          )}
+                            )}
+                          </Box>
                         </CardContent>
                       </Card>
                     );
@@ -310,44 +389,137 @@ function TaskBoardView({
         })}
       </Grid>
 
-      {/* Context Menu for Task Status / Actions */}
+      {/* Context Menu for Task Edit / Status Switch / Actions */}
       <Menu
         anchorEl={taskMenuAnchor}
         open={Boolean(taskMenuAnchor)}
         onClose={handleMenuClose}
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "12px",
+              minWidth: 180,
+              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.15)",
+              border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0"}`,
+            },
+          },
+        }}
       >
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, 1);
+            if (activeTask) onEditTask?.(activeTask);
             handleMenuClose();
           }}
+          sx={{ py: 1, px: 2 }}
         >
-          {t("task.moveToToDo", "Move to To Do")}
+          <ListItemIcon>
+            <EditOutlinedIcon fontSize="small" sx={{ color: "#2563EB" }} />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+          >
+            {t("task.editTask", "Düzelt")}
+          </ListItemText>
         </MenuItem>
+
+        <Divider sx={{ my: 0.5 }} />
+
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, 2);
+            if (activeTask)
+              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 1);
             handleMenuClose();
           }}
+          selected={Number(activeTask?.status) === 1}
+          sx={{ py: 0.8, px: 2 }}
         >
-          {t("task.moveToInProgress", "Move to In Progress")}
+          <ListItemIcon>
+            <RadioButtonUncheckedIcon
+              fontSize="small"
+              sx={{ color: "#64748B" }}
+            />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{
+              fontSize: "0.8125rem",
+              fontWeight: Number(activeTask?.status) === 1 ? 700 : 500,
+            }}
+          >
+            {t("task.statusToDo", "TO DO")}
+          </ListItemText>
         </MenuItem>
+
         <MenuItem
           onClick={() => {
-            onMoveTaskStatus(activeTaskMenu, 3);
+            if (activeTask)
+              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 2);
             handleMenuClose();
           }}
+          selected={Number(activeTask?.status) === 2}
+          sx={{ py: 0.8, px: 2 }}
         >
-          {t("task.moveToCompleted", "Move to Completed")}
+          <ListItemIcon>
+            <RadioButtonCheckedIcon
+              fontSize="small"
+              sx={{ color: "#2563EB" }}
+            />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{
+              fontSize: "0.8125rem",
+              fontWeight: Number(activeTask?.status) === 2 ? 700 : 500,
+            }}
+          >
+            {t("task.statusInProgress", "IN PROGRESS")}
+          </ListItemText>
         </MenuItem>
+
         <MenuItem
           onClick={() => {
-            onDeleteTask(activeTaskMenu);
+            if (activeTask)
+              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 3);
             handleMenuClose();
           }}
-          sx={{ color: "error.main" }}
+          selected={Number(activeTask?.status) === 3}
+          sx={{ py: 0.8, px: 2 }}
         >
-          {t("task.deleteTask", "Delete Task")}
+          <ListItemIcon>
+            <CheckCircleRoundedIcon
+              fontSize="small"
+              sx={{ color: "#16A34A" }}
+            />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{
+              fontSize: "0.8125rem",
+              fontWeight: Number(activeTask?.status) === 3 ? 700 : 500,
+            }}
+          >
+            {t("task.statusCompleted", "COMPLETED")}
+          </ListItemText>
+        </MenuItem>
+
+        <Divider sx={{ my: 0.5 }} />
+
+        <MenuItem
+          onClick={() => {
+            if (activeTask) onDeleteTask?.(activeTask.guid || activeTask.id);
+            handleMenuClose();
+          }}
+          sx={{ py: 1, px: 2, color: "error.main" }}
+        >
+          <ListItemIcon>
+            <DeleteOutlinedIcon fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText
+            primaryTypographyProps={{
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              color: "error.main",
+            }}
+          >
+            {t("task.deleteTask", "Poz")}
+          </ListItemText>
         </MenuItem>
       </Menu>
     </Box>

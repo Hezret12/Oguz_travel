@@ -17,7 +17,6 @@ import { useCreate } from "../../hooks/CRUD/useCreate";
 import { getAllUsersApi } from "../../api/queries/getters";
 import { addTaskApi } from "../../api/queries/post";
 import CustomDatePicker from "../../components/CustomDatePicker";
-import toast from "react-hot-toast";
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const { t } = useLocale();
@@ -32,7 +31,6 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     apiFn: addTaskApi,
     key: "tasks",
     onSuccess: () => {
-      toast.success(t("task.addSuccess"));
       handleCloseDialog();
     },
   });
@@ -47,16 +45,21 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
           : [];
 
     return list.map((usr) => {
-      const emp = usr?.employee || usr;
-      const assigneeGuid = usr?.employee_guid || emp?.guid || usr?.guid;
-      const fullName = emp?.fullName || usr?.fullName || emp?.phone_number || usr?.phone_number || "User";
+      const userGuid = usr?.guid;
+      const emp = usr?.employee;
+      const fullName =
+        emp?.fullName ||
+        usr?.fullName ||
+        usr?.phone_number ||
+        "User";
+
       return {
-        value: assigneeGuid,
-        userGuid: usr?.guid,
+        value: userGuid,
+        userGuid: userGuid,
         employeeGuid: usr?.employee_guid || emp?.guid,
         label: fullName,
         name: fullName,
-        initials: fullName.slice(0, 2).toUpperCase(),
+        initials: (fullName || "User").slice(0, 2).toUpperCase(),
         color: "#0E8584",
       };
     });
@@ -68,7 +71,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       description: "",
       assignee_guid: [],
       priority: "medium",
-      status: "todo",
+      status: 1,
       dueDate: "",
     },
   });
@@ -121,6 +124,16 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
     const assignedNames = assignedEmps.map((e) => e.name).join(", ");
 
+    const numericStatus =
+      Number(data.status) ||
+      (String(data.status).toLowerCase().includes("todo")
+        ? 1
+        : String(data.status).toLowerCase().includes("progress")
+        ? 2
+        : String(data.status).toLowerCase().includes("complet")
+        ? 3
+        : 1);
+
     const now = dayjs();
     dispatch(
       addCustomNotification({
@@ -143,17 +156,16 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       attachments,
       assignees,
       priority: data.priority || "medium",
-      status: data.status || null,
+      status: numericStatus,
       dueDate: data.dueDate || "",
     });
 
     const payload = {
-      assignee_guid: selectedGuids.length === 1 ? selectedGuids[0] : selectedGuids,
       assignee_guids: selectedGuids,
       title: data.title,
       description: data.description || "",
       priority: data.priority || "medium",
-      status: data.status || null,
+      status: numericStatus,
       due_date: data.dueDate
         ? new Date(data.dueDate).toISOString()
         : new Date().toISOString(),
@@ -168,14 +180,14 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   };
 
   return (
-    <CustomDialog open={open} close={handleCloseDialog} widthX={720}>
+    <CustomDialog open={open} close={handleCloseDialog} widthX={580}>
       <CustomDialogHeader
         title={t("task.createTask")}
         onClose={handleCloseDialog}
       />
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.8, pt: 0.5 }}>
           {/* Title */}
           <CustomTextField
             name="title"
@@ -191,7 +203,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
             label={t("columns.description")}
             placeholder={t("task.enterDescription")}
             multiline
-            rows={5.3}
+            rows={3}
           />
 
           <Grid container spacing={2}>

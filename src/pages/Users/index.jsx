@@ -83,13 +83,13 @@ const Users = () => {
         enableSorting: false,
       },
       {
-        accessorFn: (row) => row?.employee?.fullName,
+        accessorFn: (row) => row?.employee?.fullName || row?.fullName || row?.phone_number || "—",
         id: "fullName",
         header: t("columns.fullName"),
         size: 180,
       },
       {
-        accessorFn: (row) => row.employee?.phone_number,
+        accessorFn: (row) => row?.phone_number || row?.employee?.phone_number || "—",
         id: "phone_number",
         header: t("columns.phoneNumber"),
         size: 150,
