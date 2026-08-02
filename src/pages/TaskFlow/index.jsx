@@ -8,8 +8,9 @@ import EditTaskModal from "./EditTaskModal";
 import TaskFlowHeader from "./Contents/TaskFlowHeader";
 import TaskBoardView from "./Contents/TaskBoardView";
 import TaskListTable from "./Contents/TaskListTable";
+import Pagination from "../../components/Pagination";
 
-import { useGet } from "../../hooks/CRUD/useGet";
+import { usePagginationGet } from "../../hooks/usePagginationGet";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { getAllTasksApi } from "../../api/queries/getters";
@@ -25,6 +26,9 @@ export default function TaskFlow() {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 400);
 
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -35,11 +39,36 @@ export default function TaskFlow() {
 
   const isCardView = viewMode === "board";
 
+  const handleViewModeChange = useCallback((mode) => {
+    setViewMode(mode);
+    setPage(1);
+  }, []);
+
+  const handleSearchChange = useCallback((query) => {
+    setSearchQuery(query);
+    setPage(1);
+  }, []);
+
+  const handleFilterStatusChange = useCallback((status) => {
+    setFilterStatus(status);
+    setPage(1);
+  }, []);
+
+  const handleFilterPriorityChange = useCallback((priority) => {
+    setFilterPriority(priority);
+    setPage(1);
+  }, []);
+
+  const handleDueDateChange = useCallback((date) => {
+    setDueDate(date);
+    setPage(1);
+  }, []);
+
   // Build params for API filtering (debounced search, priority, status, due_date)
   const queryParams = useMemo(() => {
     const params = {
-      page: 1,
-      limit: 10,
+      page,
+      limit,
       type: !isCardView,
     };
 
@@ -57,10 +86,15 @@ export default function TaskFlow() {
     }
 
     return params;
-  }, [isCardView, debouncedSearch, filterStatus, filterPriority, dueDate]);
+  }, [page, limit, isCardView, debouncedSearch, filterStatus, filterPriority, dueDate]);
 
-  // API Fetch for tasks with server-side query params
-  const { data: apiTasksResponse, refetch } = useGet({
+  // API Fetch for tasks with server-side pagination & query params
+  const {
+    data: apiTasksResponse,
+    totalItems,
+    pageCount,
+    refetch,
+  } = usePagginationGet({
     apiFn: getAllTasksApi,
     key: "tasks",
     params: queryParams,
@@ -188,16 +222,16 @@ export default function TaskFlow() {
       {/* Isolated TaskFlow Header Component */}
       <TaskFlowHeader
         viewMode={viewMode}
-        setViewMode={setViewMode}
+        setViewMode={handleViewModeChange}
         onOpenCreateModal={() => setIsModalOpen(true)}
         searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
+        setSearchQuery={handleSearchChange}
         filterStatus={filterStatus}
-        setFilterStatus={setFilterStatus}
+        setFilterStatus={handleFilterStatusChange}
         filterPriority={filterPriority}
-        setFilterPriority={setFilterPriority}
+        setFilterPriority={handleFilterPriorityChange}
         dueDate={dueDate}
-        setDueDate={setDueDate}
+        setDueDate={handleDueDateChange}
       />
 
       {/* Scrollable Content Area below Fixed Header */}
@@ -205,8 +239,9 @@ export default function TaskFlow() {
         sx={{
           flexGrow: 1,
           minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
           overflow: "hidden",
-          pr: 0.5,
         }}
       >
         {viewMode === "board" ? (
@@ -227,6 +262,26 @@ export default function TaskFlow() {
           />
         )}
       </Box>
+
+      {/* Pagination Bar for Board View */}
+      {viewMode === "board" && pageCount > 1 && (
+        <Box
+          sx={{
+            pt: 1.5,
+            flexShrink: 0,
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+          }}
+        >
+          <Pagination
+            pageIndex={page - 1}
+            pageCount={pageCount}
+            totalRows={totalItems}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
+          />
+        </Box>
+      )}
 
       {/* Create Task Modal */}
       <CreateTaskModal

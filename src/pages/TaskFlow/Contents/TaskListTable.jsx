@@ -233,7 +233,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
     muiTableContainerProps: {
       sx: {
         flexGrow: 1,
-        maxHeight: "calc(100vh - 200px)",
+        minHeight: 0,
         overflowY: "auto",
       },
     },
@@ -263,9 +263,10 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
         slotProps={{
           paper: {
             sx: {
-              borderRadius: "12px",
-              minWidth: 180,
-              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.15)",
+              borderRadius: "10px",
+              minWidth: 150,
+              boxShadow: "0 8px 20px -4px rgba(0,0,0,0.12)",
+              "& .MuiList-root": { py: 0.5 },
             },
           },
         }}
@@ -275,19 +276,19 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
             if (activeTask) onEditTask?.(activeTask);
             handleMenuClose();
           }}
-          sx={{ py: 1, px: 2 }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
         >
-          <ListItemIcon>
-            <EditOutlinedIcon fontSize="small" sx={{ color: "#2563EB" }} />
+          <ListItemIcon sx={{ minWidth: 26 }}>
+            <EditOutlinedIcon sx={{ fontSize: 16, color: "#2563EB" }} />
           </ListItemIcon>
           <ListItemText
-            primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+            primaryTypographyProps={{ fontWeight: 600, fontSize: "0.775rem" }}
           >
             {t("task.editTask", "Düzelt")}
           </ListItemText>
         </MenuItem>
 
-        <Divider sx={{ my: 0.5 }} />
+        <Divider sx={{ my: 0.3 }} />
 
         <MenuItem
           onClick={() => {
@@ -296,17 +297,16 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 1}
-          sx={{ py: 0.8, px: 2 }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 26 }}>
             <RadioButtonUncheckedIcon
-              fontSize="small"
-              sx={{ color: "#64748B" }}
+              sx={{ fontSize: 15, color: "#64748B" }}
             />
           </ListItemIcon>
           <ListItemText
             primaryTypographyProps={{
-              fontSize: "0.8125rem",
+              fontSize: "0.75rem",
               fontWeight: Number(activeTask?.status) === 1 ? 700 : 500,
             }}
           >
@@ -321,17 +321,16 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 2}
-          sx={{ py: 0.8, px: 2 }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 26 }}>
             <RadioButtonCheckedIcon
-              fontSize="small"
-              sx={{ color: "#2563EB" }}
+              sx={{ fontSize: 15, color: "#2563EB" }}
             />
           </ListItemIcon>
           <ListItemText
             primaryTypographyProps={{
-              fontSize: "0.8125rem",
+              fontSize: "0.75rem",
               fontWeight: Number(activeTask?.status) === 2 ? 700 : 500,
             }}
           >
@@ -346,17 +345,16 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 3}
-          sx={{ py: 0.8, px: 2 }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 26 }}>
             <CheckCircleRoundedIcon
-              fontSize="small"
-              sx={{ color: "#16A34A" }}
+              sx={{ fontSize: 15, color: "#16A34A" }}
             />
           </ListItemIcon>
           <ListItemText
             primaryTypographyProps={{
-              fontSize: "0.8125rem",
+              fontSize: "0.75rem",
               fontWeight: Number(activeTask?.status) === 3 ? 700 : 500,
             }}
           >
@@ -364,22 +362,22 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
           </ListItemText>
         </MenuItem>
 
-        <Divider sx={{ my: 0.5 }} />
+        <Divider sx={{ my: 0.3 }} />
 
         <MenuItem
           onClick={() => {
             if (activeTask) onDeleteTask?.(activeTask.guid || activeTask.id);
             handleMenuClose();
           }}
-          sx={{ py: 1, px: 2, color: "error.main" }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30, color: "error.main" }}
         >
-          <ListItemIcon>
-            <DeleteOutlinedIcon fontSize="small" color="error" />
+          <ListItemIcon sx={{ minWidth: 26 }}>
+            <DeleteOutlinedIcon sx={{ fontSize: 16 }} color="error" />
           </ListItemIcon>
           <ListItemText
             primaryTypographyProps={{
               fontWeight: 600,
-              fontSize: "0.875rem",
+              fontSize: "0.775rem",
               color: "error.main",
             }}
           >

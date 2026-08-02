@@ -67,8 +67,28 @@ function TaskBoardView({
   };
 
   return (
-    <Box>
-      <Grid container spacing={2.5}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        minHeight: 0,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      <Grid
+        container
+        spacing={2.5}
+        sx={{
+          flexGrow: 1,
+          minHeight: 0,
+          height: "100%",
+          alignItems: "stretch",
+          overflowY: { xs: "auto", lg: "hidden" },
+          pb: 0.5,
+        }}
+      >
         {columns.map((col) => {
           const colTasks = tasks.filter(
             (t) =>
@@ -78,18 +98,29 @@ function TaskBoardView({
           );
 
           return (
-            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={col.id}>
+            <Grid
+              size={{ xs: 12, sm: 6, lg: 4 }}
+              key={col.id}
+              sx={{
+                height: { xs: 520, lg: "100%" },
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               <Box
                 sx={{
                   bgcolor: isDark ? "#0F172A" : col.bgLight,
                   border: `1px solid ${isDark ? "#1E293B" : col.borderLight}`,
                   borderRadius: "12px",
                   p: 1.5,
-                  height: "calc(100vh - 210px)",
-                  minHeight: 580,
+                  height: "100%",
+                  maxHeight: "100%",
+                  minHeight: 0,
                   display: "flex",
                   flexDirection: "column",
                   boxSizing: "border-box",
+                  overflow: "hidden",
                 }}
               >
                 {/* Column Header */}
@@ -100,6 +131,7 @@ function TaskBoardView({
                     justifyContent: "space-between",
                     mb: 1.5,
                     px: 0.5,
+                    flexShrink: 0,
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -145,10 +177,11 @@ function TaskBoardView({
                     flexDirection: "column",
                     gap: 1.25,
                     flexGrow: 1,
+                    minHeight: 0,
                     overflowY: "auto",
                     pr: 0.5,
                     "&::-webkit-scrollbar": {
-                      width: "4px",
+                      width: "5px",
                     },
                     "&::-webkit-scrollbar-track": {
                       backgroundColor: "transparent",
@@ -212,6 +245,7 @@ function TaskBoardView({
                           borderLeft: `3.5px solid ${col.color}`,
                           bgcolor: isDark ? "#1E293B" : "#FFFFFF",
                           height: 145,
+                          flexShrink: 0,
                           display: "flex",
                           flexDirection: "column",
                           transition: "all 0.15s ease-in-out",
@@ -397,10 +431,11 @@ function TaskBoardView({
         slotProps={{
           paper: {
             sx: {
-              borderRadius: "12px",
-              minWidth: 180,
-              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.15)",
+              borderRadius: "10px",
+              minWidth: 150,
+              boxShadow: "0 8px 20px -4px rgba(0,0,0,0.12)",
               border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0"}`,
+              "& .MuiList-root": { py: 0.5 },
             },
           },
         }}
@@ -410,19 +445,19 @@ function TaskBoardView({
             if (activeTask) onEditTask?.(activeTask);
             handleMenuClose();
           }}
-          sx={{ py: 1, px: 2 }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
         >
-          <ListItemIcon>
-            <EditOutlinedIcon fontSize="small" sx={{ color: "#2563EB" }} />
+          <ListItemIcon sx={{ minWidth: 26 }}>
+            <EditOutlinedIcon sx={{ fontSize: 16, color: "#2563EB" }} />
           </ListItemIcon>
           <ListItemText
-            primaryTypographyProps={{ fontWeight: 600, fontSize: "0.875rem" }}
+            primaryTypographyProps={{ fontWeight: 600, fontSize: "0.775rem" }}
           >
             {t("task.editTask", "Düzelt")}
           </ListItemText>
         </MenuItem>
 
-        <Divider sx={{ my: 0.5 }} />
+        <Divider sx={{ my: 0.3 }} />
 
         <MenuItem
           onClick={() => {
@@ -431,17 +466,16 @@ function TaskBoardView({
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 1}
-          sx={{ py: 0.8, px: 2 }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 26 }}>
             <RadioButtonUncheckedIcon
-              fontSize="small"
-              sx={{ color: "#64748B" }}
+              sx={{ fontSize: 15, color: "#64748B" }}
             />
           </ListItemIcon>
           <ListItemText
             primaryTypographyProps={{
-              fontSize: "0.8125rem",
+              fontSize: "0.75rem",
               fontWeight: Number(activeTask?.status) === 1 ? 700 : 500,
             }}
           >
@@ -456,17 +490,16 @@ function TaskBoardView({
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 2}
-          sx={{ py: 0.8, px: 2 }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 26 }}>
             <RadioButtonCheckedIcon
-              fontSize="small"
-              sx={{ color: "#2563EB" }}
+              sx={{ fontSize: 15, color: "#2563EB" }}
             />
           </ListItemIcon>
           <ListItemText
             primaryTypographyProps={{
-              fontSize: "0.8125rem",
+              fontSize: "0.75rem",
               fontWeight: Number(activeTask?.status) === 2 ? 700 : 500,
             }}
           >
@@ -481,17 +514,16 @@ function TaskBoardView({
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 3}
-          sx={{ py: 0.8, px: 2 }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: 26 }}>
             <CheckCircleRoundedIcon
-              fontSize="small"
-              sx={{ color: "#16A34A" }}
+              sx={{ fontSize: 15, color: "#16A34A" }}
             />
           </ListItemIcon>
           <ListItemText
             primaryTypographyProps={{
-              fontSize: "0.8125rem",
+              fontSize: "0.75rem",
               fontWeight: Number(activeTask?.status) === 3 ? 700 : 500,
             }}
           >
@@ -499,22 +531,22 @@ function TaskBoardView({
           </ListItemText>
         </MenuItem>
 
-        <Divider sx={{ my: 0.5 }} />
+        <Divider sx={{ my: 0.3 }} />
 
         <MenuItem
           onClick={() => {
             if (activeTask) onDeleteTask?.(activeTask.guid || activeTask.id);
             handleMenuClose();
           }}
-          sx={{ py: 1, px: 2, color: "error.main" }}
+          sx={{ py: 0.4, px: 1.25, minHeight: 30, color: "error.main" }}
         >
-          <ListItemIcon>
-            <DeleteOutlinedIcon fontSize="small" color="error" />
+          <ListItemIcon sx={{ minWidth: 26 }}>
+            <DeleteOutlinedIcon sx={{ fontSize: 16 }} color="error" />
           </ListItemIcon>
           <ListItemText
             primaryTypographyProps={{
               fontWeight: 600,
-              fontSize: "0.875rem",
+              fontSize: "0.775rem",
               color: "error.main",
             }}
           >
