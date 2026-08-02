@@ -102,3 +102,7 @@ export const deleteEmployeeCommentApi = async (guid) => {
 export const deleteTaskApi = async (guid) => {
   return await api.deletePrivate('/task/delete-task', guid);
 };
+
+export const deleteNotificationApi = async (guid) => {
+  return await api.deletePrivate('/messages/delete-notification', guid);
+};

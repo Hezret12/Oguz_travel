@@ -22,7 +22,7 @@ export default function TaskFlow() {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  const [viewMode, setViewMode] = useState("board"); // 'board' | 'list'
+  const [viewMode, setViewMode] = useState("board");
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 400);
 
@@ -62,6 +62,19 @@ export default function TaskFlow() {
   const handleDueDateChange = useCallback((date) => {
     setDueDate(date);
     setPage(1);
+  }, []);
+
+  const handleOpenCreateModal = useCallback(() => {
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCloseCreateModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  const handleCloseEditModal = useCallback(() => {
+    setIsEditModalOpen(false);
+    setEditingTask(null);
   }, []);
 
   // Build params for API filtering (debounced search, priority, status, due_date)
@@ -139,7 +152,7 @@ export default function TaskFlow() {
     [t]
   );
 
-  // Get raw tasks list directly from API (supports both 1D flat array and 3-indexed 2D array: 0=ToDo, 1=InProgress, 2=Completed)
+  // Get raw tasks list directly from API (supports 1D flat array or 3-indexed 2D array: 0=ToDo, 1=InProgress, 2=Completed)
   const tasksList = useMemo(() => {
     let rawData = apiTasksResponse;
 
@@ -155,7 +168,6 @@ export default function TaskFlow() {
 
     if (!Array.isArray(rawData) || rawData.length === 0) return [];
 
-    // Check if response is a 2D array grouped by status: index 0 = To Do (status 1), index 1 = In Progress (status 2), index 2 = Completed (status 3)
     if (Array.isArray(rawData[0])) {
       return rawData.flatMap((statusGroup, index) => {
         if (!Array.isArray(statusGroup)) return [];
@@ -223,7 +235,7 @@ export default function TaskFlow() {
       <TaskFlowHeader
         viewMode={viewMode}
         setViewMode={handleViewModeChange}
-        onOpenCreateModal={() => setIsModalOpen(true)}
+        onOpenCreateModal={handleOpenCreateModal}
         searchQuery={searchQuery}
         setSearchQuery={handleSearchChange}
         filterStatus={filterStatus}
@@ -251,7 +263,7 @@ export default function TaskFlow() {
             onMoveTaskStatus={handleMoveTaskStatus}
             onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}
-            onOpenCreateModal={() => setIsModalOpen(true)}
+            onOpenCreateModal={handleOpenCreateModal}
           />
         ) : (
           <TaskListTable
@@ -286,17 +298,14 @@ export default function TaskFlow() {
       {/* Create Task Modal */}
       <CreateTaskModal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseCreateModal}
         onCreateTask={handleCreateTask}
       />
 
       {/* Edit Task Modal */}
       <EditTaskModal
         open={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingTask(null);
-        }}
+        onClose={handleCloseEditModal}
         task={editingTask}
       />
     </Box>

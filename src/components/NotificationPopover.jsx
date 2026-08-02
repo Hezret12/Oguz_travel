@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -12,10 +12,10 @@ import {
   Stack,
   useTheme,
   alpha,
+  CircularProgress,
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
@@ -26,16 +26,16 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import NotificationsOffOutlinedIcon from '@mui/icons-material/NotificationsOffOutlined';
 import { useNavigate } from 'react-router-dom';
+
 import { PATHS } from '../routes/paths';
 import { useLocale } from '../hooks/useLocale';
 import { useDateFormat } from '../functions/generalHelpers';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-  toggleNotificationRead,
-  markAllNotificationsAsRead,
-  deleteNotification,
-} from '../store/slices/notificationSlice';
-
+import { useInfiniteGet } from '../hooks/CRUD/useInfiniteGet';
+import { useUpdate } from '../hooks/CRUD/useUpdate';
+import { useDelete } from '../hooks/CRUD/useDelete';
+import { getAllNotificationsApi } from '../api/queries/getters';
+import { markNotificationReadApi } from '../api/queries/patch';
+import { deleteNotificationApi } from '../api/queries/delete';
 
 const getTypeIcon = (type) => {
   switch (type) {
@@ -50,46 +50,100 @@ const getTypeIcon = (type) => {
 const NotificationPopover = () => {
   const { t } = useLocale();
   const theme = useTheme();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { formatChange } = useDateFormat();
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const notifications = useSelector((state) => state.notifications.notifications);
-
   const isDark = theme.palette.mode === 'dark';
 
-  const handleOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  // Senior CRUD Infinite Query Hook: /messages/get-all-notification?page=x&limit=10&isRead=false
+  const {
+    data: notificationsList,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useInfiniteGet({
+    apiFn: getAllNotificationsApi,
+    key: 'headerNotifications',
+    params: { limit: 40, isRead: false },
+  });
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  // CRUD Mutation hooks for updating & deleting notifications
+  const markReadMutation = useUpdate({
+    apiFn: markNotificationReadApi,
+    key: 'headerNotifications',
+    idKey: 'guid',
+  });
 
-  const handleViewAll = () => {
-    handleClose();
-    navigate(PATHS.NOTIFICATIONS);
-  };
+  const deleteMutation = useDelete({
+    deleteFn: deleteNotificationApi,
+    queryKey: 'headerNotifications',
+    idKey: 'guid',
+  });
 
-  const unreadNotifications = useMemo(
-    () => notifications.filter((n) => !n.isRead && !n.is_read),
-    [notifications]
+  const handleOpen = useCallback(
+    (event) => {
+      setAnchorEl(event.currentTarget);
+      refetch();
+    },
+    [refetch]
   );
+
+  const handleClose = useCallback(() => {
+    setAnchorEl(null);
+  }, []);
+
+  const handleViewAll = useCallback(() => {
+    setAnchorEl(null);
+    navigate(PATHS.NOTIFICATIONS);
+  }, [navigate]);
+
+  // Infinite scroll event handler for Popover container
+  const handleScroll = useCallback(
+    (e) => {
+      const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+      if (scrollHeight - scrollTop - clientHeight < 30 && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage]
+  );
+
+  const unreadNotifications = useMemo(() => {
+    if (!Array.isArray(notificationsList)) return [];
+    return notificationsList.filter((n) => {
+      const isReadVal = n.isRead ?? n.empltaskAssignee?.[0]?.isRead ?? false;
+      return !isReadVal;
+    });
+  }, [notificationsList]);
 
   const unreadCount = unreadNotifications.length;
 
-  const handleToggleRead = (id) => {
-    dispatch(toggleNotificationRead(id));
-  };
+  const handleToggleRead = useCallback(
+    async (id) => {
+      try {
+        await markReadMutation.mutateAsync({ guid: id, isRead: true });
+        refetch();
+      } catch (err) {
+        console.warn('API mark notification read error:', err);
+      }
+    },
+    [markReadMutation, refetch]
+  );
 
-  const handleMarkAllAsRead = () => {
-    dispatch(markAllNotificationsAsRead());
-  };
-
-  const handleDelete = (id) => {
-    dispatch(deleteNotification(id));
-  };
+  const handleDelete = useCallback(
+    async (id) => {
+      try {
+        await deleteMutation.mutateAsync(id);
+        refetch();
+      } catch (err) {
+        console.warn('API delete notification error:', err);
+      }
+    },
+    [deleteMutation, refetch]
+  );
 
   const isOpen = Boolean(anchorEl);
 
@@ -187,7 +241,7 @@ const NotificationPopover = () => {
             pb: 1.5,
             display: 'flex',
             alignItems: 'center',
-            justify: 'space-between',
+            justifyContent: 'space-between',
             borderBottom: '1px solid',
             borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
             backgroundColor: isDark ? 'rgba(30, 41, 59, 0.6)' : 'rgba(248, 250, 252, 0.8)',
@@ -212,34 +266,11 @@ const NotificationPopover = () => {
               />
             )}
           </Box>
-
-          {unreadCount > 0 && (
-            <Tooltip title={t('notifications.markAllAsRead')}>
-              <Button
-                size="small"
-                onClick={handleMarkAllAsRead}
-                startIcon={<DoneAllIcon sx={{ fontSize: 16 }} />}
-                sx={{
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  color: isDark ? '#14B8A6' : '#0E8584',
-                  px: 1,
-                  py: 0.2,
-                  borderRadius: '8px',
-                  '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                  },
-                }}
-              >
-                {t('notifications.readAll')}
-              </Button>
-            </Tooltip>
-          )}
         </Box>
 
-        {/* Notification List Container */}
+        {/* Notification List Container with Infinite Scroll */}
         <Box
+          onScroll={handleScroll}
           sx={{
             flexGrow: 1,
             overflowY: 'auto',
@@ -254,7 +285,11 @@ const NotificationPopover = () => {
             },
           }}
         >
-          {unreadNotifications.length === 0 ? (
+          {isLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 5 }}>
+              <CircularProgress size={28} sx={{ color: isDark ? '#14B8A6' : '#0E8584' }} />
+            </Box>
+          ) : unreadNotifications.length === 0 ? (
             /* Empty State */
             <Box
               sx={{
@@ -289,7 +324,29 @@ const NotificationPopover = () => {
             /* List Items */
             <Stack spacing={0.8}>
               {unreadNotifications.map((item) => {
-                const { id, title, description, sender, senderRole, avatarBg, date, isRead, type } = item;
+                const id = item.guid;
+                const title =
+                  item.title ||
+                  (item.isMessage
+                    ? t('notifications.message', 'Hat')
+                    : t('notifications.task', 'Bildiriş'));
+                const description = item.description || '';
+                const isRead = item.isRead ?? item.empltaskAssignee?.[0]?.isRead ?? false;
+
+                const sender =
+                  item.admuser?.employee?.fullName ||
+                  item.admuser?.phone_number ||
+                  'Admin';
+
+                const senderRole = item.admuser?.role || '';
+                const date = item.createdAt || item.due_date;
+                const type = item.isMessage ? 'comment' : 'task';
+                const avatarBg =
+                  item.priority === 'urgent'
+                    ? '#DC2626'
+                    : item.isMessage
+                      ? '#10B981'
+                      : '#0E8584';
 
                 return (
                   <Box
@@ -302,8 +359,8 @@ const NotificationPopover = () => {
                       backgroundColor: isRead
                         ? 'transparent'
                         : isDark
-                        ? 'rgba(20, 184, 166, 0.08)'
-                        : 'rgba(14, 133, 132, 0.04)',
+                          ? 'rgba(20, 184, 166, 0.08)'
+                          : 'rgba(14, 133, 132, 0.04)',
                       border: '1px solid',
                       borderColor: isRead
                         ? (isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)')
@@ -322,8 +379,8 @@ const NotificationPopover = () => {
                         sx={{
                           width: 38,
                           height: 38,
-                          backgroundColor: alpha(avatarBg || '#0E8584', 0.12),
-                          color: avatarBg || '#0E8584',
+                          backgroundColor: alpha(avatarBg, 0.12),
+                          color: avatarBg,
                           borderRadius: '10px',
                           flexShrink: 0,
                           mt: 0.2,
@@ -460,8 +517,8 @@ const NotificationPopover = () => {
                               color: isRead
                                 ? 'text.disabled'
                                 : isDark
-                                ? '#14B8A6'
-                                : '#0E8584',
+                                  ? '#14B8A6'
+                                  : '#0E8584',
                               backgroundColor: !isRead
                                 ? alpha(theme.palette.primary.main, 0.1)
                                 : 'transparent',
@@ -502,6 +559,12 @@ const NotificationPopover = () => {
                   </Box>
                 );
               })}
+
+              {isFetchingNextPage && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 1.5 }}>
+                  <CircularProgress size={20} sx={{ color: isDark ? '#14B8A6' : '#0E8584' }} />
+                </Box>
+              )}
             </Stack>
           )}
         </Box>
@@ -513,7 +576,7 @@ const NotificationPopover = () => {
             px: 2,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justify: 'center',
             borderTop: '1px solid',
             borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
             backgroundColor: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(248, 250, 252, 0.8)',

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -13,7 +13,9 @@ import {
   Tab,
   useTheme,
   alpha,
+  CircularProgress,
 } from "@mui/material";
+
 import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import FilterDrawer from "../../components/FilterDrawer";
@@ -21,22 +23,20 @@ import Pagination from "../../components/Pagination";
 import NotificationFilter from "./Contents/NotificationFilter";
 import AddNotificationModal from "./AddNotificationModal";
 import StatusChip from "../../components/StatusChip";
+
 import { NOTIFICATION_STATUS_CONFIG } from "../../functions/statusChipConfigs";
 import { useLocale } from "../../hooks/useLocale";
 import { useDateFormat } from "../../functions/generalHelpers";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  toggleNotificationRead,
-  markAllNotificationsAsRead,
-  deleteNotification,
-  clearAllNotifications,
-  addCustomNotification,
-} from "../../store/slices/notificationSlice";
-import dayjs from "dayjs";
+import { useDebounce } from "../../hooks/useDebounce";
+import { usePagginationGet } from "../../hooks/usePagginationGet";
+import { useUpdate } from "../../hooks/CRUD/useUpdate";
+import { useDelete } from "../../hooks/CRUD/useDelete";
+import { getAllNotificationsApi } from "../../api/queries/getters";
+import { markNotificationReadApi } from "../../api/queries/patch";
+import { deleteNotificationApi } from "../../api/queries/delete";
 
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import NotificationsOffOutlinedIcon from "@mui/icons-material/NotificationsOffOutlined";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -45,7 +45,6 @@ import ChatBubbleOutlinedIcon from "@mui/icons-material/ChatBubbleOutlined";
 import PersonIcon from "@mui/icons-material/Person";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 
 const getTypeIcon = (type) => {
   switch (type) {
@@ -60,15 +59,12 @@ const getTypeIcon = (type) => {
 const NotificationPage = () => {
   const { t } = useLocale();
   const theme = useTheme();
-  const dispatch = useDispatch();
   const { formatChange } = useDateFormat();
   const isDark = theme.palette.mode === "dark";
 
-  // Data from Redux
-  const notifications = useSelector(
-    (state) => state.notifications.notifications,
-  );
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 400);
+
   const [activeTab, setActiveTab] = useState("all"); // 'all' | 'unread' | 'read'
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -86,94 +82,157 @@ const NotificationPage = () => {
     sender: "",
   });
 
-  // Calculate unread & total count
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => !n.isRead).length,
-    [notifications],
+  const handleSearchChange = useCallback((val) => {
+    setSearchQuery(val);
+    setPage(1);
+  }, []);
+
+  const handleTabChange = useCallback((e, val) => {
+    setActiveTab(val);
+    setPage(1);
+  }, []);
+
+  // Build params for API query: page, limit, search, isRead
+  const queryParams = useMemo(() => {
+    const params = {
+      page,
+      limit,
+    };
+
+    if (debouncedSearch && debouncedSearch.trim()) {
+      params.search = debouncedSearch.trim();
+    }
+
+    if (activeTab === "unread") {
+      params.isRead = false;
+    } else if (activeTab === "read") {
+      params.isRead = true;
+    }
+
+    if (appliedFilters.sender && appliedFilters.sender.trim()) {
+      params.sender = appliedFilters.sender.trim();
+    }
+
+    return params;
+  }, [page, limit, debouncedSearch, activeTab, appliedFilters]);
+
+  // Server-side paginated GET request for notifications
+  const {
+    data: apiNotificationsResponse,
+    totalItems,
+    refetch,
+    isLoading,
+  } = usePagginationGet({
+    apiFn: getAllNotificationsApi,
+    key: "notificationsPage",
+    params: queryParams,
+  });
+
+  // Mutation hooks for updating & deleting notifications
+  const markReadMutation = useUpdate({
+    apiFn: markNotificationReadApi,
+    key: "notificationsPage",
+    idKey: "guid",
+  });
+
+  const deleteMutation = useDelete({
+    deleteFn: deleteNotificationApi,
+    queryKey: "notificationsPage",
+    idKey: "guid",
+  });
+
+  // Normalize API data strictly matching exact backend JSON schema
+  const rawList = useMemo(() => {
+    let rawData = apiNotificationsResponse;
+    if (!Array.isArray(rawData)) {
+      if (Array.isArray(rawData?.data)) {
+        rawData = rawData.data;
+      } else if (Array.isArray(rawData?.data?.data)) {
+        rawData = rawData.data.data;
+      } else {
+        rawData = [];
+      }
+    }
+    return rawData;
+  }, [apiNotificationsResponse]);
+
+  const notificationsList = useMemo(() => {
+    return rawList.map((item) => {
+      const id = item.guid;
+      const title =
+        item.title ||
+        (item.isMessage
+          ? t("notifications.message", "Hat")
+          : t("notifications.task", "Bildiriş"));
+      const description = item.description || "";
+      const isRead = item.isRead ?? item.empltaskAssignee?.[0]?.isRead ?? false;
+
+      const sender =
+        item.admuser?.employee?.fullName ||
+        item.admuser?.phone_number ||
+        "Admin";
+
+      const senderRole = item.admuser?.role || "";
+      const date = item.createdAt || item.due_date;
+      const type = item.isMessage ? "comment" : "task";
+      const avatarBg =
+        item.priority === "urgent"
+          ? "#DC2626"
+          : item.isMessage
+            ? "#10B981"
+            : "#0E8584";
+
+      return {
+        id,
+        guid: id,
+        title,
+        description,
+        sender,
+        senderRole,
+        avatarBg,
+        date,
+        isRead,
+        type,
+        priority: item.priority,
+      };
+    });
+  }, [rawList, t]);
+
+  const unreadCount = useMemo(() => {
+    return notificationsList.filter((n) => !n.isRead).length;
+  }, [notificationsList]);
+
+  const handleToggleRead = useCallback(
+    async (id) => {
+      try {
+        await markReadMutation.mutateAsync({ guid: id, isRead: true });
+        refetch();
+      } catch (err) {
+        console.warn("API mark notification read error:", err);
+      }
+    },
+    [markReadMutation, refetch]
   );
 
-  // Filter logic
-  const filteredNotifications = useMemo(() => {
-    return notifications.filter((item) => {
-      // Search Query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesTitle = item.title.toLowerCase().includes(q);
-        const matchesDesc = item.description.toLowerCase().includes(q);
-        const matchesSender = item.sender.toLowerCase().includes(q);
-        if (!matchesTitle && !matchesDesc && !matchesSender) return false;
+  const handleDelete = useCallback(
+    async (id) => {
+      try {
+        await deleteMutation.mutateAsync(id);
+        refetch();
+      } catch (err) {
+        console.warn("API delete notification error:", err);
       }
+    },
+    [deleteMutation, refetch]
+  );
 
-      // Tab Status
-      if (activeTab === "unread" && item.isRead) return false;
-      if (activeTab === "read" && !item.isRead) return false;
-
-      // Drawer Status Filter
-      if (appliedFilters.status === "unread" && item.isRead) return false;
-      if (appliedFilters.status === "read" && !item.isRead) return false;
-
-      // Type Filter
-      if (appliedFilters.type !== "all" && item.type !== appliedFilters.type)
-        return false;
-
-      // Sender Filter
-      if (
-        appliedFilters.sender &&
-        !item.sender.toLowerCase().includes(appliedFilters.sender.toLowerCase())
-      ) {
-        return false;
-      }
-
-      // Date Range Filter
-      if (appliedFilters.startDate) {
-        const itemDate = dayjs(item.date);
-        if (itemDate.isBefore(dayjs(appliedFilters.startDate), "day"))
-          return false;
-      }
-      if (appliedFilters.endDate) {
-        const itemDate = dayjs(item.date);
-        if (itemDate.isAfter(dayjs(appliedFilters.endDate), "day"))
-          return false;
-      }
-
-      return true;
-    });
-  }, [notifications, searchQuery, activeTab, appliedFilters]);
-
-  // Paginated notifications
-  const paginatedNotifications = useMemo(() => {
-    const startIndex = (page - 1) * limit;
-    return filteredNotifications.slice(startIndex, startIndex + limit);
-  }, [filteredNotifications, page, limit]);
-
-  // Handlers
-  const handleToggleRead = (id) => {
-    dispatch(toggleNotificationRead(id));
-  };
-
-  const handleMarkAllAsRead = () => {
-    dispatch(markAllNotificationsAsRead());
-  };
-
-  const handleDelete = (id) => {
-    dispatch(deleteNotification(id));
-  };
-
-  const handleClearAll = () => {
-    dispatch(clearAllNotifications());
-  };
-
-  const handleAddNotification = (newNotif) => {
-    dispatch(addCustomNotification(newNotif));
-  };
-
-  const handleApplyFilters = (filters) => {
+  const handleApplyFilters = useCallback((filters) => {
     setAppliedFilters(filters);
     setIsDrawerOpen(false);
     setPage(1);
-  };
+  }, []);
 
-  const handleResetFilters = () => {
+  const handleResetFilters = useCallback(() => {
     setAppliedFilters({
       status: "all",
       type: "all",
@@ -182,7 +241,7 @@ const NotificationPage = () => {
       sender: "",
     });
     setPage(1);
-  };
+  }, []);
 
   return (
     <Box
@@ -218,43 +277,9 @@ const NotificationPage = () => {
           t("notifications.createNotification") || "Täze Bildiriş Döret"
         }
         onAddClick={() => setIsAddModalOpen(true)}
-      >
-        {unreadCount > 0 && (
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<DoneAllIcon />}
-            onClick={handleMarkAllAsRead}
-            sx={{
-              borderRadius: "10px",
-              textTransform: "none",
-              fontWeight: 600,
-              height: 40,
-            }}
-          >
-            {t("notifications.markAllAsRead") || "Ählisini okaldy etmek"}
-          </Button>
-        )}
+      />
 
-        {notifications.length > 0 && (
-          <Button
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteSweepIcon />}
-            onClick={handleClearAll}
-            sx={{
-              borderRadius: "10px",
-              textTransform: "none",
-              fontWeight: 600,
-              height: 40,
-            }}
-          >
-            {t("notifications.clearAll")}
-          </Button>
-        )}
-      </PageHeader>
-
-      {/* Control Bar: GlobalSearchInput, FilterDrawer Button, and Tabs */}
+      {/* Control Bar: Search Input, Filter Button, and Tabs */}
       <Paper
         elevation={0}
         sx={{
@@ -266,7 +291,7 @@ const NotificationPage = () => {
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           alignItems: { xs: "stretch", md: "center" },
-          justifyContent: "space-between",
+          justify: "space-between",
           gap: 2,
         }}
       >
@@ -275,10 +300,7 @@ const NotificationPage = () => {
           <Box sx={{ maxWidth: { sm: 400 } }}>
             <GlobalSearchInput
               value={searchQuery}
-              onChange={(val) => {
-                setSearchQuery(val);
-                setPage(1);
-              }}
+              onChange={handleSearchChange}
             />
           </Box>
 
@@ -304,10 +326,7 @@ const NotificationPage = () => {
 
         <Tabs
           value={activeTab}
-          onChange={(e, val) => {
-            setActiveTab(val);
-            setPage(1);
-          }}
+          onChange={handleTabChange}
           sx={{
             minHeight: 40,
             "& .MuiTabs-indicator": {
@@ -318,7 +337,7 @@ const NotificationPage = () => {
         >
           <Tab
             value="all"
-            label={`${t("notifications.all")} (${notifications.length})`}
+            label={t("notifications.all", "Ählisi")}
             sx={{
               textTransform: "none",
               fontWeight: 700,
@@ -328,7 +347,7 @@ const NotificationPage = () => {
           />
           <Tab
             value="unread"
-            label={`${t("notifications.unread")} (${unreadCount})`}
+            label={t("notifications.unread", "Okalmandan")}
             sx={{
               textTransform: "none",
               fontWeight: 700,
@@ -338,7 +357,7 @@ const NotificationPage = () => {
           />
           <Tab
             value="read"
-            label={`${t("notifications.read")} (${notifications.length - unreadCount})`}
+            label={t("notifications.read", "Okalanlar")}
             sx={{
               textTransform: "none",
               fontWeight: 700,
@@ -349,8 +368,23 @@ const NotificationPage = () => {
         </Tabs>
       </Paper>
 
+      {/* Notifications List Body */}
       <Box sx={{ flexGrow: 1, overflowY: "auto", pr: 0.5 }}>
-        {filteredNotifications.length === 0 ? (
+        {isLoading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              py: 8,
+            }}
+          >
+            <CircularProgress
+              size={32}
+              sx={{ color: isDark ? "#14B8A6" : "#0E8584" }}
+            />
+          </Box>
+        ) : notificationsList.length === 0 ? (
           <Paper
             elevation={0}
             sx={{
@@ -397,7 +431,7 @@ const NotificationPage = () => {
         ) : (
           /* Notifications Grid Cards */
           <Grid container spacing={2}>
-            {paginatedNotifications.map((item) => {
+            {notificationsList.map((item) => {
               const {
                 id,
                 title,
@@ -602,8 +636,12 @@ const NotificationPage = () => {
 
                             {/* Mark Read/Unread Action Button */}
                             <Tooltip
-                              title={isRead ? t("notifications.markAsUnread") : t("notifications.markAsRead")
-                              }>
+                              title={
+                                isRead
+                                  ? t("notifications.markAsUnread")
+                                  : t("notifications.markAsRead")
+                              }
+                            >
                               <IconButton
                                 size="small"
                                 onClick={() => handleToggleRead(id)}
@@ -648,7 +686,7 @@ const NotificationPage = () => {
                                     color: "error.main",
                                     backgroundColor: alpha(
                                       theme.palette.error.main,
-                                      0.12,
+                                      0.12
                                     ),
                                   },
                                 }}
@@ -669,9 +707,9 @@ const NotificationPage = () => {
       </Box>
 
       {/* Pagination Footer */}
-      {filteredNotifications.length > 0 && (
+      {totalItems > 0 && (
         <Pagination
-          totalItems={filteredNotifications.length}
+          totalItems={totalItems}
           page={page}
           limit={limit}
           setPage={setPage}
@@ -697,7 +735,7 @@ const NotificationPage = () => {
       <AddNotificationModal
         open={isAddModalOpen}
         close={() => setIsAddModalOpen(false)}
-        onAdd={handleAddNotification}
+        onAdd={refetch}
       />
     </Box>
   );
