@@ -18,10 +18,7 @@ import { REFERRAL_REPORT_STATUS_CONFIG } from "../../../functions/statusChipConf
 import AddLetterStockModal from "./AddLetterStockModal";
 import AddReferralReportModal from "./AddReferralReportModal";
 
-/**
- * ReferralLetter Page - Under Reports Group
- * Uses PageHeader, CustomTabs and MaterialReactTable for reports and stock tabs
- */
+
 const ReferralLetterPage = () => {
   const { t } = useLocale();
   const { formatChange } = useDateFormat();
