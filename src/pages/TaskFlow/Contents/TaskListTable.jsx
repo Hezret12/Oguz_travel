@@ -24,6 +24,7 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import StatusChip from "../../../components/StatusChip";
+import AppAvatarGroup from "../../../components/AppAvatarGroup";
 import { TASK_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
@@ -139,45 +140,7 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
             assigneesList = [item.employee || item.empluser || item.admuser];
           }
 
-          if (assigneesList.length === 0)
-            return (
-              <Typography variant="caption" color="text.secondary">
-                —
-              </Typography>
-            );
-
-          return (
-            <AvatarGroup max={3} sx={{ justifyContent: "flex-start" }}>
-              {assigneesList.map((a, i) => {
-                const name =
-                  a.user?.employee?.fullName ||
-                  a.employee?.fullName ||
-                  a.user?.fullName ||
-                  a.fullName ||
-                  a.name ||
-                  a.user?.phone_number ||
-                  a.phone_number ||
-                  "User";
-                const initials =
-                  a.initials || (name ? name.slice(0, 2).toUpperCase() : "US");
-                return (
-                  <Tooltip key={i} title={name} arrow placement="top">
-                    <Avatar
-                      sx={{
-                        width: 26,
-                        height: 26,
-                        fontSize: "0.68rem",
-                        fontWeight: 700,
-                        bgcolor: a.color || "#2563EB",
-                      }}
-                    >
-                      {initials}
-                    </Avatar>
-                  </Tooltip>
-                );
-              })}
-            </AvatarGroup>
-          );
+          return <AppAvatarGroup items={assigneesList} max={6} size={26} />;
         },
       },
       {

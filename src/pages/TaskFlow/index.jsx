@@ -37,8 +37,6 @@ export default function TaskFlow() {
   const [filterPriority, setFilterPriority] = useState("all");
   const [dueDate, setDueDate] = useState("");
 
-  const isCardView = viewMode === "board";
-
   const handleViewModeChange = useCallback((mode) => {
     setViewMode(mode);
     setPage(1);
@@ -82,7 +80,6 @@ export default function TaskFlow() {
     const params = {
       page,
       limit,
-      type: !isCardView,
     };
 
     if (debouncedSearch && debouncedSearch.trim()) {
@@ -99,7 +96,7 @@ export default function TaskFlow() {
     }
 
     return params;
-  }, [page, limit, isCardView, debouncedSearch, filterStatus, filterPriority, dueDate]);
+  }, [page, limit, debouncedSearch, filterStatus, filterPriority, dueDate]);
 
   // API Fetch for tasks with server-side pagination & query params
   const {

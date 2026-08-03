@@ -27,6 +27,7 @@ const AppAutocomplete = ({
   multiple = false,
   maxChips,
   popupIcon = <KeyboardArrowDownIcon />,
+  renderTags: customRenderTags,
   ...props
 }) => {
   return (
@@ -78,7 +79,9 @@ const AppAutocomplete = ({
               options={options}
               getOptionLabel={(option) => option.label || ""}
               renderTags={
-                multiple
+                customRenderTags
+                  ? customRenderTags
+                  : multiple
                   ? (selectedOptions, getTagProps) => {
                       const total = selectedOptions.length;
                       const limit =
@@ -134,19 +137,25 @@ const AppAutocomplete = ({
                     }
                   : undefined
               }
-              renderOption={(props, option, { selected, index }) => (
-                <li {...props} key={`${option.value || option.label}-${index}`}>
-                  {multiple && (
-                    <Checkbox
-                      icon={icon}
-                      checkedIcon={checkedIcon}
-                      style={{ marginRight: 8 }}
-                      checked={selected}
-                    />
-                  )}
-                  {option.label}
-                </li>
-              )}
+              renderOption={(optionProps, option, { selected, index }) => {
+                const { key, renderTags: _renderTags, ownerState: _ownerState, ...restOptionProps } = optionProps;
+                return (
+                  <li
+                    key={key || `${option.value || option.label}-${index}`}
+                    {...restOptionProps}
+                  >
+                    {multiple && (
+                      <Checkbox
+                        icon={icon}
+                        checkedIcon={checkedIcon}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                      />
+                    )}
+                    {option.label}
+                  </li>
+                );
+              }}
               value={selectedValue}
               onChange={(_, newValue) => {
                 if (multiple) {
