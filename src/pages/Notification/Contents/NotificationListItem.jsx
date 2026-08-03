@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Paper,
   Box,
@@ -331,4 +332,4 @@ const NotificationListItem = ({ notification, onToggleRead, onDelete }) => {
   );
 };
 
-export default NotificationListItem;
+export default memo(NotificationListItem);
