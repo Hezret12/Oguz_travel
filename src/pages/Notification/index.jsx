@@ -5,12 +5,11 @@ import {
   Avatar,
   Paper,
   Stack,
-  Tabs,
-  Tab,
   useTheme,
   CircularProgress,
 } from "@mui/material";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
+import CustomTabs from "../../components/CustomTabs";
 import Pagination from "../../components/Pagination";
 import NotificationListItem from "./Contents/NotificationListItem";
 
@@ -159,6 +158,15 @@ const NotificationPage = () => {
     [deleteMutation, refetch],
   );
 
+  const notificationTabs = useMemo(
+    () => [
+      { value: "all", label: t("notifications.all") },
+      { value: "unread", label: t("notifications.unread") },
+      { value: "read", label: t("notifications.read") },
+    ],
+    [t]
+  );
+
   return (
     <Box
       sx={{
@@ -192,49 +200,11 @@ const NotificationPage = () => {
           />
         </Box>
 
-        <Tabs
+        <CustomTabs
           value={activeTab}
           onChange={handleTabChange}
-          sx={{
-            minHeight: 38,
-            "& .MuiTabs-indicator": {
-              height: 3,
-              borderRadius: "3px",
-              backgroundColor: isDark ? "#14B8A6" : "#0E8584",
-            },
-          }}
-        >
-          <Tab
-            value="all"
-            label={t("notifications.all")}
-            sx={{
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.825rem",
-              minHeight: 38,
-            }}
-          />
-          <Tab
-            value="unread"
-            label={t("notifications.unread")}
-            sx={{
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.825rem",
-              minHeight: 38,
-            }}
-          />
-          <Tab
-            value="read"
-            label={t("notifications.read")}
-            sx={{
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.825rem",
-              minHeight: 38,
-            }}
-          />
-        </Tabs>
+          tabs={notificationTabs}
+        />
       </Paper>
 
       {/* Notifications Compact Vertical List */}

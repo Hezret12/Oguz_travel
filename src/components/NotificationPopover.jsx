@@ -48,7 +48,6 @@ const NotificationPopover = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const isDark = theme.palette.mode === 'dark';
 
-  // Senior CRUD Infinite Query Hook: /messages/get-all-notification?page=x&limit=10&isRead=false
   const {
     data: notificationsList,
     isLoading,
@@ -142,7 +141,7 @@ const NotificationPopover = () => {
   return (
     <>
       {/* Notification Bell Button */}
-      <Tooltip title={t('notifications.title') || 'Bildirişler'}>
+      <Tooltip title={t('notifications.title')}>
         <IconButton
           onClick={handleOpen}
           sx={{
@@ -528,7 +527,7 @@ const NotificationPopover = () => {
                           </IconButton>
                         </Tooltip>
 
-                        <Tooltip title={t('notifications.delete') || 'Pozmak'}>
+                        <Tooltip title={t('notifications.delete')}>
                           <IconButton
                             size="small"
                             onClick={() => handleDelete(id)}
@@ -590,7 +589,7 @@ const NotificationPopover = () => {
               },
             }}
           >
-            {t('notifications.viewAll') || 'Ählisini Gör'}
+            {t('notifications.viewAll')}
           </Button>
         </Box>
       </Popover>

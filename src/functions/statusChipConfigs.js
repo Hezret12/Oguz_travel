@@ -58,3 +58,10 @@ export const NOTIFICATION_STATUS_CONFIG = {
   TRUE: { label: "Okaldy", color: "#16a34a", icon: CheckCircleRoundedIcon },
   FALSE: { label: "Okalmadyk", color: "#d97706", icon: ScheduleRoundedIcon },
 };
+
+export const REFERRAL_REPORT_STATUS_CONFIG = {
+  "SATIS YAPILDI": { label: "Satis yapildi", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  "TÖLEG EDILDI": { label: "Töleg edildi", color: "#2563eb", icon: CheckCircleRoundedIcon },
+  "GARAŞYLÝAR": { label: "Garaşylýar", color: "#d97706", icon: ScheduleRoundedIcon },
+  "ÝATYRYLDY": { label: "Ýatyryldy", color: "#dc2626", icon: CancelRoundedIcon },
+};

@@ -23,6 +23,7 @@ export const PATHS = {
   REPORTS: {
     ROOT: '/reports',
     TURKISH_AIRLINES: '/reports/turkish-airlines',
+    REFERRAL_LETTER: '/reports/referral-letter',
   },
 };
 

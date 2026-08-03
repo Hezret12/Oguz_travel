@@ -101,11 +101,6 @@ export const useSidebarItems = () => {
         ],
       },
       {
-        text: t("sidebar.referalLetters"),
-        path: "/visa/referal-letters",
-        icon: createElement(FileCheck, { size: 20, strokeWidth: 2.2 }),
-      },
-      {
         text: t("sidebar.translation"),
         path: "/translation",
         icon: createElement(Languages, { size: 20, strokeWidth: 2.2 }),
@@ -128,6 +123,11 @@ export const useSidebarItems = () => {
               alt: "Turkish Airlines",
               style: { width: 30, height: 28, objectFit: "contain" },
             }),
+          },
+          {
+            text: t("sidebar.referalLetters"),
+            path: "/reports/referral-letter",
+            icon: createElement(FileCheck, { size: 18, strokeWidth: 2.2 }),
           },
         ],
       },

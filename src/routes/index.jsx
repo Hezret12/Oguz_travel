@@ -38,7 +38,7 @@ const TicketTurkishAirlinesPage = lazyRetry(() => import('../pages/Ticket/Turkis
 const NotFoundPage = lazyRetry(() => import('../pages/NotFound'));
 const UnauthorizedPage = lazyRetry(() => import('../pages/Unauthorized'));
 const VisaPage = lazyRetry(() => import('../pages/Visa'));
-const ReferralLetter = lazyRetry(() => import('../pages/ReferralLetter/index'));
+const ReferralLetter = lazyRetry(() => import('../pages/Reports/ReferralLetter/index'));
 const PackagePage = lazyRetry(() => import('../pages/Visa/Package/Package'));
 const TranslatePage = lazyRetry(() => import('../pages/Translate'));
 const OutboundPage = lazyRetry(() => import('../pages/Outbound/Outbound'));
@@ -152,6 +152,7 @@ const router = createBrowserRouter([
               },
               { path: 'intake', element: <Intake /> },
               { path: 'reports/turkish-airlines', element: <TurkishReport /> },
+              { path: 'reports/referral-letter', element: <Referral /> },
               { path: 'notifications', element: <Notification /> },
               { path: 'unauthorized', element: <Unauthorized /> },
             ],
