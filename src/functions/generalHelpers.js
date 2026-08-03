@@ -41,7 +41,12 @@ export const useDateFormat = () => {
 
   const formatChange = useCallback((date, options = {}) => {
     if (!date) return "";
-    return dayjs(date).format(options.dateOnly ? dateOnlyFormat : format);
+    const parsed = dayjs(date);
+    if (!parsed.isValid()) return "";
+    if (options.smartToday && parsed.isSame(dayjs(), "day")) {
+      return parsed.format("HH:mm");
+    }
+    return parsed.format(options.dateOnly ? dateOnlyFormat : format);
   }, []);
 
   return { format, dateOnlyFormat, formatChange };

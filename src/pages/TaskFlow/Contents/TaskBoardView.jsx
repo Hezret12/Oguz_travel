@@ -451,10 +451,9 @@ function TaskBoardView({
             <EditOutlinedIcon sx={{ fontSize: 16, color: "#2563EB" }} />
           </ListItemIcon>
           <ListItemText
+            primary={t("task.editTask", "Düzelt")}
             primaryTypographyProps={{ fontWeight: 600, fontSize: "0.775rem" }}
-          >
-            {t("task.editTask", "Düzelt")}
-          </ListItemText>
+          />
         </MenuItem>
 
         <Divider sx={{ my: 0.3 }} />
@@ -474,13 +473,12 @@ function TaskBoardView({
             />
           </ListItemIcon>
           <ListItemText
+            primary={t("task.statusToDo", "TO DO")}
             primaryTypographyProps={{
               fontSize: "0.75rem",
               fontWeight: Number(activeTask?.status) === 1 ? 700 : 500,
             }}
-          >
-            {t("task.statusToDo", "TO DO")}
-          </ListItemText>
+          />
         </MenuItem>
 
         <MenuItem
@@ -498,13 +496,12 @@ function TaskBoardView({
             />
           </ListItemIcon>
           <ListItemText
+            primary={t("task.statusInProgress", "IN PROGRESS")}
             primaryTypographyProps={{
               fontSize: "0.75rem",
               fontWeight: Number(activeTask?.status) === 2 ? 700 : 500,
             }}
-          >
-            {t("task.statusInProgress", "IN PROGRESS")}
-          </ListItemText>
+          />
         </MenuItem>
 
         <MenuItem
@@ -522,13 +519,12 @@ function TaskBoardView({
             />
           </ListItemIcon>
           <ListItemText
+            primary={t("task.statusCompleted", "COMPLETED")}
             primaryTypographyProps={{
               fontSize: "0.75rem",
               fontWeight: Number(activeTask?.status) === 3 ? 700 : 500,
             }}
-          >
-            {t("task.statusCompleted", "COMPLETED")}
-          </ListItemText>
+          />
         </MenuItem>
 
         <Divider sx={{ my: 0.3 }} />
@@ -544,14 +540,13 @@ function TaskBoardView({
             <DeleteOutlinedIcon sx={{ fontSize: 16 }} color="error" />
           </ListItemIcon>
           <ListItemText
+            primary={t("task.deleteTask", "Poz")}
             primaryTypographyProps={{
               fontWeight: 600,
               fontSize: "0.775rem",
               color: "error.main",
             }}
-          >
-            {t("task.deleteTask", "Poz")}
-          </ListItemText>
+          />
         </MenuItem>
       </Menu>
     </Box>

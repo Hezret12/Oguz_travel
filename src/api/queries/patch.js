@@ -108,5 +108,16 @@ export const updateTaskApi = async (data) => {
 };
 
 export const markNotificationReadApi = async (data) => {
-  return await api.patchPrivate('/messages/read-notification', data);
+  try {
+    return await api.patchPrivate('/messages/read-notification', data);
+  } catch (err) {
+    if (err?.response?.status === 404) {
+      try {
+        return await api.patchPrivate('/messages/read-notifications', data);
+      } catch {
+        return await api.postPrivate('/messages/read-notification', data);
+      }
+    }
+    throw err;
+  }
 };

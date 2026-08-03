@@ -77,59 +77,63 @@ const AppAutocomplete = ({
               disabled={disabled}
               options={options}
               getOptionLabel={(option) => option.label || ""}
-              renderTags={(selectedOptions, getTagProps) => {
-                const total = selectedOptions.length;
-                const limit =
-                  chipLimit && chipLimit > 0 ? chipLimit : total;
-                const visible = selectedOptions.slice(0, limit);
-                const hiddenCount = total - limit;
+              renderTags={
+                multiple
+                  ? (selectedOptions, getTagProps) => {
+                      const total = selectedOptions.length;
+                      const limit =
+                        chipLimit && chipLimit > 0 ? chipLimit : total;
+                      const visible = selectedOptions.slice(0, limit);
+                      const hiddenCount = total - limit;
 
-                return [
-                  ...visible.map((opt, idx) => {
-                    const tagProps = getTagProps({ index: idx });
-                    return (
-                      <Chip
-                        {...tagProps}
-                        key={opt.value || idx}
-                        label={opt.label}
-                        size="small"
-                        sx={{
-                          borderRadius: "6px",
-                          height: "24px",
-                          fontSize: "0.75rem",
-                          fontWeight: 500,
-                          maxWidth: "110px",
-                          my: 0.25,
-                          mr: 0.5,
-                        }}
-                      />
-                    );
-                  }),
-                  hiddenCount > 0 ? (
-                    <Chip
-                      key="hidden-tag-count"
-                      size="small"
-                      label={`+${hiddenCount}`}
-                      sx={{
-                        borderRadius: "6px",
-                        height: "24px",
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "#334155"
-                            : "#E2E8F0",
-                        color: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "#F8FAFC"
-                            : "#475569",
-                        my: 0.25,
-                        mr: 0.5,
-                      }}
-                    />
-                  ) : null,
-                ].filter(Boolean);
-              }}
+                      return [
+                        ...visible.map((opt, idx) => {
+                          const tagProps = getTagProps({ index: idx });
+                          return (
+                            <Chip
+                              {...tagProps}
+                              key={opt.value || idx}
+                              label={opt.label}
+                              size="small"
+                              sx={{
+                                borderRadius: "6px",
+                                height: "24px",
+                                fontSize: "0.75rem",
+                                fontWeight: 500,
+                                maxWidth: "110px",
+                                my: 0.25,
+                                mr: 0.5,
+                              }}
+                            />
+                          );
+                        }),
+                        hiddenCount > 0 ? (
+                          <Chip
+                            key="hidden-tag-count"
+                            size="small"
+                            label={`+${hiddenCount}`}
+                            sx={{
+                              borderRadius: "6px",
+                              height: "24px",
+                              fontSize: "0.75rem",
+                              fontWeight: 700,
+                              bgcolor: (theme) =>
+                                theme.palette.mode === "dark"
+                                  ? "#334155"
+                                  : "#E2E8F0",
+                              color: (theme) =>
+                                theme.palette.mode === "dark"
+                                  ? "#F8FAFC"
+                                  : "#475569",
+                              my: 0.25,
+                              mr: 0.5,
+                            }}
+                          />
+                        ) : null,
+                      ].filter(Boolean);
+                    }
+                  : undefined
+              }
               renderOption={(props, option, { selected, index }) => (
                 <li {...props} key={`${option.value || option.label}-${index}`}>
                   {multiple && (
