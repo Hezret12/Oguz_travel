@@ -15,33 +15,19 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import PersonIcon from "@mui/icons-material/Person";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { CheckSquare, MessageSquareText, BellRing, ClipboardList } from "lucide-react";
+import { CheckSquare, MessageSquareText } from "lucide-react";
 import StatusChip from "../../../components/StatusChip";
 import { NOTIFICATION_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import { useLocale } from "../../../hooks/useLocale";
 
-const getTypeIcon = (type) => {
-  switch (type) {
-    case "comment":
-    case "message":
-      return <MessageSquareText size={18} />;
-    case "task":
-      return <CheckSquare size={18} />;
-    case "system":
-    case "alert":
-      return <BellRing size={18} />;
-    default:
-      return <ClipboardList size={18} />;
-  }
-};
+const getTypeIcon = (isMessage) =>
+  isMessage ? <MessageSquareText size={18} /> : <CheckSquare size={18} />;
 
 const getPriorityChipProps = (priority) => {
   switch (priority?.toLowerCase()) {
     case "urgent":
       return { label: "Urgent", bg: "#FEE2E2", textColor: "#DC2626" };
-    case "high":
-      return { label: "High", bg: "#FFEDD5", textColor: "#EA580C" };
     case "medium":
       return { label: "Medium", bg: "#DBEAFE", textColor: "#2563EB" };
     default:
@@ -64,7 +50,7 @@ const NotificationListItem = ({ notification, onToggleRead, onDelete }) => {
     avatarBg,
     date,
     isRead,
-    type,
+    isMessage,
     priority,
   } = notification;
 
@@ -124,11 +110,19 @@ const NotificationListItem = ({ notification, onToggleRead, onDelete }) => {
           flexShrink: 0,
         }}
       >
-        {getTypeIcon(type)}
+        {getTypeIcon(isMessage)}
       </Avatar>
 
       {/* Main Content Area */}
-      <Box sx={{ flexGrow: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.25 }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.25,
+        }}
+      >
         {/* Top Header Line */}
         <Box
           sx={{
@@ -140,7 +134,15 @@ const NotificationListItem = ({ notification, onToggleRead, onDelete }) => {
           }}
         >
           {/* Title & Badges (with fixed Unread Dot slot) */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0, overflow: "hidden" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              minWidth: 0,
+              overflow: "hidden",
+            }}
+          >
             {/* Always rendered fixed 8px slot so text position never shifts when isRead changes */}
             <Box
               sx={{
@@ -201,10 +203,27 @@ const NotificationListItem = ({ notification, onToggleRead, onDelete }) => {
           </Box>
 
           {/* Meta Info (Sender, Date & Status Chip with fixed slot widths) */}
-          <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", gap: 1.5, flexShrink: 0 }}>
+          <Box
+            sx={{
+              display: { xs: "none", sm: "flex" },
+              alignItems: "center",
+              gap: 1.5,
+              flexShrink: 0,
+            }}
+          >
             {/* Sender Column */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 110, justifyContent: "flex-end" }}>
-              <PersonIcon sx={{ fontSize: 14, color: isDark ? "#64748B" : "#94A3B8" }} />
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                minWidth: 110,
+                justifyContent: "flex-end",
+              }}
+            >
+              <PersonIcon
+                sx={{ fontSize: 14, color: isDark ? "#64748B" : "#94A3B8" }}
+              />
               <Typography
                 variant="caption"
                 sx={{
@@ -226,7 +245,9 @@ const NotificationListItem = ({ notification, onToggleRead, onDelete }) => {
                     height: 16,
                     fontSize: "0.625rem",
                     fontWeight: 600,
-                    backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.08)"
+                      : "rgba(0,0,0,0.05)",
                     color: isDark ? "#94A3B8" : "#64748B",
                     borderRadius: "4px",
                     flexShrink: 0,
@@ -236,15 +257,39 @@ const NotificationListItem = ({ notification, onToggleRead, onDelete }) => {
             </Box>
 
             {/* Date Column (fixed width slot) */}
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.4, minWidth: 105 }}>
-              <AccessTimeIcon sx={{ fontSize: 13, color: isDark ? "#64748B" : "#94A3B8" }} />
-              <Typography variant="caption" sx={{ fontSize: "0.725rem", color: isDark ? "#94A3B8" : "#64748B", fontWeight: 500 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: 0.4,
+                minWidth: 105,
+              }}
+            >
+              <AccessTimeIcon
+                sx={{ fontSize: 13, color: isDark ? "#64748B" : "#94A3B8" }}
+              />
+              <Typography
+                variant="caption"
+                sx={{
+                  fontSize: "0.725rem",
+                  color: isDark ? "#94A3B8" : "#64748B",
+                  fontWeight: 500,
+                }}
+              >
                 {formatChange(date, { smartToday: true })}
               </Typography>
             </Box>
 
             {/* Status Chip Column (fixed width slot so Okalan vs Okalmandan doesn't shift alignment) */}
-            <Box sx={{ width: 120, display: "flex", justifyContent: "center", flexShrink: 0 }}>
+            <Box
+              sx={{
+                width: 120,
+                display: "flex",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
               <StatusChip
                 status={isRead ? "TRUE" : "FALSE"}
                 config={NOTIFICATION_STATUS_CONFIG}
@@ -271,7 +316,9 @@ const NotificationListItem = ({ notification, onToggleRead, onDelete }) => {
       </Box>
 
       {/* Action Buttons */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
+      <Box
+        sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}
+      >
         <Tooltip
           title={
             isRead

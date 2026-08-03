@@ -100,8 +100,8 @@ const NotificationPage = () => {
       const title =
         item.title ||
         (item.isMessage
-          ? t("notifications.message", "Hat")
-          : t("notifications.task", "Bildiriş"));
+          ? t("notifications.message")
+          : t("notifications.task"));
       const description = item.description || "";
       const isRead = item.isRead ?? item.empltaskAssignee?.[0]?.isRead ?? false;
 
@@ -112,7 +112,6 @@ const NotificationPage = () => {
 
       const senderRole = item.admuser?.role || "";
       const date = item.createdAt || item.due_date;
-      const type = item.isMessage ? "comment" : "task";
       const avatarBg =
         item.priority === "urgent"
           ? "#DC2626"
@@ -130,7 +129,7 @@ const NotificationPage = () => {
         avatarBg,
         date,
         isRead,
-        type,
+        isMessage: item.isMessage,
         priority: item.priority,
       };
     });

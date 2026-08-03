@@ -23,7 +23,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import NotificationsOffOutlinedIcon from '@mui/icons-material/NotificationsOffOutlined';
-import { CheckSquare, MessageSquareText, BellRing, ClipboardList } from 'lucide-react';
+import { CheckSquare, MessageSquareText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { PATHS } from '../routes/paths';
@@ -36,20 +36,8 @@ import { getAllNotificationsApi } from '../api/queries/getters';
 import { markNotificationReadApi } from '../api/queries/patch';
 import { deleteNotificationApi } from '../api/queries/delete';
 
-const getTypeIcon = (type) => {
-  switch (type) {
-    case 'comment':
-    case 'message':
-      return <MessageSquareText size={20} />;
-    case 'task':
-      return <CheckSquare size={20} />;
-    case 'system':
-    case 'alert':
-      return <BellRing size={20} />;
-    default:
-      return <ClipboardList size={20} />;
-  }
-};
+const getTypeIcon = (isMessage) =>
+  isMessage ? <MessageSquareText size={20} /> : <CheckSquare size={20} />;
 
 const NotificationPopover = () => {
   const { t } = useLocale();
@@ -344,7 +332,6 @@ const NotificationPopover = () => {
 
                 const senderRole = item.admuser?.role || '';
                 const date = item.createdAt || item.due_date;
-                const type = item.isMessage ? 'comment' : 'task';
                 const avatarBg =
                   item.priority === 'urgent'
                     ? '#DC2626'
@@ -390,7 +377,7 @@ const NotificationPopover = () => {
                           mt: 0.2,
                         }}
                       >
-                        {getTypeIcon(type)}
+                        {getTypeIcon(item.isMessage)}
                       </Avatar>
 
                       {/* Notification Content Body */}
