@@ -19,12 +19,11 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import ChatBubbleOutlinedIcon from '@mui/icons-material/ChatBubbleOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import NotificationsOffOutlinedIcon from '@mui/icons-material/NotificationsOffOutlined';
+import { CheckSquare, MessageSquareText, BellRing, ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { PATHS } from '../routes/paths';
@@ -40,10 +39,15 @@ import { deleteNotificationApi } from '../api/queries/delete';
 const getTypeIcon = (type) => {
   switch (type) {
     case 'comment':
-      return <ChatBubbleOutlinedIcon sx={{ fontSize: 20 }} />;
+    case 'message':
+      return <MessageSquareText size={20} />;
     case 'task':
+      return <CheckSquare size={20} />;
+    case 'system':
+    case 'alert':
+      return <BellRing size={20} />;
     default:
-      return <AssignmentIcon sx={{ fontSize: 20 }} />;
+      return <ClipboardList size={20} />;
   }
 };
 

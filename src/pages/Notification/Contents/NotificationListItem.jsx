@@ -13,10 +13,9 @@ import {
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import ChatBubbleOutlinedIcon from "@mui/icons-material/ChatBubbleOutlined";
 import PersonIcon from "@mui/icons-material/Person";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import { CheckSquare, MessageSquareText, BellRing, ClipboardList } from "lucide-react";
 import StatusChip from "../../../components/StatusChip";
 import { NOTIFICATION_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import { useDateFormat } from "../../../functions/generalHelpers";
@@ -25,10 +24,15 @@ import { useLocale } from "../../../hooks/useLocale";
 const getTypeIcon = (type) => {
   switch (type) {
     case "comment":
-      return <ChatBubbleOutlinedIcon sx={{ fontSize: 18 }} />;
+    case "message":
+      return <MessageSquareText size={18} />;
     case "task":
+      return <CheckSquare size={18} />;
+    case "system":
+    case "alert":
+      return <BellRing size={18} />;
     default:
-      return <AssignmentIcon sx={{ fontSize: 18 }} />;
+      return <ClipboardList size={18} />;
   }
 };
 
