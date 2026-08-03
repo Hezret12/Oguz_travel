@@ -79,13 +79,14 @@ const AddTranslateModal = ({ table }) => {
     },
   });
 
-  const { mutate: createTranslation } = useCreate({
-    apiFn: addTranslationApi,
-    key: "translations",
-    onSuccess: () => {
-      table.setCreatingRow(null);
-    },
-  });
+  const { mutate: createTranslation, isPending: isCreatingTranslation } =
+    useCreate({
+      apiFn: addTranslationApi,
+      key: "translations",
+      onSuccess: () => {
+        table.setCreatingRow(null);
+      },
+    });
 
   const { mutate: createTranslator, isPending: isCreatingTranslator } =
     useCreate({

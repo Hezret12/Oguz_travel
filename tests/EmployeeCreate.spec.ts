@@ -1,16 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
 
-const TEST_COUNT = 10; // kaç kez çalışsın, istediğin sayıya değiştir
+const TEST_COUNT = 10;
 
-const departments = ["Bilet"]; // istersen listeye başka departmanlar ekle, rastgele seçilsin
+const departments = ["Bilet"];
 const positions = ["Operator"];
 const offices = ["Ahal", "Lebap", "Mary", "Asgabat", "Balkan"];
 
-// Türkmenistan mobil telefon formatı: +993 UI'da sabit gösterildiği için
-// biz sadece 8 haneli yerel numarayı üretiyoruz (2 haneli operatör prefix + 6 rakam).
-// Gerçek operatör prefix'leri: 61-65 arası (MTS, Altyn Asyr vb.) - projendeki
-// validasyona göre bu listeyi genişletebilir/daraltabilirsin.
+
 function generateTurkmenPhoneNumber(): string {
   const prefixes = ["61", "62", "63", "64", "65"];
   const prefix = faker.helpers.arrayElement(prefixes);
