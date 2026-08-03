@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<exercise>
+	<rubric><![CDATA[<b>Choose the correct line to build the text for questions 31-50.</b>]]></rubric>
+	<!--situation><![CDATA[<b>Measuring the pleasure of art</b>]]></situation-->
+	<questions>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex1 <b>G Ref</b> 2.1]]></units>
+			<label><![CDATA[<b>31</b>]]></label>
+			<sentence><![CDATA[It's official – . . . ]]></sentence>
+			<options>
+				<option><![CDATA[art make you happy!]]></option>
+				<option answer="correct"><![CDATA[art makes you happy!]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex3]]></units>
+			<label><![CDATA[<b>32</b>]]></label>
+			<sentence><![CDATA[Millions of people . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[regularly visit galleries,]]></option>
+				<option><![CDATA[visit regularly galleries,]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex12 <b>G Ref</b> 2.4]]></units>
+			<label><![CDATA[<b>33</b>]]></label>
+			<sentence><![CDATA[but now research shows that art . . . ]]></sentence>
+			<options>
+				<option><![CDATA[have special benefits.]]></option>
+				<option answer="correct"><![CDATA[has special benefits.]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex1 <b>G Ref</b> 2.1]]></units>
+			<label><![CDATA[<b>34</b>]]></label>
+			<sentence><![CDATA[When someone . . . ]]></sentence>
+			<options>
+				<option><![CDATA[look at a beautiful painting,]]></option>
+				<option answer="correct"><![CDATA[looks at a beautiful painting,]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex7 <b>G Ref</b> 2.3]]></units>
+			<label><![CDATA[<b>35</b>]]></label>
+			<sentence><![CDATA[a certain part of the . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[brain reacts.]]></option>
+				<option><![CDATA[brain is reacting.]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex7 <b>G Ref</b> 2.3]]></units>
+			<label><![CDATA[<b>36</b>]]></label>
+			<sentence><![CDATA[Interestingly, it's the same part that reacts . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[when people fall in love!]]></option>
+				<option><![CDATA[when people are falling in love!]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex 6 <b>G Ref</b> 2.3]]></units>
+			<label><![CDATA[<b>37</b>]]></label>
+			<sentence><![CDATA[The research, by Professor Semir Zeki at University College London, . . . ]]></sentence>
+			<options>
+				<option><![CDATA[is showing]]></option>
+				<option answer="correct"><![CDATA[shows]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex1 <b>G Ref</b> 2.1]]></units>
+			<label><![CDATA[<b>38</b>]]></label>
+			<sentence><![CDATA[that a beautiful work of art . . . ]]></sentence>
+			<options>
+				<option><![CDATA[create the same chemical reaction as love.]]></option>
+				<option answer="correct"><![CDATA[creates the same chemical reaction as love.]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex7 <b>G Ref</b> 2.3]]></units>
+			<label><![CDATA[<b>39</b>]]></label>
+			<sentence><![CDATA[Brain scans of the volunteers in the tests . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[measure these chemical changes.]]></option>
+				<option><![CDATA[are measuring these chemical changes.]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex 7 <b>G Ref</b> 2.3]]></units>
+			<label><![CDATA[<b>40</b>]]></label>
+			<sentence><![CDATA[Professor Zeki said that his work proves something . . . ]]></sentence>
+			<options>
+				<option><![CDATA[that we are already knowing]]></option>
+				<option answer="correct"><![CDATA[that we already know]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex1 <b>G Ref</b> 2.1]]></units>
+			<label><![CDATA[<b>41</b>]]></label>
+			<sentence><![CDATA[– beautiful paintings . . .]]></sentence>
+			<options>
+				<option><![CDATA[made us feel better.]]></option>
+				<option answer="correct"><![CDATA[make us feel better.]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex2 <b>G Ref</b> 2.3]]></units>
+			<label><![CDATA[<b>42</b>]]></label>
+			<sentence><![CDATA[Other scientists are checking the research now, . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[but what does this mean for the art world?]]></option>
+				<option><![CDATA[but what is this meaning for the art world?]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex2 <b>G Ref</b> 2.3]]></units>
+			<label><![CDATA[<b>43</b>]]></label>
+			<sentence><![CDATA[Public art galleries . . . ]]></sentence>
+			<options>
+				<option><![CDATA[costing governments millions every year]]></option>
+				<option answer="correct"><![CDATA[cost governments millions every year]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex7 <b>G Ref</b> 2.3]]></units>
+			<label><![CDATA[<b>44</b>]]></label>
+			<sentence><![CDATA[and money for art . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[is becoming difficult to find.]]></option>
+				<option><![CDATA[becomes difficult to find.]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex15]]></units>
+			<label><![CDATA[<b>45</b>]]></label>
+			<sentence><![CDATA[This research can explain the need for art . . . ]]></sentence>
+			<options>
+				<option><![CDATA[in our lifes, and make galleries more popular.]]></option>
+				<option answer="correct"><![CDATA[in our lives, and make galleries more popular.]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex11]]></units>
+			<label><![CDATA[<b>46</b>]]></label>
+			<sentence><![CDATA[So, next time you have nothing . . . ]]></sentence>
+			<options>
+				<option><![CDATA[to make,]]></option>
+				<option answer="correct"><![CDATA[to do,]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex11]]></units>
+			<label><![CDATA[<b>47</b>]]></label>
+			<sentence><![CDATA[why don't you . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[go out with your friends to a gallery?]]></option>
+				<option><![CDATA[go outside with your friends to a gallery?]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex14]]></units>
+			<label><![CDATA[<b>48</b>]]></label>
+			<sentence><![CDATA[Or if you are feeling sad, maybe . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[you could take up drawing.]]></option>
+				<option><![CDATA[you could take up draw.]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex12 <b>G Ref</b> 2.4]]></units>
+			<label><![CDATA[<b>49</b>]]></label>
+			<sentence><![CDATA[And if you’re lucky enough to . . . ]]></sentence>
+			<options>
+				<option><![CDATA[have got a lot of money,]]></option>
+				<option answer="correct"><![CDATA[have a lot of money,]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 2 Ex11]]></units>
+			<label><![CDATA[<b>50</b>]]></label>
+			<sentence><![CDATA[write <i>buy a beautiful painting</i> on your next . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[shopping list. Then just look at it and smile.]]></option>
+				<option><![CDATA[buying list. Then just look at it and smile.]]></option>
+			</options>
+		</question>
+	</questions>
+</exercise>
+		

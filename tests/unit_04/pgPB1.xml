@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<exercise>
+	<rubric><![CDATA[<b>Choose the correct line to build the text for questions 31-50.</b>]]></rubric>
+	<!--situation><![CDATA[<b>Menus or movies, or both?</b>]]></situation-->
+	<questions>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>31</b>]]></label>
+			<sentence><![CDATA[What would you prefer on a Saturday night . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[&#x2013; seeing a film at the cinema]]></option>
+				<option><![CDATA[&#x2013; seeing a film at cinema]]></option>
+			</options>
+		</question>
+			<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>32</b>]]></label>
+			<sentence><![CDATA[or having . . . ]]></sentence>
+			<options>
+				<option><![CDATA[the dinner in a good restaurant?]]></option>
+				<option answer="correct"><![CDATA[dinner in a good restaurant?]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>33</b>]]></label>
+			<sentence><![CDATA[Well, you will soon be able to do both . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[at the same time.]]></option>
+				<option><![CDATA[at same time.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>34</b>]]></label>
+			<sentence><![CDATA[The food served . . . ]]></sentence>
+			<options>
+				<option><![CDATA[at the cinemas has always been basic]]></option>
+				<option answer="correct"><![CDATA[at cinemas has always been basic]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex13]]></units>
+			<label><![CDATA[<b>35</b>]]></label>
+			<sentence><![CDATA[– a hotdog, . . . ]]></sentence>
+			<options>
+				<option><![CDATA[a piece of crisps, or an ice cream.]]></option>
+				<option answer="correct"><![CDATA[a packet of crisps, or an ice cream.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>36</b>]]></label>
+			<sentence><![CDATA[Now Rowley Leigh, . . . ]]></sentence>
+			<options>
+				<option><![CDATA[British chef,]]></option>
+				<option answer="correct"><![CDATA[a British chef,]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>37</b>]]></label>
+			<sentence><![CDATA[is working with . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[the Odeon cinemas to change things.]]></option>
+				<option><![CDATA[an Odeon cinemas to change things.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex2 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>38</b>]]></label>
+			<sentence><![CDATA[He's bringing gourmet dishes to the cinema, . . . ]]></sentence>
+			<options>
+				<option><![CDATA[including fishes risotto and fillet steak burgers.]]></option>
+				<option answer="correct"><![CDATA[including fish risotto and fillet steak burgers.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>39</b>]]></label>
+			<sentence><![CDATA[The first cinema to try this . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[is in West London.]]></option>
+				<option><![CDATA[is in the West London.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex9 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>40</b>]]></label>
+			<sentence><![CDATA[Customers can order . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[something to eat from their seat, and waiters serve the food.]]></option>
+				<option><![CDATA[somewhere to eat from their seat, and waiters serve the food.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>41</b>]]></label>
+			<sentence><![CDATA[At first I thought  . . . ]]></sentence>
+			<options>
+				<option><![CDATA['What great idea!']]></option>
+				<option answer="correct"><![CDATA['What a great idea!']]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex6 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>42</b>]]></label>
+			<sentence><![CDATA[Then I realized . . . ]]></sentence>
+			<options>
+				<option><![CDATA[how many it would cost]]></option>
+				<option answer="correct"><![CDATA[how much it would cost]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex6 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>43</b>]]></label>
+			<sentence><![CDATA[– £30–£40 per person. That seems . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[a lot of money,]]></option>
+				<option><![CDATA[much money,]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex9 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>44</b>]]></label>
+			<sentence><![CDATA[even if . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[everything is perfect.]]></option>
+				<option><![CDATA[nothing is perfect.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex7 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>45</b>]]></label>
+			<sentence><![CDATA[Then I thought, . . . ]]></sentence>
+			<options>
+				<option><![CDATA['There are a little problems here.']]></option>
+				<option answer="correct"><![CDATA['There are a few problems here.']]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex9 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>46</b>]]></label>
+			<sentence><![CDATA[Nothing is better than a good meal and a film, . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[but does anybody want them together?]]></option>
+				<option><![CDATA[but does somebody want them together?]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>47</b>]]></label>
+			<sentence><![CDATA[I can't imagine . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[people enjoying good food and wine, and focusing on a film.]]></option>
+				<option><![CDATA[the people enjoying good food and wine, and focusing on a film.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex7 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>48</b>]]></label>
+			<sentence><![CDATA[And what about the noise?]]></sentence>
+			<options>
+				<option><![CDATA[Even a few noise drives me mad]]></option>
+				<option answer="correct"><![CDATA[Even a little noise drives me mad]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>49</b>]]></label>
+			<sentence><![CDATA[when I'm watching a film. No, . . . ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[the best place for eating out is a restaurant.]]></option>
+				<option><![CDATA[a best place for eating out is a restaurant.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>50</b>]]></label>
+			<sentence><![CDATA[I want to either enjoy a film at the cinema, . . . ]]></sentence>
+			<options>
+				<option><![CDATA[or at the home with a can of beer and a takeaway pizza.]]></option>
+				<option answer="correct"><![CDATA[or at home with a can of beer and a takeaway pizza.]]></option>
+			</options>
+		</question>
+	</questions>
+</exercise>
+		

@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<exercise>
+	<rubric><![CDATA[<b>Choose the correct option to complete sentences 1-30.</b>]]></rubric>
+	<questions>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex3 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>1</b>]]></label>
+			<sentence><![CDATA['Who is [#], you or your brother?' 'My brother, by two years.']]></sentence>
+			<options>
+				<option><![CDATA[the old]]></option>
+				<option answer="correct"><![CDATA[older]]></option>
+				<option><![CDATA[the older]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex10]]></units>
+			<label><![CDATA[<b>2</b>]]></label>
+			<sentence><![CDATA['I'm sorry I got annoyed.' 'That's OK, but why were you so [#]?']]></sentence>
+			<options>
+				<option><![CDATA[naughty]]></option>
+				<option><![CDATA[hungry]]></option>
+				<option answer="correct"><![CDATA[angry]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex6 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>3</b>]]></label>
+			<sentence><![CDATA[The film [#] the book. The ending was a bit silly.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[wasn't as good as]]></option>
+				<option><![CDATA[not as good as]]></option>
+				<option><![CDATA[was as good as]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex10]]></units>
+			<label><![CDATA[<b>4</b>]]></label>
+			<sentence><![CDATA[I think I've given you the wrong phone number. The [#] one is 772215.]]></sentence>
+			<options>
+				<option><![CDATA[incorrect]]></option>
+				<option><![CDATA[possible]]></option>
+				<option answer="correct"><![CDATA[correct]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex3 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>5</b>]]></label>
+			<sentence><![CDATA[This season we had [#] team results in years. We lost nearly every match.]]></sentence>
+			<options>
+				<option><![CDATA[the bad]]></option>
+				<option answer="correct"><![CDATA[the worst]]></option>
+				<option><![CDATA[worse]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex10]]></units>
+			<label><![CDATA[<b>6</b>]]></label>
+			<sentence><![CDATA['What's the opposite of <i>wealthy</i>?' 'It's [#], I think.']]></sentence>
+			<options>
+				<option><![CDATA[<i>expensive</i>]]></option>
+				<option><![CDATA[<i>rich</i>]]></option>
+				<option answer="correct"><![CDATA[<i>poor</i>]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex6 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>7</b>]]></label>
+			<sentence><![CDATA[The food wasn't [#] last time. My steak was awful.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[as nice as]]></option>
+				<option><![CDATA[not as nice as]]></option>
+				<option><![CDATA[as nice than]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex13]]></units>
+			<label><![CDATA[<b>8</b>]]></label>
+			<sentence><![CDATA['What were the beaches like?' '[#]']]></sentence>
+			<options>
+				<option><![CDATA[Brown and white.]]></option>
+				<option><![CDATA[Lazy and selfish.]]></option>
+				<option answer="correct"><![CDATA[Crowded and touristy.]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex1 <b>G Ref</b> 6.1]]></units>
+			<label><![CDATA[<b>9</b>]]></label>
+			<sentence><![CDATA['What [#] her new boyfriend look like?' 'He's tall and slim.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[does]]></option>
+				<option><![CDATA[looks]]></option>
+				<option><![CDATA[is]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex7 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>10</b>]]></label>
+			<sentence><![CDATA[She hasn't changed. She doesn't look very different [#] when she was a teenager.]]></sentence>
+			<options>
+				<option><![CDATA[than]]></option>
+				<option><![CDATA[as]]></option>
+				<option answer="correct"><![CDATA[from]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex10]]></units>
+			<label><![CDATA[<b>11</b>]]></label>
+			<sentence><![CDATA[The twins are total opposites. Ollie is incredibly [#], but Misha is just so messy.]]></sentence>
+			<options>
+				<option><![CDATA[tiny]]></option>
+				<option><![CDATA[untidy]]></option>
+				<option answer="correct"><![CDATA[tidy]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex10, Ex13]]></units>
+			<label><![CDATA[<b>12</b>]]></label>
+			<sentence><![CDATA['Is it cold here in the winter?' 'Cold? It's [#]!']]></sentence>
+			<options>
+				<option><![CDATA[wet]]></option>
+				<option answer="correct"><![CDATA[freezing]]></option>
+				<option><![CDATA[humid]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex3 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>13</b>]]></label>
+			<sentence><![CDATA[I think it's [#] to live in the country than the city.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[safer]]></option>
+				<option><![CDATA[more safe]]></option>
+				<option><![CDATA[safest]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex5 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>14</b>]]></label>
+			<sentence><![CDATA[They stayed in [#] for their honeymoon.]]></sentence>
+			<options>
+				<option><![CDATA[the hotel most expensive]]></option>
+				<option answer="correct"><![CDATA[the most expensive hotel]]></option>
+				<option><![CDATA[the more expensive hotel]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex1 <b>G Ref</b> 6.1]]></units>
+			<label><![CDATA[<b>15</b>]]></label>
+			<sentence><![CDATA['[#] is your little boy now?' 'He's much better, thanks.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[How]]></option>
+				<option><![CDATA[What]]></option>
+				<option><![CDATA[Who]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex3 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>16</b>]]></label>
+			<sentence><![CDATA[You were fed up yesterday. Are you a bit [#] today?]]></sentence>
+			<options>
+				<option><![CDATA[happy]]></option>
+				<option answer="correct"><![CDATA[happier]]></option>
+				<option><![CDATA[more happier]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex13]]></units>
+			<label><![CDATA[<b>17</b>]]></label>
+			<sentence><![CDATA['Did you stay in the old town?' 'No, we were in the more [#] area.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[modern]]></option>
+				<option><![CDATA[crowded]]></option>
+				<option><![CDATA[new]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex3 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>18</b>]]></label>
+			<sentence><![CDATA[The walk to the beach was much [#] than we expected. It took ages.]]></sentence>
+			<options>
+				<option><![CDATA[more far]]></option>
+				<option><![CDATA[furthest]]></option>
+				<option answer="correct"><![CDATA[further]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex1 <b>G Ref</b> 6.1]]></units>
+			<label><![CDATA[<b>19</b>]]></label>
+			<sentence><![CDATA['What [#] Linda like doing?' 'Blogging and doing yoga.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[does]]></option>
+				<option><![CDATA[is]]></option>
+				<option><![CDATA[likes]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex7 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>20</b>]]></label>
+			<sentence><![CDATA[My friend has bought the same mobile phone [#] me.]]></sentence>
+			<options>
+				<option><![CDATA[like]]></option>
+				<option answer="correct"><![CDATA[as]]></option>
+				<option><![CDATA[than]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex2 <b>G Ref</b> 6.1]]></units>
+			<label><![CDATA[<b>21</b>]]></label>
+			<sentence><![CDATA['What [#] the hotel food like?' 'Great, very fresh, and tasty.']]></sentence>
+			<options>
+				<option><![CDATA[were]]></option>
+				<option><![CDATA[did]]></option>
+				<option answer="correct"><![CDATA[was]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex5 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>22</b>]]></label>
+			<sentence><![CDATA['Where is [#] place to park round here?' 'By the station.']]></sentence>
+			<options>
+				<option><![CDATA[good]]></option>
+				<option answer="correct"><![CDATA[the best]]></option>
+				<option><![CDATA[the better]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex10]]></units>
+			<label><![CDATA[<b>23</b>]]></label>
+			<sentence><![CDATA[Their kids are so [#]. They never say thank you.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[impolite]]></option>
+				<option><![CDATA[polite]]></option>
+				<option><![CDATA[unpolite ]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex7 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>24</b>]]></label>
+			<sentence><![CDATA['Your painting is a lot better [#] mine.' 'Don't be silly! Yours is good, too!' ]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[than]]></option>
+				<option><![CDATA[that]]></option>
+				<option><![CDATA[as]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex3 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>25</b>]]></label>
+			<sentence><![CDATA['Why do you need a taxi?' 'Because my case is [#] than yours.']]></sentence>
+			<options>
+				<option><![CDATA[more heavy]]></option>
+				<option answer="correct"><![CDATA[heavier]]></option>
+				<option><![CDATA[heavy]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex10, Ex13]]></units>
+			<label><![CDATA[<b>26</b>]]></label>
+			<sentence><![CDATA['Why does she look so [#]?' 'I don't know. She never smiles, does she?']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[miserable]]></option>
+				<option><![CDATA[noisy]]></option>
+				<option><![CDATA[cheerful]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex10]]></units>
+			<label><![CDATA[<b>27</b>]]></label>
+			<sentence><![CDATA['That test was very difficult.' 'You're right, it was really [#].']]></sentence>
+			<options>
+				<option><![CDATA[correct]]></option>
+				<option><![CDATA[easy]]></option>
+				<option answer="correct"><![CDATA[hard]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex7 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>28</b>]]></label>
+			<sentence><![CDATA['Where's the tallest building [#] the world?' 'In Dubai, I think.']]></sentence>
+			<options>
+				<option><![CDATA[of]]></option>
+				<option answer="correct"><![CDATA[in]]></option>
+				<option><![CDATA[from]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex3 <b>G Ref</b> 6.2]]></units>
+			<label><![CDATA[<b>29</b>]]></label>
+			<sentence><![CDATA[Their new house is a lot [#] than their old one.]]></sentence>
+			<options>
+				<option><![CDATA[modern]]></option>
+				<option><![CDATA[most modern]]></option>
+				<option answer="correct"><![CDATA[more modern]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 6 Ex1 <b>G Ref</b> 6.1]]></units>
+			<label><![CDATA[<b>30</b>]]></label>
+			<sentence><![CDATA['What's your new boss like?' '[#]']]></sentence>
+			<options>
+				<option><![CDATA[She likes everyone.]]></option>
+				<option><![CDATA[Yes, we like her.]]></option>
+				<option answer="correct"><![CDATA[She's a bit strange.]]></option>
+			</options>
+		</question>
+	</questions>
+</exercise>

@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<exercise>
+	<rubric><![CDATA[<b>Choose the correct option to complete sentences 1-30.</b>]]></rubric>
+	<questions>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex15]]></units>
+			<label><![CDATA[<b>1</b>]]></label>
+			<sentence><![CDATA[It's easier to [#] in application forms online rather than complete them by hand.]]></sentence>
+			<options>
+				<option><![CDATA[write]]></option>
+				<option answer="correct"><![CDATA[fill]]></option>
+				<option><![CDATA[give]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex3 <b>G Ref</b> 5.1]]></units>
+			<label><![CDATA[<b>2</b>]]></label>
+			<sentence><![CDATA['What do you enjoy [#] at the weekends?' 'Spending time with my friends.']]></sentence>
+			<options>
+				<option><![CDATA[do]]></option>
+				<option><![CDATA[to do]]></option>
+				<option answer="correct"><![CDATA[doing]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex7 <b>G Ref</b> 5.2]]></units>
+			<label><![CDATA[<b>3</b>]]></label>
+			<sentence><![CDATA['What would you like to drink?' '[#] a tomato juice, please.']]></sentence>
+			<options>
+				<option><![CDATA[I'm going to have]]></option>
+				<option><![CDATA[I have]]></option>
+				<option answer="correct"><![CDATA[I'll have]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex15]]></units>
+			<label><![CDATA[<b>4</b>]]></label>
+			<sentence><![CDATA['I'm going to [#] chocolate.' 'Good luck with that! I couldn't do it.']]></sentence>
+			<options>
+				<option><![CDATA[stop up]]></option>
+				<option answer="correct"><![CDATA[give up]]></option>
+				<option><![CDATA[eat up]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex16]]></units>
+			<label><![CDATA[<b>5</b>]]></label>
+			<sentence><![CDATA[We love going to the Netherlands. The [#] are so friendly.]]></sentence>
+			<options>
+				<option><![CDATA[Norwegian]]></option>
+				<option><![CDATA[Danish]]></option>
+				<option answer="correct"><![CDATA[Dutch]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex6 <b>G Ref</b> 5.2]]></units>
+			<label><![CDATA[<b>6</b>]]></label>
+			<sentence><![CDATA['My brother [#] 35 days' holiday next year.' 'Wow! That sounds like a good job!']]></sentence>
+			<options>
+				<option><![CDATA[going to get]]></option>
+				<option><![CDATA[get]]></option>
+				<option answer="correct"><![CDATA[will get]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex1 <b>G Ref</b> 5.1]]></units>
+			<label><![CDATA[<b>7</b>]]></label>
+			<sentence><![CDATA[We're hoping [#] travelling next year.]]></sentence>
+			<options>
+				<option><![CDATA[go]]></option>
+				<option answer="correct"><![CDATA[to go]]></option>
+				<option><![CDATA[going]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex15]]></units>
+			<label><![CDATA[<b>8</b>]]></label>
+			<sentence><![CDATA[Make sure you go to the garage. We don't want to [#] petrol on the motorway.]]></sentence>
+			<options>
+				<option><![CDATA[run down of]]></option>
+				<option><![CDATA[run out from]]></option>
+				<option answer="correct"><![CDATA[run out of]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex10 <b>G Ref</b> 5.2]]></units>
+			<label><![CDATA[<b>9</b>]]></label>
+			<sentence><![CDATA['The house is in such a mess!' 'Don't worry. [#] you tidy up.']]></sentence>
+			<options>
+				<option><![CDATA[I'm helping]]></option>
+				<option answer="correct"><![CDATA[I'll help]]></option>
+				<option><![CDATA[I'm going to help]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex3 <b>G Ref</b> 5.1]]></units>
+			<label><![CDATA[<b>10</b>]]></label>
+			<sentence><![CDATA['When did you start [#] judo?' 'About a year ago.']]></sentence>
+			<options>
+				<option><![CDATA[do]]></option>
+				<option><![CDATA[to doing]]></option>
+				<option answer="correct"><![CDATA[doing]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex15]]></units>
+			<label><![CDATA[<b>11</b>]]></label>
+			<sentence><![CDATA['Where did you [#]?' 'In the USA, but I went to university in Paris.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[grow up]]></option>
+				<option><![CDATA[get up]]></option>
+				<option><![CDATA[bring up]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex7 <b>G Ref</b> 5.2]]></units>
+			<label><![CDATA[<b>12</b>]]></label>
+			<sentence><![CDATA[Don't cook tonight. I [#] a takeaway on my way home.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA['ll pick up]]></option>
+				<option><![CDATA[pick up]]></option>
+				<option><![CDATA['re going to pick up]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex13]]></units>
+			<label><![CDATA[<b>13</b>]]></label>
+			<sentence><![CDATA[Text me when you [#] to the station and I'll come and meet you.]]></sentence>
+			<options>
+				<option><![CDATA[land]]></option>
+				<option><![CDATA[arrive]]></option>
+				<option answer="correct"><![CDATA[get]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex15]]></units>
+			<label><![CDATA[<b>14</b>]]></label>
+			<sentence><![CDATA['Why have you two [#] again?' 'She was talking to the boy I like.']]></sentence>
+			<options>
+				<option><![CDATA[taken out]]></option>
+				<option answer="correct"><![CDATA[fallen out]]></option>
+				<option><![CDATA[broken out]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex3 <b>G Ref</b> 5.1]]></units>
+			<label><![CDATA[<b>15</b>]]></label>
+			<sentence><![CDATA[We're looking forward to [#] you all soon at the party.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[seeing]]></option>
+				<option><![CDATA[see]]></option>
+				<option><![CDATA[sees]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex13]]></units>
+			<label><![CDATA[<b>16</b>]]></label>
+			<sentence><![CDATA['How much does he [#] in his new job?' 'I'm not sure. I haven't asked him.']]></sentence>
+			<options>
+				<option><![CDATA[become]]></option>
+				<option answer="correct"><![CDATA[get]]></option>
+				<option><![CDATA[receive]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex15]]></units>
+			<label><![CDATA[<b>17</b>]]></label>
+			<sentence><![CDATA[He'd been going [#] his first girlfriend for years and then they suddenly split up.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[out with]]></option>
+				<option><![CDATA[out for]]></option>
+				<option><![CDATA[out together]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex10 <b>G Ref</b> 5.2]]></units>
+			<label><![CDATA[<b>18</b>]]></label>
+			<sentence><![CDATA['Why are you so nervous?' '[#] my driving test tomorrow morning.']]></sentence>
+			<options>
+				<option><![CDATA[I'm going take]]></option>
+				<option answer="correct"><![CDATA[I'm taking]]></option>
+				<option><![CDATA[I'll take]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex4 <b>G Ref</b> 5.1]]></units>
+			<label><![CDATA[<b>19</b>]]></label>
+			<sentence><![CDATA['[#] your new flat?' 'Yes, but the neighbours are a bit noisy.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[Do you like]]></option>
+				<option><![CDATA[Did you like]]></option>
+				<option><![CDATA[Would you like]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex16]]></units>
+			<label><![CDATA[<b>20</b>]]></label>
+			<sentence><![CDATA['Have you ever visited Warsaw?' 'No, we've never been to [#].']]></sentence>
+			<options>
+				<option><![CDATA[Pole]]></option>
+				<option answer="correct"><![CDATA[Poland]]></option>
+				<option><![CDATA[Polish]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex9 <b>G Ref</b> 5.2]]></units>
+			<label><![CDATA[<b>21</b>]]></label>
+			<sentence><![CDATA['What [#] after work tonight?' 'Nothing much. Just watching TV, I think.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[are you doing]]></option>
+				<option><![CDATA[will you do]]></option>
+				<option><![CDATA[do you do]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex5 <b>G Ref</b> 5.1]]></units>
+			<label><![CDATA[<b>22</b>]]></label>
+			<sentence><![CDATA[I think [#] to work abroad when I finish my degree.]]></sentence>
+			<options>
+				<option><![CDATA[I like]]></option>
+				<option answer="correct"><![CDATA[I'd like]]></option>
+				<option><![CDATA[I liked]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex13]]></units>
+			<label><![CDATA[<b>23</b>]]></label>
+			<sentence><![CDATA['Why are you so late?' 'I got [#] the tram at the wrong stop!']]></sentence>
+			<options>
+				<option><![CDATA[up]]></option>
+				<option><![CDATA[out]]></option>
+				<option answer="correct"><![CDATA[off]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex13]]></units>
+			<label><![CDATA[<b>24</b>]]></label>
+			<sentence><![CDATA['Why didn't she [#] a place at medical school?' 'She failed the entrance exam.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[get]]></option>
+				<option><![CDATA[find]]></option>
+				<option><![CDATA[make]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex8 <b>G Ref</b> 5.2]]></units>
+			<label><![CDATA[<b>25</b>]]></label>
+			<sentence><![CDATA[I don't feel very well. I think [#] sick.]]></sentence>
+			<options>
+				<option><![CDATA[I will be]]></option>
+				<option answer="correct"><![CDATA[I'm going to be]]></option>
+				<option><![CDATA[I'm being]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex5 <b>G Ref</b> 5.1]]></units>
+			<label><![CDATA[<b>26</b>]]></label>
+			<sentence><![CDATA[I'm always on Facebook because [#] keeping in touch with friends.]]></sentence>
+			<options>
+				<option><![CDATA[I'd like]]></option>
+				<option><![CDATA[I liked]]></option>
+				<option answer="correct"><![CDATA[I like]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex4 <b>G Ref</b> 5.1]]></units>
+			<label><![CDATA[<b>27</b>]]></label>
+			<sentence><![CDATA['[#] something to eat?' 'No, thanks. I'm fine.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[Would you like]]></option>
+				<option><![CDATA[You like]]></option>
+				<option><![CDATA[Do you like]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex6 <b>G Ref</b> 5.2]]></units>
+			<label><![CDATA[<b>28</b>]]></label>
+			<sentence><![CDATA[The journey from the airport to the hotel [#] about 45 minutes.]]></sentence>
+			<options>
+				<option><![CDATA[take]]></option>
+				<option><![CDATA[going to take]]></option>
+				<option answer="correct"><![CDATA[will take]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex9 <b>G Ref</b> 5.2]]></units>
+			<label><![CDATA[<b>29</b>]]></label>
+			<sentence><![CDATA['How many people [#] to the wedding?' 'Only about 20. We don't want a lot of fuss.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[are coming]]></option>
+				<option><![CDATA[will come]]></option>
+				<option><![CDATA[come]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 5 Ex3 <b>G Ref</b> 5.1]]></units>
+			<label><![CDATA[<b>30</b>]]></label>
+			<sentence><![CDATA[I've joined the gym, as I'm trying [#] fit.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[to get]]></option>
+				<option><![CDATA[getting]]></option>
+				<option><![CDATA[get]]></option>
+			</options>
+		</question>
+	</questions>
+</exercise>

@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<exercise>
+	<rubric><![CDATA[<b>Choose the correct option to complete sentences 1-30.</b>]]></rubric>
+	<questions>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex17]]></units>
+			<label><![CDATA[<b>1</b>]]></label>
+			<sentence><![CDATA[I can't open this box. Can you pass me the [#], please?]]></sentence>
+			<options>
+				<option><![CDATA[stairs]]></option>
+				<option><![CDATA[scissor]]></option>
+				<option answer="correct"><![CDATA[scissors]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex4 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>2</b>]]></label>
+			<sentence><![CDATA[I don't want [#] pasta, thanks. I'm not very hungry.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[any]]></option>
+				<option><![CDATA[lot of]]></option>
+				<option><![CDATA[some]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex5 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>3</b>]]></label>
+			<sentence><![CDATA['[#] chicken do we need for the recipe?' 'About half a kilo.']]></sentence>
+			<options>
+				<option><![CDATA[How heavy]]></option>
+				<option answer="correct"><![CDATA[How much]]></option>
+				<option><![CDATA[How many]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex4 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>4</b>]]></label>
+			<sentence><![CDATA['Would you like [#]?' 'No, thanks. I'm driving.']]></sentence>
+			<options>
+				<option><![CDATA[wines]]></option>
+				<option><![CDATA[glass of wine]]></option>
+				<option answer="correct"><![CDATA[some wine]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex16]]></units>
+			<label><![CDATA[<b>5</b>]]></label>
+			<sentence><![CDATA['Can I have some [#] with my soup?' 'Yes, sure.']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[bread and butter]]></option>
+				<option><![CDATA[breads and butters]]></option>
+				<option><![CDATA[butter and bread]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex9 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>6</b>]]></label>
+			<sentence><![CDATA['Did you do the shopping?' 'Yes, I got [#] on the list.']]></sentence>
+			<options>
+				<option><![CDATA[everyone]]></option>
+				<option answer="correct"><![CDATA[everything]]></option>
+				<option><![CDATA[everywhere]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex7 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>7</b>]]></label>
+			<sentence><![CDATA[They closed the exhibition because only [#] people went to see it.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[a few]]></option>
+				<option><![CDATA[a little]]></option>
+				<option><![CDATA[a lot]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex1]]></units>
+			<label><![CDATA[<b>8</b>]]></label>
+			<sentence><![CDATA['You need to return your books.' 'OK. I'll take them back to the [#] today.']]></sentence>
+			<options>
+				<option><![CDATA[bookshelf]]></option>
+				<option answer="correct"><![CDATA[library]]></option>
+				<option><![CDATA[bookshop]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>9</b>]]></label>
+			<sentence><![CDATA[His daughter is doing well [#] and she's very popular.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[at school]]></option>
+				<option><![CDATA[at the school]]></option>
+				<option><![CDATA[at a school]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex4 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>10</b>]]></label>
+			<sentence><![CDATA['Can I have [#] help with this exercise?' 'Sure. What's the problem?']]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[some]]></option>
+				<option><![CDATA[any]]></option>
+				<option><![CDATA[much]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex17]]></units>
+			<label><![CDATA[<b>11</b>]]></label>
+			<sentence><![CDATA[Time for bed now, kids. Put your [#] on.]]></sentence>
+			<options>
+				<option><![CDATA[trousers]]></option>
+				<option><![CDATA[pyjama]]></option>
+				<option answer="correct"><![CDATA[pyjamas]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>12</b>]]></label>
+			<sentence><![CDATA[He wanted to be in a band, but he's [#] now.]]></sentence>
+			<options>
+				<option><![CDATA[accountant]]></option>
+				<option answer="correct"><![CDATA[an accountant]]></option>
+				<option><![CDATA[the accountant]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex2 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>13</b>]]></label>
+			<sentence><![CDATA[My students always use the Internet for [#] for their projects.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[information]]></option>
+				<option><![CDATA[informations]]></option>
+				<option><![CDATA[news]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex9 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>14</b>]]></label>
+			<sentence><![CDATA[I met [#] who knows you, but I can't remember her name.]]></sentence>
+			<options>
+				<option><![CDATA[everyone]]></option>
+				<option><![CDATA[no one]]></option>
+				<option answer="correct"><![CDATA[someone]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>15</b>]]></label>
+			<sentence><![CDATA[We can't cook curry – the kids aren't keen on [#].]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[spicy food]]></option>
+				<option><![CDATA[the spicy food]]></option>
+				<option><![CDATA[a spicy food]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex3 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>16</b>]]></label>
+			<sentence><![CDATA[I'm addicted to [#]. I eat two bars a day.]]></sentence>
+			<options>
+				<option><![CDATA[a chocolate]]></option>
+				<option answer="correct"><![CDATA[chocolate]]></option>
+				<option><![CDATA[some chocolate]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>17</b>]]></label>
+			<sentence><![CDATA[They have two children. [#] older one is a dancer.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[The]]></option>
+				<option><![CDATA[An]]></option>
+				<option><![CDATA[A]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex2 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>18</b>]]></label>
+			<sentence><![CDATA[We've got such a lot of [#] to do this week.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[work]]></option>
+				<option><![CDATA[works]]></option>
+				<option><![CDATA[job]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex6 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>19</b>]]></label>
+			<sentence><![CDATA[There are [#] people in the queue. Let's come back later.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[a lot of]]></option>
+				<option><![CDATA[many]]></option>
+				<option><![CDATA[much]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex13]]></units>
+			<label><![CDATA[<b>20</b>]]></label>
+			<sentence><![CDATA[Don't forget to buy a [#] of flowers for Mel's birthday.]]></sentence>
+			<options>
+				<option><![CDATA[pair]]></option>
+				<option><![CDATA[packet]]></option>
+				<option answer="correct"><![CDATA[bunch]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>21</b>]]></label>
+			<sentence><![CDATA['Wow! [#] lovely present! Thank you.' 'I'm glad you like it.']]></sentence>
+			<options>
+				<option><![CDATA[What the]]></option>
+				<option><![CDATA[What]]></option>
+				<option answer="correct"><![CDATA[What a]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex13]]></units>
+			<label><![CDATA[<b>22</b>]]></label>
+			<sentence><![CDATA['I'm thirsty.' 'There's a [#] of Coke in the fridge.']]></sentence>
+			<options>
+				<option><![CDATA[glasses]]></option>
+				<option answer="correct"><![CDATA[can]]></option>
+				<option><![CDATA[bottles]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex1]]></units>
+			<label><![CDATA[<b>23</b>]]></label>
+			<sentence><![CDATA[Can you pop into the [#] for my gardening magazine?]]></sentence>
+			<options>
+				<option><![CDATA[travel agent's]]></option>
+				<option><![CDATA[estate agent's]]></option>
+				<option answer="correct"><![CDATA[newsagent's]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex12 <b>G Ref</b> 4.2]]></units>
+			<label><![CDATA[<b>24</b>]]></label>
+			<sentence><![CDATA[It is [#] restaurant in town. And very expensive, too!]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[the worst]]></option>
+				<option><![CDATA[a worst]]></option>
+				<option><![CDATA[worst]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex9 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>25</b>]]></label>
+			<sentence><![CDATA[Let's take the bus. There's never [#] to park near the cinema.]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[anywhere]]></option>
+				<option><![CDATA[somewhere]]></option>
+				<option><![CDATA[nowhere]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex14]]></units>
+			<label><![CDATA[<b>26</b>]]></label>
+			<sentence><![CDATA[The only vegetables I like are [#].]]></sentence>
+			<options>
+				<option><![CDATA[plums]]></option>
+				<option><![CDATA[peaches]]></option>
+				<option answer="correct"><![CDATA[peas]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex5 <b>G Ref</b> 4.1]]></units>
+			<label><![CDATA[<b>27</b>]]></label>
+			<sentence><![CDATA['[#] people are coming to the party?' 'About 70.']]></sentence>
+			<options>
+				<option><![CDATA[How much]]></option>
+				<option answer="correct"><![CDATA[How many]]></option>
+				<option><![CDATA[How often]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex14]]></units>
+			<label><![CDATA[<b>28</b>]]></label>
+			<sentence><![CDATA[I don't think they eat red meat. We can't cook [#] for them.]]></sentence>
+			<options>
+				<option><![CDATA[chicken or ham]]></option>
+				<option answer="correct"><![CDATA[beef or lamb]]></option>
+				<option><![CDATA[courgettes or onions]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex1]]></units>
+			<label><![CDATA[<b>29</b>]]></label>
+			<sentence><![CDATA[I couldn't get a loaf. The [#] was shut.]]></sentence>
+			<options>
+				<option><![CDATA[chemist's]]></option>
+				<option answer="correct"><![CDATA[baker's]]></option>
+				<option><![CDATA[butcher's]]></option>
+			</options>
+		</question>
+		<question>
+			<units><![CDATA[<b>WB</b> Unit 4 Ex16]]></units>
+			<label><![CDATA[<b>30</b>]]></label>
+			<sentence><![CDATA[The dress code is casual. You don't need to wear [#].]]></sentence>
+			<options>
+				<option answer="correct"><![CDATA[a shirt and tie]]></option>
+				<option><![CDATA[a tie and shirt]]></option>
+				<option><![CDATA[shirt and tie]]></option>
+			</options>
+		</question>
+	</questions>
+</exercise>
