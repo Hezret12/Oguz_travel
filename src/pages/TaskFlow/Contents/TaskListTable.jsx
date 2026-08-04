@@ -7,15 +7,12 @@ import {
   Box,
   Typography,
   Chip,
-  Avatar,
-  AvatarGroup,
   IconButton,
   Menu,
   MenuItem,
   Divider,
   ListItemIcon,
   ListItemText,
-  Tooltip,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
