@@ -10,7 +10,6 @@ import { Box, Chip } from "@mui/material";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import AddEmployee from "./Contents/AddEmployee";
 import EditEmployee from "./Contents/EditEmployee";
-import EmployeeCommentModal from "./Contents/EmployeeCommentModal";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
 import {
@@ -34,7 +33,6 @@ import { actions } from "../../utils/helperConstant";
 
 const Employee = () => {
   const [rowSelection, setRowSelection] = useState({});
-  const [commentModalEmployee, setCommentModalEmployee] = useState(null);
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
 
@@ -183,10 +181,6 @@ const Employee = () => {
             row={row}
             table={table}
             onDelete={handleDeleteClick}
-            showComment={true}
-            onCommentClick={(employeeData) =>
-              setCommentModalEmployee(employeeData)
-            }
           />
         ),
       },
@@ -372,15 +366,6 @@ const Employee = () => {
       />
 
       <MaterialReactTable table={table} />
-
-      {/* Employee Comment & Notification Modal */}
-      {Boolean(commentModalEmployee) && (
-        <EmployeeCommentModal
-          open={Boolean(commentModalEmployee)}
-          onClose={() => setCommentModalEmployee(null)}
-          employee={commentModalEmployee}
-        />
-      )}
     </>
   );
 };
