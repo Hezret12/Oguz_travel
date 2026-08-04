@@ -4,8 +4,6 @@ import {
   Typography,
   IconButton,
   Chip,
-  Avatar,
-  AvatarGroup,
   Grid,
   Card,
   CardContent,
@@ -14,7 +12,6 @@ import {
   Divider,
   ListItemIcon,
   ListItemText,
-  Tooltip,
   useTheme,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -24,7 +21,6 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 
 import { useLocale } from "../../../hooks/useLocale";
 import AppAvatarGroup from "../../../components/AppAvatarGroup";
@@ -36,49 +32,6 @@ const getPriorityBadgeProps = (priority) => {
     case "medium":
     default:
       return { bg: "#DBEAFE", color: "#2563EB" };
-  }
-};
-
-const getStatusInfo = (status, columns = []) => {
-  const statusId = Number(status);
-  const found = columns.find(
-    (c) => c.id === statusId || c.id === status || String(c.id) === String(status)
-  );
-  if (found) return found;
-
-  switch (statusId) {
-    case 1:
-      return {
-        id: 1,
-        title: "TO DO",
-        color: "#64748B",
-        bgLight: "#F8FAFC",
-        borderLight: "#E2E8F0",
-      };
-    case 2:
-      return {
-        id: 2,
-        title: "IN PROGRESS",
-        color: "#2563EB",
-        bgLight: "#EFF6FF",
-        borderLight: "#BFDBFE",
-      };
-    case 3:
-      return {
-        id: 3,
-        title: "COMPLETED",
-        color: "#16A34A",
-        bgLight: "#F0FDF4",
-        borderLight: "#BBF7D0",
-      };
-    default:
-      return {
-        id: status,
-        title: "TASK",
-        color: "#64748B",
-        bgLight: "#F8FAFC",
-        borderLight: "#E2E8F0",
-      };
   }
 };
 
@@ -122,249 +75,309 @@ function TaskBoardView({
         overflow: "hidden",
       }}
     >
-      <Box
+      <Grid
+        container
+        spacing={2.5}
         sx={{
           flexGrow: 1,
           minHeight: 0,
-          overflowY: "auto",
-          pr: 0.5,
-          "&::-webkit-scrollbar": {
-            width: "6px",
-          },
-          "&::-webkit-scrollbar-track": {
-            backgroundColor: "transparent",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: isDark ? "#334155" : "#CBD5E1",
-            borderRadius: "4px",
-          },
+          height: "100%",
+          alignItems: "stretch",
+          overflowY: { xs: "auto", lg: "hidden" },
+          pb: 0.5,
         }}
       >
-        {tasks.length === 0 ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              minHeight: 300,
-              color: isDark ? "#64748B" : "#94A3B8",
-              gap: 1.5,
-            }}
-          >
-            <AssignmentOutlinedIcon sx={{ fontSize: 48, opacity: 0.5 }} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              {t("task.noTasksFound", "Task tapylmady")}
-            </Typography>
-          </Box>
-        ) : (
-          <Grid container spacing={2.5} sx={{ pb: 1 }}>
-            {tasks.map((task) => {
-              const taskId = task.guid || task.id;
-              const statusInfo = getStatusInfo(task.status, columns);
-              const priorityProps = getPriorityBadgeProps(task.priority);
+        {columns.map((col) => {
+          const colTasks = tasks.filter(
+            (t) =>
+              t.status === col.id ||
+              Number(t.status) === col.id ||
+              t.statusId === col.id
+          );
 
-              let formattedDate = "";
-              const rawDate = task.due_date || task.dueDate;
-              if (rawDate) {
-                const d = new Date(rawDate);
-                if (!isNaN(d.getTime())) {
-                  formattedDate = d.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  });
-                }
-              }
-
-              let assigneesList = [];
-              if (
-                Array.isArray(task.empltaskAssignee) &&
-                task.empltaskAssignee.length > 0
-              ) {
-                assigneesList = task.empltaskAssignee;
-              } else if (
-                Array.isArray(task.emplTaskAssignee) &&
-                task.emplTaskAssignee.length > 0
-              ) {
-                assigneesList = task.emplTaskAssignee;
-              } else if (
-                Array.isArray(task.assignees) &&
-                task.assignees.length > 0
-              ) {
-                assigneesList = task.assignees;
-              } else if (
-                Array.isArray(task.users) &&
-                task.users.length > 0
-              ) {
-                assigneesList = task.users;
-              } else if (task.employee || task.empluser || task.admuser) {
-                assigneesList = [
-                  task.employee || task.empluser || task.admuser,
-                ];
-              }
-
-              return (
-                <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={taskId}>
-                  <Card
-                    elevation={0}
-                    sx={{
-                      borderRadius: "12px",
-                      border: `1px solid ${isDark ? "#1E293B" : "#E2E8F0"}`,
-                      borderLeft: `4px solid ${statusInfo.color}`,
-                      bgcolor: isDark ? "#1E293B" : "#FFFFFF",
-                      height: 165,
-                      display: "flex",
-                      flexDirection: "column",
-                      transition: "all 0.15s ease-in-out",
-                      "&:hover": {
-                        boxShadow: "0 6px 16px -2px rgba(0, 0, 0, 0.09)",
-                        borderColor: isDark ? "#475569" : "#CBD5E1",
-                        transform: "translateY(-2px)",
-                      },
-                    }}
-                  >
-                    <CardContent
+          return (
+            <Grid
+              size={{ xs: 12, sm: 6, lg: 4 }}
+              key={col.id}
+              sx={{
+                height: { xs: 520, lg: "100%" },
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box
+                sx={{
+                  bgcolor: isDark ? "#0F172A" : col.bgLight,
+                  border: `1px solid ${isDark ? "#1E293B" : col.borderLight}`,
+                  borderRadius: "12px",
+                  p: 1.5,
+                  height: "100%",
+                  maxHeight: "100%",
+                  minHeight: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  boxSizing: "border-box",
+                  overflow: "hidden",
+                }}
+              >
+                {/* Column Header */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    mb: 1.5,
+                    px: 0.5,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box
                       sx={{
-                        p: 1.5,
-                        height: "100%",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        boxSizing: "border-box",
-                        "&:last-child": { pb: 1.5 },
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        bgcolor: col.color,
+                      }}
+                    />
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "0.8rem",
+                        letterSpacing: "0.04em",
+                        color: isDark ? "#F8FAFC" : "#1E293B",
+                        textTransform: "uppercase",
                       }}
                     >
-                      <Box>
-                        {/* Top Bar: Status Badge & Options Menu */}
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            mb: 1,
-                          }}
-                        >
-                          <Chip
-                            label={statusInfo.title}
-                            size="small"
-                            sx={{
-                              height: 20,
-                              fontSize: "0.675rem",
-                              fontWeight: 700,
-                              letterSpacing: "0.03em",
-                              bgcolor: isDark ? "rgba(255,255,255,0.06)" : statusInfo.bgLight,
-                              color: statusInfo.color,
-                              border: `1px solid ${isDark ? "#334155" : statusInfo.borderLight}`,
-                              borderRadius: "6px",
-                            }}
-                          />
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              setTaskMenuAnchor(e.currentTarget);
-                              setActiveTask(task);
-                            }}
-                            sx={{
-                              color: isDark ? "#64748B" : "#94A3B8",
-                              p: 0.2,
-                            }}
-                          >
-                            <MoreVertIcon sx={{ fontSize: 18 }} />
-                          </IconButton>
-                        </Box>
+                      {col.title}
+                    </Typography>
+                    <Chip
+                      label={colTasks.length}
+                      size="small"
+                      sx={{
+                        height: 18,
+                        fontSize: "0.7rem",
+                        fontWeight: 700,
+                        bgcolor: isDark ? "#1E293B" : "#FFFFFF",
+                        color: col.color,
+                        border: `1px solid ${isDark ? "#334155" : "#E2E8F0"}`,
+                      }}
+                    />
+                  </Box>
+                </Box>
 
-                        {/* Task Title */}
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            fontWeight: 650,
-                            fontSize: "0.875rem",
-                            color: isDark ? "#F8FAFC" : "#0F172A",
-                            lineHeight: 1.3,
-                            cursor: "pointer",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                            mb: 0.5,
-                            "&:hover": { color: "primary.main" },
-                          }}
-                          onClick={() => onEditTask?.(task)}
-                        >
-                          {task.title || task.description || "Task"}
-                        </Typography>
+                {/* Task Cards Stack with Smooth Internal Scrollbar */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1.25,
+                    flexGrow: 1,
+                    minHeight: 0,
+                    overflowY: "auto",
+                    pr: 0.5,
+                    "&::-webkit-scrollbar": {
+                      width: "5px",
+                    },
+                    "&::-webkit-scrollbar-track": {
+                      backgroundColor: "transparent",
+                    },
+                    "&::-webkit-scrollbar-thumb": {
+                      backgroundColor: isDark ? "#334155" : "#CBD5E1",
+                      borderRadius: "4px",
+                    },
+                  }}
+                >
+                  {colTasks.map((task) => {
+                    const taskId = task.guid || task.id;
+                    const priorityProps = getPriorityBadgeProps(task.priority);
 
-                        {/* Task Description */}
-                        {task.description && task.title && (
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: isDark ? "#94A3B8" : "#64748B",
-                              fontSize: "0.775rem",
-                              display: "-webkit-box",
-                              WebkitLineClamp: 1,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                              lineHeight: 1.35,
-                            }}
-                          >
-                            {task.description}
-                          </Typography>
-                        )}
-                      </Box>
+                    let formattedDate = "";
+                    const rawDate = task.due_date || task.dueDate;
+                    if (rawDate) {
+                      const d = new Date(rawDate);
+                      if (!isNaN(d.getTime())) {
+                        formattedDate = d.toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        });
+                      }
+                    }
 
-                      {/* Card Footer: Priority Pill & Date & Assignees */}
-                      <Box
+                    let assigneesList = [];
+                    if (
+                      Array.isArray(task.empltaskAssignee) &&
+                      task.empltaskAssignee.length > 0
+                    ) {
+                      assigneesList = task.empltaskAssignee;
+                    } else if (
+                      Array.isArray(task.emplTaskAssignee) &&
+                      task.emplTaskAssignee.length > 0
+                    ) {
+                      assigneesList = task.emplTaskAssignee;
+                    } else if (
+                      Array.isArray(task.assignees) &&
+                      task.assignees.length > 0
+                    ) {
+                      assigneesList = task.assignees;
+                    } else if (
+                      Array.isArray(task.users) &&
+                      task.users.length > 0
+                    ) {
+                      assigneesList = task.users;
+                    } else if (task.employee || task.empluser || task.admuser) {
+                      assigneesList = [
+                        task.employee || task.empluser || task.admuser,
+                      ];
+                    }
+
+                    return (
+                      <Card
+                        key={taskId}
+                        elevation={0}
                         sx={{
+                          borderRadius: "10px",
+                          border: `1px solid ${isDark ? "#1E293B" : "#E2E8F0"}`,
+                          borderLeft: `3.5px solid ${col.color}`,
+                          bgcolor: isDark ? "#1E293B" : "#FFFFFF",
+                          height: 145,
+                          flexShrink: 0,
                           display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          pt: 0.5,
+                          flexDirection: "column",
+                          transition: "all 0.15s ease-in-out",
+                          "&:hover": {
+                            boxShadow: "0 4px 12px -2px rgba(0, 0, 0, 0.08)",
+                            borderColor: isDark ? "#475569" : "#CBD5E1",
+                          },
                         }}
                       >
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <Chip
-                            label={getPriorityLabel(task.priority)}
-                            size="small"
-                            sx={{
-                              height: 20,
-                              fontSize: "0.7rem",
-                              fontWeight: 600,
-                              bgcolor: priorityProps.bg,
-                              color: priorityProps.color,
-                              borderRadius: "5px",
-                              px: 0.5,
-                            }}
-                          />
-                          {formattedDate && (
+                        <CardContent
+                          sx={{
+                            p: 1.5,
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-between",
+                            boxSizing: "border-box",
+                            "&:last-child": { pb: 1.5 },
+                          }}
+                        >
+                          <Box>
                             <Box
                               sx={{
                                 display: "flex",
-                                alignItems: "center",
-                                gap: 0.3,
-                                color: isDark ? "#64748B" : "#94A3B8",
-                                fontSize: "0.725rem",
-                                fontWeight: 500,
+                                justifyContent: "space-between",
+                                alignItems: "flex-start",
+                                mb: 0.5,
                               }}
                             >
-                              <CalendarTodayIcon sx={{ fontSize: 11 }} />
-                              <span>{formattedDate}</span>
+                              <Typography
+                                variant="subtitle1"
+                                sx={{
+                                  fontWeight: 650,
+                                  fontSize: "0.85rem",
+                                  color: isDark ? "#F8FAFC" : "#0F172A",
+                                  lineHeight: 1.3,
+                                  cursor: "pointer",
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                  "&:hover": { color: "primary.main" },
+                                }}
+                                onClick={() => onEditTask?.(task)}
+                              >
+                                {task.title || task.description || "Task"}
+                              </Typography>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  setTaskMenuAnchor(e.currentTarget);
+                                  setActiveTask(task);
+                                }}
+                                sx={{
+                                  color: isDark ? "#64748B" : "#94A3B8",
+                                  p: 0.1,
+                                  ml: 0.5,
+                                }}
+                              >
+                                <MoreVertIcon sx={{ fontSize: 16 }} />
+                              </IconButton>
                             </Box>
-                          )}
-                        </Box>
 
-                        {/* Assignee Avatars */}
-                        <AppAvatarGroup items={assigneesList} max={6} size={22} />
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              );
-            })}
-          </Grid>
-        )}
-      </Box>
+                            {task.description && (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: isDark ? "#94A3B8" : "#64748B",
+                                  fontSize: "0.775rem",
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 1,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                  lineHeight: 1.35,
+                                }}
+                              >
+                                {task.description}
+                              </Typography>
+                            )}
+                          </Box>
+
+                          {/* Card Footer: Priority Pill & Date & Assignees */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              pt: 0.5,
+                            }}
+                          >
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <Chip
+                                label={getPriorityLabel(task.priority)}
+                                size="small"
+                                sx={{
+                                  height: 20,
+                                  fontSize: "0.7rem",
+                                  fontWeight: 600,
+                                  bgcolor: priorityProps.bg,
+                                  color: priorityProps.color,
+                                  borderRadius: "5px",
+                                  px: 0.5,
+                                }}
+                              />
+                              {formattedDate && (
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 0.3,
+                                    color: isDark ? "#64748B" : "#94A3B8",
+                                    fontSize: "0.725rem",
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  <CalendarTodayIcon sx={{ fontSize: 11 }} />
+                                  <span>{formattedDate}</span>
+                                </Box>
+                              )}
+                            </Box>
+
+                            {/* Assignee Avatars */}
+                            <AppAvatarGroup items={assigneesList} max={6} size={22} />
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </Box>
+              </Box>
+            </Grid>
+          );
+        })}
+      </Grid>
 
       {/* Context Menu for Task Edit / Status Switch / Actions */}
       <Menu

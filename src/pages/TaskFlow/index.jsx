@@ -75,11 +75,12 @@ export default function TaskFlow() {
     setEditingTask(null);
   }, []);
 
-  // Build params for API filtering (debounced search, priority, status, due_date)
+  // Build params for API filtering (debounced search, priority, status, due_date, type)
   const queryParams = useMemo(() => {
     const params = {
       page,
       limit,
+      type: viewMode === "board" ? false : true,
     };
 
     if (debouncedSearch && debouncedSearch.trim()) {
@@ -96,7 +97,7 @@ export default function TaskFlow() {
     }
 
     return params;
-  }, [page, limit, debouncedSearch, filterStatus, filterPriority, dueDate]);
+  }, [page, limit, viewMode, debouncedSearch, filterStatus, filterPriority, dueDate]);
 
   // API Fetch for tasks with server-side pagination & query params
   const {
