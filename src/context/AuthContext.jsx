@@ -1,60 +1,102 @@
-import { createContext, useCallback, useMemo, useState } from 'react';
+import { createContext, useCallback, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Cookies from 'js-cookie';
 import { clearSession, getStoredSession, normalizeUser, persistSession } from '../utils/auth';
+import { getMeApi } from '../api/queries/getters';
+import { logoutApi } from '../api/queries/post';
 
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => getStoredSession()?.user ?? null);
-  const [loading] = useState(false);
+  const queryClient = useQueryClient();
+  const hasToken = Boolean(Cookies.get('accessToken'));
 
-  const login = useCallback((sessionData) => {
-    const {
-      accessToken,
-      refreshToken,
-      access_token,
-      refresh_token,
-      user: rawUser,
-      tableNames,
-    } = sessionData;
+  // TanStack Query for Current Auth User (/auth/me)
+  const {
+    data: user = null,
+    isLoading: loading,
+    refetch: refetchUser,
+  } = useQuery({
+    queryKey: ['authUser'],
+    queryFn: async () => {
+      try {
+        const response = await getMeApi();
+        const fetchedUser = response?.data?.data || response?.data;
+        if (fetchedUser) {
+          const userObj = { ...fetchedUser, user_is_login: true };
+          localStorage.setItem('user', JSON.stringify(userObj));
+          return normalizeUser(userObj);
+        }
+      } catch (err) {
+        clearSession();
+        queryClient.setQueryData(['authUser'], null);
+        throw err;
+      }
+      return null;
+    },
+    enabled: hasToken,
+    initialData: () => getStoredSession()?.user ?? null,
+    initialDataUpdatedAt: 0,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    retry: false,
+  });
 
-    const finalAccessToken = accessToken || access_token;
-    const finalRefreshToken = refreshToken || refresh_token;
+  // TanStack Mutation for Logout (/auth/logout)
+  const logoutMutation = useMutation({
+    mutationFn: logoutApi,
+    onSettled: () => {
+      clearSession();
+      queryClient.clear(); // Clears all cached queries on logout for privacy/security
+    },
+  });
 
-    let userObj = rawUser;
-    if (!userObj) {
+  const login = useCallback(
+    (sessionData) => {
       const {
-        accessToken: _at,
-        refreshToken: _rt,
-        access_token: _at2,
-        refresh_token: _rt2,
-        tableNames: _tn,
-        ...rest
+        accessToken,
+        refreshToken,
+        access_token,
+        refresh_token,
+        user: rawUser,
+        tableNames,
       } = sessionData;
-      userObj = rest;
-    }
 
-    userObj = {
-      ...userObj,
-      user_is_login: true,
-    };
+      const finalAccessToken = accessToken || access_token;
+      const finalRefreshToken = refreshToken || refresh_token;
 
-    const normalized = normalizeUser(userObj);
+      let userObj = rawUser;
+      if (!userObj) {
+        const {
+          accessToken: _at,
+          refreshToken: _rt,
+          access_token: _at2,
+          refresh_token: _rt2,
+          tableNames: _tn,
+          ...rest
+        } = sessionData;
+        userObj = rest;
+      }
 
-    persistSession({
-      accessToken: finalAccessToken,
-      refreshToken: finalRefreshToken,
-      user: userObj,
-      tableNames,
-    });
+      userObj = { ...userObj, user_is_login: true };
+      const normalized = normalizeUser(userObj);
 
-    setUser(normalized);
-    return normalized;
-  }, []);
+      persistSession({
+        accessToken: finalAccessToken,
+        refreshToken: finalRefreshToken,
+        user: userObj,
+        tableNames,
+      });
+
+      queryClient.setQueryData(['authUser'], normalized);
+      return normalized;
+    },
+    [queryClient]
+  );
 
   const logout = useCallback(() => {
-    clearSession();
-    setUser(null);
-  }, []);
+    logoutMutation.mutate();
+  }, [logoutMutation]);
 
   const value = useMemo(
     () => ({
@@ -63,8 +105,9 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user),
       login,
       logout,
+      refetchUser,
     }),
-    [user, loading, login, logout]
+    [user, loading, login, logout, refetchUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

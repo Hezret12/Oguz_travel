@@ -3,10 +3,17 @@ import Cookies from 'js-cookie';
 import { api } from '../service/apiHelper';
 
 
-export const renewAccessTokenApi = async () => {
+export const refreshTokenApi = async () => {
   const refreshToken = Cookies.get('refreshToken');
-  const bearer = 'Bearer ' + refreshToken;
-  return axiosInstance.get('/auth/renew-access-token', {
+  return axiosInstance.post('/auth/refresh', {
+    refresh_token: refreshToken,
+  });
+};
+
+export const getMeApi = async () => {
+  const accessToken = Cookies.get('accessToken');
+  const bearer = 'Bearer ' + accessToken;
+  return axiosInstance.get('/auth/me', {
     headers: {
       Authorization: bearer,
     },
@@ -145,4 +152,12 @@ export const getAllTasksApi = async (params = {}) => {
 
 export const getAllNotificationsApi = async (params = {}) => {
   return await api.getPrivate('/messages/get-all-notification', params);
+};
+
+export const getAllReportsApi = async (params = {}) => {
+  return await api.getPrivate('/report/get-all-reports', params);
+};
+
+export const getAllReportSharesApi = async (params = {}) => {
+  return await api.getPrivate('/report-share/get-all-report-shares', params);
 };

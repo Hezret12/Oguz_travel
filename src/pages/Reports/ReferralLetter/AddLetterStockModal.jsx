@@ -1,27 +1,21 @@
 import { useMemo } from "react";
-import {
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Box, Grid, Typography } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import CustomTextField from "../../../components/CustomTextField";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
+import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
+import { CustomForm } from "../../../components/Dialog/CustomForm";
+import { FooterButton } from "../../../components/Dialog/FooterButton";
+import { useCreate } from "../../../hooks/CRUD/useCreate";
+import { addReportApi } from "../../../api/queries/post";
 
-
-const AddLetterStockModal = ({ open, close, onSubmitSuccess }) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-
+const AddLetterStockModal = ({ open, close }) => {
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       batchName: "",
       startNo: "0000001",
       endNo: "0090000",
+      note: "",
     },
   });
 
@@ -39,11 +33,23 @@ const AddLetterStockModal = ({ open, close, onSubmitSuccess }) => {
     return 1;
   }, [watchStartNo, watchEndNo]);
 
+  const { mutate: createReport, isPending } = useCreate({
+    apiFn: addReportApi,
+    key: "reports",
+    onSuccess: () => {
+      reset();
+      close();
+    },
+  });
+
   const handleFormSubmit = (data) => {
-    console.log("Add Letter Stock Data:", { ...data, count: calculatedCount });
-    onSubmitSuccess?.({ ...data, count: calculatedCount });
-    reset();
-    close();
+    createReport({
+      name: data.batchName,
+      start_yh_number: Number(data.startNo || 0),
+      end_yh_number: Number(data.endNo || 0),
+      total_letter: calculatedCount,
+      note: data.note || "",
+    });
   };
 
   const handleClose = () => {
@@ -53,164 +59,81 @@ const AddLetterStockModal = ({ open, close, onSubmitSuccess }) => {
 
   return (
     <CustomDialog open={open} close={handleClose} widthX={520}>
-      <Box sx={{ position: "relative", p: 1 }}>
-        {/* Header Title & Close Button */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mb: 3,
-          }}
-        >
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: "1.2rem",
-              color: isDark ? "#F8FAFC" : "#0F172A",
-            }}
-          >
-            Täze hat stoky goşmak
-          </Typography>
-          <IconButton
-            onClick={handleClose}
-            size="small"
-            sx={{
-              color: isDark ? "#94A3B8" : "#64748B",
-              "&:hover": {
-                backgroundColor: isDark
-                  ? "rgba(255, 255, 255, 0.08)"
-                  : "rgba(0, 0, 0, 0.05)",
-              },
-            }}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Box>
+      <CustomDialogHeader variant="h5" title="Täze hat stoky goşmak" />
+      <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}>
+          {/* Field 1: Partiýanyň ady */}
+          <CustomTextField
+            name="batchName"
+            control={control}
+            label="Partiýanyň ady"
+            placeholder="Meselem: 2024-nji ýyl hats"
+            required
+          />
 
-        {/* Form Inputs */}
-        <form onSubmit={handleSubmit(handleFormSubmit)}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}>
-            {/* Field 1: Partiýanyň ady */}
-            <CustomTextField
-              name="batchName"
-              control={control}
-              label="Partiýanyň ady"
-              placeholder="Meselem: 2024-nji ýyl hats"
-              required
-            />
-
-            {/* Field 2 & 3: Başlangyç ÝH № & Soňky ÝH № */}
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <CustomTextField
-                  name="startNo"
-                  control={control}
-                  label="Başlangyç ÝH №"
-                  placeholder="0000001"
-                  required
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <CustomTextField
-                  name="endNo"
-                  control={control}
-                  label="Soňky ÝH №"
-                  placeholder="0090000"
-                  required
-                />
-              </Grid>
+          {/* Field 2 & 3: Başlangyç ÝH № & Soňky ÝH № */}
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="startNo"
+                control={control}
+                label="Başlangyç ÝH №"
+                placeholder="0000001"
+                required
+              />
             </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="endNo"
+                control={control}
+                label="Soňky ÝH №"
+                placeholder="0090000"
+                required
+              />
+            </Grid>
+          </Grid>
 
-            {/* Calculated Quantity Display Box */}
-            <Box
-              sx={{
-                mt: 0.5,
-                p: 2,
-                borderRadius: "10px",
-                backgroundColor: isDark
-                  ? "rgba(255, 255, 255, 0.04)"
-                  : "#F8FAFC",
-                border: "1px solid",
-                borderColor: isDark ? "rgba(255, 255, 255, 0.08)" : "#F1F5F9",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{
-                  color: isDark ? "#CBD5E1" : "#475569",
-                  fontSize: "0.875rem",
-                }}
-              >
-                Umumy mukdary:{" "}
-                <strong
-                  style={{
-                    color: isDark ? "#F8FAFC" : "#0F172A",
-                    fontWeight: 700,
-                  }}
-                >
-                  {calculatedCount}
-                </strong>{" "}
-                sany hat
-              </Typography>
-            </Box>
-          </Box>
+          {/* Field 4: Bellik (Note) */}
+          <CustomTextField
+            name="note"
+            control={control}
+            label="Bellik"
+            multiline
+            rows={2}
+          />
 
-          {/* Action Buttons */}
+          {/* Calculated Quantity Display Box */}
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: 1.5,
-              mt: 3.5,
+              mt: 0.5,
+              p: 2,
+              borderRadius: "10px",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.04)"
+                  : "#F8FAFC",
+              border: "1px solid",
+              borderColor: "divider",
             }}
           >
-            <Button
-              variant="outlined"
-              onClick={handleClose}
+            <Typography
+              variant="body2"
               sx={{
-                height: 40,
-                px: 3,
-                borderRadius: "8px",
-                textTransform: "none",
-                fontWeight: 600,
+                color: "text.secondary",
                 fontSize: "0.875rem",
-                color: isDark ? "#F8FAFC" : "#0F172A",
-                borderColor: isDark ? "rgba(255, 255, 255, 0.2)" : "#E2E8F0",
-                "&:hover": {
-                  borderColor: isDark ? "rgba(255, 255, 255, 0.4)" : "#CBD5E1",
-                  backgroundColor: isDark
-                    ? "rgba(255, 255, 255, 0.05)"
-                    : "rgba(0, 0, 0, 0.02)",
-                },
               }}
             >
-              Ýatyr
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{
-                height: 40,
-                px: 3.5,
-                borderRadius: "8px",
-                textTransform: "none",
-                fontWeight: 700,
-                fontSize: "0.875rem",
-                backgroundColor: isDark ? "#14B8A6" : "#18181B",
-                color: "#FFFFFF",
-                "&:hover": {
-                  backgroundColor: isDark ? "#0E8584" : "#27272A",
-                },
-              }}
-            >
-              Goş
-            </Button>
+              Umumy mukdary:{" "}
+              <strong style={{ color: "text.primary", fontWeight: 700 }}>
+                {calculatedCount}
+              </strong>{" "}
+              sany hat
+            </Typography>
           </Box>
-        </form>
-      </Box>
+        </Box>
+
+        <FooterButton loading={isPending} onCancel={handleClose} />
+      </CustomForm>
     </CustomDialog>
   );
 };

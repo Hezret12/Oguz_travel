@@ -17,7 +17,18 @@ import { useDateFormat } from "../../../functions/generalHelpers";
 import { REFERRAL_REPORT_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import AddLetterStockModal from "./AddLetterStockModal";
 import AddReferralReportModal from "./AddReferralReportModal";
-
+import EditLetterStockModal from "./EditLetterStockModal";
+import EditReferralReportModal from "./EditReferralReportModal";
+import { usePagginationGet } from "../../../hooks/usePagginationGet";
+import { useDelete } from "../../../hooks/CRUD/useDelete";
+import {
+  getAllReportsApi,
+  getAllReportSharesApi,
+} from "../../../api/queries/getters";
+import {
+  deleteReportApi,
+  deleteReportShareApi,
+} from "../../../api/queries/delete";
 
 const ReferralLetterPage = () => {
   const { t } = useLocale();
@@ -36,43 +47,74 @@ const ReferralLetterPage = () => {
   const [isStockModalOpen, setIsStockModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
-  // Mock State for Stock & Report Lists
-  const [stockList, setStockList] = useState([
-    {
-      id: "1",
-      index_number: 1,
-      batchName: "2024-nji ýyl hats",
-      startNo: "0332365",
-      endNo: "0332384",
-      count: 20,
-      createdAt: "2026-08-03T00:00:00.000Z",
-    },
-  ]);
+  // 1. Fetch Reports (Hat Stoky) from API /api/v1/report/get-all-reports
+  const stockParams = useMemo(() => {
+    const params = { page, limit };
+    if (searchQuery.trim()) params.search = searchQuery.trim();
+    return params;
+  }, [page, limit, searchQuery]);
 
-  const [reportList, setReportList] = useState([
-    {
-      id: "1",
-      index_number: 1,
-      date: "2026-08-03T00:00:00.000Z",
-      quantity: 50,
-      submittedBy: "AZAT AKMAMMEDOV",
-      receivedBy: "NASIBA",
-      startNo: "0354825",
-      endNo: "0354974",
-      status: "Satyldy",
-    },
-    {
-      id: "2",
-      index_number: 2,
-      date: "2026-08-02T00:00:00.000Z",
-      quantity: 30,
-      submittedBy: "AZAT AKMAMMEDOV",
-      receivedBy: "DOVRAN",
-      startNo: "0354795",
-      endNo: "0354824",
-      status: "Zyýan ýeten",
-    },
-  ]);
+  const {
+    data: rawStockData,
+    totalItems: stockTotal = 0,
+    isLoading: isStockLoading,
+  } = usePagginationGet({
+    apiFn: getAllReportsApi,
+    key: ["reports", stockParams],
+    params: stockParams,
+  });
+
+  // Extract array for Stock List
+  const stockList = useMemo(() => {
+    let list = rawStockData;
+    if (!Array.isArray(list)) {
+      if (Array.isArray(list?.data)) list = list.data;
+      else if (Array.isArray(list?.data?.data)) list = list.data.data;
+      else return [];
+    }
+    return list;
+  }, [rawStockData]);
+
+  // 2. Fetch Report Shares (Ýüzlenme Hasabaty) from API /api/v1/report-share/get-all-report-shares
+  const reportParams = useMemo(() => {
+    const params = { page, limit };
+    if (searchQuery.trim()) params.search = searchQuery.trim();
+    return params;
+  }, [page, limit, searchQuery]);
+
+  const {
+    data: rawReportData,
+    totalItems: reportTotal = 0,
+    isLoading: isReportLoading,
+  } = usePagginationGet({
+    apiFn: getAllReportSharesApi,
+    key: ["reportShares", reportParams],
+    params: reportParams,
+  });
+
+  // Extract array for Report List
+  const reportList = useMemo(() => {
+    let list = rawReportData;
+    if (!Array.isArray(list)) {
+      if (Array.isArray(list?.data)) list = list.data;
+      else if (Array.isArray(list?.data?.data)) list = list.data.data;
+      else return [];
+    }
+    return list;
+  }, [rawReportData]);
+
+  // Delete hooks
+  const { mutate: deleteStock } = useDelete({
+    deleteFn: deleteReportApi,
+    queryKey: "reports",
+    idKey: "guid",
+  });
+
+  const { mutate: deleteReportShare } = useDelete({
+    deleteFn: deleteReportShareApi,
+    queryKey: "reportShares",
+    idKey: "guid",
+  });
 
   const handleTabChange = useCallback((event, newValue) => {
     setActiveTab(newValue);
@@ -87,65 +129,7 @@ const ReferralLetterPage = () => {
     }
   }, [activeTab]);
 
-  const handleAddStock = useCallback((newStock) => {
-    setStockList((prev) => [
-      {
-        id: String(Date.now()),
-        index_number: prev.length + 1,
-        createdAt: new Date().toISOString(),
-        ...newStock,
-      },
-      ...prev,
-    ]);
-  }, []);
-
-  const handleAddReport = useCallback((newReport) => {
-    setReportList((prev) => [
-      {
-        id: String(Date.now()),
-        index_number: prev.length + 1,
-        date: newReport.date || new Date().toISOString(),
-        ...newReport,
-      },
-      ...prev,
-    ]);
-  }, []);
-
-  const handleDeleteStock = useCallback((id) => {
-    setStockList((prev) => prev.filter((item) => item.id !== id));
-  }, []);
-
-  const handleDeleteReport = useCallback((id) => {
-    setReportList((prev) => prev.filter((item) => item.id !== id));
-  }, []);
-
-  // Filtered Stock List based on search
-  const filteredStockList = useMemo(() => {
-    if (!searchQuery.trim()) return stockList;
-    const q = searchQuery.toLowerCase();
-    return stockList.filter(
-      (item) =>
-        item.batchName?.toLowerCase().includes(q) ||
-        item.startNo?.includes(q) ||
-        item.endNo?.includes(q)
-    );
-  }, [stockList, searchQuery]);
-
-  // Filtered Report List based on search
-  const filteredReportList = useMemo(() => {
-    if (!searchQuery.trim()) return reportList;
-    const q = searchQuery.toLowerCase();
-    return reportList.filter(
-      (item) =>
-        item.submittedBy?.toLowerCase().includes(q) ||
-        item.receivedBy?.toLowerCase().includes(q) ||
-        item.startNo?.includes(q) ||
-        item.endNo?.includes(q) ||
-        item.status?.toLowerCase().includes(q)
-    );
-  }, [reportList, searchQuery]);
-
-  // MRT Columns for Reports Tab
+  // MRT Columns for Report Shares Tab (Ýüzlenme Hasabaty)
   const reportsColumns = useMemo(
     () => [
       {
@@ -155,10 +139,11 @@ const ReferralLetterPage = () => {
         size: 60,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => row.index + 1,
       },
       {
-        accessorKey: "date",
-        id: "date",
+        accessorKey: "datetime",
+        id: "datetime",
         header: "Sene",
         size: 120,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
@@ -166,41 +151,53 @@ const ReferralLetterPage = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorKey: "submittedBy",
+        accessorKey: "assignment_opr",
         id: "submittedBy",
         header: "Tabşyran",
         size: 180,
+        Cell: ({ row }) =>
+          row.original?.assignment_opr?.fullName ||
+          `${row.original?.assignment_opr?.firstName || ""} ${row.original?.assignment_opr?.lastName || ""}`.trim() ||
+          row.original?.submittedBy ||
+          "—",
       },
       {
-        accessorKey: "receivedBy",
+        accessorKey: "receiver_opr",
         id: "receivedBy",
         header: "Kabul eden",
         size: 180,
+        Cell: ({ row }) =>
+          row.original?.receiver_opr?.fullName ||
+          `${row.original?.receiver_opr?.firstName || ""} ${row.original?.receiver_opr?.lastName || ""}`.trim() ||
+          row.original?.receivedBy ||
+          "—",
       },
       {
-        accessorKey: "startNo",
+        accessorKey: "start_yh_number",
         id: "startNo",
         header: "ÝH №-den",
         size: 130,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => row.original?.start_yh_number || row.original?.startNo || "—",
       },
       {
-        accessorKey: "endNo",
+        accessorKey: "end_yh_number",
         id: "endNo",
         header: "ÝH № çenli",
         size: 130,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => row.original?.end_yh_number || row.original?.endNo || "—",
       },
       {
-        accessorKey: "quantity",
+        accessorKey: "total_count",
         id: "quantity",
         header: "Mukdary",
         size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ cell }) => <strong>{cell.getValue()} sany</strong>,
+        Cell: ({ row }) => <strong>{row.original?.total_count || row.original?.quantity || 0} sany</strong>,
       },
       {
         accessorKey: "status",
@@ -209,19 +206,34 @@ const ReferralLetterPage = () => {
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ cell }) => (
-          <StatusChip
-            status={cell.getValue()}
-            config={REFERRAL_REPORT_STATUS_CONFIG}
-            size="small"
-          />
-        ),
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          let statusKey = val;
+          if (val === 1) statusKey = "SATYLDY";
+          else if (val === 2) statusKey = "ZYÝAN ÝETEN";
+          else if (val === 3) statusKey = "ÝITIRILEN";
+
+          return (
+            <StatusChip
+              status={statusKey}
+              config={REFERRAL_REPORT_STATUS_CONFIG}
+              size="small"
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "note",
+        id: "note",
+        header: "Bellik",
+        size: 180,
+        Cell: ({ cell }) => cell.getValue() || "—",
       },
     ],
     [formatChange]
   );
 
-  // MRT Columns for Stock Tab
+  // MRT Columns for Stock Tab (Hat Stoky)
   const stockColumns = useMemo(
     () => [
       {
@@ -231,37 +243,43 @@ const ReferralLetterPage = () => {
         size: 60,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => row.index + 1,
       },
       {
-        accessorKey: "batchName",
+        accessorKey: "name",
         id: "batchName",
         header: "Partiýanyň ady",
         size: 220,
+        Cell: ({ row }) => row.original?.name || row.original?.batchName || "—",
       },
       {
-        accessorKey: "startNo",
+        accessorKey: "start_yh_number",
         id: "startNo",
         header: "Başlangyç ÝH №",
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => row.original?.start_yh_number || row.original?.startNo || "—",
       },
       {
-        accessorKey: "endNo",
+        accessorKey: "end_yh_number",
         id: "endNo",
         header: "Soňky ÝH №",
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => row.original?.end_yh_number || row.original?.endNo || "—",
       },
       {
-        accessorKey: "count",
+        accessorKey: "total_letter",
         id: "count",
         header: "Umumy mukdary",
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ cell }) => <strong>{cell.getValue()} sany hat</strong>,
+        Cell: ({ row }) => (
+          <strong>{row.original?.total_letter || row.original?.count || 0} sany hat</strong>
+        ),
       },
       {
         accessorKey: "createdAt",
@@ -280,7 +298,10 @@ const ReferralLetterPage = () => {
   const reportsTable = useMaterialReactTable({
     ...defaultMrtOptions,
     columns: reportsColumns,
-    data: filteredReportList,
+    data: reportList,
+    state: {
+      isLoading: isReportLoading,
+    },
     enableStickyHeader: true,
     muiTableContainerProps: {
       sx: {
@@ -302,11 +323,14 @@ const ReferralLetterPage = () => {
         height: "100%",
       },
     },
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditReferralReportModal table={table} row={row} />
+    ),
     renderRowActions: ({ row, table }) => (
       <ColumnActionButtons
         row={row}
         table={table}
-        onDelete={() => handleDeleteReport(row.original.id)}
+        onDelete={() => deleteReportShare(row.original.guid || row.original.id)}
       />
     ),
   });
@@ -315,7 +339,10 @@ const ReferralLetterPage = () => {
   const stockTable = useMaterialReactTable({
     ...defaultMrtOptions,
     columns: stockColumns,
-    data: filteredStockList,
+    data: stockList,
+    state: {
+      isLoading: isStockLoading,
+    },
     enableStickyHeader: true,
     muiTableContainerProps: {
       sx: {
@@ -337,11 +364,14 @@ const ReferralLetterPage = () => {
         height: "100%",
       },
     },
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditLetterStockModal table={table} row={row} />
+    ),
     renderRowActions: ({ row, table }) => (
       <ColumnActionButtons
         row={row}
         table={table}
-        onDelete={() => handleDeleteStock(row.original.id)}
+        onDelete={() => deleteStock(row.original.guid || row.original.id)}
       />
     ),
   });
@@ -352,22 +382,19 @@ const ReferralLetterPage = () => {
         value: "reports",
         label: "Ýüzlenme hasabaty",
         icon: <FileSpreadsheet size={18} />,
-        badge: filteredReportList.length,
+        badge: reportTotal || reportList.length,
       },
       {
         value: "stock",
         label: "Hat stoky",
         icon: <FileBox size={18} />,
-        badge: filteredStockList.length,
+        badge: stockTotal || stockList.length,
       },
     ],
-    [filteredReportList.length, filteredStockList.length]
+    [reportTotal, reportList.length, stockTotal, stockList.length]
   );
 
-  const currentTotal =
-    activeTab === "reports"
-      ? filteredReportList.length
-      : filteredStockList.length;
+  const currentTotal = activeTab === "reports" ? reportTotal : stockTotal;
 
   return (
     <Box
@@ -459,14 +486,12 @@ const ReferralLetterPage = () => {
       <AddLetterStockModal
         open={isStockModalOpen}
         close={() => setIsStockModalOpen(false)}
-        onSubmitSuccess={handleAddStock}
       />
 
       {/* Modal 2: Add Referral Report */}
       <AddReferralReportModal
         open={isReportModalOpen}
         close={() => setIsReportModalOpen(false)}
-        onSubmitSuccess={handleAddReport}
       />
     </Box>
   );

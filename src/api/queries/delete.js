@@ -106,3 +106,11 @@ export const deleteTaskApi = async (guid) => {
 export const deleteNotificationApi = async (guid) => {
   return await api.deletePrivate('/messages/delete-notification', guid);
 };
+
+export const deleteReportApi = async (guid) => {
+  return await api.deletePrivate('/report/delete-report', guid);
+};
+
+export const deleteReportShareApi = async (guid) => {
+  return await api.deletePrivate('/report-share/delete-report-share', guid);
+};

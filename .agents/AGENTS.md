@@ -335,3 +335,25 @@ src/pages/<Feature>/
 - **Rationale**: Direct `useForm.watch()` forces full component re-renders on every single keystroke of watched fields. Using `useWatch` isolates field subscriptions, preventing unnecessary component re-renders and improving form input performance.
 
 
+## 14. MaterialReactTable Create & Edit Dialog Rendering Standard
+
+- **ALWAYS** use `renderCreateRowDialogContent` and `renderEditRowDialogContent` properties when configuring MaterialReactTable instances:
+  ```jsx
+  renderCreateRowDialogContent: ({ table }) => <AddXxxModal table={table} />,
+  renderEditRowDialogContent: ({ table, row }) => <EditXxxModal table={table} row={row} />,
+  ```
+- **Triggering Create Modal**: Trigger creation via `table.setCreatingRow(true)`.
+- **Triggering Edit Modal**: Trigger edit via `table.setEditingRow(row)` (handled internally by `ColumnActionButtons`).
+- **Modal Component State Pattern**:
+  ```jsx
+  const isModalOpen = open !== undefined ? Boolean(open) : Boolean(table && (table.getState().creatingRow || table.getState().editingRow?.id === row?.id));
+  const handleClose = () => {
+    if (table) {
+      table.setCreatingRow(null);
+      table.setEditingRow(null);
+    }
+    close?.();
+  };
+  ```
+- **Rationale**: Guarantees clean declarative dialog lifecycle management natively tied to MaterialReactTable instance states across all page modules.
+

@@ -5,6 +5,11 @@ export const loginApi = async (data) => {
   return response;
 };
 
+export const logoutApi = async () => {
+  const response = await api.postPrivate("/auth/logout", {});
+  return response;
+};
+
 export const addEmployeeApi = async (data) => {
   const response = await api.postPrivate(
     "/employee/add-employee",
@@ -169,5 +174,13 @@ export const addTaskApi = async (data) => {
 
 export const addMessageApi = async (data) => {
   return await api.postPrivate("/messages/add-message", data);
+};
+
+export const addReportApi = async (data) => {
+  return await api.postPrivate("/report/add-report", data);
+};
+
+export const addReportShareApi = async (data) => {
+  return await api.postPrivate("/report-share/add-report-share", data);
 };
 

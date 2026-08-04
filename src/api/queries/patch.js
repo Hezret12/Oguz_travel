@@ -121,3 +121,11 @@ export const markNotificationReadApi = async (data) => {
     throw err;
   }
 };
+
+export const updateReportApi = async (data) => {
+  return await api.patchPrivate('/report/update-report', data);
+};
+
+export const updateReportShareApi = async (data) => {
+  return await api.patchPrivate('/report-share/update-report-share', data);
+};
