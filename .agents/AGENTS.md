@@ -318,3 +318,11 @@ src/pages/<Feature>/
 
 - **ALWAYS** use the `size` prop syntax on `<Grid>` items (e.g., `<Grid size={{ xs: 12, sm: 6, lg: 4 }}>`) instead of legacy `item xs={12} sm={6}` props.
 
+---
+
+## 12. MUI Styling & Theme Tokens — NO Hardcoded Dark/Light Ternary Colors
+
+- **ALWAYS** use MUI Semantic Palette Tokens (`text.primary`, `text.secondary`, `background.paper`, `background.default`, `divider`, `action.hover`) instead of writing inline `isDark ? "#..." : "#..."` ternary color checks.
+- Only use custom hex colors if a component specifies an explicit non-standard accent/brand color (e.g., priority chips `#DC2626`, custom status dots).
+- **Rationale**: Eliminates Emotion CSS-in-JS class generation overhead on re-renders, guarantees dark/light theme consistency across the app, and prevents design system breakages.
+
