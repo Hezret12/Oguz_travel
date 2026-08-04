@@ -86,9 +86,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
   const statusOptions = useMemo(
     () => [
-      { value: 1, label: t("task.statusToDo") },
-      { value: 2, label: t("task.statusInProgress") },
-      { value: 3, label: t("task.statusCompleted") },
+      { value: 1, label: t("task.statusToDo"), color: "#64748B" },
+      { value: 2, label: t("task.statusInProgress"), color: "#2563EB" },
+      { value: 3, label: t("task.statusCompleted"), color: "#16A34A" },
     ],
     [t],
   );

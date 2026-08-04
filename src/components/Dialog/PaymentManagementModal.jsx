@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import {
   Box,
   Typography,
@@ -98,7 +98,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     },
   });
 
-  const amountValue = watch("amount");
+  const amountValue = useWatch({ control, name: "amount" });
 
   const [page, setPage] = useState(1);
   const [limit] = useState(10);

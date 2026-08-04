@@ -326,3 +326,12 @@ src/pages/<Feature>/
 - Only use custom hex colors if a component specifies an explicit non-standard accent/brand color (e.g., priority chips `#DC2626`, custom status dots).
 - **Rationale**: Eliminates Emotion CSS-in-JS class generation overhead on re-renders, guarantees dark/light theme consistency across the app, and prevents design system breakages.
 
+---
+
+## 13. React Hook Form Field Watching — ALWAYS Use `useWatch`
+
+- **ALWAYS** use the dedicated `useWatch` hook from `react-hook-form` (e.g., `const [startNo, endNo] = useWatch({ control, name: ["startNo", "endNo"] });`) when watching form values for dynamic calculations, conditional inputs, or side effects.
+- **NEVER** call `const val = watch("field")` directly from `useForm()`.
+- **Rationale**: Direct `useForm.watch()` forces full component re-renders on every single keystroke of watched fields. Using `useWatch` isolates field subscriptions, preventing unnecessary component re-renders and improving form input performance.
+
+

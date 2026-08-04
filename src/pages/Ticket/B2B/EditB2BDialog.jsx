@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMemo } from "react";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
@@ -115,7 +115,8 @@ const EditB2BDialog = ({ table, row }) => {
     mode: "onSubmit",
   });
 
-  const selectedCurrency = watch("currency") || "USD";
+  const rawSelectedCurrency = useWatch({ control, name: "currency" });
+  const selectedCurrency = rawSelectedCurrency || "USD";
   const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
 
   const closeDialog = () => {

@@ -60,8 +60,12 @@ export const NOTIFICATION_STATUS_CONFIG = {
 };
 
 export const REFERRAL_REPORT_STATUS_CONFIG = {
-  "SATIS YAPILDI": { label: "Satis yapildi", color: "#16a34a", icon: CheckCircleRoundedIcon },
-  "TÖLEG EDILDI": { label: "Töleg edildi", color: "#2563eb", icon: CheckCircleRoundedIcon },
-  "GARAŞYLÝAR": { label: "Garaşylýar", color: "#d97706", icon: ScheduleRoundedIcon },
-  "ÝATYRYLDY": { label: "Ýatyryldy", color: "#dc2626", icon: CancelRoundedIcon },
+  SATYLDY: { label: "Satyldy", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  "ZYÝAN ÝETEN": { label: "Zyýan ýeten", color: "#ea580c", icon: ScheduleRoundedIcon },
+  ÝITIRILEN: { label: "Ýitirilen", color: "#dc2626", icon: CancelRoundedIcon },
+  // Compatibility aliases
+  "SATIS YAPILDI": { label: "Satyldy", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  "TÖLEG EDILDI": { label: "Satyldy", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  "GARAŞYLÝAR": { label: "Zyýan ýeten", color: "#ea580c", icon: ScheduleRoundedIcon },
+  "ÝATYRYLDY": { label: "Ýitirilen", color: "#dc2626", icon: CancelRoundedIcon },
 };

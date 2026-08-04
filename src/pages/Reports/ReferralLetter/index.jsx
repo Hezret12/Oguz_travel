@@ -59,7 +59,7 @@ const ReferralLetterPage = () => {
       receivedBy: "NASIBA",
       startNo: "0354825",
       endNo: "0354974",
-      status: "Satis yapildi",
+      status: "Satyldy",
     },
     {
       id: "2",
@@ -70,7 +70,7 @@ const ReferralLetterPage = () => {
       receivedBy: "DOVRAN",
       startNo: "0354795",
       endNo: "0354824",
-      status: "Töleg edildi",
+      status: "Zyýan ýeten",
     },
   ]);
 

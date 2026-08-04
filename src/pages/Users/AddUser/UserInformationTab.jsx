@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { useEffect } from "react";
+import { useWatch } from "react-hook-form";
 import AppAutocomplete from "../../../components/AppAutocomplete";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomCheckbox from "../../../components/CustomCheckbox";
@@ -9,13 +10,15 @@ import { useLocale } from "../../../hooks/useLocale";
 const UserInformationTab = ({
   control,
   employees = [],
-  watch,
   setValue,
   isEdit,
 }) => {
   const { t } = useLocale();
-  const selectedEmployeeId = watch("employee_guid");
-  const isExternalUser = Boolean(watch("isExternalUser"));
+  const [selectedEmployeeId, rawIsExternalUser] = useWatch({
+    control,
+    name: ["employee_guid", "isExternalUser"],
+  });
+  const isExternalUser = Boolean(rawIsExternalUser);
 
   useEffect(() => {
     if (isExternalUser) {

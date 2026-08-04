@@ -8,19 +8,16 @@ import {
   useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import CustomTextField from "../../../components/CustomTextField";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 
-/**
- * AddLetterStockModal - Modal 1 for adding new letter stock batch
- * Matching Image 1 reference UI closely
- */
+
 const AddLetterStockModal = ({ open, close, onSubmitSuccess }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  const { control, handleSubmit, watch, reset } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       batchName: "",
       startNo: "0000001",
@@ -28,8 +25,10 @@ const AddLetterStockModal = ({ open, close, onSubmitSuccess }) => {
     },
   });
 
-  const watchStartNo = watch("startNo");
-  const watchEndNo = watch("endNo");
+  const [watchStartNo, watchEndNo] = useWatch({
+    control,
+    name: ["startNo", "endNo"],
+  });
 
   const calculatedCount = useMemo(() => {
     const start = parseInt(watchStartNo || "0", 10);

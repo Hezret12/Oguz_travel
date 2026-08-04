@@ -14,10 +14,9 @@ import CustomSelect from "../../../components/CustomSelect";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 
 const STATUS_OPTIONS = [
-  { label: "Satis yapildi", value: "Satis yapildi" },
-  { label: "Töleg edildi", value: "Töleg edildi" },
-  { label: "Garaşylýar", value: "Garaşylýar" },
-  { label: "Ýatyryldy", value: "Ýatyryldy" },
+  { label: "Satyldy", value: "Satyldy", color: "#16a34a" },
+  { label: "Zyýan ýeten", value: "Zyýan ýeten", color: "#ea580c" },
+  { label: "Ýitirilen", value: "Ýitirilen", color: "#dc2626" },
 ];
 
 /**
@@ -36,7 +35,7 @@ const AddReferralReportModal = ({ open, close, onSubmitSuccess }) => {
       receivedBy: "",
       startNo: "",
       endNo: "",
-      status: "Satis yapildi",
+      status: "Satyldy",
     },
   });
 

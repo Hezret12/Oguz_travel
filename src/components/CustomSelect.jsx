@@ -79,6 +79,7 @@ const CustomSelect = ({
       options.map((item) => ({
         id: getRowId(item),
         label: getRowLabel(item),
+        color: item?.color || item?.statusColor || item?.dotColor || null,
         raw: item,
       })),
     [options, getRowId, getRowLabel],
@@ -212,10 +213,26 @@ const CustomSelect = ({
                   const selectedOption = normalizedOptions.find(
                     (opt) => opt.id === selected,
                   );
+                  const optionColor =
+                    selectedOption?.color || selectedOption?.raw?.color;
+
                   return (
-                    <Typography sx={{ fontSize: "0.875rem" }}>
-                      {selectedOption?.label ?? selected}
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      {optionColor && (
+                        <Box
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: "50%",
+                            bgcolor: optionColor,
+                            flexShrink: 0,
+                          }}
+                        />
+                      )}
+                      <Typography sx={{ fontSize: "0.875rem" }}>
+                        {selectedOption?.label ?? selected}
+                      </Typography>
+                    </Box>
                   );
                 }}
                 {...props}
@@ -234,9 +251,30 @@ const CustomSelect = ({
                   if (renderOption) {
                     return renderOption(option.raw, option);
                   }
+                  const optionColor = option.color || option.raw?.color;
                   return (
                     <MenuItem key={option.id} value={option.id}>
-                      {option.label}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          width: "100%",
+                        }}
+                      >
+                        {optionColor && (
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              bgcolor: optionColor,
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                        <span>{option.label}</span>
+                      </Box>
                     </MenuItem>
                   );
                 })}
