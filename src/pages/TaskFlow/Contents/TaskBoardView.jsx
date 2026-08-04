@@ -168,7 +168,7 @@ function TaskBoardView({
                   </Box>
                 </Box>
 
-                {/* Task Cards Stack with Smooth Internal Scrollbar */}
+                {/* Task Cards Stack with Smooth Custom Internal Scrollbar */}
                 <Box
                   sx={{
                     display: "flex",
@@ -178,15 +178,27 @@ function TaskBoardView({
                     minHeight: 0,
                     overflowY: "auto",
                     pr: 0.5,
+                    scrollbarWidth: "thin",
+                    scrollbarColor: isDark
+                      ? "rgba(100, 116, 139, 0.4) transparent"
+                      : "rgba(148, 163, 184, 0.4) transparent",
                     "&::-webkit-scrollbar": {
-                      width: "5px",
+                      width: "4px",
                     },
                     "&::-webkit-scrollbar-track": {
                       backgroundColor: "transparent",
                     },
                     "&::-webkit-scrollbar-thumb": {
-                      backgroundColor: isDark ? "#334155" : "#CBD5E1",
-                      borderRadius: "4px",
+                      backgroundColor: isDark
+                        ? "rgba(100, 116, 139, 0.35)"
+                        : "rgba(148, 163, 184, 0.35)",
+                      borderRadius: "10px",
+                      transition: "background-color 0.2s ease-in-out",
+                    },
+                    "&:hover::-webkit-scrollbar-thumb": {
+                      backgroundColor: isDark
+                        ? "rgba(148, 163, 184, 0.6)"
+                        : "rgba(100, 116, 139, 0.5)",
                     },
                   }}
                 >
