@@ -256,8 +256,10 @@ export default function TaskFlow() {
       >
         {viewMode === "board" ? (
           <TaskBoardView
-            tasks={tasksList}
             columns={columns}
+            searchQuery={debouncedSearch}
+            filterPriority={filterPriority}
+            dueDate={dueDate}
             onMoveTaskStatus={handleMoveTaskStatus}
             onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}
