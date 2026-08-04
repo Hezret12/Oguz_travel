@@ -281,6 +281,27 @@ const ReferralLetterPage = () => {
     ...defaultMrtOptions,
     columns: reportsColumns,
     data: filteredReportList,
+    enableStickyHeader: true,
+    muiTableContainerProps: {
+      sx: {
+        flexGrow: 1,
+        minHeight: 0,
+        overflowY: "auto",
+      },
+    },
+    muiTablePaperProps: {
+      elevation: 0,
+      sx: {
+        borderRadius: "14px",
+        border: "1px solid",
+        borderColor: (theme) =>
+          theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+      },
+    },
     renderRowActions: ({ row, table }) => (
       <ColumnActionButtons
         row={row}
@@ -295,6 +316,27 @@ const ReferralLetterPage = () => {
     ...defaultMrtOptions,
     columns: stockColumns,
     data: filteredStockList,
+    enableStickyHeader: true,
+    muiTableContainerProps: {
+      sx: {
+        flexGrow: 1,
+        minHeight: 0,
+        overflowY: "auto",
+      },
+    },
+    muiTablePaperProps: {
+      elevation: 0,
+      sx: {
+        borderRadius: "14px",
+        border: "1px solid",
+        borderColor: (theme) =>
+          theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+      },
+    },
     renderRowActions: ({ row, table }) => (
       <ColumnActionButtons
         row={row}
@@ -385,8 +427,16 @@ const ReferralLetterPage = () => {
         />
       </Paper>
 
-      {/* Table Container */}
-      <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
+      {/* Table Container with Internal Scroll */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         {activeTab === "reports" ? (
           <MaterialReactTable table={reportsTable} />
         ) : (
