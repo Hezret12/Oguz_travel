@@ -12,7 +12,6 @@ import {
   Divider,
   ListItemIcon,
   ListItemText,
-  useTheme,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -43,8 +42,6 @@ function TaskBoardView({
   onDeleteTask,
 }) {
   const { t } = useLocale();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
 
   const [activeTask, setActiveTask] = useState(null);
   const [taskMenuAnchor, setTaskMenuAnchor] = useState(null);
@@ -108,8 +105,13 @@ function TaskBoardView({
             >
               <Box
                 sx={{
-                  bgcolor: isDark ? "#0F172A" : col.bgLight,
-                  border: `1px solid ${isDark ? "#1E293B" : col.borderLight}`,
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "background.default"
+                      : col.bgLight,
+                  border: "1px solid",
+                  borderColor: (theme) =>
+                    theme.palette.mode === "dark" ? "divider" : col.borderLight,
                   borderRadius: "12px",
                   p: 1.5,
                   height: "100%",
@@ -147,7 +149,7 @@ function TaskBoardView({
                         fontWeight: 700,
                         fontSize: "0.8rem",
                         letterSpacing: "0.04em",
-                        color: isDark ? "#F8FAFC" : "#1E293B",
+                        color: "text.primary",
                         textTransform: "uppercase",
                       }}
                     >
@@ -160,9 +162,10 @@ function TaskBoardView({
                         height: 18,
                         fontSize: "0.7rem",
                         fontWeight: 700,
-                        bgcolor: isDark ? "#1E293B" : "#FFFFFF",
+                        bgcolor: "background.paper",
                         color: col.color,
-                        border: `1px solid ${isDark ? "#334155" : "#E2E8F0"}`,
+                        border: "1px solid",
+                        borderColor: "divider",
                       }}
                     />
                   </Box>
@@ -179,9 +182,10 @@ function TaskBoardView({
                     overflowY: "auto",
                     pr: 0.5,
                     scrollbarWidth: "thin",
-                    scrollbarColor: isDark
-                      ? "rgba(100, 116, 139, 0.4) transparent"
-                      : "rgba(148, 163, 184, 0.4) transparent",
+                    scrollbarColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(100, 116, 139, 0.4) transparent"
+                        : "rgba(148, 163, 184, 0.4) transparent",
                     "&::-webkit-scrollbar": {
                       width: "4px",
                     },
@@ -189,16 +193,18 @@ function TaskBoardView({
                       backgroundColor: "transparent",
                     },
                     "&::-webkit-scrollbar-thumb": {
-                      backgroundColor: isDark
-                        ? "rgba(100, 116, 139, 0.35)"
-                        : "rgba(148, 163, 184, 0.35)",
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(100, 116, 139, 0.35)"
+                          : "rgba(148, 163, 184, 0.35)",
                       borderRadius: "10px",
                       transition: "background-color 0.2s ease-in-out",
                     },
                     "&:hover::-webkit-scrollbar-thumb": {
-                      backgroundColor: isDark
-                        ? "rgba(148, 163, 184, 0.6)"
-                        : "rgba(100, 116, 139, 0.5)",
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(148, 163, 184, 0.6)"
+                          : "rgba(100, 116, 139, 0.5)",
                     },
                   }}
                 >
@@ -251,9 +257,10 @@ function TaskBoardView({
                         elevation={0}
                         sx={{
                           borderRadius: "10px",
-                          border: `1px solid ${isDark ? "#1E293B" : "#E2E8F0"}`,
+                          border: "1px solid",
+                          borderColor: "divider",
                           borderLeft: `3.5px solid ${col.color}`,
-                          bgcolor: isDark ? "#1E293B" : "#FFFFFF",
+                          bgcolor: "background.paper",
                           height: 145,
                           flexShrink: 0,
                           display: "flex",
@@ -261,7 +268,7 @@ function TaskBoardView({
                           transition: "all 0.15s ease-in-out",
                           "&:hover": {
                             boxShadow: "0 4px 12px -2px rgba(0, 0, 0, 0.08)",
-                            borderColor: isDark ? "#475569" : "#CBD5E1",
+                            borderColor: "primary.main",
                           },
                         }}
                       >
@@ -290,7 +297,7 @@ function TaskBoardView({
                                 sx={{
                                   fontWeight: 650,
                                   fontSize: "0.85rem",
-                                  color: isDark ? "#F8FAFC" : "#0F172A",
+                                  color: "text.primary",
                                   lineHeight: 1.3,
                                   cursor: "pointer",
                                   display: "-webkit-box",
@@ -310,7 +317,7 @@ function TaskBoardView({
                                   setActiveTask(task);
                                 }}
                                 sx={{
-                                  color: isDark ? "#64748B" : "#94A3B8",
+                                  color: "text.secondary",
                                   p: 0.1,
                                   ml: 0.5,
                                 }}
@@ -323,7 +330,7 @@ function TaskBoardView({
                               <Typography
                                 variant="body2"
                                 sx={{
-                                  color: isDark ? "#94A3B8" : "#64748B",
+                                  color: "text.secondary",
                                   fontSize: "0.775rem",
                                   display: "-webkit-box",
                                   WebkitLineClamp: 1,
@@ -366,7 +373,7 @@ function TaskBoardView({
                                     display: "flex",
                                     alignItems: "center",
                                     gap: 0.3,
-                                    color: isDark ? "#64748B" : "#94A3B8",
+                                    color: "text.secondary",
                                     fontSize: "0.725rem",
                                     fontWeight: 500,
                                   }}
@@ -402,7 +409,8 @@ function TaskBoardView({
               borderRadius: "10px",
               minWidth: 150,
               boxShadow: "0 8px 20px -4px rgba(0,0,0,0.12)",
-              border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0"}`,
+              border: "1px solid",
+              borderColor: "divider",
               "& .MuiList-root": { py: 0.5 },
             },
           },
