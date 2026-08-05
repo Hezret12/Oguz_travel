@@ -170,6 +170,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       due_date: data.dueDate
         ? new Date(data.dueDate).toISOString()
         : new Date().toISOString(),
+      images: attachments,
       attachments,
     };
 

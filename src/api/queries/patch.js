@@ -108,19 +108,20 @@ export const updateTaskApi = async (data) => {
     return await api.patchFormDataPrivate("/messages/update-task", data);
   }
 
-  if (
-    data?.attachments &&
-    Array.isArray(data.attachments) &&
-    data.attachments.some((f) => f instanceof File)
-  ) {
+  const rawFiles = data.images || data.attachments || [];
+  const fileList = Array.isArray(rawFiles)
+    ? rawFiles.filter((f) => f instanceof File)
+    : [];
+
+  if (fileList.length > 0) {
     const formData = new FormData();
     Object.keys(data).forEach((key) => {
-      if (key === "attachments") {
-        data.attachments.forEach((file) => {
-          if (file instanceof File) {
-            formData.append("attachments", file);
-          }
+      if (key === "images" || key === "attachments") {
+        fileList.forEach((file) => {
+          formData.append("images", file);
         });
+      } else if (key === "assignee_guids" && Array.isArray(data.assignee_guids)) {
+        data.assignee_guids.forEach((guid) => formData.append("assignee_guids", guid));
       } else if (Array.isArray(data[key])) {
         data[key].forEach((val) => formData.append(key, val));
       } else if (data[key] !== undefined && data[key] !== null) {

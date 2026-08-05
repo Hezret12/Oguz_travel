@@ -77,12 +77,15 @@ const AppAutocomplete = ({
               limitTags={chipLimit ?? -1}
               disabled={disabled}
               options={options}
+              getOptionKey={(option, index) =>
+                option?.value ?? option?.id ?? option?.userGuid ?? option?.label ?? index
+              }
               getOptionLabel={(option) => option.label || ""}
-              renderTags={
-                customRenderTags
-                  ? customRenderTags
-                  : multiple
-                  ? (selectedOptions, getTagProps) => {
+              {...(customRenderTags
+                ? { renderTags: customRenderTags }
+                : multiple
+                ? {
+                    renderTags: (selectedOptions, getTagProps) => {
                       const total = selectedOptions.length;
                       const limit =
                         chipLimit && chipLimit > 0 ? chipLimit : total;
@@ -91,11 +94,16 @@ const AppAutocomplete = ({
 
                       return [
                         ...visible.map((opt, idx) => {
-                          const tagProps = getTagProps({ index: idx });
+                          const {
+                            key: tagKey,
+                            renderTags: _rt,
+                            ownerState: _os,
+                            ...cleanTagProps
+                          } = getTagProps({ index: idx });
                           return (
                             <Chip
-                              {...tagProps}
-                              key={opt.value || idx}
+                              {...cleanTagProps}
+                              key={tagKey || opt.value || idx}
                               label={opt.label}
                               size="small"
                               sx={{
@@ -134,16 +142,21 @@ const AppAutocomplete = ({
                           />
                         ) : null,
                       ].filter(Boolean);
-                    }
-                  : undefined
-              }
+                    },
+                  }
+                : {})}
               renderOption={(optionProps, option, { selected, index }) => {
-                const { key, renderTags: _renderTags, ownerState: _ownerState, ...restOptionProps } = optionProps;
+                const {
+                  key,
+                  renderTags: _renderTags,
+                  ownerState: _ownerState,
+                  ...restOptionProps
+                } = optionProps;
+                const optionKey =
+                  key || option?.value || option?.id || `${option?.label || "opt"}-${index}`;
+
                 return (
-                  <li
-                    key={key || `${option.value || option.label}-${index}`}
-                    {...restOptionProps}
-                  >
+                  <li key={optionKey} {...restOptionProps}>
                     {multiple && (
                       <Checkbox
                         icon={icon}

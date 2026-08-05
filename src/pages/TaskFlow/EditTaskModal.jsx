@@ -98,7 +98,12 @@ export default function EditTaskModal({ open, onClose, task }) {
           : [task.assignee_guid];
       }
 
-      setAttachments(Array.isArray(task.attachments) ? task.attachments : []);
+      const existingImages = Array.isArray(task.images)
+        ? task.images
+        : Array.isArray(task.attachments)
+        ? task.attachments
+        : [];
+      setAttachments(existingImages);
 
       reset({
         title: task.title || "",
@@ -145,6 +150,7 @@ export default function EditTaskModal({ open, onClose, task }) {
       due_date: formData.dueDate
         ? new Date(formData.dueDate).toISOString()
         : new Date().toISOString(),
+      images: attachments,
       attachments,
     };
 

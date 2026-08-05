@@ -9,15 +9,62 @@ import {
   Paper,
 } from "@mui/material";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import ImageIcon from "@mui/icons-material/Image";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import DescriptionIcon from "@mui/icons-material/Description";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
+import DownloadIcon from "@mui/icons-material/Download";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
+
+export async function downloadFile(fileOrUrl, fileName) {
+  if (fileOrUrl instanceof File) {
+    const url = URL.createObjectURL(fileOrUrl);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileOrUrl.name || fileName || "download";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    return;
+  }
+
+  if (typeof fileOrUrl === "string") {
+    let fullUrl = fileOrUrl;
+    if (!fullUrl.startsWith("http://") && !fullUrl.startsWith("https://")) {
+      const serverBase =
+        import.meta.env.VITE_API_MODE === "development"
+          ? import.meta.env.VITE_API_LOCAL_BACKEND_URL
+          : import.meta.env.VITE_API_PROD_BACKEND_URL;
+      try {
+        const origin = new URL(serverBase).origin;
+        const cleanPath = fileOrUrl.startsWith("/") ? fileOrUrl : `/${fileOrUrl}`;
+        fullUrl = `${origin}${cleanPath}`;
+      } catch {
+        fullUrl = `/${fileOrUrl}`;
+      }
+    }
+
+    try {
+      const response = await fetch(fullUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName || fileOrUrl.split("/").pop() || "download";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(fullUrl, "_blank");
+    }
+  }
+}
 
 const MAX_FILES = 4;
 const MAX_FILE_SIZE_MB = 10;
@@ -467,24 +514,45 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                   </Box>
                 </Box>
 
-                <Tooltip title={t("remove", "Aýyr")}>
-                  <IconButton
-                    size="small"
-                    onClick={() => handleRemoveFile(idx)}
-                    sx={{
-                      color: "text.secondary",
-                      "&:hover": {
-                        color: "error.main",
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(239, 68, 68, 0.15)"
-                            : "rgba(239, 68, 68, 0.08)",
-                      },
-                    }}
-                  >
-                    <DeleteOutlineIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Tooltip title={t("download", "Ýükläp al")}>
+                    <IconButton
+                      size="small"
+                      onClick={() => downloadFile(file, fileName)}
+                      sx={{
+                        color: "text.secondary",
+                        "&:hover": {
+                          color: "primary.main",
+                          bgcolor: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "rgba(14, 133, 132, 0.15)"
+                              : "rgba(14, 133, 132, 0.08)",
+                        },
+                      }}
+                    >
+                      <DownloadIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+
+                  <Tooltip title={t("remove", "Aýyr")}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleRemoveFile(idx)}
+                      sx={{
+                        color: "text.secondary",
+                        "&:hover": {
+                          color: "error.main",
+                          bgcolor: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "rgba(239, 68, 68, 0.15)"
+                              : "rgba(239, 68, 68, 0.08)",
+                        },
+                      }}
+                    >
+                      <DeleteOutlinedIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
               </Box>
             );
           })}

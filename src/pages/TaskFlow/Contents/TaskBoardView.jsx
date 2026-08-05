@@ -569,7 +569,7 @@ function TaskBoardView({
           </ListItemIcon>
           <ListItemText
             primary={t("task.editTask", "Düzelt")}
-            primaryTypographyProps={{ fontWeight: 600, fontSize: "0.775rem" }}
+            slotProps={{ primary: { fontWeight: 600, fontSize: "0.775rem" } }}
           />
         </MenuItem>
 
@@ -591,9 +591,11 @@ function TaskBoardView({
           </ListItemIcon>
           <ListItemText
             primary={t("task.statusToDo", "TO DO")}
-            primaryTypographyProps={{
-              fontSize: "0.75rem",
-              fontWeight: Number(activeTask?.status) === 1 ? 700 : 500,
+            slotProps={{
+              primary: {
+                fontSize: "0.75rem",
+                fontWeight: Number(activeTask?.status) === 1 ? 700 : 500,
+              },
             }}
           />
         </MenuItem>
@@ -614,9 +616,11 @@ function TaskBoardView({
           </ListItemIcon>
           <ListItemText
             primary={t("task.statusInProgress", "IN PROGRESS")}
-            primaryTypographyProps={{
-              fontSize: "0.75rem",
-              fontWeight: Number(activeTask?.status) === 2 ? 700 : 500,
+            slotProps={{
+              primary: {
+                fontSize: "0.75rem",
+                fontWeight: Number(activeTask?.status) === 2 ? 700 : 500,
+              },
             }}
           />
         </MenuItem>
@@ -637,9 +641,11 @@ function TaskBoardView({
           </ListItemIcon>
           <ListItemText
             primary={t("task.statusCompleted", "COMPLETED")}
-            primaryTypographyProps={{
-              fontSize: "0.75rem",
-              fontWeight: Number(activeTask?.status) === 3 ? 700 : 500,
+            slotProps={{
+              primary: {
+                fontSize: "0.75rem",
+                fontWeight: Number(activeTask?.status) === 3 ? 700 : 500,
+              },
             }}
           />
         </MenuItem>
@@ -658,10 +664,12 @@ function TaskBoardView({
           </ListItemIcon>
           <ListItemText
             primary={t("task.deleteTask", "Poz")}
-            primaryTypographyProps={{
-              fontWeight: 600,
-              fontSize: "0.775rem",
-              color: "error.main",
+            slotProps={{
+              primary: {
+                fontWeight: 600,
+                fontSize: "0.775rem",
+                color: "error.main",
+              },
             }}
           />
         </MenuItem>
