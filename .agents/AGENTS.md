@@ -357,3 +357,40 @@ src/pages/<Feature>/
   ```
 - **Rationale**: Guarantees clean declarative dialog lifecycle management natively tied to MaterialReactTable instance states across all page modules.
 
+
+---
+
+## 15. React 19 State Synchronization & Effect Cascading Prevention — NEVER Call `setState` Synchronously Inside `useEffect`
+
+- **NEVER** call `setState()` directly/synchronously inside a `useEffect` body to synchronize state derived from props or parent modal state (e.g., initializing local state when `task` prop changes).
+- **React 19 Anti-Pattern (Cascading Re-render Warning/Error)**:
+  ```jsx
+  // ❌ BAD: Triggers React 19 cascading re-render warning/error
+  useEffect(() => {
+    if (task && open) {
+      setAttachments(task.images || []);
+      reset(...);
+    }
+  }, [task, open]);
+  ```
+- **React 19 Official Pattern (In-Render State Adjustment)**:
+  ```jsx
+  // ✅ GOOD: Adjust state synchronously during render when key/props change
+  const [prevTaskKey, setPrevTaskKey] = useState(null);
+  const [attachments, setAttachments] = useState([]);
+
+  const currentTaskKey = open && task ? task.guid : null;
+  if (currentTaskKey !== prevTaskKey) {
+    setPrevTaskKey(currentTaskKey);
+    setAttachments(task?.images || task?.attachments || []);
+  }
+
+  useEffect(() => {
+    if (task && open) {
+      reset({ title: task.title, ... });
+    }
+  }, [task, open, reset]);
+  ```
+- **Rationale**: Direct `setState` calls inside `useEffect` force extra cascading re-render passes, harming UI performance and triggering React 19 strict compiler errors (*"Calling setState synchronously within an effect can trigger cascading renders"*). Adjusting state during render allows React to immediately retry rendering with updated state in a single execution pass.
+
+
