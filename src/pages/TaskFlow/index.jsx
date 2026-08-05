@@ -207,7 +207,7 @@ export default function TaskFlow() {
   const handleDeleteTask = useCallback(
     async (taskId) => {
       try {
-        await deleteTaskMutation.mutateAsync(taskId);
+        await deleteTaskMutation.mutateAsync({ guid: taskId });
         refetch();
       } catch (err) {
         console.warn("API delete task error:", err);

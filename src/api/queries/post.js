@@ -172,6 +172,10 @@ export const addTaskApi = async (data) => {
   return await api.postPrivate("/messages/add-task", data);
 };
 
+export const addNotificationApi = async (data) => {
+  return await api.postPrivate("/messages/add-notification", data);
+};
+
 export const addMessageApi = async (data) => {
   return await api.postPrivate("/messages/add-message", data);
 };

@@ -115,7 +115,7 @@ const NotificationPopover = () => {
   const handleToggleRead = useCallback(
     async (id) => {
       try {
-        await markReadMutation.mutateAsync({ guid: id, isRead: true });
+        await markReadMutation.mutateAsync({ task_guids: [id], guid: id, isRead: true });
         refetch();
       } catch (err) {
         console.warn('API mark notification read error:', err);
@@ -127,7 +127,7 @@ const NotificationPopover = () => {
   const handleDelete = useCallback(
     async (id) => {
       try {
-        await deleteMutation.mutateAsync(id);
+        await deleteMutation.mutateAsync({ guid: id });
         refetch();
       } catch (err) {
         console.warn('API delete notification error:', err);

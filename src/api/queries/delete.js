@@ -99,12 +99,14 @@ export const deleteEmployeeCommentApi = async (guid) => {
   return await api.deletePrivate('/employee-comment/delete-comment', guid);
 };
 
-export const deleteTaskApi = async (guid) => {
-  return await api.deletePrivate('/task/delete-task', guid);
+export const deleteTaskApi = async (data) => {
+  const payload = typeof data === 'object' && data !== null ? data : { guid: data };
+  return await api.deletePrivate('/messages/delete-notificOrmessage', payload);
 };
 
-export const deleteNotificationApi = async (guid) => {
-  return await api.deletePrivate('/messages/delete-notification', guid);
+export const deleteNotificationApi = async (data) => {
+  const payload = typeof data === 'object' && data !== null ? data : { guid: data };
+  return await api.deletePrivate('/messages/delete-notificOrmessage', payload);
 };
 
 export const deleteReportApi = async (guid) => {
