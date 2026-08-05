@@ -1,6 +1,7 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Alert } from "@mui/material";
+import toast from "react-hot-toast";
 
 import { useLocale } from "../../hooks/useLocale";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
@@ -15,7 +16,7 @@ import { getAllUsersApi } from "../../api/queries/getters";
 import { updateTaskApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload from "../../components/inputs/TaskFileUpload";
-import { useState } from "react";
+import { handleError } from "../../functions/generalHelpers";
 
 export default function EditTaskModal({ open, onClose, task }) {
   const { t } = useLocale();
@@ -30,7 +31,11 @@ export default function EditTaskModal({ open, onClose, task }) {
     key: "tasks",
     idKey: "guid",
     onSuccessUpdate: () => {
-      onClose();
+      toast.success(t("task.taskUpdatedSuccess", "Ýumuş üstünlikli täzelendi!"));
+      handleCloseModal();
+    },
+    onError: (err) => {
+      handleError(t("task.updateError", "Ýumuş täzelemekde ýalňyşlyk ýüze çykdy."), err);
     },
   });
 
@@ -76,6 +81,11 @@ export default function EditTaskModal({ open, onClose, task }) {
   });
 
   const [attachments, setAttachments] = useState([]);
+
+  const handleCloseModal = () => {
+    updateMutation.reset();
+    onClose();
+  };
 
   useEffect(() => {
     if (task && open) {
@@ -151,31 +161,48 @@ export default function EditTaskModal({ open, onClose, task }) {
         ? new Date(formData.dueDate).toISOString()
         : new Date().toISOString(),
       images: attachments,
-      attachments,
     };
 
     try {
       await updateMutation.mutateAsync(payload);
     } catch (err) {
-      console.warn("API updateTask error:", err);
-      onClose();
+      console.error("API updateTask error:", err);
     }
   };
 
+  const isSubmitting = updateMutation.isPending;
+
   return (
-    <CustomDialog open={open} close={onClose} widthX={580}>
+    <CustomDialog open={open} close={handleCloseModal} widthX={580}>
       <CustomDialogHeader
         title={t("task.editTask", "Edit Task")}
-        onClose={onClose}
+        onClose={handleCloseModal}
       />
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.8, pt: 0.5 }}>
+          {/* Error Alert Display */}
+          {updateMutation.isError && (
+            <Alert
+              severity="error"
+              sx={{
+                borderRadius: "10px",
+                fontSize: "0.825rem",
+                fontWeight: 500,
+              }}
+            >
+              {updateMutation.error?.response?.data?.message ||
+                updateMutation.error?.message ||
+                t("task.updateError", "Ýumuş täzelemekde ýalňyşlyk ýüze çykdy.")}
+            </Alert>
+          )}
+
           <CustomTextField
             name="title"
             control={control}
             label={t("task.taskTitle")}
             placeholder={t("task.enterTaskTitle")}
+            disabled={isSubmitting}
             required
           />
 
@@ -186,6 +213,7 @@ export default function EditTaskModal({ open, onClose, task }) {
             placeholder={t("task.enterDescription")}
             multiline
             rows={3}
+            disabled={isSubmitting}
           />
 
           <Grid container spacing={2}>
@@ -198,6 +226,7 @@ export default function EditTaskModal({ open, onClose, task }) {
                 placeholder={t("task.selectEmployee")}
                 multiple
                 maxChips={3}
+                disabled={isSubmitting}
               />
             </Grid>
 
@@ -207,6 +236,7 @@ export default function EditTaskModal({ open, onClose, task }) {
                 control={control}
                 label={t("task.priority")}
                 options={priorityOptions}
+                disabled={isSubmitting}
               />
             </Grid>
 
@@ -216,6 +246,7 @@ export default function EditTaskModal({ open, onClose, task }) {
                 control={control}
                 label={t("columns.status")}
                 options={statusOptions}
+                disabled={isSubmitting}
               />
             </Grid>
 
@@ -224,6 +255,7 @@ export default function EditTaskModal({ open, onClose, task }) {
                 name="dueDate"
                 control={control}
                 label={t("task.dueDate")}
+                disabled={isSubmitting}
               />
             </Grid>
           </Grid>
@@ -231,14 +263,16 @@ export default function EditTaskModal({ open, onClose, task }) {
           <TaskFileUpload
             files={attachments}
             onChange={setAttachments}
+            disabled={isSubmitting}
+            isSubmitting={isSubmitting}
           />
 
           <FooterButton
-            onCancel={onClose}
+            onCancel={handleCloseModal}
             saveText={t("save", "Save")}
             cancelText={t("cancel", "Cancel")}
             type="submit"
-            loading={updateMutation.isPending}
+            loading={isSubmitting}
           />
         </Box>
       </form>

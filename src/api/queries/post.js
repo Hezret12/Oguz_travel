@@ -180,12 +180,16 @@ export const addTaskApi = async (data) => {
 
   if (fileList.length > 0) {
     const formData = new FormData();
+    // Append files ONCE under field name 'images' for NestJS FilesInterceptor('images')
+    fileList.forEach((file) => {
+      formData.append("images", file);
+    });
+
     Object.keys(data).forEach((key) => {
-      if (key === "images" || key === "attachments") {
-        fileList.forEach((file) => {
-          formData.append("images", file);
-        });
-      } else if (key === "assignee_guids" && Array.isArray(data.assignee_guids)) {
+      // Skip file array keys (already appended above) to prevent duplicate uploads!
+      if (key === "images" || key === "attachments") return;
+
+      if (key === "assignee_guids" && Array.isArray(data.assignee_guids)) {
         data.assignee_guids.forEach((guid) => formData.append("assignee_guids", guid));
       } else if (Array.isArray(data[key])) {
         data[key].forEach((val) => formData.append(key, val));

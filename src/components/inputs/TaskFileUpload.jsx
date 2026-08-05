@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -7,6 +7,9 @@ import {
   Stack,
   Chip,
   Paper,
+  Dialog,
+  LinearProgress,
+  CircularProgress,
 } from "@mui/material";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -17,8 +20,34 @@ import TableChartIcon from "@mui/icons-material/TableChart";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DownloadIcon from "@mui/icons-material/Download";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
+
+export function getFileUrl(fileOrUrl) {
+  if (!fileOrUrl) return null;
+  if (fileOrUrl instanceof File) {
+    return URL.createObjectURL(fileOrUrl);
+  }
+  if (typeof fileOrUrl === "string") {
+    if (fileOrUrl.startsWith("http://") || fileOrUrl.startsWith("https://")) {
+      return fileOrUrl;
+    }
+    const serverBase =
+      import.meta.env.VITE_API_MODE === "development"
+        ? import.meta.env.VITE_API_LOCAL_BACKEND_URL
+        : import.meta.env.VITE_API_PROD_BACKEND_URL;
+    try {
+      const origin = new URL(serverBase).origin;
+      const cleanPath = fileOrUrl.startsWith("/") ? fileOrUrl : `/${fileOrUrl}`;
+      return `${origin}${cleanPath}`;
+    } catch {
+      return `/${fileOrUrl}`;
+    }
+  }
+  return null;
+}
 
 export async function downloadFile(fileOrUrl, fileName) {
   if (fileOrUrl instanceof File) {
@@ -141,22 +170,29 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
   const { t } = useLocale();
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [previews, setPreviews] = useState({});
+  const [previewModal, setPreviewModal] = useState(null);
 
-  // Generate object URLs for image preview thumbnails
-  useEffect(() => {
-    const newPreviews = {};
+  // Derive previews synchronously with useMemo to eliminate extra state re-renders
+  const previews = useMemo(() => {
+    const map = {};
     files.forEach((file, index) => {
-      if (file instanceof File && getFileCategory(file) === "image") {
-        newPreviews[index] = URL.createObjectURL(file);
+      if (getFileCategory(file) === "image") {
+        map[index] = getFileUrl(file);
       }
     });
-    setPreviews(newPreviews);
-
-    return () => {
-      Object.values(newPreviews).forEach((url) => URL.revokeObjectURL(url));
-    };
+    return map;
   }, [files]);
+
+  // Clean up blob URLs when previews change or component unmounts
+  useEffect(() => {
+    return () => {
+      Object.values(previews).forEach((url) => {
+        if (url && url.startsWith("blob:")) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [previews]);
 
   const processFiles = useCallback(
     (newFiles) => {
@@ -304,6 +340,35 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
         />
       </Box>
 
+      {/* Loading bar when submitting */}
+      {isSubmitting && (
+        <Box sx={{ mb: 1, width: "100%" }}>
+          <LinearProgress
+            sx={{
+              borderRadius: "4px",
+              height: 4,
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(0,0,0,0.06)",
+            }}
+          />
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              mt: 0.5,
+              fontWeight: 600,
+              fontSize: "0.725rem",
+              color: "primary.main",
+              textAlign: "center",
+            }}
+          >
+            {t("task.uploadingProcessing", "Faýllar ýüklenýär we işlenýär...")}
+          </Typography>
+        </Box>
+      )}
+
       {/* Hidden native input */}
       <input
         type="file"
@@ -312,22 +377,32 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
         accept={ACCEPT_STRING}
         multiple
         style={{ display: "none" }}
-        disabled={isFull}
+        disabled={isFull || disabled || isSubmitting}
       />
 
       {/* Dropzone Area */}
       {!isFull && (
         <Paper
           variant="outlined"
-          onClick={() => fileInputRef.current?.click()}
-          onDragOver={handleDragOver}
+          onClick={() => {
+            if (!disabled && !isSubmitting) {
+              fileInputRef.current?.click();
+            }
+          }}
+          onDragOver={(e) => {
+            if (!disabled && !isSubmitting) handleDragOver(e);
+          }}
           onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          onDrop={(e) => {
+            if (!disabled && !isSubmitting) handleDrop(e);
+          }}
           sx={{
             p: 2,
             borderRadius: "12px",
             borderStyle: "dashed",
             borderWidth: "1.5px",
+            opacity: disabled || isSubmitting ? 0.6 : 1,
+            pointerEvents: disabled || isSubmitting ? "none" : "auto",
             borderColor: isDragging
               ? "primary.main"
               : (theme) =>
@@ -342,7 +417,7 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                 : theme.palette.mode === "dark"
                 ? "rgba(255, 255, 255, 0.02)"
                 : "rgba(248, 250, 252, 0.8)",
-            cursor: "pointer",
+            cursor: disabled || isSubmitting ? "not-allowed" : "pointer",
             textAlign: "center",
             transition: "all 0.2s ease-in-out",
             "&:hover": {
@@ -456,25 +531,36 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                 >
                   {/* Image thumbnail or Format Icon */}
                   {previewUrl ? (
-                    <Box
-                      component="img"
-                      src={previewUrl}
-                      alt={fileName}
-                      sx={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: "6px",
-                        objectFit: "cover",
-                        border: "1px solid",
-                        borderColor: "divider",
-                        flexShrink: 0,
-                      }}
-                    />
+                    <Tooltip title={t("preview", "Uly görmek")}>
+                      <Box
+                        component="img"
+                        src={previewUrl}
+                        alt={fileName}
+                        onClick={() =>
+                          setPreviewModal({ url: previewUrl, name: fileName, file })
+                        }
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: "6px",
+                          objectFit: "cover",
+                          border: "1px solid",
+                          borderColor: "divider",
+                          flexShrink: 0,
+                          cursor: "pointer",
+                          transition: "transform 0.15s ease, border-color 0.15s ease",
+                          "&:hover": {
+                            transform: "scale(1.08)",
+                            borderColor: "primary.main",
+                          },
+                        }}
+                      />
+                    </Tooltip>
                   ) : (
                     <Box
                       sx={{
-                        width: 34,
-                        height: 34,
+                        width: 36,
+                        height: 36,
                         borderRadius: "8px",
                         bgcolor: (theme) =>
                           theme.palette.mode === "dark"
@@ -498,7 +584,7 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                         fontWeight: 600,
                         fontSize: "0.825rem",
                         color: "text.primary",
-                        maxWidth: { xs: 220, sm: 300 },
+                        maxWidth: { xs: 200, sm: 260 },
                       }}
                     >
                       {fileName}
@@ -515,6 +601,29 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                 </Box>
 
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  {previewUrl && (
+                    <Tooltip title={t("preview", "Uly görmek")}>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          setPreviewModal({ url: previewUrl, name: fileName, file })
+                        }
+                        sx={{
+                          color: "text.secondary",
+                          "&:hover": {
+                            color: "primary.main",
+                            bgcolor: (theme) =>
+                              theme.palette.mode === "dark"
+                                ? "rgba(14, 133, 132, 0.15)"
+                                : "rgba(14, 133, 132, 0.08)",
+                          },
+                        }}
+                      >
+                        <VisibilityOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+
                   <Tooltip title={t("download", "Ýükläp al")}>
                     <IconButton
                       size="small"
@@ -558,6 +667,84 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
           })}
         </Stack>
       )}
+
+      {/* Image Preview Lightbox Modal */}
+      <Dialog
+        open={Boolean(previewModal)}
+        onClose={() => setPreviewModal(null)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "16px",
+            bgcolor: "background.paper",
+            overflow: "hidden",
+            boxShadow: "0 24px 48px rgba(0,0,0,0.4)",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            p: 2,
+            px: 2.5,
+            borderBottom: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }} noWrap>
+            {previewModal?.name || t("task.imagePreview", "Surat syny")}
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {previewModal && (
+              <Tooltip title={t("download", "Ýükläp al")}>
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    downloadFile(previewModal.file || previewModal.url, previewModal.name)
+                  }
+                >
+                  <DownloadIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            <IconButton size="small" onClick={() => setPreviewModal(null)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            p: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark" ? "#090D16" : "#F1F5F9",
+            minHeight: 300,
+            maxHeight: "75vh",
+            overflow: "auto",
+          }}
+        >
+          {previewModal?.url && (
+            <Box
+              component="img"
+              src={previewModal.url}
+              alt={previewModal.name}
+              sx={{
+                maxWidth: "100%",
+                maxHeight: "70vh",
+                objectFit: "contain",
+                borderRadius: "8px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+              }}
+            />
+          )}
+        </Box>
+      </Dialog>
     </Box>
   );
 }

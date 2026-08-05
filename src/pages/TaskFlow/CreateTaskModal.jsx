@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Box, Grid } from "@mui/material";
+import { Box, Grid, Alert } from "@mui/material";
+import toast from "react-hot-toast";
 
 import { useLocale } from "../../hooks/useLocale";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
@@ -18,6 +19,7 @@ import { getAllUsersApi } from "../../api/queries/getters";
 import { addTaskApi } from "../../api/queries/post";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload from "../../components/inputs/TaskFileUpload";
+import { handleError } from "../../functions/generalHelpers";
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const { t } = useLocale();
@@ -32,7 +34,11 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     apiFn: addTaskApi,
     key: "tasks",
     onSuccess: () => {
+      toast.success(t("task.taskCreatedSuccess", "Ýumuş üstünlikli döredildi!"));
       handleCloseDialog();
+    },
+    onError: (err) => {
+      handleError(t("task.createError", "Ýumuş döretmekde ýalňyşlyk ýüze çykdy."), err);
     },
   });
 
@@ -99,6 +105,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const handleCloseDialog = () => {
     reset();
     setAttachments([]);
+    createMutation.reset();
     onClose();
   };
 
@@ -171,16 +178,16 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
         ? new Date(data.dueDate).toISOString()
         : new Date().toISOString(),
       images: attachments,
-      attachments,
     };
 
     try {
       await createMutation.mutateAsync(payload);
     } catch (err) {
-      console.warn("API addTask fallback to local state:", err);
-      handleCloseDialog();
+      console.error("API addTask mutation error:", err);
     }
   };
+
+  const isSubmitting = createMutation.isPending;
 
   return (
     <CustomDialog open={open} close={handleCloseDialog} widthX={580}>
@@ -191,12 +198,29 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.8, pt: 0.5 }}>
+          {/* Error Alert display */}
+          {createMutation.isError && (
+            <Alert
+              severity="error"
+              sx={{
+                borderRadius: "10px",
+                fontSize: "0.825rem",
+                fontWeight: 500,
+              }}
+            >
+              {createMutation.error?.response?.data?.message ||
+                createMutation.error?.message ||
+                t("task.createError", "Ýumuş döretmekde ýalňyşlyk ýüze çykdy.")}
+            </Alert>
+          )}
+
           {/* Title */}
           <CustomTextField
             name="title"
             control={control}
             label={t("task.taskTitle")}
             placeholder={t("task.enterTaskTitle")}
+            disabled={isSubmitting}
             required
           />
 
@@ -207,6 +231,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
             placeholder={t("task.enterDescription")}
             multiline
             rows={3}
+            disabled={isSubmitting}
           />
 
           <Grid container spacing={2}>
@@ -219,6 +244,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 placeholder={t("task.selectEmployee")}
                 multiple
                 maxChips={3}
+                disabled={isSubmitting}
               />
             </Grid>
 
@@ -228,6 +254,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 control={control}
                 label={t("task.priority")}
                 options={priorityOptions}
+                disabled={isSubmitting}
               />
             </Grid>
 
@@ -237,6 +264,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 control={control}
                 label={t("columns.status")}
                 options={statusOptions}
+                disabled={isSubmitting}
               />
             </Grid>
 
@@ -245,14 +273,17 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 name="dueDate"
                 control={control}
                 label={t("task.dueDate")}
+                disabled={isSubmitting}
               />
             </Grid>
           </Grid>
 
-          {/* File Upload Section (Max 4 files: Image, PDF, Excel, Word) */}
+          {/* File Upload Section */}
           <TaskFileUpload
             files={attachments}
             onChange={setAttachments}
+            disabled={isSubmitting}
+            isSubmitting={isSubmitting}
           />
 
           {/* Dialog Action Buttons */}
@@ -261,7 +292,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
             saveText={t("task.createTask")}
             cancelText={t("cancel")}
             type="submit"
-            loading={createMutation.isPending}
+            loading={isSubmitting}
           />
         </Box>
       </form>
