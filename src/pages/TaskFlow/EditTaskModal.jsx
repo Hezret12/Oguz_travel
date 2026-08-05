@@ -14,6 +14,8 @@ import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { getAllUsersApi } from "../../api/queries/getters";
 import { updateTaskApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
+import TaskFileUpload from "../../components/inputs/TaskFileUpload";
+import { useState } from "react";
 
 export default function EditTaskModal({ open, onClose, task }) {
   const { t } = useLocale();
@@ -73,6 +75,8 @@ export default function EditTaskModal({ open, onClose, task }) {
     },
   });
 
+  const [attachments, setAttachments] = useState([]);
+
   useEffect(() => {
     if (task && open) {
       let currentAssignees = [];
@@ -93,6 +97,8 @@ export default function EditTaskModal({ open, onClose, task }) {
           ? task.assignee_guid
           : [task.assignee_guid];
       }
+
+      setAttachments(Array.isArray(task.attachments) ? task.attachments : []);
 
       reset({
         title: task.title || "",
@@ -139,6 +145,7 @@ export default function EditTaskModal({ open, onClose, task }) {
       due_date: formData.dueDate
         ? new Date(formData.dueDate).toISOString()
         : new Date().toISOString(),
+      attachments,
     };
 
     try {
@@ -214,6 +221,11 @@ export default function EditTaskModal({ open, onClose, task }) {
               />
             </Grid>
           </Grid>
+
+          <TaskFileUpload
+            files={attachments}
+            onChange={setAttachments}
+          />
 
           <FooterButton
             onCancel={onClose}

@@ -17,6 +17,7 @@ import { useCreate } from "../../hooks/CRUD/useCreate";
 import { getAllUsersApi } from "../../api/queries/getters";
 import { addTaskApi } from "../../api/queries/post";
 import CustomDatePicker from "../../components/CustomDatePicker";
+import TaskFileUpload from "../../components/inputs/TaskFileUpload";
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const { t } = useLocale();
@@ -169,6 +170,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       due_date: data.dueDate
         ? new Date(data.dueDate).toISOString()
         : new Date().toISOString(),
+      attachments,
     };
 
     try {
@@ -245,6 +247,12 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
           </Grid>
+
+          {/* File Upload Section (Max 4 files: Image, PDF, Excel, Word) */}
+          <TaskFileUpload
+            files={attachments}
+            onChange={setAttachments}
+          />
 
           {/* Dialog Action Buttons */}
           <FooterButton

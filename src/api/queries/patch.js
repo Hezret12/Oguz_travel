@@ -104,7 +104,33 @@ export const updateTurkishPaymentApi = async (data) => {
 };
 
 export const updateTaskApi = async (data) => {
-  return await api.patchPrivate('/messages/update-task', data);
+  if (data instanceof FormData) {
+    return await api.patchFormDataPrivate("/messages/update-task", data);
+  }
+
+  if (
+    data?.attachments &&
+    Array.isArray(data.attachments) &&
+    data.attachments.some((f) => f instanceof File)
+  ) {
+    const formData = new FormData();
+    Object.keys(data).forEach((key) => {
+      if (key === "attachments") {
+        data.attachments.forEach((file) => {
+          if (file instanceof File) {
+            formData.append("attachments", file);
+          }
+        });
+      } else if (Array.isArray(data[key])) {
+        data[key].forEach((val) => formData.append(key, val));
+      } else if (data[key] !== undefined && data[key] !== null) {
+        formData.append(key, data[key]);
+      }
+    });
+    return await api.patchFormDataPrivate("/messages/update-task", formData);
+  }
+
+  return await api.patchPrivate("/messages/update-task", data);
 };
 
 export const updateNotificationApi = async (data) => {
