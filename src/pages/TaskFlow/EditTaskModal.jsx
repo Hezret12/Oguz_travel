@@ -31,22 +31,16 @@ export default function EditTaskModal({ open, onClose, task }) {
     key: "tasks",
     idKey: "guid",
     onSuccessUpdate: () => {
-      toast.success(t("task.taskUpdatedSuccess", "Ýumuş üstünlikli täzelendi!"));
+      toast.success(t("task.taskUpdatedSuccess"));
       handleCloseModal();
     },
     onError: (err) => {
-      handleError(t("task.updateError", "Ýumuş täzelemekde ýalňyşlyk ýüze çykdy."), err);
+      handleError(t("task.updateError"), err);
     },
   });
 
   const employeeOptions = useMemo(() => {
-    const list = Array.isArray(usersData)
-      ? usersData
-      : Array.isArray(usersData?.data)
-        ? usersData.data
-        : Array.isArray(usersData?.data?.data)
-          ? usersData.data.data
-          : [];
+    const list = Array.isArray(usersData?.data?.data) ? usersData.data.data : [];
 
     return list.map((usr) => {
       const userGuid = usr?.guid;
@@ -80,10 +74,23 @@ export default function EditTaskModal({ open, onClose, task }) {
     },
   });
 
+  const [prevTaskKey, setPrevTaskKey] = useState(null);
   const [attachments, setAttachments] = useState([]);
+
+  const currentTaskKey = open && task ? task.guid : null;
+  if (currentTaskKey !== prevTaskKey) {
+    setPrevTaskKey(currentTaskKey);
+    const existingImages = Array.isArray(task?.images)
+      ? task.images
+      : Array.isArray(task?.attachments)
+      ? task.attachments
+      : [];
+    setAttachments(existingImages);
+  }
 
   const handleCloseModal = () => {
     updateMutation.reset();
+    setPrevTaskKey(null);
     onClose();
   };
 
@@ -98,13 +105,6 @@ export default function EditTaskModal({ open, onClose, task }) {
       const currentAssignees = rawAssignees
         .map((a) => a?.guid || a?.user?.guid || a?.assignee_guid || a?.id || a)
         .filter(Boolean);
-
-      const existingImages = Array.isArray(task.images)
-        ? task.images
-        : Array.isArray(task.attachments)
-        ? task.attachments
-        : [];
-      setAttachments(existingImages);
 
       reset({
         title: task.title || "",
@@ -142,7 +142,7 @@ export default function EditTaskModal({ open, onClose, task }) {
         : [];
 
     const payload = {
-      guid: task.guid || task.id,
+      guid: task.guid,
       assignee_guids: selectedGuids,
       title: formData.title,
       description: formData.description || "",
@@ -184,7 +184,7 @@ export default function EditTaskModal({ open, onClose, task }) {
             >
               {updateMutation.error?.response?.data?.message ||
                 updateMutation.error?.message ||
-                t("task.updateError", "Ýumuş täzelemekde ýalňyşlyk ýüze çykdy.")}
+                t("task.updateError")}
             </Alert>
           )}
 
