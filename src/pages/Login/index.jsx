@@ -36,7 +36,7 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { login, isAuthenticated, user, loading: authLoading } = useAuth();
+  const { login, user } = useAuth();
   const { loginValidSchema } = useValidShema();
   const { mode, setMode } = useColorScheme();
 
@@ -45,11 +45,7 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!authLoading && isAuthenticated && user?.role) {
-      navigate(getRoleHomePath(user.role), { replace: true });
-    }
-  }, [authLoading, isAuthenticated, user, navigate]);
+
 
   const {
     control,

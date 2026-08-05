@@ -4,6 +4,7 @@ import { Box, CircularProgress } from '@mui/material';
 import ErrorBoundary from '../components/ErrorBoundary';
 import ScrollToTop from '../components/ScrollToTop';
 import ProtectedRoute from '../components/ProtectedRoute';
+import GuestRoute from '../components/GuestRoute';
 import DashboardLayout from '../layouts/DashboardLayout';
 
 
@@ -123,7 +124,12 @@ const router = createBrowserRouter([
     ),
     errorElement: <ErrorBoundary />,
     children: [
-      { path: '/login', element: <Login /> },
+      {
+        element: <GuestRoute />,
+        children: [
+          { path: '/login', element: <Login /> },
+        ],
+      },
       {
         path: '/',
         element: <ProtectedRoute />,

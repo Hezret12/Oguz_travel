@@ -14,7 +14,9 @@ export function AuthProvider({ children }) {
   // TanStack Query for Current Auth User (/auth/me)
   const {
     data: user = null,
-    isLoading: loading,
+    isLoading,
+    isFetching,
+    dataUpdatedAt,
     refetch: refetchUser,
   } = useQuery({
     queryKey: ['authUser'],
@@ -41,6 +43,17 @@ export function AuthProvider({ children }) {
     gcTime: 10 * 60 * 1000,
     retry: false,
   });
+
+  // ── Loading State Logic ─────────────────────────────────────────
+  // isLoading  = no data at all (first ever load, no initialData)
+  // isFetching = network request in-flight
+  // dataUpdatedAt = 0 means only initialData exists, no real /auth/me
+  //                 response has been received yet
+  //
+  // We stay in "loading" until the first REAL server verification
+  // completes. This prevents the expired-token bounce:
+  //   login → (stale cache says authenticated) → home → (401) → login
+  const loading = isLoading || (isFetching && dataUpdatedAt === 0);
 
   // TanStack Mutation for Logout (/auth/logout)
   const logoutMutation = useMutation({
