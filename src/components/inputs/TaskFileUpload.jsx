@@ -9,7 +9,7 @@ import {
   Paper,
   Dialog,
   LinearProgress,
-  CircularProgress,
+  Button,
 } from "@mui/material";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -25,78 +25,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
 
-export function getFileUrl(fileOrUrl) {
-  if (!fileOrUrl) return null;
-  if (fileOrUrl instanceof File) {
-    return URL.createObjectURL(fileOrUrl);
-  }
-  if (typeof fileOrUrl === "string") {
-    if (fileOrUrl.startsWith("http://") || fileOrUrl.startsWith("https://")) {
-      return fileOrUrl;
-    }
-    const serverBase =
-      import.meta.env.VITE_API_MODE === "development"
-        ? import.meta.env.VITE_API_LOCAL_BACKEND_URL
-        : import.meta.env.VITE_API_PROD_BACKEND_URL;
-    try {
-      const origin = new URL(serverBase).origin;
-      const cleanPath = fileOrUrl.startsWith("/") ? fileOrUrl : `/${fileOrUrl}`;
-      return `${origin}${cleanPath}`;
-    } catch {
-      return `/${fileOrUrl}`;
-    }
-  }
-  return null;
-}
-
-export async function downloadFile(fileOrUrl, fileName) {
-  if (fileOrUrl instanceof File) {
-    const url = URL.createObjectURL(fileOrUrl);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = fileOrUrl.name || fileName || "download";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    return;
-  }
-
-  if (typeof fileOrUrl === "string") {
-    let fullUrl = fileOrUrl;
-    if (!fullUrl.startsWith("http://") && !fullUrl.startsWith("https://")) {
-      const serverBase =
-        import.meta.env.VITE_API_MODE === "development"
-          ? import.meta.env.VITE_API_LOCAL_BACKEND_URL
-          : import.meta.env.VITE_API_PROD_BACKEND_URL;
-      try {
-        const origin = new URL(serverBase).origin;
-        const cleanPath = fileOrUrl.startsWith("/") ? fileOrUrl : `/${fileOrUrl}`;
-        fullUrl = `${origin}${cleanPath}`;
-      } catch {
-        fullUrl = `/${fileOrUrl}`;
-      }
-    }
-
-    try {
-      const response = await fetch(fullUrl);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = fileName || fileOrUrl.split("/").pop() || "download";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-    } catch {
-      window.open(fullUrl, "_blank");
-    }
-  }
-}
-
 const MAX_FILES = 4;
 const MAX_FILE_SIZE_MB = 10;
+
 const ALLOWED_EXTENSIONS = [
   "png",
   "jpg",
@@ -136,8 +67,8 @@ function getFileCategory(file) {
   }
   if (
     ["xls", "xlsx"].includes(ext) ||
-    mime.includes("spreadsheet") ||
-    mime.includes("excel")
+    mime.includes("excel") ||
+    mime.includes("spreadsheetml")
   ) {
     return "excel";
   }
@@ -154,19 +85,113 @@ function getFileCategory(file) {
 function FileTypeIcon({ category }) {
   switch (category) {
     case "image":
-      return <ImageIcon sx={{ color: "#0EA5E9", fontSize: 22 }} />;
+      return <ImageIcon sx={{ color: "#10B981", fontSize: 20 }} />;
     case "pdf":
-      return <PictureAsPdfIcon sx={{ color: "#EF4444", fontSize: 22 }} />;
+      return <PictureAsPdfIcon sx={{ color: "#EF4444", fontSize: 20 }} />;
     case "excel":
-      return <TableChartIcon sx={{ color: "#10B981", fontSize: 22 }} />;
+      return <TableChartIcon sx={{ color: "#059669", fontSize: 20 }} />;
     case "word":
-      return <DescriptionIcon sx={{ color: "#2563EB", fontSize: 22 }} />;
+      return <DescriptionIcon sx={{ color: "#2563EB", fontSize: 20 }} />;
     default:
-      return <InsertDriveFileIcon sx={{ color: "text.secondary", fontSize: 22 }} />;
+      return <InsertDriveFileIcon sx={{ color: "text.secondary", fontSize: 20 }} />;
   }
 }
 
-export default function TaskFileUpload({ files = [], onChange, label }) {
+function FileCategoryBadge({ category }) {
+  const configs = {
+    image: { label: "IMG", bg: "rgba(16, 185, 129, 0.12)", color: "#059669" },
+    pdf: { label: "PDF", bg: "rgba(239, 68, 68, 0.12)", color: "#DC2626" },
+    excel: { label: "XLS", bg: "rgba(16, 185, 129, 0.12)", color: "#047857" },
+    word: { label: "DOC", bg: "rgba(37, 99, 235, 0.12)", color: "#1D4ED8" },
+    other: { label: "FILE", bg: "rgba(100, 116, 139, 0.12)", color: "#475569" },
+  };
+
+  const cfg = configs[category] || configs.other;
+
+  return (
+    <Box
+      component="span"
+      sx={{
+        px: 0.75,
+        py: 0.2,
+        borderRadius: "4px",
+        fontSize: "0.65rem",
+        fontWeight: 700,
+        bgcolor: cfg.bg,
+        color: cfg.color,
+        letterSpacing: "0.5px",
+        display: "inline-block",
+      }}
+    >
+      {cfg.label}
+    </Box>
+  );
+}
+
+export function getFileUrl(fileOrUrl) {
+  if (!fileOrUrl) return null;
+  if (fileOrUrl instanceof File) {
+    return URL.createObjectURL(fileOrUrl);
+  }
+  if (typeof fileOrUrl === "string") {
+    if (fileOrUrl.startsWith("http://") || fileOrUrl.startsWith("https://")) {
+      return fileOrUrl;
+    }
+    const serverBase =
+      import.meta.env.VITE_API_MODE === "development"
+        ? import.meta.env.VITE_API_LOCAL_BACKEND_URL
+        : import.meta.env.VITE_API_PROD_BACKEND_URL;
+    try {
+      const origin = new URL(serverBase).origin;
+      const cleanPath = fileOrUrl.startsWith("/") ? fileOrUrl : `/${fileOrUrl}`;
+      return `${origin}${cleanPath}`;
+    } catch {
+      return `/${fileOrUrl}`;
+    }
+  }
+  return null;
+}
+
+export async function downloadFile(fileOrUrl, fileName) {
+  if (fileOrUrl instanceof File) {
+    const url = URL.createObjectURL(fileOrUrl);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileOrUrl.name || fileName || "download";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    return;
+  }
+
+  const url = getFileUrl(fileOrUrl);
+  if (!url) return;
+
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = fileName || url.split("/").pop() || "file";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    console.error("Direct download failed, opening link:", err);
+    window.open(url, "_blank");
+  }
+}
+
+export default function TaskFileUpload({
+  files = [],
+  onChange,
+  label,
+  disabled = false,
+  isSubmitting = false,
+}) {
   const { t } = useLocale();
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -297,7 +322,7 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 0.8,
+          mb: 1,
         }}
       >
         <Typography
@@ -315,34 +340,36 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
           {label || t("task.attachments", "Goşulýan faýllar")}
         </Typography>
 
-        <Chip
-          label={`${files.length} / ${MAX_FILES}`}
-          size="small"
-          color={files.length === MAX_FILES ? "warning" : "default"}
-          sx={{
-            height: "22px",
-            fontSize: "0.725rem",
-            fontWeight: 700,
-            borderRadius: "6px",
-            bgcolor: (theme) =>
-              files.length === MAX_FILES
-                ? theme.palette.mode === "dark"
-                  ? "rgba(245, 158, 11, 0.2)"
-                  : "#FEF3C7"
-                : theme.palette.mode === "dark"
-                ? "rgba(255, 255, 255, 0.08)"
-                : "rgba(0, 0, 0, 0.06)",
-            color: (theme) =>
-              files.length === MAX_FILES
-                ? "#D97706"
-                : theme.palette.text.secondary,
-          }}
-        />
+        <Stack direction="row" spacing={0.75} alignItems="center">
+          <Chip
+            label={`${files.length} / ${MAX_FILES}`}
+            size="small"
+            color={files.length === MAX_FILES ? "warning" : "default"}
+            sx={{
+              height: "22px",
+              fontSize: "0.725rem",
+              fontWeight: 700,
+              borderRadius: "6px",
+              bgcolor: (theme) =>
+                files.length === MAX_FILES
+                  ? theme.palette.mode === "dark"
+                    ? "rgba(245, 158, 11, 0.2)"
+                    : "#FEF3C7"
+                  : theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "rgba(0, 0, 0, 0.06)",
+              color: (theme) =>
+                files.length === MAX_FILES
+                  ? "#D97706"
+                  : theme.palette.text.secondary,
+            }}
+          />
+        </Stack>
       </Box>
 
       {/* Loading bar when submitting */}
       {isSubmitting && (
-        <Box sx={{ mb: 1, width: "100%" }}>
+        <Box sx={{ mb: 1.25, width: "100%" }}>
           <LinearProgress
             sx={{
               borderRadius: "4px",
@@ -398,6 +425,7 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
           }}
           sx={{
             p: 2,
+            px: 2.5,
             borderRadius: "12px",
             borderStyle: "dashed",
             borderWidth: "1.5px",
@@ -407,75 +435,129 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
               ? "primary.main"
               : (theme) =>
                   theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.2)"
-                    : "rgba(0, 0, 0, 0.16)",
+                    ? "rgba(255, 255, 255, 0.18)"
+                    : "rgba(0, 0, 0, 0.15)",
             bgcolor: (theme) =>
               isDragging
                 ? theme.palette.mode === "dark"
-                  ? "rgba(14, 133, 132, 0.12)"
-                  : "rgba(14, 133, 132, 0.04)"
+                  ? "rgba(14, 133, 132, 0.15)"
+                  : "rgba(14, 133, 132, 0.05)"
                 : theme.palette.mode === "dark"
                 ? "rgba(255, 255, 255, 0.02)"
-                : "rgba(248, 250, 252, 0.8)",
+                : "#F8FAFC",
             cursor: disabled || isSubmitting ? "not-allowed" : "pointer",
             textAlign: "center",
-            transition: "all 0.2s ease-in-out",
+            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
             "&:hover": {
               borderColor: "primary.main",
               bgcolor: (theme) =>
                 theme.palette.mode === "dark"
                   ? "rgba(14, 133, 132, 0.08)"
                   : "rgba(14, 133, 132, 0.03)",
-              transform: "translateY(-1px)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
             },
           }}
         >
           <Box
             sx={{
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
-              gap: 1,
+              justifyContent: "space-between",
+              gap: 2,
             }}
           >
             <Box
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                bgcolor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(14, 133, 132, 0.15)"
-                    : "rgba(14, 133, 132, 0.08)",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                color: "primary.main",
+                gap: 1.5,
+                textAlign: "left",
               }}
             >
-              <CloudUploadOutlinedIcon sx={{ fontSize: 24 }} />
+              <Box
+                sx={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: "10px",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(14, 133, 132, 0.18)"
+                      : "rgba(14, 133, 132, 0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "primary.main",
+                  flexShrink: 0,
+                }}
+              >
+                <CloudUploadOutlinedIcon sx={{ fontSize: 24 }} />
+              </Box>
+
+              <Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    color: "text.primary",
+                    fontSize: "0.85rem",
+                  }}
+                >
+                  {t(
+                    "task.dragOrClickToUpload",
+                    "Faýly şu ýere süýräň ýa-da saýlamak üçin basyň"
+                  )}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    fontSize: "0.725rem",
+                    display: "block",
+                    mt: 0.2,
+                  }}
+                >
+                  {t(
+                    "task.supportedFormatsHint",
+                    "Surat (PNG, JPG), PDF, Excel, Word (Maks: 4 faýl, 10MB)"
+                  )}
+                </Typography>
+              </Box>
             </Box>
 
-            <Box>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 600, color: "text.primary", fontSize: "0.85rem" }}
-              >
-                {t(
-                  "task.dragOrClickToUpload",
-                  "Faýly şu ýere süýräň ýa-da saýlamak üçin basyň"
-                )}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{ color: "text.secondary", fontSize: "0.75rem", mt: 0.25, display: "block" }}
-              >
-                {t(
-                  "task.supportedFormatsHint",
-                  "Surat (PNG, JPG), PDF, Excel, Word (Maks: 4 faýl, 10MB)"
-                )}
-              </Typography>
-            </Box>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!disabled && !isSubmitting) {
+                  fileInputRef.current?.click();
+                }
+              }}
+              disabled={disabled || isSubmitting}
+              sx={{
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.775rem",
+                px: 1.75,
+                py: 0.5,
+                borderColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : "rgba(0, 0, 0, 0.16)",
+                color: "text.primary",
+                whiteSpace: "nowrap",
+                "&:hover": {
+                  borderColor: "primary.main",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(14, 133, 132, 0.12)"
+                      : "rgba(14, 133, 132, 0.05)",
+                },
+              }}
+            >
+              {t("task.selectFile", "Faýl saýla")}
+            </Button>
           </Box>
         </Paper>
       )}
@@ -505,19 +587,21 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                   border: "1px solid",
                   borderColor: (theme) =>
                     theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.1)"
-                      : "rgba(0, 0, 0, 0.08)",
+                      ? "rgba(255, 255, 255, 0.08)"
+                      : "rgba(0, 0, 0, 0.07)",
                   bgcolor: (theme) =>
                     theme.palette.mode === "dark"
                       ? "rgba(255, 255, 255, 0.03)"
                       : "#FFFFFF",
-                  transition: "all 0.15s ease",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
+                  transition: "all 0.15s ease-in-out",
                   "&:hover": {
                     borderColor: "primary.main",
                     bgcolor: (theme) =>
                       theme.palette.mode === "dark"
                         ? "rgba(255, 255, 255, 0.05)"
                         : "rgba(240, 247, 255, 0.5)",
+                    transform: "translateY(-1px)",
                   },
                 }}
               >
@@ -540,15 +624,16 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                           setPreviewModal({ url: previewUrl, name: fileName, file })
                         }
                         sx={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: "6px",
+                          width: 38,
+                          height: 38,
+                          borderRadius: "8px",
                           objectFit: "cover",
                           border: "1px solid",
                           borderColor: "divider",
                           flexShrink: 0,
                           cursor: "pointer",
-                          transition: "transform 0.15s ease, border-color 0.15s ease",
+                          transition:
+                            "transform 0.15s ease, border-color 0.15s ease",
                           "&:hover": {
                             transform: "scale(1.08)",
                             borderColor: "primary.main",
@@ -559,8 +644,8 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                   ) : (
                     <Box
                       sx={{
-                        width: 36,
-                        height: 36,
+                        width: 38,
+                        height: 38,
                         borderRadius: "8px",
                         bgcolor: (theme) =>
                           theme.palette.mode === "dark"
@@ -577,18 +662,22 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                   )}
 
                   <Box sx={{ minWidth: 0 }}>
-                    <Typography
-                      variant="body2"
-                      noWrap
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: "0.825rem",
-                        color: "text.primary",
-                        maxWidth: { xs: 200, sm: 260 },
-                      }}
-                    >
-                      {fileName}
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                      <Typography
+                        variant="body2"
+                        noWrap
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: "0.825rem",
+                          color: "text.primary",
+                          maxWidth: { xs: 180, sm: 240 },
+                        }}
+                      >
+                        {fileName}
+                      </Typography>
+                      <FileCategoryBadge category={category} />
+                    </Box>
+
                     {fileSize && (
                       <Typography
                         variant="caption"
@@ -647,6 +736,7 @@ export default function TaskFileUpload({ files = [], onChange, label }) {
                     <IconButton
                       size="small"
                       onClick={() => handleRemoveFile(idx)}
+                      disabled={disabled || isSubmitting}
                       sx={{
                         color: "text.secondary",
                         "&:hover": {

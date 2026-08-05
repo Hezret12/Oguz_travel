@@ -23,6 +23,7 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 
 import { useLocale } from "../../../hooks/useLocale";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
@@ -279,32 +280,8 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
               }
             }
 
-            let assigneesList = [];
-            if (
-              Array.isArray(task.empltaskAssignee) &&
-              task.empltaskAssignee.length > 0
-            ) {
-              assigneesList = task.empltaskAssignee;
-            } else if (
-              Array.isArray(task.emplTaskAssignee) &&
-              task.emplTaskAssignee.length > 0
-            ) {
-              assigneesList = task.emplTaskAssignee;
-            } else if (
-              Array.isArray(task.assignees) &&
-              task.assignees.length > 0
-            ) {
-              assigneesList = task.assignees;
-            } else if (
-              Array.isArray(task.users) &&
-              task.users.length > 0
-            ) {
-              assigneesList = task.users;
-            } else if (task.employee || task.empluser || task.admuser) {
-              assigneesList = [
-                task.employee || task.empluser || task.admuser,
-              ];
-            }
+            const assigneesList = task.assignees || [];
+            const attachmentCount = task.images?.length || 0;
 
             return (
               <Card
@@ -399,7 +376,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
                     )}
                   </Box>
 
-                  {/* Card Footer: Priority Pill & Date & Assignees */}
+                  {/* Card Footer: Priority Pill & Date & Attachments & Assignees */}
                   <Box
                     sx={{
                       display: "flex",
@@ -435,6 +412,23 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
                         >
                           <CalendarTodayIcon sx={{ fontSize: 11 }} />
                           <span>{formattedDate}</span>
+                        </Box>
+                      )}
+                      {attachmentCount > 0 && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.25,
+                            color: "text.secondary",
+                            fontSize: "0.725rem",
+                            fontWeight: 600,
+                          }}
+                        >
+                          <AttachFileIcon
+                            sx={{ fontSize: 13, color: "primary.main" }}
+                          />
+                          <span>{attachmentCount}</span>
                         </Box>
                       )}
                     </Box>

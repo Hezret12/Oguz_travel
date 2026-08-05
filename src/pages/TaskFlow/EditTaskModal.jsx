@@ -89,24 +89,15 @@ export default function EditTaskModal({ open, onClose, task }) {
 
   useEffect(() => {
     if (task && open) {
-      let currentAssignees = [];
-      if (Array.isArray(task.empltaskAssignee) && task.empltaskAssignee.length > 0) {
-        currentAssignees = task.empltaskAssignee
-          .map((a) => a.assignee_guid || a.user?.guid || a.guid)
-          .filter(Boolean);
-      } else if (Array.isArray(task.emplTaskAssignee) && task.emplTaskAssignee.length > 0) {
-        currentAssignees = task.emplTaskAssignee
-          .map((a) => a.assignee_guid || a.user?.guid || a.guid)
-          .filter(Boolean);
-      } else if (Array.isArray(task.assignees) && task.assignees.length > 0) {
-        currentAssignees = task.assignees.map((a) => a.id || a.guid || a.value).filter(Boolean);
-      } else if (Array.isArray(task.assignee_guids)) {
-        currentAssignees = task.assignee_guids;
-      } else if (task.assignee_guid) {
-        currentAssignees = Array.isArray(task.assignee_guid)
-          ? task.assignee_guid
-          : [task.assignee_guid];
-      }
+      const rawAssignees = Array.isArray(task.assignees)
+        ? task.assignees
+        : Array.isArray(task.empltaskAssignee)
+        ? task.empltaskAssignee
+        : [];
+
+      const currentAssignees = rawAssignees
+        .map((a) => a?.guid || a?.user?.guid || a?.assignee_guid || a?.id || a)
+        .filter(Boolean);
 
       const existingImages = Array.isArray(task.images)
         ? task.images
