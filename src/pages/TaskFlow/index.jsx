@@ -107,6 +107,9 @@ export default function TaskFlow() {
     totalItems,
     pageCount,
     refetch,
+    isLoading,
+    isFetching,
+    isError,
   } = usePagginationGet({
     apiFn: getAllTasksApi,
     key: "tasks",
@@ -272,6 +275,9 @@ export default function TaskFlow() {
         ) : (
           <TaskListTable
             tasks={tasksList}
+            isLoading={isLoading}
+            isFetching={isFetching}
+            isError={isError}
             onMoveTaskStatus={handleMoveTaskStatus}
             onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}
@@ -279,8 +285,8 @@ export default function TaskFlow() {
         )}
       </Box>
 
-      {/* Shared App Pagination for both Board View and Table View */}
-      {pageCount > 1 && (
+      {/* Shared App Pagination for Table View */}
+      {viewMode === "list" && pageCount > 1 && (
         <Box
           sx={{
             pt: 1.5,

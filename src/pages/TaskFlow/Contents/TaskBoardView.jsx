@@ -13,6 +13,7 @@ import {
   ListItemIcon,
   ListItemText,
   CircularProgress,
+  Skeleton,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -78,6 +79,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     data: apiResponse,
     totalItems = 0,
     pageCount = 1,
+    isLoading,
     isFetching,
   } = usePagginationGet({
     apiFn: getAllTasksApi,
@@ -280,7 +282,13 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
             },
           }}
         >
-          {accumulatedTasks.map((task) => {
+          {isLoading && accumulatedTasks.length === 0 ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+              <Skeleton variant="rounded" height={145} sx={{ borderRadius: "10px" }} />
+              <Skeleton variant="rounded" height={145} sx={{ borderRadius: "10px" }} />
+            </Box>
+          ) : (
+            accumulatedTasks.map((task) => {
             const taskId = task.guid || task.id;
             const priorityProps = getPriorityBadgeProps(task.priority);
 
@@ -455,7 +463,8 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
                 </CardContent>
               </Card>
             );
-          })}
+          })
+          )}
 
           {/* Infinite scroll loading indicator */}
           {isFetching && hasMorePages && (

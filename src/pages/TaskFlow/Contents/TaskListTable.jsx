@@ -36,7 +36,15 @@ const getPriorityBadgeProps = (priority) => {
   }
 };
 
-function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask }) {
+function TaskListTable({
+  tasks = [],
+  isLoading = false,
+  isFetching = false,
+  isError = false,
+  onMoveTaskStatus,
+  onEditTask,
+  onDeleteTask,
+}) {
   const { t } = useLocale();
   const [activeTask, setActiveTask] = useState(null);
   const [taskMenuAnchor, setTaskMenuAnchor] = useState(null);
@@ -187,6 +195,12 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
     enableStickyHeader: true,
     enableTopToolbar: false,
     enableBottomToolbar: false,
+    state: {
+      isLoading,
+      showSkeletons: isLoading,
+      showAlertBanner: isError,
+      showProgressBars: isFetching,
+    },
     muiTableContainerProps: {
       sx: {
         flexGrow: 1,
