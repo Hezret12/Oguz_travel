@@ -335,12 +335,9 @@ export default function TaskFileUpload({
             gap: 0.5,
           }}
         >
-          {label || t("task.attachments", "Goşulýan faýllar")}
+          {label || t("task.attachments")}
           <Tooltip
-            title={t(
-              "task.fileUploadTooltip",
-              "Maksimum 4 faýl | Iň uly ölçeg: 10MB | Goldanýanlar: PNG, JPG, PDF, XLS, DOC"
-            )}
+            title={t("task.fileUploadTooltip")}
             arrow
             placement="top"
             slotProps={{
@@ -418,17 +415,6 @@ export default function TaskFileUpload({
           minHeight: "44px",
           height: "44px",
           borderRadius: "7px",
-          border: "1px solid",
-          borderColor: (theme) =>
-            isDragging
-              ? "primary.main"
-              : theme.palette.mode === "dark"
-              ? "rgba(255, 255, 255, 0.15)"
-              : "rgba(0, 0, 0, 0.23)",
-          bgcolor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(255, 255, 255, 0.03)"
-              : "#ffffff",
           px: 1.5,
           display: "flex",
           alignItems: "center",
@@ -436,15 +422,9 @@ export default function TaskFileUpload({
           opacity: disabled || isSubmitting ? 0.6 : 1,
           pointerEvents: disabled || isSubmitting ? "none" : "auto",
           cursor: disabled || isSubmitting || isFull ? "not-allowed" : "pointer",
+          borderColor: isDragging ? "primary.main" : undefined,
           boxSizing: "border-box",
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-          "&:hover": {
-            borderColor: "primary.main",
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark"
-                ? "rgba(255, 255, 255, 0.05)"
-                : "#ffffff",
-          },
         }}
       >
         <Box
@@ -477,13 +457,13 @@ export default function TaskFileUpload({
                 files.length > 0
                   ? "text.primary"
                   : theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.4)"
-                  : "rgba(0, 0, 0, 0.4)",
+                    ? "rgba(255, 255, 255, 0.4)"
+                    : "rgba(0, 0, 0, 0.4)",
             }}
           >
             {files.length > 0
-              ? `${files.length} faýl saýlandy`
-              : t("task.dragOrClickToUpload", "Faýl saýlaň ýa-da süýräň...")}
+              ? `${files.length} ${t("task.filesSelected", "resminama birikdirildi")}`
+              : t("task.dragOrClickToUpload", "Resminamany saýlaň ýa-da süýräň...")}
           </Typography>
         </Box>
 
@@ -502,8 +482,8 @@ export default function TaskFileUpload({
               files.length === MAX_FILES
                 ? "warning.main"
                 : theme.palette.mode === "dark"
-                ? "rgba(255, 255, 255, 0.1)"
-                : "rgba(0, 0, 0, 0.08)",
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : "rgba(0, 0, 0, 0.08)",
           }}
         />
       </Paper>
