@@ -90,7 +90,6 @@ const AddReferralReportModal = ({ open, close }) => {
       <CustomDialogHeader variant="h5" title="Täze hasabat goşmak" />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         <Grid container spacing={2.25}>
-          {/* Row 1: Sene & Mukdary */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomDatePicker
               name="date"
