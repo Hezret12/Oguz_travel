@@ -14,6 +14,8 @@ const CustomDatePicker = ({
   size = "small",
   showTime = false,
   format = showTime ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY",
+  sx = {},
+  slotProps: externalSlotProps = {},
   ...props
 }) => {
   const PickerComponent = showTime ? DateTimePicker : DatePicker;
@@ -35,6 +37,7 @@ const CustomDatePicker = ({
                   mb: 0.75,
                   fontWeight: 600,
                   fontSize: "0.875rem",
+                  color: "text.primary",
                 }}
               >
                 {label}
@@ -70,16 +73,20 @@ const CustomDatePicker = ({
                   error: hasError,
                   helperText: error?.message,
                   inputRef: field.ref,
-                },
-                sx: {
-                  "& .MuiInputBase-root": {
-                    fontSize: "0.9rem",
+                  sx: {
+                    "& .MuiInputBase-root": {
+                      fontSize: "0.9rem",
+                    },
+                    "& .MuiInputLabel-root": { fontSize: "0.9rem" },
+                    "& .MuiInputAdornment-root .MuiIconButton-root": {
+                      color: "#1565C0",
+                    },
+                    ...sx,
+                    ...(externalSlotProps.textField?.sx || {}),
                   },
-                  "& .MuiInputLabel-root": { fontSize: "0.9rem" },
-                  "& .MuiInputAdornment-root .MuiIconButton-root": {
-                    color: "#1565C0",
-                  },
+                  ...(externalSlotProps.textField || {}),
                 },
+                ...externalSlotProps,
               }}
               {...props}
             />

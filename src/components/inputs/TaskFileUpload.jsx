@@ -9,7 +9,6 @@ import {
   Paper,
   Dialog,
   LinearProgress,
-  Button,
 } from "@mui/material";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -18,9 +17,9 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import DescriptionIcon from "@mui/icons-material/Description";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
@@ -128,7 +127,7 @@ function FileCategoryBadge({ category }) {
   );
 }
 
-export function getFileUrl(fileOrUrl) {
+function getFileUrl(fileOrUrl) {
   if (!fileOrUrl) return null;
   if (fileOrUrl instanceof File) {
     return URL.createObjectURL(fileOrUrl);
@@ -152,7 +151,7 @@ export function getFileUrl(fileOrUrl) {
   return null;
 }
 
-export async function downloadFile(fileOrUrl, fileName) {
+async function downloadFile(fileOrUrl, fileName) {
   if (fileOrUrl instanceof File) {
     const url = URL.createObjectURL(fileOrUrl);
     const link = document.createElement("a");
@@ -316,13 +315,13 @@ export default function TaskFileUpload({
 
   return (
     <Box sx={{ width: "100%" }}>
-      {/* Header Label & Counter */}
+      {/* Header Label & Tooltip */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
-          mb: 1,
+          justifyContent: "space-between",
+          mb: 0.75,
         }}
       >
         <Typography
@@ -333,43 +332,34 @@ export default function TaskFileUpload({
             color: "text.primary",
             display: "flex",
             alignItems: "center",
-            gap: 0.75,
+            gap: 0.5,
           }}
         >
-          <AttachFileIcon sx={{ fontSize: 18, color: "primary.main" }} />
           {label || t("task.attachments", "Goşulýan faýllar")}
+          <Tooltip
+            title={t(
+              "task.fileUploadTooltip",
+              "Maksimum 4 faýl | Iň uly ölçeg: 10MB | Goldanýanlar: PNG, JPG, PDF, XLS, DOC"
+            )}
+            arrow
+            placement="top"
+          >
+            <HelpOutlineRoundedIcon
+              sx={{
+                fontSize: 14,
+                color: "text.secondary",
+                cursor: "pointer",
+                transition: "color 0.15s ease",
+                "&:hover": { color: "primary.main" },
+              }}
+            />
+          </Tooltip>
         </Typography>
-
-        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-          <Chip
-            label={`${files.length} / ${MAX_FILES}`}
-            size="small"
-            color={files.length === MAX_FILES ? "warning" : "default"}
-            sx={{
-              height: "22px",
-              fontSize: "0.725rem",
-              fontWeight: 700,
-              borderRadius: "6px",
-              bgcolor: (theme) =>
-                files.length === MAX_FILES
-                  ? theme.palette.mode === "dark"
-                    ? "rgba(245, 158, 11, 0.2)"
-                    : "#FEF3C7"
-                  : theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.08)"
-                  : "rgba(0, 0, 0, 0.06)",
-              color: (theme) =>
-                files.length === MAX_FILES
-                  ? "#D97706"
-                  : theme.palette.text.secondary,
-            }}
-          />
-        </Stack>
       </Box>
 
       {/* Loading bar when submitting */}
       {isSubmitting && (
-        <Box sx={{ mb: 1.25, width: "100%" }}>
+        <Box sx={{ mb: 1, width: "100%" }}>
           <LinearProgress
             sx={{
               borderRadius: "4px",
@@ -380,19 +370,6 @@ export default function TaskFileUpload({
                   : "rgba(0,0,0,0.06)",
             }}
           />
-          <Typography
-            variant="caption"
-            sx={{
-              display: "block",
-              mt: 0.5,
-              fontWeight: 600,
-              fontSize: "0.725rem",
-              color: "primary.main",
-              textAlign: "center",
-            }}
-          >
-            {t("task.uploadingProcessing", "Faýllar ýüklenýär we işlenýär...")}
-          </Typography>
         </Box>
       )}
 
@@ -407,160 +384,114 @@ export default function TaskFileUpload({
         disabled={isFull || disabled || isSubmitting}
       />
 
-      {/* Dropzone Area */}
-      {!isFull && (
-        <Paper
-          variant="outlined"
-          onClick={() => {
-            if (!disabled && !isSubmitting) {
-              fileInputRef.current?.click();
-            }
-          }}
-          onDragOver={(e) => {
-            if (!disabled && !isSubmitting) handleDragOver(e);
-          }}
-          onDragLeave={handleDragLeave}
-          onDrop={(e) => {
-            if (!disabled && !isSubmitting) handleDrop(e);
-          }}
-          sx={{
-            p: 2,
-            px: 2.5,
-            borderRadius: "12px",
-            borderStyle: "dashed",
-            borderWidth: "1.5px",
-            opacity: disabled || isSubmitting ? 0.6 : 1,
-            pointerEvents: disabled || isSubmitting ? "none" : "auto",
-            borderColor: isDragging
+      {/* 44px Input Field matching CustomSelect & CustomTextField 100% */}
+      <Paper
+        variant="outlined"
+        onClick={() => {
+          if (!disabled && !isSubmitting && !isFull) {
+            fileInputRef.current?.click();
+          }
+        }}
+        onDragOver={(e) => {
+          if (!disabled && !isSubmitting && !isFull) handleDragOver(e);
+        }}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => {
+          if (!disabled && !isSubmitting && !isFull) handleDrop(e);
+        }}
+        sx={{
+          minHeight: "44px",
+          height: "44px",
+          borderRadius: "7px",
+          border: "1px solid",
+          borderColor: (theme) =>
+            isDragging
               ? "primary.main"
-              : (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.18)"
-                    : "rgba(0, 0, 0, 0.15)",
+              : theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.15)"
+              : "rgba(0, 0, 0, 0.23)",
+          bgcolor: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.03)"
+              : "#ffffff",
+          px: 1.5,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          opacity: disabled || isSubmitting ? 0.6 : 1,
+          pointerEvents: disabled || isSubmitting ? "none" : "auto",
+          cursor: disabled || isSubmitting || isFull ? "not-allowed" : "pointer",
+          boxSizing: "border-box",
+          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          "&:hover": {
+            borderColor: "primary.main",
             bgcolor: (theme) =>
-              isDragging
-                ? theme.palette.mode === "dark"
-                  ? "rgba(14, 133, 132, 0.15)"
-                  : "rgba(14, 133, 132, 0.05)"
-                : theme.palette.mode === "dark"
-                ? "rgba(255, 255, 255, 0.02)"
-                : "#F8FAFC",
-            cursor: disabled || isSubmitting ? "not-allowed" : "pointer",
-            textAlign: "center",
-            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-            "&:hover": {
-              borderColor: "primary.main",
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(14, 133, 132, 0.08)"
-                  : "rgba(14, 133, 132, 0.03)",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
-            },
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.05)"
+                : "#ffffff",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            minWidth: 0,
+            flex: 1,
+            overflow: "hidden",
           }}
         >
-          <Box
+          <CloudUploadOutlinedIcon
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
+              fontSize: 18,
+              color: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.5)"
+                  : "rgba(0, 0, 0, 0.5)",
+              flexShrink: 0,
+            }}
+          />
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              fontSize: "0.875rem",
+              fontWeight: 400,
+              color: (theme) =>
+                files.length > 0
+                  ? "text.primary"
+                  : theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.4)"
+                  : "rgba(0, 0, 0, 0.4)",
             }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                textAlign: "left",
-              }}
-            >
-              <Box
-                sx={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: "10px",
-                  bgcolor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(14, 133, 132, 0.18)"
-                      : "rgba(14, 133, 132, 0.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "primary.main",
-                  flexShrink: 0,
-                }}
-              >
-                <CloudUploadOutlinedIcon sx={{ fontSize: 24 }} />
-              </Box>
+            {files.length > 0
+              ? `${files.length} faýl saýlandy`
+              : t("task.dragOrClickToUpload", "Faýl saýlaň ýa-da süýräň...")}
+          </Typography>
+        </Box>
 
-              <Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 600,
-                    color: "text.primary",
-                    fontSize: "0.85rem",
-                  }}
-                >
-                  {t(
-                    "task.dragOrClickToUpload",
-                    "Faýly şu ýere süýräň ýa-da saýlamak üçin basyň"
-                  )}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                    fontSize: "0.725rem",
-                    display: "block",
-                    mt: 0.2,
-                  }}
-                >
-                  {t(
-                    "task.supportedFormatsHint",
-                    "Surat (PNG, JPG), PDF, Excel, Word (Maks: 4 faýl, 10MB)"
-                  )}
-                </Typography>
-              </Box>
-            </Box>
-
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!disabled && !isSubmitting) {
-                  fileInputRef.current?.click();
-                }
-              }}
-              disabled={disabled || isSubmitting}
-              sx={{
-                borderRadius: "8px",
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: "0.775rem",
-                px: 1.75,
-                py: 0.5,
-                borderColor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.2)"
-                    : "rgba(0, 0, 0, 0.16)",
-                color: "text.primary",
-                whiteSpace: "nowrap",
-                "&:hover": {
-                  borderColor: "primary.main",
-                  bgcolor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(14, 133, 132, 0.12)"
-                      : "rgba(14, 133, 132, 0.05)",
-                },
-              }}
-            >
-              {t("task.selectFile", "Faýl saýla")}
-            </Button>
-          </Box>
-        </Paper>
-      )}
+        <Chip
+          label={`${files.length} / ${MAX_FILES}`}
+          size="small"
+          color={files.length === MAX_FILES ? "warning" : "default"}
+          sx={{
+            height: "20px",
+            fontSize: "0.675rem",
+            fontWeight: 700,
+            borderRadius: "4px",
+            flexShrink: 0,
+            ml: 1,
+            bgcolor: (theme) =>
+              files.length === MAX_FILES
+                ? "warning.main"
+                : theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.1)"
+                : "rgba(0, 0, 0, 0.08)",
+          }}
+        />
+      </Paper>
 
       {/* Files List Preview */}
       {files.length > 0 && (
@@ -670,7 +601,7 @@ export default function TaskFileUpload({
                           fontWeight: 600,
                           fontSize: "0.825rem",
                           color: "text.primary",
-                          maxWidth: { xs: 180, sm: 240 },
+                          maxWidth: { xs: 90, sm: 110, md: 140 },
                         }}
                       >
                         {fileName}

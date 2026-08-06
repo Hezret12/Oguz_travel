@@ -247,6 +247,30 @@ export default function EditTaskModal({ open, onClose, task }) {
                 control={control}
                 label={t("task.dueDate")}
                 disabled={isSubmitting}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "7px",
+                    minHeight: "44px",
+                    maxHeight: "44px",
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.03)"
+                        : "#ffffff",
+                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.05)"
+                          : "#ffffff",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "primary.main",
+                      },
+                    },
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    py: "10px",
+                  },
+                }}
               />
             </Grid>
           </Grid>

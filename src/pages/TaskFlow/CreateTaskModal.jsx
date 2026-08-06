@@ -34,11 +34,16 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     apiFn: addTaskApi,
     key: "tasks",
     onSuccess: () => {
-      toast.success(t("task.taskCreatedSuccess", "Ýumuş üstünlikli döredildi!"));
+      toast.success(
+        t("task.taskCreatedSuccess", "Ýumuş üstünlikli döredildi!"),
+      );
       handleCloseDialog();
     },
     onError: (err) => {
-      handleError(t("task.createError", "Ýumuş döretmekde ýalňyşlyk ýüze çykdy."), err);
+      handleError(
+        t("task.createError", "Ýumuş döretmekde ýalňyşlyk ýüze çykdy."),
+        err,
+      );
     },
   });
 
@@ -55,10 +60,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       const userGuid = usr?.guid;
       const emp = usr?.employee;
       const fullName =
-        emp?.fullName ||
-        usr?.fullName ||
-        usr?.phone_number ||
-        "User";
+        emp?.fullName || usr?.fullName || usr?.phone_number || "User";
 
       return {
         value: userGuid,
@@ -137,10 +139,10 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       (String(data.status).toLowerCase().includes("todo")
         ? 1
         : String(data.status).toLowerCase().includes("progress")
-        ? 2
-        : String(data.status).toLowerCase().includes("complet")
-        ? 3
-        : 1);
+          ? 2
+          : String(data.status).toLowerCase().includes("complet")
+            ? 3
+            : 1);
 
     const now = dayjs();
     dispatch(
@@ -194,10 +196,13 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       <CustomDialogHeader
         title={t("task.createTask")}
         onClose={handleCloseDialog}
+        variant={"h6"}
       />
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.8, pt: 0.5 }}>
+        <Box
+          sx={{ display: "flex", flexDirection: "column", gap: 1.8, pt: 0.5 }}
+        >
           {/* Error Alert display */}
           {createMutation.isError && (
             <Alert
@@ -248,7 +253,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <CustomSelect
                 name="priority"
                 control={control}
@@ -258,7 +263,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <CustomSelect
                 name="status"
                 control={control}
@@ -268,29 +273,51 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <CustomDatePicker
                 name="dueDate"
                 control={control}
                 label={t("task.dueDate")}
                 disabled={isSubmitting}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "7px",
+                    minHeight: "44px",
+                    maxHeight: "44px",
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.03)"
+                        : "#ffffff",
+                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.05)"
+                          : "#ffffff",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "primary.main",
+                      },
+                    },
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    py: "10px",
+                  },
+                }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+              <TaskFileUpload
+                files={attachments}
+                onChange={setAttachments}
+                disabled={isSubmitting}
+                isSubmitting={isSubmitting}
               />
             </Grid>
           </Grid>
 
-          {/* File Upload Section */}
-          <TaskFileUpload
-            files={attachments}
-            onChange={setAttachments}
-            disabled={isSubmitting}
-            isSubmitting={isSubmitting}
-          />
-
           {/* Dialog Action Buttons */}
           <FooterButton
             onCancel={handleCloseDialog}
-            saveText={t("task.createTask")}
-            cancelText={t("cancel")}
             type="submit"
             loading={isSubmitting}
           />
