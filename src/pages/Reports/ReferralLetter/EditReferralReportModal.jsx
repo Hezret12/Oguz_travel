@@ -58,7 +58,6 @@ const EditReferralReportModal = ({ table, row }) => {
     }
   }, [row, reset]);
 
-  // Fetch employees for assignment & receiver dropdowns
   const { data: employees = [] } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
@@ -110,7 +109,6 @@ const EditReferralReportModal = ({ table, row }) => {
       <CustomDialogHeader variant="h5" title="Hasabaty düzeltmek" />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         <Grid container spacing={2.25}>
-          {/* Row 1: Sene & Mukdary */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomDatePicker
               name="date"
@@ -128,7 +126,6 @@ const EditReferralReportModal = ({ table, row }) => {
             />
           </Grid>
 
-          {/* Row 2: Tabşyran & Kabul eden */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <AppAutocomplete
               name="assignment_opr_guid"
@@ -146,7 +143,6 @@ const EditReferralReportModal = ({ table, row }) => {
             />
           </Grid>
 
-          {/* Row 3: ÝH №-den & ÝH № çenli */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               name="startNo"
@@ -162,7 +158,6 @@ const EditReferralReportModal = ({ table, row }) => {
             />
           </Grid>
 
-          {/* Row 4: Status (Full Width) */}
           <Grid size={{ xs: 12 }}>
             <CustomSelect
               name="status"
@@ -172,7 +167,6 @@ const EditReferralReportModal = ({ table, row }) => {
             />
           </Grid>
 
-          {/* Row 5: Bellik (Note - Full Width) */}
           <Grid size={{ xs: 12 }}>
             <CustomTextField
               name="note"
