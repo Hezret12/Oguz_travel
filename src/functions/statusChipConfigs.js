@@ -29,7 +29,6 @@ export const TRANSLATION_STATUS_CONFIG = {
   TRUE: { label: "Gyssagly", color: "#e11d48", icon: BoltRoundedIcon },
   FALSE: { label: "Adaty", color: "#0284c7", icon: ScheduleRoundedIcon },
   "0": { label: "Gaýtaryldy", color: "#ea580c", icon: ReplayRoundedIcon },
-  0: { label: "Gaýtaryldy", color: "#ea580c", icon: ReplayRoundedIcon },
 };
 
 export const VISA_CATEGORY_CONFIG = {

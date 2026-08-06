@@ -276,7 +276,9 @@ const GlobalClientAutocompleteField = ({
         }
         onChange={(_, client) => selectClient(client)}
         renderOption={(props, option) => {
-          const { key, renderTags: _renderTags, ownerState: _ownerState, ...optionProps } = props;
+          const { key, ...optionProps } = props;
+          delete optionProps.renderTags;
+          delete optionProps.ownerState;
           const selected = optionProps["aria-selected"] === "true";
           const optionKey = option?.guid || option?.id || key;
           return (

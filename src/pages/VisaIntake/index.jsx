@@ -28,6 +28,7 @@ import FilterDrawer from "../../components/FilterDrawer";
 import VisaIntakeFilter from "./Contents/VisaIntakeFilter";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import StackedCell from "../../components/inputs/StackCell";
+import StatusChip from "../../components/StatusChip";
 import {
   VISA_CATEGORY_CONFIG,
   PROCESSED_STATUS_CONFIG,

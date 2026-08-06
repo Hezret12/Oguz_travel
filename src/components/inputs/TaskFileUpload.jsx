@@ -340,7 +340,7 @@ export default function TaskFileUpload({
           {label || t("task.attachments", "Goşulýan faýllar")}
         </Typography>
 
-        <Stack direction="row" spacing={0.75} alignItems="center">
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
           <Chip
             label={`${files.length} / ${MAX_FILES}`}
             size="small"

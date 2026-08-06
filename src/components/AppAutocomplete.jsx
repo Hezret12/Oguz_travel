@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import {
   Autocomplete,
   Box,
@@ -14,11 +15,19 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
+
+const CleanRoot = forwardRef(function CleanRoot(props, ref) {
+  const domProps = { ...props };
+  delete domProps.renderTags;
+  delete domProps.ownerState;
+  return <div ref={ref} {...domProps} />;
+});
+
 const AppAutocomplete = ({
   name,
   control,
   label,
-  options = [], // [{ label: "name", value: "id" }]
+  options = [],
   required = false,
   placeholder,
   fullWidth = true,
@@ -31,7 +40,9 @@ const AppAutocomplete = ({
   ...restProps
 }) => {
   // Strip any accidental renderTags or ownerState from restProps
-  const { renderTags: _unusedRenderTags, ownerState: _unusedOwnerState, ...cleanProps } = restProps;
+  const cleanProps = { ...restProps };
+  delete cleanProps.renderTags;
+  delete cleanProps.ownerState;
 
   return (
     <Controller
@@ -49,13 +60,13 @@ const AppAutocomplete = ({
           typeof maxChips === "number" && maxChips > 0
             ? maxChips
             : typeof cleanProps.limitTags === "number" && cleanProps.limitTags > 0
-            ? cleanProps.limitTags
-            : null;
+              ? cleanProps.limitTags
+              : null;
 
         const renderTagsProp = customRenderTags
           ? customRenderTags
           : multiple
-          ? (selectedOptions, getTagProps) => {
+            ? (selectedOptions, getTagProps) => {
               const total = selectedOptions.length;
               const limit = chipLimit && chipLimit > 0 ? chipLimit : total;
               const visible = selectedOptions.slice(0, limit);
@@ -63,15 +74,15 @@ const AppAutocomplete = ({
 
               return [
                 ...visible.map((opt, idx) => {
-                  const {
-                    key: tagKey,
-                    renderTags: _rt,
-                    ownerState: _os,
-                    ...cleanTagProps
-                  } = getTagProps({ index: idx });
+                  const tagProps = { ...getTagProps({ index: idx }) };
+                  const tagKey = tagProps.key;
+                  delete tagProps.key;
+                  delete tagProps.renderTags;
+                  delete tagProps.ownerState;
+
                   return (
                     <Chip
-                      {...cleanTagProps}
+                      {...tagProps}
                       key={tagKey || opt.value || idx}
                       label={opt.label}
                       size="small"
@@ -112,7 +123,7 @@ const AppAutocomplete = ({
                 ) : null,
               ].filter(Boolean);
             }
-          : undefined;
+            : undefined;
 
         return (
           <Box sx={{ width: fullWidth ? "100%" : "auto" }}>
@@ -136,29 +147,30 @@ const AppAutocomplete = ({
             )}
 
             <Autocomplete
+              {...cleanProps}
               id={`${name}-autocomplete`}
               multiple={multiple}
               disableCloseOnSelect={multiple}
               limitTags={chipLimit ?? -1}
               disabled={disabled}
               options={options}
+              popupIcon={popupIcon}
+              slots={{ root: CleanRoot }}
               getOptionKey={(option, index) =>
                 option?.value ?? option?.id ?? option?.userGuid ?? option?.label ?? index
               }
               getOptionLabel={(option) => option.label || ""}
               {...(renderTagsProp ? { renderTags: renderTagsProp } : {})}
               renderOption={(optionProps, option, { selected, index }) => {
-                const {
-                  key,
-                  renderTags: _rt,
-                  ownerState: _os,
-                  ...restOptionProps
-                } = optionProps;
+                const cleaned = { ...optionProps };
                 const optionKey =
-                  key || option?.value || option?.id || `${option?.label || "opt"}-${index}`;
+                  cleaned.key || option?.value || option?.id || `${option?.label || "opt"}-${index}`;
+                delete cleaned.key;
+                delete cleaned.renderTags;
+                delete cleaned.ownerState;
 
                 return (
-                  <li key={optionKey} {...restOptionProps}>
+                  <li key={optionKey} {...cleaned}>
                     {multiple && (
                       <Checkbox
                         icon={icon}
@@ -186,72 +198,62 @@ const AppAutocomplete = ({
               isOptionEqualToValue={(option, val) =>
                 option.value === (val?.value ?? val)
               }
-              popupIcon={popupIcon}
-              renderInput={(params) => {
-                const {
-                  renderTags: _inputRt,
-                  ownerState: _inputOs,
-                  ...cleanParams
-                } = params;
-
-                return (
-                  <TextField
-                    {...cleanParams}
-                    inputRef={ref}
-                    placeholder={
-                      multiple && Array.isArray(selectedValue) && selectedValue.length > 0
-                        ? ""
-                        : placeholder
-                    }
-                    error={hasError}
-                    helperText={error?.message}
-                    fullWidth={fullWidth}
-                    size={size}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "10px",
-                        minHeight: "44px",
-                        maxHeight: "44px",
-                        overflow: "hidden",
-                        flexWrap: "nowrap",
-                        py: "2px",
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  inputRef={ref}
+                  placeholder={
+                    multiple && Array.isArray(selectedValue) && selectedValue.length > 0
+                      ? ""
+                      : placeholder
+                  }
+                  error={hasError}
+                  helperText={error?.message}
+                  fullWidth={fullWidth}
+                  size={size}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "10px",
+                      minHeight: "44px",
+                      maxHeight: "44px",
+                      overflow: "hidden",
+                      flexWrap: "nowrap",
+                      py: "2px",
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.03)"
+                          : "#ffffff",
+                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                      "&:hover": {
                         backgroundColor: (theme) =>
                           theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.03)"
+                            ? "rgba(255, 255, 255, 0.05)"
                             : "#ffffff",
-                        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                        "&:hover": {
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === "dark"
-                              ? "rgba(255, 255, 255, 0.05)"
-                              : "#ffffff",
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "primary.main",
-                          },
-                        },
-                        "&.Mui-focused": {
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === "dark"
-                              ? "rgba(255, 255, 255, 0.02)"
-                              : "#ffffff",
-                          boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.12)",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "primary.main",
                         },
                       },
-                      "& .MuiOutlinedInput-input": {
-                        py: "4px",
-                        minWidth: "30px !important",
+                      "&.Mui-focused": {
+                        backgroundColor: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "rgba(255, 255, 255, 0.02)"
+                            : "#ffffff",
+                        boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.12)",
                       },
-                      "& .MuiFormHelperText-root": {
-                        mx: 1,
-                        mt: 0.5,
-                        fontSize: "0.75rem",
-                        fontWeight: 500,
-                      },
-                    }}
-                  />
-                );
-              }}
-              {...cleanProps}
+                    },
+                    "& .MuiOutlinedInput-input": {
+                      py: "4px",
+                      minWidth: "30px !important",
+                    },
+                    "& .MuiFormHelperText-root": {
+                      mx: 1,
+                      mt: 0.5,
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                    },
+                  }}
+                />
+              )}
             />
           </Box>
         );

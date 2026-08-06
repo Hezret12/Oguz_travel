@@ -164,7 +164,7 @@ export default function EditTaskModal({ open, onClose, task }) {
   const isSubmitting = updateMutation.isPending;
 
   return (
-    <CustomDialog open={open} close={handleCloseModal} widthX={580}>
+    <CustomDialog open={open} close={handleCloseModal} widthX={600}>
       <CustomDialogHeader
         title={t("task.editTask", "Edit Task")}
         onClose={handleCloseModal}

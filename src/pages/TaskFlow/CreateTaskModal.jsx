@@ -190,7 +190,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const isSubmitting = createMutation.isPending;
 
   return (
-    <CustomDialog open={open} close={handleCloseDialog} widthX={580}>
+    <CustomDialog open={open} close={handleCloseDialog} widthX={600}>
       <CustomDialogHeader
         title={t("task.createTask")}
         onClose={handleCloseDialog}

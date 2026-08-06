@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useMemo } from "react";
+import { memo, useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -45,9 +45,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
   searchQuery,
   filterPriority,
   dueDate,
-  onMoveTaskStatus,
   onEditTask,
-  onDeleteTask,
   setTaskMenuAnchor,
   setActiveTask,
 }) {
@@ -106,8 +104,24 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     return rawData;
   }, [apiResponse, col.id]);
 
-  // Accumulate tasks per page, or reset when on page 1
-  useEffect(() => {
+  // Reset column page when global filters change (in-render state adjustment)
+  const filterKey = `${searchQuery}-${filterPriority}-${dueDate}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setPage(1);
+  }
+
+  // Build a stable serialized key for the fetched data to detect actual changes
+  const fetchedKey = useMemo(() => {
+    if (!fetchedTasks || fetchedTasks.length === 0) return `empty-${page}`;
+    return fetchedTasks.map((t) => t.guid || t.id).join(",") + `-p${page}`;
+  }, [fetchedTasks, page]);
+
+  // Accumulate tasks using serialized key comparison (stable string, no infinite loop)
+  const [prevFetchedKey, setPrevFetchedKey] = useState("");
+  if (fetchedKey !== prevFetchedKey) {
+    setPrevFetchedKey(fetchedKey);
     if (page === 1) {
       setAccumulatedTasks(fetchedTasks);
     } else if (fetchedTasks.length > 0) {
@@ -116,15 +130,11 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
         const newUnique = fetchedTasks.filter(
           (t) => !existingGuids.has(t.guid || t.id)
         );
+        if (newUnique.length === 0) return prev;
         return [...prev, ...newUnique];
       });
     }
-  }, [fetchedTasks, page]);
-
-  // Reset column page when global filters change
-  useEffect(() => {
-    setPage(1);
-  }, [searchQuery, filterPriority, dueDate]);
+  }
 
   const hasMorePages = page < pageCount;
 
