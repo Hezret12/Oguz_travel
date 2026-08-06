@@ -343,14 +343,29 @@ export default function TaskFileUpload({
             )}
             arrow
             placement="top"
+            slotProps={{
+              tooltip: {
+                sx: {
+                  fontSize: "0.825rem",
+                  fontWeight: 500,
+                  py: 0.75,
+                  px: 1.25,
+                  borderRadius: "8px",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.2)",
+                },
+              },
+            }}
           >
             <HelpOutlineRoundedIcon
               sx={{
-                fontSize: 14,
+                fontSize: 17,
                 color: "text.secondary",
                 cursor: "pointer",
-                transition: "color 0.15s ease",
-                "&:hover": { color: "primary.main" },
+                transition: "color 0.15s ease, transform 0.15s ease",
+                "&:hover": {
+                  color: "primary.main",
+                  transform: "scale(1.1)",
+                },
               }}
             />
           </Tooltip>

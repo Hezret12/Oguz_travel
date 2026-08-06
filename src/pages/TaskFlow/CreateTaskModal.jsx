@@ -35,13 +35,13 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     key: "tasks",
     onSuccess: () => {
       toast.success(
-        t("task.taskCreatedSuccess", "Ýumuş üstünlikli döredildi!"),
+        t("task.taskCreatedSuccess"),
       );
       handleCloseDialog();
     },
     onError: (err) => {
       handleError(
-        t("task.createError", "Ýumuş döretmekde ýalňyşlyk ýüze çykdy."),
+        t("task.createError"),
         err,
       );
     },
@@ -215,7 +215,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
             >
               {createMutation.error?.response?.data?.message ||
                 createMutation.error?.message ||
-                t("task.createError", "Ýumuş döretmekde ýalňyşlyk ýüze çykdy.")}
+                t("task.createError")}
             </Alert>
           )}
 
@@ -279,28 +279,14 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 control={control}
                 label={t("task.dueDate")}
                 disabled={isSubmitting}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "7px",
-                    minHeight: "44px",
-                    maxHeight: "44px",
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "rgba(255, 255, 255, 0.03)"
-                        : "#ffffff",
-                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "&:hover": {
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.05)"
-                          : "#ffffff",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "primary.main",
-                      },
-                    },
+                inputSx={{
+                  "& .MuiPickersOutlinedInput-root, & .MuiOutlinedInput-root, & .MuiInputBase-root": {
+                    minHeight: "44px !important",
+                    height: "44px !important",
                   },
-                  "& .MuiOutlinedInput-input": {
-                    py: "10px",
+                  "& .MuiPickersInputBase-sectionsContainer, & .MuiInputBase-input": {
+                    paddingTop: "10px !important",
+                    paddingBottom: "10px !important",
                   },
                 }}
               />

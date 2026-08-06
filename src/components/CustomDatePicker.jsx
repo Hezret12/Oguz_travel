@@ -15,6 +15,7 @@ const CustomDatePicker = ({
   showTime = false,
   format = showTime ? "DD.MM.YYYY HH:mm" : "DD.MM.YYYY",
   sx = {},
+  inputSx = {},
   slotProps: externalSlotProps = {},
   ...props
 }) => {
@@ -82,6 +83,7 @@ const CustomDatePicker = ({
                       color: "#1565C0",
                     },
                     ...sx,
+                    ...inputSx,
                     ...(externalSlotProps.textField?.sx || {}),
                   },
                   ...(externalSlotProps.textField || {}),
