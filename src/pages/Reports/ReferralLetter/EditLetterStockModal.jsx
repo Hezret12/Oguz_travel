@@ -80,7 +80,6 @@ const EditLetterStockModal = ({ table, row }) => {
       />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}>
-          {/* Field 1: Partiýanyň ady */}
           <CustomTextField
             name="batchName"
             control={control}
@@ -89,7 +88,6 @@ const EditLetterStockModal = ({ table, row }) => {
             required
           />
 
-          {/* Field 2 & 3: Başlangyç ÝH № & Soňky ÝH № */}
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
@@ -111,7 +109,6 @@ const EditLetterStockModal = ({ table, row }) => {
             </Grid>
           </Grid>
 
-          {/* Field 4: Bellik (Note) */}
           <CustomTextField
             name="note"
             control={control}
@@ -120,7 +117,6 @@ const EditLetterStockModal = ({ table, row }) => {
             rows={2}
           />
 
-          {/* Calculated Quantity Display Box */}
           <Box
             sx={{
               mt: 0.5,
