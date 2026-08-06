@@ -7,9 +7,11 @@ import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeade
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { FooterButton } from "../../../components/Dialog/FooterButton";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
+import { useLocale } from "../../../hooks/useLocale";
 import { updateReportApi } from "../../../api/queries/patch";
 
 const EditLetterStockModal = ({ table, row }) => {
+  const { t } = useLocale();
   const isModalOpen = Boolean(table && row && table.getState().editingRow?.id === row.id);
 
   const { control, handleSubmit, reset } = useForm({
@@ -72,15 +74,18 @@ const EditLetterStockModal = ({ table, row }) => {
 
   return (
     <CustomDialog open={isModalOpen} close={handleClose} widthX={520}>
-      <CustomDialogHeader variant="h5" title="Hat stokuny düzeltmek" />
+      <CustomDialogHeader
+        variant="h5"
+        title={t("referralLetter.editLetterStock")}
+      />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}>
           {/* Field 1: Partiýanyň ady */}
           <CustomTextField
             name="batchName"
             control={control}
-            label="Partiýanyň ady"
-            placeholder="Meselem: 2024-nji ýyl hats"
+            label={t("referralLetter.batchName")}
+            placeholder={t("referralLetter.batchNamePlaceholder")}
             required
           />
 
@@ -90,7 +95,7 @@ const EditLetterStockModal = ({ table, row }) => {
               <CustomTextField
                 name="startNo"
                 control={control}
-                label="Başlangyç ÝH №"
+                label={t("referralLetter.startNo")}
                 placeholder="0000001"
                 required
               />
@@ -99,7 +104,7 @@ const EditLetterStockModal = ({ table, row }) => {
               <CustomTextField
                 name="endNo"
                 control={control}
-                label="Soňky ÝH №"
+                label={t("referralLetter.endNo")}
                 placeholder="0090000"
                 required
               />
@@ -110,7 +115,7 @@ const EditLetterStockModal = ({ table, row }) => {
           <CustomTextField
             name="note"
             control={control}
-            label="Bellik"
+            label={t("columns.note")}
             multiline
             rows={2}
           />
@@ -136,11 +141,11 @@ const EditLetterStockModal = ({ table, row }) => {
                 fontSize: "0.875rem",
               }}
             >
-              Umumy mukdary:{" "}
+              {t("referralLetter.totalQuantity")}:{" "}
               <strong style={{ color: "text.primary", fontWeight: 700 }}>
                 {calculatedCount}
               </strong>{" "}
-              sany hat
+              {t("referralLetter.letterUnit")}
             </Typography>
           </Box>
         </Box>

@@ -108,12 +108,14 @@ const ReferralLetterPage = () => {
     deleteFn: deleteReportApi,
     queryKey: "reports",
     idKey: "guid",
+    isPaginated: true,
   });
 
   const { mutate: deleteReportShare } = useDelete({
     deleteFn: deleteReportShareApi,
     queryKey: "reportShares",
     idKey: "guid",
+    isPaginated: true,
   });
 
   const handleTabChange = useCallback((event, newValue) => {

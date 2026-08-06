@@ -7,9 +7,12 @@ import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeade
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { FooterButton } from "../../../components/Dialog/FooterButton";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
+import { useLocale } from "../../../hooks/useLocale";
 import { addReportApi } from "../../../api/queries/post";
 
 const AddLetterStockModal = ({ open, close }) => {
+  const { t } = useLocale();
+
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       batchName: "",
@@ -59,25 +62,23 @@ const AddLetterStockModal = ({ open, close }) => {
 
   return (
     <CustomDialog open={open} close={handleClose} widthX={520}>
-      <CustomDialogHeader variant="h5" title="Täze hat stoky goşmak" />
+      <CustomDialogHeader variant="h5" title={t("referralLetter.addLetterStock")} />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}>
-          {/* Field 1: Partiýanyň ady */}
           <CustomTextField
             name="batchName"
             control={control}
-            label="Partiýanyň ady"
-            placeholder="Meselem: 2024-nji ýyl hats"
+            label={t("referralLetter.batchName")}
+            placeholder={t("referralLetter.batchNamePlaceholder")}
             required
           />
 
-          {/* Field 2 & 3: Başlangyç ÝH № & Soňky ÝH № */}
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="startNo"
                 control={control}
-                label="Başlangyç ÝH №"
+                label={t("referralLetter.startNo")}
                 placeholder="0000001"
                 required
               />
@@ -86,23 +87,21 @@ const AddLetterStockModal = ({ open, close }) => {
               <CustomTextField
                 name="endNo"
                 control={control}
-                label="Soňky ÝH №"
+                label={t("referralLetter.endNo")}
                 placeholder="0090000"
                 required
               />
             </Grid>
           </Grid>
 
-          {/* Field 4: Bellik (Note) */}
           <CustomTextField
             name="note"
             control={control}
-            label="Bellik"
+            label={t("columns.note")}
             multiline
             rows={2}
           />
 
-          {/* Calculated Quantity Display Box */}
           <Box
             sx={{
               mt: 0.5,
@@ -123,11 +122,11 @@ const AddLetterStockModal = ({ open, close }) => {
                 fontSize: "0.875rem",
               }}
             >
-              Umumy mukdary:{" "}
+              {t("referralLetter.totalQuantity")}:{" "}
               <strong style={{ color: "text.primary", fontWeight: 700 }}>
                 {calculatedCount}
               </strong>{" "}
-              sany hat
+              {t("referralLetter.letterUnit")}
             </Typography>
           </Box>
         </Box>

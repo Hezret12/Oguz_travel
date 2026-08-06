@@ -724,5 +724,16 @@
     "commentAdded": "Комментарий сохранен и уведомление отправлено сотруднику!",
     "saveAndSend": "Сохранить и отправить",
     "viewAll": "Посмотреть все"
+  },
+  "referralLetter": {
+    "addLetterStock": "Добавить склад писем",
+    "editLetterStock": "Редактировать склад писем",
+    "batchName": "Название партии",
+    "batchNamePlaceholder": "Например: Письма 2024 года",
+    "startNo": "Начальный № ИХ",
+    "endNo": "Конечный № ИХ",
+    "note": "Заметка",
+    "totalQuantity": "Общее количество",
+    "letterUnit": "шт. писем"
   }
 }

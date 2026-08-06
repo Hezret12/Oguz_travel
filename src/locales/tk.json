@@ -588,5 +588,16 @@
     "commentAdded": "Kommentariýa ýazyldy we işgäre bildiriş ugradyldy!",
     "saveAndSend": "Ýatda sakla & Ugrat",
     "viewAll": "Ählisini Gör"
+  },
+  "referralLetter": {
+    "addLetterStock": "Täze hat stoky goşmak",
+    "editLetterStock": "Hat stokuny düzeltmek",
+    "batchName": "Partiýanyň ady",
+    "batchNamePlaceholder": "Meselem: 2024-nji ýyl hats",
+    "startNo": "Başlangyç ÝH №",
+    "endNo": "Soňky ÝH №",
+    "note": "Bellik",
+    "totalQuantity": "Umumy mukdary",
+    "letterUnit": "sany hat"
   }
 }

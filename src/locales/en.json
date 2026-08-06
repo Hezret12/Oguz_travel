@@ -733,5 +733,16 @@
     "commentAdded": "Comment saved and notification sent to employee!",
     "saveAndSend": "Save & Send Notification",
     "viewAll": "View All Notifications"
+  },
+  "referralLetter": {
+    "addLetterStock": "Add letter stock",
+    "editLetterStock": "Edit letter stock",
+    "batchName": "Batch name",
+    "batchNamePlaceholder": "Example: 2024 letters",
+    "startNo": "Start YH No.",
+    "endNo": "End YH No.",
+    "note": "Note",
+    "totalQuantity": "Total quantity",
+    "letterUnit": "letters"
   }
 }
