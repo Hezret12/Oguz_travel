@@ -254,6 +254,7 @@ const {
 - Use `const { t, selectedLang } = useLocale();` for translations.
 - `selectedLang(obj)` extracts the correct language field from multilingual objects (e.g., `office.shortName`).
 - All user-facing strings must go through clean `t("key")` calls. **NEVER** add redundant inline `|| "Fallback"` default strings when translation keys exist in locale files (`tk.json`, `ru.json`, `en.json`), as `i18next` handles fallbacks automatically.
+- **NO DUPLICATE JSON KEYS**: Always merge new translation keys into existing top-level domain namespace objects in `tk.json`, `ru.json`, and `en.json`. **NEVER** declare duplicate object keys (e.g. creating a second `"referralLetter"` block) in locale JSON files.
 
 ### `useDateFormat` (`src/functions/generalHelpers.js`)
 ```js

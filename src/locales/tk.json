@@ -369,7 +369,26 @@
     "addSuccess": "Ýollanma haty üstünlikli goşuldy!",
     "editSuccess": "Ýollanma haty üstünlikli üýtgedildi!",
     "travel_doc_tooltip": "Syýahat ýol hatynyň №.",
-    "syhNo": "S-ÝH №"
+    "syhNo": "S-ÝH №",
+    "addLetterStock": "Täze hat stoky goşmak",
+    "editLetterStock": "Hat stokuny düzeltmek",
+    "addReport": "Täze hasabat goşmak",
+    "editReport": "Hasabaty düzeltmek",
+    "batchName": "Partiýanyň ady",
+    "batchNamePlaceholder": "Meselem: 2024-nji ýyl hats",
+    "startNo": "Başlangyç ÝH №",
+    "endNo": "Soňky ÝH №",
+    "startNoFrom": "ÝH №-den",
+    "endNoTo": "ÝH № çenli",
+    "submittedBy": "Tabşyran",
+    "receivedBy": "Kabul eden",
+    "quantity": "Mukdary",
+    "note": "Bellik",
+    "totalQuantity": "Umumy mukdary",
+    "letterUnit": "sany hat",
+    "statusSold": "Satyldy",
+    "statusDamaged": "Zyýan ýeten",
+    "statusLost": "Ýitirilen"
   },
   "sale": "Arzanladyş",
   "saleSettings": "Arzanladyş sazlamalary (Gerek bolsa)",
@@ -588,16 +607,5 @@
     "commentAdded": "Kommentariýa ýazyldy we işgäre bildiriş ugradyldy!",
     "saveAndSend": "Ýatda sakla & Ugrat",
     "viewAll": "Ählisini Gör"
-  },
-  "referralLetter": {
-    "addLetterStock": "Täze hat stoky goşmak",
-    "editLetterStock": "Hat stokuny düzeltmek",
-    "batchName": "Partiýanyň ady",
-    "batchNamePlaceholder": "Meselem: 2024-nji ýyl hats",
-    "startNo": "Başlangyç ÝH №",
-    "endNo": "Soňky ÝH №",
-    "note": "Bellik",
-    "totalQuantity": "Umumy mukdary",
-    "letterUnit": "sany hat"
   }
 }

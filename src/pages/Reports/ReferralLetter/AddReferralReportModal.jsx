@@ -11,20 +11,26 @@ import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { FooterButton } from "../../../components/Dialog/FooterButton";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
+import { useLocale } from "../../../hooks/useLocale";
 import { getAllEmployeeApi } from "../../../api/queries/getters";
 import { addReportShareApi } from "../../../api/queries/post";
-
-const STATUS_OPTIONS = [
-  { label: "Satyldy", value: 1, color: "#16a34a" },
-  { label: "Zyýan ýeten", value: 2, color: "#ea580c" },
-  { label: "Ýitirilen", value: 3, color: "#dc2626" },
-];
 
 /**
  * AddReferralReportModal - Modal 2 for adding new report share entry
  * Connected to Swagger CreateReportShareDto endpoint /api/v1/report-share/add-report-share
  */
 const AddReferralReportModal = ({ open, close }) => {
+  const { t } = useLocale();
+
+  const statusOptions = useMemo(
+    () => [
+      { label: t("referralLetter.statusSold"), value: 1, color: "#16a34a" },
+      { label: t("referralLetter.statusDamaged"), value: 2, color: "#ea580c" },
+      { label: t("referralLetter.statusLost"), value: 3, color: "#dc2626" },
+    ],
+    [t]
+  );
+
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       date: null,
@@ -87,14 +93,14 @@ const AddReferralReportModal = ({ open, close }) => {
 
   return (
     <CustomDialog open={open} close={handleClose} widthX={560}>
-      <CustomDialogHeader variant="h5" title="Täze hasabat goşmak" />
+      <CustomDialogHeader variant="h5" title={t("referralLetter.addReport")} />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         <Grid container spacing={2.25}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomDatePicker
               name="date"
               control={control}
-              label="Sene"
+              label={t("columns.dateTime")}
               size="medium"
             />
           </Grid>
@@ -102,17 +108,16 @@ const AddReferralReportModal = ({ open, close }) => {
             <CustomTextField
               name="quantity"
               control={control}
-              label="Mukdary"
+              label={t("referralLetter.quantity")}
               type="number"
             />
           </Grid>
 
-          {/* Row 2: Tabşyran & Kabul eden */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <AppAutocomplete
               name="assignment_opr_guid"
               control={control}
-              label="Tabşyran"
+              label={t("referralLetter.submittedBy")}
               options={employeeOptions}
             />
           </Grid>
@@ -120,43 +125,40 @@ const AddReferralReportModal = ({ open, close }) => {
             <AppAutocomplete
               name="receiver_opr_guid"
               control={control}
-              label="Kabul eden"
+              label={t("referralLetter.receivedBy")}
               options={employeeOptions}
             />
           </Grid>
 
-          {/* Row 3: ÝH №-den & ÝH № çenli */}
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               name="startNo"
               control={control}
-              label="ÝH №-den"
+              label={t("referralLetter.startNoFrom")}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               name="endNo"
               control={control}
-              label="ÝH № çenli"
+              label={t("referralLetter.endNoTo")}
             />
           </Grid>
 
-          {/* Row 4: Status (Full Width) */}
           <Grid size={{ xs: 12 }}>
             <CustomSelect
               name="status"
               control={control}
-              label="Status"
-              options={STATUS_OPTIONS}
+              label={t("columns.status")}
+              options={statusOptions}
             />
           </Grid>
 
-          {/* Row 5: Bellik (Note - Full Width) */}
           <Grid size={{ xs: 12 }}>
             <CustomTextField
               name="note"
               control={control}
-              label="Bellik"
+              label={t("columns.note")}
               multiline
               rows={2}
             />

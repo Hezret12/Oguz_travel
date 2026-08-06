@@ -203,28 +203,6 @@
         "genderRequired": "Пол обязателен"
       }
     },
-    "referralLetter": {
-      "title": "Письма и договоры",
-      "add": "Добавить письмо",
-      "addSuccess": "Письмо успешно добавлено!",
-      "addError": "Произошла ошибка при сохранении письма.",
-      "travel_doc_tooltip": "Введите номер проездного документа.",
-      "validation": {
-        "arzaNoRequired": "Номер письма обязателен",
-        "operatorRequired": "Оператор обязателен",
-        "nameRequired": "Имя обязательно",
-        "surnameRequired": "Фамилия обязательна",
-        "genderRequired": "Пол обязателен",
-        "dateOfBirthRequired": "Дата рождения обязательна",
-        "passportNumberRequired": "Номер паспорта обязателен",
-        "destinationCountryRequired": "Страна назначения обязательна",
-        "departureDateRequired": "Дата отправления обязательна",
-        "returnDateRequired": "Дата возвращения обязательна",
-        "priceRequired": "Цена обязательна",
-        "numberRequired": "Введите корректное число",
-        "contractDateRequired": "Дата договора обязательна"
-      }
-    },
     "ticket": {
       "export": "Экспорт",
       "summary": {
@@ -533,16 +511,6 @@
           "cardRequired": "Card is required"
         }
       }
-    },
-    "referralLetter": {
-      "title": "Письма и договоры",
-      "add": "Добавить письмо",
-      "edit": "Редактировать письмо",
-      "deleteConfirm": "Вы уверены, что хотите удалить это рекомендательное письмо? Это действие нельзя отменить.",
-      "deleteSuccess": "Письмо успешно удалено!",
-      "addSuccess": "Письмо успешно добавлено!",
-      "editSuccess": "Письмо успешно обновлено!",
-      "travel_doc_tooltip": "Введите номер проездного документа."
     }
   },
   "sale": "Скидка",
@@ -726,14 +694,48 @@
     "viewAll": "Посмотреть все"
   },
   "referralLetter": {
+    "title": "Письма и договоры",
+    "add": "Добавить письмо",
+    "edit": "Редактировать письмо",
+    "deleteConfirm": "Вы уверены, что хотите удалить это рекомендательное письмо? Это действие нельзя отменить.",
+    "deleteSuccess": "Письмо успешно удалено!",
+    "addSuccess": "Письмо успешно добавлено!",
+    "addError": "Произошла ошибка при сохранении письма.",
+    "editSuccess": "Письмо успешно обновлено!",
+    "travel_doc_tooltip": "Введите номер проездного документа.",
+    "validation": {
+      "arzaNoRequired": "Номер письма обязателен",
+      "operatorRequired": "Оператор обязателен",
+      "nameRequired": "Имя обязательно",
+      "surnameRequired": "Фамилия обязательна",
+      "genderRequired": "Пол обязателен",
+      "dateOfBirthRequired": "Дата рождения обязательна",
+      "passportNumberRequired": "Номер паспорта обязателен",
+      "destinationCountryRequired": "Страна назначения обязательна",
+      "departureDateRequired": "Дата отправления обязательна",
+      "returnDateRequired": "Дата возвращения обязательна",
+      "priceRequired": "Цена обязательна",
+      "numberRequired": "Введите корректное число",
+      "contractDateRequired": "Дата договора обязательна"
+    },
     "addLetterStock": "Добавить склад писем",
     "editLetterStock": "Редактировать склад писем",
+    "addReport": "Добавить новый отчет",
+    "editReport": "Редактировать отчет",
     "batchName": "Название партии",
     "batchNamePlaceholder": "Например: Письма 2024 года",
     "startNo": "Начальный № ИХ",
     "endNo": "Конечный № ИХ",
+    "startNoFrom": "№ ИХ от",
+    "endNoTo": "№ ИХ до",
+    "submittedBy": "Сдал",
+    "receivedBy": "Принял",
+    "quantity": "Количество",
     "note": "Заметка",
     "totalQuantity": "Общее количество",
-    "letterUnit": "шт. писем"
+    "letterUnit": "шт. писем",
+    "statusSold": "Продано",
+    "statusDamaged": "Повреждено",
+    "statusLost": "Утеряно"
   }
 }

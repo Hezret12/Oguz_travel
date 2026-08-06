@@ -11,17 +11,22 @@ import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { FooterButton } from "../../../components/Dialog/FooterButton";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
+import { useLocale } from "../../../hooks/useLocale";
 import { getAllEmployeeApi } from "../../../api/queries/getters";
 import { updateReportShareApi } from "../../../api/queries/patch";
 
-const STATUS_OPTIONS = [
-  { label: "Satyldy", value: 1, color: "#16a34a" },
-  { label: "Zyýan ýeten", value: 2, color: "#ea580c" },
-  { label: "Ýitirilen", value: 3, color: "#dc2626" },
-];
-
 const EditReferralReportModal = ({ table, row }) => {
+  const { t } = useLocale();
   const isModalOpen = Boolean(table && row && table.getState().editingRow?.id === row.id);
+
+  const statusOptions = useMemo(
+    () => [
+      { label: t("referralLetter.statusSold"), value: 1, color: "#16a34a" },
+      { label: t("referralLetter.statusDamaged"), value: 2, color: "#ea580c" },
+      { label: t("referralLetter.statusLost"), value: 3, color: "#dc2626" },
+    ],
+    [t]
+  );
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -106,14 +111,14 @@ const EditReferralReportModal = ({ table, row }) => {
 
   return (
     <CustomDialog open={isModalOpen} close={handleClose} widthX={560}>
-      <CustomDialogHeader variant="h5" title="Hasabaty düzeltmek" />
+      <CustomDialogHeader variant="h5" title={t("referralLetter.editReport")} />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         <Grid container spacing={2.25}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomDatePicker
               name="date"
               control={control}
-              label="Sene"
+              label={t("columns.dateTime")}
               size="medium"
             />
           </Grid>
@@ -121,7 +126,7 @@ const EditReferralReportModal = ({ table, row }) => {
             <CustomTextField
               name="quantity"
               control={control}
-              label="Mukdary"
+              label={t("referralLetter.quantity")}
               type="number"
             />
           </Grid>
@@ -130,7 +135,7 @@ const EditReferralReportModal = ({ table, row }) => {
             <AppAutocomplete
               name="assignment_opr_guid"
               control={control}
-              label="Tabşyran"
+              label={t("referralLetter.submittedBy")}
               options={employeeOptions}
             />
           </Grid>
@@ -138,7 +143,7 @@ const EditReferralReportModal = ({ table, row }) => {
             <AppAutocomplete
               name="receiver_opr_guid"
               control={control}
-              label="Kabul eden"
+              label={t("referralLetter.receivedBy")}
               options={employeeOptions}
             />
           </Grid>
@@ -147,14 +152,14 @@ const EditReferralReportModal = ({ table, row }) => {
             <CustomTextField
               name="startNo"
               control={control}
-              label="ÝH №-den"
+              label={t("referralLetter.startNoFrom")}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               name="endNo"
               control={control}
-              label="ÝH № çenli"
+              label={t("referralLetter.endNoTo")}
             />
           </Grid>
 
@@ -162,8 +167,8 @@ const EditReferralReportModal = ({ table, row }) => {
             <CustomSelect
               name="status"
               control={control}
-              label="Status"
-              options={STATUS_OPTIONS}
+              label={t("columns.status")}
+              options={statusOptions}
             />
           </Grid>
 
@@ -171,7 +176,7 @@ const EditReferralReportModal = ({ table, row }) => {
             <CustomTextField
               name="note"
               control={control}
-              label="Bellik"
+              label={t("columns.note")}
               multiline
               rows={2}
             />
