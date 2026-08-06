@@ -20,6 +20,7 @@ const CleanRoot = forwardRef(function CleanRoot(props, ref) {
   const domProps = { ...props };
   delete domProps.renderTags;
   delete domProps.ownerState;
+  delete domProps.PaperProps;
   return <div ref={ref} {...domProps} />;
 });
 
@@ -39,10 +40,11 @@ const AppAutocomplete = ({
   renderTags: customRenderTags,
   ...restProps
 }) => {
-  // Strip any accidental renderTags or ownerState from restProps
+  // Strip any accidental renderTags, ownerState, or PaperProps from restProps
   const cleanProps = { ...restProps };
   delete cleanProps.renderTags;
   delete cleanProps.ownerState;
+  delete cleanProps.PaperProps;
 
   return (
     <Controller

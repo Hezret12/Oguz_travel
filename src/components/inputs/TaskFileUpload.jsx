@@ -764,12 +764,14 @@ export default function TaskFileUpload({
         onClose={() => setPreviewModal(null)}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: "16px",
-            bgcolor: "background.paper",
-            overflow: "hidden",
-            boxShadow: "0 24px 48px rgba(0,0,0,0.4)",
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "16px",
+              bgcolor: "background.paper",
+              overflow: "hidden",
+              boxShadow: "0 24px 48px rgba(0,0,0,0.4)",
+            },
           },
         }}
       >

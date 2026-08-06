@@ -1,4 +1,4 @@
-import { memo, useState, useMemo } from "react";
+import { memo, useState, useMemo, useCallback, useRef } from "react";
 import {
   Box,
   Typography,
@@ -12,7 +12,6 @@ import {
   Divider,
   ListItemIcon,
   ListItemText,
-  Button,
   CircularProgress,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -22,7 +21,7 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 
 import { useLocale } from "../../../hooks/useLocale";
@@ -52,6 +51,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
   const { t } = useLocale();
   const [page, setPage] = useState(1);
   const [accumulatedTasks, setAccumulatedTasks] = useState([]);
+  const scrollContainerRef = useRef(null);
 
   // Build query params for this specific column's status & filters
   const columnParams = useMemo(() => {
@@ -138,11 +138,15 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
 
   const hasMorePages = page < pageCount;
 
-  const handleLoadMore = () => {
-    if (hasMorePages && !isFetching) {
+  const handleScroll = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !hasMorePages || isFetching) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    if (scrollTop + clientHeight >= scrollHeight - 100) {
       setPage((prev) => prev + 1);
     }
-  };
+  }, [hasMorePages, isFetching]);
 
   const getPriorityLabel = (priority) => {
     switch (priority?.toLowerCase()) {
@@ -237,8 +241,10 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
           )}
         </Box>
 
-        {/* Task Cards Stack */}
+        {/* Task Cards Stack — Infinite Scroll */}
         <Box
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
           sx={{
             display: "flex",
             flexDirection: "column",
@@ -451,32 +457,17 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
             );
           })}
 
-          {/* Load More Button per Column */}
-          {hasMorePages && (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
-              <Button
-                size="small"
-                variant="outlined"
-                onClick={handleLoadMore}
-                disabled={isFetching}
-                endIcon={<ExpandMoreIcon fontSize="small" />}
-                sx={{
-                  borderRadius: "8px",
-                  fontSize: "0.725rem",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  borderColor: "divider",
-                  color: "text.secondary",
-                  py: 0.4,
-                  px: 1.5,
-                  "&:hover": {
-                    borderColor: col.color,
-                    color: col.color,
-                  },
-                }}
-              >
-                {t("task.loadMore", "Daha fazla yükle")} ({accumulatedTasks.length}/{totalItems})
-              </Button>
+          {/* Infinite scroll loading indicator */}
+          {isFetching && hasMorePages && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                py: 1.5,
+                flexShrink: 0,
+              }}
+            >
+              <CircularProgress size={20} sx={{ color: col.color }} />
             </Box>
           )}
         </Box>
