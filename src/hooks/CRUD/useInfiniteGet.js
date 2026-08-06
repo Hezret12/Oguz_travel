@@ -1,9 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-/**
- * Clean production-grade infinite pagination CRUD hook for Oguz Travel
- * Wraps TanStack React Query's useInfiniteQuery for seamless scroll fetching & cache management.
- */
 export const useInfiniteGet = ({ apiFn, key, params = {}, options = {} }) => {
   const queryKey = Array.isArray(key) ? [...key, params] : [key, params];
 
