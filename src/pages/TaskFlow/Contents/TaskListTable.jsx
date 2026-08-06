@@ -183,13 +183,10 @@ function TaskListTable({ tasks = [], onMoveTaskStatus, onEditTask, onDeleteTask 
     ...defaultMrtOptions,
     columns,
     data: tasks,
-    enablePagination: true,
+    enablePagination: false,
     enableStickyHeader: true,
     enableTopToolbar: false,
-    enableBottomToolbar: true,
-    initialState: {
-      pagination: { pageIndex: 0, pageSize: 10 },
-    },
+    enableBottomToolbar: false,
     muiTableContainerProps: {
       sx: {
         flexGrow: 1,

@@ -1,5 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { Box, useTheme } from "@mui/material";
+import toast from "react-hot-toast";
+import { handleError } from "../../functions/generalHelpers";
 import { useLocale } from "../../hooks/useLocale";
 import { useDebounce } from "../../hooks/useDebounce";
 
@@ -115,12 +117,14 @@ export default function TaskFlow() {
     apiFn: updateTaskApi,
     key: "tasks",
     idKey: "guid",
+    invalidateQueries: ["tasks"],
   });
 
   const deleteTaskMutation = useDelete({
     deleteFn: deleteTaskApi,
     queryKey: "tasks",
     idKey: "guid",
+    invalidateQueries: ["tasks"],
   });
 
   const columns = useMemo(
@@ -196,24 +200,24 @@ export default function TaskFlow() {
           guid: taskId,
           status: Number(newStatus) || newStatus,
         });
-        refetch();
+        toast.success(t("task.taskUpdatedSuccess"));
       } catch (err) {
-        console.warn("API update task status error:", err);
+        handleError(t("task.updateError"), err);
       }
     },
-    [updateTaskMutation, refetch]
+    [updateTaskMutation, t]
   );
 
   const handleDeleteTask = useCallback(
     async (taskId) => {
       try {
-        await deleteTaskMutation.mutateAsync({ guid: taskId });
-        refetch();
+        await deleteTaskMutation.mutateAsync(taskId);
+        toast.success(t("deleteConfirm.deleted", "Üstünlikli pozuldy!"));
       } catch (err) {
-        console.warn("API delete task error:", err);
+        handleError(t("errorOccurred"), err);
       }
     },
-    [deleteTaskMutation, refetch]
+    [deleteTaskMutation, t]
   );
 
   return (
@@ -275,8 +279,8 @@ export default function TaskFlow() {
         )}
       </Box>
 
-      {/* Pagination Bar for Board View */}
-      {viewMode === "board" && pageCount > 1 && (
+      {/* Shared App Pagination for both Board View and Table View */}
+      {pageCount > 1 && (
         <Box
           sx={{
             pt: 1.5,
