@@ -53,7 +53,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     });
   }, [usersData]);
 
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit } = useForm({
     defaultValues: {
       title: null,
       description: null,
@@ -84,9 +84,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const [attachments, setAttachments] = useState([]);
 
   const handleCloseDialog = () => {
-    reset();
     setAttachments([]);
-    createMutation.reset();
     onClose();
   };
 
