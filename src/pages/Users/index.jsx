@@ -10,7 +10,7 @@ import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 import AddUserModal from "./AddUser/AddUserModal";
 import EditUserModal from "./EditUser/EditUserModal";
-import { Box } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
@@ -93,6 +93,31 @@ const Users = () => {
         id: "phone_number",
         header: t("columns.phoneNumber"),
         size: 150,
+      },
+      {
+        accessorFn: (row) => row.isAdmin || row.user_is_admin || row.role === "admin",
+        id: "isAdmin",
+        header: t("columns.role") ?? "Rol",
+        size: 110,
+        Cell: ({ cell }) => {
+          const isAdmin = Boolean(cell.getValue());
+          return (
+            <Chip
+              label={isAdmin ? "Admin" : "User"}
+              size="small"
+              sx={{
+                height: "22px",
+                fontSize: "0.725rem",
+                fontWeight: 600,
+                backgroundColor: isAdmin
+                  ? "rgba(37, 99, 235, 0.12)"
+                  : "rgba(107, 114, 128, 0.1)",
+                color: isAdmin ? "primary.main" : "text.secondary",
+                border: `1px solid ${isAdmin ? "rgba(37, 99, 235, 0.3)" : "rgba(107, 114, 128, 0.2)"}`,
+              }}
+            />
+          );
+        },
       },
       {
         accessorFn: (row) => row.isActive,

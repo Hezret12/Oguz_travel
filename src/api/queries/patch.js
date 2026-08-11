@@ -2,6 +2,9 @@ import { api } from "../service/apiHelper";
 
 
 export const updateEmployeeApi = async (data) => {
+  if (data instanceof FormData) {
+    return await api.patchFormDataPrivate("/employee/update-employee", data);
+  }
   const response = await api.patchPrivate(`/employee/update-employee`, data);
   return response;
 };
@@ -12,7 +15,18 @@ export const updateUserApi = async (data) => {
 };
 
 export const updateClientApi = async (data) => {
+  if (data instanceof FormData) {
+    return await api.patchFormDataPrivate("/client/update-client", data);
+  }
   const response = await api.patchPrivate(`/client/update-client`, data);
+  return response;
+};
+
+export const updatePassportApi = async (data) => {
+  if (data instanceof FormData) {
+    return await api.patchFormDataPrivate("/client/update-passport", data);
+  }
+  const response = await api.patchPrivate("/client/update-passport", data);
   return response;
 };
 

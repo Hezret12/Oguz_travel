@@ -74,7 +74,23 @@ const AddEmployee = ({ table }) => {
 
   const submitHandler = async (data) => {
     try {
-      await createEmployee(data);
+      const rawPhone = (data.phone_number || "").replace(/\s/g, "");
+      const formattedPhone = rawPhone.startsWith("+993")
+        ? rawPhone
+        : `+993${rawPhone}`;
+
+      const payload = {
+        fullName: data.fullName,
+        phone_number: formattedPhone,
+        position_guid: data.position_guid,
+        office_guid: data.office_guid,
+      };
+
+      if (data.department_guid) payload.department_guid = data.department_guid;
+      if (data.gmail) payload.gmail = data.gmail;
+      if (data.address) payload.address = data.address;
+
+      await createEmployee(payload);
     } catch (err) {
       console.error(err);
     }
@@ -96,6 +112,7 @@ const AddEmployee = ({ table }) => {
               name="fullName"
               control={control}
               label={t("columns.fullName")}
+              required
             />
           </Grid>
 
@@ -104,6 +121,7 @@ const AddEmployee = ({ table }) => {
               control={control}
               name="phone_number"
               label={t("columns.phoneNumber")}
+              required
             />
           </Grid>
 
@@ -117,19 +135,6 @@ const AddEmployee = ({ table }) => {
 
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomSelect
-              name="department_guid"
-              control={control}
-              label={t("columns.department")}
-              options={department}
-              isLoading={isDepartmentLoading}
-              isError={isDepartmentError}
-              getRowId={(item) => item.guid}
-              getRowLabel={(item) => selectedLang(item.name)}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomSelect
               name="position_guid"
               control={control}
               label={t("columns.position")}
@@ -138,6 +143,7 @@ const AddEmployee = ({ table }) => {
               isError={isPositionError}
               getRowId={(item) => item.guid}
               getRowLabel={(item) => selectedLang(item.name)}
+              required
             />
           </Grid>
 
@@ -151,6 +157,20 @@ const AddEmployee = ({ table }) => {
               isError={isOfficeError}
               getRowId={(item) => item.guid}
               getRowLabel={(item) => selectedLang(item.fullName)}
+              required
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CustomSelect
+              name="department_guid"
+              control={control}
+              label={t("columns.department")}
+              options={department}
+              isLoading={isDepartmentLoading}
+              isError={isDepartmentError}
+              getRowId={(item) => item.guid}
+              getRowLabel={(item) => selectedLang(item.name)}
             />
           </Grid>
 

@@ -6,7 +6,7 @@ import { api } from '../service/apiHelper';
 export const refreshTokenApi = async () => {
   const refreshToken = Cookies.get('refreshToken');
   return axiosInstance.post('/auth/refresh', {
-    refresh_token: refreshToken,
+    refreshToken: refreshToken,
   });
 };
 

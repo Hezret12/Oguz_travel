@@ -48,6 +48,7 @@ const EditUserModal = ({ table, row }) => {
         : "",
       isActive: row?.original?.isActive ?? true,
       isExternalUser: row?.original?.isExternalUser ?? !Boolean(row?.original?.employee_guid || row?.original?.employee?.guid),
+      isAdmin: Boolean(row?.original?.isAdmin || row?.original?.user_is_admin || row?.original?.role === "admin"),
       permissions: row?.original?.permissions || [],
     },
     resolver: yupResolver(editUser),
@@ -67,6 +68,9 @@ const EditUserModal = ({ table, row }) => {
     try {
       const formattedData = {
         ...data,
+        isAdmin: Boolean(data.isAdmin),
+        user_is_admin: Boolean(data.isAdmin),
+        role: data.isAdmin ? "admin" : "user",
         phone_number: data.phone_number
           ? (data.phone_number.startsWith("+993")
             ? data.phone_number

@@ -32,9 +32,10 @@ export function getRoleHomePath(role) {
 
 export function getStoredSession() {
   const accessToken = Cookies.get('accessToken');
+  const refreshToken = Cookies.get('refreshToken');
   const rawUser = localStorage.getItem('user');
 
-  if (!accessToken || !rawUser) return null;
+  if ((!accessToken && !refreshToken) || !rawUser) return null;
 
   try {
     const parsed = JSON.parse(rawUser);
@@ -50,13 +51,17 @@ export function getStoredSession() {
 }
 
 export function persistSession({ accessToken, refreshToken, user, tableNames }) {
-  Cookies.set('accessToken', accessToken);
+  if (accessToken) {
+    Cookies.set('accessToken', accessToken, { expires: 7 });
+  }
 
   if (refreshToken) {
     Cookies.set('refreshToken', refreshToken, { expires: 30 });
   }
 
-  localStorage.setItem('user', JSON.stringify(user));
+  if (user) {
+    localStorage.setItem('user', JSON.stringify(user));
+  }
 
   if (tableNames != null) {
     localStorage.setItem('tableNames', JSON.stringify(tableNames));

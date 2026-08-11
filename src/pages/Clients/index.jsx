@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
-import { Box, Chip, IconButton } from "@mui/material";
+import { Box, Chip, IconButton, Typography } from "@mui/material";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import {
   MaterialReactTable,
@@ -130,6 +130,28 @@ const Clients = () => {
         id: "fullName",
         header: t("columns.fullName"),
         size: 180,
+        Cell: ({ row, cell }) => (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              {cell.getValue()}
+            </Typography>
+            {(row.original.vip === true || row.original.vip === "true" || row.original.vip === 1) && (
+              <Chip
+                label="VIP"
+                size="small"
+                sx={{
+                  height: "20px",
+                  fontSize: "0.675rem",
+                  fontWeight: 700,
+                  background: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
+                  color: "#FFF",
+                  boxShadow: "0 2px 6px rgba(217, 119, 6, 0.3)",
+                  px: 0.5,
+                }}
+              />
+            )}
+          </Box>
+        ),
       },
       {
         accessorFn: (row) => row.phone_number,

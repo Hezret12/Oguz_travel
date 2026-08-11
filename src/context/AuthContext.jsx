@@ -9,7 +9,7 @@ export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const queryClient = useQueryClient();
-  const hasToken = Boolean(Cookies.get('accessToken'));
+  const hasToken = Boolean(Cookies.get('accessToken') || Cookies.get('refreshToken'));
 
   // TanStack Query for Current Auth User (/auth/me)
   const {

@@ -89,7 +89,7 @@ const UserInformationTab = ({
       <Box
         sx={{
           display: "flex",
-          gap: 12,
+          gap: 4,
           flexWrap: "wrap",
         }}
       >
@@ -103,6 +103,12 @@ const UserInformationTab = ({
           name="isExternalUser"
           control={control}
           label={t("users.isExternalUser")}
+        />
+
+        <CustomCheckbox
+          name="isAdmin"
+          control={control}
+          label={t("users.isAdmin") || "Admin (isAdmin)"}
         />
       </Box>
     </Box>

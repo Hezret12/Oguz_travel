@@ -11,6 +11,9 @@ export const logoutApi = async () => {
 };
 
 export const addEmployeeApi = async (data) => {
+  if (data instanceof FormData) {
+    return await api.postFormDataPrivate("/employee/add-employee", data);
+  }
   const response = await api.postPrivate(
     "/employee/add-employee",
     data,
@@ -27,6 +30,9 @@ export const addUserApi = async (data) => {
 };
 
 export const addClientsApi = async (data) => {
+  if (data instanceof FormData) {
+    return await api.postFormDataPrivate("/client/add-client", data);
+  }
   const response = await api.postPrivate(
     "/client/add-client",
     data,

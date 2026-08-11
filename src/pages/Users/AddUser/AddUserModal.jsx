@@ -53,6 +53,7 @@ const AddUserModal = ({ table }) => {
       password: "",
       isActive: true,
       isExternalUser: false,
+      isAdmin: false,
       permissions: [],
     },
     resolver: yupResolver(addUser),
@@ -63,6 +64,9 @@ const AddUserModal = ({ table }) => {
     try {
       const formattedData = {
         ...data,
+        isAdmin: Boolean(data.isAdmin),
+        user_is_admin: Boolean(data.isAdmin),
+        role: data.isAdmin ? "admin" : "user",
         phone_number: data.phone_number
           ? (data.phone_number.startsWith("+993")
             ? data.phone_number

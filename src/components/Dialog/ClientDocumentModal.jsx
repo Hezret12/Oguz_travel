@@ -7,6 +7,7 @@ import {
   Paper,
   Stack,
   Typography,
+  Grid,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -17,19 +18,31 @@ import toast from 'react-hot-toast';
 import { CustomDialog } from './CustomDialog';
 import { CustomDialogHeader } from './CustomDialogHeader';
 import { useLocale } from '../../hooks/useLocale';
-import { api } from '../../api/service/apiHelper';
+import { updatePassportApi } from '../../api/queries/patch';
 import { BASE_URL } from '../../api/axiosIntance';
+import CustomTextField from '../CustomTextField';
+import CustomDatePicker from '../CustomDatePicker';
+import { useForm } from 'react-hook-form';
 
 export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
   const { t } = useLocale();
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const fileUrl = client?.passport_file_url || client?.passportFileUrl;
+  const fileUrl = client?.passport_file_url || client?.passportFileUrl || client?.images?.[0];
   const fullUrl = fileUrl ? (fileUrl.startsWith('http') ? fileUrl : `${BASE_URL}${fileUrl}`) : null;
   const fileName = fileUrl ? fileUrl.split('/').pop() : '';
 
-  // Dosyayı Bilgisayara İndirme (Download)
+  const { control, handleSubmit } = useForm({
+    defaultValues: {
+      passport_number: client?.passport_number || '',
+      passportIssueDate: client?.passportIssueDate || client?.passport_issue_date || null,
+      passportExpiryDate: client?.passportExpiryDate || null,
+      passportCountryOfIssue: client?.passportCountryOfIssue || '',
+    },
+  });
+
   const handleDownload = async () => {
     if (!fullUrl) return;
     try {
@@ -50,38 +63,49 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
     }
   };
 
-  // Yeni Dosya Yükleme (Upload)
-  const handleFileUpload = async (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
 
+  const submitPassportHandler = async (data) => {
+    if (!client?.guid) return;
     try {
       setUploading(true);
       const formData = new FormData();
-      formData.append('guid', client?.guid);
-      formData.append('passport_file', file);
+      formData.append('guid', client.guid);
+      if (data.passport_number) formData.append('passport_number', data.passport_number);
+      if (data.passportIssueDate) formData.append('passportIssueDate', data.passportIssueDate);
+      if (data.passportExpiryDate) formData.append('passportExpiryDate', data.passportExpiryDate);
+      if (data.passportCountryOfIssue) formData.append('passportCountryOfIssue', data.passportCountryOfIssue);
 
-      await api.patchFormDataPrivate('/client/update-client', formData);
-      toast.success(t('clients.documentUploaded') || 'Resminama üstünlikli ýüklendi');
+      if (selectedFile) {
+        formData.append('images', selectedFile);
+      }
+
+      await updatePassportApi(formData);
+      toast.success(t('clients.documentUploaded') || 'Pasport maglumatlary täzelendi');
       onRefresh?.();
+      onClose?.();
     } catch (err) {
       console.error(err);
-      toast.error(t('clients.documentUploadError') || 'Resminama ýüklenende ýalňyşlyk çykdy');
+      toast.error(t('clients.documentUploadError') || 'Täzelenende ýalňyşlyk çykdy');
     } finally {
       setUploading(false);
     }
   };
 
-  // Belgeyi Silme (Delete)
   const handleDeleteFile = async () => {
     if (!window.confirm(t('clients.deleteConfirmDocument') || 'Bu resminamany pozmak isleýärsiňizmi?')) return;
     try {
       setDeleting(true);
       const formData = new FormData();
       formData.append('guid', client?.guid);
-      formData.append('passport_file', ''); // Dosya yolunu temizle
+      formData.append('images', '');
 
-      await api.patchFormDataPrivate('/client/update-client', formData);
+      await updatePassportApi(formData);
       toast.success(t('clients.documentDeleted') || 'Resminama pozuldy');
       onRefresh?.();
     } catch (err) {
@@ -93,13 +117,14 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
   };
 
   return (
-    <CustomDialog widthX={600} open={open} close={onClose}>
+    <CustomDialog widthX={650} open={open} close={onClose}>
       <CustomDialogHeader
         variant="h5"
-        title={`${client?.fullName || ''} - ${t('clients.documents')}`}
+        title={`${client?.fullName || ''} - Pasport & Resminama`}
       />
 
-      <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+      <Box component="form" onSubmit={handleSubmit(submitPassportHandler)} sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+        {/* Existing File View */}
         {fullUrl ? (
           <Paper
             variant="outlined"
@@ -117,7 +142,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
               <InsertDriveFileIcon color="primary" sx={{ fontSize: 32 }} />
               <Box sx={{ overflow: 'hidden' }}>
                 <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
-                  {t('clients.passportDocument')}
+                  {t('clients.passportDocument') || 'Pasport Faýly'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary" noWrap>
                   {fileName}
@@ -126,7 +151,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
             </Box>
 
             <Stack direction="row" spacing={1}>
-              {/* Göster / Önizle */}
               <IconButton
                 size="small"
                 color="primary"
@@ -139,7 +163,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                 <VisibilityIcon fontSize="small" />
               </IconButton>
 
-              {/* Bilgisayara İndir */}
               <IconButton
                 size="small"
                 color="success"
@@ -149,7 +172,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                 <DownloadIcon fontSize="small" />
               </IconButton>
 
-              {/* Sil */}
               <IconButton
                 size="small"
                 color="error"
@@ -161,39 +183,80 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
               </IconButton>
             </Stack>
           </Paper>
-        ) : (
-          <Box
-            sx={{
-              p: 4,
-              border: '2px dashed',
-              borderColor: 'divider',
-              borderRadius: '12px',
-              textAlign: 'center',
-              color: 'text.secondary',
-            }}
-          >
-            <Typography variant="body2" sx={{ mb: 1 }}>
-              {t('clients.noDocument')}
-            </Typography>
-          </Box>
-        )}
+        ) : null}
 
-        {/* Yeni Belge Yükleme Butonu */}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
-          <Button
-            variant="contained"
-            component="label"
-            startIcon={uploading ? <CircularProgress size={20} color="inherit" /> : <CloudUploadIcon />}
-            disabled={uploading}
-            sx={{ borderRadius: '10px', textTransform: 'none' }}
-          >
-            {fullUrl ? t('clients.changeDocument') : t('clients.uploadDocument')}
-            <input
-              type="file"
-              hidden
-              accept="image/*,application/pdf"
-              onChange={handleFileUpload}
+        {/* Passport Form Inputs */}
+        <Grid container spacing={2}>
+          <Grid size={6}>
+            <CustomTextField
+              name="passport_number"
+              control={control}
+              label={t("columns.passportNumber")}
             />
+          </Grid>
+          <Grid size={6}>
+            <CustomTextField
+              name="passportCountryOfIssue"
+              control={control}
+              label={t("columns.passportCountryOfIssue")}
+            />
+          </Grid>
+          <Grid size={6}>
+            <CustomDatePicker
+              name="passportIssueDate"
+              control={control}
+              label={t("columns.passportIssueDate")}
+            />
+          </Grid>
+          <Grid size={6}>
+            <CustomDatePicker
+              name="passportExpiryDate"
+              control={control}
+              label={t("columns.passportExpiryDate")}
+            />
+          </Grid>
+        </Grid>
+
+        {/* Upload File Zone */}
+        <Paper
+          variant="outlined"
+          component="label"
+          sx={{
+            p: 2,
+            borderRadius: '12px',
+            borderStyle: 'dashed',
+            borderColor: 'divider',
+            cursor: 'pointer',
+            textAlign: 'center',
+            bgcolor: (theme) =>
+              theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#fafafa',
+            '&:hover': { borderColor: 'primary.main' },
+          }}
+        >
+          <input
+            type="file"
+            hidden
+            accept="image/*,application/pdf"
+            onChange={handleFileChange}
+          />
+          <CloudUploadIcon color="primary" sx={{ fontSize: 28, mb: 0.5 }} />
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            {selectedFile ? selectedFile.name : (fullUrl ? t('clients.changeDocument', 'Täze faýl saýlaň') : t('clients.uploadDocument', 'Faýl / Surat yükleň (images)'))}
+          </Typography>
+        </Paper>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+          <Button onClick={onClose} variant="outlined" color="inherit" sx={{ borderRadius: '10px' }}>
+            {t('cancel', 'Yza')}
+          </Button>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={uploading}
+            startIcon={uploading ? <CircularProgress size={20} color="inherit" /> : null}
+            sx={{ borderRadius: '10px' }}
+          >
+            {t('save', 'Ýatda sakla')}
           </Button>
         </Box>
       </Box>

@@ -63,6 +63,7 @@ axiosInstance.interceptors.response.use(
       }
 
       const response = await axiosInstance.post('/auth/refresh', {
+        refreshToken: refreshToken,
         refresh_token: refreshToken,
       });
 
@@ -82,8 +83,8 @@ axiosInstance.interceptors.response.use(
         throw new Error('No access token in refresh response');
       }
 
-      // Persist new tokens
-      Cookies.set('accessToken', newAccessToken);
+      // Persist new tokens matching Travel_server (7d / 30d)
+      Cookies.set('accessToken', newAccessToken, { expires: 7 });
       if (newRefreshToken) {
         Cookies.set('refreshToken', newRefreshToken, { expires: 30 });
       }
