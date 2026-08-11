@@ -61,12 +61,12 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      title: "",
-      description: "",
+      title: null,
+      description: null,
       assignee_guid: [],
       priority: "medium",
       status: 1,
-      dueDate: "",
+      dueDate: null,
     },
   });
 
@@ -103,20 +103,6 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
         ? [data.assignee_guid]
         : [];
 
-    const assignedEmps = employeeOptions.filter(
-      (emp) =>
-        selectedGuids.includes(emp.value) ||
-        selectedGuids.includes(emp.userGuid) ||
-        selectedGuids.includes(emp.employeeGuid),
-    );
-
-    const assignees = assignedEmps.map((emp) => ({
-      id: emp.value,
-      name: emp.name,
-      initials: emp.initials,
-      color: emp.color,
-    }));
-
     const numericStatus =
       Number(data.status) ||
       (String(data.status).toLowerCase().includes("todo")
@@ -126,17 +112,6 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
           : String(data.status).toLowerCase().includes("complet")
             ? 3
             : 1);
-
-    onCreateTask?.({
-      id: `task-${Date.now()}`,
-      title: data.title,
-      description: data.description,
-      attachments,
-      assignees,
-      priority: data.priority || "medium",
-      status: numericStatus,
-      dueDate: data.dueDate || "",
-    });
 
     const payload = {
       assignee_guids: selectedGuids,
@@ -152,6 +127,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
     try {
       await createMutation.mutateAsync(payload);
+      onCreateTask?.();
     } catch (err) {
       console.error("API addTask mutation error:", err);
     }
