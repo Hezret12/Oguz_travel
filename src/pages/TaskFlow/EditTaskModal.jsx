@@ -259,14 +259,16 @@ export default function EditTaskModal({ open, onClose, task }) {
                 }}
               />
             </Grid>
-          </Grid>
 
-          <TaskFileUpload
-            files={attachments}
-            onChange={setAttachments}
-            disabled={isSubmitting}
-            isSubmitting={isSubmitting}
-          />
+            <Grid size={{ xs: 12 }}>
+              <TaskFileUpload
+                files={attachments}
+                onChange={setAttachments}
+                disabled={isSubmitting}
+                isSubmitting={isSubmitting}
+              />
+            </Grid>
+          </Grid>
 
           <FooterButton
             onCancel={handleCloseModal}

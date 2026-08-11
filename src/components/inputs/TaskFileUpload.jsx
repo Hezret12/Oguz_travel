@@ -4,7 +4,7 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  Stack,
+  Grid,
   Chip,
   Paper,
   Dialog,
@@ -120,6 +120,7 @@ function FileCategoryBadge({ category }) {
         color: cfg.color,
         letterSpacing: "0.5px",
         display: "inline-block",
+        flexShrink: 0,
       }}
     >
       {cfg.label}
@@ -376,10 +377,7 @@ export default function TaskFileUpload({
             sx={{
               borderRadius: "4px",
               height: 4,
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(255,255,255,0.1)"
-                  : "rgba(0,0,0,0.06)",
+              bgcolor: "action.hover",
             }}
           />
         </Box>
@@ -422,7 +420,7 @@ export default function TaskFileUpload({
           opacity: disabled || isSubmitting ? 0.6 : 1,
           pointerEvents: disabled || isSubmitting ? "none" : "auto",
           cursor: disabled || isSubmitting || isFull ? "not-allowed" : "pointer",
-          borderColor: isDragging ? "primary.main" : undefined,
+          borderColor: isDragging ? "primary.main" : "divider",
           boxSizing: "border-box",
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
@@ -440,10 +438,7 @@ export default function TaskFileUpload({
           <CloudUploadOutlinedIcon
             sx={{
               fontSize: 18,
-              color: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.5)"
-                  : "rgba(0, 0, 0, 0.5)",
+              color: "text.secondary",
               flexShrink: 0,
             }}
           />
@@ -453,12 +448,7 @@ export default function TaskFileUpload({
             sx={{
               fontSize: "0.875rem",
               fontWeight: 400,
-              color: (theme) =>
-                files.length > 0
-                  ? "text.primary"
-                  : theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.4)"
-                    : "rgba(0, 0, 0, 0.4)",
+              color: files.length > 0 ? "text.primary" : "text.secondary",
             }}
           >
             {files.length > 0
@@ -478,19 +468,36 @@ export default function TaskFileUpload({
             borderRadius: "4px",
             flexShrink: 0,
             ml: 1,
-            bgcolor: (theme) =>
-              files.length === MAX_FILES
-                ? "warning.main"
-                : theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.1)"
-                  : "rgba(0, 0, 0, 0.08)",
+            bgcolor: files.length === MAX_FILES ? "warning.main" : "action.hover",
           }}
         />
       </Paper>
 
-      {/* Files List Preview */}
+      {/* Files List Preview - 2 items per row grid (1 satirda 2 tane) */}
       {files.length > 0 && (
-        <Stack spacing={1} sx={{ mt: 1.25 }}>
+        <Grid
+          container
+          spacing={1}
+          sx={{
+            mt: 1,
+            maxHeight: "125px",
+            overflowY: "auto",
+            pr: 0.5,
+            "&::-webkit-scrollbar": {
+              width: "4px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              background: "rgba(100, 116, 139, 0.2)",
+              borderRadius: "4px",
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              background: "rgba(100, 116, 139, 0.4)",
+            },
+          }}
+        >
           {files.map((file, idx) => {
             const fileName =
               typeof file === "string"
@@ -501,187 +508,175 @@ export default function TaskFileUpload({
             const previewUrl = previews[idx];
 
             return (
-              <Box
-                key={idx}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  p: 1,
-                  px: 1.5,
-                  borderRadius: "10px",
-                  border: "1px solid",
-                  borderColor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.08)"
-                      : "rgba(0, 0, 0, 0.07)",
-                  bgcolor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.03)"
-                      : "#FFFFFF",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
-                  transition: "all 0.15s ease-in-out",
-                  "&:hover": {
-                    borderColor: "primary.main",
-                    bgcolor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "rgba(255, 255, 255, 0.05)"
-                        : "rgba(240, 247, 255, 0.5)",
-                    transform: "translateY(-1px)",
-                  },
-                }}
-              >
+              <Grid size={{ xs: 12, sm: 6 }} key={idx}>
                 <Box
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 1.5,
-                    minWidth: 0,
+                    justifyContent: "space-between",
+                    p: 0.75,
+                    px: 1.25,
+                    height: "52px",
+                    boxSizing: "border-box",
+                    borderRadius: "10px",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.02)",
+                    transition: "all 0.15s ease-in-out",
+                    "&:hover": {
+                      borderColor: "primary.main",
+                      bgcolor: "action.hover",
+                      transform: "translateY(-1px)",
+                    },
                   }}
                 >
-                  {/* Image thumbnail or Format Icon */}
-                  {previewUrl ? (
-                    <Tooltip title={t("preview", "Uly görmek")}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      minWidth: 0,
+                      flex: 1,
+                    }}
+                  >
+                    {/* Image thumbnail or Format Icon */}
+                    {previewUrl ? (
+                      <Tooltip title={t("preview", "Uly görmek")}>
+                        <Box
+                          component="img"
+                          src={previewUrl}
+                          alt={fileName}
+                          onClick={() =>
+                            setPreviewModal({ url: previewUrl, name: fileName, file })
+                          }
+                          sx={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: "7px",
+                            objectFit: "cover",
+                            border: "1px solid",
+                            borderColor: "divider",
+                            flexShrink: 0,
+                            cursor: "pointer",
+                            transition:
+                              "transform 0.15s ease, border-color 0.15s ease",
+                            "&:hover": {
+                              transform: "scale(1.08)",
+                              borderColor: "primary.main",
+                            },
+                          }}
+                        />
+                      </Tooltip>
+                    ) : (
                       <Box
-                        component="img"
-                        src={previewUrl}
-                        alt={fileName}
-                        onClick={() =>
-                          setPreviewModal({ url: previewUrl, name: fileName, file })
-                        }
                         sx={{
-                          width: 38,
-                          height: 38,
-                          borderRadius: "8px",
-                          objectFit: "cover",
-                          border: "1px solid",
-                          borderColor: "divider",
+                          width: 34,
+                          height: 34,
+                          borderRadius: "7px",
+                          bgcolor: "action.hover",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                           flexShrink: 0,
-                          cursor: "pointer",
-                          transition:
-                            "transform 0.15s ease, border-color 0.15s ease",
-                          "&:hover": {
-                            transform: "scale(1.08)",
-                            borderColor: "primary.main",
-                          },
-                        }}
-                      />
-                    </Tooltip>
-                  ) : (
-                    <Box
-                      sx={{
-                        width: 38,
-                        height: 38,
-                        borderRadius: "8px",
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.06)"
-                            : "rgba(0, 0, 0, 0.04)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <FileTypeIcon category={category} />
-                    </Box>
-                  )}
-
-                  <Box sx={{ minWidth: 0 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                      <Typography
-                        variant="body2"
-                        noWrap
-                        sx={{
-                          fontWeight: 600,
-                          fontSize: "0.825rem",
-                          color: "text.primary",
-                          maxWidth: { xs: 90, sm: 110, md: 140 },
                         }}
                       >
-                        {fileName}
-                      </Typography>
-                      <FileCategoryBadge category={category} />
-                    </Box>
-
-                    {fileSize && (
-                      <Typography
-                        variant="caption"
-                        sx={{ color: "text.secondary", fontSize: "0.725rem" }}
-                      >
-                        {fileSize}
-                      </Typography>
+                        <FileTypeIcon category={category} />
+                      </Box>
                     )}
-                  </Box>
-                </Box>
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  {previewUrl && (
-                    <Tooltip title={t("preview", "Uly görmek")}>
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 0 }}>
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: "0.8rem",
+                            color: "text.primary",
+                            minWidth: 0,
+                            flexShrink: 1,
+                          }}
+                        >
+                          {fileName}
+                        </Typography>
+                        <FileCategoryBadge category={category} />
+                      </Box>
+
+                      {fileSize && (
+                        <Typography
+                          variant="caption"
+                          noWrap
+                          sx={{ color: "text.secondary", fontSize: "0.7rem", display: "block" }}
+                        >
+                          {fileSize}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
+                    {previewUrl && (
+                      <Tooltip title={t("preview", "Uly görmek")}>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            setPreviewModal({ url: previewUrl, name: fileName, file })
+                          }
+                          sx={{
+                            p: 0.5,
+                            color: "text.secondary",
+                            "&:hover": {
+                              color: "primary.main",
+                              bgcolor: "action.hover",
+                            },
+                          }}
+                        >
+                          <VisibilityOutlinedIcon sx={{ fontSize: 17 }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+
+                    <Tooltip title={t("download", "Ýükläp al")}>
                       <IconButton
                         size="small"
-                        onClick={() =>
-                          setPreviewModal({ url: previewUrl, name: fileName, file })
-                        }
+                        onClick={() => downloadFile(file, fileName)}
                         sx={{
+                          p: 0.5,
                           color: "text.secondary",
                           "&:hover": {
                             color: "primary.main",
-                            bgcolor: (theme) =>
-                              theme.palette.mode === "dark"
-                                ? "rgba(14, 133, 132, 0.15)"
-                                : "rgba(14, 133, 132, 0.08)",
+                            bgcolor: "action.hover",
                           },
                         }}
                       >
-                        <VisibilityOutlinedIcon fontSize="small" />
+                        <DownloadIcon sx={{ fontSize: 17 }} />
                       </IconButton>
                     </Tooltip>
-                  )}
 
-                  <Tooltip title={t("download", "Ýükläp al")}>
-                    <IconButton
-                      size="small"
-                      onClick={() => downloadFile(file, fileName)}
-                      sx={{
-                        color: "text.secondary",
-                        "&:hover": {
-                          color: "primary.main",
-                          bgcolor: (theme) =>
-                            theme.palette.mode === "dark"
-                              ? "rgba(14, 133, 132, 0.15)"
-                              : "rgba(14, 133, 132, 0.08)",
-                        },
-                      }}
-                    >
-                      <DownloadIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip title={t("remove", "Aýyr")}>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemoveFile(idx)}
-                      disabled={disabled || isSubmitting}
-                      sx={{
-                        color: "text.secondary",
-                        "&:hover": {
-                          color: "error.main",
-                          bgcolor: (theme) =>
-                            theme.palette.mode === "dark"
-                              ? "rgba(239, 68, 68, 0.15)"
-                              : "rgba(239, 68, 68, 0.08)",
-                        },
-                      }}
-                    >
-                      <DeleteOutlinedIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
+                    <Tooltip title={t("remove", "Aýyr")}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveFile(idx)}
+                        disabled={disabled || isSubmitting}
+                        sx={{
+                          p: 0.5,
+                          color: "text.secondary",
+                          "&:hover": {
+                            color: "error.main",
+                            bgcolor: "action.hover",
+                          },
+                        }}
+                      >
+                        <DeleteOutlinedIcon sx={{ fontSize: 17 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </Box>
-              </Box>
+              </Grid>
             );
           })}
-        </Stack>
+        </Grid>
       )}
 
       {/* Image Preview Lightbox Modal */}
@@ -740,8 +735,7 @@ export default function TaskFileUpload({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "#090D16" : "#F1F5F9",
+            bgcolor: "background.default",
             minHeight: 300,
             maxHeight: "75vh",
             overflow: "auto",
@@ -766,3 +760,4 @@ export default function TaskFileUpload({
     </Box>
   );
 }
+

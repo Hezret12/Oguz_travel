@@ -253,7 +253,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <CustomSelect
                 name="priority"
                 control={control}
@@ -263,7 +263,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <CustomSelect
                 name="status"
                 control={control}
@@ -273,7 +273,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
               <CustomDatePicker
                 name="dueDate"
                 control={control}
@@ -291,7 +291,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+
+            <Grid size={{ xs: 12 }}>
               <TaskFileUpload
                 files={attachments}
                 onChange={setAttachments}
