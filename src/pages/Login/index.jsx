@@ -23,7 +23,6 @@ import { loginApi } from '../../api/queries/post';
 import { useValidShema } from '../../functions/useValidShema';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
 import ThemeToggle from '../../components/ThemeToggle';
-import DevLoginHelper from '../../components/DevLoginHelper';
 
 import eyeIcon from '../../assets/icons/eye.svg';
 import closeEyeIcon from '../../assets/icons/closeEye.svg';
@@ -396,8 +395,6 @@ export default function Login() {
           </Box>
         </Box>
       </Box>
-
-      <DevLoginHelper />
     </Box>
   );
 }
