@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Box, Grid, Alert } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import toast from "react-hot-toast";
 
 import { useLocale } from "../../hooks/useLocale";
@@ -168,27 +168,11 @@ export default function EditTaskModal({ open, onClose, task }) {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.8, pt: 0.5 }}>
-          {/* Error Alert Display */}
-          {updateMutation.isError && (
-            <Alert
-              severity="error"
-              sx={{
-                borderRadius: "10px",
-                fontSize: "0.825rem",
-                fontWeight: 500,
-              }}
-            >
-              {updateMutation.error?.response?.data?.message ||
-                updateMutation.error?.message ||
-                t("task.updateError")}
-            </Alert>
-          )}
-
+      
           <CustomTextField
             name="title"
             control={control}
             label={t("task.taskTitle")}
-            placeholder={t("task.enterTaskTitle")}
             disabled={isSubmitting}
             required
           />
@@ -197,7 +181,6 @@ export default function EditTaskModal({ open, onClose, task }) {
             name="description"
             control={control}
             label={t("columns.description")}
-            placeholder={t("task.enterDescription")}
             multiline
             rows={3}
             disabled={isSubmitting}
@@ -210,7 +193,6 @@ export default function EditTaskModal({ open, onClose, task }) {
                 control={control}
                 label={t("task.assignEmployee")}
                 options={employeeOptions}
-                placeholder={t("task.selectEmployee")}
                 multiple
                 maxChips={3}
                 disabled={isSubmitting}
@@ -280,8 +262,6 @@ export default function EditTaskModal({ open, onClose, task }) {
 
           <FooterButton
             onCancel={handleCloseModal}
-            saveText={t("save", "Save")}
-            cancelText={t("cancel", "Cancel")}
             type="submit"
             loading={isSubmitting}
           />
