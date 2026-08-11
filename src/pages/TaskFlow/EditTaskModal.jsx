@@ -40,7 +40,7 @@ export default function EditTaskModal({ open, onClose, task }) {
   });
 
   const employeeOptions = useMemo(() => {
-    const list = Array.isArray(usersData?.data?.data) ? usersData.data.data : [];
+    const list = Array.isArray(usersData) ? usersData : [];
 
     return list.map((usr) => {
       const userGuid = usr?.guid;
@@ -134,7 +134,7 @@ export default function EditTaskModal({ open, onClose, task }) {
     [t]
   );
 
-  const onSubmit = async (formData) => {
+  const onSubmit = (formData) => {
     const selectedGuids = Array.isArray(formData.assignee_guid)
       ? formData.assignee_guid
       : formData.assignee_guid
@@ -144,8 +144,8 @@ export default function EditTaskModal({ open, onClose, task }) {
     const payload = {
       guid: task.guid,
       assignee_guids: selectedGuids,
-      title: formData.title,
-      description: formData.description || "",
+      title: formData.title?.trim() || "",
+      description: formData.description?.trim() || "",
       priority: formData.priority || "medium",
       status: Number(formData.status) || 1,
       due_date: formData.dueDate
@@ -154,11 +154,7 @@ export default function EditTaskModal({ open, onClose, task }) {
       images: attachments,
     };
 
-    try {
-      await updateMutation.mutateAsync(payload);
-    } catch (err) {
-      console.error("API updateTask error:", err);
-    }
+    updateMutation.mutate(payload);
   };
 
   const isSubmitting = updateMutation.isPending;

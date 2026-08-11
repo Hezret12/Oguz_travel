@@ -35,8 +35,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
 
   const employeeOptions = useMemo(() => {
+    const list = Array.isArray(usersData) ? usersData : [];
 
-    return usersData?.map((usr) => {
+    return list.map((usr) => {
       const userGuid = usr?.guid;
       const emp = usr?.employee;
       const fullName = emp?.fullName || usr?.fullName || usr?.phone_number || "User";
@@ -53,14 +54,14 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     });
   }, [usersData]);
 
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      title: null,
-      description: null,
+      title: "",
+      description: "",
       assignee_guid: [],
-      priority: null,
-      status: null,
-      dueDate: null,
+      priority: "medium",
+      status: 1,
+      dueDate: "",
     },
   });
 
@@ -84,7 +85,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const [attachments, setAttachments] = useState([]);
 
   const handleCloseDialog = () => {
+    reset();
     setAttachments([]);
+    createMutation.reset();
     onClose();
   };
 
