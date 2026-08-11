@@ -28,24 +28,18 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     apiFn: addTaskApi,
     key: "tasks",
     onSuccess: () => {
+      onCreateTask?.();
       handleCloseDialog();
-    }
+    },
   });
 
-  const employeeOptions = useMemo(() => {
-    const list = Array.isArray(usersData)
-      ? usersData
-      : Array.isArray(usersData?.data)
-        ? usersData.data
-        : Array.isArray(usersData?.data?.data)
-          ? usersData.data.data
-          : [];
 
-    return list.map((usr) => {
+  const employeeOptions = useMemo(() => {
+
+    return usersData?.map((usr) => {
       const userGuid = usr?.guid;
       const emp = usr?.employee;
-      const fullName =
-        emp?.fullName || usr?.fullName || usr?.phone_number || "User";
+      const fullName = emp?.fullName || usr?.fullName || usr?.phone_number || "User";
 
       return {
         value: userGuid,
@@ -64,8 +58,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       title: null,
       description: null,
       assignee_guid: [],
-      priority: "medium",
-      status: 1,
+      priority: null,
+      status: null,
       dueDate: null,
     },
   });
@@ -96,41 +90,26 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     onClose();
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = (data) => {
     const selectedGuids = Array.isArray(data.assignee_guid)
       ? data.assignee_guid
       : data.assignee_guid
         ? [data.assignee_guid]
         : [];
 
-    const numericStatus =
-      Number(data.status) ||
-      (String(data.status).toLowerCase().includes("todo")
-        ? 1
-        : String(data.status).toLowerCase().includes("progress")
-          ? 2
-          : String(data.status).toLowerCase().includes("complet")
-            ? 3
-            : 1);
-
     const payload = {
       assignee_guids: selectedGuids,
-      title: data.title,
-      description: data.description || "",
+      title: data.title?.trim() || "",
+      description: data.description?.trim() || "",
       priority: data.priority || "medium",
-      status: numericStatus,
+      status: Number(data.status) || 1,
       due_date: data.dueDate
         ? new Date(data.dueDate).toISOString()
         : new Date().toISOString(),
       images: attachments,
     };
 
-    try {
-      await createMutation.mutateAsync(payload);
-      onCreateTask?.();
-    } catch (err) {
-      console.error("API addTask mutation error:", err);
-    }
+    createMutation.mutate(payload);
   };
 
   const isSubmitting = createMutation.isPending;
