@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Box, Grid, Alert } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import toast from "react-hot-toast";
 
 import { useLocale } from "../../hooks/useLocale";
@@ -203,28 +203,12 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
         <Box
           sx={{ display: "flex", flexDirection: "column", gap: 1.8, pt: 0.5 }}
         >
-          {/* Error Alert display */}
-          {createMutation.isError && (
-            <Alert
-              severity="error"
-              sx={{
-                borderRadius: "10px",
-                fontSize: "0.825rem",
-                fontWeight: 500,
-              }}
-            >
-              {createMutation.error?.response?.data?.message ||
-                createMutation.error?.message ||
-                t("task.createError")}
-            </Alert>
-          )}
-
+  
           {/* Title */}
           <CustomTextField
             name="title"
             control={control}
             label={t("task.taskTitle")}
-            placeholder={t("task.enterTaskTitle")}
             disabled={isSubmitting}
             required
           />

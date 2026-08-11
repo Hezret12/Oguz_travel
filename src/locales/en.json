@@ -619,8 +619,6 @@
     "enterTitle": "Enter task title...",
     "enterDescription": "Enter task details & description...",
     "todoList": "To-Do List",
-    "noSubtasks": "No subtasks added yet.",
-    "subtaskName": "Subtask name...",
     "add": "Add",
     "addSubtask": "Add subtask",
     "assignEmployee": "Assignee",
