@@ -8,21 +8,14 @@ import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import FooterButton from "../../components/Dialog/FooterButton";
 import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
-import AppAutocomplete from "../../components/AppAutocomplete";
-import { useGet } from "../../hooks/CRUD/useGet";
+import AppUserAutocomplete from "../../components/AppUserAutocomplete";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
-import { getAllUsersApi } from "../../api/queries/getters";
 import { updateTaskApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload, { TaskFileList } from "../../components/inputs/TaskFileUpload";
 
 export default function EditTaskModal({ open, onClose, task }) {
   const { t } = useLocale();
-
-  const { data: usersData } = useGet({
-    apiFn: getAllUsersApi,
-    key: "users",
-  });
 
   const updateMutation = useUpdate({
     apiFn: updateTaskApi,
@@ -33,29 +26,36 @@ export default function EditTaskModal({ open, onClose, task }) {
     }
   });
 
-  const employeeOptions = useMemo(() => {
-    const list = Array.isArray(usersData) ? usersData : [];
+  const initialUserOptions = useMemo(() => {
+    if (!task) return [];
+    const raw = Array.isArray(task.assignees)
+      ? task.assignees
+      : Array.isArray(task.empltaskAssignee)
+      ? task.empltaskAssignee
+      : [];
 
-    return list.map((usr) => {
-      const userGuid = usr?.guid;
-      const emp = usr?.employee;
-      const fullName =
-        emp?.fullName ||
-        usr?.fullName ||
-        usr?.phone_number ||
-        "User";
+    return raw
+      .map((a) => {
+        const usr = a?.user || a;
+        const emp = usr?.employee || a?.employee;
+        const userGuid = a?.guid || usr?.guid || a?.assignee_guid || a?.id;
+        const fullName =
+          emp?.fullName ||
+          usr?.fullName ||
+          usr?.username ||
+          usr?.phone_number ||
+          a?.name ||
+          "User";
 
-      return {
-        value: userGuid,
-        userGuid: userGuid,
-        employeeGuid: usr?.employee_guid || emp?.guid,
-        label: fullName,
-        name: fullName,
-        initials: (fullName || "User").slice(0, 2).toUpperCase(),
-        color: "#0E8584",
-      };
-    });
-  }, [usersData]);
+        return {
+          value: userGuid,
+          userGuid: userGuid,
+          label: fullName,
+          name: fullName,
+        };
+      })
+      .filter((opt) => Boolean(opt.value));
+  }, [task]);
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -182,13 +182,12 @@ export default function EditTaskModal({ open, onClose, task }) {
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>
-              <AppAutocomplete
+              <AppUserAutocomplete
                 name="assignee_guid"
                 control={control}
                 label={t("task.assignEmployee")}
-                options={employeeOptions}
+                initialOptions={initialUserOptions}
                 multiple
-                maxChips={3}
                 disabled={isSubmitting}
               />
             </Grid>

@@ -8,21 +8,12 @@ import {
   Typography,
 } from "@mui/material";
 
-function AppAvatarGroup({
-  items = [],
-  max = 6,
-  size = 26,
-  sx = {},
-}) {
+function AppAvatarGroup({ items = [], max = 6, size = 26, sx = {} }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
   if (!items || items.length === 0) {
-    return (
-      <Typography variant="caption" color="text.secondary">
-        —
-      </Typography>
-    );
+    return <Typography variant="caption" color="text.secondary"></Typography>;
   }
 
   const parseAssignee = (a) => {

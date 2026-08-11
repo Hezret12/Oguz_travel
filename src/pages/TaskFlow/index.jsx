@@ -1,17 +1,21 @@
 import { useState, useMemo, useCallback } from "react";
-import { Box, useTheme } from "@mui/material";
-import toast from "react-hot-toast";
-import { handleError } from "../../functions/generalHelpers";
+import { Box } from "@mui/material";
 import { useLocale } from "../../hooks/useLocale";
-import { useDebounce } from "../../hooks/useDebounce";
+import { usePageFilters } from "../../hooks/usePageFilters";
 
 import CreateTaskModal from "./CreateTaskModal";
 import EditTaskModal from "./EditTaskModal";
 import TaskFlowHeader from "./Contents/TaskFlowHeader";
 import TaskBoardView from "./Contents/TaskBoardView";
 import TaskListTable from "./Contents/TaskListTable";
+import TaskFilter from "./Contents/TaskFilter";
+import FilterDrawer from "../../components/FilterDrawer";
 import Pagination from "../../components/Pagination";
 
+import {
+  taskFilterActions,
+  taskFilterSelectors,
+} from "../../store/slices/filters/taskFilterSlice";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
@@ -21,48 +25,38 @@ import { deleteTaskApi } from "../../api/queries/delete";
 
 export default function TaskFlow() {
   const { t } = useLocale();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
 
   const [viewMode, setViewMode] = useState("board");
-  const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearch = useDebounce(searchQuery, 400);
-
-  const [page, setPage] = useState(1);
-  const limit = 40;
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterPriority, setFilterPriority] = useState("all");
-  const [dueDate, setDueDate] = useState("");
+  const {
+    applied,
+    draft,
+    isDrawerOpen,
+    openDrawer,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    searchQuery,
+    setSearch,
+    page,
+    setPage,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+    queryParams,
+  } = usePageFilters({
+    actions: taskFilterActions,
+    selectors: taskFilterSelectors,
+  });
 
   const handleViewModeChange = useCallback((mode) => {
     setViewMode(mode);
     setPage(1);
-  }, []);
-
-  const handleSearchChange = useCallback((query) => {
-    setSearchQuery(query);
-    setPage(1);
-  }, []);
-
-  const handleFilterStatusChange = useCallback((status) => {
-    setFilterStatus(status);
-    setPage(1);
-  }, []);
-
-  const handleFilterPriorityChange = useCallback((priority) => {
-    setFilterPriority(priority);
-    setPage(1);
-  }, []);
-
-  const handleDueDateChange = useCallback((date) => {
-    setDueDate(date);
-    setPage(1);
-  }, []);
+  }, [setPage]);
 
   const handleOpenCreateModal = useCallback(() => {
     setIsModalOpen(true);
@@ -77,29 +71,17 @@ export default function TaskFlow() {
     setEditingTask(null);
   }, []);
 
-  // Build params for API filtering (debounced search, priority, status, due_date, type)
-  const queryParams = useMemo(() => {
+  // Build params for API filtering matching Swagger MessagesController_getAll
+  const finalQueryParams = useMemo(() => {
     const params = {
-      page,
-      limit,
+      ...queryParams,
       type: viewMode === "board" ? false : true,
     };
-
-    if (debouncedSearch && debouncedSearch.trim()) {
-      params.search = debouncedSearch.trim();
+    if (params.status && params.status !== "all") {
+      params.status = Number(params.status) || params.status;
     }
-    if (filterStatus && filterStatus !== "all") {
-      params.status = Number(filterStatus) || filterStatus;
-    }
-    if (filterPriority && filterPriority !== "all") {
-      params.priority = filterPriority;
-    }
-    if (dueDate) {
-      params.due_date = dueDate;
-    }
-
     return params;
-  }, [page, limit, viewMode, debouncedSearch, filterStatus, filterPriority, dueDate]);
+  }, [queryParams, viewMode]);
 
   const {
     data: apiTasksResponse,
@@ -112,7 +94,7 @@ export default function TaskFlow() {
   } = usePagginationGet({
     apiFn: getAllTasksApi,
     key: "tasks",
-    params: queryParams,
+    params: finalQueryParams,
   });
 
   const updateTaskMutation = useUpdate({
@@ -133,30 +115,29 @@ export default function TaskFlow() {
     () => [
       {
         id: 1,
-        title: t("task.statusToDo", "TO DO"),
+        title: t("task.statusToDo"),
         color: "#64748B",
         bgLight: "#F8FAFC",
         borderLight: "#E2E8F0",
       },
       {
         id: 2,
-        title: t("task.statusInProgress", "IN PROGRESS"),
+        title: t("task.statusInProgress"),
         color: "#2563EB",
         bgLight: "#EFF6FF",
         borderLight: "#BFDBFE",
       },
       {
         id: 3,
-        title: t("task.statusCompleted", "COMPLETED"),
+        title: t("task.statusCompleted"),
         color: "#16A34A",
         bgLight: "#F0FDF4",
         borderLight: "#BBF7D0",
       },
     ],
-    [t]
+    [t],
   );
 
-  // Get raw tasks list directly from API (supports 1D flat array or 3-indexed 2D array: 0=ToDo, 1=InProgress, 2=Completed)
   const tasksList = useMemo(() => {
     let rawData = apiTasksResponse;
 
@@ -202,31 +183,34 @@ export default function TaskFlow() {
           guid: taskId,
           status: Number(newStatus) || newStatus,
         });
-        toast.success(t("task.taskUpdatedSuccess"));
       } catch (err) {
-        handleError(t("task.updateError"), err);
+        console.log(err);
       }
     },
-    [updateTaskMutation, t]
+    [updateTaskMutation],
   );
 
   const handleDeleteTask = useCallback(
     async (taskId) => {
       try {
         await deleteTaskMutation.mutateAsync(taskId);
-        toast.success(t("deleteConfirm.deleted", "Üstünlikli pozuldy!"));
       } catch (err) {
-        handleError(t("errorOccurred"), err);
+        console.log(err);
       }
     },
-    [deleteTaskMutation, t]
+    [deleteTaskMutation],
   );
+
+  const hasActiveFilters = useMemo(() => {
+    return Boolean(
+      applied.status || applied.priority || applied.due_date || applied.opr_guid
+    );
+  }, [applied]);
 
   return (
     <Box
       sx={{
         p: { xs: 2, md: 3.5 },
-        bgcolor: isDark ? "#090D16" : "#F8FAFC",
         height: "100%",
         display: "flex",
         flexDirection: "column",
@@ -235,22 +219,32 @@ export default function TaskFlow() {
         overflow: "hidden",
       }}
     >
-      {/* Isolated TaskFlow Header Component */}
       <TaskFlowHeader
         viewMode={viewMode}
         setViewMode={handleViewModeChange}
         onOpenCreateModal={handleOpenCreateModal}
         searchQuery={searchQuery}
-        setSearchQuery={handleSearchChange}
-        filterStatus={filterStatus}
-        setFilterStatus={handleFilterStatusChange}
-        filterPriority={filterPriority}
-        setFilterPriority={handleFilterPriorityChange}
-        dueDate={dueDate}
-        setDueDate={handleDueDateChange}
+        setSearchQuery={setSearch}
+        onFilterClick={openDrawer}
+        hasActiveFilters={hasActiveFilters}
       />
 
-      {/* Scrollable Content Area below Fixed Header */}
+      <FilterDrawer
+        open={isDrawerOpen}
+        onClose={cancelFilters}
+        onApply={applyFilters}
+        onReset={resetFilters}
+        onCancel={cancelFilters}
+      >
+        <TaskFilter
+          filters={draft}
+          selectsOpen={selectsOpen}
+          onFilterChange={setDraftFilter}
+          onSelectOpen={openSelect}
+          onSelectClose={closeSelect}
+        />
+      </FilterDrawer>
+
       <Box
         sx={{
           flexGrow: 1,
@@ -263,9 +257,11 @@ export default function TaskFlow() {
         {viewMode === "board" ? (
           <TaskBoardView
             columns={columns}
-            searchQuery={debouncedSearch}
-            filterPriority={filterPriority}
-            dueDate={dueDate}
+            searchQuery={queryParams.search || ""}
+            filterStatus={applied.status}
+            filterPriority={applied.priority}
+            dueDate={applied.due_date}
+            oprGuid={applied.opr_guid}
             onMoveTaskStatus={handleMoveTaskStatus}
             onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}

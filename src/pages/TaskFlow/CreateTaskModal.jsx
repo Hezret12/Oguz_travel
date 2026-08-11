@@ -8,21 +8,14 @@ import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import FooterButton from "../../components/Dialog/FooterButton";
 import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
-import AppAutocomplete from "../../components/AppAutocomplete";
-import { useGet } from "../../hooks/CRUD/useGet";
+import AppUserAutocomplete from "../../components/AppUserAutocomplete";
 import { useCreate } from "../../hooks/CRUD/useCreate";
-import { getAllUsersApi } from "../../api/queries/getters";
 import { addTaskApi } from "../../api/queries/post";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload, { TaskFileList } from "../../components/inputs/TaskFileUpload";
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const { t } = useLocale();
-
-  const { data: usersData } = useGet({
-    apiFn: getAllUsersApi,
-    key: "users",
-  });
 
   const createMutation = useCreate({
     apiFn: addTaskApi,
@@ -32,27 +25,6 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       handleCloseDialog();
     },
   });
-
-
-  const employeeOptions = useMemo(() => {
-    const list = Array.isArray(usersData) ? usersData : [];
-
-    return list.map((usr) => {
-      const userGuid = usr?.guid;
-      const emp = usr?.employee;
-      const fullName = emp?.fullName || usr?.fullName || usr?.phone_number || "User";
-
-      return {
-        value: userGuid,
-        userGuid: userGuid,
-        employeeGuid: usr?.employee_guid || emp?.guid,
-        label: fullName,
-        name: fullName,
-        initials: (fullName || "User").slice(0, 2).toUpperCase(),
-        color: "#0E8584",
-      };
-    });
-  }, [usersData]);
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -148,13 +120,11 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12 }}>
-              <AppAutocomplete
+              <AppUserAutocomplete
                 name="assignee_guid"
                 control={control}
                 label={t("task.assignEmployee")}
-                options={employeeOptions}
                 multiple
-                maxChips={3}
                 disabled={isSubmitting}
               />
             </Grid>

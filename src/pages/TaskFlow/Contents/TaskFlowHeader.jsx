@@ -1,24 +1,15 @@
 import { memo } from "react";
 import {
   Box,
-  Typography,
   Button,
   Paper,
   useTheme,
-  FormControl,
-  Select,
-  MenuItem,
-  ListSubheader,
-  Divider,
+  Badge,
 } from "@mui/material";
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import AddIcon from "@mui/icons-material/Add";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import BlockIcon from "@mui/icons-material/Block";
+import FilterListIcon from "@mui/icons-material/FilterList";
 
 import { useLocale } from "../../../hooks/useLocale";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
@@ -29,10 +20,8 @@ function TaskFlowHeader({
   onOpenCreateModal,
   searchQuery,
   setSearchQuery,
-  filterStatus,
-  setFilterStatus,
-  filterPriority,
-  setFilterPriority,
+  onFilterClick,
+  hasActiveFilters = false,
 }) {
   const { t } = useLocale();
   const theme = useTheme();
@@ -50,7 +39,6 @@ function TaskFlowHeader({
           flexWrap: "wrap",
         }}
       >
-        {/* Left Side: Search & Filter Selects */}
         <Box
           sx={{
             display: "flex",
@@ -63,267 +51,35 @@ function TaskFlowHeader({
           <GlobalSearchInput
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder={t("task.searchTasks", "Search tasks...")}
           />
-
-          {/* Status Select Filter */}
-          <FormControl size="small" sx={{ minWidth: 175 }}>
-            <Select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => {
-                if (selected === "all" || !selected) {
-                  return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <BlockIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {t("task.allStatuses", "All Statuses")}
-                      </Typography>
-                    </Box>
-                  );
-                }
-                if (selected === 1 || selected === "1" || selected === "to do") {
-                  return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <RadioButtonUncheckedIcon
-                        sx={{ color: "#64748B", fontSize: 18 }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
-                      >
-                        {t("task.statusToDo", "TO DO")}
-                      </Typography>
-                    </Box>
-                  );
-                }
-                if (selected === 2 || selected === "2" || selected === "in progress") {
-                  return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <RadioButtonCheckedIcon
-                        sx={{ color: "#2563EB", fontSize: 18 }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
-                      >
-                        {t("task.statusInProgress", "IN PROGRESS")}
-                      </Typography>
-                    </Box>
-                  );
-                }
-                if (selected === 3 || selected === "3" || selected === "completed") {
-                  return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <CheckCircleRoundedIcon
-                        sx={{ color: "#16A34A", fontSize: 18 }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
-                      >
-                        {t("task.statusCompleted", "COMPLETED")}
-                      </Typography>
-                    </Box>
-                  );
-                }
-                return selected;
-              }}
+          {onFilterClick && (
+            <Button
+              variant="outlined"
+              startIcon={
+                <Badge
+                  color="primary"
+                  variant="dot"
+                  invisible={!hasActiveFilters}
+                >
+                  <FilterListIcon sx={{ fontSize: "17px !important" }} />
+                </Badge>
+              }
+              onClick={onFilterClick}
+              disableElevation
               sx={{
-                borderRadius: "8px",
-                bgcolor: isDark ? "#1E293B" : "#FFFFFF",
+                height: "40px",
+                px: 2.5,
+                borderRadius: "10px",
+                textTransform: "none",
+                fontWeight: 600,
                 fontSize: "0.875rem",
-                fontWeight: 500,
               }}
             >
-              <ListSubheader
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.75rem",
-                  color: isDark ? "#94A3B8" : "#64748B",
-                  lineHeight: "24px",
-                  pt: 1,
-                  bgcolor: "transparent",
-                }}
-              >
-                {t("task.notStarted", "Not started")}
-              </ListSubheader>
-              <MenuItem value={1}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                  <RadioButtonUncheckedIcon
-                    sx={{ color: "#64748B", fontSize: 18 }}
-                  />
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
-                  >
-                    {t("task.statusToDo", "TO DO")}
-                  </Typography>
-                </Box>
-              </MenuItem>
-
-              <Divider sx={{ my: 0.5 }} />
-
-              <ListSubheader
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.75rem",
-                  color: isDark ? "#94A3B8" : "#64748B",
-                  lineHeight: "24px",
-                  bgcolor: "transparent",
-                }}
-              >
-                {t("task.active", "Active")}
-              </ListSubheader>
-              <MenuItem value={2}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                  <RadioButtonCheckedIcon
-                    sx={{ color: "#2563EB", fontSize: 18 }}
-                  />
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
-                  >
-                    {t("task.statusInProgress", "IN PROGRESS")}
-                  </Typography>
-                </Box>
-              </MenuItem>
-              <MenuItem value={3}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                  <CheckCircleRoundedIcon
-                    sx={{ color: "#16A34A", fontSize: 18 }}
-                  />
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 700, fontSize: "0.8125rem" }}
-                  >
-                    {t("task.statusCompleted", "COMPLETED")}
-                  </Typography>
-                </Box>
-              </MenuItem>
-
-              <Divider sx={{ my: 0.5 }} />
-
-              <MenuItem value="all">
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.2,
-                    color: "text.secondary",
-                  }}
-                >
-                  <BlockIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {t("task.allStatuses", "All Statuses")}
-                  </Typography>
-                </Box>
-              </MenuItem>
-            </Select>
-          </FormControl>
-
-          {/* Priority Select Filter */}
-          <FormControl size="small" sx={{ minWidth: 175 }}>
-            <Select
-              value={filterPriority}
-              onChange={(e) => setFilterPriority(e.target.value)}
-              displayEmpty
-              renderValue={(selected) => {
-                if (selected === "all" || !selected) {
-                  return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <BlockIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {t("task.allPriorities", "All Priorities")}
-                      </Typography>
-                    </Box>
-                  );
-                }
-                if (selected === "urgent") {
-                  return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <FlagRoundedIcon
-                        sx={{ color: "#DC2626", fontSize: 18 }}
-                      />
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {t("task.priorityUrgent", "Urgent")}
-                      </Typography>
-                    </Box>
-                  );
-                }
-                if (selected === "medium") {
-                  return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <FlagRoundedIcon
-                        sx={{ color: "#F59E0B", fontSize: 18 }}
-                      />
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {t("task.priorityMedium", "Medium")}
-                      </Typography>
-                    </Box>
-                  );
-                }
-                return selected;
-              }}
-              sx={{
-                borderRadius: "8px",
-                bgcolor: isDark ? "#1E293B" : "#FFFFFF",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-              }}
-            >
-              <ListSubheader
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.75rem",
-                  color: isDark ? "#94A3B8" : "#64748B",
-                  lineHeight: "24px",
-                  pt: 1,
-                  bgcolor: "transparent",
-                }}
-              >
-                {t("task.taskPriority", "Task Priority")}
-              </ListSubheader>
-              <MenuItem value="urgent">
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                  <FlagRoundedIcon sx={{ color: "#DC2626", fontSize: 18 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {t("task.priorityUrgent", "Urgent")}
-                  </Typography>
-                </Box>
-              </MenuItem>
-              <MenuItem value="medium">
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                  <FlagRoundedIcon sx={{ color: "#F59E0B", fontSize: 18 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {t("task.priorityMedium", "Medium")}
-                  </Typography>
-                </Box>
-              </MenuItem>
-
-              <Divider sx={{ my: 0.5 }} />
-
-              <MenuItem value="all">
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1.2,
-                    color: "text.secondary",
-                  }}
-                >
-                  <BlockIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {t("task.allPriorities", "All Priorities")}
-                  </Typography>
-                </Box>
-              </MenuItem>
-            </Select>
-          </FormControl>
+              {t("filter")}
+            </Button>
+          )}
         </Box>
 
-        {/* Right Side: View Switcher & New Task Button */}
         <Box
           sx={{
             display: "flex",
@@ -332,7 +88,6 @@ function TaskFlowHeader({
             flexWrap: "wrap",
           }}
         >
-          {/* View Toggle */}
           <Paper
             elevation={0}
             sx={{
@@ -370,7 +125,7 @@ function TaskFlowHeader({
                       : "#64748B",
               }}
             >
-              {t("task.board", "Board")}
+              {t("task.board")}
             </Button>
             <Button
               size="small"
@@ -392,14 +147,14 @@ function TaskFlowHeader({
                 color:
                   viewMode === "list"
                     ? isDark
-                      ? "#F8FAFC"
-                      : "#0F172A"
+                      ? "#334155"
+                      : "#F1F5F9"
                     : isDark
                       ? "#94A3B8"
                       : "#64748B",
               }}
             >
-              {t("task.list", "List")}
+              {t("task.list")}
             </Button>
           </Paper>
 
@@ -424,7 +179,7 @@ function TaskFlowHeader({
               },
             }}
           >
-            {t("task.newTask", "New Task")}
+            {t("task.newTask")}
           </Button>
         </Box>
       </Box>
@@ -433,4 +188,3 @@ function TaskFlowHeader({
 }
 
 export default memo(TaskFlowHeader);
-

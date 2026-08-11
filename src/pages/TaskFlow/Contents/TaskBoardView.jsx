@@ -43,8 +43,10 @@ const getPriorityBadgeProps = (priority) => {
 const TaskBoardColumn = memo(function TaskBoardColumn({
   col,
   searchQuery,
+  filterStatus,
   filterPriority,
   dueDate,
+  oprGuid,
   onEditTask,
   setTaskMenuAnchor,
   setActiveTask,
@@ -54,8 +56,14 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
   const [accumulatedTasks, setAccumulatedTasks] = useState([]);
   const scrollContainerRef = useRef(null);
 
+  const isStatusMatched =
+    !filterStatus ||
+    filterStatus === "all" ||
+    Number(filterStatus) === Number(col.id);
+
   // Build query params for this specific column's status & filters
   const columnParams = useMemo(() => {
+    if (!isStatusMatched) return null;
     const params = {
       page,
       limit: 10,
@@ -71,8 +79,11 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     if (dueDate) {
       params.due_date = dueDate;
     }
+    if (oprGuid) {
+      params.opr_guid = oprGuid;
+    }
     return params;
-  }, [col.id, page, searchQuery, filterPriority, dueDate]);
+  }, [col.id, page, searchQuery, filterPriority, dueDate, oprGuid, isStatusMatched]);
 
   // Fetch paginated tasks independently for this column
   const {
@@ -84,11 +95,15 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
   } = usePagginationGet({
     apiFn: getAllTasksApi,
     key: ["tasks-column", col.id, columnParams],
-    params: columnParams,
+    params: columnParams || {},
+    options: {
+      enabled: isStatusMatched,
+    },
   });
 
   // Extract raw tasks array from API response
   const fetchedTasks = useMemo(() => {
+    if (!isStatusMatched) return [];
     let rawData = apiResponse;
     if (!Array.isArray(rawData)) {
       if (Array.isArray(rawData?.data)) rawData = rawData.data;
@@ -104,10 +119,10 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
       return group || rawData.flat();
     }
     return rawData;
-  }, [apiResponse, col.id]);
+  }, [apiResponse, col.id, isStatusMatched]);
 
   // Reset column page when global filters change (in-render state adjustment)
-  const filterKey = `${searchQuery}-${filterPriority}-${dueDate}`;
+  const filterKey = `${searchQuery}-${filterStatus}-${filterPriority}-${dueDate}-${oprGuid}`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
   if (filterKey !== prevFilterKey) {
     setPrevFilterKey(filterKey);
@@ -289,181 +304,198 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
             </Box>
           ) : (
             accumulatedTasks.map((task) => {
-            const taskId = task.guid || task.id;
-            const priorityProps = getPriorityBadgeProps(task.priority);
+              const taskId = task.guid || task.id;
+              const priorityProps = getPriorityBadgeProps(task.priority);
 
-            let formattedDate = "";
-            const rawDate = task.due_date || task.dueDate;
-            if (rawDate) {
-              const d = new Date(rawDate);
-              if (!isNaN(d.getTime())) {
-                formattedDate = d.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                });
+              let formattedDate = "";
+              const rawDate = task.due_date || task.dueDate;
+              if (rawDate) {
+                const d = new Date(rawDate);
+                if (!isNaN(d.getTime())) {
+                  formattedDate = d.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
+                }
               }
-            }
 
-            const assigneesList = task.assignees || [];
-            const attachmentCount = task.images?.length || 0;
+              const assigneesList = task.assignees || [];
+              const attachmentCount = task.images?.length || 0;
 
-            return (
-              <Card
-                key={taskId}
-                elevation={0}
-                sx={{
-                  borderRadius: "10px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderLeft: `3.5px solid ${col.color}`,
-                  bgcolor: "background.paper",
-                  height: 145,
-                  flexShrink: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  transition: "all 0.15s ease-in-out",
-                  "&:hover": {
-                    boxShadow: "0 4px 12px -2px rgba(0, 0, 0, 0.08)",
-                    borderColor: "primary.main",
-                  },
-                }}
-              >
-                <CardContent
+              return (
+                <Card
+                  key={taskId}
+                  elevation={0}
                   sx={{
-                    p: 1.5,
-                    height: "100%",
+                    borderRadius: "10px",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderLeft: `3.5px solid ${col.color}`,
+                    bgcolor: "background.paper",
+                    height: 145,
+                    flexShrink: 0,
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "space-between",
-                    boxSizing: "border-box",
-                    "&:last-child": { pb: 1.5 },
+                    transition: "all 0.15s ease-in-out",
+                    "&:hover": {
+                      boxShadow: "0 4px 12px -2px rgba(0, 0, 0, 0.08)",
+                      borderColor: "primary.main",
+                    },
                   }}
                 >
-                  <Box>
+                  <CardContent
+                    sx={{
+                      p: 1.5,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      boxSizing: "border-box",
+                      "&:last-child": { pb: 1.5 },
+                    }}
+                  >
+                    <Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
+                          mb: 0.5,
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontWeight: 650,
+                            fontSize: "0.85rem",
+                            color: "text.primary",
+                            lineHeight: 1.3,
+                            cursor: "pointer",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            "&:hover": { color: "primary.main" },
+                          }}
+                          onClick={() => onEditTask?.(task)}
+                        >
+                          {task.title || task.description || "Task"}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            setTaskMenuAnchor(e.currentTarget);
+                            setActiveTask(task);
+                          }}
+                          sx={{
+                            color: "text.secondary",
+                            p: 0.1,
+                            ml: 0.5,
+                          }}
+                        >
+                          <MoreVertIcon sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Box>
+
+                      {task.description && (
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "text.secondary",
+                            fontSize: "0.775rem",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            lineHeight: 1.35,
+                          }}
+                        >
+                          {task.description}
+                        </Typography>
+                      )}
+                    </Box>
+
                     <Box
                       sx={{
                         display: "flex",
+                        alignItems: "center",
                         justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        mb: 0.5,
+                        pt: 0.5,
                       }}
                     >
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontWeight: 650,
-                          fontSize: "0.85rem",
-                          color: "text.primary",
-                          lineHeight: 1.3,
-                          cursor: "pointer",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          "&:hover": { color: "primary.main" },
-                        }}
-                        onClick={() => onEditTask?.(task)}
-                      >
-                        {task.title || task.description || "Task"}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          setTaskMenuAnchor(e.currentTarget);
-                          setActiveTask(task);
-                        }}
-                        sx={{
-                          color: "text.secondary",
-                          p: 0.1,
-                          ml: 0.5,
-                        }}
-                      >
-                        <MoreVertIcon sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-
-                    {task.description && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                          fontSize: "0.775rem",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 1,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          lineHeight: 1.35,
-                        }}
-                      >
-                        {task.description}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  {/* Card Footer: Priority Pill & Date & Attachments & Assignees */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      pt: 0.5,
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Chip
-                        label={getPriorityLabel(task.priority)}
-                        size="small"
-                        sx={{
-                          height: 20,
-                          fontSize: "0.7rem",
-                          fontWeight: 600,
-                          bgcolor: priorityProps.bg,
-                          color: priorityProps.color,
-                          borderRadius: "5px",
-                          px: 0.5,
-                        }}
-                      />
-                      {formattedDate && (
-                        <Box
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Chip
+                          label={getPriorityLabel(task.priority)}
+                          size="small"
                           sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.3,
-                            color: "text.secondary",
-                            fontSize: "0.725rem",
-                            fontWeight: 500,
-                          }}
-                        >
-                          <CalendarTodayIcon sx={{ fontSize: 11 }} />
-                          <span>{formattedDate}</span>
-                        </Box>
-                      )}
-                      {attachmentCount > 0 && (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.25,
-                            color: "text.secondary",
-                            fontSize: "0.725rem",
+                            height: 20,
+                            fontSize: "0.7rem",
                             fontWeight: 600,
+                            bgcolor: priorityProps.bg,
+                            color: priorityProps.color,
+                            borderRadius: "5px",
+                            px: 0.5,
                           }}
-                        >
-                          <AttachFileIcon
-                            sx={{ fontSize: 13, color: "primary.main" }}
-                          />
-                          <span>{attachmentCount}</span>
-                        </Box>
-                      )}
-                    </Box>
+                        />
+                        {formattedDate && (
+                          <Box
+                            sx={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 0.4,
+                              color: "text.secondary",
+                            }}
+                          >
+                            <CalendarTodayIcon sx={{ fontSize: 15 }} />
+                            <Typography
+                              component="span"
+                              sx={{
+                                fontSize: "0.75rem",
+                                fontWeight: 500,
+                                lineHeight: 1,
+                                display: "inline-flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              {formattedDate}
+                            </Typography>
+                          </Box>
+                        )}
+                        {attachmentCount > 0 && (
+                          <Box
+                            sx={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 0.35,
+                              color: "text.secondary",
+                            }}
+                          >
+                            <AttachFileIcon
+                              sx={{ fontSize: 17, color: "primary.main" }}
+                            />
+                            <Typography
+                              component="span"
+                              sx={{
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                                lineHeight: 1,
+                                display: "inline-flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              {attachmentCount}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
 
-                    {/* Assignee Avatars */}
-                    <AppAvatarGroup items={assigneesList} max={6} size={22} />
-                  </Box>
-                </CardContent>
-              </Card>
-            );
-          })
+                      {/* Assignee Avatars */}
+                      <AppAvatarGroup items={assigneesList} max={6} size={22} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
 
           {/* Infinite scroll loading indicator */}
@@ -488,8 +520,10 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
 function TaskBoardView({
   columns = [],
   searchQuery = "",
+  filterStatus = "all",
   filterPriority = "all",
   dueDate = "",
+  oprGuid = "",
   onMoveTaskStatus,
   onEditTask,
   onDeleteTask,
@@ -532,8 +566,10 @@ function TaskBoardView({
             key={col.id}
             col={col}
             searchQuery={searchQuery}
+            filterStatus={filterStatus}
             filterPriority={filterPriority}
             dueDate={dueDate}
+            oprGuid={oprGuid}
             onMoveTaskStatus={onMoveTaskStatus}
             onEditTask={onEditTask}
             onDeleteTask={onDeleteTask}
@@ -551,12 +587,17 @@ function TaskBoardView({
         slotProps={{
           paper: {
             sx: {
-              borderRadius: "10px",
-              minWidth: 150,
-              boxShadow: "0 8px 20px -4px rgba(0,0,0,0.12)",
+              borderRadius: "12px",
+              minWidth: 190,
+              boxShadow: "0 10px 32px -4px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.06)",
               border: "1px solid",
               borderColor: "divider",
-              "& .MuiList-root": { py: 0.5 },
+              "& .MuiList-root": { py: 0.75 },
+              "& .MuiMenuItem-root": {
+                transition: "background-color 0.15s ease",
+                borderRadius: "6px",
+                mx: 0.75,
+              },
             },
           },
         }}
@@ -566,18 +607,18 @@ function TaskBoardView({
             if (activeTask) onEditTask?.(activeTask);
             handleMenuClose();
           }}
-          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
+          sx={{ py: 0.85, px: 1.5, minHeight: 36 }}
         >
-          <ListItemIcon sx={{ minWidth: 26 }}>
-            <EditOutlinedIcon sx={{ fontSize: 16, color: "#2563EB" }} />
+          <ListItemIcon sx={{ minWidth: 30 }}>
+            <EditOutlinedIcon sx={{ fontSize: 19, color: "#2563EB" }} />
           </ListItemIcon>
           <ListItemText
-            primary={t("task.editTask", "Düzelt")}
-            slotProps={{ primary: { fontWeight: 600, fontSize: "0.775rem" } }}
+            primary={t("task.editTask")}
+            slotProps={{ primary: { fontWeight: 600, fontSize: "0.825rem" } }}
           />
         </MenuItem>
 
-        <Divider sx={{ my: 0.3 }} />
+        <Divider sx={{ my: 0.5, mx: 1 }} />
 
         <MenuItem
           onClick={() => {
@@ -586,18 +627,18 @@ function TaskBoardView({
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 1}
-          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
+          sx={{ py: 0.75, px: 1.5, minHeight: 36 }}
         >
-          <ListItemIcon sx={{ minWidth: 26 }}>
+          <ListItemIcon sx={{ minWidth: 30 }}>
             <RadioButtonUncheckedIcon
-              sx={{ fontSize: 15, color: "#64748B" }}
+              sx={{ fontSize: 18, color: "#64748B" }}
             />
           </ListItemIcon>
           <ListItemText
             primary={t("task.statusToDo", "TO DO")}
             slotProps={{
               primary: {
-                fontSize: "0.75rem",
+                fontSize: "0.8rem",
                 fontWeight: Number(activeTask?.status) === 1 ? 700 : 500,
               },
             }}
@@ -611,18 +652,18 @@ function TaskBoardView({
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 2}
-          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
+          sx={{ py: 0.75, px: 1.5, minHeight: 36 }}
         >
-          <ListItemIcon sx={{ minWidth: 26 }}>
+          <ListItemIcon sx={{ minWidth: 30 }}>
             <RadioButtonCheckedIcon
-              sx={{ fontSize: 15, color: "#2563EB" }}
+              sx={{ fontSize: 18, color: "#2563EB" }}
             />
           </ListItemIcon>
           <ListItemText
             primary={t("task.statusInProgress", "IN PROGRESS")}
             slotProps={{
               primary: {
-                fontSize: "0.75rem",
+                fontSize: "0.8rem",
                 fontWeight: Number(activeTask?.status) === 2 ? 700 : 500,
               },
             }}
@@ -636,42 +677,42 @@ function TaskBoardView({
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 3}
-          sx={{ py: 0.4, px: 1.25, minHeight: 30 }}
+          sx={{ py: 0.75, px: 1.5, minHeight: 36 }}
         >
-          <ListItemIcon sx={{ minWidth: 26 }}>
+          <ListItemIcon sx={{ minWidth: 30 }}>
             <CheckCircleRoundedIcon
-              sx={{ fontSize: 15, color: "#16A34A" }}
+              sx={{ fontSize: 18, color: "#16A34A" }}
             />
           </ListItemIcon>
           <ListItemText
             primary={t("task.statusCompleted", "COMPLETED")}
             slotProps={{
               primary: {
-                fontSize: "0.75rem",
+                fontSize: "0.8rem",
                 fontWeight: Number(activeTask?.status) === 3 ? 700 : 500,
               },
             }}
           />
         </MenuItem>
 
-        <Divider sx={{ my: 0.3 }} />
+        <Divider sx={{ my: 0.5, mx: 1 }} />
 
         <MenuItem
           onClick={() => {
             if (activeTask) onDeleteTask?.(activeTask.guid || activeTask.id);
             handleMenuClose();
           }}
-          sx={{ py: 0.4, px: 1.25, minHeight: 30, color: "error.main" }}
+          sx={{ py: 0.85, px: 1.5, minHeight: 36, color: "error.main" }}
         >
-          <ListItemIcon sx={{ minWidth: 26 }}>
-            <DeleteOutlinedIcon sx={{ fontSize: 16 }} color="error" />
+          <ListItemIcon sx={{ minWidth: 30 }}>
+            <DeleteOutlinedIcon sx={{ fontSize: 19 }} color="error" />
           </ListItemIcon>
           <ListItemText
             primary={t("task.deleteTask", "Poz")}
             slotProps={{
               primary: {
                 fontWeight: 600,
-                fontSize: "0.775rem",
+                fontSize: "0.825rem",
                 color: "error.main",
               },
             }}

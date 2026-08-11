@@ -2,7 +2,10 @@ import { useMemo } from "react";
 import { FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
+import AppUserAutocomplete from "../../../components/AppUserAutocomplete";
 
 const selectSx = {
   borderRadius: "10px",
@@ -64,30 +67,75 @@ const FilterSelect = ({
   </FormControl>
 );
 
+const FilterDatePicker = ({ label, name, value, onChange }) => (
+  <FormControl fullWidth size="small">
+    <Typography
+      variant="body2"
+      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
+    >
+      {label}
+    </Typography>
+    <DatePicker
+      value={value ? dayjs(value) : null}
+      onChange={(newValue) => {
+        onChange(
+          name,
+          newValue && newValue.isValid()
+            ? newValue.format("YYYY-MM-DD")
+            : ""
+        );
+      }}
+      format="DD.MM.YYYY"
+      views={["year", "month", "day"]}
+      slotProps={{
+        textField: {
+          fullWidth: true,
+          size: "small",
+          sx: {
+            "& .MuiInputBase-root": {
+              fontSize: "0.9rem",
+              height: "40px",
+              borderRadius: "10px",
+            },
+          },
+        },
+      }}
+    />
+  </FormControl>
+);
+
 export default function TaskFilter({
+  filters,
   draft,
+  onFilterChange,
   setFilter,
   selectsOpen = {},
+  onSelectOpen,
+  onSelectClose,
   openSelect,
   closeSelect,
 }) {
   const { t } = useLocale();
 
+  const currentFilters = filters || draft || {};
+  const handleFilterChange = onFilterChange || setFilter;
+  const handleSelectOpen = onSelectOpen || openSelect;
+  const handleSelectClose = onSelectClose || closeSelect;
   const statusOptions = useMemo(
     () => [
-      { label: t("task.statusToDo", "TO DO"), value: "To Do" },
-      { label: t("task.statusInProgress", "IN PROGRESS"), value: "In Progress" },
-      { label: t("task.statusCompleted", "COMPLETED"), value: "Completed" },
-      { label: t("task.statusCancelled", "Cancelled"), value: "Cancelled" },
+      { label: t("task.statusToDo", "TO DO"), value: 1 },
+      { label: t("task.statusInProgress", "IN PROGRESS"), value: 2 },
+      { label: t("task.statusCompleted", "COMPLETED"), value: 3 },
     ],
     [t]
   );
 
   const priorityOptions = useMemo(
     () => [
-      { label: t("task.priorityHigh", "High"), value: "High" },
-      { label: t("task.priorityMedium", "Medium"), value: "Medium" },
-      { label: t("task.priorityLow", "Low"), value: "Low" },
+      { label: t("task.priorityUrgent", "Gyssagly"), value: "urgent" },
+      { label: t("task.priorityHigh", "High"), value: "high" },
+      { label: t("task.priorityMedium", "Medium"), value: "medium" },
+      { label: t("task.priorityLow", "Low"), value: "low" },
     ],
     [t]
   );
@@ -97,26 +145,37 @@ export default function TaskFilter({
       <FilterSelect
         label={t("columns.status", "Status")}
         name="status"
-        value={draft.status}
+        value={currentFilters.status}
         options={statusOptions}
         isOpen={Boolean(selectsOpen.status)}
         allText={t("all", "Hemmesi")}
-        onChange={setFilter}
-        onOpen={openSelect}
-        onClose={closeSelect}
+        onChange={handleFilterChange}
+        onOpen={handleSelectOpen}
+        onClose={handleSelectClose}
       />
       <FilterSelect
         label={t("task.priority", "Priority")}
         name="priority"
-        value={draft.priority}
+        value={currentFilters.priority}
         options={priorityOptions}
         isOpen={Boolean(selectsOpen.priority)}
         allText={t("all", "Hemmesi")}
-        onChange={setFilter}
-        onOpen={openSelect}
-        onClose={closeSelect}
+        onChange={handleFilterChange}
+        onOpen={handleSelectOpen}
+        onClose={handleSelectClose}
+      />
+      <FilterDatePicker
+        label={t("task.dueDate", "Due Date")}
+        name="due_date"
+        value={currentFilters.due_date}
+        onChange={handleFilterChange}
+      />
+      <AppUserAutocomplete
+        label={t("task.assignees", "Assignees")}
+        value={currentFilters.opr_guid}
+        onChange={(val) => handleFilterChange("opr_guid", val)}
+        multiple={false}
       />
     </Stack>
   );
 }
-
