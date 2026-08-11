@@ -571,6 +571,7 @@
     "maxFilesLimitExceeded": "Çäklendirme sebäpli käbir faýllar birikdirilmedi.",
     "unsupportedFileType": "Goldanylmaýan faýl görnüşi. Diňe Surat, PDF, Excel we Word kabul edilýär.",
     "fileTooLarge": "Faýl ölçegi 10MB-dan uly bolmaly däl.",
+    "duplicateFile": "Bu faýl eýýäm goşuldy.",
     "uploadingProcessing": "Faýllar ýüklenýär we işlenýär...",
     "loadMore": "Daha fazla yükle"
   },

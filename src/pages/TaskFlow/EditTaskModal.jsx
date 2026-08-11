@@ -15,7 +15,7 @@ import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { getAllUsersApi } from "../../api/queries/getters";
 import { updateTaskApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
-import TaskFileUpload from "../../components/inputs/TaskFileUpload";
+import TaskFileUpload, { TaskFileList } from "../../components/inputs/TaskFileUpload";
 import { handleError } from "../../functions/generalHelpers";
 
 export default function EditTaskModal({ open, onClose, task }) {
@@ -164,7 +164,7 @@ export default function EditTaskModal({ open, onClose, task }) {
   const isSubmitting = updateMutation.isPending;
 
   return (
-    <CustomDialog open={open} close={handleCloseModal} widthX={600}>
+    <CustomDialog open={open} close={handleCloseModal} widthX={650}>
       <CustomDialogHeader
         title={t("task.editTask", "Edit Task")}
         onClose={handleCloseModal}
@@ -221,7 +221,7 @@ export default function EditTaskModal({ open, onClose, task }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <CustomSelect
                 name="priority"
                 control={control}
@@ -231,7 +231,7 @@ export default function EditTaskModal({ open, onClose, task }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <CustomSelect
                 name="status"
                 control={control}
@@ -241,7 +241,7 @@ export default function EditTaskModal({ open, onClose, task }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <CustomDatePicker
                 name="dueDate"
                 control={control}
@@ -260,14 +260,26 @@ export default function EditTaskModal({ open, onClose, task }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TaskFileUpload
                 files={attachments}
                 onChange={setAttachments}
                 disabled={isSubmitting}
                 isSubmitting={isSubmitting}
+                hideList
               />
             </Grid>
+
+            {attachments.length > 0 && (
+              <Grid size={{ xs: 12 }}>
+                <TaskFileList
+                  files={attachments}
+                  onChange={setAttachments}
+                  disabled={isSubmitting}
+                  isSubmitting={isSubmitting}
+                />
+              </Grid>
+            )}
           </Grid>
 
           <FooterButton

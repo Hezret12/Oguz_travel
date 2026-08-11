@@ -665,6 +665,7 @@
     "maxFilesLimitExceeded": "Some files were not added due to the limit.",
     "unsupportedFileType": "Unsupported file type. Only Image, PDF, Excel, and Word are allowed.",
     "fileTooLarge": "File size must not exceed 10MB.",
+    "duplicateFile": "This file has already been added.",
     "uploadingProcessing": "Files uploading and processing...",
     "loadMore": "Load More"
   },
