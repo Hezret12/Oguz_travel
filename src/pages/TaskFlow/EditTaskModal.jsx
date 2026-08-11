@@ -1,7 +1,6 @@
 import { useMemo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Box, Grid } from "@mui/material";
-import toast from "react-hot-toast";
 
 import { useLocale } from "../../hooks/useLocale";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
@@ -16,7 +15,6 @@ import { getAllUsersApi } from "../../api/queries/getters";
 import { updateTaskApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload, { TaskFileList } from "../../components/inputs/TaskFileUpload";
-import { handleError } from "../../functions/generalHelpers";
 
 export default function EditTaskModal({ open, onClose, task }) {
   const { t } = useLocale();
@@ -31,12 +29,8 @@ export default function EditTaskModal({ open, onClose, task }) {
     key: "tasks",
     idKey: "guid",
     onSuccessUpdate: () => {
-      toast.success(t("task.taskUpdatedSuccess"));
       handleCloseModal();
-    },
-    onError: (err) => {
-      handleError(t("task.updateError"), err);
-    },
+    }
   });
 
   const employeeOptions = useMemo(() => {
