@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { Box, Grid } from "@mui/material";
-import toast from "react-hot-toast";
 
 import { useLocale } from "../../hooks/useLocale";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
@@ -10,20 +9,15 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
 import AppAutocomplete from "../../components/AppAutocomplete";
-import { useDispatch } from "react-redux";
-import { addCustomNotification } from "../../store/slices/notificationSlice";
-import dayjs from "dayjs";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { getAllUsersApi } from "../../api/queries/getters";
 import { addTaskApi } from "../../api/queries/post";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload, { TaskFileList } from "../../components/inputs/TaskFileUpload";
-import { handleError } from "../../functions/generalHelpers";
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const { t } = useLocale();
-  const dispatch = useDispatch();
 
   const { data: usersData } = useGet({
     apiFn: getAllUsersApi,
@@ -34,17 +28,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
     apiFn: addTaskApi,
     key: "tasks",
     onSuccess: () => {
-      toast.success(
-        t("task.taskCreatedSuccess"),
-      );
       handleCloseDialog();
-    },
-    onError: (err) => {
-      handleError(
-        t("task.createError"),
-        err,
-      );
-    },
+    }
   });
 
   const employeeOptions = useMemo(() => {
@@ -132,8 +117,6 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       color: emp.color,
     }));
 
-    const assignedNames = assignedEmps.map((e) => e.name).join(", ");
-
     const numericStatus =
       Number(data.status) ||
       (String(data.status).toLowerCase().includes("todo")
@@ -144,23 +127,8 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
             ? 3
             : 1);
 
-    const now = dayjs();
-    dispatch(
-      addCustomNotification({
-        id: `notif-task-${now.valueOf()}`,
-        title: `Täze Ýumuş: ${data.title}`,
-        description: `${assignedNames || "Işgär"}-a täze ýumuş bellenildi: "${data.title}"`,
-        sender: "Task Manager",
-        senderRole: "System",
-        avatarBg: "#6366F1",
-        date: now.toISOString(),
-        isRead: false,
-        type: "task",
-      }),
-    );
-
     onCreateTask?.({
-      id: `task-${now.valueOf()}`,
+      id: `task-${Date.now()}`,
       title: data.title,
       description: data.description,
       attachments,
@@ -217,7 +185,6 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
             name="description"
             control={control}
             label={t("columns.description")}
-            placeholder={t("task.enterDescription")}
             multiline
             rows={3}
             disabled={isSubmitting}
@@ -230,7 +197,6 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 control={control}
                 label={t("task.assignEmployee")}
                 options={employeeOptions}
-                placeholder={t("task.selectEmployee")}
                 multiple
                 maxChips={3}
                 disabled={isSubmitting}
@@ -261,7 +227,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               <CustomDatePicker
                 name="dueDate"
                 control={control}
-                label={t("task.dueDate")}
+                label={t("notifications.endDate")}
                 disabled={isSubmitting}
                 inputSx={{
                   "& .MuiPickersOutlinedInput-root, & .MuiOutlinedInput-root, & .MuiInputBase-root": {
