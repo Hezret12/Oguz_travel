@@ -430,6 +430,16 @@ export const CANONICAL_RECURRING_FIELDS = [
   },
 ];
 
+export const slugifyFieldKey = (text) => {
+  if (!text || typeof text !== "string") return "";
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+};
+
 export const normalizeFieldString = (str) => {
   if (!str || typeof str !== "string") return "";
   return str
@@ -443,6 +453,9 @@ export const normalizeFieldString = (str) => {
     .replace(/ç/g, "c")
     .replace(/ň/g, "n")
     .replace(/ž/g, "z")
+    .replace(/рожд/g, "рождения")
+    .replace(/очеред/g, "ocered")
+    .replace(/очередь/g, "ocered")
     .replace(/\s+/g, " ");
 };
 

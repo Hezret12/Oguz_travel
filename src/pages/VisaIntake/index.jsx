@@ -571,6 +571,7 @@ const VisaIntake = () => {
 
   const countryTable = useMaterialReactTable({
     ...defaultMrtOptions,
+    enableTopToolbar: false,
     columns: countryColumns,
     data: countries,
     enableColumnPinning: true,
@@ -603,25 +604,6 @@ const VisaIntake = () => {
         }}
       />
     ),
-    renderTopToolbarCustomActions: () => (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={() => setIsCreateCountryOpen(true)}
-          sx={{
-            borderRadius: "10px",
-            height: "40px",
-            textTransform: "none",
-            fontWeight: 600,
-            boxShadow: "none",
-          }}
-        >
-          {t("visaIntake.createCountry") || "Täze Ýurt Goş"}
-        </Button>
-      </Box>
-    ),
   });
 
   const tabOptions = useMemo(
@@ -636,8 +618,16 @@ const VisaIntake = () => {
     <>
       <PageHeader
         pageTitle={`${t("visaIntake.title") || "Wiza Arzalary"} | Oguz Travel`}
-        addButtonText={activeTab === "applications" ? (t("visaIntake.addApplication") || "Arza Goş") : undefined}
-        onAddClick={activeTab === "applications" ? () => visaTable.setCreatingRow(true) : undefined}
+        addButtonText={
+          activeTab === "applications"
+            ? t("visaIntake.addApplication") || "Arza Goş"
+            : t("visaIntake.createCountry") || "Täze Ýurt Goş"
+        }
+        onAddClick={
+          activeTab === "applications"
+            ? () => visaTable.setCreatingRow(true)
+            : () => countryTable.setCreatingRow(true)
+        }
         filterButtonText={activeTab === "applications" ? t("filter") : undefined}
         onFilterClick={activeTab === "applications" ? openDrawer : undefined}
       />

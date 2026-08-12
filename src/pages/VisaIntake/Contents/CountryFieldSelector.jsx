@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useMemo } from "react";
+import { forwardRef, useCallback, useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import {
   Autocomplete,
@@ -11,6 +11,8 @@ import {
   Paper,
   Tooltip,
   Button,
+  Grid,
+  MenuItem,
 } from "@mui/material";
 import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
@@ -22,11 +24,158 @@ import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { getAllVisaFieldsApi } from "../../../api/queries/getters";
 import { useLocale } from "../../../hooks/useLocale";
+import { CustomDialog } from "../../../components/Dialog/CustomDialog";
+import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import {
   CANONICAL_RECURRING_FIELDS,
   findMatchingCatalogField,
   normalizeFieldString,
+  slugifyFieldKey,
 } from "../../../functions/visaCountryFieldConfigs";
+
+const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave }) => {
+  const { t } = useLocale();
+  const [labelTm, setLabelTm] = useState(candidateString || "");
+  const [labelRu, setLabelRu] = useState(candidateString || "");
+  const [labelEn, setLabelEn] = useState(candidateString || "");
+  const [fieldType, setFieldType] = useState("text");
+  const [optionInput, setOptionInput] = useState("");
+  const [options, setOptions] = useState([]);
+
+  const autoKey = useMemo(() => slugifyFieldKey(labelEn || labelTm), [labelEn, labelTm]);
+
+  const handleAddOption = () => {
+    if (optionInput.trim()) {
+      setOptions((prev) => [...prev, optionInput.trim()]);
+      setOptionInput("");
+    }
+  };
+
+  const handleRemoveOption = (idx) => {
+    setOptions((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!labelTm.trim() || !labelRu.trim() || !labelEn.trim()) return;
+
+    const newFieldObj = {
+      fieldKey: autoKey || `custom_${Date.now()}`,
+      labelTm: labelTm.trim(),
+      labelRu: labelRu.trim(),
+      labelEn: labelEn.trim(),
+      fieldType,
+      options: fieldType === "select" ? options : [],
+      isDefault: false,
+      isCustom: true,
+    };
+    onSave(newFieldObj);
+    onClose();
+  };
+
+  return (
+    <CustomDialog open={open} close={onClose} widthX={540}>
+      <CustomDialogHeader variant="h6" title={t("visaIntake.createCustomFieldTitle") || "Täze meýdança döretmek"} />
+      <Box component="form" onSubmit={handleSubmit} sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
+        <Grid container spacing={2}>
+          <Grid size={12}>
+            <TextField
+              label="TM Label (Türkmen)"
+              value={labelTm}
+              onChange={(e) => setLabelTm(e.target.value)}
+              required
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="RU Label (Русский)"
+              value={labelRu}
+              onChange={(e) => setLabelRu(e.target.value)}
+              required
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label="EN Label (English)"
+              value={labelEn}
+              onChange={(e) => setLabelEn(e.target.value)}
+              required
+              fullWidth
+              size="small"
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              select
+              label={t("visaIntake.fieldTypeLabel") || "Meýdança görnüşi"}
+              value={fieldType}
+              onChange={(e) => setFieldType(e.target.value)}
+              fullWidth
+              size="small"
+            >
+              <MenuItem value="text">{t("visaIntake.typeText") || "Tekst"}</MenuItem>
+              <MenuItem value="date">{t("visaIntake.typeDate") || "Sene"}</MenuItem>
+              <MenuItem value="number">{t("visaIntake.typeNumber") || "San"}</MenuItem>
+              <MenuItem value="select">{t("visaIntake.typeSelect") || "Saýlawly"}</MenuItem>
+            </TextField>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <TextField
+              label={t("visaIntake.fieldKeyPreview") || "fieldKey (Auto)"}
+              value={autoKey}
+              disabled
+              fullWidth
+              size="small"
+              helperText="English label-dan döredilýär"
+            />
+          </Grid>
+          {fieldType === "select" && (
+            <Grid size={12}>
+              <Typography variant="caption" sx={{ fontWeight: 600, display: "block", mb: 0.5 }}>
+                {t("visaIntake.selectOptionsLabel") || "Saýlaw opsiýalary"}
+              </Typography>
+              <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+                <TextField
+                  placeholder={t("visaIntake.addOptionPlaceholder") || "Opsiýa ady..."}
+                  value={optionInput}
+                  onChange={(e) => setOptionInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddOption();
+                    }
+                  }}
+                  size="small"
+                  fullWidth
+                />
+                <Button variant="outlined" onClick={handleAddOption} size="small">
+                  Goş
+                </Button>
+              </Box>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.8 }}>
+                {options.map((opt, i) => (
+                  <Chip key={i} label={opt} onDelete={() => handleRemoveOption(i)} size="small" color="primary" />
+                ))}
+              </Box>
+            </Grid>
+          )}
+        </Grid>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5, mt: 1 }}>
+          <Button variant="outlined" color="inherit" onClick={onClose}>
+            {t("cancel") || "Ýatyr"}
+          </Button>
+          <Button variant="contained" type="submit">
+            {t("save") || "Ýatda sakla"}
+          </Button>
+        </Box>
+      </Box>
+    </CustomDialog>
+  );
+};
 
 const CleanRoot = forwardRef(function CleanRoot(props, ref) {
   const domProps = { ...props };
@@ -132,6 +281,8 @@ const ReorderableFieldItem = ({
 
 export const CountryFieldSelector = ({ control, name = "fields" }) => {
   const { t, selectedLang } = useLocale();
+  const [candidateString, setCandidateString] = useState(null);
+  const [pendingUpdateFn, setPendingUpdateFn] = useState(null);
 
   const { data: allFieldsRaw = [], isLoading } = useGet({
     apiFn: getAllVisaFieldsApi,
@@ -162,11 +313,11 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
   }, [allFieldsRaw]);
 
   const customFilterOptions = useCallback((options, state) => {
-    const rawQuery = state.inputValue;
+    const rawQuery = state.inputValue?.trim();
     const query = normalizeFieldString(rawQuery);
     if (!query) return options;
 
-    return options.filter((option) => {
+    const filtered = options.filter((option) => {
       if (typeof option === "string") {
         return normalizeFieldString(option).includes(query);
       }
@@ -184,6 +335,22 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
 
       return keyMatch || tmMatch || ruMatch || enMatch || aliasMatch;
     });
+
+    const hasExactMatch = filtered.some((opt) => {
+      if (typeof opt === "string") return normalizeFieldString(opt) === query;
+      return (
+        normalizeFieldString(opt.fieldKey) === query ||
+        normalizeFieldString(opt.labelTm) === query ||
+        normalizeFieldString(opt.labelRu) === query ||
+        normalizeFieldString(opt.labelEn) === query
+      );
+    });
+
+    if (!hasExactMatch && rawQuery) {
+      filtered.push(rawQuery);
+    }
+
+    return filtered;
   }, []);
 
   return (
@@ -300,17 +467,33 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               }}
               value={value}
               onChange={(_, newValue) => {
-                const normalizedValue = (newValue || []).map((item) => {
+                const nextList = [];
+                let freeSoloStr = null;
+
+                (newValue || []).forEach((item) => {
                   if (typeof item === "string") {
                     const match = findMatchingCatalogField(
                       item,
                       availableFields
                     );
-                    return match || item;
+                    if (match) {
+                      nextList.push(match);
+                    } else {
+                      freeSoloStr = item;
+                    }
+                  } else {
+                    nextList.push(item);
                   }
-                  return item;
                 });
-                onChange(normalizedValue);
+
+                if (freeSoloStr) {
+                  setCandidateString(freeSoloStr);
+                  setPendingUpdateFn(() => (newFieldObj) => {
+                    onChange([...nextList, newFieldObj]);
+                  });
+                } else {
+                  onChange(nextList);
+                }
               }}
               renderOption={(props, option, { selected }) => {
                 const { key: optionKey, ...otherProps } = props;
@@ -324,6 +507,36 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                 const fallbackKey = isNew
                   ? option
                   : option.guid || option.id || option.fieldKey || label;
+
+                if (isNew) {
+                  return (
+                    <Box
+                      component="li"
+                      key={optionKey || `new-${option}`}
+                      {...otherProps}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        px: 1.5,
+                        py: 1,
+                        borderRadius: "6px",
+                        my: 0.2,
+                        color: "primary.main",
+                        fontWeight: 600,
+                        backgroundColor: "action.hover",
+                        "&:hover": {
+                          backgroundColor: "action.selected",
+                        },
+                      }}
+                    >
+                      <AddBoxOutlinedIcon color="primary" fontSize="small" />
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: "primary.main" }}>
+                        + {t("visaIntake.createCustomFieldTitle") || "Täze meýdança goşmak"}: "{option}"
+                      </Typography>
+                    </Box>
+                  );
+                }
 
                 return (
                   <Box
@@ -488,8 +701,8 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                         flexWrap: "wrap",
                         alignItems: "center",
                         gap: "6px",
-                        maxHeight: "160px",
-                        overflowY: "auto",
+                        maxHeight: selectedCount > 3 ? "160px" : "none",
+                        overflowY: selectedCount > 3 ? "auto" : "visible",
                         py: 1,
                         px: 1.5,
                         alignContent: "flex-start",
@@ -554,6 +767,24 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                   })}
                 </Paper>
               </Box>
+            )}
+
+            {Boolean(candidateString) && (
+              <CreateCustomFieldModal
+                open={true}
+                candidateString={candidateString}
+                onClose={() => {
+                  setCandidateString(null);
+                  setPendingUpdateFn(null);
+                }}
+                onSave={(newFieldObj) => {
+                  if (pendingUpdateFn) {
+                    pendingUpdateFn(newFieldObj);
+                  }
+                  setCandidateString(null);
+                  setPendingUpdateFn(null);
+                }}
+              />
             )}
           </Box>
         );
