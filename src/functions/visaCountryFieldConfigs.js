@@ -20,17 +20,6 @@ export const DEFAULT_VISA_FIELDS = [
     aliases: ["applicationdate", "application_date", "arza senesi", "дата подачи", "дата заявления"],
   },
   {
-    fieldKey: "office_guid",
-    labelTm: "Edara",
-    labelRu: "Офис",
-    labelEn: "Office",
-    fieldType: "autocomplete",
-    optionsKey: "offices",
-    isDefault: true,
-    gridSize: 4,
-    aliases: ["office", "office_guid", "edara", "офис", "филиал"],
-  },
-  {
     fieldKey: "operator_guid",
     labelTm: "Operator",
     labelRu: "Оператор",
@@ -39,7 +28,18 @@ export const DEFAULT_VISA_FIELDS = [
     optionsKey: "employees",
     isDefault: true,
     gridSize: 4,
-    aliases: ["operator", "operator_guid", "оператор", "сотрудник"],
+    aliases: ["operator", "operator_guid", "оператор", "сотрудник", "assignment_operator"],
+  },
+  {
+    fieldKey: "operator2_guid",
+    labelTm: "Kabul ediji (Operator)",
+    labelRu: "Оператор 2",
+    labelEn: "Operator 2",
+    fieldType: "autocomplete",
+    optionsKey: "employees",
+    isDefault: true,
+    gridSize: 4,
+    aliases: ["operator2", "operator2_guid", "receiver_operator", "kabul ediji", "оператор 2"],
   },
   {
     fieldKey: "birth_date",
@@ -117,14 +117,33 @@ export const isNotesField = (field) => {
   );
 };
 
+export const isOperator2Field = (field) => {
+  if (!field) return false;
+  const key = (field.fieldKey || "").toLowerCase();
+  const tm = normalizeFieldString(field.labelTm || "");
+  const ru = normalizeFieldString(field.labelRu || "");
+  return (
+    key === "operator2_guid" ||
+    key === "operator2" ||
+    key === "receiver_operator" ||
+    tm.includes("kabul ediji") ||
+    tm.includes("operator2") ||
+    tm.includes("operator 2") ||
+    ru.includes("оператор 2") ||
+    ru.includes("оператор2")
+  );
+};
+
 export const isOperatorField = (field) => {
   if (!field) return false;
+  if (isOperator2Field(field)) return false;
   const key = (field.fieldKey || "").toLowerCase();
   const tm = normalizeFieldString(field.labelTm || "");
   const ru = normalizeFieldString(field.labelRu || "");
   return (
     key === "operator_guid" ||
     key === "operator" ||
+    key === "assignment_operator" ||
     tm === "operator" ||
     ru === "оператор"
   );
@@ -168,6 +187,7 @@ export const ensureAllVisaFields = (apiFields = []) => {
       (f) =>
         f.fieldKey === def.fieldKey ||
         (def.fieldKey === "operator_guid" && isOperatorField(f)) ||
+        (def.fieldKey === "operator2_guid" && isOperator2Field(f)) ||
         (def.fieldKey === "office_guid" && isOfficeField(f))
     );
     return match ? { ...match, fieldKey: def.fieldKey } : def;
@@ -176,6 +196,7 @@ export const ensureAllVisaFields = (apiFields = []) => {
   const defaultKeys = new Set([
     ...DEFAULT_VISA_FIELDS.map((f) => f.fieldKey),
     "operator",
+    "operator2",
     "office",
   ]);
 
@@ -184,6 +205,7 @@ export const ensureAllVisaFields = (apiFields = []) => {
       !isClientField(f) &&
       !isNotesField(f) &&
       !isOperatorField(f) &&
+      !isOperator2Field(f) &&
       !isOfficeField(f) &&
       !defaultKeys.has(f.fieldKey)
   );
@@ -468,6 +490,20 @@ export const findMatchingCatalogField = (input, catalog = []) => {
   }
 
   return null;
+};
+
+export const getVisaFieldLabel = (field, currentLanguage = "tk") => {
+  if (!field) return "";
+  const match = findMatchingCatalogField(field) || (typeof field === "object" ? field : null);
+  if (!match) return typeof field === "string" ? field : field.fieldKey || "";
+
+  if (currentLanguage === "ru") {
+    return match.labelRu || match.labelTm || match.labelEn || match.fieldKey || "";
+  }
+  if (currentLanguage === "en") {
+    return match.labelEn || match.labelTm || match.labelRu || match.fieldKey || "";
+  }
+  return match.labelTm || match.labelRu || match.labelEn || match.fieldKey || "";
 };
 
 export const VISA_FIELD_DEFS = {

@@ -65,11 +65,8 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
       const defaultHeaderFields = [
         "Müşderi",
         "Arza berlen senesi",
-        "Edara",
         "Operator",
-        "Doglan senesi",
-        "Pasaport belgisi",
-        "Wiza görnüşi",
+        "Kabul ediji (Operator)",
       ];
       const defaultFooterField = "Bellikler";
 
@@ -99,7 +96,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
 
   return (
     <CustomDialog widthX={680} open={open} close={onClose}>
-      <CustomDialogHeader variant="h5" title={t("visa.addCountryTitle")} />
+      <CustomDialogHeader variant="h5" title={t("visaIntake.addCountryTitle")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
           <Alert
@@ -112,10 +109,9 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
             }}
           >
             <strong>
-              {t("visa.defaultFieldsInfoTitle") || "Standart Meýdançalar:"}
+              {t("visaIntake.defaultFieldsInfoTitle")}
             </strong>{" "}
-            {t("visa.defaultFieldsInfoDesc") ||
-              "Müşderi, Arza berlen senesi, Edara, Operator, Doglan senesi, Pasaport belgisi, Wiza görnüşi we Bellikler awtomatiki goşulýar."}
+            {t("visaIntake.defaultFieldsInfoDesc")}
           </Alert>
 
           <Grid container spacing={2}>

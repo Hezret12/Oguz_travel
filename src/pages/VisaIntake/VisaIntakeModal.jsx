@@ -22,7 +22,13 @@ import {
   getAllOfficeApi,
   getCountryVisaFieldsApi,
 } from "../../api/queries/getters";
-import { sortVisaFields } from "../../functions/visaCountryFieldConfigs";
+import {
+  sortVisaFields,
+  isOperatorField,
+  isOperator2Field,
+  isClientField,
+  isNotesField,
+} from "../../functions/visaCountryFieldConfigs";
 
 const DynamicVisaField = ({
   field,
@@ -66,32 +72,18 @@ const DynamicVisaField = ({
   if (
     fieldKey === "operator_guid" ||
     fieldKey === "operator" ||
-    field.optionsKey === "employees"
+    fieldKey === "operator2_guid" ||
+    fieldKey === "operator2" ||
+    isOperatorField(field) ||
+    isOperator2Field(field)
   ) {
     return (
-      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <AppAutocomplete
           name={fieldKey}
           control={control}
           label={label}
           options={employeeOptions}
-        />
-      </Grid>
-    );
-  }
-
-  if (
-    fieldKey === "office_guid" ||
-    fieldKey === "office" ||
-    field.optionsKey === "offices"
-  ) {
-    return (
-      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-        <AppAutocomplete
-          name={fieldKey}
-          control={control}
-          label={label}
-          options={officeOptions}
         />
       </Grid>
     );
@@ -167,6 +159,49 @@ const VisaIntakeModal = ({
   );
   const fields = useMemo(() => sortVisaFields(rawApiFields), [rawApiFields]);
 
+  const modalFields = useMemo(() => {
+    const filtered = fields.filter(
+      (f) =>
+        f.fieldKey !== "birth_date" &&
+        f.fieldKey !== "passport_number" &&
+        f.fieldKey !== "office_guid" &&
+        f.fieldKey !== "office"
+    );
+
+    const clientField = filtered.find((f) => f.fieldKey === "client_guid" || isClientField(f));
+    const op1Field = filtered.find((f) => f.fieldKey === "operator_guid" || isOperatorField(f));
+    const op2Field = filtered.find((f) => f.fieldKey === "operator2_guid" || isOperator2Field(f));
+    const appDateField = filtered.find(
+      (f) => f.fieldKey === "application_date" || f.fieldKey === "date"
+    );
+    const notesField = filtered.find((f) => f.fieldKey === "notes" || f.fieldKey === "note" || isNotesField(f));
+
+    const excludeSet = new Set([
+      clientField?.fieldKey,
+      op1Field?.fieldKey,
+      op2Field?.fieldKey,
+      appDateField?.fieldKey,
+      notesField?.fieldKey,
+      "client_guid",
+      "operator_guid",
+      "operator2_guid",
+      "application_date",
+      "notes",
+    ].filter(Boolean));
+
+    const middleFields = filtered.filter((f) => !excludeSet.has(f.fieldKey));
+
+    const result = [];
+    if (clientField) result.push(clientField);
+    if (op1Field) result.push(op1Field);
+    if (op2Field) result.push(op2Field);
+    result.push(...middleFields);
+    if (appDateField) result.push(appDateField);
+    if (notesField) result.push(notesField);
+
+    return result;
+  }, [fields]);
+
   const initialClient = useMemo(() => {
     if (!isEdit || !row?.original) return null;
     if (row.original.client) return row.original.client;
@@ -222,10 +257,15 @@ const VisaIntakeModal = ({
 
   const defaultValues = useMemo(() => {
     const defaults = { countryGuid, countryName: country };
-    fields.forEach((field) => {
+    modalFields.forEach((field) => {
       const key = field.fieldKey;
       if (isEdit && row?.original) {
-        const val = row.original.customFields?.[key] ?? row.original[key];
+        let val = row.original.customFields?.[key] ?? row.original[key];
+        if (key === "operator_guid" || key === "operator") {
+          val = row.original.operator_guid || row.original.operator?.guid || row.original.assignment_operator?.guid || val;
+        } else if (key === "operator2_guid" || key === "operator2") {
+          val = row.original.operator2_guid || row.original.operator2?.guid || row.original.receiver_operator?.guid || val;
+        }
         if (field.fieldType === "date") {
           defaults[key] = val ? dayjs(val).format("YYYY-MM-DD") : null;
         } else {
@@ -242,7 +282,7 @@ const VisaIntakeModal = ({
       }
     });
     return defaults;
-  }, [countryGuid, country, fields, isEdit, row]);
+  }, [countryGuid, country, modalFields, isEdit, row]);
 
   const {
     control,
@@ -273,7 +313,7 @@ const VisaIntakeModal = ({
 
   const onSubmit = (data) => {
     const customFields = {};
-    fields.forEach((field) => {
+    modalFields.forEach((field) => {
       const key = field.fieldKey;
       let val = data[key];
       if (field.fieldType === "date" && val) {
@@ -313,7 +353,7 @@ const VisaIntakeModal = ({
       ) : (
         <CustomForm onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            {fields.map((field) => (
+            {modalFields.map((field) => (
               <DynamicVisaField
                 key={field.guid || field.fieldKey}
                 field={field}

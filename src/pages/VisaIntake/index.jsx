@@ -37,9 +37,17 @@ import FilterDrawer from "../../components/FilterDrawer";
 import VisaIntakeFilter from "./Contents/VisaIntakeFilter";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import StackedCell from "../../components/inputs/StackCell";
+import StatusChip from "../../components/StatusChip";
+import { PROCESSED_STATUS_CONFIG } from "../../functions/statusChipConfigs";
 
 import {
   sortVisaFields,
+  isNotesField,
+  isOperatorField,
+  isOperator2Field,
+  isClientField,
+  isOfficeField,
+  getVisaFieldLabel,
 } from "../../functions/visaCountryFieldConfigs";
 
 const CleanRoot = forwardRef(function CleanRoot(props, ref) {
@@ -51,7 +59,7 @@ const CleanRoot = forwardRef(function CleanRoot(props, ref) {
 });
 
 const VisaIntake = () => {
-  const { t, selectedLang } = useLocale();
+  const { t, currentLanguage, selectedLang } = useLocale();
   const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
 
@@ -161,11 +169,119 @@ const VisaIntake = () => {
   );
 
   const visaColumns = useMemo(() => {
-    const fieldCols = visaFields.map((field) => {
-      const fieldKey = field.fieldKey;
-      const label = selectedLang(field.labelTm) || field.labelTm || fieldKey;
+    const indexCol = {
+      accessorFn: (row) => row.index_number,
+      id: "index_number",
+      header: "№",
+      size: 10,
+      enableSorting: false,
+    };
 
-      if (fieldKey === "client_guid") {
+    const dateField = visaFields.find(
+      (f) => f.fieldKey === "application_date" || f.fieldKey === "date"
+    );
+    const dateLabel = dateField
+      ? selectedLang(dateField.labelTm) || dateField.labelTm
+      : null;
+
+    const dateCol = {
+      id: "application_date",
+      header: t("visaIntake.fields.applicationDate") || dateLabel || "Arza senesi",
+      size: 140,
+      muiTableHeadCellProps: { align: "center" },
+      muiTableBodyCellProps: { align: "center" },
+      accessorFn: (row) =>
+        row.customFields?.application_date ??
+        row.application_date ??
+        row.created_at ??
+        "",
+      Cell: ({ cell }) => {
+        const val = cell.getValue();
+        return val ? formatChange(val, { dateOnly: true }) : "";
+      },
+    };
+
+    const operatorField = visaFields.find((f) => isOperatorField(f));
+    const operatorLabel = operatorField
+      ? selectedLang(operatorField.labelTm) || operatorField.labelTm
+      : null;
+
+    const operatorCol = {
+      id: "operator",
+      header: t("columns.operator") || operatorLabel || "Operator",
+      size: 180,
+      accessorFn: (row) =>
+        row.operator?.fullName ??
+        row.assignment_operator?.fullName ??
+        row.employee?.fullName ??
+        row.operator_full_name ??
+        row.customFields?.operator ??
+        "",
+      Cell: ({ row }) => {
+        const op = row.original.operator || row.original.assignment_operator || row.original.employee;
+        const primaryName =
+          op?.fullName || row.original.operator_full_name || row.original.customFields?.operator;
+        const secondaryInfo =
+          selectedLang(op?.office?.fullName) ||
+          selectedLang(op?.office?.shortName) ||
+          op?.office?.shortName ||
+          op?.office?.fullName ||
+          "";
+        return <StackedCell primary={primaryName} secondary={secondaryInfo} />;
+      },
+    };
+
+    const operator2Field = visaFields.find((f) => isOperator2Field(f));
+    const operator2Label = operator2Field
+      ? selectedLang(operator2Field.labelTm) || operator2Field.labelTm
+      : null;
+
+    const operator2Col = {
+      id: "operator2",
+      header: t("columns.operatorTwo") || operator2Label || "Kabul ediji (Operator)",
+      size: 180,
+      accessorFn: (row) =>
+        row.operator2?.fullName ??
+        row.receiver_operator?.fullName ??
+        row.employee2?.fullName ??
+        row.operator2_full_name ??
+        row.customFields?.operator2 ??
+        "",
+      Cell: ({ row }) => {
+        const op2 = row.original.operator2 || row.original.receiver_operator || row.original.employee2;
+        const primaryName =
+          op2?.fullName || row.original.operator2_full_name || row.original.customFields?.operator2;
+        const secondaryInfo =
+          selectedLang(op2?.office?.fullName) ||
+          selectedLang(op2?.office?.shortName) ||
+          op2?.office?.shortName ||
+          op2?.office?.fullName ||
+          "";
+        return <StackedCell primary={primaryName} secondary={secondaryInfo} />;
+      },
+    };
+
+    const remainingFields = visaFields.filter((field) => {
+      const key = field.fieldKey;
+      return (
+        key !== "application_date" &&
+        key !== "date" &&
+        key !== "note" &&
+        !isNotesField(field) &&
+        !isOperatorField(field) &&
+        !isOperator2Field(field)
+      );
+    });
+
+    const remainingCols = remainingFields.map((field) => {
+      const fieldKey = field.fieldKey;
+      const label =
+        getVisaFieldLabel(field, currentLanguage) ||
+        selectedLang(field.labelTm) ||
+        field.labelTm ||
+        fieldKey;
+
+      if (fieldKey === "client_guid" || isClientField(field)) {
         return {
           id: "client",
           header: t("columns.client") || "Müşderi",
@@ -181,76 +297,19 @@ const VisaIntake = () => {
         };
       }
 
-      if (fieldKey === "operator_guid" || fieldKey === "operator") {
+      if (fieldKey === "is_processed") {
         return {
-          id: "operator",
-          header: t("columns.operator") || label || "Operator",
-          size: 180,
-          accessorFn: (row) =>
-            row.operator?.fullName ??
-            row.employee?.fullName ??
-            row.operator_full_name ??
-            row.customFields?.operator ??
-            "",
-          Cell: ({ row }) => {
-            const op = row.original.operator || row.original.employee;
-            const primaryName =
-              op?.fullName || row.original.operator_full_name || row.original.customFields?.operator;
-            const secondaryInfo =
-              selectedLang(op?.office?.shortName) ||
-              op?.office?.shortName ||
-              selectedLang(op?.office?.fullName) ||
-              op?.office?.fullName ||
-              "";
-            return <StackedCell primary={primaryName} secondary={secondaryInfo} />;
-          },
-        };
-      }
-
-      if (fieldKey === "office_guid" || fieldKey === "office") {
-        return {
-          id: "office",
-          header: t("columns.office") || label || "Edara",
-          size: 160,
-          accessorFn: (row) =>
-            selectedLang(row.office?.shortName) ||
-            row.office?.shortName ||
-            selectedLang(row.office?.fullName) ||
-            row.office?.fullName ||
-            row.customFields?.office ||
-            "",
-          Cell: ({ row }) => {
-            const officeObj = row.original.office;
-            const primaryName =
-              selectedLang(officeObj?.shortName) ||
-              officeObj?.shortName ||
-              selectedLang(officeObj?.fullName) ||
-              officeObj?.fullName ||
-              row.original.customFields?.office;
-            const secondaryInfo =
-              selectedLang(officeObj?.fullName) !== primaryName
-                ? selectedLang(officeObj?.fullName) || officeObj?.fullName
-                : "";
-            return <StackedCell primary={primaryName} secondary={secondaryInfo} />;
-          },
-        };
-      }
-
-      if (fieldKey === "notes") {
-        return {
-          id: "notes",
-          header: t("columns.notes") || label || "Bellikler",
-          size: 200,
+          id: fieldKey,
+          header: label,
+          size: 140,
           muiTableHeadCellProps: { align: "center" },
           muiTableBodyCellProps: { align: "center" },
-          accessorFn: (row) =>
-            row.customFields?.notes ??
-            row.customFields?.bellikler ??
-            row.customFields?.bellik ??
-            row.notes ??
-            row.bellikler ??
-            "",
-          Cell: ({ cell }) => cell.getValue() ?? "",
+          accessorFn: (row) => row.customFields?.[fieldKey] ?? row[fieldKey] ?? "",
+          Cell: ({ cell }) => {
+            const val = cell.getValue();
+            if (val === undefined || val === null || val === "") return "";
+            return <StatusChip status={val} config={PROCESSED_STATUS_CONFIG} size="small" />;
+          },
         };
       }
 
@@ -271,33 +330,56 @@ const VisaIntake = () => {
       };
     });
 
+    const notesField = visaFields.find((f) => f.fieldKey === "note" || f.fieldKey === "notes" || isNotesField(f));
+    const notesLabel = notesField ? getVisaFieldLabel(notesField, currentLanguage) : null;
+
+    const notesColumn = {
+      id: "note",
+      header: t("columns.note") || notesLabel || "Bellik",
+      size: 200,
+      muiTableHeadCellProps: { align: "center" },
+      muiTableBodyCellProps: { align: "center" },
+      accessorFn: (row) =>
+        row.note ??
+        row.notes ??
+        row.customFields?.note ??
+        row.customFields?.notes ??
+        row.customFields?.bellik ??
+        row.customFields?.bellikler ??
+        row.bellik ??
+        row.bellikler ??
+        "",
+      Cell: ({ cell }) => cell.getValue() ?? "",
+    };
+
+    const actionsColumn = {
+      id: "actions",
+      header: t("columns.actions") || "Sazlamalar",
+      size: 100,
+      enableSorting: false,
+      muiTableHeadCellProps: { align: "center" },
+      muiTableBodyCellProps: { align: "center" },
+      Cell: ({ row, table }) => (
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={handleDeleteIntakeClick}
+          />
+        </Box>
+      ),
+    };
+
     return [
-      {
-        accessorFn: (row) => row.index_number,
-        id: "index_number",
-        header: "№",
-        size: 10,
-        enableSorting: false,
-      },
-      ...fieldCols,
-      {
-        id: "actions",
-        header: t("columns.actions") || "Sazlamalar",
-        size: 100,
-        enableSorting: false,
-        muiTableHeadCellProps: { align: "center" },
-        Cell: ({ row, table }) => (
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <ColumnActionButtons
-              row={row}
-              table={table}
-              onDelete={handleDeleteIntakeClick}
-            />
-          </Box>
-        ),
-      },
+      indexCol,
+      dateCol,
+      operatorCol,
+      operator2Col,
+      ...remainingCols,
+      notesColumn,
+      actionsColumn,
     ];
-  }, [visaFields, t, selectedLang, formatChange, handleDeleteIntakeClick]);
+  }, [visaFields, t, currentLanguage, selectedLang, formatChange, handleDeleteIntakeClick]);
 
   const countryOptions = useMemo(
     () =>
@@ -318,6 +400,13 @@ const VisaIntake = () => {
     ...defaultMrtOptions,
     columns: visaColumns,
     data: intakeData,
+    enableColumnPinning: true,
+    initialState: {
+      ...defaultMrtOptions.initialState,
+      columnPinning: {
+        right: ["actions"],
+      },
+    },
     state: {
       isLoading: intakeLoading,
       showProgressBars: intakeFetching,
@@ -406,7 +495,7 @@ const VisaIntake = () => {
             fontWeight: 600,
           }}
         >
-          {t("visa.createCountry") || "Ýurt Goş"}
+          {t("visaIntake.createCountry") || "Ýurt Goş"}
         </Button>
       </Box>
     ),
@@ -484,6 +573,13 @@ const VisaIntake = () => {
     ...defaultMrtOptions,
     columns: countryColumns,
     data: countries,
+    enableColumnPinning: true,
+    initialState: {
+      ...defaultMrtOptions.initialState,
+      columnPinning: {
+        right: ["actions"],
+      },
+    },
     state: {
       isLoading: countriesLoading,
     },
@@ -522,7 +618,7 @@ const VisaIntake = () => {
             boxShadow: "none",
           }}
         >
-          {t("visa.createCountry") || "Täze Ýurt Goş"}
+          {t("visaIntake.createCountry") || "Täze Ýurt Goş"}
         </Button>
       </Box>
     ),
@@ -531,7 +627,7 @@ const VisaIntake = () => {
   const tabOptions = useMemo(
     () => [
       { value: "applications", label: t("visaIntake.title") || "Wiza Arzalary" },
-      { value: "countries", label: t("visa.countriesManagement") || "Ýurtlar Sazlamalary (Country Control)" },
+      { value: "countries", label: t("visaIntake.countriesManagement") || "Ýurtlar Sazlamalary" },
     ],
     [t],
   );

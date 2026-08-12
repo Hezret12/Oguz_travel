@@ -436,6 +436,12 @@
     "editApplication": "Arzany üýtgetmek",
     "deleteConfirm": "Siz hakykatdan hem bu arzany pozmak isleýärsiňizmi?",
     "selectCountry": "Ýurt saýlaň",
+    "createCountry": "Täze Ýurt Goş",
+    "addCountryTitle": "Täze Ýurt Goşmak",
+    "editCountryTitle": "Ýurt Maglumatlaryny Üýtgetmek",
+    "countriesManagement": "Ýurtlar Sazlamalary",
+    "defaultFieldsInfoTitle": "Standart Meýdançalar:",
+    "defaultFieldsInfoDesc": "Müşderi, Arza berlen senesi, Operator 1, Operator 2 we Bellikler awtomatiki birikdirilýär.",
     "fields": {
       "applicationDate": "Arza senesi",
       "office": "Ofis",

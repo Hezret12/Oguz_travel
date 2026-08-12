@@ -118,7 +118,7 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
 
   return (
     <CustomDialog widthX={680} open={isModalOpen} close={handleClose}>
-      <CustomDialogHeader variant="h5" title={t("visa.editCountryTitle")} />
+      <CustomDialogHeader variant="h5" title={t("visaIntake.editCountryTitle")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
           <Alert
@@ -131,10 +131,9 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
             }}
           >
             <strong>
-              {t("visa.defaultFieldsInfoTitle") || "Standart Meýdançalar:"}
+              {t("visaIntake.defaultFieldsInfoTitle")}
             </strong>{" "}
-            {t("visa.defaultFieldsInfoDesc") ||
-              "Müşderi, Arza berlen senesi, Edara, Operator, Doglan senesi, Pasaport belgisi, Wiza görnüşi we Bellikler awtomatiki birikdirilýär."}
+            {t("visaIntake.defaultFieldsInfoDesc")}
           </Alert>
 
           <Grid container spacing={2}>
