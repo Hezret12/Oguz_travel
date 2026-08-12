@@ -47,7 +47,6 @@ import {
   isOperatorField,
   isOperator2Field,
   isClientField,
-  isOfficeField,
   getVisaFieldLabel,
 } from "../../functions/visaCountryFieldConfigs";
 
@@ -72,7 +71,10 @@ const VisaIntake = () => {
     key: "countries",
   });
 
-  const countries = Array.isArray(rawCountries) ? rawCountries : [];
+  const countries = useMemo(
+    () => (Array.isArray(rawCountries) ? rawCountries : []),
+    [rawCountries]
+  );
 
   const [selectedCountryGuid, setSelectedCountryGuid] = useState("");
 
@@ -91,8 +93,10 @@ const VisaIntake = () => {
     options: { enabled: Boolean(activeCountryGuid) },
   });
 
-  const rawFieldsList = Array.isArray(rawVisaFields) ? rawVisaFields : [];
-  const visaFields = useMemo(() => sortVisaFields(rawFieldsList), [rawFieldsList]);
+  const visaFields = useMemo(
+    () => sortVisaFields(Array.isArray(rawVisaFields) ? rawVisaFields : []),
+    [rawVisaFields]
+  );
 
   const {
     draft,
