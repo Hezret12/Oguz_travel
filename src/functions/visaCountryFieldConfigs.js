@@ -20,7 +20,7 @@ export const DEFAULT_VISA_FIELDS = [
     aliases: ["applicationdate", "application_date", "arza senesi", "дата подачи", "дата заявления"],
   },
   {
-    fieldKey: "operator_guid",
+    fieldKey: "accepted_opr_guid",
     labelTm: "Operator",
     labelRu: "Оператор",
     labelEn: "Operator",
@@ -28,10 +28,10 @@ export const DEFAULT_VISA_FIELDS = [
     optionsKey: "employees",
     isDefault: true,
     gridSize: 4,
-    aliases: ["operator", "operator_guid", "оператор", "сотрудник", "assignment_operator"],
+    aliases: ["accepted_opr_guid", "operator", "operator_guid", "оператор", "сотрудник", "assignment_operator"],
   },
   {
-    fieldKey: "operator2_guid",
+    fieldKey: "received_opr_guid",
     labelTm: "Kabul ediji (Operator)",
     labelRu: "Оператор 2",
     labelEn: "Operator 2",
@@ -39,7 +39,7 @@ export const DEFAULT_VISA_FIELDS = [
     optionsKey: "employees",
     isDefault: true,
     gridSize: 4,
-    aliases: ["operator2", "operator2_guid", "receiver_operator", "kabul ediji", "оператор 2"],
+    aliases: ["received_opr_guid", "recieved_opr_guid", "operator2", "operator2_guid", "receiver_operator", "kabul ediji", "оператор 2"],
   },
   {
     fieldKey: "birth_date",
@@ -117,51 +117,10 @@ export const isNotesField = (field) => {
   );
 };
 
-export const isOperator2Field = (field) => {
-  if (!field) return false;
-  const key = (field.fieldKey || "").toLowerCase();
-  const tm = normalizeFieldString(field.labelTm || "");
-  const ru = normalizeFieldString(field.labelRu || "");
-  return (
-    key === "operator2_guid" ||
-    key === "operator2" ||
-    key === "receiver_operator" ||
-    tm.includes("kabul ediji") ||
-    tm.includes("operator2") ||
-    tm.includes("operator 2") ||
-    ru.includes("оператор 2") ||
-    ru.includes("оператор2")
-  );
-};
+export const isOperator2Field = (field) => field?.fieldKey === "received_opr_guid";
 
-export const isOperatorField = (field) => {
-  if (!field) return false;
-  if (isOperator2Field(field)) return false;
-  const key = (field.fieldKey || "").toLowerCase();
-  const tm = normalizeFieldString(field.labelTm || "");
-  const ru = normalizeFieldString(field.labelRu || "");
-  return (
-    key === "operator_guid" ||
-    key === "operator" ||
-    key === "assignment_operator" ||
-    tm === "operator" ||
-    ru === "оператор"
-  );
-};
+export const isOperatorField = (field) => field?.fieldKey === "accepted_opr_guid";
 
-export const isOfficeField = (field) => {
-  if (!field) return false;
-  const key = (field.fieldKey || "").toLowerCase();
-  const tm = normalizeFieldString(field.labelTm || "");
-  const ru = normalizeFieldString(field.labelRu || "");
-  return (
-    key === "office_guid" ||
-    key === "office" ||
-    tm === "edara" ||
-    ru === "офис" ||
-    ru === "филиал"
-  );
-};
 
 export const ensureAllVisaFields = (apiFields = []) => {
   const fields = Array.isArray(apiFields) ? [...apiFields] : [];

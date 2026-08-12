@@ -69,29 +69,14 @@ const DynamicVisaField = ({
     );
   }
 
-  if (
-    fieldKey === "operator_guid" ||
-    fieldKey === "operator" ||
-    fieldKey === "received_opr_guid" ||
-    fieldKey === "operator2_guid" ||
-    isOperatorField(field) ||
-    isOperator2Field(field)
-  ) {
-    const isOp1 =
-      fieldKey === "operator_guid" ||
-      fieldKey === "operator" ||
-      isOperatorField(field);
-
-    const operatorLabel = isOp1
-      ? t("columns.operator")
-      : t("columns.operatorTwo");
-
+  if (fieldKey === "accepted_opr_guid" || fieldKey === "received_opr_guid") {
+    const isAccepted = fieldKey === "accepted_opr_guid";
     return (
       <Grid size={{ xs: 12, sm: 6 }}>
         <AppAutocomplete
           name={fieldKey}
           control={control}
-          label={operatorLabel}
+          label={isAccepted ? t("columns.operator") : t("columns.operatorTwo")}
           options={employeeOptions}
         />
       </Grid>
@@ -271,37 +256,38 @@ const VisaIntakeModal = ({
   );
 
   const defaultValues = useMemo(() => {
+    const rowData = row?.original;
     const defaults = { countryGuid, countryName: country };
+
     modalFields.forEach((field) => {
       const key = field.fieldKey;
-      if (isEdit && row?.original) {
-        let val = row.original[key] ?? row.original.customFields?.[key];
-        if (key === "operator_guid" || key === "operator") {
-          val = row.original.operator_guid || row.original.operator?.guid || val;
-        } else if (key === "received_opr_guid" || key === "operator2_guid" || key === "operator2") {
-          val = row.original.received_opr_guid || row.original.receiver_operator?.guid || row.original.operator2?.guid || val;
+      if (isEdit && rowData) {
+        let val = rowData[key] ?? rowData.customFields?.[key];
+        if (key === "accepted_opr_guid") {
+          val = rowData.accepted_opr_guid || rowData.accepted_operator?.guid || val;
+        } else if (key === "received_opr_guid") {
+          val = rowData.received_opr_guid || rowData.receiver_operator?.guid || val;
         }
-        if (field.fieldType === "date") {
-          defaults[key] = val ? dayjs(val).format("YYYY-MM-DD") : null;
-        } else {
-          defaults[key] = val ?? (field.fieldType === "number" ? null : "");
-        }
+        defaults[key] =
+          field.fieldType === "date"
+            ? val
+              ? dayjs(val).format("YYYY-MM-DD")
+              : null
+            : (val ?? (field.fieldType === "number" ? null : ""));
       } else {
-        if (key === "application_date" || key === "date") {
-          defaults[key] = dayjs().format("YYYY-MM-DD");
-        } else {
-          defaults[key] = field.fieldType === "date" || field.fieldType === "number" ? null : "";
-        }
+        defaults[key] =
+          key === "application_date"
+            ? dayjs().format("YYYY-MM-DD")
+            : field.fieldType === "date" || field.fieldType === "number"
+              ? null
+              : "";
       }
     });
-    return defaults;
-  }, [countryGuid, country, modalFields, isEdit, row]);
 
-  const {
-    control,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm({ defaultValues, values: defaultValues });
+    return defaults;
+  }, [countryGuid, country, modalFields, isEdit, row?.original]);
+
+  const { control, handleSubmit } = useForm({ defaultValues });
 
   const closeModal = () => {
     if (isEdit) {
@@ -340,9 +326,9 @@ const VisaIntakeModal = ({
 
     const payload = {
       countryGuid,
-      applicantName: data.client_guid || data.applicantName || "",
-      operator_guid: data.operator_guid || data.operator || "",
-      received_opr_guid: data.received_opr_guid || data.operator2_guid || "",
+      applicantName: data.client_guid || "",
+      accepted_opr_guid: data.accepted_opr_guid || "",
+      received_opr_guid: data.received_opr_guid || "",
       customFields,
       ...data,
     };

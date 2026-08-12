@@ -206,61 +206,35 @@ const VisaIntake = () => {
       },
     };
 
-    const operatorField = visaFields.find((f) => isOperatorField(f));
-    const operatorLabel = operatorField
-      ? selectedLang(operatorField.labelTm) || operatorField.labelTm
-      : null;
-
     const operatorCol = {
-      id: "operator",
-      header: t("columns.operator") || operatorLabel || "Operator",
+      id: "accepted_opr_guid",
+      header: t("columns.operator"),
       size: 180,
-      accessorFn: (row) =>
-        row.operator?.fullName ??
-        row.assignment_operator?.fullName ??
-        row.employee?.fullName ??
-        row.operator_full_name ??
-        row.customFields?.operator ??
-        "",
+      accessorFn: (row) => row.accepted_operator?.fullName ?? row.operator?.fullName ?? "",
       Cell: ({ row }) => {
-        const op = row.original.operator || row.original.assignment_operator || row.original.employee;
-        const primaryName =
-          op?.fullName || row.original.operator_full_name || row.original.customFields?.operator;
+        const op = row.original.accepted_operator || row.original.operator;
+        const primaryName = op?.fullName || "";
         const secondaryInfo =
-          selectedLang(op?.office?.fullName) ||
           selectedLang(op?.office?.shortName) ||
           op?.office?.shortName ||
-          op?.office?.fullName ||
+          selectedLang(op?.office?.fullName) ||
           "";
         return <StackedCell primary={primaryName} secondary={secondaryInfo} />;
       },
     };
 
-    const operator2Field = visaFields.find((f) => isOperator2Field(f));
-    const operator2Label = operator2Field
-      ? selectedLang(operator2Field.labelTm) || operator2Field.labelTm
-      : null;
-
     const operator2Col = {
-      id: "operator2",
-      header: t("columns.operatorTwo") || operator2Label || "Kabul ediji (Operator)",
+      id: "received_opr_guid",
+      header: t("columns.operatorTwo"),
       size: 180,
-      accessorFn: (row) =>
-        row.operator2?.fullName ??
-        row.receiver_operator?.fullName ??
-        row.employee2?.fullName ??
-        row.operator2_full_name ??
-        row.customFields?.operator2 ??
-        "",
+      accessorFn: (row) => row.receiver_operator?.fullName ?? row.operator2?.fullName ?? "",
       Cell: ({ row }) => {
-        const op2 = row.original.operator2 || row.original.receiver_operator || row.original.employee2;
-        const primaryName =
-          op2?.fullName || row.original.operator2_full_name || row.original.customFields?.operator2;
+        const op2 = row.original.receiver_operator || row.original.operator2;
+        const primaryName = op2?.fullName || "";
         const secondaryInfo =
-          selectedLang(op2?.office?.fullName) ||
           selectedLang(op2?.office?.shortName) ||
           op2?.office?.shortName ||
-          op2?.office?.fullName ||
+          selectedLang(op2?.office?.fullName) ||
           "";
         return <StackedCell primary={primaryName} secondary={secondaryInfo} />;
       },
