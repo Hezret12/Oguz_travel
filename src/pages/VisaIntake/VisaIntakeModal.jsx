@@ -287,7 +287,11 @@ const VisaIntakeModal = ({
           defaults[key] = val ?? (field.fieldType === "number" ? null : "");
         }
       } else {
-        defaults[key] = field.fieldType === "date" || field.fieldType === "number" ? null : "";
+        if (key === "application_date" || key === "date") {
+          defaults[key] = dayjs().format("YYYY-MM-DD");
+        } else {
+          defaults[key] = field.fieldType === "date" || field.fieldType === "number" ? null : "";
+        }
       }
     });
     return defaults;
