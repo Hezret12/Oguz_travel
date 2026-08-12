@@ -29,8 +29,7 @@ const CustomTabs = ({
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-
-  const primaryColor = isDark ? "#14B8A6" : "#0E8584";
+  const primaryColor = theme.palette.primary.main;
 
   // Sizes configuration
   const minHeight = size === "small" ? 34 : 38;

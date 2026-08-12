@@ -10,6 +10,23 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
 });
 
+// ── Request Interceptor ──────────────────────────────────────────
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get('accessToken');
+    if (token) {
+      if (config.headers?.set) {
+        config.headers.set('Authorization', `Bearer ${token}`);
+      } else {
+        config.headers = config.headers || {};
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // ── 401 Auto-Refresh Interceptor ──────────────────────────────────
 let isRefreshing = false;
 let failedQueue = [];
@@ -30,12 +47,19 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
+
+    const requestUrl = originalRequest.url || '';
+
     // Only intercept 401 errors, skip for auth endpoints themselves
     if (
       error.response?.status !== 401 ||
       originalRequest._retry ||
-      originalRequest.url?.includes('/auth/signin') ||
-      originalRequest.url?.includes('/auth/refresh')
+      requestUrl.includes('/auth/signin') ||
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/refresh')
     ) {
       return Promise.reject(error);
     }
@@ -46,7 +70,12 @@ axiosInstance.interceptors.response.use(
         failedQueue.push({ resolve, reject });
       })
         .then((token) => {
-          originalRequest.headers['Authorization'] = 'Bearer ' + token;
+          if (originalRequest.headers?.set) {
+            originalRequest.headers.set('Authorization', 'Bearer ' + token);
+          } else {
+            originalRequest.headers = originalRequest.headers || {};
+            originalRequest.headers['Authorization'] = 'Bearer ' + token;
+          }
           return axiosInstance(originalRequest);
         })
         .catch((err) => Promise.reject(err));
@@ -62,16 +91,28 @@ axiosInstance.interceptors.response.use(
         throw new Error('No refresh token available');
       }
 
-      const response = await axiosInstance.post('/auth/refresh', {
-        refreshToken: refreshToken,
-        refresh_token: refreshToken,
-      });
+      // Perform refresh call using unintercepted axios.post to avoid recursive 401s or sending expired accessToken
+      const response = await axios.post(
+        `${BASE_URL}/auth/refresh`,
+        {
+          refreshToken: refreshToken,
+          refresh_token: refreshToken,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${refreshToken}`,
+            'x-refresh-token': refreshToken,
+          },
+        }
+      );
 
       const newAccessToken =
         response?.data?.data?.accessToken ||
         response?.data?.data?.access_token ||
         response?.data?.accessToken ||
-        response?.data?.access_token;
+        response?.data?.access_token ||
+        response?.data?.token;
 
       const newRefreshToken =
         response?.data?.data?.refreshToken ||
@@ -92,8 +133,14 @@ axiosInstance.interceptors.response.use(
       // Retry all queued requests with the new token
       processQueue(null, newAccessToken);
 
-      // Retry the original request
-      originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
+      // Retry original request
+      if (originalRequest.headers?.set) {
+        originalRequest.headers.set('Authorization', 'Bearer ' + newAccessToken);
+      } else {
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
+      }
+
       return axiosInstance(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);
@@ -104,7 +151,6 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem('user');
       localStorage.removeItem('tableNames');
 
-      // Redirect to login page (avoid infinite loop if already on login)
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }

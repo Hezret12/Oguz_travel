@@ -9,6 +9,7 @@ import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 import { Autocomplete, Box, Button, TextField, Paper } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useDateFormat } from "../../functions/generalHelpers";
@@ -618,27 +619,72 @@ const VisaIntake = () => {
     <>
       <PageHeader
         pageTitle={`${t("visaIntake.title") || "Wiza Arzalary"} | Oguz Travel`}
-        addButtonText={
-          activeTab === "applications"
-            ? t("visaIntake.addApplication") || "Arza Goş"
-            : t("visaIntake.createCountry") || "Täze Ýurt Goş"
-        }
-        onAddClick={
-          activeTab === "applications"
-            ? () => visaTable.setCreatingRow(true)
-            : () => countryTable.setCreatingRow(true)
-        }
-        filterButtonText={activeTab === "applications" ? t("filter") : undefined}
-        onFilterClick={activeTab === "applications" ? openDrawer : undefined}
       />
 
-      <Paper sx={{ mb: 2.5, p: 1, borderRadius: "12px", border: "1px solid", borderColor: "divider" }} elevation={0}>
+      <Paper
+        sx={{
+          mb: 2.5,
+          p: 1.25,
+          borderRadius: "12px",
+          border: "1px solid",
+          borderColor: "divider",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+          flexWrap: "wrap",
+        }}
+        elevation={0}
+      >
         <CustomTabs
           value={activeTab}
           onChange={(_, val) => setActiveTab(val)}
           tabs={tabOptions}
           variant="pills"
         />
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          {activeTab === "applications" && (
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<FilterListIcon />}
+              onClick={openDrawer}
+              sx={{
+                borderRadius: "10px",
+                height: "40px",
+                px: 2,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+            >
+              {t("filter") || "Filter"}
+            </Button>
+          )}
+
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={
+              activeTab === "applications"
+                ? () => visaTable.setCreatingRow(true)
+                : () => countryTable.setCreatingRow(true)
+            }
+            sx={{
+              borderRadius: "10px",
+              height: "40px",
+              px: 2.5,
+              textTransform: "none",
+              fontWeight: 600,
+              boxShadow: "none",
+            }}
+          >
+            {activeTab === "applications"
+              ? t("visaIntake.addApplication") || "Arza Goş"
+              : t("visaIntake.createCountry") || "Täze Ýurt Goş"}
+          </Button>
+        </Box>
       </Paper>
 
       <FilterDrawer
