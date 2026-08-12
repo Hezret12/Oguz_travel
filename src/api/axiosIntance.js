@@ -10,7 +10,6 @@ const axiosInstance = axios.create({
   baseURL: BASE_URL,
 });
 
-// ── Request Interceptor ──────────────────────────────────────────
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = Cookies.get('accessToken');
@@ -27,7 +26,6 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ── 401 Auto-Refresh Interceptor ──────────────────────────────────
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -53,7 +51,6 @@ axiosInstance.interceptors.response.use(
 
     const requestUrl = originalRequest.url || '';
 
-    // Only intercept 401 errors, skip for auth endpoints themselves
     if (
       error.response?.status !== 401 ||
       originalRequest._retry ||
@@ -64,7 +61,6 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // If already refreshing, queue this request
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
@@ -91,7 +87,6 @@ axiosInstance.interceptors.response.use(
         throw new Error('No refresh token available');
       }
 
-      // Perform refresh call using unintercepted axios.post to avoid recursive 401s or sending expired accessToken
       const response = await axios.post(
         `${BASE_URL}/auth/refresh`,
         {
@@ -124,16 +119,13 @@ axiosInstance.interceptors.response.use(
         throw new Error('No access token in refresh response');
       }
 
-      // Persist new tokens matching Travel_server (7d / 30d)
       Cookies.set('accessToken', newAccessToken, { expires: 7 });
       if (newRefreshToken) {
         Cookies.set('refreshToken', newRefreshToken, { expires: 30 });
       }
 
-      // Retry all queued requests with the new token
       processQueue(null, newAccessToken);
 
-      // Retry original request
       if (originalRequest.headers?.set) {
         originalRequest.headers.set('Authorization', 'Bearer ' + newAccessToken);
       } else {
@@ -145,7 +137,6 @@ axiosInstance.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError, null);
 
-      // Clear session and redirect to login
       Cookies.remove('accessToken');
       Cookies.remove('refreshToken');
       localStorage.removeItem('user');
