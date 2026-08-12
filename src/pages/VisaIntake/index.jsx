@@ -240,17 +240,13 @@ const VisaIntake = () => {
       },
     };
 
-    const remainingFields = visaFields.filter((field) => {
-      const key = field.fieldKey;
-      return (
-        key !== "application_date" &&
-        key !== "date" &&
-        key !== "note" &&
+    const remainingFields = visaFields.filter(
+      (field) =>
+        field.fieldKey !== "application_date" &&
         !isNotesField(field) &&
         !isOperatorField(field) &&
-        !isOperator2Field(field)
-      );
-    });
+        !isOperator2Field(field),
+    );
 
     const remainingCols = remainingFields.map((field) => {
       const fieldKey = field.fieldKey;

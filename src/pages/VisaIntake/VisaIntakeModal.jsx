@@ -55,7 +55,7 @@ const DynamicVisaField = ({
     );
   }
 
-  if (fieldKey === "notes" || field.multiline) {
+  if (fieldKey === "note" || field.multiline) {
     return (
       <Grid size={12}>
         <CustomTextField
@@ -158,21 +158,11 @@ const VisaIntakeModal = ({
       (f) => f.fieldKey !== "birth_date" && f.fieldKey !== "passport_number",
     );
 
-    const clientField = filtered.find(
-      (f) => f.fieldKey === "client_guid" || isClientField(f),
-    );
-    const op1Field = filtered.find(
-      (f) => f.fieldKey === "operator_guid" || isOperatorField(f),
-    );
-    const op2Field = filtered.find(
-      (f) => f.fieldKey === "operator2_guid" || isOperator2Field(f),
-    );
-    const appDateField = filtered.find(
-      (f) => f.fieldKey === "application_date" || f.fieldKey === "date",
-    );
-    const notesField = filtered.find(
-      (f) => f.fieldKey === "notes" || f.fieldKey === "note" || isNotesField(f),
-    );
+    const clientField = filtered.find((f) => isClientField(f));
+    const op1Field = filtered.find((f) => isOperatorField(f));
+    const op2Field = filtered.find((f) => isOperator2Field(f));
+    const appDateField = filtered.find((f) => f.fieldKey === "application_date");
+    const notesField = filtered.find((f) => isNotesField(f));
 
     const excludeSet = new Set(
       [
@@ -182,10 +172,10 @@ const VisaIntakeModal = ({
         appDateField?.fieldKey,
         notesField?.fieldKey,
         "client_guid",
-        "operator_guid",
-        "operator2_guid",
+        "accepted_opr_guid",
+        "received_opr_guid",
         "application_date",
-        "notes",
+        "note",
       ].filter(Boolean),
     );
 

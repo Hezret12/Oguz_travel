@@ -73,7 +73,7 @@ export const DEFAULT_VISA_FIELDS = [
     aliases: ["visatype", "visa_category", "wiza görnüşi", "категория визы", "тип визы"],
   },
   {
-    fieldKey: "notes",
+    fieldKey: "note",
     labelTm: "Bellikler",
     labelRu: "Примечание",
     labelEn: "Notes",
@@ -82,40 +82,13 @@ export const DEFAULT_VISA_FIELDS = [
     gridSize: 12,
     multiline: true,
     rows: 2,
-    aliases: ["bellik", "bellikler", "primecaniye", "заметки", "примечание"],
+    aliases: ["note", "notes", "bellik", "bellikler", "primecaniye", "заметки", "примечание"],
   },
 ];
 
-export const isClientField = (field) => {
-  if (!field) return false;
-  const key = (field.fieldKey || "").toLowerCase();
-  const tm = normalizeFieldString(field.labelTm || "");
-  const ru = normalizeFieldString(field.labelRu || "");
-  return (
-    key === "client_guid" ||
-    key === "client" ||
-    key === "musderi" ||
-    tm === "musderi" ||
-    ru === "клиент"
-  );
-};
+export const isClientField = (field) => field?.fieldKey === "client_guid";
 
-export const isNotesField = (field) => {
-  if (!field) return false;
-  const key = (field.fieldKey || "").toLowerCase();
-  const tm = normalizeFieldString(field.labelTm || "");
-  const ru = normalizeFieldString(field.labelRu || "");
-  return (
-    key === "notes" ||
-    key === "note" ||
-    key === "bellikler" ||
-    key === "bellik" ||
-    key === "primecaniye" ||
-    tm.includes("bellik") ||
-    ru.includes("примеч") ||
-    ru.includes("замет")
-  );
-};
+export const isNotesField = (field) => field?.fieldKey === "note";
 
 export const isOperator2Field = (field) => field?.fieldKey === "received_opr_guid";
 
@@ -134,9 +107,9 @@ export const ensureAllVisaFields = (apiFields = []) => {
 
   let notesField = fields.find((f) => isNotesField(f));
   if (!notesField) {
-    notesField = DEFAULT_VISA_FIELDS.find((f) => f.fieldKey === "notes");
+    notesField = DEFAULT_VISA_FIELDS.find((f) => f.fieldKey === "note");
   } else {
-    notesField = { ...notesField, fieldKey: "notes", multiline: true };
+    notesField = { ...notesField, fieldKey: "note", multiline: true };
   }
 
   const defaultMiddleFields = DEFAULT_VISA_FIELDS.filter(
