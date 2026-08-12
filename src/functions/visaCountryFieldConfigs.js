@@ -42,37 +42,6 @@ export const DEFAULT_VISA_FIELDS = [
     aliases: ["received_opr_guid", "recieved_opr_guid", "operator2", "operator2_guid", "receiver_operator", "kabul ediji", "оператор 2"],
   },
   {
-    fieldKey: "birth_date",
-    labelTm: "Doglan senesi",
-    labelRu: "Дата рождения",
-    labelEn: "Date of birth",
-    fieldType: "date",
-    isDefault: true,
-    gridSize: 4,
-    aliases: ["dateofbirth", "birth_date", "doglan senesi", "дата рождения", "дата рожд", "дата рожд."],
-  },
-  {
-    fieldKey: "passport_number",
-    labelTm: "Pasport belgisi",
-    labelRu: "Номер паспорта",
-    labelEn: "Passport number",
-    fieldType: "text",
-    isDefault: true,
-    gridSize: 4,
-    aliases: ["passportnumber", "passport_number", "pasport belgisi", "номер паспорта", "паспорт №"],
-  },
-  {
-    fieldKey: "visa_category",
-    labelTm: "Wiza görnüşi",
-    labelRu: "Категория визы",
-    labelEn: "Visa category",
-    fieldType: "select",
-    optionsKey: "visaCategories",
-    isDefault: true,
-    gridSize: 4,
-    aliases: ["visatype", "visa_category", "wiza görnüşi", "категория визы", "тип визы"],
-  },
-  {
     fieldKey: "note",
     labelTm: "Bellikler",
     labelRu: "Примечание",
@@ -119,8 +88,7 @@ export const ensureAllVisaFields = (apiFields = []) => {
       (f) =>
         f.fieldKey === def.fieldKey ||
         (def.fieldKey === "operator_guid" && isOperatorField(f)) ||
-        (def.fieldKey === "operator2_guid" && isOperator2Field(f)) ||
-        (def.fieldKey === "office_guid" && isOfficeField(f))
+        (def.fieldKey === "operator2_guid" && isOperator2Field(f))
     );
     return match ? { ...match, fieldKey: def.fieldKey } : def;
   });
@@ -138,7 +106,6 @@ export const ensureAllVisaFields = (apiFields = []) => {
       !isNotesField(f) &&
       !isOperatorField(f) &&
       !isOperator2Field(f) &&
-      !isOfficeField(f) &&
       !defaultKeys.has(f.fieldKey)
   );
 

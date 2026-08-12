@@ -137,13 +137,22 @@ axiosInstance.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError, null);
 
-      Cookies.remove('accessToken');
-      Cookies.remove('refreshToken');
-      localStorage.removeItem('user');
-      localStorage.removeItem('tableNames');
+      const status = refreshError.response?.status;
+      const isAuthFailure =
+        status === 401 ||
+        status === 403 ||
+        refreshError.message === 'No refresh token available' ||
+        refreshError.message === 'No access token in refresh response';
 
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
+      if (isAuthFailure) {
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
+        localStorage.removeItem('user');
+        localStorage.removeItem('tableNames');
+
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
       }
 
       return Promise.reject(refreshError);

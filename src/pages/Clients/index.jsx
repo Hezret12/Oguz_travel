@@ -1,12 +1,14 @@
 import { useMemo, useState, useCallback } from "react";
-import { Box, Chip, IconButton, Typography } from "@mui/material";
+import { Box, Chip, IconButton } from "@mui/material";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
+import toast from "react-hot-toast";
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../hooks/useLocale";
+import { useAuth } from "../../context/AuthContext";
 import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
@@ -37,6 +39,10 @@ const formatDate = (value) => {
 
 const Clients = () => {
   const { t } = useLocale();
+  const { user } = useAuth();
+  const isAdmin = Boolean(
+    user?.role === "admin" || user?.user_is_admin || user?.isAdmin,
+  );
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
   const [selectedDocClient, setSelectedDocClient] = useState(null);
@@ -85,7 +91,7 @@ const Clients = () => {
     queryKey: ["clients", queryParams],
     idKey: "guid",
     apiName: "guid",
-    isInfiniteQuery: true
+    isInfiniteQuery: true,
   });
 
   const deleteDialog = useDeleteDialog({
@@ -108,7 +114,11 @@ const Clients = () => {
               : value;
         return `${t(`columns.${key}`)}: ${label}`;
       }
-      if (key === "dateOfBirth" || key === "passportIssueDate" || key === "passportExpiryDate") {
+      if (
+        key === "dateOfBirth" ||
+        key === "passportIssueDate" ||
+        key === "passportExpiryDate"
+      ) {
         return `${t(`columns.${key}`)}: ${formatDate(value)}`;
       }
       return `${t(`columns.${key}`)}: ${value}`;
@@ -130,28 +140,6 @@ const Clients = () => {
         id: "fullName",
         header: t("columns.fullName"),
         size: 180,
-        Cell: ({ row, cell }) => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {cell.getValue()}
-            </Typography>
-            {(row.original.vip === true || row.original.vip === "true" || row.original.vip === 1) && (
-              <Chip
-                label="VIP"
-                size="small"
-                sx={{
-                  height: "20px",
-                  fontSize: "0.675rem",
-                  fontWeight: 700,
-                  background: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
-                  color: "#FFF",
-                  boxShadow: "0 2px 6px rgba(217, 119, 6, 0.3)",
-                  px: 0.5,
-                }}
-              />
-            )}
-          </Box>
-        ),
       },
       {
         accessorFn: (row) => row.phone_number,
@@ -211,55 +199,53 @@ const Clients = () => {
         size: actions,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
-        Cell: ({ row, table }) => (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 1,
-            }}
-          >
-            <IconButton
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedDocClient(row.original);
-              }}
-              size="small"
-              sx={(theme) => ({
-                borderRadius: "7px",
-                border: `1px solid ${theme.palette.divider}`,
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.05)"
-                    : "rgba(0,0,0,0.04)",
-                color: "primary.main",
-                transition: "all 0.15s ease",
-                "&:hover": {
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(255,255,255,0.10)"
-                      : "rgba(0,0,0,0.09)",
-                  borderColor: "primary.main",
-                  transform: "translateY(-1px)",
-                },
-                "&:active": { transform: "scale(0.95)" },
-              })}
-              title={t("clients.documents") || "Belgeler"}
-            >
-              <InsertDriveFileIcon sx={{ fontSize: 16 }} />
-            </IconButton>
+        Cell: ({ row, table }) => {
+          const isVip = Boolean(
+            row.original.vip === true ||
+            row.original.vip === "true" ||
+            row.original.vip === 1,
+          );
+          const isDocRestricted = isVip && !isAdmin;
 
-            <ColumnActionButtons
-              row={row}
-              table={table}
-              onDelete={handleDeleteClick}
-            />
-          </Box>
-        ),
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+              }}
+            >
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isDocRestricted) {
+                    toast.error(t("clients.vipFileRestricted"));
+                    return;
+                  }
+                  setSelectedDocClient(row.original);
+                }}
+                size="small"
+                title={
+                  isDocRestricted
+                    ? t("clients.vipFileRestricted")
+                    : t("clients.documents")
+                }
+              >
+                <InsertDriveFileIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+
+              <ColumnActionButtons
+                row={row}
+                table={table}
+                onDelete={handleDeleteClick}
+              />
+            </Box>
+          );
+        },
       },
     ],
-    [t, handleDeleteClick],
+    [t, handleDeleteClick, isAdmin],
   );
 
   const activeFilters = useMemo(

@@ -30,15 +30,28 @@ export function AuthProvider({ children }) {
           return normalizeUser(userObj);
         }
       } catch (err) {
-        clearSession();
-        queryClient.setQueryData(['authUser'], null);
+        const status = err?.response?.status;
+        const isAuthError =
+          status === 401 ||
+          status === 403 ||
+          err?.message === 'No refresh token available' ||
+          err?.message === 'No access token in refresh response';
+
+        if (isAuthError) {
+          clearSession();
+          queryClient.setQueryData(['authUser'], null);
+        } else {
+          const stored = getStoredSession();
+          if (stored?.user) {
+            return stored.user;
+          }
+        }
         throw err;
       }
       return null;
     },
     enabled: hasToken,
     initialData: () => getStoredSession()?.user ?? null,
-    initialDataUpdatedAt: 0,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     retry: false,

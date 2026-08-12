@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Box } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import { Box, Paper, Typography, FormControlLabel, Switch } from '@mui/material';
+import StarRoundedIcon from '@mui/icons-material/StarRounded';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useLocale } from '../../../hooks/useLocale';
+import { useAuth } from '../../../context/AuthContext';
 import { useValidShema } from '../../../functions/useValidShema';
 import { CustomDialog } from '../../Dialog/CustomDialog';
 import { CustomDialogHeader } from '../../Dialog/CustomDialogHeader';
@@ -21,6 +23,8 @@ import CustomDatePicker from '../../CustomDatePicker';
 const AddClientModal = () => {
   const dispatch = useDispatch();
   const { t } = useLocale();
+  const { user } = useAuth();
+  const isAdmin = Boolean(user?.role === "admin" || user?.user_is_admin || user?.isAdmin);
   const { clientValidShema } = useValidShema();
   const { open, initialValues, onCreated } = useSelector(selectAddClientModal);
   const [loading, setLoading] = useState(false);
@@ -37,6 +41,7 @@ const AddClientModal = () => {
       passportExpiryDate: null,
       passportCountryOfIssue: null,
       gender: null,
+      vip: false,
       ...initialValues,
     }),
     [initialValues],
@@ -60,7 +65,11 @@ const AddClientModal = () => {
   const submitHandler = async (data) => {
     try {
       setLoading(true);
-      const response = await createClient(data);
+      const payload = {
+        ...data,
+        vip: isAdmin ? Boolean(data.vip) : false,
+      };
+      const response = await createClient(payload);
       const createdClient = response?.data?.data ?? response?.data;
 
       queryClient.invalidateQueries({ queryKey: ['clients'] });
@@ -157,6 +166,56 @@ const AddClientModal = () => {
               ]}
             />
           </Box>
+
+          {isAdmin && (
+            <Box sx={{ flex: '1 1 100%' }}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 1.5,
+                  px: 2,
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 215, 0, 0.05)"
+                      : "#FFFDF0",
+                  borderColor: "#FFD700",
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <StarRoundedIcon sx={{ color: "#D97706", fontSize: 24 }} />
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#D97706" }}>
+                      VIP Müşteri Statusı
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Bu müşderini VIP hökmünde bellemek üçin açary açyň (Diňe Admin üçin)
+                    </Typography>
+                  </Box>
+                </Box>
+                <Controller
+                  name="vip"
+                  control={control}
+                  render={({ field: { value, onChange } }) => (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={Boolean(value)}
+                          onChange={(e) => onChange(e.target.checked)}
+                          color="warning"
+                        />
+                      }
+                      label=""
+                      sx={{ m: 0 }}
+                    />
+                  )}
+                />
+              </Paper>
+            </Box>
+          )}
         </Box>
 
         <FooterButton loading={loading} onCancel={closeModal} type="submit" />

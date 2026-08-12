@@ -19,7 +19,6 @@ import { addVisaApi } from "../../api/queries/post";
 import { updateVisaApi } from "../../api/queries/patch";
 import {
   getAllEmployeeApi,
-  getAllOfficeApi,
   getCountryVisaFieldsApi,
 } from "../../api/queries/getters";
 import {
@@ -227,23 +226,7 @@ const VisaIntakeModal = ({
     [employees, selectedLang],
   );
 
-  const { data: rawOffices = [] } = useGet({
-    apiFn: getAllOfficeApi,
-    key: "offices",
-  });
 
-  const officeOptions = useMemo(
-    () =>
-      (Array.isArray(rawOffices) ? rawOffices : []).map((off) => ({
-        label:
-          selectedLang(off.shortName) ||
-          off.shortName ||
-          selectedLang(off.fullName) ||
-          off.fullName,
-        value: off.guid,
-      })),
-    [rawOffices, selectedLang],
-  );
 
   const defaultValues = useMemo(() => {
     const rowData = row?.original;
@@ -277,7 +260,11 @@ const VisaIntakeModal = ({
     return defaults;
   }, [countryGuid, country, modalFields, isEdit, row?.original]);
 
-  const { control, handleSubmit } = useForm({ defaultValues });
+  const {
+    control,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm({ defaultValues });
 
   const closeModal = () => {
     if (isEdit) {
@@ -351,7 +338,6 @@ const VisaIntakeModal = ({
                 control={control}
                 selectedLang={selectedLang}
                 employeeOptions={employeeOptions}
-                officeOptions={officeOptions}
                 initialClient={initialClient}
               />
             ))}

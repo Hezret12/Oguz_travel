@@ -207,6 +207,8 @@
     "documentUploadError": "Resminama ýüklenende ýalňyşlyk çykdy",
     "documentDeleted": "Resminama pozuldy",
     "documentDeleteError": "Resminama pozulanda ýalňyşlyk çykdy",
+    "vipFileRestricted": "VIP müşderiniň resminamalary diňe Admin üçin elýeterli.",
+    "vipFileRestrictedNotice": "VIP müşderiniň ýüklenen resminamalary diňe Admin tarapyndan görülip bilner.",
     "autocomplete": {
       "noClientFound": "Müşderi tapylmady.",
       "addClient": "Müşderi goş"

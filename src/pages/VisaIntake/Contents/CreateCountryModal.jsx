@@ -46,39 +46,21 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
     try {
       const selectedItems = data.fields || [];
       const existingFieldIds = [];
-      const dynamicFieldsList = [];
+      const newFields = [];
 
       selectedItems.forEach((item) => {
         if (typeof item === "string") {
-          dynamicFieldsList.push(item);
+          newFields.push(item);
         } else if (item && typeof item === "object") {
           if (item.guid || item.id) {
             existingFieldIds.push(item.guid || item.id);
           } else {
             const label =
               item.labelTm || item.labelRu || item.labelEn || item.fieldKey;
-            if (label) dynamicFieldsList.push(label);
+            if (label) newFields.push(label);
           }
         }
       });
-
-      const defaultHeaderFields = [
-        "Müşderi",
-        "Arza berlen senesi",
-        "Operator",
-        "Kabul ediji (Operator)",
-      ];
-      const defaultFooterField = "Bellikler";
-
-      const cleanDynamicFields = dynamicFieldsList.filter(
-        (f) => !defaultHeaderFields.includes(f) && f !== defaultFooterField
-      );
-
-      const newFields = [
-        ...defaultHeaderFields,
-        ...cleanDynamicFields,
-        defaultFooterField,
-      ];
 
       const payload = {
         nameTm: data.nameTm,

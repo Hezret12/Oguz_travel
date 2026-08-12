@@ -187,6 +187,8 @@
       "documentUploadError": "Ошибка при загрузке документа",
       "documentDeleted": "Документ успешно удален",
       "documentDeleteError": "Ошибка при удалении документа",
+      "vipFileRestricted": "Документы VIP клиента доступны только Админу.",
+      "vipFileRestrictedNotice": "Загруженные документы VIP клиента может просматривать только Admin.",
       "autocomplete": {
         "noClientFound": "Клиент не найден.",
         "addClient": "+ Добавить клиента"

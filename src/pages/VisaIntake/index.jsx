@@ -457,21 +457,6 @@ const VisaIntake = () => {
             );
           }}
         />
-
-        <Button
-          variant="outlined"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={() => setIsCreateCountryOpen(true)}
-          sx={{
-            borderRadius: "10px",
-            height: "40px",
-            textTransform: "none",
-            fontWeight: 600,
-          }}
-        >
-          {t("visaIntake.createCountry") || "Ýurt Goş"}
-        </Button>
       </Box>
     ),
     renderBottomToolbarCustomActions: () => (

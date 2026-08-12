@@ -24,7 +24,7 @@ import CustomDatePicker from "../../../components/CustomDatePicker";
 const EditClient = ({ table, row, queryParams }) => {
   const { t } = useLocale();
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin" || user?.user_is_admin;
+  const isAdmin = Boolean(user?.role === "admin" || user?.user_is_admin || user?.isAdmin);
 
   const { clientValidShema } = useValidShema();
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -76,7 +76,7 @@ const EditClient = ({ table, row, queryParams }) => {
     try {
       const payload = {
         ...data,
-        vip: Boolean(data.vip),
+        vip: isAdmin ? Boolean(data.vip) : Boolean(row?.original?.vip),
       };
 
       if (selectedFiles.length > 0) {

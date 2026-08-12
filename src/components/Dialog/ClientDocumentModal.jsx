@@ -8,16 +8,19 @@ import {
   Stack,
   Typography,
   Grid,
+  Alert,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import LockIcon from '@mui/icons-material/Lock';
 import toast from 'react-hot-toast';
 import { CustomDialog } from './CustomDialog';
 import { CustomDialogHeader } from './CustomDialogHeader';
 import { useLocale } from '../../hooks/useLocale';
+import { useAuth } from '../../context/AuthContext';
 import { updatePassportApi } from '../../api/queries/patch';
 import { BASE_URL } from '../../api/axiosIntance';
 import CustomTextField from '../CustomTextField';
@@ -26,6 +29,11 @@ import { useForm } from 'react-hook-form';
 
 export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
   const { t } = useLocale();
+  const { user } = useAuth();
+  const isAdmin = Boolean(user?.role === 'admin' || user?.user_is_admin || user?.isAdmin);
+  const isVipClient = Boolean(client?.vip === true || client?.vip === 'true' || client?.vip === 1);
+  const isRestrictedForUser = isVipClient && !isAdmin;
+
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -124,66 +132,82 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
       />
 
       <Box component="form" onSubmit={handleSubmit(submitPassportHandler)} sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-        {/* Existing File View */}
-        {fullUrl ? (
-          <Paper
-            variant="outlined"
+        {isRestrictedForUser ? (
+          <Alert
+            severity="warning"
+            icon={<LockIcon />}
             sx={{
-              p: 2,
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              backgroundColor: (theme) =>
-                theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#f9fafb',
+              borderRadius: '10px',
+              my: 1,
+              fontWeight: 500,
             }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, overflow: 'hidden' }}>
-              <InsertDriveFileIcon color="primary" sx={{ fontSize: 32 }} />
-              <Box sx={{ overflow: 'hidden' }}>
-                <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
-                  {t('clients.passportDocument') || 'Pasport Faýly'}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" noWrap>
-                  {fileName}
-                </Typography>
-              </Box>
-            </Box>
-
-            <Stack direction="row" spacing={1}>
-              <IconButton
-                size="small"
-                color="primary"
-                component="a"
-                href={fullUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={t('clients.viewDocument')}
+            {t('clients.vipFileRestrictedNotice') || 'VIP müşderiniň ýüklenen resminamalary diňe Admin tarapyndan görülip bilner.'}
+          </Alert>
+        ) : (
+          <>
+            {/* Existing File View */}
+            {fullUrl ? (
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : '#f9fafb',
+                }}
               >
-                <VisibilityIcon fontSize="small" />
-              </IconButton>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, overflow: 'hidden' }}>
+                  <InsertDriveFileIcon color="primary" sx={{ fontSize: 32 }} />
+                  <Box sx={{ overflow: 'hidden' }}>
+                    <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
+                      {t('clients.passportDocument') || 'Pasport Faýly'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" noWrap>
+                      {fileName}
+                    </Typography>
+                  </Box>
+                </Box>
 
-              <IconButton
-                size="small"
-                color="success"
-                onClick={handleDownload}
-                title={t('clients.downloadDocument')}
-              >
-                <DownloadIcon fontSize="small" />
-              </IconButton>
+                <Stack direction="row" spacing={1}>
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    component="a"
+                    href={fullUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={t('clients.viewDocument')}
+                  >
+                    <VisibilityIcon fontSize="small" />
+                  </IconButton>
 
-              <IconButton
-                size="small"
-                color="error"
-                onClick={handleDeleteFile}
-                disabled={deleting}
-                title={t('clients.deleteDocument')}
-              >
-                {deleting ? <CircularProgress size={18} /> : <DeleteIcon fontSize="small" />}
-              </IconButton>
-            </Stack>
-          </Paper>
-        ) : null}
+                  <IconButton
+                    size="small"
+                    color="success"
+                    onClick={handleDownload}
+                    title={t('clients.downloadDocument')}
+                  >
+                    <DownloadIcon fontSize="small" />
+                  </IconButton>
+
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={handleDeleteFile}
+                    disabled={deleting}
+                    title={t('clients.deleteDocument')}
+                  >
+                    {deleting ? <CircularProgress size={18} /> : <DeleteIcon fontSize="small" />}
+                  </IconButton>
+                </Stack>
+              </Paper>
+            ) : null}
+          </>
+        )}
 
         {/* Passport Form Inputs */}
         <Grid container spacing={2}>
@@ -218,32 +242,34 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
         </Grid>
 
         {/* Upload File Zone */}
-        <Paper
-          variant="outlined"
-          component="label"
-          sx={{
-            p: 2,
-            borderRadius: '12px',
-            borderStyle: 'dashed',
-            borderColor: 'divider',
-            cursor: 'pointer',
-            textAlign: 'center',
-            bgcolor: (theme) =>
-              theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#fafafa',
-            '&:hover': { borderColor: 'primary.main' },
-          }}
-        >
-          <input
-            type="file"
-            hidden
-            accept="image/*,application/pdf"
-            onChange={handleFileChange}
-          />
-          <CloudUploadIcon color="primary" sx={{ fontSize: 28, mb: 0.5 }} />
-          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            {selectedFile ? selectedFile.name : (fullUrl ? t('clients.changeDocument', 'Täze faýl saýlaň') : t('clients.uploadDocument', 'Faýl / Surat yükleň (images)'))}
-          </Typography>
-        </Paper>
+        {!isRestrictedForUser && (
+          <Paper
+            variant="outlined"
+            component="label"
+            sx={{
+              p: 2,
+              borderRadius: '12px',
+              borderStyle: 'dashed',
+              borderColor: 'divider',
+              cursor: 'pointer',
+              textAlign: 'center',
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#fafafa',
+              '&:hover': { borderColor: 'primary.main' },
+            }}
+          >
+            <input
+              type="file"
+              hidden
+              accept="image/*,application/pdf"
+              onChange={handleFileChange}
+            />
+            <CloudUploadIcon color="primary" sx={{ fontSize: 28, mb: 0.5 }} />
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              {selectedFile ? selectedFile.name : (fullUrl ? t('clients.changeDocument', 'Täze faýl saýlaň') : t('clients.uploadDocument', 'Faýl / Surat yükleň (images)'))}
+            </Typography>
+          </Paper>
+        )}
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
           <Button onClick={onClose} variant="outlined" color="inherit" sx={{ borderRadius: '10px' }}>

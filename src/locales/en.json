@@ -195,6 +195,8 @@
       "documentUploadError": "Error uploading document",
       "documentDeleted": "Document deleted successfully",
       "documentDeleteError": "Error deleting document",
+      "vipFileRestricted": "VIP client documents are only accessible by Admin.",
+      "vipFileRestrictedNotice": "Uploaded documents of a VIP client can only be viewed by Admin.",
       "autocomplete": {
         "noClientFound": "No client found.",
         "addClient": "+ Add Client"
