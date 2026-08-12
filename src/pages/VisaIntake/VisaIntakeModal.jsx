@@ -36,7 +36,6 @@ const DynamicVisaField = ({
   selectedLang,
   initialClient,
   employeeOptions = [],
-  officeOptions = [],
 }) => {
   const fieldKey = field.fieldKey;
   const label = selectedLang(field.labelTm) || field.labelTm || fieldKey;
