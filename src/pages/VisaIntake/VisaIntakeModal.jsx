@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Grid } from "@mui/material";
+import { Grid, CircularProgress, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
 import { useLocale } from "../../hooks/useLocale";
@@ -10,70 +10,32 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
 import CustomDatePicker from "../../components/CustomDatePicker";
+import AppAutocomplete from "../../components/AppAutocomplete";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
+import { useGet } from "../../hooks/CRUD/useGet";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
-import { useGet } from "../../hooks/CRUD/useGet";
+import { addVisaApi } from "../../api/queries/post";
+import { updateVisaApi } from "../../api/queries/patch";
 import {
-  addVisaIntakeApi,
-  updateVisaIntakeApi,
-} from "../../api/queries/visaIntakeApi";
-import { getAllEmployeeApi } from "../../api/queries/getters";
-import {
-  VISA_COUNTRY_CONFIGS,
-  VISA_FIELD_DEFS,
-  VISA_SELECT_OPTIONS,
-} from "../../functions/visaCountryFieldConfigs";
+  getAllEmployeeApi,
+  getAllOfficeApi,
+  getCountryVisaFieldsApi,
+} from "../../api/queries/getters";
+import { sortVisaFields } from "../../functions/visaCountryFieldConfigs";
 
-// ─── Build default values from the superset fields for a given country ────────
-const buildDefaults = (country, row) => {
-  const config = VISA_COUNTRY_CONFIGS[country];
-  if (!config) return {};
+const DynamicVisaField = ({
+  field,
+  control,
+  selectedLang,
+  initialClient,
+  employeeOptions = [],
+  officeOptions = [],
+}) => {
+  const fieldKey = field.fieldKey;
+  const label = selectedLang(field.labelTm) || field.labelTm || fieldKey;
 
-  const defaults = { country };
-  config.fields.forEach((key) => {
-    const def = VISA_FIELD_DEFS[key];
-    if (!def) return;
-
-    if (row) {
-      // Edit mode — pre-fill from row data per AGENTS.md §8
-      if (key === "client_guid") {
-        defaults[key] = row.original?.client_guid || row.original?.client?.guid || "";
-      } else {
-        const val = row.original?.[key];
-        if (def.type === "date") {
-          defaults[key] = val ? dayjs(val).format("YYYY-MM-DD") : null;
-        } else {
-          defaults[key] = val ?? (def.type === "number" ? null : "");
-        }
-      }
-    } else {
-      // Add mode — sensible defaults
-      if (key === "application_date") {
-        defaults[key] = dayjs().format("YYYY-MM-DD");
-      } else if (def.type === "date") {
-        defaults[key] = null;
-      } else if (def.type === "number") {
-        defaults[key] = null;
-      } else {
-        defaults[key] = "";
-      }
-    }
-  });
-
-  return defaults;
-};
-
-// ─── DynamicVisaField: renders the right input per field key ──────────────────
-const DynamicVisaField = ({ fieldKey, control, t, employeeOptions, initialClient }) => {
-  const def = VISA_FIELD_DEFS[fieldKey];
-  if (!def) return null;
-
-  const label = t(def.labelKey) || fieldKey;
-  const gridSize = def.gridSize || 4;
-
-  // GlobalClientAutocomplete for client selection
-  if (def.type === "client_autocomplete" || fieldKey === "client_guid") {
+  if (fieldKey === "client_guid") {
     return (
       <Grid size={12}>
         <GlobalClientAutocomplete
@@ -87,23 +49,65 @@ const DynamicVisaField = ({ fieldKey, control, t, employeeOptions, initialClient
     );
   }
 
-  // Date fields
-  if (def.type === "date") {
+  if (fieldKey === "notes" || field.multiline) {
     return (
-      <Grid size={gridSize}>
-        <CustomDatePicker
+      <Grid size={12}>
+        <CustomTextField
           name={fieldKey}
           control={control}
           label={label}
+          multiline
+          rows={field.rows || 2}
         />
       </Grid>
     );
   }
 
-  // Number fields
-  if (def.type === "number") {
+  if (
+    fieldKey === "operator_guid" ||
+    fieldKey === "operator" ||
+    field.optionsKey === "employees"
+  ) {
     return (
-      <Grid size={gridSize}>
+      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+        <AppAutocomplete
+          name={fieldKey}
+          control={control}
+          label={label}
+          options={employeeOptions}
+        />
+      </Grid>
+    );
+  }
+
+  if (
+    fieldKey === "office_guid" ||
+    fieldKey === "office" ||
+    field.optionsKey === "offices"
+  ) {
+    return (
+      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+        <AppAutocomplete
+          name={fieldKey}
+          control={control}
+          label={label}
+          options={officeOptions}
+        />
+      </Grid>
+    );
+  }
+
+  if (field.fieldType === "date") {
+    return (
+      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+        <CustomDatePicker name={fieldKey} control={control} label={label} />
+      </Grid>
+    );
+  }
+
+  if (field.fieldType === "number") {
+    return (
+      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <CustomTextField
           name={fieldKey}
           control={control}
@@ -114,11 +118,15 @@ const DynamicVisaField = ({ fieldKey, control, t, employeeOptions, initialClient
     );
   }
 
-  // Select fields (static options)
-  if (def.type === "select") {
-    const options = VISA_SELECT_OPTIONS[def.optionsKey] || [];
+  if (field.fieldType === "select") {
+    const rawOptions = field.options || [];
+    const options = rawOptions.map((opt) => ({
+      label: typeof opt === "object" ? opt.label : String(opt),
+      value: typeof opt === "object" ? opt.value : String(opt),
+    }));
+
     return (
-      <Grid size={gridSize}>
+      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <CustomSelect
           name={fieldKey}
           control={control}
@@ -129,43 +137,36 @@ const DynamicVisaField = ({ fieldKey, control, t, employeeOptions, initialClient
     );
   }
 
-  // Autocomplete fields (employees)
-  if (def.type === "autocomplete") {
-    return (
-      <Grid size={gridSize}>
-        <CustomSelect
-          name={fieldKey}
-          control={control}
-          label={label}
-          options={employeeOptions}
-        />
-      </Grid>
-    );
-  }
-
-  // Text fields (default)
   return (
-    <Grid size={gridSize}>
-      <CustomTextField
-        name={fieldKey}
-        control={control}
-        label={label}
-        multiline={def.multiline || false}
-        rows={def.rows || 1}
-      />
+    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+      <CustomTextField name={fieldKey} control={control} label={label} />
     </Grid>
   );
 };
 
-// ─── Modal Component ──────────────────────────────────────────────────────────
-const VisaIntakeModal = ({ mode = "add", table, row, country }) => {
+const VisaIntakeModal = ({
+  mode = "add",
+  table,
+  row,
+  country,
+  countryGuid,
+}) => {
   const { t, selectedLang } = useLocale();
   const isEdit = mode === "edit";
 
-  const config = VISA_COUNTRY_CONFIGS[country];
-  const fieldKeys = config?.fields || [];
+  const { data: apiFields = [], isLoading: fieldsLoading } = useGet({
+    apiFn: () =>
+      countryGuid ? getCountryVisaFieldsApi(countryGuid) : Promise.resolve([]),
+    key: ["countryVisaFields", countryGuid],
+    options: { enabled: Boolean(countryGuid) },
+  });
 
-  // Initial client object for GlobalClientAutocomplete in edit mode
+  const rawApiFields = useMemo(
+    () => (Array.isArray(apiFields) ? apiFields : []),
+    [apiFields],
+  );
+  const fields = useMemo(() => sortVisaFields(rawApiFields), [rawApiFields]);
+
   const initialClient = useMemo(() => {
     if (!isEdit || !row?.original) return null;
     if (row.original.client) return row.original.client;
@@ -180,7 +181,6 @@ const VisaIntakeModal = ({ mode = "add", table, row, country }) => {
     return null;
   }, [isEdit, row]);
 
-  // Fetch employee options
   const { data: employees = [] } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
@@ -202,14 +202,53 @@ const VisaIntakeModal = ({ mode = "add", table, row, country }) => {
     [employees, selectedLang],
   );
 
-  // Form setup
+  const { data: rawOffices = [] } = useGet({
+    apiFn: getAllOfficeApi,
+    key: "offices",
+  });
+
+  const officeOptions = useMemo(
+    () =>
+      (Array.isArray(rawOffices) ? rawOffices : []).map((off) => ({
+        label:
+          selectedLang(off.shortName) ||
+          off.shortName ||
+          selectedLang(off.fullName) ||
+          off.fullName,
+        value: off.guid,
+      })),
+    [rawOffices, selectedLang],
+  );
+
+  const defaultValues = useMemo(() => {
+    const defaults = { countryGuid, countryName: country };
+    fields.forEach((field) => {
+      const key = field.fieldKey;
+      if (isEdit && row?.original) {
+        const val = row.original.customFields?.[key] ?? row.original[key];
+        if (field.fieldType === "date") {
+          defaults[key] = val ? dayjs(val).format("YYYY-MM-DD") : null;
+        } else {
+          defaults[key] = val ?? (field.fieldType === "number" ? null : "");
+        }
+      } else {
+        if (field.fieldType === "date") {
+          defaults[key] = null;
+        } else if (field.fieldType === "number") {
+          defaults[key] = null;
+        } else {
+          defaults[key] = "";
+        }
+      }
+    });
+    return defaults;
+  }, [countryGuid, country, fields, isEdit, row]);
+
   const {
     control,
     handleSubmit,
     formState: { isSubmitting },
-  } = useForm({
-    defaultValues: buildDefaults(country, isEdit ? row : null),
-  });
+  } = useForm({ defaultValues, values: defaultValues });
 
   const closeModal = () => {
     if (isEdit) {
@@ -219,32 +258,39 @@ const VisaIntakeModal = ({ mode = "add", table, row, country }) => {
     }
   };
 
-  // CRUD hooks — correct param names per AGENTS.md §1
   const { mutate: createIntake, isPending: isCreating } = useCreate({
-    apiFn: addVisaIntakeApi,
-    key: ["visa-intake", country],
+    apiFn: addVisaApi,
+    key: ["visa-intake", countryGuid || country],
     onSuccess: closeModal,
   });
 
   const { mutate: updateIntake, isPending: isUpdating } = useUpdate({
-    apiFn: updateVisaIntakeApi,
-    key: ["visa-intake", country],
+    apiFn: updateVisaApi,
+    key: ["visa-intake", countryGuid || country],
     idKey: "guid",
     onSuccessUpdate: closeModal,
   });
 
   const onSubmit = (data) => {
-    // Normalize date fields to YYYY-MM-DD strings
-    const payload = { ...data, country };
-    fieldKeys.forEach((key) => {
-      const def = VISA_FIELD_DEFS[key];
-      if (def?.type === "date" && payload[key]) {
-        payload[key] = dayjs(payload[key]).format("YYYY-MM-DD");
+    const customFields = {};
+    fields.forEach((field) => {
+      const key = field.fieldKey;
+      let val = data[key];
+      if (field.fieldType === "date" && val) {
+        val = dayjs(val).format("YYYY-MM-DD");
       }
-      if (def?.type === "number" && payload[key] !== null && payload[key] !== "") {
-        payload[key] = Number(payload[key]);
+      if (field.fieldType === "number" && val !== null && val !== "") {
+        val = Number(val);
       }
+      customFields[key] = val;
     });
+
+    const payload = {
+      countryGuid,
+      applicantName: data.client_guid || data.applicantName || "",
+      customFields,
+      ...data,
+    };
 
     if (isEdit) {
       updateIntake({ ...payload, guid: row.original.guid });
@@ -260,27 +306,33 @@ const VisaIntakeModal = ({ mode = "add", table, row, country }) => {
   return (
     <CustomDialog open={true} close={closeModal} widthX={800}>
       <CustomDialogHeader variant="h5" title={title} />
-      <CustomForm onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={2} sx={{ mt: 0.5 }}>
-          {fieldKeys.map((key) => (
-            <DynamicVisaField
-              key={key}
-              fieldKey={key}
-              control={control}
-              t={t}
-              employeeOptions={employeeOptions}
-              initialClient={initialClient}
-            />
-          ))}
-        </Grid>
+      {fieldsLoading ? (
+        <Box sx={{ p: 4, display: "flex", justifyContent: "center" }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <CustomForm onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={2} sx={{ mt: 0.5 }}>
+            {fields.map((field) => (
+              <DynamicVisaField
+                key={field.guid || field.fieldKey}
+                field={field}
+                control={control}
+                selectedLang={selectedLang}
+                employeeOptions={employeeOptions}
+                officeOptions={officeOptions}
+                initialClient={initialClient}
+              />
+            ))}
+          </Grid>
 
-        <FooterButton
-          loading={isSubmitting || isCreating || isUpdating}
-          onCancel={closeModal}
-          type="submit"
-          sx={{ mt: 3 }}
-        />
-      </CustomForm>
+          <FooterButton
+            loading={isSubmitting || isCreating || isUpdating}
+            onCancel={closeModal}
+            type="submit"
+          />
+        </CustomForm>
+      )}
     </CustomDialog>
   );
 };

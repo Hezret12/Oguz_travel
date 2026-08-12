@@ -167,3 +167,7 @@ export const updateReportApi = async (data) => {
 export const updateReportShareApi = async (data) => {
   return await api.patchPrivate('/report-share/update-report-share', data);
 };
+
+export const updateCountryApi = async (data) => {
+  return await api.patchPrivate('/visa/country/update-country', data);
+};

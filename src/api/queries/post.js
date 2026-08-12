@@ -225,3 +225,7 @@ export const addReportShareApi = async (data) => {
   return await api.postPrivate("/report-share/add-report-share", data);
 };
 
+export const createCountryApi = async (data) => {
+  return await api.postPrivate("/visa/country/add-country", data);
+};
+

@@ -116,3 +116,7 @@ export const deleteReportApi = async (guid) => {
 export const deleteReportShareApi = async (guid) => {
   return await api.deletePrivate('/report-share/delete-report-share', guid);
 };
+
+export const deleteCountryApi = async (guid) => {
+  return await api.deletePrivate('/visa/country/delete-country', guid);
+};

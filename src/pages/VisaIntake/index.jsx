@@ -3,23 +3,32 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { useCallback, useMemo, useState } from "react";
+import { forwardRef, useCallback, useMemo, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
-import { Autocomplete, Box, Chip, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, TextField, Paper } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useDateFormat } from "../../functions/generalHelpers";
 import VisaIntakeModal from "./VisaIntakeModal";
+import CreateCountryModal from "./Contents/CreateCountryModal";
+import EditCountryModal from "./Contents/EditCountryModal";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import DeleteDialog from "../../components/DeleteDialog";
+import CustomTabs from "../../components/CustomTabs";
+import { useGet } from "../../hooks/CRUD/useGet";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
+import { deleteVisaApi, deleteCountryApi } from "../../api/queries/delete";
 import {
-  getAllVisaIntakeApi,
-  deleteVisaIntakeApi,
-} from "../../api/queries/visaIntakeApi";
+  getAllVisasApi,
+  getCountriesApi,
+  getCountryVisaFieldsApi,
+} from "../../api/queries/getters";
 import {
   visaIntakeFilterActions,
   visaIntakeFilterSelectors,
@@ -28,174 +37,60 @@ import FilterDrawer from "../../components/FilterDrawer";
 import VisaIntakeFilter from "./Contents/VisaIntakeFilter";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import StackedCell from "../../components/inputs/StackCell";
-import StatusChip from "../../components/StatusChip";
+
 import {
-  VISA_CATEGORY_CONFIG,
-  PROCESSED_STATUS_CONFIG,
-} from "../../functions/statusChipConfigs";
-import {
-  VISA_COUNTRY_CONFIGS,
-  VISA_COUNTRY_OPTIONS,
-  VISA_FIELD_DEFS,
+  sortVisaFields,
 } from "../../functions/visaCountryFieldConfigs";
 
-// ─── localStorage key for persisting selected country ─────────────────────────
-const STORAGE_KEY = "oguz_visa_intake_country";
+const CleanRoot = forwardRef(function CleanRoot(props, ref) {
+  const domProps = { ...props };
+  delete domProps.renderTags;
+  delete domProps.ownerState;
+  delete domProps.PaperProps;
+  return <div ref={ref} {...domProps} />;
+});
 
-const getInitialCountry = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && VISA_COUNTRY_CONFIGS[saved]) return saved;
-  } catch {
-    /* ignore */
-  }
-  return "UZB";
-};
+const VisaIntake = () => {
+  const { t, selectedLang } = useLocale();
+  const { formatChange } = useDateFormat();
+  const defaultMrtOptions = getDefaultMRTOptions();
 
-// ─── Column builder: maps field keys → MRT column defs ────────────────────────
-const buildColumnsForCountry = (countryKey, t, selectedLang, formatChange) => {
-  const config = VISA_COUNTRY_CONFIGS[countryKey];
-  if (!config) return [];
+  const [activeTab, setActiveTab] = useState("applications");
+  const [isCreateCountryOpen, setIsCreateCountryOpen] = useState(false);
 
-  const fieldColumns = config.fields.map((fieldKey) => {
-    const def = VISA_FIELD_DEFS[fieldKey];
-    if (!def) return null;
-
-    const base = {
-      id: fieldKey,
-      header: t(def.labelKey) || fieldKey,
-      size: fieldKey === "notes" || fieldKey === "booking_datetime" ? 180 : 130,
-      muiTableHeadCellProps: { align: "center" },
-      muiTableBodyCellProps: { align: "center" },
-    };
-
-    // Client Autocomplete Column
-    if (def.type === "client_autocomplete" || fieldKey === "client_guid") {
-      return {
-        ...base,
-        id: "client",
-        header: t("columns.client") || "Müşderi",
-        size: 200,
-        accessorFn: (row) => row.client?.fullName ?? row.client_full_name ?? "",
-        Cell: ({ row }) => {
-          const clientObj = row.original.client;
-          const primaryName = clientObj?.fullName || row.original.client_full_name;
-          const secondaryInfo =
-            clientObj?.phone_number || clientObj?.passport_number || row.original.passport_number;
-          return (
-            <StackedCell
-              primary={primaryName}
-              secondary={secondaryInfo}
-            />
-          );
-        },
-      };
-    }
-
-    // Relation / Autocomplete fields (e.g., operator, form_filled_by, etc.)
-    if (def.type === "autocomplete") {
-      return {
-        ...base,
-        size: 190,
-        accessorFn: (row) => {
-          const emp = row[fieldKey];
-          if (typeof emp === "object" && emp !== null) {
-            return emp.fullName ?? emp.shortName ?? emp.name ?? "";
-          }
-          return emp ?? "";
-        },
-        Cell: ({ row }) => {
-          const emp = row.original[fieldKey];
-          if (typeof emp === "object" && emp !== null) {
-            const officeName = emp.office?.shortName
-              ? selectedLang(emp.office.shortName) || selectedLang(emp.office.fullName)
-              : selectedLang(emp.office?.fullName);
-            return (
-              <StackedCell
-                primary={emp.fullName}
-                secondary={officeName}
-              />
-            );
-          }
-          return emp || "-";
-        },
-      };
-    }
-
-    // Date fields
-    if (def.type === "date") {
-      return {
-        ...base,
-        accessorKey: fieldKey,
-        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
-      };
-    }
-
-    // Visa category — StatusChip
-    if (fieldKey === "visa_category") {
-      return {
-        ...base,
-        accessorKey: fieldKey,
-        Cell: ({ cell }) => (
-          <StatusChip
-            status={cell.getValue()}
-            config={VISA_CATEGORY_CONFIG}
-            size="small"
-          />
-        ),
-      };
-    }
-
-    // Processed status (KOR/ROM) — StatusChip
-    if (fieldKey === "is_processed") {
-      return {
-        ...base,
-        accessorKey: fieldKey,
-        Cell: ({ cell }) => (
-          <StatusChip
-            status={cell.getValue()}
-            config={PROCESSED_STATUS_CONFIG}
-            size="small"
-          />
-        ),
-      };
-    }
-
-    return {
-      ...base,
-      accessorKey: fieldKey,
-    };
+  const { data: rawCountries = [], isLoading: countriesLoading, refetch: refetchCountries } = useGet({
+    apiFn: getCountriesApi,
+    key: "countries",
   });
 
-  return fieldColumns.filter(Boolean);
-};
+  const countries = Array.isArray(rawCountries) ? rawCountries : [];
 
-// ─── Page Component ───────────────────────────────────────────────────────────
-const VisaIntakePage = () => {
-  const { t, selectedLang } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
-  const { formatChange } = useDateFormat();
-  const [rowSelection, setRowSelection] = useState({});
-  const [selectedCountry, setSelectedCountry] = useState(getInitialCountry);
+  const [selectedCountryGuid, setSelectedCountryGuid] = useState("");
 
-  // Persist selected country
-  const handleCountryChange = useCallback((_, newValue) => {
-    const key = newValue?.value || "UZB";
-    setSelectedCountry(key);
-    try {
-      localStorage.setItem(STORAGE_KEY, key);
-    } catch {
-      /* ignore */
+  const currentCountry = useMemo(() => {
+    if (selectedCountryGuid) {
+      return countries.find((c) => c.guid === selectedCountryGuid) || countries[0];
     }
-  }, []);
+    return countries[0];
+  }, [countries, selectedCountryGuid]);
+
+  const activeCountryGuid = currentCountry?.guid || "";
+
+  const { data: rawVisaFields = [], refetch: refetchVisaFields } = useGet({
+    apiFn: () => (activeCountryGuid ? getCountryVisaFieldsApi(activeCountryGuid) : Promise.resolve([])),
+    key: ["countryVisaFields", activeCountryGuid],
+    options: { enabled: Boolean(activeCountryGuid) },
+  });
+
+  const rawFieldsList = Array.isArray(rawVisaFields) ? rawVisaFields : [];
+  const visaFields = useMemo(() => sortVisaFields(rawFieldsList), [rawFieldsList]);
 
   const {
-    applied,
     draft,
+    queryParams,
     isDrawerOpen,
     openDrawer,
     setDraftFilter,
-    setFilter,
     applyFilters,
     cancelFilters,
     resetFilters,
@@ -205,172 +100,246 @@ const VisaIntakePage = () => {
     limit,
     setPage,
     setPageSize,
+    sortBy,
+    sortOrder,
     setSort,
     selectsOpen,
     openSelect,
     closeSelect,
-    queryParams,
   } = usePageFilters({
     actions: visaIntakeFilterActions,
     selectors: visaIntakeFilterSelectors,
   });
 
-  const {
-    data: intakeData,
-    isLoading,
-    isFetching,
-    refetch,
-    pageCount,
-    totalItems,
-  } = usePagginationGet({
-    apiFn: getAllVisaIntakeApi,
-    key: ["visa-intake", selectedCountry],
-    params: { country: selectedCountry, ...queryParams },
-  });
-
-  const rows = useMemo(
-    () => intakeData?.data ?? intakeData ?? [],
-    [intakeData],
+  const mergedParams = useMemo(
+    () => ({ ...queryParams, countryGuid: activeCountryGuid }),
+    [queryParams, activeCountryGuid],
   );
 
-  // Delete — note the different param names per AGENTS.md §1
-  const { mutate: deleteIntake, isPending: isDeleting } = useDelete({
-    deleteFn: deleteVisaIntakeApi,
-    queryKey: ["visa-intake", selectedCountry],
+  const {
+    data: intakeData = [],
+    isLoading: intakeLoading,
+    isFetching: intakeFetching,
+    refetch: refetchIntake,
+    totalItems,
+  } = usePagginationGet({
+    apiFn: getAllVisasApi,
+    key: ["visa-intake", activeCountryGuid],
+    params: mergedParams,
+  });
+
+  const { mutate: deleteIntake, isPending: isDeletingIntake } = useDelete({
+    deleteFn: deleteVisaApi,
+    queryKey: ["visa-intake", activeCountryGuid],
     idKey: "guid",
     isPaginated: true,
   });
 
-  const deleteDialog = useDeleteDialog({
+  const intakeDeleteDialog = useDeleteDialog({
     onConfirm: (item) => deleteIntake(item.guid),
   });
 
-  const handleDeleteClick = (item) => deleteDialog.open(item);
-
-  const activeFilters = useMemo(
-    () =>
-      Object.entries(applied).filter(
-        // eslint-disable-next-line no-unused-vars
-        ([_, value]) => value !== undefined && value !== null && value !== "",
-      ),
-    [applied],
+  const handleDeleteIntakeClick = useCallback(
+    (item) => intakeDeleteDialog.open(item),
+    [intakeDeleteDialog],
   );
 
-  // Dynamic columns based on selected country
-  const columns = useMemo(() => {
-    const indexCol = {
-      accessorKey: "index_number",
-      id: "index_number",
-      header: "#",
-      size: 50,
-      enableSorting: false,
-    };
+  const { mutate: deleteCountry, isPending: isDeletingCountry } = useDelete({
+    deleteFn: deleteCountryApi,
+    queryKey: "countries",
+    idKey: "guid",
+    isPaginated: false,
+  });
 
-    const actionsCol = {
-      id: "actions",
-      header: t("columns.actions") ?? "Actions",
-      size: 110,
-      enableSorting: false,
-      muiTableHeadCellProps: { align: "center" },
-      muiTableBodyCellProps: { align: "center" },
-      Cell: ({ row, table }) => (
-        <ColumnActionButtons
-          row={row}
-          table={table}
-          onDelete={() => handleDeleteClick(row.original)}
-        />
-      ),
-    };
+  const countryDeleteDialog = useDeleteDialog({
+    onConfirm: (item) => deleteCountry(item.guid),
+  });
 
-    const dynamicCols = buildColumnsForCountry(selectedCountry, t, selectedLang, formatChange);
-    return [indexCol, ...dynamicCols, actionsCol];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCountry, t, selectedLang, formatChange]);
+  const handleDeleteCountryClick = useCallback(
+    (item) => countryDeleteDialog.open(item),
+    [countryDeleteDialog],
+  );
 
-  const table = useMaterialReactTable({
+  const visaColumns = useMemo(() => {
+    const fieldCols = visaFields.map((field) => {
+      const fieldKey = field.fieldKey;
+      const label = selectedLang(field.labelTm) || field.labelTm || fieldKey;
+
+      if (fieldKey === "client_guid") {
+        return {
+          id: "client",
+          header: t("columns.client") || "Müşderi",
+          size: 200,
+          accessorFn: (row) => row.client?.fullName ?? row.client_full_name ?? "",
+          Cell: ({ row }) => {
+            const clientObj = row.original.client;
+            const primaryName = clientObj?.fullName || row.original.client_full_name;
+            const secondaryInfo =
+              clientObj?.phone_number || clientObj?.passport_number || row.original.passport_number;
+            return <StackedCell primary={primaryName} secondary={secondaryInfo} />;
+          },
+        };
+      }
+
+      if (fieldKey === "operator_guid" || fieldKey === "operator") {
+        return {
+          id: "operator",
+          header: t("columns.operator") || label || "Operator",
+          size: 180,
+          accessorFn: (row) =>
+            row.operator?.fullName ??
+            row.employee?.fullName ??
+            row.operator_full_name ??
+            row.customFields?.operator ??
+            "",
+          Cell: ({ row }) => {
+            const op = row.original.operator || row.original.employee;
+            const primaryName =
+              op?.fullName || row.original.operator_full_name || row.original.customFields?.operator;
+            const secondaryInfo =
+              selectedLang(op?.office?.shortName) ||
+              op?.office?.shortName ||
+              selectedLang(op?.office?.fullName) ||
+              op?.office?.fullName ||
+              "";
+            return <StackedCell primary={primaryName} secondary={secondaryInfo} />;
+          },
+        };
+      }
+
+      if (fieldKey === "office_guid" || fieldKey === "office") {
+        return {
+          id: "office",
+          header: t("columns.office") || label || "Edara",
+          size: 160,
+          accessorFn: (row) =>
+            selectedLang(row.office?.shortName) ||
+            row.office?.shortName ||
+            selectedLang(row.office?.fullName) ||
+            row.office?.fullName ||
+            row.customFields?.office ||
+            "",
+          Cell: ({ row }) => {
+            const officeObj = row.original.office;
+            const primaryName =
+              selectedLang(officeObj?.shortName) ||
+              officeObj?.shortName ||
+              selectedLang(officeObj?.fullName) ||
+              officeObj?.fullName ||
+              row.original.customFields?.office;
+            const secondaryInfo =
+              selectedLang(officeObj?.fullName) !== primaryName
+                ? selectedLang(officeObj?.fullName) || officeObj?.fullName
+                : "";
+            return <StackedCell primary={primaryName} secondary={secondaryInfo} />;
+          },
+        };
+      }
+
+      if (fieldKey === "notes") {
+        return {
+          id: "notes",
+          header: t("columns.notes") || label || "Bellikler",
+          size: 200,
+          muiTableHeadCellProps: { align: "center" },
+          muiTableBodyCellProps: { align: "center" },
+          accessorFn: (row) =>
+            row.customFields?.notes ??
+            row.customFields?.bellikler ??
+            row.customFields?.bellik ??
+            row.notes ??
+            row.bellikler ??
+            "",
+          Cell: ({ cell }) => cell.getValue() ?? "",
+        };
+      }
+
+      return {
+        id: fieldKey,
+        header: label,
+        size: 140,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        accessorFn: (row) => row.customFields?.[fieldKey] ?? row[fieldKey] ?? "",
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          if (field.fieldType === "date" && val) {
+            return formatChange(val, { dateOnly: true });
+          }
+          return val ?? "";
+        },
+      };
+    });
+
+    return [
+      {
+        accessorFn: (row) => row.index_number,
+        id: "index_number",
+        header: "№",
+        size: 10,
+        enableSorting: false,
+      },
+      ...fieldCols,
+      {
+        id: "actions",
+        header: t("columns.actions") || "Sazlamalar",
+        size: 100,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        Cell: ({ row, table }) => (
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <ColumnActionButtons
+              row={row}
+              table={table}
+              onDelete={handleDeleteIntakeClick}
+            />
+          </Box>
+        ),
+      },
+    ];
+  }, [visaFields, t, selectedLang, formatChange, handleDeleteIntakeClick]);
+
+  const countryOptions = useMemo(
+    () =>
+      countries.map((c) => ({
+        label: selectedLang(c.nameTm) || c.nameTm,
+        value: c.guid,
+        countryObj: c,
+      })),
+    [countries, selectedLang],
+  );
+
+  const selectedCountryOption = useMemo(
+    () => countryOptions.find((c) => c.value === activeCountryGuid) || countryOptions[0] || null,
+    [countryOptions, activeCountryGuid],
+  );
+
+  const visaTable = useMaterialReactTable({
     ...defaultMrtOptions,
-    columns,
-    data: rows || [],
+    columns: visaColumns,
+    data: intakeData,
     state: {
-      rowSelection,
-      isLoading: false,
-      showLoadingOverlay: isLoading || isFetching,
-      showSkeletons: false,
-      showProgressBars: false,
-      pagination: {
-        pageIndex: page - 1,
-        pageSize: limit,
-      },
+      isLoading: intakeLoading,
+      showProgressBars: intakeFetching,
+      sorting: sortBy ? [{ id: sortBy, desc: sortOrder === "desc" }] : [],
     },
-    initialState: {
-      columnPinning: {
-        left: ["index_number"],
-        right: ["actions"],
-      },
-    },
-    muiTableBodyProps: {
-      sx: (theme) => ({
-        backgroundColor: theme.palette.background.default,
-        color: theme.palette.text.secondary,
-        opacity: isLoading || isFetching ? 0 : 1,
-        pointerEvents: isLoading || isFetching ? "none" : "auto",
-        transition: "opacity 0.15s ease",
-      }),
-    },
-    getRowId: (row) => row.guid,
-    onRowSelectionChange: setRowSelection,
-
-    // Server-side options
-    manualPagination: true,
-    manualFiltering: true,
-    manualSorting: true,
-    pageCount,
-    rowCount: totalItems,
-
-    onPaginationChange: (updater) => {
-      const next =
-        typeof updater === "function"
-          ? updater(table.getState().pagination)
-          : updater;
-      if (next.pageIndex !== undefined) setPage(next.pageIndex + 1);
-      if (next.pageSize !== undefined) setPageSize(next.pageSize);
-    },
-
     onSortingChange: (updater) => {
-      const next =
+      const nextSorting =
         typeof updater === "function"
-          ? updater(table.getState().sorting)
+          ? updater(sortBy ? [{ id: sortBy, desc: sortOrder === "desc" }] : [])
           : updater;
-      if (next && next.length > 0) {
-        setSort(next[0].id, next[0].desc ? "desc" : "asc");
+      if (nextSorting && nextSorting.length > 0) {
+        setSort(nextSorting[0].id, nextSorting[0].desc ? "desc" : "asc");
       } else {
-        setSort("", "asc");
+        setSort(null, null);
       }
     },
-
-    renderEmptyRowsFallback: () => {
-      if (isLoading || isFetching) return null;
-      return (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            p: 4,
-            color: "text.secondary",
-            fontWeight: 500,
-          }}
-        >
-          {t("noData")}
-        </Box>
-      );
-    },
-
     renderCreateRowDialogContent: ({ table }) => (
       <VisaIntakeModal
         mode="add"
         table={table}
-        country={selectedCountry}
+        country={selectedCountryOption?.label || ""}
+        countryGuid={activeCountryGuid}
       />
     ),
     renderEditRowDialogContent: ({ table, row }) => (
@@ -378,114 +347,213 @@ const VisaIntakePage = () => {
         mode="edit"
         table={table}
         row={row}
-        country={selectedCountry}
+        country={selectedCountryOption?.label || ""}
+        countryGuid={activeCountryGuid}
       />
     ),
-
     renderTopToolbarCustomActions: () => (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          flexWrap: "wrap",
-          mt: 0.5,
-        }}
-      >
-        <Autocomplete
-          size="small"
-          disableClearable
-          options={VISA_COUNTRY_OPTIONS}
-          value={
-            VISA_COUNTRY_OPTIONS.find((o) => o.value === selectedCountry) ||
-            VISA_COUNTRY_OPTIONS[0]
-          }
-          onChange={handleCountryChange}
-          getOptionLabel={(opt) => opt.label}
-          isOptionEqualToValue={(option, value) => option.value === value.value}
-          sx={{ minWidth: 200 }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              placeholder={t("visaIntake.selectCountry") || "Ýurt saýlaň"}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "10px",
-                },
-              }}
-            />
-          )}
-        />
-
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
         <GlobalSearchInput
           value={searchQuery}
           onChange={setSearch}
           placeholder={t("search")}
-          disabled={isLoading}
-          onRefetch={refetch}
-          isFetching={isFetching}
+          onRefetch={refetchIntake}
+          isFetching={intakeFetching}
         />
 
-        {activeFilters.map(([key, value]) => (
-          <Chip
-            key={key}
-            label={`${t(`columns.${key}`, key)}: ${value}`}
-            onDelete={() => setFilter(key, "")}
-            color="primary"
-            variant="outlined"
-            size="small"
-            sx={{
-              borderRadius: "8px",
-              height: "32px",
-              fontWeight: 500,
-              "& .MuiChip-deleteIcon": {
-                color: "primary.main",
-                transition: "all 0.15s ease",
-              },
-            }}
-          />
-        ))}
+        <Autocomplete
+          slots={{ root: CleanRoot }}
+          options={countryOptions}
+          value={selectedCountryOption}
+          onChange={(_, val) => {
+            if (val) {
+              setSelectedCountryGuid(val.value);
+            }
+          }}
+          getOptionLabel={(option) => option.label || ""}
+          isOptionEqualToValue={(opt, val) => opt.value === val?.value}
+          disableClearable
+          size="small"
+          sx={{ width: 200 }}
+          renderInput={(params) => {
+            const { slotProps: paramsSlotProps, ...textFieldProps } = params;
+            return (
+              <TextField
+                {...textFieldProps}
+                size="small"
+                placeholder={t("visa.selectCountry") || "Ýurt saýlaň"}
+                slotProps={paramsSlotProps}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "10px",
+                    height: "40px",
+                  },
+                }}
+              />
+            );
+          }}
+        />
+
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => setIsCreateCountryOpen(true)}
+          sx={{
+            borderRadius: "10px",
+            height: "40px",
+            textTransform: "none",
+            fontWeight: 600,
+          }}
+        >
+          {t("visa.createCountry") || "Ýurt Goş"}
+        </Button>
       </Box>
     ),
-
-    renderBottomToolbar: ({ table: mrtTable }) => {
-      const { pageIndex } = mrtTable.getState().pagination;
-      return (
-        <Box
-          sx={(theme) => ({
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            px: 2,
-            py: 0.75,
-            minHeight: "52px",
-            borderTop: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
-          })}
-        >
-          <Box />
-          <Pagination
-            pageIndex={pageIndex}
-            pageCount={pageCount}
-            pageSize={limit}
-            totalRows={totalItems}
-            onPageChange={(newIndex) => setPage(newIndex + 1)}
-          />
-        </Box>
-      );
-    },
+    renderBottomToolbarCustomActions: () => (
+      <Pagination
+        totalItems={totalItems}
+        page={page}
+        limit={limit}
+        setPage={setPage}
+        setPageSize={setPageSize}
+      />
+    ),
   });
+
+  const countryColumns = useMemo(
+    () => [
+      {
+        accessorFn: (_, index) => index + 1,
+        id: "index_number",
+        header: "№",
+        size: 50,
+      },
+      {
+        accessorKey: "nameTm",
+        header: t("columns.countryNameTm") || "Ýurt ady (TM)",
+        size: 180,
+      },
+      {
+        accessorKey: "nameRu",
+        header: t("columns.countryNameRu") || "Ýurt ady (RU)",
+        size: 180,
+      },
+      {
+        accessorKey: "nameEn",
+        header: t("columns.countryNameEn") || "Ýurt ady (EN)",
+        size: 180,
+      },
+      {
+        id: "actions",
+        header: t("columns.actions") || "Sazlamalar",
+        size: 120,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row, table }) => (
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              color="primary"
+              startIcon={<EditIcon style={{ fontSize: 16 }} />}
+              onClick={() => table.setEditingRow(row)}
+              sx={{ borderRadius: "8px", textTransform: "none", py: 0.5, px: 1.2, fontWeight: 600 }}
+            >
+              {t("edit") || "Özgert"}
+            </Button>
+            <Button
+              size="small"
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon style={{ fontSize: 16 }} />}
+              onClick={() => handleDeleteCountryClick(row.original)}
+              sx={{ borderRadius: "8px", textTransform: "none", py: 0.5, px: 1.2, fontWeight: 600 }}
+            >
+              {t("delete") || "Pozny"}
+            </Button>
+          </Box>
+        ),
+      },
+    ],
+    [t, handleDeleteCountryClick],
+  );
+
+  const countryTable = useMaterialReactTable({
+    ...defaultMrtOptions,
+    columns: countryColumns,
+    data: countries,
+    state: {
+      isLoading: countriesLoading,
+    },
+    renderCreateRowDialogContent: ({ table }) => (
+      <CreateCountryModal
+        open={true}
+        onClose={() => table.setCreatingRow(null)}
+        onRefresh={() => {
+          refetchCountries();
+          refetchVisaFields();
+        }}
+      />
+    ),
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditCountryModal
+        table={table}
+        row={row}
+        onRefresh={() => {
+          refetchCountries();
+          refetchVisaFields();
+        }}
+      />
+    ),
+    renderTopToolbarCustomActions: () => (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={() => setIsCreateCountryOpen(true)}
+          sx={{
+            borderRadius: "10px",
+            height: "40px",
+            textTransform: "none",
+            fontWeight: 600,
+            boxShadow: "none",
+          }}
+        >
+          {t("visa.createCountry") || "Täze Ýurt Goş"}
+        </Button>
+      </Box>
+    ),
+  });
+
+  const tabOptions = useMemo(
+    () => [
+      { value: "applications", label: t("visaIntake.title") || "Wiza Arzalary" },
+      { value: "countries", label: t("visa.countriesManagement") || "Ýurtlar Sazlamalary (Country Control)" },
+    ],
+    [t],
+  );
 
   return (
     <>
       <PageHeader
-        title={t("visaIntake.title") || "Kabul ediji bölümi"}
-        pageTitle={`${t("visaIntake.title") || "Kabul ediji bölümi"} | Oguz Travel`}
-        addButtonText={t("visaIntake.addApplication") || "Arza goşmak"}
-        filterButtonText={t("filter")}
-        onAddClick={() => table.setCreatingRow(true)}
-        onFilterClick={openDrawer}
+        pageTitle={`${t("visaIntake.title") || "Wiza Arzalary"} | Oguz Travel`}
+        addButtonText={activeTab === "applications" ? (t("visaIntake.addApplication") || "Arza Goş") : undefined}
+        onAddClick={activeTab === "applications" ? () => visaTable.setCreatingRow(true) : undefined}
+        filterButtonText={activeTab === "applications" ? t("filter") : undefined}
+        onFilterClick={activeTab === "applications" ? openDrawer : undefined}
       />
+
+      <Paper sx={{ mb: 2.5, p: 1, borderRadius: "12px", border: "1px solid", borderColor: "divider" }} elevation={0}>
+        <CustomTabs
+          value={activeTab}
+          onChange={(_, val) => setActiveTab(val)}
+          tabs={tabOptions}
+          variant="pills"
+        />
+      </Paper>
 
       <FilterDrawer
         open={isDrawerOpen}
@@ -504,16 +572,39 @@ const VisaIntakePage = () => {
       </FilterDrawer>
 
       <DeleteDialog
-        open={deleteDialog.isOpen}
-        onClose={deleteDialog.close}
-        onConfirm={deleteDialog.confirm}
-        isLoading={isDeleting}
-        description={t("visaIntake.deleteConfirm") || "Siz hakykatdan hem bu arzany pozmak isleýärsiňizmi?"}
+        open={intakeDeleteDialog.isOpen}
+        onClose={intakeDeleteDialog.close}
+        onConfirm={intakeDeleteDialog.confirm}
+        isLoading={isDeletingIntake}
       />
 
-      <MaterialReactTable table={table} />
+      <DeleteDialog
+        open={countryDeleteDialog.isOpen}
+        onClose={countryDeleteDialog.close}
+        onConfirm={countryDeleteDialog.confirm}
+        isLoading={isDeletingCountry}
+      />
+
+      {activeTab === "applications" && (
+        <MaterialReactTable table={visaTable} />
+      )}
+
+      {activeTab === "countries" && (
+        <MaterialReactTable table={countryTable} />
+      )}
+
+      {isCreateCountryOpen && (
+        <CreateCountryModal
+          open={isCreateCountryOpen}
+          onClose={() => setIsCreateCountryOpen(false)}
+          onRefresh={() => {
+            refetchCountries();
+            refetchVisaFields();
+          }}
+        />
+      )}
     </>
   );
 };
 
-export default VisaIntakePage;
+export default VisaIntake;
