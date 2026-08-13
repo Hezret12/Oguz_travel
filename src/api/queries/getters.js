@@ -55,7 +55,8 @@ export const getCountriesApi = async (params = {}) => {
 
 export const getCustomFieldsApi = async (params = {}) => {
   const queryParams = { limit: 40, page: 1, ...params };
-  return await api.getPrivate('/custom_fields/get-all-field', queryParams);
+  const data = await api.getPrivate('/custom_fields/get-all-field', queryParams);
+  return data
 };
 
 export const getAllVisaFieldsApi = async (params = {}) => {

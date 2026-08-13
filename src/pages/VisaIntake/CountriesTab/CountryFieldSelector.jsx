@@ -19,7 +19,8 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import { useGet } from "../../../hooks/CRUD/useGet";
+import { usePagginationGet } from "../../../hooks/usePagginationGet";
+import { useDebounce } from "../../../hooks/useDebounce";
 import { getCustomFieldsApi } from "../../../api/queries/getters";
 import { useLocale } from "../../../hooks/useLocale";
 import { CreateCustomFieldModal } from "../CustomFieldsTab/CreateCustomFieldModal";
@@ -135,16 +136,45 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
   const [candidateString, setCandidateString] = useState(null);
   const [pendingUpdateFn, setPendingUpdateFn] = useState(null);
 
-  const { data: allFieldsRaw = [], isLoading } = useGet({
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 400);
+
+  const [accumulatedFields, setAccumulatedFields] = useState([]);
+  const [prevQueryKey, setPrevQueryKey] = useState("");
+  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
+
+  if (debouncedSearch !== prevSearch) {
+    setPrevSearch(debouncedSearch);
+    setPage(1);
+  }
+
+  const { data: pageData = [], isLoading, isFetching, pageCount } = usePagginationGet({
     apiFn: getCustomFieldsApi,
-    key: ["customFields", { limit: 40, page: 1 }],
-    params: { limit: 40 },
+    key: "customFields",
+    params: { limit: 40, page, search: debouncedSearch || undefined },
   });
 
+  const currentQueryKey = `${debouncedSearch}_${page}`;
+  if (currentQueryKey !== prevQueryKey) {
+    setPrevQueryKey(currentQueryKey);
+    const newItems = Array.isArray(pageData) ? pageData : [];
+    if (page === 1) {
+      setAccumulatedFields(newItems);
+    } else {
+      setAccumulatedFields((prev) => {
+        const existingGuids = new Set(prev.map((item) => item.guid || item.id || item.fieldKey));
+        const filteredNew = newItems.filter(
+          (item) => !existingGuids.has(item.guid || item.id || item.fieldKey)
+        );
+        return [...prev, ...filteredNew];
+      });
+    }
+  }
+
   const availableFields = useMemo(() => {
-    return Array.isArray(allFieldsRaw) ? allFieldsRaw : [];
-  }, [allFieldsRaw]);
-  console.log(availableFields,'availableFields')
+    return Array.isArray(accumulatedFields) ? accumulatedFields : [];
+  }, [accumulatedFields]);
 
   const getFieldLabel = useCallback(
     (item) => {
@@ -204,6 +234,24 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
       defaultValue={[]}
       render={({ field: { onChange, value = [] }, fieldState: { error } }) => {
         const selectedCount = value?.length || 0;
+
+        const mergedOptions = useMemo(() => {
+          const list = [...availableFields];
+          if (Array.isArray(value)) {
+            value.forEach((valItem) => {
+              if (typeof valItem === "object" && valItem !== null) {
+                const valKey = valItem.guid || valItem.id || valItem.fieldKey;
+                const exists = list.some(
+                  (opt) => typeof opt === "object" && (opt.guid || opt.id || opt.fieldKey) === valKey
+                );
+                if (!exists) {
+                  list.push(valItem);
+                }
+              }
+            });
+          }
+          return list;
+        }, [availableFields, value]);
 
         const handleMoveUp = (index) => {
           if (index <= 0) return;
@@ -284,8 +332,26 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               freeSolo
               disableCloseOnSelect
               slots={{ root: CleanRoot }}
-              options={availableFields}
-              loading={isLoading}
+              options={mergedOptions}
+              loading={isLoading || isFetching}
+              onInputChange={(_, newInputValue, reason) => {
+                if (reason === "input" || reason === "clear") {
+                  setSearchInput(newInputValue);
+                }
+              }}
+              ListboxProps={{
+                onScroll: (event) => {
+                  const listboxNode = event.currentTarget;
+                  if (
+                    listboxNode.scrollTop + listboxNode.clientHeight >=
+                    listboxNode.scrollHeight - 30
+                  ) {
+                    if (page < pageCount && !isFetching && !isLoading) {
+                      setPage((prev) => prev + 1);
+                    }
+                  }
+                },
+              }}
               filterOptions={customFilterOptions}
               getOptionLabel={(option) => getFieldLabel(option)}
               isOptionEqualToValue={(option, val) => {
