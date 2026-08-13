@@ -29,7 +29,7 @@ import {
   normalizeFieldString,
 } from "../../../functions/visaCountryFieldConfigs";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 
 const getItemKey = (item) => item?.guid || item?.fieldKey;
 
@@ -38,7 +38,6 @@ const CleanRoot = forwardRef(function CleanRoot(props, ref) {
   return <div ref={ref} {...domProps} />;
 });
 
-// ─── ReorderableFieldItem ─────────────────────────────────────────────────────
 
 const ReorderableFieldItem = ({ index, total, label, onMoveUp, onMoveDown, onRemove }) => (
   <Box
@@ -115,38 +114,37 @@ const ReorderableFieldItem = ({ index, total, label, onMoveUp, onMoveDown, onRem
   </Box>
 );
 
-// ─── CountryFieldSelector ─────────────────────────────────────────────────────
 
 export const CountryFieldSelector = ({ control, name = "fields" }) => {
   const { t } = useLocale();
 
-  // Create-field modal state
+
   const [candidateString, setCandidateString] = useState(null);
   const [pendingUpdateFn, setPendingUpdateFn] = useState(null);
 
-  // Pagination & search state
+
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 400);
 
-  // Accumulated fields for infinite scroll
+
   const [accumulatedFields, setAccumulatedFields] = useState([]);
 
-  // ── React 19 in-render state adjustment: reset page on search change ──
+
   const [prevSearch, setPrevSearch] = useState(debouncedSearch);
   if (debouncedSearch !== prevSearch) {
     setPrevSearch(debouncedSearch);
     setPage(1);
   }
 
-  // ── Fetch current page ──
+
   const { data: pageData = [], isLoading, isFetching, pageCount } = usePagginationGet({
     apiFn: getCustomFieldsApi,
     key: "customFields",
     params: { limit: 20, page, search: debouncedSearch || undefined },
   });
 
-  // ── React 19 in-render state adjustment: accumulate pages ──
+
   const [prevDataKey, setPrevDataKey] = useState("");
   const currentDataKey = `${debouncedSearch}_${page}_${pageData?.length ?? 0}_${pageData?.[0]?.guid ?? ""}`;
 
@@ -165,10 +163,10 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     }
   }
 
-  // ── Watch field value at top level (Rule 13: useWatch, not watch) ──
+
   const fieldValue = useWatch({ control, name, defaultValue: [] });
 
-  // ── Merge fetched options with already-selected values ──
+
   const mergedOptions = useMemo(() => {
     const list = Array.isArray(accumulatedFields) ? [...accumulatedFields] : [];
     if (Array.isArray(fieldValue)) {
@@ -186,13 +184,13 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     return list;
   }, [accumulatedFields, fieldValue]);
 
-  // ── Label resolver ──
+
   const getFieldLabel = useCallback((item) => {
     if (typeof item === "string") return item;
     return item.field_label?.tk || item.fieldKey || "";
   }, []);
 
-  // ── Local + server filter ──
+
   const customFilterOptions = useCallback((options, state) => {
     const rawQuery = state.inputValue?.trim();
     const query = normalizeFieldString(rawQuery);
@@ -228,7 +226,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     return filtered;
   }, []);
 
-  // ── Scroll handler for infinite loading ──
+
   const handleListboxScroll = useCallback(
     (event) => {
       const node = event.currentTarget;
@@ -240,14 +238,14 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     [page, pageCount, isFetching, isLoading]
   );
 
-  // ── Autocomplete input change handler ──
+
   const handleInputChange = useCallback((_, value, reason) => {
     if (reason === "input" || reason === "clear") {
       setSearchInput(value);
     }
   }, []);
 
-  // ── Option equality ──
+
   const isOptionEqual = useCallback((option, val) => {
     if (typeof option === "string" || typeof val === "string") {
       return normalizeFieldString(option) === normalizeFieldString(val);
@@ -308,7 +306,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
 
         return (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}>
-            {/* Header */}
+
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary" }}>
                 {t("customFields.title")}
@@ -335,7 +333,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               )}
             </Box>
 
-            {/* Autocomplete */}
+
             <Autocomplete
               multiple
               freeSolo
@@ -521,7 +519,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               }}
             />
 
-            {/* Reorderable selected list */}
+
             {selectedCount > 0 && (
               <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
                 <Typography
@@ -563,7 +561,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               </Box>
             )}
 
-            {/* Create custom field modal */}
+
             {Boolean(candidateString) && (
               <CreateCustomFieldModal
                 open={true}
