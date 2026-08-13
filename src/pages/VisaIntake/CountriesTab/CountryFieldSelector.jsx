@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useMemo, useState } from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import {
   Autocomplete,
@@ -141,7 +141,6 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
   const debouncedSearch = useDebounce(searchInput, 400);
 
   const [accumulatedFields, setAccumulatedFields] = useState([]);
-  const [prevQueryKey, setPrevQueryKey] = useState("");
   const [prevSearch, setPrevSearch] = useState(debouncedSearch);
 
   if (debouncedSearch !== prevSearch) {
@@ -152,25 +151,24 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
   const { data: pageData = [], isLoading, isFetching, pageCount } = usePagginationGet({
     apiFn: getCustomFieldsApi,
     key: "customFields",
-    params: { limit: 40, page, search: debouncedSearch || undefined },
+    params: { limit: 20, page, search: debouncedSearch || undefined },
   });
 
-  const currentQueryKey = `${debouncedSearch}_${page}`;
-  if (currentQueryKey !== prevQueryKey) {
-    setPrevQueryKey(currentQueryKey);
-    const newItems = Array.isArray(pageData) ? pageData : [];
+  useEffect(() => {
+    if (!Array.isArray(pageData)) return;
+
     if (page === 1) {
-      setAccumulatedFields(newItems);
-    } else {
+      setAccumulatedFields(pageData);
+    } else if (pageData.length > 0) {
       setAccumulatedFields((prev) => {
-        const existingGuids = new Set(prev.map((item) => item.guid || item.id || item.fieldKey));
-        const filteredNew = newItems.filter(
-          (item) => !existingGuids.has(item.guid || item.id || item.fieldKey)
+        const existingGuids = new Set(prev.map((item) => item?.guid || item?.id || item?.fieldKey));
+        const newItems = pageData.filter(
+          (item) => !existingGuids.has(item?.guid || item?.id || item?.fieldKey)
         );
-        return [...prev, ...filteredNew];
+        return [...prev, ...newItems];
       });
     }
-  }
+  }, [pageData, page]);
 
   const availableFields = useMemo(() => {
     return Array.isArray(accumulatedFields) ? accumulatedFields : [];
@@ -334,6 +332,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               slots={{ root: CleanRoot }}
               options={mergedOptions}
               loading={isLoading || isFetching}
+              inputValue={searchInput}
               onInputChange={(_, newInputValue, reason) => {
                 if (reason === "input" || reason === "clear") {
                   setSearchInput(newInputValue);
@@ -342,13 +341,11 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               ListboxProps={{
                 onScroll: (event) => {
                   const listboxNode = event.currentTarget;
-                  if (
+                  const isBottom =
                     listboxNode.scrollTop + listboxNode.clientHeight >=
-                    listboxNode.scrollHeight - 30
-                  ) {
-                    if (page < pageCount && !isFetching && !isLoading) {
-                      setPage((prev) => prev + 1);
-                    }
+                    listboxNode.scrollHeight - 25;
+                  if (isBottom && page < pageCount && !isFetching && !isLoading) {
+                    setPage((prev) => prev + 1);
                   }
                 },
               }}
