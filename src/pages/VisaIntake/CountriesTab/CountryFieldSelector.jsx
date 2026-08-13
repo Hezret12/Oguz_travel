@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Controller, useWatch } from "react-hook-form";
 import {
   Autocomplete,
@@ -33,10 +33,7 @@ import {
 
 const getItemKey = (item) => item?.guid || item?.fieldKey;
 
-const CleanRoot = forwardRef(function CleanRoot(props, ref) {
-  const { renderTags, ownerState, PaperProps, ...domProps } = props;
-  return <div ref={ref} {...domProps} />;
-});
+
 
 
 const ReorderableFieldItem = ({ index, total, label, onMoveUp, onMoveDown, onRemove }) => (
