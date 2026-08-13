@@ -36,7 +36,10 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
     options: { enabled: Boolean(countryGuid) },
   });
 
-  const countryFields = Array.isArray(rawCountryFields) ? rawCountryFields : [];
+  const countryFields = useMemo(
+    () => (Array.isArray(rawCountryFields) ? rawCountryFields : []),
+    [rawCountryFields]
+  );
 
   const handleClose = () => {
     if (table) {
