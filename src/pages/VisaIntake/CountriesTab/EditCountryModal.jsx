@@ -27,13 +27,13 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
   const { t } = useLocale();
 
   const countryData = row?.original;
-  const countryGuid = countryData?.guid || countryData?.id;
+  const country_guid = countryData?.guid;
 
   const { data: rawCountryFields = [] } = useGet({
     apiFn: () =>
-      countryGuid ? getCountryVisaFieldsApi(countryGuid) : Promise.resolve([]),
-    key: ["countryVisaFields", countryGuid],
-    options: { enabled: Boolean(countryGuid) },
+      country_guid ? getCountryVisaFieldsApi(country_guid) : Promise.resolve([]),
+    key: ["countryVisaFields", country_guid],
+    options: { enabled: Boolean(country_guid) },
   });
 
   const countryFields = useMemo(
@@ -68,16 +68,9 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
   const { control, handleSubmit } = useForm({
     defaultValues: {
       code: countryData?.code || "",
-      nameTm: countryData?.name?.tk || countryData?.nameTm || "",
-      nameRu: countryData?.name?.ru || countryData?.nameRu || "",
-      nameEn: countryData?.name?.en || countryData?.nameEn || "",
-      fields: currentFields,
-    },
-    values: {
-      code: countryData?.code || "",
-      nameTm: countryData?.name?.tk || countryData?.nameTm || "",
-      nameRu: countryData?.name?.ru || countryData?.nameRu || "",
-      nameEn: countryData?.name?.en || countryData?.nameEn || "",
+      nameTm: countryData?.name?.tk || "",
+      nameRu: countryData?.name?.ru || "",
+      nameEn: countryData?.name?.en || "",
       fields: currentFields,
     },
     resolver: yupResolver(schema),
@@ -88,13 +81,13 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
     try {
       const selectedItems = data.fields || [];
       const custom_field_guids = selectedItems
-        .map((item) => (typeof item === "object" && item !== null ? (item.guid || item.id) : null))
+        .map((item) => (typeof item === "object" && item !== null ? (item.guid) : null))
         .filter(Boolean);
 
       const countryCode = data.code.trim().toUpperCase();
 
       const payload = {
-        guid: countryGuid,
+        guid: country_guid,
         code: countryCode,
         nameTm: data.nameTm,
         nameRu: data.nameRu || data.nameTm,
