@@ -53,6 +53,10 @@
     "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz."
   },
   "columns": {
+    "code": "Kody",
+    "countryNameTm": "Ýurt ady (TM)",
+    "countryNameRu": "Ýurt ady (RU)",
+    "countryNameEn": "Ýurt ady (EN)",
     "fullName": "Add Familýa",
     "phoneNumber": "Telefon belgisi",
     "gmail": "El. poçta",
@@ -434,6 +438,9 @@
   },
   "visaIntake": {
     "title": "Kabul ediji bölümi",
+    "subtitle": "Resminamalary kabul etmek we resmileşdirmek",
+    "deleteApplicationTitle": "Arzany pozmak",
+    "deleteCountryTitle": "Ýurdy pozmak",
     "addApplication": "Arza goşmak",
     "editApplication": "Arzany üýtgetmek",
     "deleteConfirm": "Siz hakykatdan hem bu arzany pozmak isleýärsiňizmi?",
@@ -601,5 +608,21 @@
     "commentAdded": "Kommentariýa ýazyldy we işgäre bildiriş ugradyldy!",
     "saveAndSend": "Ýatda sakla & Ugrat",
     "viewAll": "Ählisini Gör"
+  },
+  "customFields": {
+    "title": "Ýörite meýdançalar",
+    "addTitle": "Täze meýdança döretmek",
+    "editTitle": "Meýdançany üýtgetmek",
+    "deleteTitle": "Meýdançany pozmak",
+    "labelTm": "TM Ady (Türkmen)",
+    "labelRu": "RU Ady (Русский)",
+    "labelEn": "EN Ady (English)",
+    "fieldType": "Meýdança görnüşi",
+    "options": "Opsiýalar",
+    "sortOrder": "Tertip belgisi",
+    "typeText": "Tekst (Text)",
+    "typeNumber": "San (Number)",
+    "typeDate": "Sene (Date)",
+    "typeSelect": "Saýlawly (Select)"
   }
 }

@@ -50,15 +50,26 @@ export const getAllB2BApi = async (params = {}) => {
 };
 
 export const getCountriesApi = async (params = {}) => {
-  return await api.getPrivate('/visa/country/get-all-countries', params);
+  return await api.getPrivate('/countries/get-all-country', params);
 };
 
-export const getAllVisaFieldsApi = async () => {
-  return await api.getPrivate('/visa/country/get-all-fields');
+export const getCustomFieldsApi = async (params = {}) => {
+  const queryParams = { limit: 40, ...params };
+  return await api.getPrivate('/custom_fields/get-by-country', queryParams);
 };
 
-export const getCountryVisaFieldsApi = async (countryGuid) => {
-  return await api.getPrivate(`/visa/country/get-country-fields/${countryGuid}`);
+export const getAllVisaFieldsApi = async (params = {}) => {
+  const queryParams = { limit: 40, ...params };
+  return await api.getPrivate('/custom_fields/get-by-country', queryParams);
+};
+
+export const getCountryVisaFieldsApi = async () => {
+
+};
+
+export const getAllReceivingsApi = async (params = {}) => {
+    const res = await api.getPrivate('/receivings/get-all-receivings', params);
+    return res
 };
 
 export const getAllUsersApi = async (params = {}) => {

@@ -169,5 +169,13 @@ export const updateReportShareApi = async (data) => {
 };
 
 export const updateCountryApi = async (data) => {
-  return await api.patchPrivate('/visa/country/update-country', data);
+  return await api.patchPrivate('/countries/update-country', data);
+};
+
+export const updateReceivingApi = async (data) => {
+  return await api.patchPrivate('/receivings/update-receiving', data);
+};
+
+export const updateCustomFieldApi = async (data) => {
+  return await api.patchPrivate('/custom_fields/update-custom-field', data);
 };

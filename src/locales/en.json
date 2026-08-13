@@ -49,6 +49,10 @@
     "invalidReturnDate": "Return date cannot be before departure date"
   },
   "columns": {
+    "code": "Code",
+    "countryNameTm": "Country Name (TM)",
+    "countryNameRu": "Country Name (RU)",
+    "countryNameEn": "Country Name (EN)",
     "fullName": "Full Name",
     "phoneNumber": "Phone Number",
     "gmail": "Email",
@@ -730,6 +734,9 @@
   },
   "visaIntake": {
     "title": "Visa Intake",
+    "subtitle": "Intake and processing of visa documents",
+    "deleteApplicationTitle": "Delete Application",
+    "deleteCountryTitle": "Delete Country",
     "addApplication": "Add Application",
     "editApplication": "Edit Application",
     "deleteConfirm": "Are you sure you want to delete this application?",
@@ -779,5 +786,21 @@
       "schengenCountry": "Schengen Country",
       "queueDate": "Queue Date"
     }
+  },
+  "customFields": {
+    "title": "Custom Fields",
+    "addTitle": "Create Custom Field",
+    "editTitle": "Edit Custom Field",
+    "deleteTitle": "Delete Field",
+    "labelTm": "TM Label (Türkmen)",
+    "labelRu": "RU Label (Русский)",
+    "labelEn": "EN Label (English)",
+    "fieldType": "Field Type",
+    "options": "Options",
+    "sortOrder": "Sort Order",
+    "typeText": "Text",
+    "typeNumber": "Number",
+    "typeDate": "Date",
+    "typeSelect": "Dropdown Select"
   }
 }

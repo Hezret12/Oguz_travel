@@ -13,6 +13,7 @@ import { createCountryApi } from "../../../api/queries/post";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 
 const schema = yup.object().shape({
+  code: yup.string().required("Ýurt kody (Code) hökmany"),
   nameTm: yup.string().required("Ýurt ady (TM) hökmany"),
   nameRu: yup.string().nullable(),
   nameEn: yup.string().nullable(),
@@ -33,6 +34,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
 
   const { control, handleSubmit } = useForm({
     defaultValues: {
+      code: "",
       nameTm: "",
       nameRu: "",
       nameEn: "",
@@ -45,29 +47,23 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
   const submitHandler = async (data) => {
     try {
       const selectedItems = data.fields || [];
-      const existingFieldIds = [];
-      const newFields = [];
+      const custom_field_guids = selectedItems
+        .map((item) => (typeof item === "object" && item !== null ? (item.guid || item.id) : null))
+        .filter(Boolean);
 
-      selectedItems.forEach((item) => {
-        if (typeof item === "string") {
-          newFields.push(item);
-        } else if (item && typeof item === "object") {
-          if (item.guid || item.id) {
-            existingFieldIds.push(item.guid || item.id);
-          } else {
-            const label =
-              item.labelTm || item.labelRu || item.labelEn || item.fieldKey;
-            if (label) newFields.push(label);
-          }
-        }
-      });
+      const countryCode = data.code.trim().toUpperCase();
 
       const payload = {
+        code: countryCode,
         nameTm: data.nameTm,
         nameRu: data.nameRu || data.nameTm,
         nameEn: data.nameEn || data.nameTm,
-        existingFieldIds,
-        newFields,
+        name: {
+          tk: data.nameTm,
+          ru: data.nameRu || data.nameTm,
+          en: data.nameEn || data.nameTm,
+        },
+        custom_field_guids,
       };
 
       await createCountry(payload);
@@ -77,7 +73,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
   };
 
   return (
-    <CustomDialog widthX={680} open={open} close={onClose}>
+    <CustomDialog widthX={750} open={open} close={onClose}>
       <CustomDialogHeader variant="h5" title={t("visaIntake.addCountryTitle")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -97,7 +93,16 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
           </Alert>
 
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 4 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
+              <CustomTextField
+                name="code"
+                control={control}
+                label={t("columns.code")}
+                required
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="nameTm"
                 control={control}
@@ -106,7 +111,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="nameRu"
                 control={control}
@@ -114,7 +119,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="nameEn"
                 control={control}
@@ -133,3 +138,5 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
 };
 
 export default CreateCountryModal;
+
+

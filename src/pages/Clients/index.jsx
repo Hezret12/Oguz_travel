@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { Box, Chip, IconButton } from "@mui/material";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import FolderSharedOutlinedIcon from "@mui/icons-material/FolderSharedOutlined";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -139,7 +139,7 @@ const Clients = () => {
         accessorFn: (row) => row.fullName,
         id: "fullName",
         header: t("columns.fullName"),
-        size: 180,
+        size: 180
       },
       {
         accessorFn: (row) => row.phone_number,
@@ -226,13 +226,27 @@ const Clients = () => {
                   setSelectedDocClient(row.original);
                 }}
                 size="small"
+                disabled={isDocRestricted}
+                sx={{
+                  color: isDocRestricted ? "text.disabled" : "primary.main",
+                  borderRadius: "8px",
+                  p: 0.75,
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(37, 99, 235, 0.15)"
+                        : "rgba(37, 99, 235, 0.08)",
+                    transform: "scale(1.08)",
+                  },
+                }}
                 title={
                   isDocRestricted
                     ? t("clients.vipFileRestricted")
                     : t("clients.documents")
                 }
               >
-                <InsertDriveFileIcon sx={{ fontSize: 16 }} />
+                <FolderSharedOutlinedIcon sx={{ fontSize: 18 }} />
               </IconButton>
 
               <ColumnActionButtons

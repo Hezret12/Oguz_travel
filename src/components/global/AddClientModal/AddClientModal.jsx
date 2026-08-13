@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Paper, Typography, FormControlLabel, Switch } from '@mui/material';
-import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
@@ -169,32 +168,29 @@ const AddClientModal = () => {
 
           {isAdmin && (
             <Box sx={{ flex: '1 1 100%' }}>
-              <Paper
-                variant="outlined"
+              <Box
                 sx={{
-                  p: 1.5,
-                  px: 2,
-                  borderRadius: "10px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
+                  py: 1,
+                  px: 2,
+                  borderRadius: "10px",
                   bgcolor: (theme) =>
                     theme.palette.mode === "dark"
-                      ? "rgba(255, 215, 0, 0.05)"
-                      : "#FFFDF0",
-                  borderColor: "#FFD700",
+                      ? "rgba(255, 255, 255, 0.03)"
+                      : "rgba(0, 0, 0, 0.02)",
+                  border: "1px solid",
+                  borderColor: "divider",
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <StarRoundedIcon sx={{ color: "#D97706", fontSize: 24 }} />
-                  <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#D97706" }}>
-                      VIP Müşteri Statusı
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Bu müşderini VIP hökmünde bellemek üçin açary açyň (Diňe Admin üçin)
-                    </Typography>
-                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                    VIP Müşteri
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    (Diňe Admin üçin)
+                  </Typography>
                 </Box>
                 <Controller
                   name="vip"
@@ -203,6 +199,7 @@ const AddClientModal = () => {
                     <FormControlLabel
                       control={
                         <Switch
+                          size="small"
                           checked={Boolean(value)}
                           onChange={(e) => onChange(e.target.checked)}
                           color="warning"
@@ -213,7 +210,7 @@ const AddClientModal = () => {
                     />
                   )}
                 />
-              </Paper>
+              </Box>
             </Box>
           )}
         </Box>

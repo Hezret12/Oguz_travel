@@ -118,5 +118,16 @@ export const deleteReportShareApi = async (guid) => {
 };
 
 export const deleteCountryApi = async (guid) => {
-  return await api.deletePrivate('/visa/country/delete-country', guid);
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/countries/delete-country', { guid: actualGuid });
+};
+
+export const deleteReceivingApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/receivings/delete-receiving', { guid: actualGuid });
+};
+
+export const deleteCustomFieldApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/custom_fields/delete-custom-field', { guid: actualGuid });
 };

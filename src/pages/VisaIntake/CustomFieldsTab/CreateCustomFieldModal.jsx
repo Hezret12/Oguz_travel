@@ -9,11 +9,25 @@ import FooterButton from "../../../components/Dialog/FooterButton";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
 import { slugifyFieldKey } from "../../../functions/visaCountryFieldConfigs";
+import { useCreate } from "../../../hooks/CRUD/useCreate";
+import { addCustomFieldApi } from "../../../api/queries/post";
 
 export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave }) => {
   const { t } = useLocale();
   const [optionInput, setOptionInput] = useState("");
   const [options, setOptions] = useState([]);
+
+  const { mutate: createCustomField, isPending } = useCreate({
+    apiFn: addCustomFieldApi,
+    key: "customFields",
+    onSuccess: (res) => {
+      const createdItem = res?.data?.data || res?.data || res;
+      if (onSave) {
+        onSave(createdItem);
+      }
+      onClose();
+    },
+  });
 
   const { control, handleSubmit } = useForm({
     defaultValues: {
@@ -21,6 +35,7 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
       labelRu: candidateString || "",
       labelEn: candidateString || "",
       fieldType: "text",
+      sort_order: 0,
     },
   });
 
@@ -48,32 +63,32 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
   const onSubmit = (data) => {
     if (!data.labelTm?.trim() || !data.labelRu?.trim() || !data.labelEn?.trim()) return;
 
-    const newFieldObj = {
-      fieldKey: autoKey || `custom_${Date.now()}`,
-      labelTm: data.labelTm.trim(),
-      labelRu: data.labelRu.trim(),
-      labelEn: data.labelEn.trim(),
-      fieldType: data.fieldType,
-      options: data.fieldType === "select" ? options : [],
-      isDefault: false,
-      isCustom: true,
+    const payload = {
+      field_label: {
+        tk: data.labelTm.trim(),
+        ru: data.labelRu.trim(),
+        en: data.labelEn.trim(),
+      },
+      field_type: data.fieldType,
+      options: data.fieldType === "select" ? options : null,
+      sort_order: Number(data.sort_order || 0),
     };
-    onSave(newFieldObj);
-    onClose();
+
+    createCustomField(payload);
   };
 
   const typeOptions = [
-    { label: t("visaIntake.typeText") || "Tekst (Text)", value: "text" },
-    { label: t("visaIntake.typeDate") || "Sene (Date)", value: "date" },
-    { label: t("visaIntake.typeNumber") || "San (Number)", value: "number" },
-    { label: t("visaIntake.typeSelect") || "Saýlawly (Dropdown Select)", value: "select" },
+    { label: t("customFields.typeText"), value: "text" },
+    { label: t("customFields.typeDate"), value: "date" },
+    { label: t("customFields.typeNumber"), value: "number" },
+    { label: t("customFields.typeSelect"), value: "select" },
   ];
 
   return (
     <CustomDialog open={open} close={onClose} widthX={700}>
       <CustomDialogHeader
         variant="h5"
-        title={t("visaIntake.createCustomFieldTitle") || "Täze meýdança döretmek"}
+        title={t("customFields.addTitle")}
       />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -82,7 +97,7 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
               <CustomTextField
                 name="labelTm"
                 control={control}
-                label="TM Label (Türkmen)"
+                label={t("customFields.labelTm")}
                 required
               />
             </Grid>
@@ -90,7 +105,7 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
               <CustomTextField
                 name="labelRu"
                 control={control}
-                label="RU Label (Русский)"
+                label={t("customFields.labelRu")}
                 required
               />
             </Grid>
@@ -98,7 +113,7 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
               <CustomTextField
                 name="labelEn"
                 control={control}
-                label="EN Label (English)"
+                label={t("customFields.labelEn")}
                 required
               />
             </Grid>
@@ -106,7 +121,7 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
               <CustomSelect
                 name="fieldType"
                 control={control}
-                label={t("visaIntake.fieldTypeLabel") || "Meýdança görnüşi"}
+                label={t("customFields.fieldType")}
                 options={typeOptions}
                 required
               />
@@ -116,7 +131,7 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
                 variant="body2"
                 sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}
               >
-                {t("visaIntake.fieldKeyPreview") || "fieldKey (Auto)"}
+                fieldKey (Auto)
               </Typography>
               <TextField
                 value={autoKey}
@@ -138,13 +153,11 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
                   variant="body2"
                   sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}
                 >
-                  {t("visaIntake.selectOptionsLabel") || "Saýlaw opsiýalary"}
+                  {t("customFields.options")}
                 </Typography>
                 <Box sx={{ display: "flex", gap: 1, mb: 1.5 }}>
                   <TextField
-                    placeholder={
-                      t("visaIntake.addOptionPlaceholder") || "Opsiýa adyny ýazyň..."
-                    }
+                    placeholder="Opsiýa adyny ýazyň..."
                     value={optionInput}
                     onChange={(e) => setOptionInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -185,7 +198,7 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
             )}
           </Grid>
 
-          <FooterButton onCancel={onClose} type="submit" />
+          <FooterButton loading={isPending} onCancel={onClose} type="submit" />
         </Box>
       </CustomForm>
     </CustomDialog>

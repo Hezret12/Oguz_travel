@@ -27,7 +27,6 @@ export const useDelete = ({
       const targetGuids = Array.isArray(guid) ? guid : [guid];
 
       if (isPaginated) {
-        // For paginated queries, invalidate so current page refetches
         queryClient.invalidateQueries({
           queryKey: finalKey,
           refetchType: "active",
@@ -61,7 +60,6 @@ export const useDelete = ({
         queryClient.setQueriesData({ queryKey: finalKey, exact: false }, (prev) => {
           if (!prev) return prev;
 
-          // Case A: { data: { data: [...], meta: {...} } } (e.g. usePagginationGet)
           if (Array.isArray(prev?.data?.data)) {
             return {
               ...prev,
@@ -78,7 +76,6 @@ export const useDelete = ({
             };
           }
 
-          // Case B: { data: [...] } (e.g. useGet)
           if (Array.isArray(prev?.data)) {
             return {
               ...prev,
@@ -86,7 +83,6 @@ export const useDelete = ({
             };
           }
 
-          // Case C: Array directly
           if (Array.isArray(prev)) {
             return prev.filter((item) => !targetGuids.includes(item?.[idKey]));
           }

@@ -16,6 +16,7 @@ import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { useGet } from "../../../hooks/CRUD/useGet";
 
 const schema = yup.object().shape({
+  code: yup.string().required("Ýurt kody (Code) hökmany"),
   nameTm: yup.string().required("Ýurt ady (TM) hökmany"),
   nameRu: yup.string().nullable(),
   nameEn: yup.string().nullable(),
@@ -54,23 +55,27 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
     },
   });
 
-  const nonDefaultFields = useMemo(
-    () => countryFields.filter((f) => !f.isDefault),
-    [countryFields]
-  );
+  const currentFields = useMemo(() => {
+    if (Array.isArray(countryData?.custom_fields) && countryData.custom_fields.length > 0) {
+      return countryData.custom_fields;
+    }
+    return countryFields;
+  }, [countryData, countryFields]);
 
   const { control, handleSubmit } = useForm({
     defaultValues: {
-      nameTm: countryData?.nameTm || "",
-      nameRu: countryData?.nameRu || "",
-      nameEn: countryData?.nameEn || "",
-      fields: nonDefaultFields,
+      code: countryData?.code || "",
+      nameTm: countryData?.name?.tk || countryData?.nameTm || "",
+      nameRu: countryData?.name?.ru || countryData?.nameRu || "",
+      nameEn: countryData?.name?.en || countryData?.nameEn || "",
+      fields: currentFields,
     },
     values: {
-      nameTm: countryData?.nameTm || "",
-      nameRu: countryData?.nameRu || "",
-      nameEn: countryData?.nameEn || "",
-      fields: nonDefaultFields,
+      code: countryData?.code || "",
+      nameTm: countryData?.name?.tk || countryData?.nameTm || "",
+      nameRu: countryData?.name?.ru || countryData?.nameRu || "",
+      nameEn: countryData?.name?.en || countryData?.nameEn || "",
+      fields: currentFields,
     },
     resolver: yupResolver(schema),
     mode: "onSubmit",
@@ -79,30 +84,24 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
   const submitHandler = async (data) => {
     try {
       const selectedItems = data.fields || [];
-      const existingFieldIds = [];
-      const newFields = [];
+      const custom_field_guids = selectedItems
+        .map((item) => (typeof item === "object" && item !== null ? (item.guid || item.id) : null))
+        .filter(Boolean);
 
-      selectedItems.forEach((item) => {
-        if (typeof item === "string") {
-          newFields.push(item);
-        } else if (item && typeof item === "object") {
-          if (item.guid || item.id) {
-            existingFieldIds.push(item.guid || item.id);
-          } else {
-            const label =
-              item.labelTm || item.labelRu || item.labelEn || item.fieldKey;
-            if (label) newFields.push(label);
-          }
-        }
-      });
+      const countryCode = data.code.trim().toUpperCase();
 
       const payload = {
         guid: countryGuid,
+        code: countryCode,
         nameTm: data.nameTm,
         nameRu: data.nameRu || data.nameTm,
         nameEn: data.nameEn || data.nameTm,
-        existingFieldIds,
-        newFields,
+        name: {
+          tk: data.nameTm,
+          ru: data.nameRu || data.nameTm,
+          en: data.nameEn || data.nameTm,
+        },
+        custom_field_guids,
       };
 
       await updateCountry(payload);
@@ -117,8 +116,11 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
       : Boolean(table && table.getState().editingRow?.id === row?.id);
 
   return (
-    <CustomDialog widthX={680} open={isModalOpen} close={handleClose}>
-      <CustomDialogHeader variant="h5" title={t("visaIntake.editCountryTitle")} />
+    <CustomDialog widthX={750} open={isModalOpen} close={handleClose}>
+      <CustomDialogHeader
+        variant="h5"
+        title={t("visaIntake.editCountryTitle")}
+      />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
           <Alert
@@ -137,7 +139,16 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
           </Alert>
 
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 4 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
+              <CustomTextField
+                name="code"
+                control={control}
+                label={t("columns.code")}
+                required
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="nameTm"
                 control={control}
@@ -146,7 +157,7 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="nameRu"
                 control={control}
@@ -154,7 +165,7 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 4 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="nameEn"
                 control={control}
@@ -173,3 +184,4 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
 };
 
 export default EditCountryModal;
+

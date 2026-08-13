@@ -161,7 +161,24 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, overflow: 'hidden' }}>
-                  <InsertDriveFileIcon color="primary" sx={{ fontSize: 32 }} />
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(37, 99, 235, 0.15)'
+                          : 'rgba(37, 99, 235, 0.1)',
+                      color: 'primary.main',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <InsertDriveFileIcon sx={{ fontSize: 22 }} />
+                  </Box>
                   <Box sx={{ overflow: 'hidden' }}>
                     <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
                       {t('clients.passportDocument') || 'Pasport Faýly'}
@@ -247,15 +264,31 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
             variant="outlined"
             component="label"
             sx={{
-              p: 2,
+              py: 2.5,
+              px: 3,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
               borderRadius: '12px',
               borderStyle: 'dashed',
-              borderColor: 'divider',
+              borderWidth: 1.5,
+              borderColor: (theme) =>
+                theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
               cursor: 'pointer',
-              textAlign: 'center',
               bgcolor: (theme) =>
-                theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : '#fafafa',
-              '&:hover': { borderColor: 'primary.main' },
+                theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.015)' : '#FAFBFD',
+              '&:hover': {
+                borderColor: 'primary.main',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'rgba(37,99,235,0.06)' : 'rgba(37,99,235,0.03)',
+                '& .upload-icon': {
+                  transform: 'scale(1.1)',
+                  color: 'primary.main',
+                },
+              },
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             <input
@@ -264,10 +297,37 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
               accept="image/*,application/pdf"
               onChange={handleFileChange}
             />
-            <CloudUploadIcon color="primary" sx={{ fontSize: 28, mb: 0.5 }} />
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {selectedFile ? selectedFile.name : (fullUrl ? t('clients.changeDocument', 'Täze faýl saýlaň') : t('clients.uploadDocument', 'Faýl / Surat yükleň (images)'))}
-            </Typography>
+            <Box
+              className="upload-icon"
+              sx={{
+                width: 42,
+                height: 42,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(37, 99, 235, 0.15)'
+                    : 'rgba(37, 99, 235, 0.08)',
+                color: 'primary.main',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <CloudUploadIcon sx={{ fontSize: 22 }} />
+            </Box>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                {selectedFile
+                  ? selectedFile.name
+                  : (fullUrl
+                    ? t('clients.changeDocument', 'Täze faýl saýlaň')
+                    : t('clients.uploadDocument', 'Faýl / Surat saýlamak üçin basyň'))}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.25, display: 'block' }}>
+                PNG, JPG, PDF (maks. 10MB)
+              </Typography>
+            </Box>
           </Paper>
         )}
 

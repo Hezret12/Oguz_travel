@@ -5,7 +5,6 @@ import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import ImageIcon from "@mui/icons-material/Image";
-import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale } from "../../../hooks/useLocale";
 import { useAuth } from "../../../context/AuthContext";
@@ -171,32 +170,29 @@ const AddClient = ({ table }) => {
           {/* Admin-only VIP Client Switch */}
           {isAdmin && (
             <Grid size={12}>
-              <Paper
-                variant="outlined"
+              <Box
                 sx={{
-                  p: 1.5,
-                  px: 2,
-                  borderRadius: "10px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
+                  py: 1,
+                  px: 2,
+                  borderRadius: "10px",
                   bgcolor: (theme) =>
                     theme.palette.mode === "dark"
-                      ? "rgba(255, 215, 0, 0.05)"
-                      : "#FFFDF0",
-                  borderColor: "#FFD700",
+                      ? "rgba(255, 255, 255, 0.03)"
+                      : "rgba(0, 0, 0, 0.02)",
+                  border: "1px solid",
+                  borderColor: "divider",
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <StarRoundedIcon sx={{ color: "#D97706", fontSize: 24 }} />
-                  <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#D97706" }}>
-                      VIP Müşteri Statusı
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Bu müşderini VIP hökmünde bellemek üçin açary açyň (Diňe Admin üçin)
-                    </Typography>
-                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                    VIP Müşteri
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    (Diňe Admin üçin)
+                  </Typography>
                 </Box>
                 <Controller
                   name="vip"
@@ -205,6 +201,7 @@ const AddClient = ({ table }) => {
                     <FormControlLabel
                       control={
                         <Switch
+                          size="small"
                           checked={Boolean(value)}
                           onChange={(e) => onChange(e.target.checked)}
                           color="warning"
@@ -215,7 +212,7 @@ const AddClient = ({ table }) => {
                     />
                   )}
                 />
-              </Paper>
+              </Box>
             </Grid>
           )}
 
@@ -223,7 +220,7 @@ const AddClient = ({ table }) => {
           <Grid size={12}>
             <Typography
               variant="body2"
-              sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
+              sx={{ mb: 1, fontWeight: 600, color: "text.primary" }}
             >
               {t("clients.documents", "Resminamalar / Suratlar (images)")}
             </Typography>
@@ -232,28 +229,35 @@ const AddClient = ({ table }) => {
               variant="outlined"
               component="label"
               sx={{
-                p: 1.5,
+                py: 2.5,
+                px: 3,
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 1.5,
-                borderRadius: "10px",
+                gap: 1,
+                borderRadius: "12px",
                 borderStyle: "dashed",
-                borderColor: "divider",
+                borderWidth: 1.5,
+                borderColor: (theme) =>
+                  theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)",
                 cursor: "pointer",
                 bgcolor: (theme) =>
                   theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.02)"
-                    : "#FAFAFA",
+                    ? "rgba(255, 255, 255, 0.015)"
+                    : "#FAFBFD",
                 "&:hover": {
                   borderColor: "primary.main",
                   bgcolor: (theme) =>
                     theme.palette.mode === "dark"
-                      ? "rgba(37, 99, 235, 0.05)"
-                      : "#EFF6FF",
+                      ? "rgba(37, 99, 235, 0.06)"
+                      : "rgba(37, 99, 235, 0.03)",
+                  "& .upload-icon": {
+                    transform: "scale(1.1)",
+                    color: "primary.main",
+                  },
                 },
-                transition: "all 0.2s ease",
-                height: "44px",
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
               }}
             >
               <input
@@ -263,61 +267,114 @@ const AddClient = ({ table }) => {
                 onChange={handleFileChange}
                 accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
               />
-              <CloudUploadOutlinedIcon
-                sx={{ color: "primary.main", fontSize: 22 }}
-              />
-              <Typography
-                variant="body2"
-                sx={{ color: "text.secondary", fontWeight: 500, fontSize: "0.85rem" }}
+              <Box
+                className="upload-icon"
+                sx={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(37, 99, 235, 0.15)"
+                      : "rgba(37, 99, 235, 0.08)",
+                  color: "primary.main",
+                  transition: "all 0.2s ease",
+                }}
               >
-                {t("uploadFile", "Faýl saýlaň (Suratlar / Resminamalar)")}
-              </Typography>
+                <CloudUploadOutlinedIcon sx={{ fontSize: 22 }} />
+              </Box>
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                  {t("uploadFileClick", "Faýllary saýlamak üçin basyň")}
+                </Typography>
+                <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.25, display: "block" }}>
+                  PNG, JPG, PDF, DOC, XLS
+                </Typography>
+              </Box>
             </Paper>
 
             {selectedFiles.length > 0 && (
               <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
-                {selectedFiles.map((file, idx) => (
-                  <Paper
-                    key={`${file.name}-${idx}`}
-                    variant="outlined"
-                    sx={{
-                      p: 1,
-                      px: 1.5,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      borderRadius: "10px",
-                      borderColor: "primary.light",
-                      bgcolor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(37, 99, 235, 0.08)"
-                          : "#EFF6FF",
-                      height: "40px",
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, overflow: "hidden" }}>
-                      {file.type.startsWith("image/") ? (
-                        <ImageIcon sx={{ color: "#10B981", fontSize: 20 }} />
-                      ) : (
-                        <InsertDriveFileIcon sx={{ color: "primary.main", fontSize: 20 }} />
-                      )}
-                      <Typography
-                        variant="body2"
-                        noWrap
-                        sx={{ fontWeight: 500, fontSize: "0.85rem", maxWidth: "350px" }}
-                      >
-                        {file.name}
-                      </Typography>
-                    </Box>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemoveFile(idx)}
-                      sx={{ color: "error.main" }}
+                {selectedFiles.map((file, idx) => {
+                  const isImage = file.type.startsWith("image/");
+                  const fileSizeKb = (file.size / 1024).toFixed(1);
+                  return (
+                    <Paper
+                      key={`${file.name}-${idx}`}
+                      variant="outlined"
+                      sx={{
+                        p: 1.25,
+                        px: 1.75,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        borderRadius: "10px",
+                        borderColor: "divider",
+                        bgcolor: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "rgba(255, 255, 255, 0.03)"
+                            : "#F9FAFB",
+                        transition: "all 0.15s ease",
+                        "&:hover": {
+                          borderColor: "primary.light",
+                        },
+                      }}
                     >
-                      <DeleteOutlinedIcon fontSize="small" />
-                    </IconButton>
-                  </Paper>
-                ))}
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, overflow: "hidden" }}>
+                        <Box
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: "8px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            bgcolor: isImage
+                              ? "rgba(16, 185, 129, 0.1)"
+                              : "rgba(37, 99, 235, 0.1)",
+                            color: isImage ? "#10B981" : "primary.main",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {isImage ? (
+                            <ImageIcon sx={{ fontSize: 18 }} />
+                          ) : (
+                            <InsertDriveFileIcon sx={{ fontSize: 18 }} />
+                          )}
+                        </Box>
+                        <Box sx={{ overflow: "hidden" }}>
+                          <Typography
+                            variant="body2"
+                            noWrap
+                            sx={{ fontWeight: 600, fontSize: "0.85rem", maxWidth: "340px" }}
+                          >
+                            {file.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {fileSizeKb} KB
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveFile(idx)}
+                        sx={{
+                          color: "text.secondary",
+                          borderRadius: "6px",
+                          "&:hover": {
+                            color: "error.main",
+                            bgcolor: "rgba(239, 68, 68, 0.08)",
+                          },
+                        }}
+                      >
+                        <DeleteOutlinedIcon fontSize="small" />
+                      </IconButton>
+                    </Paper>
+                  );
+                })}
               </Box>
             )}
           </Grid>

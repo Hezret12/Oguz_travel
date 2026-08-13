@@ -226,6 +226,14 @@ export const addReportShareApi = async (data) => {
 };
 
 export const createCountryApi = async (data) => {
-  return await api.postPrivate("/visa/country/add-country", data);
+  return await api.postPrivate("/countries/add-country", data);
+};
+
+export const addReceivingApi = async (data) => {
+  return await api.postPrivate("/receivings/add-receiving", data);
+};
+
+export const addCustomFieldApi = async (data) => {
+  return await api.postPrivate("/custom_fields/add-custom-field", data);
 };
 

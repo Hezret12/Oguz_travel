@@ -16,7 +16,8 @@ export const useGet = ({ apiFn, key, params = {}, options = {} }) => {
     ...options,
   });
 
-  const data = query?.data?.data?.data ?? [];
+  const rawData = query?.data?.data;
+  const data = Array.isArray(rawData) ? rawData : (rawData?.items || []);
 
   return { ...query, data };
 };

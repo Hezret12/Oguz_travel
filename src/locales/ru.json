@@ -49,6 +49,10 @@
     "invalidReturnDate": "Return date cannot be before departure date"
   },
   "columns": {
+    "code": "Код",
+    "countryNameTm": "Название страны (TM)",
+    "countryNameRu": "Название страны (RU)",
+    "countryNameEn": "Название страны (EN)",
     "fullName": "Полное имя",
     "phoneNumber": "Номер телефона",
     "gmail": "Эл. почта",
@@ -721,6 +725,9 @@
   },
   "visaIntake": {
     "title": "Прием документов",
+    "subtitle": "Прием и оформление документов",
+    "deleteApplicationTitle": "Удалить заявку",
+    "deleteCountryTitle": "Удалить страну",
     "addApplication": "Добавить заявку",
     "editApplication": "Редактировать заявку",
     "deleteConfirm": "Вы уверены, что хотите удалить эту заявку?",
@@ -770,5 +777,21 @@
       "schengenCountry": "Страна Шенгена",
       "queueDate": "Дата очереди"
     }
+  },
+  "customFields": {
+    "title": "Пользовательские поля",
+    "addTitle": "Создать пользовательское поле",
+    "editTitle": "Редактировать поле",
+    "deleteTitle": "Удалить поле",
+    "labelTm": "Название TM (Türkmen)",
+    "labelRu": "Название RU (Русский)",
+    "labelEn": "Название EN (English)",
+    "fieldType": "Тип поля",
+    "options": "Опции",
+    "sortOrder": "Порядок сортировки",
+    "typeText": "Текст (Text)",
+    "typeNumber": "Число (Number)",
+    "typeDate": "Дата (Date)",
+    "typeSelect": "Выпадающий список (Select)"
   }
 }

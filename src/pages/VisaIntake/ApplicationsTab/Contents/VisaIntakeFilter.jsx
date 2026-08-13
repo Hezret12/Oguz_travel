@@ -4,10 +4,10 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
-import { useLocale } from "../../../hooks/useLocale";
-import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllEmployeeApi } from "../../../api/queries/getters";
-import { VISA_SELECT_OPTIONS } from "../../../functions/visaCountryFieldConfigs";
+import { useLocale } from "../../../../hooks/useLocale";
+import { useGet } from "../../../../hooks/CRUD/useGet";
+import { getAllEmployeeApi } from "../../../../api/queries/getters";
+import { VISA_SELECT_OPTIONS } from "../../../../functions/visaCountryFieldConfigs";
 
 const selectSx = {
   borderRadius: "10px",
@@ -140,26 +140,26 @@ const VisaIntakeFilter = ({
     [employees, selectedLang],
   );
 
-  const allText = t("all") ?? "All";
+  const allText = t("all");
 
   return (
     <Stack spacing={2.5}>
       <FilterDatePicker
-        label={t("visaIntake.fields.applicationDate") || "Arza senesi (başlangyç)"}
+        label={t("visaIntake.fields.applicationDate")}
         name="start_date"
         value={filters.start_date}
         onChange={onFilterChange}
       />
 
       <FilterDatePicker
-        label={t("visaIntake.fields.applicationDate") || "Arza senesi (gutarýan)"}
+        label={t("visaIntake.fields.applicationDate")}
         name="end_date"
         value={filters.end_date}
         onChange={onFilterChange}
       />
 
       <FilterSelect
-        label={t("columns.operator") || "Operator"}
+        label={t("columns.operator")}
         name="operator_guid"
         value={filters.operator_guid}
         options={employeeOptions}
@@ -171,7 +171,7 @@ const VisaIntakeFilter = ({
       />
 
       <FilterSelect
-        label={t("visaIntake.fields.visaCategory") || "Wiza kategoriýasy"}
+        label={t("visaIntake.fields.visaCategory")}
         name="visa_category"
         value={filters.visa_category}
         options={VISA_SELECT_OPTIONS.visaCategories}

@@ -20,11 +20,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllVisaFieldsApi } from "../../../api/queries/getters";
+import { getCustomFieldsApi } from "../../../api/queries/getters";
 import { useLocale } from "../../../hooks/useLocale";
-import { CreateCustomFieldModal } from "./CreateCustomFieldModal";
+import { CreateCustomFieldModal } from "../CustomFieldsTab/CreateCustomFieldModal";
 import {
-  CANONICAL_RECURRING_FIELDS,
   findMatchingCatalogField,
   normalizeFieldString,
 } from "../../../functions/visaCountryFieldConfigs";
@@ -137,32 +136,29 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
   const [pendingUpdateFn, setPendingUpdateFn] = useState(null);
 
   const { data: allFieldsRaw = [], isLoading } = useGet({
-    apiFn: getAllVisaFieldsApi,
-    key: "visaFields",
+    apiFn: getCustomFieldsApi,
+    key: ["customFields", { limit: 40 }],
+    params: { limit: 40 },
   });
 
   const availableFields = useMemo(() => {
-    const apiList = Array.isArray(allFieldsRaw) ? allFieldsRaw : [];
-    const mapByFieldKey = new Map();
-
-    CANONICAL_RECURRING_FIELDS.forEach((field) => {
-      if (!field.isDefault && field.fieldKey) {
-        mapByFieldKey.set(field.fieldKey, field);
-      }
-    });
-
-    apiList.forEach((field) => {
-      if (!field.isDefault) {
-        const key = field.fieldKey || normalizeFieldString(field.labelTm);
-        if (key) {
-          const existing = mapByFieldKey.get(key);
-          mapByFieldKey.set(key, { ...existing, ...field });
-        }
-      }
-    });
-
-    return Array.from(mapByFieldKey.values());
+    return Array.isArray(allFieldsRaw) ? allFieldsRaw : [];
   }, [allFieldsRaw]);
+
+  const getFieldLabel = useCallback(
+    (item) => {
+      if (typeof item === "string") return item;
+      return (
+        selectedLang(item.field_label) ||
+        selectedLang(item.labelTm) ||
+        item.field_label?.tk ||
+        item.labelTm ||
+        item.fieldKey ||
+        ""
+      );
+    },
+    [selectedLang]
+  );
 
   const customFilterOptions = useCallback((options, state) => {
     const rawQuery = state.inputValue?.trim();
@@ -174,27 +170,22 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
         return normalizeFieldString(option).includes(query);
       }
 
-      const keyMatch = normalizeFieldString(option.fieldKey).includes(query);
-      const tmMatch = normalizeFieldString(option.labelTm).includes(query);
-      const ruMatch = normalizeFieldString(option.labelRu).includes(query);
-      const enMatch = normalizeFieldString(option.labelEn).includes(query);
+      const keyMatch = normalizeFieldString(option.fieldKey || option.guid).includes(query);
+      const tmMatch = normalizeFieldString(option.field_label?.tk || option.labelTm).includes(query);
+      const ruMatch = normalizeFieldString(option.field_label?.ru || option.labelRu).includes(query);
+      const enMatch = normalizeFieldString(option.field_label?.en || option.labelEn).includes(query);
+      const typeMatch = normalizeFieldString(option.field_type || option.fieldType).includes(query);
 
-      const aliasMatch =
-        Array.isArray(option.aliases) &&
-        option.aliases.some((alias) =>
-          normalizeFieldString(alias).includes(query)
-        );
-
-      return keyMatch || tmMatch || ruMatch || enMatch || aliasMatch;
+      return keyMatch || tmMatch || ruMatch || enMatch || typeMatch;
     });
 
     const hasExactMatch = filtered.some((opt) => {
       if (typeof opt === "string") return normalizeFieldString(opt) === query;
       return (
-        normalizeFieldString(opt.fieldKey) === query ||
-        normalizeFieldString(opt.labelTm) === query ||
-        normalizeFieldString(opt.labelRu) === query ||
-        normalizeFieldString(opt.labelEn) === query
+        normalizeFieldString(opt.fieldKey || opt.guid) === query ||
+        normalizeFieldString(opt.field_label?.tk || opt.labelTm) === query ||
+        normalizeFieldString(opt.field_label?.ru || opt.labelRu) === query ||
+        normalizeFieldString(opt.field_label?.en || opt.labelEn) === query
       );
     });
 
@@ -253,13 +244,12 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                 variant="subtitle2"
                 sx={{ fontWeight: 600, color: "text.primary" }}
               >
-                {t("visa.fieldsSelectorTitle") ||
-                  "Ýurt üçin meýdançalar (Dynamic Columns)"}
+                {t("customFields.title")}
               </Typography>
               {selectedCount > 0 && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <Chip
-                    label={`${selectedCount} ${t("selected") || "saýlandy"}`}
+                    label={`${selectedCount} saýlandy`}
                     size="small"
                     color="primary"
                     variant="outlined"
@@ -282,7 +272,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                       minWidth: "auto",
                     }}
                   >
-                    {t("clearAll") || "Aýyr"}
+                    {t("clearAll")}
                   </Button>
                 </Box>
               )}
@@ -296,17 +286,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               options={availableFields}
               loading={isLoading}
               filterOptions={customFilterOptions}
-              getOptionLabel={(option) => {
-                if (typeof option === "string") return option;
-                const localized = selectedLang(option.labelTm) || option.labelTm;
-                return (
-                  localized ||
-                  option.labelRu ||
-                  option.labelEn ||
-                  option.fieldKey ||
-                  ""
-                );
-              }}
+              getOptionLabel={(option) => getFieldLabel(option)}
               isOptionEqualToValue={(option, val) => {
                 if (typeof option === "string" || typeof val === "string") {
                   return (
@@ -350,12 +330,8 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               renderOption={(props, option, { selected }) => {
                 const { key: optionKey, ...otherProps } = props;
                 const isNew = typeof option === "string";
-                const label = isNew
-                  ? option
-                  : selectedLang(option.labelTm) ||
-                    option.labelTm ||
-                    option.fieldKey;
-                const fieldType = option.fieldType || "text";
+                const label = getFieldLabel(option);
+                const fieldType = option.fieldType || option.field_type || "text";
                 const fallbackKey = isNew
                   ? option
                   : option.guid || option.id || option.fieldKey || label;
@@ -384,7 +360,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                     >
                       <AddBoxOutlinedIcon color="primary" fontSize="small" />
                       <Typography variant="body2" sx={{ fontWeight: 600, color: "primary.main" }}>
-                        + {t("visaIntake.createCustomFieldTitle") || "Täze meýdança goşmak"}: "{option}"
+                        + {t("customFields.addTitle")}: "{option}"
                       </Typography>
                     </Box>
                   );
@@ -449,7 +425,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
 
                     {!isNew && (
                       <Chip
-                        label={fieldType.toUpperCase()}
+                        label={String(fieldType).toUpperCase()}
                         size="small"
                         sx={{
                           height: 20,
@@ -470,11 +446,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               renderTags={(tagValue, getTagProps) =>
                 tagValue.map((option, index) => {
                   const isNew = typeof option === "string";
-                  const label = isNew
-                    ? option
-                    : selectedLang(option.labelTm) ||
-                      option.labelTm ||
-                      option.fieldKey;
+                  const label = getFieldLabel(option);
 
                   const tagProps = { ...getTagProps({ index }) };
                   const tagKey = tagProps.key;
@@ -522,15 +494,11 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                 return (
                   <TextField
                     {...textFieldProps}
-                    placeholder={
-                      t("visa.typeOrSelectField") ||
-                      "Meýdança saýlaň ýa-da täze adyny ýazyň..."
-                    }
+                    placeholder="Meýdança saýlaň ýa-da gözleň..."
                     error={Boolean(error)}
                     helperText={
                       error?.message ||
-                      (t("visa.fieldSelectorHint") ||
-                        "Default 7 meýdança awtomatiki birikdiriler. Listden köp meýdança saýlap bilersiňiz.")
+                      "Ýurt üçin meýdançalary saýlaň."
                     }
                     slotProps={{
                       ...paramsSlotProps,
@@ -575,8 +543,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                     px: 0.5,
                   }}
                 >
-                  {t("visa.reorderFieldsHint") ||
-                    "Saýlanan meýdançalaryň sıralamasy (Índeksi çalşyrmak üçin strelkalary basyň):"}
+                  Saýlanan meýdançalaryň sıralamasy:
                 </Typography>
                 <Paper
                   variant="outlined"
@@ -593,19 +560,15 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                   }}
                 >
                   {value.map((item, index) => {
+                    const label = getFieldLabel(item);
                     const isNew = typeof item === "string";
-                    const label = isNew
-                      ? item
-                      : selectedLang(item.labelTm) ||
-                        item.labelTm ||
-                        item.fieldKey;
 
                     return (
                       <ReorderableFieldItem
                         key={
                           isNew
                             ? `reorder-${item}-${index}`
-                            : `reorder-${item.guid || item.fieldKey}-${index}`
+                            : `reorder-${item.guid || item.fieldKey || index}-${index}`
                         }
                         item={item}
                         index={index}
