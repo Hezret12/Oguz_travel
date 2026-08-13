@@ -19,7 +19,7 @@ import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 
 export const CustomFieldsTable = forwardRef((props, ref) => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
 
   const [page, setPage] = useState(1);
@@ -68,7 +68,7 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
   const columns = useMemo(() => {
     return [
       {
-        accessorFn: (row, index) => (page - 1) * limit + index + 1,
+        accessorKey: "index_number",
         id: "index_number",
         header: "№",
         size: 50,
@@ -78,19 +78,19 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
         id: "labelTm",
         header: t("customFields.labelTm"),
         size: 180,
-        accessorFn: (row) => row.field_label?.tk || row.labelTm || "",
+        accessorFn: (row) => row.field_label?.tk,
       },
       {
         id: "labelRu",
         header: t("customFields.labelRu"),
         size: 180,
-        accessorFn: (row) => row.field_label?.ru || row.labelRu || "",
+        accessorFn: (row) => row.field_label?.ru,
       },
       {
         id: "labelEn",
         header: t("customFields.labelEn"),
         size: 180,
-        accessorFn: (row) => row.field_label?.en || row.labelEn || "",
+        accessorFn: (row) => row.field_label?.en,
       },
       {
         id: "field_type",
@@ -166,7 +166,7 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
         ),
       },
     ];
-  }, [page, limit, t, handleDeleteClick]);
+  }, [t, handleDeleteClick]);
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,

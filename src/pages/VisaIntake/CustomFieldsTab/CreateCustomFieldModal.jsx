@@ -12,7 +12,12 @@ import { slugifyFieldKey } from "../../../functions/visaCountryFieldConfigs";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { addCustomFieldApi } from "../../../api/queries/post";
 
-export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave }) => {
+export const CreateCustomFieldModal = ({
+  open,
+  onClose,
+  candidateString,
+  onSave,
+}) => {
   const { t } = useLocale();
   const [optionInput, setOptionInput] = useState("");
   const [options, setOptions] = useState([]);
@@ -46,7 +51,7 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
 
   const autoKey = useMemo(
     () => slugifyFieldKey(labelEn || labelTm),
-    [labelEn, labelTm]
+    [labelEn, labelTm],
   );
 
   const handleAddOption = () => {
@@ -61,7 +66,11 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
   };
 
   const onSubmit = (data) => {
-    if (!data.labelTm?.trim() || !data.labelRu?.trim() || !data.labelEn?.trim()) return;
+    if (!data.labelTm?.trim() || !data.labelRu?.trim() || !data.labelEn?.trim())
+      return;
+
+    const computedFieldKey =
+      autoKey || slugifyFieldKey(data.labelEn || data.labelTm);
 
     const payload = {
       field_label: {
@@ -69,9 +78,10 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
         ru: data.labelRu.trim(),
         en: data.labelEn.trim(),
       },
+      field_key: computedFieldKey,
       field_type: data.fieldType,
-      options: data.fieldType === "select" ? options : null,
-      sort_order: Number(data.sort_order || 0),
+      options: data.fieldType === "select" ? options : [],
+      sort_order: Number(data.sort_order ?? 0) || 0,
     };
 
     createCustomField(payload);
@@ -86,14 +96,11 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
 
   return (
     <CustomDialog open={open} close={onClose} widthX={700}>
-      <CustomDialogHeader
-        variant="h5"
-        title={t("customFields.addTitle")}
-      />
+      <CustomDialogHeader variant="h5" title={t("customFields.addTitle")} />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 2.5 }}>
           <Grid container spacing={2}>
-            <Grid size={12}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="labelTm"
                 control={control}
@@ -124,6 +131,14 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
                 label={t("customFields.fieldType")}
                 options={typeOptions}
                 required
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="sort_order"
+                control={control}
+                label={t("customFields.sortOrder")}
+                type="number"
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -178,7 +193,12 @@ export const CreateCustomFieldModal = ({ open, onClose, candidateString, onSave 
                   <Button
                     variant="contained"
                     onClick={handleAddOption}
-                    sx={{ height: "44px", borderRadius: "7px", px: 3, fontWeight: 600 }}
+                    sx={{
+                      height: "44px",
+                      borderRadius: "7px",
+                      px: 3,
+                      fontWeight: 600,
+                    }}
                   >
                     Goş
                   </Button>
