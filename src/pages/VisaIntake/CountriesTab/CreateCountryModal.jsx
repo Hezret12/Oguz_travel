@@ -88,12 +88,12 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
           >
             <strong>
               {t("visaIntake.defaultFieldsInfoTitle")}
-            </strong>{" "}
+            </strong>
             {t("visaIntake.defaultFieldsInfoDesc")}
           </Alert>
 
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 3 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="code"
                 control={control}
@@ -102,7 +102,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 3 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="nameTm"
                 control={control}
@@ -111,7 +111,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 3 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="nameRu"
                 control={control}
@@ -119,7 +119,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 3 }}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="nameEn"
                 control={control}

@@ -54,7 +54,7 @@ export const getCountriesApi = async (params = {}) => {
 };
 
 export const getCustomFieldsApi = async (params = {}) => {
-  const queryParams = { limit: 40, ...params };
+  const queryParams = { limit: 40, page: 1, ...params };
   return await api.getPrivate('/custom_fields/get-by-country', queryParams);
 };
 

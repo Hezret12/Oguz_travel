@@ -137,13 +137,14 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
 
   const { data: allFieldsRaw = [], isLoading } = useGet({
     apiFn: getCustomFieldsApi,
-    key: ["customFields", { limit: 40 }],
+    key: ["customFields", { limit: 40, page: 1 }],
     params: { limit: 40 },
   });
 
   const availableFields = useMemo(() => {
     return Array.isArray(allFieldsRaw) ? allFieldsRaw : [];
   }, [allFieldsRaw]);
+  console.log(availableFields,'availableFields')
 
   const getFieldLabel = useCallback(
     (item) => {
