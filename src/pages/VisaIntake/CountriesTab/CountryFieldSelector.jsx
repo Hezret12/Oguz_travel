@@ -335,7 +335,6 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               multiple
               freeSolo
               disableCloseOnSelect
-              slots={{ root: CleanRoot }}
               options={mergedOptions}
               loading={isLoading || isFetching}
               inputValue={searchInput}
