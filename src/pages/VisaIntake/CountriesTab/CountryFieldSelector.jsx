@@ -1,5 +1,5 @@
-import { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
-import { Controller } from "react-hook-form";
+import { forwardRef, useCallback, useMemo, useState } from "react";
+import { Controller, useWatch } from "react-hook-form";
 import {
   Autocomplete,
   TextField,
@@ -132,7 +132,7 @@ const ReorderableFieldItem = ({
 };
 
 export const CountryFieldSelector = ({ control, name = "fields" }) => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const [candidateString, setCandidateString] = useState(null);
   const [pendingUpdateFn, setPendingUpdateFn] = useState(null);
 
@@ -142,6 +142,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
 
   const [accumulatedFields, setAccumulatedFields] = useState([]);
   const [prevSearch, setPrevSearch] = useState(debouncedSearch);
+  const [prevDataKey, setPrevDataKey] = useState("");
 
   if (debouncedSearch !== prevSearch) {
     setPrevSearch(debouncedSearch);
@@ -154,39 +155,62 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     params: { limit: 20, page, search: debouncedSearch || undefined },
   });
 
-  useEffect(() => {
-    if (!Array.isArray(pageData)) return;
-
-    if (page === 1) {
-      setAccumulatedFields(pageData);
-    } else if (pageData.length > 0) {
-      setAccumulatedFields((prev) => {
-        const existingGuids = new Set(prev.map((item) => item?.guid || item?.id || item?.fieldKey));
-        const newItems = pageData.filter(
-          (item) => !existingGuids.has(item?.guid || item?.id || item?.fieldKey)
-        );
-        return [...prev, ...newItems];
-      });
+  const currentDataKey = `${debouncedSearch}_${page}_${Array.isArray(pageData) ? pageData.length : 0}_${pageData?.[0]?.guid || ""}`;
+  if (currentDataKey !== prevDataKey) {
+    setPrevDataKey(currentDataKey);
+    if (Array.isArray(pageData)) {
+      if (page === 1) {
+        setAccumulatedFields(pageData);
+      } else if (pageData.length > 0) {
+        setAccumulatedFields((prev) => {
+          const existingGuids = new Set(prev.map((item) => item?.guid || item?.id || item?.fieldKey));
+          const newItems = pageData.filter(
+            (item) => !existingGuids.has(item?.guid || item?.id || item?.fieldKey)
+          );
+          return [...prev, ...newItems];
+        });
+      }
     }
-  }, [pageData, page]);
+  }
 
   const availableFields = useMemo(() => {
     return Array.isArray(accumulatedFields) ? accumulatedFields : [];
   }, [accumulatedFields]);
 
+  const fieldValue = useWatch({
+    control,
+    name,
+    defaultValue: [],
+  });
+
+  const mergedOptions = useMemo(() => {
+    const list = [...availableFields];
+    if (Array.isArray(fieldValue)) {
+      fieldValue.forEach((valItem) => {
+        if (typeof valItem === "object" && valItem !== null) {
+          const valKey = valItem.guid || valItem.fieldKey;
+          const exists = list.some(
+            (opt) => typeof opt === "object" && (opt.guid || opt.fieldKey) === valKey
+          );
+          if (!exists) {
+            list.push(valItem);
+          }
+        }
+      });
+    }
+    return list;
+  }, [availableFields, fieldValue]);
+
   const getFieldLabel = useCallback(
     (item) => {
       if (typeof item === "string") return item;
       return (
-        selectedLang(item.field_label) ||
-        selectedLang(item.labelTm) ||
         item.field_label?.tk ||
-        item.labelTm ||
         item.fieldKey ||
         ""
       );
     },
-    [selectedLang]
+    []
   );
 
   const customFilterOptions = useCallback((options, state) => {
@@ -200,9 +224,9 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
       }
 
       const keyMatch = normalizeFieldString(option.fieldKey || option.guid).includes(query);
-      const tmMatch = normalizeFieldString(option.field_label?.tk || option.labelTm).includes(query);
-      const ruMatch = normalizeFieldString(option.field_label?.ru || option.labelRu).includes(query);
-      const enMatch = normalizeFieldString(option.field_label?.en || option.labelEn).includes(query);
+      const tmMatch = normalizeFieldString(option.field_label?.tk).includes(query);
+      const ruMatch = normalizeFieldString(option.field_label?.ru).includes(query);
+      const enMatch = normalizeFieldString(option.field_label?.en).includes(query);
       const typeMatch = normalizeFieldString(option.field_type || option.fieldType).includes(query);
 
       return keyMatch || tmMatch || ruMatch || enMatch || typeMatch;
@@ -212,9 +236,9 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
       if (typeof opt === "string") return normalizeFieldString(opt) === query;
       return (
         normalizeFieldString(opt.fieldKey || opt.guid) === query ||
-        normalizeFieldString(opt.field_label?.tk || opt.labelTm) === query ||
-        normalizeFieldString(opt.field_label?.ru || opt.labelRu) === query ||
-        normalizeFieldString(opt.field_label?.en || opt.labelEn) === query
+        normalizeFieldString(opt.field_label?.tk) === query ||
+        normalizeFieldString(opt.field_label?.ru) === query ||
+        normalizeFieldString(opt.field_label?.en) === query
       );
     });
 
@@ -232,24 +256,6 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
       defaultValue={[]}
       render={({ field: { onChange, value = [] }, fieldState: { error } }) => {
         const selectedCount = value?.length || 0;
-
-        const mergedOptions = useMemo(() => {
-          const list = [...availableFields];
-          if (Array.isArray(value)) {
-            value.forEach((valItem) => {
-              if (typeof valItem === "object" && valItem !== null) {
-                const valKey = valItem.guid || valItem.id || valItem.fieldKey;
-                const exists = list.some(
-                  (opt) => typeof opt === "object" && (opt.guid || opt.id || opt.fieldKey) === valKey
-                );
-                if (!exists) {
-                  list.push(valItem);
-                }
-              }
-            });
-          }
-          return list;
-        }, [availableFields, value]);
 
         const handleMoveUp = (index) => {
           if (index <= 0) return;
