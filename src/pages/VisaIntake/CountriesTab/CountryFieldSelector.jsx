@@ -29,133 +29,127 @@ import {
   normalizeFieldString,
 } from "../../../functions/visaCountryFieldConfigs";
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const getItemKey = (item) => item?.guid || item?.fieldKey;
+
 const CleanRoot = forwardRef(function CleanRoot(props, ref) {
-  const domProps = { ...props };
-  delete domProps.renderTags;
-  delete domProps.ownerState;
-  delete domProps.PaperProps;
+  const { renderTags, ownerState, PaperProps, ...domProps } = props;
   return <div ref={ref} {...domProps} />;
 });
 
-const ReorderableFieldItem = ({
-  index,
-  total,
-  label,
-  onMoveUp,
-  onMoveDown,
-  onRemove,
-}) => {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        px: 1.5,
-        py: 0.7,
-        borderRadius: "8px",
-        border: "1px solid",
-        borderColor: "divider",
-        backgroundColor: "background.paper",
-        boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.03)",
-        transition: "all 0.18s ease-in-out",
-        "&:hover": {
-          backgroundColor: "action.hover",
-          borderColor: "primary.main",
-          boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.06)",
-        },
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-        <DragIndicatorIcon
-          sx={{ fontSize: 18, color: "text.disabled", cursor: "grab" }}
-        />
-        <Chip
-          label={`#${index + 1}`}
-          size="small"
-          color="primary"
-          sx={{
-            height: 22,
-            fontWeight: 700,
-            fontSize: "0.7rem",
-            borderRadius: "6px",
-          }}
-        />
-        <Typography
-          variant="body2"
-          sx={{ fontWeight: 600, color: "text.primary" }}
-        >
-          {label}
-        </Typography>
-      </Box>
+// ─── ReorderableFieldItem ─────────────────────────────────────────────────────
 
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
-        <Tooltip title="Ýokary süýşür (Move Up)">
-          <span>
-            <IconButton
-              size="small"
-              disabled={index === 0}
-              onClick={() => onMoveUp(index)}
-              sx={{ p: 0.4, borderRadius: "6px" }}
-            >
-              <ArrowUpwardIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
+const ReorderableFieldItem = ({ index, total, label, onMoveUp, onMoveDown, onRemove }) => (
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      px: 1.5,
+      py: 0.7,
+      borderRadius: "8px",
+      border: "1px solid",
+      borderColor: "divider",
+      backgroundColor: "background.paper",
+      boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.03)",
+      transition: "all 0.18s ease-in-out",
+      "&:hover": {
+        backgroundColor: "action.hover",
+        borderColor: "primary.main",
+        boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.06)",
+      },
+    }}
+  >
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
+      <DragIndicatorIcon sx={{ fontSize: 18, color: "text.disabled", cursor: "grab" }} />
+      <Chip
+        label={`#${index + 1}`}
+        size="small"
+        color="primary"
+        sx={{ height: 22, fontWeight: 700, fontSize: "0.7rem", borderRadius: "6px" }}
+      />
+      <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+        {label}
+      </Typography>
+    </Box>
 
-        <Tooltip title="Aşak süýşür (Move Down)">
-          <span>
-            <IconButton
-              size="small"
-              disabled={index === total - 1}
-              onClick={() => onMoveDown(index)}
-              sx={{ p: 0.4, borderRadius: "6px" }}
-            >
-              <ArrowDownwardIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
-
-        <Tooltip title="Poz (Remove)">
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
+      <Tooltip title="Ýokary süýşür (Move Up)">
+        <span>
           <IconButton
             size="small"
-            color="error"
-            onClick={() => onRemove(index)}
+            disabled={index === 0}
+            onClick={() => onMoveUp(index)}
             sx={{ p: 0.4, borderRadius: "6px" }}
           >
-            <CloseIcon fontSize="small" />
+            <ArrowUpwardIcon fontSize="small" />
           </IconButton>
-        </Tooltip>
-      </Box>
+        </span>
+      </Tooltip>
+
+      <Tooltip title="Aşak süýşür (Move Down)">
+        <span>
+          <IconButton
+            size="small"
+            disabled={index === total - 1}
+            onClick={() => onMoveDown(index)}
+            sx={{ p: 0.4, borderRadius: "6px" }}
+          >
+            <ArrowDownwardIcon fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
+
+      <Tooltip title="Poz (Remove)">
+        <IconButton
+          size="small"
+          color="error"
+          onClick={() => onRemove(index)}
+          sx={{ p: 0.4, borderRadius: "6px" }}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
     </Box>
-  );
-};
+  </Box>
+);
+
+// ─── CountryFieldSelector ─────────────────────────────────────────────────────
 
 export const CountryFieldSelector = ({ control, name = "fields" }) => {
   const { t } = useLocale();
+
+  // Create-field modal state
   const [candidateString, setCandidateString] = useState(null);
   const [pendingUpdateFn, setPendingUpdateFn] = useState(null);
 
+  // Pagination & search state
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 400);
 
+  // Accumulated fields for infinite scroll
   const [accumulatedFields, setAccumulatedFields] = useState([]);
-  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
-  const [prevDataKey, setPrevDataKey] = useState("");
 
+  // ── React 19 in-render state adjustment: reset page on search change ──
+  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
   if (debouncedSearch !== prevSearch) {
     setPrevSearch(debouncedSearch);
     setPage(1);
   }
 
+  // ── Fetch current page ──
   const { data: pageData = [], isLoading, isFetching, pageCount } = usePagginationGet({
     apiFn: getCustomFieldsApi,
     key: "customFields",
     params: { limit: 20, page, search: debouncedSearch || undefined },
   });
 
-  const currentDataKey = `${debouncedSearch}_${page}_${Array.isArray(pageData) ? pageData.length : 0}_${pageData?.[0]?.guid || ""}`;
+  // ── React 19 in-render state adjustment: accumulate pages ──
+  const [prevDataKey, setPrevDataKey] = useState("");
+  const currentDataKey = `${debouncedSearch}_${page}_${pageData?.length ?? 0}_${pageData?.[0]?.guid ?? ""}`;
+
   if (currentDataKey !== prevDataKey) {
     setPrevDataKey(currentDataKey);
     if (Array.isArray(pageData)) {
@@ -163,56 +157,42 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
         setAccumulatedFields(pageData);
       } else if (pageData.length > 0) {
         setAccumulatedFields((prev) => {
-          const existingGuids = new Set(prev.map((item) => item?.guid || item?.id || item?.fieldKey));
-          const newItems = pageData.filter(
-            (item) => !existingGuids.has(item?.guid || item?.id || item?.fieldKey)
-          );
-          return [...prev, ...newItems];
+          const existing = new Set(prev.map(getItemKey));
+          const unique = pageData.filter((item) => !existing.has(getItemKey(item)));
+          return [...prev, ...unique];
         });
       }
     }
   }
 
-  const availableFields = useMemo(() => {
-    return Array.isArray(accumulatedFields) ? accumulatedFields : [];
-  }, [accumulatedFields]);
+  // ── Watch field value at top level (Rule 13: useWatch, not watch) ──
+  const fieldValue = useWatch({ control, name, defaultValue: [] });
 
-  const fieldValue = useWatch({
-    control,
-    name,
-    defaultValue: [],
-  });
-
+  // ── Merge fetched options with already-selected values ──
   const mergedOptions = useMemo(() => {
-    const list = [...availableFields];
+    const list = Array.isArray(accumulatedFields) ? [...accumulatedFields] : [];
     if (Array.isArray(fieldValue)) {
-      fieldValue.forEach((valItem) => {
-        if (typeof valItem === "object" && valItem !== null) {
-          const valKey = valItem.guid || valItem.fieldKey;
-          const exists = list.some(
-            (opt) => typeof opt === "object" && (opt.guid || opt.fieldKey) === valKey
-          );
-          if (!exists) {
-            list.push(valItem);
+      const existingKeys = new Set(list.map(getItemKey));
+      fieldValue.forEach((item) => {
+        if (typeof item === "object" && item !== null) {
+          const key = getItemKey(item);
+          if (key && !existingKeys.has(key)) {
+            list.push(item);
+            existingKeys.add(key);
           }
         }
       });
     }
     return list;
-  }, [availableFields, fieldValue]);
+  }, [accumulatedFields, fieldValue]);
 
-  const getFieldLabel = useCallback(
-    (item) => {
-      if (typeof item === "string") return item;
-      return (
-        item.field_label?.tk ||
-        item.fieldKey ||
-        ""
-      );
-    },
-    []
-  );
+  // ── Label resolver ──
+  const getFieldLabel = useCallback((item) => {
+    if (typeof item === "string") return item;
+    return item.field_label?.tk || item.fieldKey || "";
+  }, []);
 
+  // ── Local + server filter ──
   const customFilterOptions = useCallback((options, state) => {
     const rawQuery = state.inputValue?.trim();
     const query = normalizeFieldString(rawQuery);
@@ -222,17 +202,16 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
       if (typeof option === "string") {
         return normalizeFieldString(option).includes(query);
       }
-
-      const keyMatch = normalizeFieldString(option.fieldKey || option.guid).includes(query);
-      const tmMatch = normalizeFieldString(option.field_label?.tk).includes(query);
-      const ruMatch = normalizeFieldString(option.field_label?.ru).includes(query);
-      const enMatch = normalizeFieldString(option.field_label?.en).includes(query);
-      const typeMatch = normalizeFieldString(option.field_type || option.fieldType).includes(query);
-
-      return keyMatch || tmMatch || ruMatch || enMatch || typeMatch;
+      return (
+        normalizeFieldString(option.fieldKey || option.guid).includes(query) ||
+        normalizeFieldString(option.field_label?.tk).includes(query) ||
+        normalizeFieldString(option.field_label?.ru).includes(query) ||
+        normalizeFieldString(option.field_label?.en).includes(query) ||
+        normalizeFieldString(option.field_type).includes(query)
+      );
     });
 
-    const hasExactMatch = filtered.some((opt) => {
+    const hasExact = filtered.some((opt) => {
       if (typeof opt === "string") return normalizeFieldString(opt) === query;
       return (
         normalizeFieldString(opt.fieldKey || opt.guid) === query ||
@@ -242,11 +221,39 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
       );
     });
 
-    if (!hasExactMatch && rawQuery) {
+    if (!hasExact && rawQuery) {
       filtered.push(rawQuery);
     }
 
     return filtered;
+  }, []);
+
+  // ── Scroll handler for infinite loading ──
+  const handleListboxScroll = useCallback(
+    (event) => {
+      const node = event.currentTarget;
+      const isBottom = node.scrollTop + node.clientHeight >= node.scrollHeight - 25;
+      if (isBottom && page < pageCount && !isFetching && !isLoading) {
+        setPage((p) => p + 1);
+      }
+    },
+    [page, pageCount, isFetching, isLoading]
+  );
+
+  // ── Autocomplete input change handler ──
+  const handleInputChange = useCallback((_, value, reason) => {
+    if (reason === "input" || reason === "clear") {
+      setSearchInput(value);
+    }
+  }, []);
+
+  // ── Option equality ──
+  const isOptionEqual = useCallback((option, val) => {
+    if (typeof option === "string" || typeof val === "string") {
+      return normalizeFieldString(option) === normalizeFieldString(val);
+    }
+    if (option.guid && val.guid) return option.guid === val.guid;
+    return option.fieldKey === val.fieldKey;
   }, []);
 
   return (
@@ -259,44 +266,51 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
 
         const handleMoveUp = (index) => {
           if (index <= 0) return;
-          const newArr = [...value];
-          const temp = newArr[index - 1];
-          newArr[index - 1] = newArr[index];
-          newArr[index] = temp;
-          onChange(newArr);
+          const arr = [...value];
+          [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+          onChange(arr);
         };
 
         const handleMoveDown = (index) => {
           if (index >= value.length - 1) return;
-          const newArr = [...value];
-          const temp = newArr[index + 1];
-          newArr[index + 1] = newArr[index];
-          newArr[index] = temp;
-          onChange(newArr);
+          const arr = [...value];
+          [arr[index + 1], arr[index]] = [arr[index], arr[index + 1]];
+          onChange(arr);
         };
 
-        const handleRemove = (index) => {
-          const newArr = value.filter((_, i) => i !== index);
-          onChange(newArr);
-        };
+        const handleRemove = (index) => onChange(value.filter((_, i) => i !== index));
+        const handleClearAll = () => onChange([]);
 
-        const handleClearAll = () => {
-          onChange([]);
+        const handleChange = (_, newValue) => {
+          const nextList = [];
+          let freeSoloStr = null;
+
+          (newValue || []).forEach((item) => {
+            if (typeof item === "string") {
+              const match = findMatchingCatalogField(item, accumulatedFields);
+              if (match) {
+                nextList.push(match);
+              } else {
+                freeSoloStr = item;
+              }
+            } else {
+              nextList.push(item);
+            }
+          });
+
+          if (freeSoloStr) {
+            setCandidateString(freeSoloStr);
+            setPendingUpdateFn(() => (newFieldObj) => onChange([...nextList, newFieldObj]));
+          } else {
+            onChange(nextList);
+          }
         };
 
         return (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <Typography
-                variant="subtitle2"
-                sx={{ fontWeight: 600, color: "text.primary" }}
-              >
+            {/* Header */}
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary" }}>
                 {t("customFields.title")}
               </Typography>
               {selectedCount > 0 && (
@@ -306,24 +320,14 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                     size="small"
                     color="primary"
                     variant="outlined"
-                    sx={{
-                      borderRadius: "6px",
-                      fontWeight: 600,
-                      fontSize: "0.75rem",
-                    }}
+                    sx={{ borderRadius: "6px", fontWeight: 600, fontSize: "0.75rem" }}
                   />
                   <Button
                     size="small"
                     color="error"
                     startIcon={<DeleteSweepIcon style={{ fontSize: 16 }} />}
                     onClick={handleClearAll}
-                    sx={{
-                      textTransform: "none",
-                      fontSize: "0.75rem",
-                      py: 0.2,
-                      px: 0.8,
-                      minWidth: "auto",
-                    }}
+                    sx={{ textTransform: "none", fontSize: "0.75rem", py: 0.2, px: 0.8, minWidth: "auto" }}
                   >
                     {t("clearAll")}
                   </Button>
@@ -331,6 +335,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               )}
             </Box>
 
+            {/* Autocomplete */}
             <Autocomplete
               multiple
               freeSolo
@@ -339,72 +344,18 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               options={mergedOptions}
               loading={isLoading || isFetching}
               inputValue={searchInput}
-              onInputChange={(_, newInputValue, reason) => {
-                if (reason === "input" || reason === "clear") {
-                  setSearchInput(newInputValue);
-                }
-              }}
-              ListboxProps={{
-                onScroll: (event) => {
-                  const listboxNode = event.currentTarget;
-                  const isBottom =
-                    listboxNode.scrollTop + listboxNode.clientHeight >=
-                    listboxNode.scrollHeight - 25;
-                  if (isBottom && page < pageCount && !isFetching && !isLoading) {
-                    setPage((prev) => prev + 1);
-                  }
-                },
-              }}
+              onInputChange={handleInputChange}
+              ListboxProps={{ onScroll: handleListboxScroll }}
               filterOptions={customFilterOptions}
-              getOptionLabel={(option) => getFieldLabel(option)}
-              isOptionEqualToValue={(option, val) => {
-                if (typeof option === "string" || typeof val === "string") {
-                  return (
-                    normalizeFieldString(option) === normalizeFieldString(val)
-                  );
-                }
-                if (option.guid && val.guid) return option.guid === val.guid;
-                if (option.id && val.id) return option.id === val.id;
-                return option.fieldKey === val.fieldKey;
-              }}
+              getOptionLabel={getFieldLabel}
+              isOptionEqualToValue={isOptionEqual}
               value={value}
-              onChange={(_, newValue) => {
-                const nextList = [];
-                let freeSoloStr = null;
-
-                (newValue || []).forEach((item) => {
-                  if (typeof item === "string") {
-                    const match = findMatchingCatalogField(
-                      item,
-                      availableFields
-                    );
-                    if (match) {
-                      nextList.push(match);
-                    } else {
-                      freeSoloStr = item;
-                    }
-                  } else {
-                    nextList.push(item);
-                  }
-                });
-
-                if (freeSoloStr) {
-                  setCandidateString(freeSoloStr);
-                  setPendingUpdateFn(() => (newFieldObj) => {
-                    onChange([...nextList, newFieldObj]);
-                  });
-                } else {
-                  onChange(nextList);
-                }
-              }}
+              onChange={handleChange}
               renderOption={(props, option, { selected }) => {
                 const { key: optionKey, ...otherProps } = props;
                 const isNew = typeof option === "string";
                 const label = getFieldLabel(option);
-                const fieldType = option.fieldType || option.field_type || "text";
-                const fallbackKey = isNew
-                  ? option
-                  : option.guid || option.id || option.fieldKey || label;
+                const fieldType = option.field_type || "text";
 
                 if (isNew) {
                   return (
@@ -423,9 +374,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                         color: "primary.main",
                         fontWeight: 600,
                         backgroundColor: "action.hover",
-                        "&:hover": {
-                          backgroundColor: "action.selected",
-                        },
+                        "&:hover": { backgroundColor: "action.selected" },
                       }}
                     >
                       <AddBoxOutlinedIcon color="primary" fontSize="small" />
@@ -439,7 +388,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                 return (
                   <Box
                     component="li"
-                    key={optionKey || fallbackKey}
+                    key={optionKey || option.guid || option.fieldKey || label}
                     {...otherProps}
                     sx={{
                       display: "flex",
@@ -450,27 +399,13 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                       gap: 1.5,
                       borderRadius: "6px",
                       my: 0.2,
-                      backgroundColor: selected
-                        ? "action.selected"
-                        : "transparent",
-                      "&:hover": {
-                        backgroundColor: "action.hover",
-                      },
+                      backgroundColor: selected ? "action.selected" : "transparent",
+                      "&:hover": { backgroundColor: "action.hover" },
                     }}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        flex: 1,
-                      }}
-                    >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: 1 }}>
                       {selected ? (
-                        <CheckCircleOutlinedIcon
-                          color="primary"
-                          sx={{ fontSize: 18 }}
-                        />
+                        <CheckCircleOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
                       ) : (
                         <Box
                           sx={{
@@ -484,32 +419,23 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                       )}
                       <Typography
                         variant="body2"
-                        sx={{
-                          fontWeight: selected ? 600 : 400,
-                          color: "text.primary",
-                        }}
+                        sx={{ fontWeight: selected ? 600 : 400, color: "text.primary" }}
                       >
                         {label}
                       </Typography>
                     </Box>
-
-                    {!isNew && (
-                      <Chip
-                        label={String(fieldType).toUpperCase()}
-                        size="small"
-                        sx={{
-                          height: 20,
-                          fontSize: "0.65rem",
-                          fontWeight: 700,
-                          borderRadius: "4px",
-                          backgroundColor:
-                            fieldType === "date"
-                              ? "info.soft"
-                              : "action.hover",
-                          color: "text.secondary",
-                        }}
-                      />
-                    )}
+                    <Chip
+                      label={String(fieldType).toUpperCase()}
+                      size="small"
+                      sx={{
+                        height: 20,
+                        fontSize: "0.65rem",
+                        fontWeight: 700,
+                        borderRadius: "4px",
+                        backgroundColor: fieldType === "date" ? "info.soft" : "action.hover",
+                        color: "text.secondary",
+                      }}
+                    />
                   </Box>
                 );
               }}
@@ -517,20 +443,15 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                 tagValue.map((option, index) => {
                   const isNew = typeof option === "string";
                   const label = getFieldLabel(option);
-
                   const tagProps = { ...getTagProps({ index }) };
                   const tagKey = tagProps.key;
                   delete tagProps.key;
                   delete tagProps.renderTags;
                   delete tagProps.ownerState;
 
-                  const fallbackTagKey = isNew
-                    ? `tag-${option}-${index}`
-                    : `tag-${option.guid || option.id || option.fieldKey}-${index}`;
-
                   return (
                     <Chip
-                      key={tagKey || fallbackTagKey}
+                      key={tagKey || `tag-${getItemKey(option) || option}-${index}`}
                       {...tagProps}
                       label={label}
                       size="small"
@@ -566,19 +487,16 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                     {...textFieldProps}
                     placeholder="Meýdança saýlaň ýa-da gözleň..."
                     error={Boolean(error)}
-                    helperText={
-                      error?.message ||
-                      "Ýurt üçin meýdançalary saýlaň."
-                    }
+                    helperText={error?.message || "Ýurt üçin meýdançalary saýlaň."}
                     slotProps={{
                       ...paramsSlotProps,
                       input: {
                         ...paramsSlotProps?.input,
                         endAdornment: (
                           <>
-                            {isLoading ? (
+                            {(isLoading || isFetching) && (
                               <CircularProgress color="inherit" size={20} />
-                            ) : null}
+                            )}
                             {paramsSlotProps?.input?.endAdornment}
                           </>
                         ),
@@ -603,15 +521,12 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               }}
             />
 
+            {/* Reorderable selected list */}
             {selectedCount > 0 && (
               <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
                 <Typography
                   variant="caption"
-                  sx={{
-                    fontWeight: 600,
-                    color: "text.secondary",
-                    px: 0.5,
-                  }}
+                  sx={{ fontWeight: 600, color: "text.secondary", px: 0.5 }}
                 >
                   Saýlanan meýdançalaryň sıralamasy:
                 </Typography>
@@ -629,31 +544,26 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                     borderColor: "divider",
                   }}
                 >
-                  {value.map((item, index) => {
-                    const label = getFieldLabel(item);
-                    const isNew = typeof item === "string";
-
-                    return (
-                      <ReorderableFieldItem
-                        key={
-                          isNew
-                            ? `reorder-${item}-${index}`
-                            : `reorder-${item.guid || item.fieldKey || index}-${index}`
-                        }
-                        item={item}
-                        index={index}
-                        total={value.length}
-                        label={label}
-                        onMoveUp={handleMoveUp}
-                        onMoveDown={handleMoveDown}
-                        onRemove={handleRemove}
-                      />
-                    );
-                  })}
+                  {value.map((item, index) => (
+                    <ReorderableFieldItem
+                      key={
+                        typeof item === "string"
+                          ? `reorder-${item}-${index}`
+                          : `reorder-${getItemKey(item) || index}-${index}`
+                      }
+                      index={index}
+                      total={value.length}
+                      label={getFieldLabel(item)}
+                      onMoveUp={handleMoveUp}
+                      onMoveDown={handleMoveDown}
+                      onRemove={handleRemove}
+                    />
+                  ))}
                 </Paper>
               </Box>
             )}
 
+            {/* Create custom field modal */}
             {Boolean(candidateString) && (
               <CreateCustomFieldModal
                 open={true}
@@ -663,9 +573,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                   setPendingUpdateFn(null);
                 }}
                 onSave={(newFieldObj) => {
-                  if (pendingUpdateFn) {
-                    pendingUpdateFn(newFieldObj);
-                  }
+                  pendingUpdateFn?.(newFieldObj);
                   setCandidateString(null);
                   setPendingUpdateFn(null);
                 }}
