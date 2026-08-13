@@ -49,7 +49,11 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
   const quarterInfo = useMemo(() => {
     if (!quarterRes) return null;
     const responseData = quarterRes?.data || {};
-    const list = Array.isArray(responseData?.data) ? responseData.data : Array.isArray(responseData) ? responseData : [];
+    const list = Array.isArray(responseData?.data)
+      ? responseData.data
+      : Array.isArray(responseData)
+        ? responseData
+        : [];
 
     const achievementStr = responseData?.achievement_percentage || "0%";
     const achievementNum = parseFloat(achievementStr.replace("%", "")) || 0;
@@ -60,10 +64,8 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
 
     const prevProfit = Number(prevYearData?.profit) || 0;
     const currProfit = Number(currYearData?.profit) || 0;
-
     const prevQuoted = Number(prevYearData?.total_quoted_price) || 0;
     const currQuoted = Number(currYearData?.total_quoted_price) || 0;
-
     const prevBase = Number(prevYearData?.total_base_fare) || 0;
     const currBase = Number(currYearData?.total_base_fare) || 0;
 
@@ -93,8 +95,26 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
     };
   }, [quarterRes]);
 
+  const statusColor = quarterInfo?.isCompleted ? "#10B981" : isDark ? "#F59E0B" : "#EF4444";
+  const statusBg = quarterInfo?.isCompleted
+    ? isDark ? "rgba(16,185,129,0.1)" : "rgba(16,185,129,0.05)"
+    : isDark ? "rgba(20,184,166,0.08)" : "rgba(14,133,132,0.04)";
+  const statusBorder = quarterInfo?.isCompleted
+    ? "rgba(16,185,129,0.3)"
+    : isDark ? "rgba(20,184,166,0.25)" : "rgba(14,133,132,0.2)";
+
   return (
-    <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 }, position: "relative", overflow: "hidden", height: "100%" }}>
+    <Paper
+      sx={{
+        ...paperSx,
+        p: { xs: 2, sm: 2.5 },
+        position: "relative",
+        overflow: "hidden",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {/* Title Bar */}
       <Box
         sx={{
@@ -109,20 +129,24 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
           <Box
             sx={{
-              width: 38,
-              height: 38,
-              borderRadius: "10px",
+              width: 40,
+              height: 40,
+              borderRadius: 2.5,
               backgroundColor: alpha(teal, 0.15),
               color: teal,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              border: `1px solid ${alpha(teal, 0.2)}`,
             }}
           >
             <EmojiEventsRoundedIcon sx={{ fontSize: 22 }} />
           </Box>
           <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800, fontSize: "0.95rem", lineHeight: 1.2 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: 800, fontSize: "0.95rem", lineHeight: 1.2, color: isDark ? "#FFF" : "#0F172A" }}
+            >
               {t("report.turkishAirlines.quarterReport") || "Çäryeklik Deňeşdirme we Maksat Hasabaty"}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
@@ -152,36 +176,45 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
           <Skeleton variant="rectangular" height={140} sx={{ borderRadius: 3 }} />
         </Box>
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {/* 1. Hero KPI Banner: Goal Progress & Remaining Gap */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, flex: 1 }}>
+          {/* Hero KPI Banner */}
           <Box
             sx={{
               p: 2,
               borderRadius: "12px",
-              backgroundColor: quarterInfo?.isCompleted
-                ? isDark
-                  ? "rgba(16, 185, 129, 0.1)"
-                  : "rgba(16, 185, 129, 0.05)"
-                : isDark
-                ? "rgba(20, 184, 166, 0.08)"
-                : "rgba(14, 133, 132, 0.04)",
+              backgroundColor: statusBg,
               border: "1.5px solid",
-              borderColor: quarterInfo?.isCompleted
-                ? "rgba(16, 185, 129, 0.3)"
-                : isDark
-                ? "rgba(20, 184, 166, 0.25)"
-                : "rgba(14, 133, 132, 0.2)",
+              borderColor: statusBorder,
+              position: "relative",
+              overflow: "hidden",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 3,
+                background: `linear-gradient(90deg, ${statusColor} 0%, ${alpha(statusColor, 0.3)} 100%)`,
+              },
             }}
           >
-            {/* Header Status Text */}
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1, flexWrap: "wrap", gap: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 1,
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 {quarterInfo?.isCompleted ? (
                   <CheckCircleRoundedIcon sx={{ color: "#10B981", fontSize: 22 }} />
                 ) : (
                   <HourglassTopRoundedIcon sx={{ color: isDark ? "#F59E0B" : "#D97706", fontSize: 22 }} />
                 )}
-                <Typography variant="body2" sx={{ fontWeight: 700, fontSize: "0.875rem" }}>
+                <Typography variant="body2" sx={{ fontWeight: 700, fontSize: "0.875rem", color: isDark ? "#FFF" : "#0F172A" }}>
                   {quarterInfo?.isCompleted
                     ? "Maksat Doly Amala Aşyryldy!"
                     : "Geçen Çäryek Temasyna Galan Miktar:"}
@@ -198,14 +231,13 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
                 sx={{
                   fontWeight: 800,
                   fontSize: "0.8rem",
-                  backgroundColor: quarterInfo?.isCompleted ? "#10B981" : isDark ? "#F59E0B" : "#EF4444",
+                  backgroundColor: statusColor,
                   color: "#FFFFFF",
                   borderRadius: "6px",
                 }}
               />
             </Box>
 
-            {/* Progress Bar */}
             <LinearProgress
               variant="determinate"
               value={Math.min(100, quarterInfo?.achievementNum || 0)}
@@ -216,37 +248,61 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
                 backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
                 "& .MuiLinearProgress-bar": {
                   borderRadius: 4,
-                  backgroundColor: quarterInfo?.isCompleted ? "#10B981" : teal,
+                  backgroundColor: statusColor,
+                  transition: "transform 0.4s ease",
                 },
               }}
             />
 
-            {/* 3 Executive Stat Cards */}
             <Grid container spacing={1.5}>
               <Grid size={{ xs: 4 }}>
-                <Box sx={{ p: 1, borderRadius: "8px", bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF", textAlign: "center" }}>
+                <Box
+                  sx={{
+                    p: 1.2,
+                    borderRadius: "8px",
+                    bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+                    textAlign: "center",
+                    border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9"}`,
+                  }}
+                >
                   <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem", display: "block" }}>
                     Geçen Ýyl ({quarterInfo?.prevYearData?.year || 2025}) Peýda
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 800, color: "text.primary", mt: 0.2 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 800, color: "text.primary", mt: 0.3 }}>
                     ${formatNumber(quarterInfo?.prevProfit)}
                   </Typography>
                 </Box>
               </Grid>
 
               <Grid size={{ xs: 4 }}>
-                <Box sx={{ p: 1, borderRadius: "8px", bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF", textAlign: "center" }}>
+                <Box
+                  sx={{
+                    p: 1.2,
+                    borderRadius: "8px",
+                    bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+                    textAlign: "center",
+                    border: `1px solid ${alpha(teal, 0.15)}`,
+                  }}
+                >
                   <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem", display: "block" }}>
                     Häzirki Ýyl ({quarterInfo?.currYearData?.year || 2026}) Peýda
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 800, color: teal, mt: 0.2 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 800, color: teal, mt: 0.3 }}>
                     ${formatNumber(quarterInfo?.currProfit)}
                   </Typography>
                 </Box>
               </Grid>
 
               <Grid size={{ xs: 4 }}>
-                <Box sx={{ p: 1, borderRadius: "8px", bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF", textAlign: "center" }}>
+                <Box
+                  sx={{
+                    p: 1.2,
+                    borderRadius: "8px",
+                    bgcolor: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+                    textAlign: "center",
+                    border: `1px solid ${alpha(statusColor, 0.2)}`,
+                  }}
+                >
                   <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.72rem", display: "block" }}>
                     {quarterInfo?.isCompleted ? "Artykmaç Gazanç" : "Kalan Miktar (Galan)"}
                   </Typography>
@@ -254,8 +310,8 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
                     variant="body2"
                     sx={{
                       fontWeight: 800,
-                      color: quarterInfo?.isCompleted ? "#10B981" : "#EF4444",
-                      mt: 0.2,
+                      color: statusColor,
+                      mt: 0.3,
                     }}
                   >
                     {quarterInfo?.isCompleted
@@ -267,7 +323,7 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
             </Grid>
           </Box>
 
-          {/* 2. Structured Year-over-Year Comparison Table */}
+          {/* Year-over-Year Comparison Table */}
           <TableContainer
             component={Paper}
             elevation={0}
@@ -276,49 +332,73 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
               border: "1px solid",
               borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
               backgroundColor: isDark ? "rgba(255, 255, 255, 0.02)" : "#FFFFFF",
+              overflow: "hidden",
             }}
           >
             <Table size="small">
               <TableHead>
                 <TableRow sx={{ backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#F8FAFC" }}>
-                  <TableCell sx={{ fontWeight: 700, fontSize: "0.78rem" }}>Metrik (Görkeziji)</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.78rem" }}>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.78rem", color: isDark ? "rgba(255,255,255,0.6)" : "#475569" }}>
+                    Metrik (Görkeziji)
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.78rem", color: isDark ? "rgba(255,255,255,0.6)" : "#475569" }}>
                     {quarterInfo?.prevYearData?.year || 2025} Ýyl
                   </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.78rem" }}>
+                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.78rem", color: isDark ? "rgba(255,255,255,0.6)" : "#475569" }}>
                     {quarterInfo?.currYearData?.year || 2026} Ýyl
                   </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.78rem" }}>
+                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.78rem", color: isDark ? "rgba(255,255,255,0.6)" : "#475569" }}>
                     Üýtgeşme (Fark)
                   </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {/* Base Fare Row */}
-                <TableRow hover>
-                  <TableCell sx={{ fontSize: "0.78rem", fontWeight: 600 }}>Maya Çykdajysy (Base)</TableCell>
-                  <TableCell align="right" sx={{ fontSize: "0.78rem" }}>${formatNumber(quarterInfo?.prevBase)}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: "0.78rem", fontWeight: 700 }}>${formatNumber(quarterInfo?.currBase)}</TableCell>
+                <TableRow hover sx={{ transition: "background-color 0.15s ease" }}>
+                  <TableCell sx={{ fontSize: "0.78rem", fontWeight: 600, color: isDark ? "rgba(255,255,255,0.85)" : "#334155" }}>
+                    Maya Çykdajysy (Base)
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: "0.78rem", color: isDark ? "rgba(255,255,255,0.7)" : "#475569" }}>
+                    ${formatNumber(quarterInfo?.prevBase)}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: "0.78rem", fontWeight: 700, color: isDark ? "#FFF" : "#0F172A" }}>
+                    ${formatNumber(quarterInfo?.currBase)}
+                  </TableCell>
                   <TableCell align="right" sx={{ fontSize: "0.78rem", fontWeight: 700, color: quarterInfo?.baseDiff >= 0 ? "#10B981" : "#EF4444" }}>
                     {quarterInfo?.baseDiff >= 0 ? `+$${formatNumber(quarterInfo?.baseDiff)}` : `-$${formatNumber(Math.abs(quarterInfo?.baseDiff))}`}
                   </TableCell>
                 </TableRow>
 
-                {/* Quoted Price Row */}
-                <TableRow hover>
-                  <TableCell sx={{ fontSize: "0.78rem", fontWeight: 600 }}>Satylgy Bahasy (Quoted)</TableCell>
-                  <TableCell align="right" sx={{ fontSize: "0.78rem" }}>${formatNumber(quarterInfo?.prevQuoted)}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: "0.78rem", fontWeight: 700 }}>${formatNumber(quarterInfo?.currQuoted)}</TableCell>
+                <TableRow hover sx={{ transition: "background-color 0.15s ease" }}>
+                  <TableCell sx={{ fontSize: "0.78rem", fontWeight: 600, color: isDark ? "rgba(255,255,255,0.85)" : "#334155" }}>
+                    Satylgy Bahasy (Quoted)
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: "0.78rem", color: isDark ? "rgba(255,255,255,0.7)" : "#475569" }}>
+                    ${formatNumber(quarterInfo?.prevQuoted)}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: "0.78rem", fontWeight: 700, color: isDark ? "#FFF" : "#0F172A" }}>
+                    ${formatNumber(quarterInfo?.currQuoted)}
+                  </TableCell>
                   <TableCell align="right" sx={{ fontSize: "0.78rem", fontWeight: 700, color: quarterInfo?.quotedDiff >= 0 ? "#10B981" : "#EF4444" }}>
                     {quarterInfo?.quotedDiff >= 0 ? `+$${formatNumber(quarterInfo?.quotedDiff)}` : `-$${formatNumber(Math.abs(quarterInfo?.quotedDiff))}`}
                   </TableCell>
                 </TableRow>
 
-                {/* Net Profit Row */}
-                <TableRow hover sx={{ backgroundColor: isDark ? "rgba(20, 184, 166, 0.05)" : "rgba(14, 133, 132, 0.03)" }}>
-                  <TableCell sx={{ fontSize: "0.8rem", fontWeight: 800, color: teal }}>Net Peýda (Profit)</TableCell>
-                  <TableCell align="right" sx={{ fontSize: "0.8rem", fontWeight: 700 }}>${formatNumber(quarterInfo?.prevProfit)}</TableCell>
-                  <TableCell align="right" sx={{ fontSize: "0.8rem", fontWeight: 800, color: teal }}>${formatNumber(quarterInfo?.currProfit)}</TableCell>
+                <TableRow
+                  hover
+                  sx={{
+                    backgroundColor: isDark ? "rgba(20, 184, 166, 0.05)" : "rgba(14, 133, 132, 0.03)",
+                    transition: "background-color 0.15s ease",
+                  }}
+                >
+                  <TableCell sx={{ fontSize: "0.8rem", fontWeight: 800, color: teal }}>
+                    Net Peýda (Profit)
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: "0.8rem", fontWeight: 700, color: isDark ? "rgba(255,255,255,0.85)" : "#334155" }}>
+                    ${formatNumber(quarterInfo?.prevProfit)}
+                  </TableCell>
+                  <TableCell align="right" sx={{ fontSize: "0.8rem", fontWeight: 800, color: teal }}>
+                    ${formatNumber(quarterInfo?.currProfit)}
+                  </TableCell>
                   <TableCell align="right" sx={{ fontSize: "0.8rem", fontWeight: 800 }}>
                     <Chip
                       icon={quarterInfo?.profitDiff >= 0 ? <TrendingUpIcon sx={{ fontSize: "14px !important" }} /> : <TrendingDownIcon sx={{ fontSize: "14px !important" }} />}
