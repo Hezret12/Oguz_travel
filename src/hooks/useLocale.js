@@ -5,10 +5,11 @@ import Cookies from 'js-cookie';
 export function useLocale() {
     const { t, i18n } = useTranslation();
 
-    const currentLanguage = i18n.language || Cookies.get('language') || 'tk';
+    const currentLanguage = i18n.language || Cookies.get('language') || localStorage.getItem('language') || 'tk';
 
     function changeLang(value) {
         Cookies.set('language', value, { expires: 365, path: '/' });
+        localStorage.setItem('language', value);
         i18n.changeLanguage(value);
     }
 

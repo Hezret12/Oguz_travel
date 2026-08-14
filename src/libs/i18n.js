@@ -6,7 +6,7 @@ import ru from '../locales/ru.json';
 import tk from '../locales/tk.json';
 import en from '../locales/en.json';
 
-const savedLang = Cookies.get('language') || 'tk';
+const savedLang = Cookies.get('language') || localStorage.getItem('language') || 'tk';
 
 i18n
     .use(initReactI18next)

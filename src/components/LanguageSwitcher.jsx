@@ -8,7 +8,6 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import LanguageIcon from '@mui/icons-material/Language';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useLocale } from '../hooks/useLocale';
 
@@ -30,7 +29,7 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
   const isDark = mode === 'dark';
   const isLogin = variant === 'login';
 
-  const activeLangObj = LANGUAGES.find((l) => l.code === currentLanguage) || LANGUAGES[0];
+  const activeLangObj = LANGUAGES.find((l) => l.code === (currentLanguage || 'tk')) || LANGUAGES[0];
 
   const handleSelectLanguage = (lng) => {
     changeLang(lng);
@@ -44,8 +43,11 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
   const loginTextColor    = isDark ? '#ffffff' : '#1a1a2e';
 
   const loginButtonSx = {
+    width: 142,
+    minWidth: 142,
+    maxWidth: 142,
     height: 36,
-    px: 1.5,
+    px: 1.2,
     borderRadius: '10px',
     backgroundColor: loginTopBtnBg,
     border: `1px solid ${loginTopBtnBorder}`,
@@ -55,6 +57,7 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
     textTransform: 'none',
     backdropFilter: 'blur(8px)',
     letterSpacing: '0.01em',
+    justifyContent: 'space-between',
     '&:hover': {
       backgroundColor: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.14)',
     },
@@ -67,14 +70,17 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
     backdropFilter: 'blur(12px)',
     backgroundColor: isDark ? 'rgba(20,40,60,0.95)' : 'rgba(255,255,255,0.97)',
     border: `1px solid ${loginTopBtnBorder}`,
-    minWidth: 140,
+    width: 142,
     p: 0.5,
   };
 
   const headerButtonSx = {
+    width: 142,
+    minWidth: 142,
+    maxWidth: 142,
     borderRadius: '10px',
     height: 38,
-    px: 1.5,
+    px: 1.2,
     backgroundColor: (theme) =>
       theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
     border: '1px solid',
@@ -82,6 +88,8 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
       theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
     color: (theme) =>
       theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.85)' : '#334155',
+    textTransform: 'none',
+    justifyContent: 'space-between',
     '&:hover': {
       backgroundColor: (theme) =>
         theme.palette.mode === 'dark'
@@ -102,6 +110,7 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
         ? '0px 10px 30px rgba(0,0,0,0.4), 0px 0px 0px 1px rgba(255,255,255,0.08)'
         : '0px 10px 30px rgba(0,0,0,0.1), 0px 0px 0px 1px rgba(0,0,0,0.05)',
     borderRadius: '12px',
+    width: 142,
     p: 0.5,
   };
 
@@ -111,7 +120,21 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
         <Button
           color={isLogin ? undefined : 'inherit'}
           onClick={(e) => setAnchorEl(e.currentTarget)}
-          startIcon={<LanguageIcon sx={{ fontSize: 18 }} />}
+          startIcon={
+            <Box
+              component="img"
+              src={activeLangObj.flag}
+              alt={activeLangObj.label}
+              sx={{
+                width: 20,
+                height: 14,
+                borderRadius: '3px',
+                objectFit: 'cover',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.25)',
+                display: 'block',
+              }}
+            />
+          }
           endIcon={
             <KeyboardArrowDownIcon
               sx={{
@@ -126,14 +149,17 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
         >
           <Typography
             variant="body2"
+            noWrap
             sx={{
+              flex: 1,
+              textAlign: 'left',
+              ml: 0.25,
               fontWeight: 600,
               fontSize: '0.85rem',
-              textTransform: 'uppercase',
               color: isLogin ? loginTopBtnText : 'inherit',
             }}
           >
-            {activeLangObj.shortLabel}
+            {activeLangObj.label}
           </Typography>
         </Button>
       </Tooltip>
