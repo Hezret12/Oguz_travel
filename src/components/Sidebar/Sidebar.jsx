@@ -99,18 +99,21 @@ const SidebarPanel = ({
         },
       }}
     >
-      {navItems.map((item) => (
-        <SidebarItem
-          key={item.text}
-          item={item}
-          location={location}
-          onSidebarClose={onSidebarClose}
-          isExpanded={Boolean(openGroups[item.text])}
-          onToggleGroup={onToggleGroup}
-          collapsed={collapsed}
-          isDark={isDark}
-        />
-      ))}
+      {navItems.map((item) => {
+        const itemKey = item.id || item.text;
+        return (
+          <SidebarItem
+            key={itemKey}
+            item={item}
+            location={location}
+            onSidebarClose={onSidebarClose}
+            isExpanded={Boolean(openGroups[itemKey])}
+            onToggleGroup={onToggleGroup}
+            collapsed={collapsed}
+            isDark={isDark}
+          />
+        );
+      })}
     </List>
 
     <SidebarFooter
@@ -133,18 +136,32 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
   const isDark = mode === "dark";
 
   const filteredNavItems = useMemo(() => {
-    if (!user || !user.permissions) return navItems;
+    if (!user) return [];
+    const role = String(user.role || "").toUpperCase();
+    
+    // SuperAdmin, Admin or wildcard permission has full access
+    if (
+      role === "ADMIN" ||
+      role === "SUPER_ADMIN" ||
+      (Array.isArray(user.permissions) && user.permissions.includes("*"))
+    ) {
+      return navItems;
+    }
+
+    if (!Array.isArray(user.permissions)) return navItems;
+
+    const permSet = new Set(user.permissions);
 
     return navItems
       .map((item) => {
         if (item.isGroup && item.children) {
           const allowedChildren = item.children.filter((child) =>
-            user.permissions.includes(child.path),
+            permSet.has(child.path),
           );
           if (allowedChildren.length === 0) return null;
           return { ...item, children: allowedChildren };
         }
-        if (item.path && !user.permissions.includes(item.path)) {
+        if (item.path && !permSet.has(item.path)) {
           return null;
         }
         return item;
@@ -154,10 +171,18 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
 
   const autoOpenGroups = useMemo(() => {
     const result = {};
+    const currentPath = location.pathname;
     filteredNavItems.forEach((item) => {
       if (!item.isGroup || !item.children) return;
-      if (item.children.some((c) => c.path === location.pathname)) {
-        result[item.text] = true;
+      const key = item.id || item.text;
+      if (
+        item.children.some(
+          (c) =>
+            currentPath === c.path ||
+            (c.path !== "/" && currentPath.startsWith(c.path + "/")),
+        )
+      ) {
+        result[key] = true;
       }
     });
     return result;
@@ -171,10 +196,10 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
   );
 
   const handleGroupToggle = useCallback(
-    (groupText) => {
+    (groupId) => {
       setManualOverrides((prev) => ({
         ...prev,
-        [groupText]: !(prev[groupText] ?? autoOpenGroups[groupText] ?? false),
+        [groupId]: !(prev[groupId] ?? autoOpenGroups[groupId] ?? false),
       }));
     },
     [autoOpenGroups],

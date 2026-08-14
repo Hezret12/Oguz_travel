@@ -3,6 +3,11 @@ import { NavLink } from 'react-router-dom';
 import { Tooltip, ListItemButton, ListItemIcon, ListItemText, Collapse, List, Box } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
 
+const isPathActive = (targetPath, currentPath) => {
+  if (!targetPath || !currentPath) return false;
+  return currentPath === targetPath || (targetPath !== '/' && currentPath.startsWith(targetPath + '/'));
+};
+
 const getTokens = (isDark) => ({
   text: isDark ? '#94A3B8' : '#475569',
   textActive: isDark ? '#F8FAFC' : '#0F172A',
@@ -95,11 +100,12 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
 
 const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, collapsed, isDark }) => {
   const t = getTokens(isDark);
-  const hasActiveChild = item.children?.some((c) => c.path === location.pathname);
+  const itemKey = item.id || item.text;
+  const hasActiveChild = item.children?.some((c) => isPathActive(c.path, location.pathname));
 
   const headerEl = (
     <ListItemButton
-      onClick={() => onToggleGroup(item.text)}
+      onClick={() => onToggleGroup(itemKey)}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -195,10 +201,11 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
           }}
         >
           {item.children?.map((child) => {
-            const isChildActive = location.pathname === child.path;
+            const childKey = child.id || child.path || child.text;
+            const isChildActive = isPathActive(child.path, location.pathname);
             return (
               <ListItemButton
-                key={child.text}
+                key={childKey}
                 component={NavLink}
                 to={child.path}
                 onClick={onSidebarClose}
@@ -278,7 +285,7 @@ const SidebarItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup
     );
   }
 
-  const isActive = location.pathname === item.path;
+  const isActive = isPathActive(item.path, location.pathname);
   return (
     <FlatItem
       item={item}
