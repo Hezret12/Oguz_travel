@@ -56,11 +56,11 @@ const baseFieldStyles = {
   },
   login: {
     '& .MuiOutlinedInput-root': {
-      borderRadius: '18px',
+      borderRadius: '16px',
       backgroundColor: 'transparent',
-      fontSize: '1.05rem',
+      fontSize: '1rem',
       color: 'inherit',
-      height: 50,
+      height: { xs: 48, sm: 50 },
       paddingLeft: '14px',
       paddingRight: '16px',
       gap: 0,
@@ -86,10 +86,8 @@ const baseFieldStyles = {
     '& .MuiFormHelperText-root': {
       color: '#f87171',
       fontSize: '0.75rem',
-      ml: 0,
-      mt: 0.4,
-      position: 'absolute',
-      bottom: '-20px',
+      ml: 0.5,
+      mt: 0.5,
     },
   },
 };
@@ -203,6 +201,7 @@ const PhoneNumberField = ({
                 htmlInput: {
                   maxLength,
                   inputMode: 'numeric',
+                  autoComplete: variant === 'login' ? 'tel' : undefined,
                   style: { paddingLeft: 0 },
                 },
               }}

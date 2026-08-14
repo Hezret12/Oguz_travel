@@ -1,5 +1,7 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import i18n from '../libs/i18n';
+import { getCookieOptions } from '../utils/auth';
 
 const BASE_URL =
   import.meta.env.VITE_API_MODE === 'development'
@@ -21,6 +23,15 @@ axiosInstance.interceptors.request.use(
         config.headers['Authorization'] = `Bearer ${token}`;
       }
     }
+
+    const currentLang = i18n.language || 'tk';
+    if (config.headers?.set) {
+      config.headers.set('Accept-Language', currentLang);
+    } else {
+      config.headers = config.headers || {};
+      config.headers['Accept-Language'] = currentLang;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -119,9 +130,9 @@ axiosInstance.interceptors.response.use(
         throw new Error('No access token in refresh response');
       }
 
-      Cookies.set('accessToken', newAccessToken, { expires: 7 });
+      Cookies.set('accessToken', newAccessToken, getCookieOptions(7));
       if (newRefreshToken) {
-        Cookies.set('refreshToken', newRefreshToken, { expires: 30 });
+        Cookies.set('refreshToken', newRefreshToken, getCookieOptions(30));
       }
 
       processQueue(null, newAccessToken);
@@ -145,8 +156,9 @@ axiosInstance.interceptors.response.use(
         refreshError.message === 'No access token in refresh response';
 
       if (isAuthFailure) {
-        Cookies.remove('accessToken');
-        Cookies.remove('refreshToken');
+        const removeOpts = { path: '/' };
+        Cookies.remove('accessToken', removeOpts);
+        Cookies.remove('refreshToken', removeOpts);
         localStorage.removeItem('user');
         localStorage.removeItem('tableNames');
 

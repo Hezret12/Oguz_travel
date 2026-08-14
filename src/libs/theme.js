@@ -1,6 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 
 export const themeConfig = createTheme({
+    defaultColorScheme: 'light',
     colorSchemes: {
         light: {
             palette: {

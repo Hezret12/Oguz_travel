@@ -50,13 +50,20 @@ export function getStoredSession() {
   }
 }
 
+export const getCookieOptions = (expiresDays = 7) => ({
+  expires: expiresDays,
+  secure: typeof window !== 'undefined' && window.location.protocol === 'https:',
+  sameSite: 'lax',
+  path: '/',
+});
+
 export function persistSession({ accessToken, refreshToken, user, tableNames }) {
   if (accessToken) {
-    Cookies.set('accessToken', accessToken, { expires: 7 });
+    Cookies.set('accessToken', accessToken, getCookieOptions(7));
   }
 
   if (refreshToken) {
-    Cookies.set('refreshToken', refreshToken, { expires: 30 });
+    Cookies.set('refreshToken', refreshToken, getCookieOptions(30));
   }
 
   if (user) {
@@ -69,8 +76,9 @@ export function persistSession({ accessToken, refreshToken, user, tableNames }) 
 }
 
 export function clearSession() {
-  Cookies.remove('accessToken');
-  Cookies.remove('refreshToken');
+  const removeOpts = { path: '/' };
+  Cookies.remove('accessToken', removeOpts);
+  Cookies.remove('refreshToken', removeOpts);
   localStorage.removeItem('user');
   localStorage.removeItem('tableNames');
 }

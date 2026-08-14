@@ -9,11 +9,11 @@ const ProtectedRoute = () => {
   if (loading) return <LoadingScreen />;
   if (!user)   return <Navigate to="/login" replace />;
 
-  if (user.permissions && location.pathname !== '/unauthorized') {
+  if (Array.isArray(user.permissions) && user.permissions.length > 0 && location.pathname !== '/unauthorized') {
     const currentPath = location.pathname;
     const isAllowed = user.permissions.some(
       (permission) =>
-        currentPath === permission || permission.startsWith(currentPath + '/')
+        currentPath === permission || currentPath.startsWith(permission + '/')
     );
 
     if (!isAllowed) {

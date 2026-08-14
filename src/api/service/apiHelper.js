@@ -1,142 +1,45 @@
-import i18n from '../../libs/i18n';
-import Cookies from 'js-cookie';
 import { axiosInstance } from '../axiosIntance';
 
-
-const config = {
-  withCredentials: false,
-};
-
-
-const privateConfig = {
-  headers: {
-    "Authorization": "",
-    "Content-type": "application/json",
-    "Accept-Language" : i18n.language
-  },
-  withCredentials: false,
-};
-
-const getAccessToken = () => Cookies.get('accessToken');
-
-
 export const api = {
-  // Get
-  get: async (url) => {
-    const response = await axiosInstance.get(url, { ...config });
-    return response;
-  },
-  // Post
-  post: async (url, data) => {
-    const response = await axiosInstance.post(url, data, { ...config });
-    return response;
-  },
-  // Put
-  put: async (url, data) => {
-    const response = await axiosInstance.put(url, data, { ...config });
-    return response;
-  },
-  //Patch
-    patch: async (url, data) => {
-    const response = await axiosInstance.patch(url, data, { ...config });
-    return response;
-  },
-  // Delete
-  delete: async (url, data) => {
-    const response = await axiosInstance.delete(url, {
+  // Public methods
+  get: (url, config = {}) => axiosInstance.get(url, config),
+  post: (url, data, config = {}) => axiosInstance.post(url, data, config),
+  put: (url, data, config = {}) => axiosInstance.put(url, data, config),
+  patch: (url, data, config = {}) => axiosInstance.patch(url, data, config),
+  delete: (url, data, config = {}) => axiosInstance.delete(url, { ...config, data }),
+
+  // Private methods (Authorization & Accept-Language are automatically attached by axiosInstance interceptors)
+  getPrivate: (url, queryParams, config = {}) =>
+    axiosInstance.get(url, { ...config, params: queryParams }),
+
+  postPrivate: (url, data, config = {}) =>
+    axiosInstance.post(url, data, config),
+
+  putPrivate: (url, data, config = {}) =>
+    axiosInstance.put(url, data, config),
+
+  patchPrivate: (url, data, config = {}) =>
+    axiosInstance.patch(url, data, config),
+
+  deletePrivate: (url, data, config = {}) =>
+    axiosInstance.delete(url, { ...config, data }),
+
+  // FormData methods (for file uploads)
+  postFormDataPrivate: (url, formData, config = {}) =>
+    axiosInstance.post(url, formData, {
       ...config,
-      data: data,
-    });
-    return response;
-  },
-  // Get private
-  getPrivate: async (url, queryParams) => {
-    const token = 'Bearer ' + getAccessToken();
-    const config = {
-      ...privateConfig,
       headers: {
-        ...privateConfig.headers,
-        Authorization: token
-      },
-      params: queryParams
-    };
-    const res = axiosInstance.get(url, { ...config });
-    return res;
-  },
-  // Post private
-  postPrivate: async (url, data) => {
-    const token = 'Bearer ' + getAccessToken();
-    const config = {
-      ...privateConfig,
-      headers: {
-        ...privateConfig.headers,
-        "Authorization": token,
-      },
-    };
-    const res = await axiosInstance.post(url, { ...data }, { ...config });
-    return res;
-  },
-  // Put private
-  putPrivate: async (url, data) => {
-    const token = 'Bearer ' + getAccessToken();
-    const config = {
-      ...privateConfig,
-      headers: {
-        ...privateConfig.headers,
-        Authorization: token
-      },
-    };
-    const res = await axiosInstance.put(url, { ...data }, { ...config });
-    return res;
-  },
-  //Patch
-   patchPrivate: async (url, data) => {
-    const token = 'Bearer ' + getAccessToken();
-    const config = {
-      ...privateConfig,
-      headers: {
-        ...privateConfig.headers,
-        Authorization: token,
-      },
-    };
-    const res = await axiosInstance.patch(url, { ...data }, { ...config });
-    return res;
-  },
-  // Delete private
-  deletePrivate: async (url, data) => {
-    const token = 'Bearer ' + getAccessToken();
-    const config = {
-      ...privateConfig,
-      headers: {
-        ...privateConfig.headers,
-        Authorization: token
-      },
-    };
-    const res = await axiosInstance.delete(url, { ...config, data: data });
-    return res;
-  },
-  // Post FormData private (for file upload)
-  postFormDataPrivate: async (url, formData) => {
-    const token = 'Bearer ' + getAccessToken();
-    const res = await axiosInstance.post(url, formData, {
-      headers: {
-        Authorization: token,
         'Content-Type': 'multipart/form-data',
-        'Accept-Language': i18n.language,
+        ...config.headers,
       },
-    });
-    return res;
-  },
-  // Patch FormData private (for file upload)
-  patchFormDataPrivate: async (url, formData) => {
-    const token = 'Bearer ' + getAccessToken();
-    const res = await axiosInstance.patch(url, formData, {
+    }),
+
+  patchFormDataPrivate: (url, formData, config = {}) =>
+    axiosInstance.patch(url, formData, {
+      ...config,
       headers: {
-        Authorization: token,
         'Content-Type': 'multipart/form-data',
-        'Accept-Language': i18n.language,
+        ...config.headers,
       },
-    });
-    return res;
-  },
+    }),
 };
