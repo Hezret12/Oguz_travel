@@ -74,13 +74,11 @@ function App() {
       }
     };
 
-    // 1. Min duration gate: Ensure 1 full logo animation cycle plays (1.4s)
     const minTimer = setTimeout(() => {
       minTimePassed = true;
       tryFinish();
     }, 1400);
 
-    // 2. App load gate: Ensure assets and initial DOM/chunks are loaded
     const handleLoad = () => {
       isAppLoaded = true;
       tryFinish();
@@ -90,7 +88,6 @@ function App() {
       window.addEventListener("load", handleLoad);
     }
 
-    // 3. Production Safety Net: Max 6s fallback limit (prevents freezing on bad network)
     const maxSafetyTimer = setTimeout(() => {
       isAppLoaded = true;
       minTimePassed = true;
