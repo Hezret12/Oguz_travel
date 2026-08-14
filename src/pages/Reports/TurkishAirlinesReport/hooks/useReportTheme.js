@@ -1,43 +1,50 @@
 import { useMemo } from "react";
 import { useTheme } from "@mui/material";
 
-/**
- * Centralizes all theme-aware design tokens and memoized style objects
- * used across TurkishAirlinesReport sub-components.
- */
 const useReportTheme = () => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
-  /* ── Color Tokens ── */
   const colors = useMemo(
     () => ({
-      teal: isDark ? "#14B8A6" : "#0E8584",
+      teal: isDark ? "#2DD4BF" : "#0E8584",
+      tealSoft: isDark ? "#14B8A6" : "#0D9488",
       accent: isDark ? "#22D3EE" : "#0284C7",
       green: isDark ? "#34D399" : "#10B981",
       orange: isDark ? "#FBBF24" : "#D97706",
+      red: "#EF4444",
       bgCard: isDark ? "#031E2A" : "#FFFFFF",
       bgSticky: isDark ? "#021721" : "#FFFFFF",
       bgHeader: isDark ? "#052938" : "#F8FAFC",
       border: isDark ? "rgba(20, 184, 166, 0.15)" : "#E2E8F0",
+      hoverTeal: isDark ? "rgba(20,184,166,0.08)" : "rgba(14,133,132,0.05)",
+      gradientTeal: isDark
+        ? "linear-gradient(135deg, rgba(20,184,166,0.12) 0%, rgba(34,211,238,0.06) 100%)"
+        : "linear-gradient(135deg, rgba(14,133,132,0.06) 0%, rgba(2,132,199,0.04) 100%)",
+      shadowCard: isDark
+        ? "0 8px 32px rgba(0,0,0,0.36), 0 2px 8px rgba(20,184,166,0.08)"
+        : "0 2px 12px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03)",
+      shadowHover: isDark
+        ? "0 12px 40px rgba(0,0,0,0.4), 0 4px 12px rgba(20,184,166,0.12)"
+        : "0 8px 28px rgba(0,0,0,0.08), 0 2px 8px rgba(14,133,132,0.06)",
     }),
     [isDark]
   );
 
-  /* ── Paper Card Style ── */
   const paperSx = useMemo(
     () => ({
       borderRadius: 3,
       border: `1px solid ${colors.border}`,
       backgroundColor: colors.bgCard,
-      boxShadow: isDark
-        ? "0 8px 32px rgba(0,0,0,0.36)"
-        : "0 2px 12px rgba(0,0,0,0.04)",
+      boxShadow: colors.shadowCard,
+      transition: "box-shadow 0.25s ease, transform 0.25s ease",
+      "&:hover": {
+        boxShadow: colors.shadowHover,
+      },
     }),
-    [colors, isDark]
+    [colors]
   );
 
-  /* ── Date Select Style ── */
   const selectSx = useMemo(
     () => ({
       backgroundColor: isDark ? "rgba(20,184,166,0.06)" : "#FFFFFF",
@@ -48,12 +55,12 @@ const useReportTheme = () => {
       },
       "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
         borderColor: colors.teal,
+        borderWidth: 1.5,
       },
     }),
     [isDark, colors]
   );
 
-  /* ── Table Cell Styles ── */
   const headerCellSx = useMemo(
     () => ({
       fontWeight: 700,
@@ -61,7 +68,7 @@ const useReportTheme = () => {
       letterSpacing: "0.06em",
       textTransform: "uppercase",
       color: isDark ? "rgba(255,255,255,0.6)" : "#475569",
-      borderBottom: `1px solid ${colors.border}`,
+      borderBottom: `2px solid ${isDark ? "rgba(20,184,166,0.2)" : "#E2E8F0"}`,
       py: 1.5,
       px: 1.5,
       whiteSpace: "nowrap",

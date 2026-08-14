@@ -22,7 +22,13 @@ const ReportHeader = ({
   const monthLabel = dayjs(selectedDate).format("MMMM YYYY");
 
   return (
-    <Paper sx={{ ...paperSx, p: { xs: 2, sm: 2.5 } }}>
+    <Paper
+      sx={{
+        ...paperSx,
+        p: 0,
+        overflow: "hidden",
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -30,19 +36,35 @@ const ReportHeader = ({
           justifyContent: "space-between",
           flexWrap: "wrap",
           gap: 2,
+          p: { xs: 2, sm: 2.5 },
+          background: isDark
+            ? `linear-gradient(135deg, rgba(20,184,166,0.08) 0%, rgba(34,211,238,0.04) 100%)`
+            : `linear-gradient(135deg, rgba(14,133,132,0.04) 0%, rgba(2,132,199,0.02) 100%)`,
+          position: "relative",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 4,
+            background: `linear-gradient(180deg, ${teal} 0%, ${alpha(teal, 0.3)} 100%)`,
+            borderRadius: "0 4px 4px 0",
+          },
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box
             sx={{
-              width: 46,
-              height: 46,
+              width: 48,
+              height: 48,
               borderRadius: 2.5,
               backgroundColor: alpha(teal, 0.15),
               color: teal,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              border: `1px solid ${alpha(teal, 0.2)}`,
             }}
           >
             <AssessmentRoundedIcon sx={{ fontSize: 26 }} />
@@ -54,6 +76,7 @@ const ReportHeader = ({
                 fontWeight: 800,
                 color: isDark ? "#FFF" : "#0F172A",
                 lineHeight: 1.2,
+                fontSize: { xs: "1.1rem", sm: "1.25rem" },
               }}
             >
               {t("report.turkishAirlines.title")}
@@ -63,11 +86,25 @@ const ReportHeader = ({
               sx={{
                 color: isDark ? "rgba(255,255,255,0.5)" : "#64748B",
                 fontSize: 13,
-                mt: 0.2,
+                mt: 0.3,
                 textTransform: "capitalize",
+                display: "flex",
+                alignItems: "center",
+                gap: 0.8,
               }}
             >
-              {monthLabel} • {t("report.turkishAirlines.subTitle")}
+              {monthLabel}
+              <Box
+                component="span"
+                sx={{
+                  width: 3,
+                  height: 3,
+                  borderRadius: "50%",
+                  backgroundColor: isDark ? "rgba(255,255,255,0.3)" : "#94A3B8",
+                  display: "inline-block",
+                }}
+              />
+              {t("report.turkishAirlines.subTitle")}
             </Typography>
           </Box>
         </Box>
@@ -80,7 +117,6 @@ const ReportHeader = ({
             flexWrap: "wrap",
           }}
         >
-          {/* Day.js & MUI X DatePicker for Month & Year */}
           <DatePicker
             views={["year", "month"]}
             value={selectedDate}
@@ -108,7 +144,6 @@ const ReportHeader = ({
             }}
           />
 
-          {/* Quarter Select (1, 2, 3, 4) */}
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <Select
               value={selectedQuarter ?? ""}

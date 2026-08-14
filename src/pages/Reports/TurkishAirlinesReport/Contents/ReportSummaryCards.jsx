@@ -18,6 +18,19 @@ const SummaryCard = memo(
         flexDirection: "column",
         gap: 1.2,
         position: "relative",
+        overflow: "hidden",
+        "&::before": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 3,
+          background: `linear-gradient(90deg, ${color} 0%, ${alpha(color, 0.3)} 100%)`,
+        },
+        "&:hover": {
+          transform: "translateY(-2px)",
+        },
       }}
     >
       <Box
@@ -29,14 +42,16 @@ const SummaryCard = memo(
       >
         <Box
           sx={{
-            width: 42,
-            height: 42,
+            width: 44,
+            height: 44,
             borderRadius: 2.5,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: alpha(color, 0.12),
             color: color,
+            border: `1px solid ${alpha(color, 0.15)}`,
+            transition: "transform 0.2s ease",
           }}
         >
           {icon}
@@ -62,6 +77,7 @@ const SummaryCard = memo(
             fontFamily: "'Inter', sans-serif",
             color: isDark ? "#FFF" : "#0F172A",
             letterSpacing: "-0.02em",
+            lineHeight: 1.1,
           }}
         >
           {value}
@@ -72,7 +88,7 @@ const SummaryCard = memo(
             fontWeight: 600,
             color: isDark ? "rgba(255,255,255,0.7)" : "#475569",
             fontSize: 13,
-            mt: 0.2,
+            mt: 0.3,
           }}
         >
           {label}

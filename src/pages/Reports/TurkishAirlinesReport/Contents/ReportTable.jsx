@@ -10,6 +10,7 @@ import {
   TableHead,
   TableRow,
   Skeleton,
+  alpha,
   useTheme,
 } from "@mui/material";
 import AccountBalanceWalletRoundedIcon from "@mui/icons-material/AccountBalanceWalletRounded";
@@ -17,17 +18,16 @@ import { useLocale } from "../../../../hooks/useLocale";
 
 const ReportTable = ({
   isLoading,
-  offices,
-  rows,
-  footer,
-  grandTotal,
+  offices = [],
+  rows = [],
+  footer = [],
+  grandTotal = {},
   findFooter,
   formatNumber,
   daysInMonth,
   teal,
   accent,
   green,
-  orange,
   borderCol,
   paperSx,
   headerCellSx,
@@ -40,8 +40,15 @@ const ReportTable = ({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
+  const stickyShadow = isDark
+    ? "inset 4px 0 6px -4px rgba(0,0,0,0.5)"
+    : "inset 4px 0 6px -4px rgba(0,0,0,0.1)";
+  const stickyShadowRight = isDark
+    ? "inset -4px 0 6px -4px rgba(0,0,0,0.5)"
+    : "inset -4px 0 6px -4px rgba(0,0,0,0.1)";
+
   return (
-    <Paper sx={paperSx}>
+    <Paper sx={{ ...paperSx, p: 0, overflow: "hidden" }}>
       <Box
         sx={{
           display: "flex",
@@ -50,10 +57,27 @@ const ReportTable = ({
           px: 2.5,
           py: 2,
           borderBottom: `1px solid ${borderCol}`,
+          background: isDark
+            ? "linear-gradient(135deg, rgba(16,185,129,0.06) 0%, transparent 100%)"
+            : "linear-gradient(135deg, rgba(16,185,129,0.04) 0%, transparent 100%)",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-          <AccountBalanceWalletRoundedIcon sx={{ color: green, fontSize: 22 }} />
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: 2,
+              backgroundColor: alpha(green, 0.12),
+              color: green,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: `1px solid ${alpha(green, 0.15)}`,
+            }}
+          >
+            <AccountBalanceWalletRoundedIcon sx={{ fontSize: 20 }} />
+          </Box>
           <Typography
             variant="subtitle1"
             sx={{ fontWeight: 700, color: isDark ? "#FFF" : "#0F172A" }}
@@ -63,7 +87,14 @@ const ReportTable = ({
         </Box>
         <Typography
           variant="caption"
-          sx={{ color: isDark ? "rgba(255,255,255,0.4)" : "#64748B" }}
+          sx={{
+            color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
+            fontWeight: 600,
+            px: 1.5,
+            py: 0.5,
+            borderRadius: 1.5,
+            backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9",
+          }}
         >
           {daysInMonth} {t("report.turkishAirlines.daysData")}
         </Typography>
@@ -96,6 +127,7 @@ const ReportTable = ({
                     width: 48,
                     minWidth: 48,
                     px: 1,
+                    boxShadow: stickyShadow,
                   }}
                 >
                   {t("report.turkishAirlines.day")}
@@ -119,6 +151,7 @@ const ReportTable = ({
                     zIndex: 3,
                     backgroundColor: bgHeader,
                     minWidth: 110,
+                    boxShadow: stickyShadowRight,
                   }}
                 >
                   {t("report.turkishAirlines.total")}
@@ -130,152 +163,179 @@ const ReportTable = ({
               {offices.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={offices.length + 2} align="center" sx={{ py: 6 }}>
-                    <Typography variant="body2" sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontWeight: 600 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: isDark ? "rgba(255,255,255,0.5)" : "#64748B",
+                        fontWeight: 600,
+                      }}
+                    >
                       {t("noData")}
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                rows.map((row, idx) => (
-                  <TableRow
-                    key={row.day}
-                    sx={{
-                      backgroundColor:
-                        idx % 2 === 1
-                          ? isDark
-                            ? "rgba(255,255,255,0.015)"
-                            : "#F8FAFC"
-                          : "transparent",
-                      "&:hover": {
-                        backgroundColor: isDark
-                          ? "rgba(20,184,166,0.08)"
-                          : "rgba(14,133,132,0.05)",
-                      },
-                      transition: "background-color 0.15s ease",
-                    }}
-                  >
-                    <TableCell
-                      align="center"
+                rows.map((row, idx) => {
+                  const isEven = idx % 2 === 1;
+                  const rowBg = isEven
+                    ? isDark
+                      ? "rgba(255,255,255,0.015)"
+                      : "#F8FAFC"
+                    : "transparent";
+                  const stickyBg = isEven
+                    ? isDark
+                      ? "#021721"
+                      : "#F8FAFC"
+                    : bgSticky;
+
+                  return (
+                    <TableRow
+                      key={row.day}
                       sx={{
-                        ...bodyCellSx,
-                        fontWeight: 700,
-                        color: teal,
-                        fontSize: 13.5,
-                        position: "sticky",
-                        left: 0,
-                        zIndex: 1,
-                        width: 48,
-                        minWidth: 48,
-                        px: 1,
-                        backgroundColor:
-                          idx % 2 === 1
-                            ? isDark
-                              ? "#021721"
-                              : "#F8FAFC"
-                            : bgSticky,
+                        backgroundColor: rowBg,
+                        "&:hover": {
+                          backgroundColor: isDark
+                            ? "rgba(20,184,166,0.08)"
+                            : "rgba(14,133,132,0.05)",
+                        },
+                        transition: "background-color 0.15s ease",
                       }}
                     >
-                      {row.day}
-                    </TableCell>
-                    {offices.map(({ short }) => {
-                      const cellVal = row[short];
-                      if (!cellVal) {
+                      <TableCell
+                        align="center"
+                        sx={{
+                          ...bodyCellSx,
+                          fontWeight: 700,
+                          color: teal,
+                          fontSize: 13.5,
+                          position: "sticky",
+                          left: 0,
+                          zIndex: 1,
+                          width: 48,
+                          minWidth: 48,
+                          px: 1,
+                          backgroundColor: stickyBg,
+                          boxShadow: stickyShadow,
+                        }}
+                      >
+                        {row.day}
+                      </TableCell>
+                      {offices.map(({ short }) => {
+                        const cellVal = row[short];
+                        if (!cellVal) {
+                          return (
+                            <TableCell key={short} align="center" sx={bodyCellSx}>
+                              <Typography
+                                component="span"
+                                sx={{
+                                  color: isDark
+                                    ? "rgba(255,255,255,0.15)"
+                                    : "#CBD5E1",
+                                }}
+                              >
+                                —
+                              </Typography>
+                            </TableCell>
+                          );
+                        }
+                        const quoted =
+                          typeof cellVal === "object"
+                            ? cellVal.quoted
+                            : Number(cellVal) || 0;
+                        const base =
+                          typeof cellVal === "object" ? cellVal.base : 0;
+
                         return (
                           <TableCell key={short} align="center" sx={bodyCellSx}>
-                            —
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 0.5,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              <Typography
+                                component="span"
+                                sx={{
+                                  fontWeight: 600,
+                                  fontSize: 13,
+                                  lineHeight: 1.2,
+                                  color: isDark ? "rgba(255,255,255,0.9)" : "#1E293B",
+                                }}
+                              >
+                                {quoted > 0 ? formatNumber(quoted) : "0"}
+                              </Typography>
+                              {base > 0 && (
+                                <>
+                                  <Typography
+                                    component="span"
+                                    sx={{
+                                      fontSize: 11,
+                                      color: isDark
+                                        ? "rgba(255,255,255,0.2)"
+                                        : "#CBD5E1",
+                                      fontWeight: 400,
+                                      lineHeight: 1.2,
+                                    }}
+                                  >
+                                    |
+                                  </Typography>
+                                  <Typography
+                                    component="span"
+                                    sx={{
+                                      fontSize: 12,
+                                      color: "#EF4444",
+                                      fontWeight: 600,
+                                      lineHeight: 1.2,
+                                    }}
+                                  >
+                                    {formatNumber(base)}
+                                  </Typography>
+                                </>
+                              )}
+                            </Box>
                           </TableCell>
                         );
-                      }
-                      const quoted = typeof cellVal === "object" ? cellVal.quoted : Number(cellVal) || 0;
-                      const base = typeof cellVal === "object" ? cellVal.base : 0;
-
-                      return (
-                        <TableCell key={short} align="center" sx={bodyCellSx}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: 0.6,
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: 600, fontSize: 13, lineHeight: 1.2 }}
-                            >
-                              {quoted > 0 ? formatNumber(quoted) : "0"}
-                            </Typography>
-                            {base > 0 && (
-                              <>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    fontSize: 13,
-                                    color: isDark ? "rgba(255,255,255,0.4)" : "#94A3B8",
-                                    fontWeight: 500,
-                                    lineHeight: 1.2,
-                                  }}
-                                >
-                                  |
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    fontSize: 13,
-                                    color: "#EF4444",
-                                    fontWeight: 600,
-                                    lineHeight: 1.2,
-                                  }}
-                                >
-                                  {formatNumber(base)}
-                                </Typography>
-                              </>
-                            )}
-                          </Box>
-                        </TableCell>
-                      );
-                    })}
-                    <TableCell
-                      align="right"
-                      sx={{
-                        ...bodyCellSx,
-                        fontWeight: 700,
-                        color:
-                          row.total > 0
-                            ? green
-                            : isDark
-                              ? "rgba(255,255,255,0.2)"
-                              : "#CBD5E1",
-                        fontSize: 13.5,
-                        position: "sticky",
-                        right: 0,
-                        zIndex: 1,
-                        backgroundColor:
-                          idx % 2 === 1
-                            ? isDark
-                              ? "#021721"
-                              : "#F8FAFC"
-                            : bgSticky,
-                      }}
-                    >
-                      {row.total > 0 ? formatNumber(row.total) : "0"}
-                    </TableCell>
-                  </TableRow>
-                ))
+                      })}
+                      <TableCell
+                        align="right"
+                        sx={{
+                          ...bodyCellSx,
+                          fontWeight: 700,
+                          color:
+                            row.total > 0
+                              ? green
+                              : isDark
+                                ? "rgba(255,255,255,0.2)"
+                                : "#CBD5E1",
+                          fontSize: 13.5,
+                          position: "sticky",
+                          right: 0,
+                          zIndex: 1,
+                          backgroundColor: stickyBg,
+                          boxShadow: stickyShadowRight,
+                        }}
+                      >
+                        {row.total > 0 ? formatNumber(row.total) : "0"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
 
-              {/* ── Summary Footer Rows ── */}
+              {/* Summary Footer Rows */}
               {footer.length > 0 && (
                 <>
                   <TableRow>
                     <TableCell
                       colSpan={offices.length + 2}
                       sx={{
-                        py: 1,
+                        py: 1.2,
                         borderBottom: "none",
                         backgroundColor: isDark
-                          ? "rgba(20,184,166,0.04)"
+                          ? "rgba(20,184,166,0.06)"
                           : "#F1F5F9",
                       }}
                     >
@@ -302,6 +362,7 @@ const ReportTable = ({
                         left: 0,
                         zIndex: 1,
                         backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        boxShadow: stickyShadow,
                       }}
                     >
                       {t("report.turkishAirlines.baseFare")}
@@ -309,7 +370,11 @@ const ReportTable = ({
                     {offices.map(({ short }) => {
                       const f = findFooter(short);
                       return (
-                        <TableCell key={short} align="center" sx={{ ...footerCellSx, color: "#EF4444" }}>
+                        <TableCell
+                          key={short}
+                          align="center"
+                          sx={{ ...footerCellSx, color: "#EF4444" }}
+                        >
                           {f ? formatNumber(f.total_base) : "—"}
                         </TableCell>
                       );
@@ -323,6 +388,7 @@ const ReportTable = ({
                         right: 0,
                         zIndex: 1,
                         backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        boxShadow: stickyShadowRight,
                       }}
                     >
                       {formatNumber(grandTotal.month_total_base)}
@@ -339,6 +405,7 @@ const ReportTable = ({
                         left: 0,
                         zIndex: 1,
                         backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        boxShadow: stickyShadow,
                       }}
                     >
                       {t("report.turkishAirlines.quotedPrice")}
@@ -365,6 +432,7 @@ const ReportTable = ({
                         right: 0,
                         zIndex: 1,
                         backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        boxShadow: stickyShadowRight,
                       }}
                     >
                       {formatNumber(grandTotal.month_total_quoted)}
@@ -381,6 +449,7 @@ const ReportTable = ({
                         left: 0,
                         zIndex: 1,
                         backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        boxShadow: stickyShadow,
                       }}
                     >
                       {t("report.turkishAirlines.percentage")}
@@ -414,6 +483,7 @@ const ReportTable = ({
                         right: 0,
                         zIndex: 1,
                         backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        boxShadow: stickyShadowRight,
                       }}
                     >
                       100%
