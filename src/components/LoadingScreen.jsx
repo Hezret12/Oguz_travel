@@ -1,8 +1,9 @@
-import { Box, CircularProgress, Typography, Fade } from '@mui/material';
+import { Box, CircularProgress, Fade } from '@mui/material';
+import OguzLogo from '../assets/icons/OguzLogo';
 
 const LoadingScreen = () => {
   return (
-    <Fade in={true} timeout={400}>
+    <Fade in={true} timeout={300}>
       <Box
         sx={{
           display: 'flex',
@@ -15,8 +16,7 @@ const LoadingScreen = () => {
           top: 0,
           left: 0,
           zIndex: 9999,
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? '#1E293B' : '#F8FAFC',
+          backgroundColor: (theme) => theme.palette.background.default,
           transition: 'background-color 0.3s ease',
         }}
       >
@@ -25,65 +25,45 @@ const LoadingScreen = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 3,
+            gap: 3.5,
           }}
         >
-          {/* Outer glow container for spinner */}
+          {/* Branded Logo with smooth breathing animation */}
           <Box
             sx={{
-              position: 'relative',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: 80,
-              height: 80,
+              animation: 'logoBreathe 2.4s infinite ease-in-out',
+              '@keyframes logoBreathe': {
+                '0%, 100%': {
+                  transform: 'scale(1)',
+                  opacity: 0.88,
+                  filter: 'drop-shadow(0 4px 12px rgba(14,133,132,0.15))',
+                },
+                '50%': {
+                  transform: 'scale(1.03)',
+                  opacity: 1,
+                  filter: 'drop-shadow(0 8px 24px rgba(14,133,132,0.30))',
+                },
+              },
             }}
           >
-            <CircularProgress
-              size={60}
-              thickness={4}
+            <OguzLogo
               sx={{
-                color: (theme) =>
-                  theme.palette.mode === 'dark' ? '#38BDF8' : '#2563EB',
-              }}
-            />
-            {/* Subtle inner pulse decoration */}
-            <Box
-              sx={{
-                position: 'absolute',
-                width: 30,
-                height: 30,
-                borderRadius: '50%',
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'dark' ? '#38BDF8' : '#2563EB',
-                opacity: 0.15,
-                animation: 'pulse 1.5s infinite ease-in-out',
-                '@keyframes pulse': {
-                  '0%': { transform: 'scale(0.8)', opacity: 0.2 },
-                  '50%': { transform: 'scale(1.2)', opacity: 0.5 },
-                  '100%': { transform: 'scale(0.8)', opacity: 0.2 },
-                },
+                width: { xs: 180, sm: 220 },
+                height: 'auto',
+                display: 'block',
               }}
             />
           </Box>
 
-          <Typography
-            variant="h6"
+          {/* Minimalist, branded spinner */}
+          <CircularProgress
+            size={28}
+            thickness={3.5}
             sx={{
-              fontWeight: 600,
-              letterSpacing: '0.05em',
-              color: (theme) =>
-                theme.palette.mode === 'dark' ? '#F1F5F9' : '#1E293B',
-              fontFamily: 'Outfit, Inter, sans-serif',
-              animation: 'shimmer 2s infinite ease-in-out',
-              '@keyframes shimmer': {
-                '0%, 100%': { opacity: 0.6 },
-                '50%': { opacity: 1 },
-              },
+              color: 'primary.main',
+              opacity: 0.9,
             }}
-          >
-            OGUZ TRAVEL
-          </Typography>
+          />
         </Box>
       </Box>
     </Fade>
