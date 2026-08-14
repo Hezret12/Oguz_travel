@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
@@ -93,14 +94,12 @@ export function AuthProvider({ children }) {
 
       let userObj = rawUser;
       if (!userObj) {
-        const {
-          accessToken: _at,
-          refreshToken: _rt,
-          access_token: _at2,
-          refresh_token: _rt2,
-          tableNames: _tn,
-          ...rest
-        } = sessionData;
+        const rest = { ...sessionData };
+        delete rest.accessToken;
+        delete rest.refreshToken;
+        delete rest.access_token;
+        delete rest.refresh_token;
+        delete rest.tableNames;
         userObj = rest;
       }
 

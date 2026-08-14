@@ -47,7 +47,7 @@ const EditUserModal = ({ table, row }) => {
           : `+993${row.original.phoneNumber.replace(/\s/g, "")}`)
         : "",
       isActive: row?.original?.isActive ?? true,
-      isExternalUser: row?.original?.isExternalUser ?? !Boolean(row?.original?.employee_guid || row?.original?.employee?.guid),
+      isExternalUser: row?.original?.isExternalUser ?? !(row?.original?.employee_guid || row?.original?.employee?.guid),
       isAdmin: Boolean(row?.original?.isAdmin || row?.original?.user_is_admin || row?.original?.role === "admin"),
       permissions: row?.original?.permissions || [],
     },

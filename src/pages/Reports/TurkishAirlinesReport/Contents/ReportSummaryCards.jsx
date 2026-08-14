@@ -3,7 +3,6 @@ import { Box, Typography, Paper, Chip, alpha, useTheme } from "@mui/material";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
-import PriceCheckRoundedIcon from "@mui/icons-material/PriceCheckRounded";
 import PendingActionsRoundedIcon from "@mui/icons-material/PendingActionsRounded";
 import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
 import { useLocale } from "../../../../hooks/useLocale";

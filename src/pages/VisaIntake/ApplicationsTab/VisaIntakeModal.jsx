@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Grid, CircularProgress, Box, FormControl, Select, MenuItem, Typography, Autocomplete, TextField } from "@mui/material";
+import { Grid, CircularProgress, Box, Typography, Autocomplete, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
@@ -27,8 +27,6 @@ import {
   sortVisaFields,
   isOperatorField,
   isOperator2Field,
-  isClientField,
-  isNotesField,
 } from "../../../functions/visaCountryFieldConfigs";
 
 const DynamicVisaField = ({
@@ -38,7 +36,6 @@ const DynamicVisaField = ({
   initialClient,
   employeeOptions = [],
 }) => {
-  const { t } = useLocale();
   const fieldKey = field.fieldKey;
   const label = selectedLang(field.labelTm) || field.labelTm || fieldKey;
 
@@ -323,7 +320,7 @@ export const VisaIntakeModal = ({
       const key = field.fieldKey;
       const val = formData[key];
 
-      let formattedVal = val;
+      let formattedVal;
       if (field.fieldType === "date") {
         if (val && dayjs.isDayjs(val) && val.isValid()) {
           formattedVal = val.format("YYYY-MM-DD");

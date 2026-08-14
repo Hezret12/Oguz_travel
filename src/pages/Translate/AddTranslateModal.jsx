@@ -57,7 +57,6 @@ const AddTranslateModal = ({ table }) => {
     control,
     handleSubmit,
     setValue,
-    formState: { isSubmitting },
   } = useForm({
     resolver: yupResolver(addTranslation),
     defaultValues: {

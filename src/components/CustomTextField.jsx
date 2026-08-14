@@ -18,7 +18,7 @@ const CustomTextField = ({
   onChange,
   sx = {},
   InputProps = {},
-  InputLabelProps = {},
+  InputLabelProps,
   ...props
 }) => {
   return (
@@ -66,6 +66,7 @@ const CustomTextField = ({
               helperText={error?.message}
               fullWidth
               slotProps={{
+                ...(InputLabelProps ? { inputLabel: InputLabelProps } : {}),
                 input: {
                   ...InputProps,
                   startAdornment: startIcon ? (

@@ -48,9 +48,9 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
       <Tooltip title={t('header.languageTooltip') || 'Language'}>
         <Button
           id="language-switcher-button"
-          aria-controls={Boolean(anchorEl) ? 'language-switcher-menu' : undefined}
+          aria-controls={anchorEl ? 'language-switcher-menu' : undefined}
           aria-haspopup="true"
-          aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
+          aria-expanded={anchorEl ? 'true' : undefined}
           onClick={handleOpen}
           startIcon={
             <Box
@@ -72,7 +72,7 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
               sx={{
                 fontSize: 16,
                 transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                transform: Boolean(anchorEl) ? 'rotate(180deg)' : 'none',
+                transform: anchorEl ? 'rotate(180deg)' : 'none',
                 opacity: 0.8,
               }}
             />

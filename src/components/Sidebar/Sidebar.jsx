@@ -6,7 +6,6 @@ import SidebarItem from "./SidebarItem";
 import SidebarFooter from "./SidebarFooter";
 import { useAuth } from "../../context/AuthContext";
 import { useNavItems } from "../../hooks/useSidebarItems";
-import OguzLogo from "../../assets/icons/OguzLogo";
 
 const SIDEBAR_W = 280;
 const SIDEBAR_CW = 68;

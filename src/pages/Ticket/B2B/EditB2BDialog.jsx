@@ -86,7 +86,7 @@ const EditB2BDialog = ({ table, row }) => {
     },
   });
 
-  const { control, handleSubmit, watch, setValue } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
       guid: row?.original?.guid || "",
       datetime: row?.original?.datetime || "",

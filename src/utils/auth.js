@@ -26,7 +26,7 @@ export function normalizeUser(rawUser) {
   };
 }
 
-export function getRoleHomePath(role) {
+export function getRoleHomePath() {
   return '/';
 }
 

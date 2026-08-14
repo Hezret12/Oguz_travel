@@ -34,8 +34,16 @@ import { useUpdate } from "../../hooks/CRUD/useUpdate";
 const CURRENCY_SYMBOLS = {
   USD: "$",
   EUR: "€",
-  TMT: "m",
+  TRY: "₺",
+  TMT: "TMT",
   RUB: "₽",
+  AED: "AED",
+};
+
+let localPaymentIdCounter = 0;
+const getNextLocalPaymentGuid = () => {
+  localPaymentIdCounter += 1;
+  return `p-${localPaymentIdCounter}`;
 };
 
 const formatCurrency = (val, currencyCode = "USD") => {
@@ -89,7 +97,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const [localPayments, setLocalPayments] = useState([]);
   const [editingPayment, setEditingPayment] = useState(null);
 
-  const { handleSubmit, reset, watch, control } = useForm({
+  const { handleSubmit, reset, control } = useForm({
     defaultValues: {
       amount: "",
       paymentDate: new Date().toISOString(),
@@ -369,12 +377,15 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       employeeOptions?.[0]?.value ||
       null;
 
+    const nowIso = new Date().toISOString();
+    const resolvedPaymentDate = paymentDate ? new Date(paymentDate).toISOString() : nowIso;
+
     if (editingPayment) {
       if (ticketGuid && !String(editingPayment.guid).startsWith("p-")) {
         const payload = {
           guid: editingPayment.guid,
           amount: Number(amount),
-          payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
+          payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
         };
@@ -400,12 +411,12 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           prev.map((p) =>
             (p.guid || p.id) === editingPayment.guid
               ? {
-                ...p,
-                amount: Number(amount),
-                payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
-                note: description?.trim() || "",
-                opr_guid: resolvedOprGuid,
-              }
+                  ...p,
+                  amount: Number(amount),
+                  payment_date: resolvedPaymentDate,
+                  note: description?.trim() || "",
+                  opr_guid: resolvedOprGuid,
+                }
               : p
           )
         );
@@ -415,7 +426,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       if (ticketGuid) {
         const payload = {
           amount: Number(amount),
-          payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
+          payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
         };
@@ -438,9 +449,9 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       } else {
         // Local fallback
         const newPayment = {
-          guid: `p-${Date.now()}`,
+          guid: getNextLocalPaymentGuid(),
           amount: Number(amount),
-          payment_date: paymentDate ? new Date(paymentDate).toISOString() : new Date().toISOString(),
+          payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
         };

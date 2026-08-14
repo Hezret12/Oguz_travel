@@ -5,15 +5,12 @@ import { useValidShemaConst } from "./useValidShemaConst";
 export const useValidShema = () => {
   const { t } = useTranslation();
   const {
-    dateRequiredValidSchema,
-    emailRequiredValidSchema,
-    numberRequiredValidSchema,
     passwordRequiredValidSchema,
     phoneNumberOptionalValidSchema,
     phoneNumberRequiredValidSchema,
     stringOptionalValidSchema,
     stringRequiredValidSchema,
-    guidRequiredValidSchema
+    guidRequiredValidSchema,
   } = useValidShemaConst();
 
   const loginValidSchema = yup.object({
