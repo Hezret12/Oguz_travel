@@ -13,7 +13,6 @@ import {
   Button,
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -106,139 +105,234 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
 
           {user && (
             <Box sx={{ flexGrow: 0 }}>
-              <Tooltip title={t('header.userMenuTooltip') || 'User Menu'}>
+              <Tooltip title={t('header.userMenuTooltip') || 'Profile'}>
                 <Button
                   onClick={handleOpenUserMenu}
                   sx={{
-                    p: 0.5,
-                    px: 1.2,
-                    borderRadius: '10px',
+                    p: '3px 8px 3px 4px',
+                    borderRadius: '24px',
                     textTransform: 'none',
                     textAlign: 'left',
                     backgroundColor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.04)'
+                        : 'rgba(0, 0, 0, 0.03)',
                     border: '1px solid',
                     borderColor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.08)'
+                        : 'rgba(0, 0, 0, 0.06)',
                     '&:hover': {
                       backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.07)',
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(255, 255, 255, 0.08)'
+                          : 'rgba(0, 0, 0, 0.05)',
                       borderColor: (theme) =>
-                        theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.22)',
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(20, 184, 166, 0.3)'
+                          : 'rgba(14, 133, 132, 0.25)',
                     },
-                    transition: 'all 0.2s ease',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar
-                      alt={user.name}
+                    {/* Modern Avatar with Online Status Indicator */}
+                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                      <Avatar
+                        alt={user.name}
+                        sx={{
+                          width: 34,
+                          height: 34,
+                          background: (theme) =>
+                            theme.palette.mode === 'dark'
+                              ? 'linear-gradient(135deg, #0D9488 0%, #14B8A6 100%)'
+                              : 'linear-gradient(135deg, #0E8584 0%, #14B8A6 100%)',
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          boxShadow: '0 2px 8px rgba(14, 133, 132, 0.25)',
+                        }}
+                      >
+                        {(user.name || user.fullName || user.phone_number || '?').charAt(0).toUpperCase()}
+                      </Avatar>
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          bottom: 0,
+                          right: 0,
+                          width: 9,
+                          height: 9,
+                          bgcolor: '#10B981',
+                          borderRadius: '50%',
+                          border: (theme) =>
+                            `2px solid ${
+                              theme.palette.mode === 'dark' ? '#11192A' : '#ffffff'
+                            }`,
+                        }}
+                      />
+                    </Box>
+
+                    <Box
                       sx={{
-                        width: 34,
-                        height: 34,
-                        border: '2px solid #0E8584',
-                        bgcolor: 'rgba(14,133,132,0.1)',
-                        color: '#0E8584',
-                        fontWeight: 600,
-                        fontSize: '0.875rem',
+                        display: { xs: 'none', sm: 'flex' },
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        maxWidth: 130,
                       }}
                     >
-                      {(user.name || '?').charAt(0).toUpperCase()}
-                    </Avatar>
-                    <Box sx={{ display: { xs: 'none', sm: 'flex' }, flexDirection: 'column', alignItems: 'flex-start', mr: 0.5 }}>
                       <Typography
                         variant="body2"
+                        noWrap
                         sx={{
-                          fontWeight: 600,
+                          fontWeight: 650,
                           fontSize: '0.825rem',
                           lineHeight: 1.2,
                           color: (theme) =>
-                            theme.palette.mode === 'dark' ? '#f1f5f9' : '#1e293b',
+                            theme.palette.mode === 'dark' ? '#F8FAFC' : '#0F172A',
+                          maxWidth: '100%',
                         }}
                       >
-                        {user.name}
+                        {user.name || user.fullName || user.phone_number}
                       </Typography>
                       <Typography
                         variant="caption"
+                        noWrap
                         sx={{
-                          fontWeight: 500,
-                          fontSize: '0.70rem',
+                          fontWeight: 600,
+                          fontSize: '0.68rem',
                           lineHeight: 1.1,
                           color: (theme) =>
-                            theme.palette.mode === 'dark' ? '#14B8A6' : '#0E8584',
+                            theme.palette.mode === 'dark' ? '#2DD4BF' : '#0E8584',
                           textTransform: 'capitalize',
+                          maxWidth: '100%',
                         }}
                       >
-                        {user.position || user.position_name || user.role || user.job_title || 'User'}
+                        {user.position || user.position_name || user.role || 'User'}
                       </Typography>
                     </Box>
+
                     <KeyboardArrowDownIcon
                       sx={{
                         fontSize: 16,
                         color: (theme) =>
-                          theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.6)' : '#64748b',
+                          theme.palette.mode === 'dark'
+                            ? 'rgba(255,255,255,0.5)'
+                            : 'rgba(0,0,0,0.4)',
                         transition: 'transform 0.2s',
                         transform: anchorElUser ? 'rotate(180deg)' : 'none',
+                        ml: -0.25,
                       }}
                     />
                   </Box>
                 </Button>
               </Tooltip>
+
               <Menu
-                sx={{ mt: '45px' }}
                 id="menu-appbar"
                 anchorEl={anchorElUser}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                keepMounted
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
                 slotProps={{
                   paper: {
                     sx: {
-                      boxShadow: '0px 10px 30px rgba(0,0,0,0.15)',
-                      borderRadius: '12px',
-                      minWidth: 200,
+                      mt: 1.5,
+                      borderRadius: '14px',
+                      minWidth: 230,
                       p: 1,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? '#11192A'
+                          : '#ffffff',
+                      boxShadow: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? '0 12px 36px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)'
+                          : '0 12px 36px rgba(15,23,42,0.12)',
                     },
                   },
                 }}
               >
-                <Box sx={{ px: 2, py: 1.5 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                    {user.name}
+                {/* User Info Header in Dropdown */}
+                <Box
+                  sx={{
+                    px: 1.5,
+                    py: 1.2,
+                    mb: 0.5,
+                    borderRadius: '10px',
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.03)'
+                        : 'rgba(0,0,0,0.02)',
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    noWrap
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      color: 'text.primary',
+                    }}
+                  >
+                    {user.name || user.fullName || user.phone_number}
                   </Typography>
                   {user.email ? (
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      noWrap
+                      sx={{ display: 'block', mt: 0.25 }}
+                    >
                       {user.email}
                     </Typography>
                   ) : null}
+
                   <Box
                     sx={{
-                      display: 'inline-block',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      mt: 0.75,
                       px: 1,
-                      py: 0.25,
-                      borderRadius: '4px',
-                      fontSize: '0.65rem',
+                      py: 0.3,
+                      borderRadius: '6px',
+                      fontSize: '0.68rem',
                       fontWeight: 700,
+                      letterSpacing: '0.02em',
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(20, 184, 166, 0.15)'
+                          : 'rgba(14, 133, 132, 0.10)',
+                      color: (theme) =>
+                        theme.palette.mode === 'dark' ? '#2DD4BF' : '#0E8584',
                       textTransform: 'uppercase',
-                      color:
-                        user.role === 'admin'
-                          ? 'error.contrastText'
-                          : user.role === 'agent'
-                            ? 'warning.contrastText'
-                            : 'primary.contrastText',
                     }}
                   >
-                    {user.position || user.position_name || user.role}
+                    {user.position || user.position_name || user.role || 'User'}
                   </Box>
                 </Box>
-                <Divider sx={{ my: 1 }} />
-                <MenuItem onClick={handleCloseUserMenu}>
-                  <AccountCircleIcon sx={{ mr: 1.5, fontSize: 20 }} />
-                  {t('header.profile')}
-                </MenuItem>
-                <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-                  <LogoutIcon sx={{ mr: 1.5, fontSize: 20 }} />
+
+                <Divider sx={{ my: 0.75 }} />
+
+                <MenuItem
+                  onClick={handleLogout}
+                  sx={{
+                    borderRadius: '8px',
+                    py: 1,
+                    px: 1.5,
+                    color: '#EF4444',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    '&:hover': {
+                      backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                      color: '#DC2626',
+                    },
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <LogoutIcon sx={{ mr: 1.5, fontSize: 18 }} />
                   {t('header.logout')}
                 </MenuItem>
               </Menu>
