@@ -1,15 +1,13 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getRoleHomePath } from '../utils/auth';
-import LoadingScreen from './LoadingScreen';
 
 /**
  * GuestRoute — only allows unauthenticated users through.
  *
  * If a valid token + user session already exists the visitor is
  * redirected to their role-based home page instead of showing the
- * login screen. This prevents the flicker where an authenticated
- * user momentarily sees the login form before being redirected.
+ * login screen.
  *
  * Usage in the router:
  *   { element: <GuestRoute />, children: [{ path: '/login', element: <Login /> }] }
@@ -17,9 +15,8 @@ import LoadingScreen from './LoadingScreen';
 const GuestRoute = () => {
   const { user, loading, isAuthenticated } = useAuth();
 
-  // While the auth state is being resolved (cookie check + /auth/me),
-  // show a full-screen loader to avoid any UI flash.
-  if (loading) return <LoadingScreen />;
+  // While initial auth state resolves, return null so App.jsx splash screen covers the transition seamlessly.
+  if (loading) return null;
 
   // Authenticated users should never see the login page.
   if (isAuthenticated && user) {
