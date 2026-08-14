@@ -1,13 +1,11 @@
 import { useMemo } from "react";
 import { FormControl, MenuItem, Select, Stack, Typography, TextField } from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { getAllEmployeeApi, getAllOfficeApi } from "../../../api/queries/getters";
 
 const selectSx = {
-  borderRadius: "10px",
+  borderRadius: "8px",
   "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
   "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
@@ -20,7 +18,10 @@ const menuPaperProps = {
     sx: {
       borderRadius: "12px",
       marginTop: "4px",
-      boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+      boxShadow: (theme) =>
+        theme.palette.mode === "dark"
+          ? "0 8px 24px rgba(0,0,0,0.5)"
+          : "0 4px 20px rgba(0,0,0,0.08)",
     },
   },
 };
@@ -49,7 +50,6 @@ const FilterSelect = ({
       open={isOpen}
       onOpen={() => onOpen?.(name)}
       onClose={() => onClose?.(name)}
-      IconComponent={isOpen ? KeyboardArrowUpIcon : KeyboardArrowDownIcon}
       displayEmpty
       sx={selectSx}
       slotProps={menuPaperProps}

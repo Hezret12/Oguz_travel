@@ -9,7 +9,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { ChevronDown } from "lucide-react";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
@@ -150,7 +150,7 @@ export default function AppUserAutocomplete({
           options={options}
           value={selectedValue}
           filterOptions={(x) => x} // Disable local filter so API search results dictate options
-          popupIcon={<KeyboardArrowDownIcon />}
+          popupIcon={<ChevronDown size={18} />}
           loading={isLoading || isFetchingNextPage}
           onInputChange={(_, newInputValue, reason) => {
             if (reason === "input" || reason === "clear") {

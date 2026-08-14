@@ -15,7 +15,7 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { ChevronDown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -211,18 +211,20 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                       </Typography>
                     </Box>
 
-                    <KeyboardArrowDownIcon
+                    <Box
+                      component="span"
                       sx={{
-                        fontSize: 16,
-                        color: (theme) =>
-                          theme.palette.mode === 'dark'
-                            ? 'rgba(255,255,255,0.5)'
-                            : 'rgba(0,0,0,0.4)',
-                        transition: 'transform 0.2s',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'text.secondary',
+                        transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                         transform: anchorElUser ? 'rotate(180deg)' : 'none',
                         ml: -0.25,
                       }}
-                    />
+                    >
+                      <ChevronDown size={15} />
+                    </Box>
                   </Box>
                 </Button>
               </Tooltip>

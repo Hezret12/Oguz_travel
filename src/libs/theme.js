@@ -87,5 +87,83 @@ export const themeConfig = createTheme({
         },
       },
     },
+    MuiSelect: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: 8,
+          transition: 'all 0.2s ease',
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: theme.palette.primary.main,
+          },
+          '&.Mui-focused': {
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: theme.palette.primary.main,
+              borderWidth: 1.5,
+            },
+          },
+        }),
+        icon: ({ theme }) => ({
+          color: theme.palette.text.secondary,
+          transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease',
+          '&.MuiSelect-iconOpen': {
+            transform: 'rotate(180deg)',
+            color: theme.palette.primary.main,
+          },
+        }),
+      },
+    },
+    MuiAutocomplete: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 8,
+            transition: 'all 0.2s ease',
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: theme.palette.primary.main,
+            },
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: theme.palette.primary.main,
+              borderWidth: 1.5,
+            },
+          },
+        }),
+        popupIndicator: ({ theme }) => ({
+          color: theme.palette.text.secondary,
+          transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease',
+          '&.MuiAutocomplete-popupIndicatorOpen': {
+            transform: 'rotate(180deg)',
+            color: theme.palette.primary.main,
+          },
+        }),
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: 8,
+          margin: '2px 6px',
+          padding: '8px 12px',
+          fontSize: '0.875rem',
+          transition: 'all 0.15s ease',
+          '&:hover': {
+            backgroundColor: theme.palette.action.hover,
+          },
+          '&.Mui-selected': {
+            backgroundColor:
+              theme.palette.mode === 'dark'
+                ? 'rgba(20, 184, 166, 0.16)'
+                : 'rgba(14, 133, 132, 0.08)',
+            color: theme.palette.primary.main,
+            fontWeight: 600,
+            '&:hover': {
+              backgroundColor:
+                theme.palette.mode === 'dark'
+                  ? 'rgba(20, 184, 166, 0.22)'
+                  : 'rgba(14, 133, 132, 0.12)',
+            },
+          },
+        }),
+      },
+    },
   },
 });

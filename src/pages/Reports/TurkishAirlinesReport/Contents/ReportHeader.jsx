@@ -2,7 +2,6 @@ import { memo } from "react";
 import { Box, Typography, Paper, FormControl, Select, MenuItem, alpha, useTheme } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 
@@ -149,7 +148,6 @@ const ReportHeader = ({
               value={selectedQuarter ?? ""}
               onChange={(e) => onQuarterChange(e.target.value)}
               displayEmpty
-              IconComponent={KeyboardArrowDownIcon}
               sx={{
                 ...selectSx,
                 height: 40,

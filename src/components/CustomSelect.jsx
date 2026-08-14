@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { useState, useMemo } from "react";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { ChevronDown } from "lucide-react";
 
 const defaultGetRowId = (item) => item?.guid ?? item?.value ?? "";
 const defaultGetRowLabel = (item) => item?.label ?? "";
@@ -17,6 +17,7 @@ const defaultGetRowLabel = (item) => item?.label ?? "";
 const menuPaperSx = {
   borderRadius: "12px",
   marginTop: "6px",
+  backgroundColor: "background.paper",
   boxShadow: (theme) =>
     theme.palette.mode === "dark"
       ? "0px 12px 32px rgba(0, 0, 0, 0.55)"
@@ -27,25 +28,27 @@ const menuPaperSx = {
   "& .MuiList-root": { padding: "6px 0" },
   "& .MuiMenuItem-root": {
     borderRadius: "8px",
-    margin: "4px 8px",
-    padding: "10px 14px",
-    fontSize: "0.9rem",
-    transition: "all 0.2s ease",
+    margin: "3px 6px",
+    padding: "9px 12px",
+    fontSize: "0.875rem",
+    transition: "all 0.15s ease",
     "&:hover": {
-      backgroundColor: (theme) =>
-        theme.palette.mode === "dark"
-          ? "rgba(255, 255, 255, 0.05)"
-          : "rgba(37, 99, 235, 0.04)",
-      transform: "translateX(4px)",
-      color: "primary.main",
+      backgroundColor: "action.hover",
+      color: "text.primary",
     },
     "&.Mui-selected": {
       backgroundColor: (theme) =>
         theme.palette.mode === "dark"
-          ? "rgba(37, 99, 235, 0.2)"
-          : "rgba(37, 99, 235, 0.08)",
+          ? "rgba(20, 184, 166, 0.16)"
+          : "rgba(14, 133, 132, 0.08)",
       color: "primary.main",
       fontWeight: 600,
+      "&:hover": {
+        backgroundColor: (theme) =>
+          theme.palette.mode === "dark"
+            ? "rgba(20, 184, 166, 0.22)"
+            : "rgba(14, 133, 132, 0.12)",
+      },
     },
   },
 };
@@ -139,7 +142,7 @@ const CustomSelect = ({
               required={required}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: "7px",
+                  borderRadius: "8px",
                   minHeight: "44px",
                   backgroundColor: (theme) =>
                     theme.palette.mode === "dark"
@@ -154,8 +157,8 @@ const CustomSelect = ({
                   "&.Mui-focused": {
                     boxShadow: (theme) =>
                       theme.palette.mode === "dark"
-                        ? "0 0 0 3px rgba(59, 130, 246, 0.16)"
-                        : "0 0 0 3px rgba(37, 99, 235, 0.12)",
+                        ? "0 0 0 3px rgba(20, 184, 166, 0.18)"
+                        : "0 0 0 3px rgba(14, 133, 132, 0.12)",
                   },
                 },
                 "& .MuiSelect-select": {
@@ -176,21 +179,30 @@ const CustomSelect = ({
                 open={isOpen}
                 onOpen={() => !isDisabled && setIsOpen(true)}
                 onClose={() => setIsOpen(false)}
-                IconComponent={(iconProps) =>
+                IconComponent={() =>
                   isLoading ? (
                     <CircularProgress
                       size={16}
                       sx={{ mr: 1.5, color: "text.disabled" }}
                     />
                   ) : (
-                    <KeyboardArrowDownIcon
-                      {...iconProps}
-                      style={{
-                        ...iconProps.style,
+                    <Box
+                      component="span"
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "absolute",
+                        right: 12,
+                        top: "calc(50% - 9px)",
+                        color: "text.secondary",
+                        pointerEvents: "none",
                         transform: isOpen ? "rotate(180deg)" : "none",
-                        transition: "transform 0.2s ease",
+                        transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease",
                       }}
-                    />
+                    >
+                      <ChevronDown size={18} />
+                    </Box>
                   )
                 }
                 renderValue={(selected) => {

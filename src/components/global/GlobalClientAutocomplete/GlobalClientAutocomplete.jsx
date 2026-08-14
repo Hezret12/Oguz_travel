@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import AddIcon from "@mui/icons-material/Add";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { ChevronDown } from "lucide-react";
 import { Controller } from "react-hook-form";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
@@ -213,7 +213,7 @@ const GlobalClientAutocompleteField = ({
         disabled={disabled}
         clearOnBlur={false}
         autoHighlight
-        popupIcon={<KeyboardArrowDownIcon />}
+        popupIcon={<ChevronDown size={18} />}
         getOptionKey={(option) => option?.guid || option?.id || getClientSummary(option, columns, t)}
         isOptionEqualToValue={(option, value) => (option?.guid || option?.id) === (value?.guid || value?.id)}
         getOptionLabel={(option) => getClientSummary(option, columns, t)}

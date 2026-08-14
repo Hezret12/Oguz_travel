@@ -7,7 +7,7 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import { ChevronDown } from 'lucide-react';
 import { useLocale } from '../hooks/useLocale';
 
 import tkmFlag from '../assets/language/tkm.png';
@@ -68,14 +68,19 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
             />
           }
           endIcon={
-            <KeyboardArrowDownIcon
+            <Box
+              component="span"
               sx={{
-                fontSize: 16,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 transform: anchorEl ? 'rotate(180deg)' : 'none',
                 opacity: 0.8,
               }}
-            />
+            >
+              <ChevronDown size={15} />
+            </Box>
           }
           sx={{
             width: 142,

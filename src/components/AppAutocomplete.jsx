@@ -8,7 +8,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { ChevronDown } from "lucide-react";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
@@ -36,7 +36,7 @@ const AppAutocomplete = ({
   disabled = false,
   multiple = false,
   maxChips,
-  popupIcon = <KeyboardArrowDownIcon />,
+  popupIcon = <ChevronDown size={18} />,
   renderTags: customRenderTags,
   ...restProps
 }) => {
