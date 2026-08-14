@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { Grid, CircularProgress, Box } from "@mui/material";
+import { useMemo, useState } from "react";
+import { Grid, CircularProgress, Box, FormControl, Select, MenuItem, Typography, Autocomplete, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
@@ -13,6 +13,7 @@ import CustomDatePicker from "../../../components/CustomDatePicker";
 import AppAutocomplete from "../../../components/AppAutocomplete";
 import GlobalClientAutocomplete from "../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { useGet } from "../../../hooks/CRUD/useGet";
+import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { addReceivingApi } from "../../../api/queries/post";
@@ -20,6 +21,7 @@ import { updateReceivingApi } from "../../../api/queries/patch";
 import {
   getAllEmployeeApi,
   getCountryVisaFieldsApi,
+  getCountriesApi,
 } from "../../../api/queries/getters";
 import {
   sortVisaFields,
@@ -150,11 +152,49 @@ export const VisaIntakeModal = ({
   const itemData = row?.original || null;
   const isEditing = Boolean(itemData);
 
+  const [modalCountryGuid, setModalCountryGuid] = useState("");
+
+  const countryParams = useMemo(() => ({ page: 1, limit: 100 }), []);
+
+  const { data: countriesData = [] } = usePagginationGet({
+    apiFn: getCountriesApi,
+    key: "countriesList",
+    params: countryParams,
+  });
+
+  const countryOptions = useMemo(() => {
+    const list = Array.isArray(countriesData) ? countriesData : [];
+    return list.map((c) => {
+      const label =
+        (typeof c.name === "string" ? c.name : null) ||
+        selectedLang(c.name) ||
+        c.name?.tk ||
+        c.name?.ru ||
+        c.name?.en ||
+        c.nameTm ||
+        c.code ||
+        "";
+      return {
+        guid: c.guid,
+        code: c.code,
+        label: c.code ? `${label} (${c.code})` : label,
+      };
+    });
+  }, [countriesData, selectedLang]);
+
+  const effectiveCountryGuid =
+    countryGuid ||
+    modalCountryGuid ||
+    itemData?.country_guid ||
+    (countriesData[0]?.guid || "");
+
   const { data: rawFields = [], isLoading: fieldsLoading } = useGet({
     apiFn: () =>
-      countryGuid ? getCountryVisaFieldsApi(countryGuid) : Promise.resolve([]),
-    key: ["countryVisaFields", countryGuid],
-    options: { enabled: Boolean(countryGuid) },
+      effectiveCountryGuid
+        ? getCountryVisaFieldsApi(effectiveCountryGuid)
+        : Promise.resolve([]),
+    key: ["countryVisaFields", effectiveCountryGuid],
+    options: { enabled: Boolean(effectiveCountryGuid) },
   });
 
   const { data: employees = [] } = useGet({
@@ -189,17 +229,37 @@ export const VisaIntakeModal = ({
       const key = field.fieldKey;
 
       if (itemData) {
+        let val = itemData[key];
+        if (val === undefined || val === null) {
+          val = itemData.custom_field_values?.[key];
+        }
+
         if (key === "client_guid") {
           defaults[key] = itemData.client_guid || itemData.client?.guid || "";
-        } else if (key === "operator_guid") {
-          defaults[key] = itemData.operator_guid || itemData.operator?.guid || "";
-        } else if (key === "operator2_guid") {
-          defaults[key] = itemData.operator2_guid || itemData.operator2?.guid || "";
-        } else if (itemData[key] !== undefined && itemData[key] !== null) {
+        } else if (key === "operator_guid" || key === "accepted_opr_guid") {
+          defaults[key] =
+            itemData.operator_guid ||
+            itemData.operator?.guid ||
+            itemData.accepted_opr_guid ||
+            "";
+        } else if (key === "operator2_guid" || key === "received_opr_guid") {
+          defaults[key] =
+            itemData.operator2_guid ||
+            itemData.operator2?.guid ||
+            itemData.received_opr_guid ||
+            "";
+        } else if (key === "visa_type" || key === "visa_category") {
+          defaults[key] =
+            itemData.visa_type ||
+            itemData.visa_category ||
+            itemData.custom_field_values?.visa_type ||
+            itemData.custom_field_values?.visa_category ||
+            "";
+        } else if (val !== undefined && val !== null) {
           if (field.fieldType === "date") {
-            defaults[key] = itemData[key] ? dayjs(itemData[key]) : null;
+            defaults[key] = val ? dayjs(val) : null;
           } else {
-            defaults[key] = itemData[key];
+            defaults[key] = val;
           }
         } else {
           defaults[key] = field.fieldType === "date" ? null : "";
@@ -250,8 +310,9 @@ export const VisaIntakeModal = ({
   };
 
   const submitHandler = async (formData) => {
+    const custom_field_values = {};
     const payload = {
-      country_guid: countryGuid,
+      country_guid: effectiveCountryGuid,
     };
 
     if (isEditing && itemData?.guid) {
@@ -262,20 +323,41 @@ export const VisaIntakeModal = ({
       const key = field.fieldKey;
       const val = formData[key];
 
+      let formattedVal = val;
       if (field.fieldType === "date") {
         if (val && dayjs.isDayjs(val) && val.isValid()) {
-          payload[key] = val.format("YYYY-MM-DD");
+          formattedVal = val.format("YYYY-MM-DD");
         } else if (typeof val === "string" && val) {
-          payload[key] = val;
+          formattedVal = val;
         } else {
-          payload[key] = null;
+          formattedVal = null;
         }
       } else if (field.fieldType === "number") {
-        payload[key] = val !== "" && val !== null ? Number(val) : null;
+        formattedVal = val !== "" && val !== null ? Number(val) : null;
       } else {
-        payload[key] = val !== undefined && val !== null ? val : "";
+        formattedVal = val !== undefined && val !== null ? val : "";
+      }
+
+      if (key === "application_date") {
+        payload.application_date = formattedVal;
+      } else if (key === "client_guid") {
+        payload.client_guid = formattedVal || null;
+      } else if (key === "operator_guid" || key === "accepted_opr_guid") {
+        payload.operator_guid = formattedVal || null;
+      } else if (key === "office_guid") {
+        payload.office_guid = formattedVal || null;
+      } else if (key === "visa_type" || key === "visa_category") {
+        payload.visa_type = formattedVal || null;
+      } else if (key === "note") {
+        payload.note = formattedVal || null;
+      } else {
+        if (formattedVal !== null && formattedVal !== "") {
+          custom_field_values[key] = formattedVal;
+        }
       }
     });
+
+    payload.custom_field_values = custom_field_values;
 
     if (isEditing) {
       updateReceiving(payload);
@@ -299,6 +381,8 @@ export const VisaIntakeModal = ({
       return {
         guid: itemData.client_guid,
         fullName: itemData.client_name || itemData.client_guid,
+        phone_number: itemData.phone_number || "",
+        passport_number: itemData.passport_number || "",
       };
     }
     return null;
@@ -326,6 +410,41 @@ export const VisaIntakeModal = ({
             </Box>
           ) : (
             <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <Typography
+                  variant="body2"
+                  sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
+                >
+                  {t("columns.country") || "Ýurt"}
+                </Typography>
+                <Autocomplete
+                  size="small"
+                  options={countryOptions}
+                  getOptionLabel={(option) => option.label || ""}
+                  value={
+                    countryOptions.find((c) => c.guid === effectiveCountryGuid) || null
+                  }
+                  onChange={(_, newValue) => {
+                    setModalCountryGuid(newValue ? newValue.guid : "");
+                  }}
+                  disabled={isEditing || Boolean(countryGuid)}
+                  isOptionEqualToValue={(option, val) =>
+                    option.guid === (val?.guid ?? val)
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder={t("columns.country") || "Ýurt saýlaň..."}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "10px",
+                          minHeight: "44px",
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
               {sortedFields.map((field) => (
                 <DynamicVisaField
                   key={field.fieldKey}

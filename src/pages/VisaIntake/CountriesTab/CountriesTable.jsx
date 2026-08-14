@@ -66,7 +66,7 @@ export const CountriesTable = forwardRef((props, ref) => {
   const columns = useMemo(() => {
     return [
       {
-        accessorFn: (row, index) => (page - 1) * limit + index + 1,
+        accessorKey: "index_number",
         id: "index_number",
         header: "№",
         size: 50,
@@ -144,7 +144,7 @@ export const CountriesTable = forwardRef((props, ref) => {
         ),
       },
     ];
-  }, [page, limit, t, handleDeleteClick]);
+  }, [t, handleDeleteClick]);
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,

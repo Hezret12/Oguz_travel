@@ -9,7 +9,14 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, Chip, Badge } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  Badge,
+  Autocomplete,
+  TextField,
+} from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
@@ -21,6 +28,7 @@ import { useDateFormat } from "../../../functions/generalHelpers";
 import {
   getAllReceivingsApi,
   getCountryVisaFieldsApi,
+  getCountriesApi,
 } from "../../../api/queries/getters";
 import { deleteReceivingApi } from "../../../api/queries/delete";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
@@ -52,14 +60,47 @@ export const ApplicationsTable = forwardRef(
 
     const [page, setPage] = useState(1);
     const [limit, setPageSize] = useState(40);
+    const [selectedCountryGuid, setSelectedCountryGuid] = useState(
+      countryGuid || "",
+    );
+
+    const activeCountryGuid = countryGuid || selectedCountryGuid;
+
+    const countryParams = useMemo(() => ({ page: 1, limit: 100 }), []);
+
+    const { data: countriesData = [] } = usePagginationGet({
+      apiFn: getCountriesApi,
+      key: "countriesList",
+      params: countryParams,
+    });
+
+    const countryOptions = useMemo(() => {
+      const list = Array.isArray(countriesData) ? countriesData : [];
+      return list.map((c) => {
+        const label =
+          (typeof c.name === "string" ? c.name : null) ||
+          selectedLang(c.name) ||
+          c.name?.tk ||
+          c.name?.ru ||
+          c.name?.en ||
+          c.nameTm ||
+          c.code ||
+          "";
+        return {
+          guid: c.guid,
+          code: c.code,
+          label: c.code ? `${label} (${c.code})` : label,
+        };
+      });
+    }, [countriesData, selectedLang]);
 
     const { data: rawVisaFields = [] } = useGet({
       apiFn: () =>
-        countryGuid
-          ? getCountryVisaFieldsApi(countryGuid)
+        activeCountryGuid
+          ? getCountryVisaFieldsApi(activeCountryGuid)
           : Promise.resolve([]),
-      key: ["countryVisaFields", countryGuid],
-      options: { enabled: Boolean(countryGuid) },
+      key: ["countryVisaFields", activeCountryGuid],
+      options: { enabled: Boolean(activeCountryGuid) },
     });
 
     const sortedFields = useMemo(() => {
@@ -70,10 +111,11 @@ export const ApplicationsTable = forwardRef(
       () => ({
         page,
         limit,
-        country_guid: countryGuid || undefined,
+        search: searchQuery || undefined,
+        country_guid: activeCountryGuid || undefined,
         ...queryParams,
       }),
-      [page, limit, countryGuid, queryParams],
+      [page, limit, searchQuery, activeCountryGuid, queryParams],
     );
 
     const {
@@ -116,8 +158,9 @@ export const ApplicationsTable = forwardRef(
       ];
 
       if (sortedFields && sortedFields.length > 0) {
-        sortedFields.forEach((field) => {
-          const fieldKey = field.fieldKey;
+        sortedFields.forEach((field, index) => {
+          const fieldKey =
+            field.fieldKey || field.field_key || field.guid || `col_${index}`;
           const headerLabel =
             selectedLang(field.labelTm) || field.labelTm || fieldKey;
 
@@ -147,17 +190,26 @@ export const ApplicationsTable = forwardRef(
                 />
               ),
             });
-          } else if (fieldKey === "operator_guid") {
+          } else if (
+            fieldKey === "operator_guid" ||
+            fieldKey === "accepted_opr_guid"
+          ) {
             cols.push({
-              id: "operator_guid",
+              id: fieldKey,
               header: headerLabel,
               size: 160,
               accessorFn: (row) =>
-                row.operator?.fullName || row.operator_name || "-",
+                row.operator?.fullName ||
+                row.operator_fullName ||
+                row.operator_name ||
+                "-",
             });
-          } else if (fieldKey === "operator2_guid") {
+          } else if (
+            fieldKey === "operator2_guid" ||
+            fieldKey === "received_opr_guid"
+          ) {
             cols.push({
-              id: "operator2_guid",
+              id: fieldKey,
               header: headerLabel,
               size: 160,
               accessorFn: (row) =>
@@ -168,7 +220,8 @@ export const ApplicationsTable = forwardRef(
               id: fieldKey,
               header: headerLabel,
               size: 130,
-              accessorFn: (row) => row[fieldKey],
+              accessorFn: (row) =>
+                row[fieldKey] ?? row.custom_field_values?.[fieldKey],
               Cell: ({ cell }) =>
                 formatChange(cell.getValue(), { dateOnly: true }),
             });
@@ -177,7 +230,8 @@ export const ApplicationsTable = forwardRef(
               id: fieldKey,
               header: headerLabel,
               size: 140,
-              accessorFn: (row) => row[fieldKey] || "-",
+              accessorFn: (row) =>
+                row[fieldKey] ?? row.custom_field_values?.[fieldKey] ?? "-",
               Cell: ({ cell }) => {
                 const val = cell.getValue();
                 if (!val || val === "-") return "-";
@@ -197,7 +251,8 @@ export const ApplicationsTable = forwardRef(
               id: fieldKey,
               header: headerLabel,
               size: 150,
-              accessorFn: (row) => row[fieldKey] ?? "-",
+              accessorFn: (row) =>
+                row[fieldKey] ?? row.custom_field_values?.[fieldKey] ?? "-",
             });
           }
         });
@@ -310,7 +365,7 @@ export const ApplicationsTable = forwardRef(
           open={Boolean(table.getState().creatingRow)}
           close={() => table.setCreatingRow(null)}
           onRefresh={refetch}
-          countryGuid={countryGuid}
+          countryGuid={activeCountryGuid}
         />
       ),
       renderEditRowDialogContent: ({ table, row }) => (
@@ -318,7 +373,7 @@ export const ApplicationsTable = forwardRef(
           table={table}
           row={row}
           onRefresh={refetch}
-          countryGuid={countryGuid}
+          countryGuid={activeCountryGuid || row.original?.country_guid}
         />
       ),
     });
@@ -363,6 +418,47 @@ export const ApplicationsTable = forwardRef(
                 {t("filter")}
               </Button>
             </Badge>
+
+            <Autocomplete
+              size="small"
+              options={countryOptions}
+              getOptionLabel={(option) => option.label || ""}
+              value={
+                countryOptions.find((c) => c.guid === activeCountryGuid) || null
+              }
+              onChange={(_, newValue) => {
+                setSelectedCountryGuid(newValue ? newValue.guid : "");
+                setPage(1);
+              }}
+              isOptionEqualToValue={(option, val) =>
+                option.guid === (val?.guid ?? val)
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder={t("columns.country") || "Ýurt saýlaň..."}
+                  sx={{
+                    width: 220,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "10px",
+                      height: "40px",
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.05)"
+                          : "#ffffff",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "rgba(255,255,255,0.12)"
+                            : "#E2E8F0",
+                      },
+                    },
+                  }}
+                />
+              )}
+            />
           </Box>
         </Box>
 

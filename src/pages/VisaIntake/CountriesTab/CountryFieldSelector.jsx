@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Controller, useWatch } from "react-hook-form";
 import {
   Autocomplete,
@@ -14,8 +14,7 @@ import {
 } from "@mui/material";
 import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+
 import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
@@ -36,8 +35,21 @@ const getItemKey = (item) => item?.guid || item?.fieldKey;
 
 
 
-const ReorderableFieldItem = ({ index, total, label, onMoveUp, onMoveDown, onRemove }) => (
+const ReorderableFieldItem = ({
+  index,
+  label,
+  onRemove,
+  isDragging,
+  dragOverIndex,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+}) => (
   <Box
+    draggable
+    onDragStart={(e) => onDragStart(e, index)}
+    onDragOver={(e) => onDragOver(e, index)}
+    onDragEnd={onDragEnd}
     sx={{
       display: "flex",
       alignItems: "center",
@@ -46,19 +58,24 @@ const ReorderableFieldItem = ({ index, total, label, onMoveUp, onMoveDown, onRem
       py: 0.7,
       borderRadius: "8px",
       border: "1px solid",
-      borderColor: "divider",
-      backgroundColor: "background.paper",
-      boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.03)",
+      borderColor: dragOverIndex === index ? "primary.main" : "divider",
+      backgroundColor: isDragging ? "action.selected" : "background.paper",
+      boxShadow: isDragging
+        ? "0px 4px 12px rgba(0, 0, 0, 0.12)"
+        : "0px 1px 2px rgba(0, 0, 0, 0.03)",
+      opacity: isDragging ? 0.6 : 1,
+      cursor: "grab",
       transition: "all 0.18s ease-in-out",
       "&:hover": {
         backgroundColor: "action.hover",
         borderColor: "primary.main",
         boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.06)",
       },
+      "&:active": { cursor: "grabbing" },
     }}
   >
     <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-      <DragIndicatorIcon sx={{ fontSize: 18, color: "text.disabled", cursor: "grab" }} />
+      <DragIndicatorIcon sx={{ fontSize: 18, color: "text.disabled" }} />
       <Chip
         label={`#${index + 1}`}
         size="small"
@@ -70,44 +87,16 @@ const ReorderableFieldItem = ({ index, total, label, onMoveUp, onMoveDown, onRem
       </Typography>
     </Box>
 
-    <Box sx={{ display: "flex", alignItems: "center", gap: 0.3 }}>
-      <Tooltip title="Ýokary süýşür (Move Up)">
-        <span>
-          <IconButton
-            size="small"
-            disabled={index === 0}
-            onClick={() => onMoveUp(index)}
-            sx={{ p: 0.4, borderRadius: "6px" }}
-          >
-            <ArrowUpwardIcon fontSize="small" />
-          </IconButton>
-        </span>
-      </Tooltip>
-
-      <Tooltip title="Aşak süýşür (Move Down)">
-        <span>
-          <IconButton
-            size="small"
-            disabled={index === total - 1}
-            onClick={() => onMoveDown(index)}
-            sx={{ p: 0.4, borderRadius: "6px" }}
-          >
-            <ArrowDownwardIcon fontSize="small" />
-          </IconButton>
-        </span>
-      </Tooltip>
-
-      <Tooltip title="Poz (Remove)">
-        <IconButton
-          size="small"
-          color="error"
-          onClick={() => onRemove(index)}
-          sx={{ p: 0.4, borderRadius: "6px" }}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-    </Box>
+    <Tooltip title="Poz">
+      <IconButton
+        size="small"
+        color="error"
+        onClick={() => onRemove(index)}
+        sx={{ p: 0.4, borderRadius: "6px" }}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
   </Box>
 );
 
@@ -251,6 +240,9 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     return option.fieldKey === val.fieldKey;
   }, []);
 
+  const dragIndexRef = useRef(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+
   return (
     <Controller
       name={name}
@@ -259,19 +251,30 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
       render={({ field: { onChange, value = [] }, fieldState: { error } }) => {
         const selectedCount = value?.length || 0;
 
-        const handleMoveUp = (index) => {
-          if (index <= 0) return;
+        const handleDragStart = (e, index) => {
+          dragIndexRef.current = index;
+          e.dataTransfer.effectAllowed = "move";
+        };
+
+        const handleDragOver = (e, index) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          if (dragOverIndex !== index) setDragOverIndex(index);
+        };
+
+        const handleDragEnd = () => {
+          const fromIndex = dragIndexRef.current;
+          const toIndex = dragOverIndex;
+          dragIndexRef.current = null;
+          setDragOverIndex(null);
+
+          if (fromIndex == null || toIndex == null || fromIndex === toIndex) return;
           const arr = [...value];
-          [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+          const [moved] = arr.splice(fromIndex, 1);
+          arr.splice(toIndex, 0, moved);
           onChange(arr);
         };
 
-        const handleMoveDown = (index) => {
-          if (index >= value.length - 1) return;
-          const arr = [...value];
-          [arr[index + 1], arr[index]] = [arr[index], arr[index + 1]];
-          onChange(arr);
-        };
 
         const handleRemove = (index) => onChange(value.filter((_, i) => i !== index));
         const handleClearAll = () => onChange([]);
@@ -339,7 +342,9 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               loading={isLoading || isFetching}
               inputValue={searchInput}
               onInputChange={handleInputChange}
-              ListboxProps={{ onScroll: handleListboxScroll }}
+              slotProps={{
+                listbox: { onScroll: handleListboxScroll },
+              }}
               filterOptions={customFilterOptions}
               getOptionLabel={getFieldLabel}
               isOptionEqualToValue={isOptionEqual}
@@ -546,10 +551,12 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                           : `reorder-${getItemKey(item) || index}-${index}`
                       }
                       index={index}
-                      total={value.length}
                       label={getFieldLabel(item)}
-                      onMoveUp={handleMoveUp}
-                      onMoveDown={handleMoveDown}
+                      isDragging={dragIndexRef.current === index}
+                      dragOverIndex={dragOverIndex}
+                      onDragStart={handleDragStart}
+                      onDragOver={handleDragOver}
+                      onDragEnd={handleDragEnd}
                       onRemove={handleRemove}
                     />
                   ))}

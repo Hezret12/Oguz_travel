@@ -64,13 +64,18 @@ export const getAllVisaFieldsApi = async (params = {}) => {
   return await api.getPrivate('/custom_fields/get-by-country', queryParams);
 };
 
-export const getCountryVisaFieldsApi = async () => {
-
+export const getCountryVisaFieldsApi = async (countryGuid) => {
+  if (!countryGuid) return { data: [] };
+  const res = await getCountriesApi({ limit: 100 });
+  const raw = res?.data;
+  const countries = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
+  const country = countries.find((c) => c.guid === countryGuid);
+  return { data: country?.custom_fields || [] };
 };
 
 export const getAllReceivingsApi = async (params = {}) => {
-    const res = await api.getPrivate('/receivings/get-all-receivings', params);
-    return res
+  const res = await api.getPrivate('/receivings/get-all-receiving', params);
+  return res;
 };
 
 export const getAllUsersApi = async (params = {}) => {

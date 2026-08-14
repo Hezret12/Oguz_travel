@@ -65,7 +65,25 @@ export const isOperatorField = (field) => field?.fieldKey === "accepted_opr_guid
 
 
 export const ensureAllVisaFields = (apiFields = []) => {
-  const fields = Array.isArray(apiFields) ? [...apiFields] : [];
+  const fields = Array.isArray(apiFields)
+    ? apiFields
+        .filter(Boolean)
+        .map((f) => {
+          const key = f.fieldKey || f.field_key || f.guid || f.id;
+          const labelTm = f.labelTm || f.field_label?.tk || (typeof f.field_label === "string" ? f.field_label : key);
+          const labelRu = f.labelRu || f.field_label?.ru || labelTm;
+          const labelEn = f.labelEn || f.field_label?.en || labelTm;
+          const fieldType = f.fieldType || f.field_type || "text";
+          return {
+            ...f,
+            fieldKey: key,
+            labelTm,
+            labelRu,
+            labelEn,
+            fieldType,
+          };
+        })
+    : [];
 
   let clientField = fields.find((f) => isClientField(f));
   if (!clientField) {
@@ -102,6 +120,7 @@ export const ensureAllVisaFields = (apiFields = []) => {
 
   const dynamicFields = fields.filter(
     (f) =>
+      f.fieldKey &&
       !isClientField(f) &&
       !isNotesField(f) &&
       !isOperatorField(f) &&
