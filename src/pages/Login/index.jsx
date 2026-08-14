@@ -406,7 +406,7 @@ export default function Login() {
             {loginMutation.isPending ? (
               <CircularProgress size={20} sx={{ color: '#fff' }} />
             ) : (
-              t('login.loginButton')
+              t('pages.login.loginButton')
             )}
           </Box>
         </Box>
