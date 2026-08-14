@@ -27,16 +27,16 @@ const sidebarSurfaceStyles = (isDark, width) => ({
   height: "100vh",
   width,
   background: isDark
-    ? "linear-gradient(180deg, #021819 0%, #022C45 100%)"
+    ? "#11192A"
     : "#ffffff",
-  borderRight: isDark ? "1px solid rgba(20,184,166,0.15)" : "1px solid #e2e8f0",
+  borderRight: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
   display: "flex",
   flexDirection: "column",
   zIndex: 1200,
   transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   overflow: "hidden",
   boxShadow: isDark
-    ? "4px 0 24px rgba(0,0,0,0.25)"
+    ? "4px 0 24px rgba(0,0,0,0.30)"
     : "1px 0 12px rgba(0,0,0,0.06)",
   fontFamily: "'Inter', sans-serif",
 });

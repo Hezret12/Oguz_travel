@@ -55,15 +55,15 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
         borderBottom: '1px solid',
         borderColor: (theme) =>
           theme.palette.mode === 'dark'
-            ? 'rgba(20,184,166,0.15)'
+            ? 'rgba(255, 255, 255, 0.08)'
             : '#e2e8f0',
         backgroundColor: (theme) =>
           theme.palette.mode === 'dark'
-            ? theme.palette.background.paper
-            : '#ffffff',
+            ? 'rgba(17, 25, 42, 0.88)'
+            : 'rgba(255, 255, 255, 0.88)',
         boxShadow: (theme) =>
           theme.palette.mode === 'dark'
-            ? 'none'
+            ? '0 4px 20px rgba(0,0,0,0.25)'
             : '0 1px 3px rgba(0,0,0,0.04)',
         left: { xs: 0, md: sidebarWidth },
         width: { xs: '100%', md: `calc(100% - ${sidebarWidth}px)` },

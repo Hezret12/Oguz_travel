@@ -45,8 +45,7 @@ const DashboardLayout = () => {
           p: { xs: 2, sm: 3 },
           ml: { xs: 0, md: `${sidebarWidth}px` },
           mt: '64px', // header height
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? '' : '#F0F4F8',
+          backgroundColor: 'background.default',
           height: 'calc(100vh - 64px)',
           minHeight: 0,
           overflow: 'hidden',
