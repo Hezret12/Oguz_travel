@@ -224,6 +224,8 @@ const NotificationPopover = () => {
 
   const [anchorEl, setAnchorEl] = useState(null);
 
+  const unreadParams = useMemo(() => ({ limit: 40, isRead: false }), []);
+
   const {
     data: notificationsList,
     isLoading,
@@ -234,7 +236,7 @@ const NotificationPopover = () => {
   } = useInfiniteGet({
     apiFn: getAllNotificationsApi,
     key: 'headerNotifications',
-    params: { limit: 40, isRead: false },
+    params: unreadParams,
   });
 
   const markReadMutation = useUpdate({
