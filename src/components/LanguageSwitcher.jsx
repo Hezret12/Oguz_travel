@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import {
   Button,
   Menu,
   MenuItem,
   Tooltip,
-  useColorScheme,
   Box,
   Typography,
 } from '@mui/material';
@@ -23,103 +22,36 @@ const LANGUAGES = [
 
 const LanguageSwitcher = ({ variant = 'header' }) => {
   const { t, currentLanguage, changeLang } = useLocale();
-  const { mode } = useColorScheme();
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const isDark = mode === 'dark';
   const isLogin = variant === 'login';
 
-  const activeLangObj = LANGUAGES.find((l) => l.code === (currentLanguage || 'tk')) || LANGUAGES[0];
+  // Normalize language code (e.g. 'tk-TM' -> 'tk')
+  const normalizedLang = (currentLanguage || 'tk').slice(0, 2).toLowerCase();
+  const activeLangObj = LANGUAGES.find((l) => l.code === normalizedLang) || LANGUAGES[0];
 
-  const handleSelectLanguage = (lng) => {
+  const handleOpen = useCallback((e) => {
+    setAnchorEl(e.currentTarget);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setAnchorEl(null);
+  }, []);
+
+  const handleSelectLanguage = useCallback((lng) => {
     changeLang(lng);
     setAnchorEl(null);
-  };
-
-  /* ── Login variant styles ── */
-  const loginTopBtnBg     = isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.08)';
-  const loginTopBtnBorder = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.15)';
-  const loginTopBtnText   = '#ffffff';
-  const loginTextColor    = isDark ? '#ffffff' : '#1a1a2e';
-
-  const loginButtonSx = {
-    width: 142,
-    minWidth: 142,
-    maxWidth: 142,
-    height: 36,
-    px: 1.2,
-    borderRadius: '10px',
-    backgroundColor: loginTopBtnBg,
-    border: `1px solid ${loginTopBtnBorder}`,
-    color: loginTopBtnText,
-    fontSize: '0.80rem',
-    fontWeight: 600,
-    textTransform: 'none',
-    backdropFilter: 'blur(8px)',
-    letterSpacing: '0.01em',
-    justifyContent: 'space-between',
-    '&:hover': {
-      backgroundColor: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.14)',
-    },
-    transition: 'background 0.2s',
-  };
-
-  const loginMenuPaperSx = {
-    mt: 1,
-    borderRadius: '10px',
-    backdropFilter: 'blur(12px)',
-    backgroundColor: isDark ? 'rgba(20,40,60,0.95)' : 'rgba(255,255,255,0.97)',
-    border: `1px solid ${loginTopBtnBorder}`,
-    width: 142,
-    p: 0.5,
-  };
-
-  const headerButtonSx = {
-    width: 142,
-    minWidth: 142,
-    maxWidth: 142,
-    borderRadius: '10px',
-    height: 38,
-    px: 1.2,
-    backgroundColor: (theme) =>
-      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
-    border: '1px solid',
-    borderColor: (theme) =>
-      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
-    color: (theme) =>
-      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.85)' : '#334155',
-    textTransform: 'none',
-    justifyContent: 'space-between',
-    '&:hover': {
-      backgroundColor: (theme) =>
-        theme.palette.mode === 'dark'
-          ? 'rgba(255,255,255,0.12)'
-          : 'rgba(0,0,0,0.07)',
-      borderColor: (theme) =>
-        theme.palette.mode === 'dark'
-          ? 'rgba(255,255,255,0.25)'
-          : 'rgba(0,0,0,0.22)',
-    },
-    transition: 'all 0.2s ease',
-  };
-
-  const headerMenuPaperSx = {
-    mt: 1.5,
-    boxShadow: (theme) =>
-      theme.palette.mode === 'dark'
-        ? '0px 10px 30px rgba(0,0,0,0.4), 0px 0px 0px 1px rgba(255,255,255,0.08)'
-        : '0px 10px 30px rgba(0,0,0,0.1), 0px 0px 0px 1px rgba(0,0,0,0.05)',
-    borderRadius: '12px',
-    width: 142,
-    p: 0.5,
-  };
+  }, [changeLang]);
 
   return (
     <>
       <Tooltip title={t('header.languageTooltip') || 'Language'}>
         <Button
-          color={isLogin ? undefined : 'inherit'}
-          onClick={(e) => setAnchorEl(e.currentTarget)}
+          id="language-switcher-button"
+          aria-controls={Boolean(anchorEl) ? 'language-switcher-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={Boolean(anchorEl) ? 'true' : undefined}
+          onClick={handleOpen}
           startIcon={
             <Box
               component="img"
@@ -139,13 +71,51 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
             <KeyboardArrowDownIcon
               sx={{
                 fontSize: 16,
-                transition: 'transform 0.2s',
+                transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 transform: Boolean(anchorEl) ? 'rotate(180deg)' : 'none',
                 opacity: 0.8,
               }}
             />
           }
-          sx={isLogin ? loginButtonSx : headerButtonSx}
+          sx={{
+            width: 142,
+            minWidth: 142,
+            maxWidth: 142,
+            height: isLogin ? 36 : 38,
+            px: 1.2,
+            borderRadius: '10px',
+            textTransform: 'none',
+            justifyContent: 'space-between',
+            border: '1px solid',
+            borderColor: isLogin
+              ? 'rgba(255,255,255,0.18)'
+              : (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.15)'
+                    : 'rgba(0,0,0,0.12)',
+            backgroundColor: isLogin
+              ? 'rgba(255,255,255,0.10)'
+              : (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.06)'
+                    : 'rgba(0,0,0,0.03)',
+            color: isLogin
+              ? '#ffffff'
+              : (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.85)'
+                    : 'text.primary',
+            backdropFilter: 'blur(8px)',
+            '&:hover': {
+              backgroundColor: isLogin
+                ? 'rgba(255,255,255,0.18)'
+                : (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'rgba(255,255,255,0.12)'
+                      : 'rgba(0,0,0,0.07)',
+            },
+            transition: 'all 0.2s ease',
+          }}
         >
           <Typography
             variant="body2"
@@ -156,7 +126,7 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
               ml: 0.25,
               fontWeight: 600,
               fontSize: '0.85rem',
-              color: isLogin ? loginTopBtnText : 'inherit',
+              color: 'inherit',
             }}
           >
             {activeLangObj.label}
@@ -165,10 +135,34 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
       </Tooltip>
 
       <Menu
+        id="language-switcher-menu"
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        slotProps={{ paper: { sx: isLogin ? loginMenuPaperSx : headerMenuPaperSx } }}
+        onClose={handleClose}
+        MenuListProps={{
+          'aria-labelledby': 'language-switcher-button',
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              mt: 1,
+              borderRadius: '12px',
+              width: 142,
+              p: 0.5,
+              backdropFilter: isLogin ? 'blur(12px)' : undefined,
+              backgroundColor: isLogin
+                ? (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'rgba(20,40,60,0.95)'
+                      : 'rgba(255,255,255,0.97)'
+                : undefined,
+              boxShadow: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? '0px 10px 30px rgba(0,0,0,0.4), 0px 0px 0px 1px rgba(255,255,255,0.08)'
+                  : '0px 10px 30px rgba(0,0,0,0.1), 0px 0px 0px 1px rgba(0,0,0,0.05)',
+            },
+          },
+        }}
       >
         {LANGUAGES.map((lang) => {
           const isSelected = activeLangObj.code === lang.code;
@@ -182,18 +176,11 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
                 alignItems: 'center',
                 gap: 1.2,
                 py: 0.8,
-                px: 1.5,
+                px: 1.2,
                 borderRadius: '8px',
                 my: 0.25,
-                color: isLogin ? loginTextColor : 'inherit',
-                fontSize: '0.875rem',
+                fontSize: '0.85rem',
                 fontWeight: isSelected ? 700 : 500,
-                backgroundColor: isSelected
-                  ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(14,133,132,0.12)')
-                  : 'transparent',
-                '&:hover': {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(14,133,132,0.18)',
-                },
               }}
             >
               <Box
@@ -201,15 +188,18 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
                 src={lang.flag}
                 alt={lang.label}
                 sx={{
-                  width: 22,
-                  height: 15,
+                  width: 20,
+                  height: 14,
                   borderRadius: '3px',
                   objectFit: 'cover',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
                   display: 'block',
                 }}
               />
-              <Typography variant="body2" sx={{ fontWeight: isSelected ? 700 : 500, fontSize: '0.85rem' }}>
+              <Typography
+                variant="body2"
+                sx={{ fontWeight: isSelected ? 700 : 500, fontSize: '0.85rem' }}
+              >
                 {lang.label}
               </Typography>
             </MenuItem>
@@ -220,6 +210,6 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
   );
 };
 
-export default LanguageSwitcher;
+export default memo(LanguageSwitcher);
 
 
