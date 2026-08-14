@@ -1,24 +1,15 @@
 import { useState, useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useColorScheme, Box, Divider, List } from "@mui/material";
+import { useColorScheme, Box, List } from "@mui/material";
 import SidebarItem from "./SidebarItem";
 import SidebarFooter from "./SidebarFooter";
+import OguzLogo from "../../assets/icons/OguzLogo";
 import { useAuth } from "../../context/AuthContext";
 import { useNavItems } from "../../hooks/useSidebarItems";
 
 const SIDEBAR_W = 280;
 const SIDEBAR_CW = 68;
-
-const LOGO_DARK = "/logo/oguz_logo.svg";
-const LOGO_LIGHT = "/logo/logo_white.png";
-
-if (typeof window !== "undefined") {
-  [LOGO_DARK, LOGO_LIGHT].forEach((src) => {
-    const img = new Image();
-    img.src = src;
-  });
-}
 
 const sidebarSurfaceStyles = (isDark, width) => ({
   position: "fixed",
@@ -54,40 +45,59 @@ const SidebarPanel = ({
   i18n,
 }) => (
   <>
-    {/* <Box
+    {/* Brand Header */}
+    <Box
       sx={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
-        py: 1.5,
-        px: collapsed ? 1 : 2,
-        minHeight: 64,
+        height: 64,
+        px: collapsed ? 1 : 2.5,
+        borderBottom: "1px solid",
+        borderColor: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.06)",
         overflow: "hidden",
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        flexShrink: 0,
+        transition: "padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
-      <OguzLogo
-        width={collapsed ? 44 : 160}
-        height={collapsed ? 36 : 70}
+      <Box
         sx={{
-          maxWidth: "100%",
-          height: "auto",
-          display: "block",
-          mx: "auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          cursor: "pointer",
         }}
-      />
-    </Box> */}
+      >
+        <OguzLogo
+          sx={{
+            width: collapsed ? 38 : 136,
+            height: collapsed ? 30 : 34,
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        />
+      </Box>
+    </Box>
 
-    <Divider
-      sx={{
-        borderColor: isDark ? "rgba(20,184,166,0.2)" : "#e2e8f0",
-        marginBottom: "8px",
-      }}
-    />
-
+    {/* Scrollable Navigation List */}
     <List
-      sx={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "8px 0" }}
+      sx={{
+        flex: 1,
+        overflowY: "auto",
+        overflowX: "hidden",
+        padding: "10px 0",
+        "&::-webkit-scrollbar": {
+          width: "4px",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)",
+          borderRadius: "4px",
+        },
+        "&:hover::-webkit-scrollbar-thumb": {
+          backgroundColor: isDark ? "rgba(255, 255, 255, 0.16)" : "rgba(0, 0, 0, 0.16)",
+        },
+      }}
     >
       {navItems.map((item) => (
         <SidebarItem

@@ -1,46 +1,36 @@
-import { useMemo } from "react";
-import { Box, Button, IconButton } from "@mui/material";
-import LogoutIcon from "@mui/icons-material/Logout";
-import PlaceIcon from "@mui/icons-material/Place";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { LogOut, MapPin } from "lucide-react";
 
-const getFooterTokens = (isDark) => ({
-  border: isDark ? "rgba(20,184,166,0.15)" : "#e2e8f0",
-  locationText: isDark ? "#14B8A6" : "#0E8584",
-});
-
-const SidebarFooter = ({
-  collapsed,
-  onLogout,
-  isDark,
-}) => {
-  const t = useMemo(() => getFooterTokens(isDark), [isDark]);
-
+const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
   if (collapsed) {
     return (
       <Box
         sx={{
-          padding: "12px 0",
+          py: 1.5,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "8px",
-          borderTop: `1px solid ${t.border}`,
+          borderTop: "1px solid",
+          borderColor: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.06)",
         }}
       >
-        <IconButton
-          onClick={onLogout}
-          sx={{
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            background: "rgba(239,68,68,0.08)",
-            border: "1px solid rgba(239,68,68,0.2)",
-            color: "#ef4444",
-            "&:hover": { background: "rgba(239,68,68,0.16)" },
-          }}
-        >
-          <LogoutIcon sx={{ fontSize: 17 }} />
-        </IconButton>
+        <Tooltip title="Logout" placement="right">
+          <IconButton
+            onClick={onLogout}
+            sx={{
+              width: 38,
+              height: 38,
+              borderRadius: "10px",
+              color: "#EF4444",
+              "&:hover": {
+                backgroundColor: "rgba(239, 68, 68, 0.08)",
+              },
+              transition: "all 0.15s ease",
+            }}
+          >
+            <LogOut size={17} />
+          </IconButton>
+        </Tooltip>
       </Box>
     );
   }
@@ -48,55 +38,65 @@ const SidebarFooter = ({
   return (
     <Box
       sx={{
-        padding: "12px 14px 16px",
-        borderTop: `1px solid ${t.border}`,
+        p: "12px 14px",
+        borderTop: "1px solid",
+        borderColor: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.06)",
         display: "flex",
-        flexDirection: "column",
-        gap: "10px",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 1,
       }}
     >
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: "5px",
-          color: t.locationText,
-          fontSize: 12,
-          fontWeight: 600,
-          marginBottom: "2px",
-          fontFamily: "'Inter', sans-serif",
-        }}
-      >
-        <PlaceIcon sx={{ fontSize: 15 }} />
-        Aşgabat
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, minWidth: 0 }}>
+        <MapPin size={15} style={{ color: isDark ? "#2DD4BF" : "#0E8584", flexShrink: 0 }} />
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            variant="caption"
+            noWrap
+            sx={{
+              fontSize: "0.76rem",
+              fontWeight: 650,
+              color: isDark ? "#F8FAFC" : "#0F172A",
+              display: "block",
+              lineHeight: 1.2,
+            }}
+          >
+            Aşgabat
+          </Typography>
+          <Typography
+            variant="caption"
+            noWrap
+            sx={{
+              fontSize: "0.66rem",
+              color: "text.secondary",
+              display: "block",
+              lineHeight: 1.1,
+            }}
+          >
+            Baş Ofis
+          </Typography>
+        </Box>
       </Box>
 
-      <Button
-        onClick={onLogout}
-        sx={{
-          width: "100%",
-          height: 38,
-          borderRadius: "24px",
-          border: "1px solid rgba(239,68,68,0.25)",
-          background: "rgba(239,68,68,0.06)",
-          color: "#ef4444",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
-          fontSize: 13,
-          fontWeight: 600,
-          textTransform: "none",
-          "&:hover": {
-            background: "rgba(239,68,68,0.12)",
-            border: "1px solid rgba(239,68,68,0.35)",
-          },
-          transition: "all 0.2s ease",
-        }}
-      >
-        <LogoutIcon sx={{ fontSize: 16 }} />
-        Logout
-      </Button>
+      <Tooltip title="Logout">
+        <IconButton
+          size="small"
+          onClick={onLogout}
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: "8px",
+            color: "text.secondary",
+            "&:hover": {
+              color: "#EF4444",
+              backgroundColor: "rgba(239, 68, 68, 0.08)",
+            },
+            transition: "all 0.15s ease",
+          }}
+        >
+          <LogOut size={16} />
+        </IconButton>
+      </Tooltip>
     </Box>
   );
 };
