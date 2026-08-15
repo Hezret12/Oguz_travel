@@ -547,14 +547,12 @@ const ReferralLetterPage = () => {
         </Button>
       </Paper>
 
-      {/* Table Section */}
       {activeTab === "reports" ? (
         <MaterialReactTable table={reportsTable} />
       ) : (
         <MaterialReactTable table={stockTable} />
       )}
 
-      {/* Delete Dialogs */}
       <DeleteDialog
         open={reportDeleteDialog.isOpen}
         onClose={reportDeleteDialog.close}
