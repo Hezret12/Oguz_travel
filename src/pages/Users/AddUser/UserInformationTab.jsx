@@ -83,8 +83,7 @@ const UserInformationTab = ({
         label={t("columns.password")}
         placeholder={
           isEdit
-            ? (t("users.passwordEditPlaceholder") ??
-              "Leave blank to keep current")
+            ? (t("users.passwordEditPlaceholder"))
             : "******"
         }
         required={!isEdit}
