@@ -485,7 +485,7 @@ const ReferralLetterPage = () => {
       },
       {
         value: "stock",
-        label: t("referralLetter.stockTab") || "Hat stoky",
+        label: t("referralLetter.stockTab"),
         icon: <FileBox size={18} />,
         badge: stockTotal || stockList.length,
       },
