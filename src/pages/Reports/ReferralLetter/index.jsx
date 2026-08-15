@@ -525,7 +525,6 @@ const ReferralLetterPage = () => {
           flexWrap: "wrap",
         }}
       >
-        {/* LEFT SIDE: CustomTabs with Blue Theme */}
         <CustomTabs
           value={activeTab}
           onChange={handleTabChange}
@@ -538,7 +537,6 @@ const ReferralLetterPage = () => {
           }}
         />
 
-        {/* RIGHT SIDE: Add Button */}
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -562,7 +560,7 @@ const ReferralLetterPage = () => {
         onClose={reportDeleteDialog.close}
         onConfirm={reportDeleteDialog.confirm}
         isLoading={isDeletingReport}
-        description={t("referralLetter.deleteReportConfirm") || "Bu hasabaty pozmak isleýärsiňizmi?"}
+        description={t("referralLetter.deleteReportConfirm")}
       />
 
       <DeleteDialog
@@ -570,7 +568,7 @@ const ReferralLetterPage = () => {
         onClose={stockDeleteDialog.close}
         onConfirm={stockDeleteDialog.confirm}
         isLoading={isDeletingStock}
-        description={t("referralLetter.deleteStockConfirm") || "Bu hat stokyny pozmak isleýärsiňizmi?"}
+        description={t("referralLetter.deleteStockConfirm")}
       />
     </Box>
   );
