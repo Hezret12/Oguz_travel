@@ -112,7 +112,7 @@ const UserInformationTab = ({
         <CustomCheckbox
           name="isAdmin"
           control={control}
-          label={t("users.isAdmin") || "Admin (isAdmin)"}
+          label={t("users.isAdmin")}
         />
       </Box>
     </Box>
