@@ -284,7 +284,6 @@ const Users = () => {
         onAddClick={() => table.setCreatingRow(true)}
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeleteDialog
         open={deleteDialog.isOpen}
         onClose={deleteDialog.close}
