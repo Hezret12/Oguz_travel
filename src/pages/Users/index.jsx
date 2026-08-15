@@ -122,7 +122,7 @@ const Users = () => {
       {
         accessorFn: (row) => row.isActive,
         id: "isActive",
-        header: t("columns.status") ?? "Status",
+        header: t("columns.status"),
         size: 120,
         Cell: ({ cell }) => {
           const isActive = cell.getValue();
@@ -142,8 +142,8 @@ const Users = () => {
               }}
             >
               {isActive
-                ? (t("users.statusActiveLabel") ?? "Active")
-                : (t("users.statusInactiveLabel") ?? "Inactive")}
+                ? (t("users.statusActiveLabel"))
+                : (t("users.statusInactiveLabel"))}
             </Box>
           );
         },
@@ -151,11 +151,11 @@ const Users = () => {
       {
         accessorFn: (row) => row.permissions?.length || 0,
         id: "permissions",
-        header: t("columns.permissions") ?? "Permissions",
+        header: t("columns.permissions"),
         size: 150,
         Cell: ({ cell }) => (
           <Box sx={{ fontWeight: 500 }}>
-            {cell.getValue()} {t("users.permissionsCount") ?? "Selected"}
+            {cell.getValue()} {t("users.permissionsCount")}
           </Box>
         ),
       },
