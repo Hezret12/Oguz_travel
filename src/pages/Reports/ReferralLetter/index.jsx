@@ -503,13 +503,12 @@ const ReferralLetterPage = () => {
 
   const addButtonText = useMemo(() => {
     return activeTab === "stock"
-      ? (t("referralLetter.addStock") || "Täze hat stoky goşmak")
-      : (t("referralLetter.addReport") || "Täze hasabat goşmak");
+      ? (t("referralLetter.addStock"))
+      : (t("referralLetter.addReport"));
   }, [activeTab, t]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 3 }}>
-      {/* Top Header Bar: CustomTabs on LEFT, Add button on RIGHT */}
       <Paper
         elevation={0}
         sx={{
