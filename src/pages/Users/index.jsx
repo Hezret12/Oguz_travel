@@ -83,21 +83,21 @@ const Users = () => {
         enableSorting: false,
       },
       {
-        accessorFn: (row) => row?.employee?.fullName || row?.fullName || row?.phone_number || "—",
+        accessorFn: (row) => row?.employee?.fullName,
         id: "fullName",
         header: t("columns.fullName"),
         size: 180,
       },
       {
-        accessorFn: (row) => row?.phone_number || row?.employee?.phone_number || "—",
+        accessorFn: (row) => row?.phone_number,
         id: "phone_number",
         header: t("columns.phoneNumber"),
         size: 150,
       },
       {
-        accessorFn: (row) => row.isAdmin || row.user_is_admin || row.role === "admin",
+        accessorFn: (row) => row.isAdmin,
         id: "isAdmin",
-        header: t("columns.role") ?? "Rol",
+        header: t("columns.role"),
         size: 110,
         Cell: ({ cell }) => {
           const isAdmin = Boolean(cell.getValue());
