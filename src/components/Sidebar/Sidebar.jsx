@@ -52,7 +52,7 @@ const SidebarPanel = ({
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
-        height: 64,
+        height: 94,
         px: collapsed ? 1 : 2.5,
         borderBottom: "1px solid",
         borderColor: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.06)",
@@ -72,8 +72,8 @@ const SidebarPanel = ({
       >
         <OguzLogo
           sx={{
-            width: collapsed ? 38 : 136,
-            height: collapsed ? 30 : 34,
+            width: collapsed ? 38 : 175,
+            height: collapsed ? 30 : 82,
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         />
@@ -137,36 +137,42 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
 
   const filteredNavItems = useMemo(() => {
     if (!user) return [];
-    const role = String(user.role || "").toUpperCase();
-    
-    // SuperAdmin, Admin or wildcard permission has full access
+
+    // Wildcard permission has full access to everything
     if (
-      role === "ADMIN" ||
-      role === "SUPER_ADMIN" ||
-      (Array.isArray(user.permissions) && user.permissions.includes("*"))
+      Array.isArray(user.permissions) &&
+      user.permissions.includes("*")
     ) {
       return navItems;
     }
 
-    if (!Array.isArray(user.permissions)) return navItems;
+    // If user has specific permissions defined
+    if (Array.isArray(user.permissions)) {
+      const isPathAllowed = (path) => {
+        if (!path) return false;
+        return user.permissions.some(
+          (perm) => path === perm || (perm !== "/" && path.startsWith(perm + "/")),
+        );
+      };
 
-    const permSet = new Set(user.permissions);
+      return navItems
+        .map((item) => {
+          if (item.isGroup && item.children) {
+            const allowedChildren = item.children.filter((child) =>
+              isPathAllowed(child.path),
+            );
+            if (allowedChildren.length === 0) return null;
+            return { ...item, children: allowedChildren };
+          }
+          if (item.path && !isPathAllowed(item.path)) {
+            return null;
+          }
+          return item;
+        })
+        .filter(Boolean);
+    }
 
-    return navItems
-      .map((item) => {
-        if (item.isGroup && item.children) {
-          const allowedChildren = item.children.filter((child) =>
-            permSet.has(child.path),
-          );
-          if (allowedChildren.length === 0) return null;
-          return { ...item, children: allowedChildren };
-        }
-        if (item.path && !permSet.has(item.path)) {
-          return null;
-        }
-        return item;
-      })
-      .filter(Boolean);
+    return navItems;
   }, [navItems, user]);
 
   const autoOpenGroups = useMemo(() => {

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Grid, CircularProgress, Box, Typography, Autocomplete, TextField } from "@mui/material";
+import { useMemo } from "react";
+import { Grid, CircularProgress, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
@@ -13,7 +13,6 @@ import CustomDatePicker from "../../../components/CustomDatePicker";
 import AppAutocomplete from "../../../components/AppAutocomplete";
 import GlobalClientAutocomplete from "../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { useGet } from "../../../hooks/CRUD/useGet";
-import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { addReceivingApi } from "../../../api/queries/post";
@@ -21,7 +20,6 @@ import { updateReceivingApi } from "../../../api/queries/patch";
 import {
   getAllEmployeeApi,
   getCountryVisaFieldsApi,
-  getCountriesApi,
 } from "../../../api/queries/getters";
 import {
   sortVisaFields,
@@ -39,6 +37,31 @@ const DynamicVisaField = ({
   const fieldKey = field.fieldKey;
   const label = selectedLang(field.labelTm) || field.labelTm || fieldKey;
 
+  if (isOperatorField(fieldKey) || isOperator2Field(fieldKey)) {
+    return (
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <AppAutocomplete
+          name={fieldKey}
+          control={control}
+          label={label}
+          options={employeeOptions}
+        />
+      </Grid>
+    );
+  }
+
+  if (fieldKey === "note" || field.multiline) {
+    return (
+      <Grid size={12}>
+        <CustomTextField
+          name={fieldKey}
+          control={control}
+          label={label}
+        />
+      </Grid>
+    );
+  }
+
   if (fieldKey === "client_guid") {
     return (
       <Grid size={12}>
@@ -53,40 +76,13 @@ const DynamicVisaField = ({
     );
   }
 
-  if (fieldKey === "note" || field.multiline) {
-    return (
-      <Grid size={12}>
-        <CustomTextField
-          name={fieldKey}
-          control={control}
-          label={label}
-          multiline
-          rows={3}
-        />
-      </Grid>
-    );
-  }
-
-  if (isOperatorField(fieldKey) || isOperator2Field(fieldKey)) {
-    return (
-      <Grid size={{ xs: 12, sm: 6 }}>
-        <AppAutocomplete
-          name={fieldKey}
-          control={control}
-          label={label}
-          options={employeeOptions}
-        />
-      </Grid>
-    );
-  }
-
   if (field.fieldType === "select" && Array.isArray(field.options)) {
     const opts = field.options.map((opt) => ({
       label: typeof opt === "string" ? opt : opt.label,
       value: typeof opt === "string" ? opt : opt.value,
     }));
     return (
-      <Grid size={{ xs: 12, sm: 6 }}>
+      <Grid size={{ xs: 12, sm: 4 }}>
         <CustomSelect
           name={fieldKey}
           control={control}
@@ -100,7 +96,7 @@ const DynamicVisaField = ({
 
   if (field.fieldType === "date") {
     return (
-      <Grid size={{ xs: 12, sm: 6 }}>
+      <Grid size={{ xs: 12, sm: 4 }}>
         <CustomDatePicker
           name={fieldKey}
           control={control}
@@ -113,7 +109,7 @@ const DynamicVisaField = ({
 
   if (field.fieldType === "number") {
     return (
-      <Grid size={{ xs: 12, sm: 6 }}>
+      <Grid size={{ xs: 12, sm: 4 }}>
         <CustomTextField
           name={fieldKey}
           control={control}
@@ -125,8 +121,21 @@ const DynamicVisaField = ({
     );
   }
 
+  if (field.fieldType === "autocomplete" || field.optionsKey === "employees") {
+    return (
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <AppAutocomplete
+          name={fieldKey}
+          control={control}
+          label={label}
+          options={employeeOptions}
+        />
+      </Grid>
+    );
+  }
+
   return (
-    <Grid size={{ xs: 12, sm: 6 }}>
+    <Grid size={{ xs: 12, sm: 4 }}>
       <CustomTextField
         name={fieldKey}
         control={control}
@@ -149,41 +158,10 @@ export const VisaIntakeModal = ({
   const itemData = row?.original || null;
   const isEditing = Boolean(itemData);
 
-  const [modalCountryGuid, setModalCountryGuid] = useState("");
-
-  const countryParams = useMemo(() => ({ page: 1, limit: 100 }), []);
-
-  const { data: countriesData = [] } = usePagginationGet({
-    apiFn: getCountriesApi,
-    key: "countriesList",
-    params: countryParams,
-  });
-
-  const countryOptions = useMemo(() => {
-    const list = Array.isArray(countriesData) ? countriesData : [];
-    return list.map((c) => {
-      const label =
-        (typeof c.name === "string" ? c.name : null) ||
-        selectedLang(c.name) ||
-        c.name?.tk ||
-        c.name?.ru ||
-        c.name?.en ||
-        c.nameTm ||
-        c.code ||
-        "";
-      return {
-        guid: c.guid,
-        code: c.code,
-        label: c.code ? `${label} (${c.code})` : label,
-      };
-    });
-  }, [countriesData, selectedLang]);
-
   const effectiveCountryGuid =
     countryGuid ||
-    modalCountryGuid ||
     itemData?.country_guid ||
-    (countriesData[0]?.guid || "");
+    "";
 
   const { data: rawFields = [], isLoading: fieldsLoading } = useGet({
     apiFn: () =>
@@ -341,6 +319,8 @@ export const VisaIntakeModal = ({
         payload.client_guid = formattedVal || null;
       } else if (key === "operator_guid" || key === "accepted_opr_guid") {
         payload.operator_guid = formattedVal || null;
+      } else if (key === "operator2_guid" || key === "received_opr_guid") {
+        payload.operator2_guid = formattedVal || null;
       } else if (key === "office_guid") {
         payload.office_guid = formattedVal || null;
       } else if (key === "visa_type" || key === "visa_category") {
@@ -407,41 +387,6 @@ export const VisaIntakeModal = ({
             </Box>
           ) : (
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <Typography
-                  variant="body2"
-                  sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
-                >
-                  {t("columns.country") || "Ýurt"}
-                </Typography>
-                <Autocomplete
-                  size="small"
-                  options={countryOptions}
-                  getOptionLabel={(option) => option.label || ""}
-                  value={
-                    countryOptions.find((c) => c.guid === effectiveCountryGuid) || null
-                  }
-                  onChange={(_, newValue) => {
-                    setModalCountryGuid(newValue ? newValue.guid : "");
-                  }}
-                  disabled={isEditing || Boolean(countryGuid)}
-                  isOptionEqualToValue={(option, val) =>
-                    option.guid === (val?.guid ?? val)
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder={t("columns.country") || "Ýurt saýlaň..."}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "10px",
-                          minHeight: "44px",
-                        },
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
               {sortedFields.map((field) => (
                 <DynamicVisaField
                   key={field.fieldKey}

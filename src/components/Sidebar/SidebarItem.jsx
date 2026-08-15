@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react';
 
 const isPathActive = (targetPath, currentPath) => {
   if (!targetPath || !currentPath) return false;
-  return currentPath === targetPath || (targetPath !== '/' && currentPath.startsWith(targetPath + '/'));
+  return currentPath === targetPath;
 };
 
 const getTokens = (isDark) => ({
@@ -27,12 +27,13 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
     <ListItemButton
       component={NavLink}
       to={item.path}
+      end
       onClick={onSidebarClose}
       sx={{
         display: 'flex',
         alignItems: 'center',
         gap: collapsed ? 0 : '12px',
-        padding: collapsed ? '10px 0' : '9px 12px',
+        padding: collapsed ? '11px 0' : '10px 14px',
         margin: collapsed ? '3px auto' : '2px 10px',
         borderRadius: '10px',
         width: collapsed ? '44px' : 'calc(100% - 20px)',
@@ -55,11 +56,11 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
         sx={{
           minWidth: 'auto',
           color: isActive ? t.iconActive : (item.iconColor || t.icon),
-          fontSize: 19,
+          fontSize: 20,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 22,
+          width: 24,
           flexShrink: 0,
           transition: 'color 0.15s ease',
         }}
@@ -73,7 +74,7 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
             primary: {
               noWrap: true,
               sx: {
-                fontSize: '0.84rem',
+                fontSize: '0.915rem',
                 fontWeight: isActive ? 650 : 500,
                 fontFamily: "'Inter', sans-serif",
                 overflow: 'hidden',
@@ -110,7 +111,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
         display: 'flex',
         alignItems: 'center',
         gap: collapsed ? 0 : '12px',
-        padding: collapsed ? '10px 0' : '9px 12px',
+        padding: collapsed ? '11px 0' : '10px 14px',
         margin: collapsed ? '3px auto' : '2px 10px',
         borderRadius: '10px',
         width: collapsed ? '44px' : 'calc(100% - 20px)',
@@ -133,11 +134,11 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
         sx={{
           minWidth: 'auto',
           color: hasActiveChild ? t.iconActive : (item.iconColor || t.icon),
-          fontSize: 19,
+          fontSize: 20,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 22,
+          width: 24,
           flexShrink: 0,
           transition: 'color 0.15s ease',
         }}
@@ -152,7 +153,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
               primary: {
                 noWrap: true,
                 sx: {
-                  fontSize: '0.84rem',
+                  fontSize: '0.915rem',
                   fontWeight: hasActiveChild ? 650 : 500,
                   fontFamily: "'Inter', sans-serif",
                   overflow: 'hidden',
@@ -172,7 +173,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
               transform: isExpanded ? 'rotate(180deg)' : 'none',
             }}
           >
-            <ChevronDown size={14} />
+            <ChevronDown size={16} />
           </Box>
         </>
       )}
@@ -186,7 +187,6 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
         : headerEl
       }
 
-      {/* Submenu with delicate Tree Rail Guide */}
       <Collapse in={!collapsed && isExpanded} timeout="auto" unmountOnExit>
         <List
           component="div"
@@ -208,12 +208,13 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                 key={childKey}
                 component={NavLink}
                 to={child.path}
+                end
                 onClick={onSidebarClose}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px',
-                  padding: '7px 10px',
+                  padding: '8px 12px',
                   margin: '2px 0',
                   borderRadius: '8px',
                   width: '100%',
@@ -234,11 +235,11 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                   sx={{
                     minWidth: 'auto',
                     color: isChildActive ? t.iconActive : (child.iconColor || t.icon),
-                    fontSize: 16,
+                    fontSize: 18,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: 18,
+                    width: 20,
                     flexShrink: 0,
                     transition: 'color 0.15s ease',
                   }}
@@ -251,7 +252,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                     primary: {
                       noWrap: true,
                       sx: {
-                        fontSize: '0.80rem',
+                        fontSize: '0.865rem',
                         fontWeight: isChildActive ? 650 : 500,
                         fontFamily: "'Inter', sans-serif",
                         overflow: 'hidden',

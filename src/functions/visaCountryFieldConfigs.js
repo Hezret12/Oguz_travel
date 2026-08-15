@@ -1,5 +1,5 @@
 export const DEFAULT_VISA_FIELDS = [
-  {
+    {
     fieldKey: "client_guid",
     labelTm: "Müşderi",
     labelRu: "ФИО клиента",
@@ -10,24 +10,14 @@ export const DEFAULT_VISA_FIELDS = [
     aliases: ["clientfullname", "client_guid", "client", "müşderi", "фио клиента", "клиент"],
   },
   {
-    fieldKey: "application_date",
-    labelTm: "Arza berlen senesi",
-    labelRu: "Дата подачи",
-    labelEn: "Application date",
-    fieldType: "date",
-    isDefault: true,
-    gridSize: 4,
-    aliases: ["applicationdate", "application_date", "arza senesi", "дата подачи", "дата заявления"],
-  },
-  {
     fieldKey: "accepted_opr_guid",
-    labelTm: "Operator",
+    labelTm: "Tabşyryjy (Operator)",
     labelRu: "Оператор",
     labelEn: "Operator",
     fieldType: "autocomplete",
     optionsKey: "employees",
     isDefault: true,
-    gridSize: 4,
+    gridSize: 6,
     aliases: ["accepted_opr_guid", "operator", "operator_guid", "оператор", "сотрудник", "assignment_operator"],
   },
   {
@@ -38,8 +28,18 @@ export const DEFAULT_VISA_FIELDS = [
     fieldType: "autocomplete",
     optionsKey: "employees",
     isDefault: true,
-    gridSize: 4,
+    gridSize: 6,
     aliases: ["received_opr_guid", "recieved_opr_guid", "operator2", "operator2_guid", "receiver_operator", "kabul ediji", "оператор 2"],
+  },
+  {
+    fieldKey: "application_date",
+    labelTm: "Arza berlen senesi",
+    labelRu: "Дата подачи",
+    labelEn: "Application date",
+    fieldType: "date",
+    isDefault: true,
+    gridSize: 4,
+    aliases: ["applicationdate", "application_date", "arza senesi", "дата подачи", "дата заявления"],
   },
   {
     fieldKey: "note",
@@ -55,14 +55,36 @@ export const DEFAULT_VISA_FIELDS = [
   },
 ];
 
-export const isClientField = (field) => field?.fieldKey === "client_guid";
+export const isClientField = (field) => {
+  const key = typeof field === "string" ? field : field?.fieldKey;
+  return key === "client_guid";
+};
 
-export const isNotesField = (field) => field?.fieldKey === "note";
+export const isNotesField = (field) => {
+  const key = typeof field === "string" ? field : field?.fieldKey;
+  return key === "note" || key === "notes";
+};
 
-export const isOperator2Field = (field) => field?.fieldKey === "received_opr_guid";
+export const isOperatorField = (field) => {
+  const key = typeof field === "string" ? field : field?.fieldKey;
+  return (
+    key === "accepted_opr_guid" ||
+    key === "operator" ||
+    key === "operator_guid" ||
+    key === "assignment_operator"
+  );
+};
 
-export const isOperatorField = (field) => field?.fieldKey === "accepted_opr_guid";
-
+export const isOperator2Field = (field) => {
+  const key = typeof field === "string" ? field : field?.fieldKey;
+  return (
+    key === "received_opr_guid" ||
+    key === "recieved_opr_guid" ||
+    key === "operator2" ||
+    key === "operator2_guid" ||
+    key === "receiver_operator"
+  );
+};
 
 export const ensureAllVisaFields = (apiFields = []) => {
   const fields = Array.isArray(apiFields)
@@ -85,38 +107,17 @@ export const ensureAllVisaFields = (apiFields = []) => {
         })
     : [];
 
-  let clientField = fields.find((f) => isClientField(f));
-  if (!clientField) {
-    clientField = DEFAULT_VISA_FIELDS.find((f) => f.fieldKey === "client_guid");
-  } else {
-    clientField = { ...clientField, fieldKey: "client_guid" };
-  }
+  let clientField = fields.find((f) => isClientField(f)) || DEFAULT_VISA_FIELDS[0];
+  let opr1Field = fields.find((f) => isOperatorField(f)) || DEFAULT_VISA_FIELDS[1];
+  let opr2Field = fields.find((f) => isOperator2Field(f)) || DEFAULT_VISA_FIELDS[2];
+  let appDateField = fields.find((f) => f.fieldKey === "application_date") || DEFAULT_VISA_FIELDS[3];
+  let notesField = fields.find((f) => isNotesField(f)) || DEFAULT_VISA_FIELDS[4];
 
-  let notesField = fields.find((f) => isNotesField(f));
-  if (!notesField) {
-    notesField = DEFAULT_VISA_FIELDS.find((f) => f.fieldKey === "note");
-  } else {
-    notesField = { ...notesField, fieldKey: "note", multiline: true };
-  }
-
-  const defaultMiddleFields = DEFAULT_VISA_FIELDS.filter(
-    (f) => !isClientField(f) && !isNotesField(f)
-  ).map((def) => {
-    const match = fields.find(
-      (f) =>
-        f.fieldKey === def.fieldKey ||
-        (def.fieldKey === "operator_guid" && isOperatorField(f)) ||
-        (def.fieldKey === "operator2_guid" && isOperator2Field(f))
-    );
-    return match ? { ...match, fieldKey: def.fieldKey } : def;
-  });
-
-  const defaultKeys = new Set([
-    ...DEFAULT_VISA_FIELDS.map((f) => f.fieldKey),
-    "operator",
-    "operator2",
-    "office",
-  ]);
+  if (clientField) clientField = { ...clientField, fieldKey: "client_guid", gridSize: 12 };
+  if (opr1Field) opr1Field = { ...opr1Field, fieldKey: "accepted_opr_guid", gridSize: 6 };
+  if (opr2Field) opr2Field = { ...opr2Field, fieldKey: "received_opr_guid", gridSize: 6 };
+  if (appDateField) appDateField = { ...appDateField, fieldKey: "application_date", gridSize: 4 };
+  if (notesField) notesField = { ...notesField, fieldKey: "note", multiline: true, gridSize: 12 };
 
   const dynamicFields = fields.filter(
     (f) =>
@@ -125,10 +126,10 @@ export const ensureAllVisaFields = (apiFields = []) => {
       !isNotesField(f) &&
       !isOperatorField(f) &&
       !isOperator2Field(f) &&
-      !defaultKeys.has(f.fieldKey)
+      f.fieldKey !== "application_date"
   );
 
-  return [clientField, ...defaultMiddleFields, ...dynamicFields, notesField];
+  return [clientField, opr1Field, opr2Field, appDateField, ...dynamicFields, notesField];
 };
 
 export const sortVisaFields = ensureAllVisaFields;

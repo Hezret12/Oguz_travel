@@ -63,6 +63,40 @@ export const themeConfig = createTheme({
         },
       },
     },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: ({ theme }) => ({
+          backgroundColor: theme.palette.mode === 'dark' ? '#162238' : '#ffffff',
+          color: theme.palette.text.primary,
+          border: `1px solid ${theme.palette.divider}`,
+          borderRadius: 8,
+          fontSize: '0.78rem',
+          fontWeight: 500,
+          padding: '6px 10px',
+          boxShadow:
+            theme.palette.mode === 'dark'
+              ? '0 8px 24px rgba(0, 0, 0, 0.45)'
+              : '0 8px 24px rgba(0, 0, 0, 0.08)',
+        }),
+        arrow: ({ theme }) => ({
+          color: theme.palette.mode === 'dark' ? '#162238' : '#ffffff',
+          '&::before': {
+            border: `1px solid ${theme.palette.divider}`,
+          },
+        }),
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderColor: theme.palette.divider,
+        }),
+        head: ({ theme }) => ({
+          fontWeight: 650,
+          backgroundColor: theme.palette.background.paper,
+        }),
+      },
+    },
     MuiCard: {
       styleOverrides: {
         root: {

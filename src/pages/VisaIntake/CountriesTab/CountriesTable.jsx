@@ -76,7 +76,7 @@ export const CountriesTable = forwardRef((props, ref) => {
         id: "code",
         header: t("columns.code"),
         size: 80,
-        accessorFn: (row) => row.code || "-",
+        accessorFn: (row) => row.code || "",
         Cell: ({ cell }) => (
           <Chip
             label={cell.getValue()}
@@ -120,7 +120,7 @@ export const CountriesTable = forwardRef((props, ref) => {
             <Chip
               label={`${count} meýdança`}
               size="small"
-              color={count > 0 ? "secondary" : "default"}
+              color={"default"}
               sx={{ fontWeight: 600, borderRadius: "6px" }}
             />
           );
@@ -148,6 +148,13 @@ export const CountriesTable = forwardRef((props, ref) => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
+      },
+    },
     columns,
     data: countriesData,
     state: {
@@ -155,6 +162,25 @@ export const CountriesTable = forwardRef((props, ref) => {
       showSkeletons: isLoading,
     },
     enablePagination: false,
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          p: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search")}
+          onRefetch={refetch}
+          isFetching={isFetching}
+        />
+      </Box>
+    ),
     renderCreateRowDialogContent: ({ table }) => (
       <CreateCountryModal
         open={Boolean(table.getState().creatingRow)}
@@ -177,24 +203,6 @@ export const CountriesTable = forwardRef((props, ref) => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-          flexWrap: "wrap",
-        }}
-      >
-        <GlobalSearchInput
-          value={searchQuery}
-          onChange={setSearch}
-          placeholder={t("search")}
-          onRefetch={refetch}
-          isFetching={isFetching}
-        />
-      </Box>
-
       <MaterialReactTable table={table} />
 
       <Pagination

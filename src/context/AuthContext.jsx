@@ -53,21 +53,16 @@ export function AuthProvider({ children }) {
     },
     enabled: hasToken,
     initialData: () => getStoredSession()?.user ?? null,
-    staleTime: 5 * 60 * 1000,
+    initialDataUpdatedAt: 0,
+    staleTime: 0,
     gcTime: 10 * 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     retry: false,
   });
 
-  // ── Loading State Logic ─────────────────────────────────────────
-  // isLoading  = no data at all (first ever load, no initialData)
-  // isFetching = network request in-flight
-  // dataUpdatedAt = 0 means only initialData exists, no real /auth/me
-  //                 response has been received yet
-  //
-  // We stay in "loading" until the first REAL server verification
-  // completes. This prevents the expired-token bounce:
-  //   login → (stale cache says authenticated) → home → (401) → login
-  const loading = isLoading || (isFetching && dataUpdatedAt === 0);
+  // Loading is only true if we don't have stored session data at all on first load
+  const loading = isLoading && !user;
 
   // TanStack Mutation for Logout (/auth/logout)
   const logoutMutation = useMutation({

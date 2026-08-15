@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
+import TableEmptyState from "../../components/TableEmptyState";
 import { Box, Chip } from "@mui/material";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
@@ -275,7 +276,7 @@ const Visa = () => {
     },
     muiTableBodyProps: {
       sx: (theme) => ({
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.secondary,
         opacity: isLoading || isFetching ? 0 : 1,
         pointerEvents: isLoading || isFetching ? "none" : "auto",
@@ -315,20 +316,7 @@ const Visa = () => {
 
     renderEmptyRowsFallback: () => {
       if (isLoading || isFetching) return null;
-      return (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            p: 4,
-            color: "text.secondary",
-            fontWeight: 500,
-          }}
-        >
-          {t("noData")}
-        </Box>
-      );
+      return <TableEmptyState onResetFilters={resetFilters} />;
     },
 
     renderCreateRowDialogContent: ({ table }) => <AddVisaModal table={table} />,

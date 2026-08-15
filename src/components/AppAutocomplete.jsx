@@ -1,4 +1,3 @@
-import { forwardRef } from "react";
 import {
   Autocomplete,
   Box,
@@ -15,15 +14,6 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-
-const CleanRoot = forwardRef(function CleanRoot(props, ref) {
-  const domProps = { ...props };
-  delete domProps.renderTags;
-  delete domProps.ownerState;
-  delete domProps.PaperProps;
-  return <div ref={ref} {...domProps} />;
-});
-
 const AppAutocomplete = ({
   name,
   control,
@@ -38,6 +28,8 @@ const AppAutocomplete = ({
   maxChips,
   popupIcon = <ChevronDown size={18} />,
   renderTags: customRenderTags,
+  onValueChange,
+  sx = {},
   ...restProps
 }) => {
   // Strip any accidental renderTags, ownerState, or PaperProps from restProps
@@ -157,22 +149,20 @@ const AppAutocomplete = ({
               disabled={disabled}
               options={options}
               popupIcon={popupIcon}
-              slots={{ root: CleanRoot }}
               getOptionKey={(option, index) =>
                 option?.value ?? option?.id ?? option?.userGuid ?? option?.label ?? index
               }
               getOptionLabel={(option) => option.label || ""}
               {...(renderTagsProp ? { renderTags: renderTagsProp } : {})}
               renderOption={(optionProps, option, { selected, index }) => {
-                const cleaned = { ...optionProps };
+                const { key, ...cleanOptionProps } = optionProps;
+                delete cleanOptionProps.renderTags;
+                delete cleanOptionProps.ownerState;
                 const optionKey =
-                  cleaned.key || option?.value || option?.id || `${option?.label || "opt"}-${index}`;
-                delete cleaned.key;
-                delete cleaned.renderTags;
-                delete cleaned.ownerState;
+                  option?.value ?? option?.id ?? key ?? `${option?.label || "opt"}-${index}`;
 
                 return (
-                  <li key={optionKey} {...cleaned}>
+                  <li key={optionKey} {...cleanOptionProps}>
                     {multiple && (
                       <Checkbox
                         icon={icon}
@@ -188,13 +178,15 @@ const AppAutocomplete = ({
               value={selectedValue}
               onChange={(_, newValue) => {
                 if (multiple) {
-                  onChange(
-                    Array.isArray(newValue)
-                      ? newValue.map((v) => v.value)
-                      : [],
-                  );
+                  const vals = Array.isArray(newValue)
+                    ? newValue.map((v) => v.value)
+                    : [];
+                  onChange(vals);
+                  onValueChange?.(vals, newValue);
                 } else {
-                  onChange(newValue ? newValue.value : "");
+                  const val = newValue ? newValue.value : "";
+                  onChange(val);
+                  onValueChange?.(val, newValue);
                 }
               }}
               isOptionEqualToValue={(option, val) =>
@@ -213,49 +205,54 @@ const AppAutocomplete = ({
                   helperText={error?.message}
                   fullWidth={fullWidth}
                   size={size}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "10px",
-                      minHeight: "44px",
-                      maxHeight: "44px",
-                      overflow: "hidden",
-                      flexWrap: "nowrap",
-                      py: "2px",
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.03)"
-                          : "#ffffff",
-                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                      "&:hover": {
-                        backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.05)"
-                            : "#ffffff",
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "primary.main",
-                        },
-                      },
-                      "&.Mui-focused": {
-                        backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.02)"
-                            : "#ffffff",
-                        boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.12)",
-                      },
-                    },
-                    "& .MuiOutlinedInput-input": {
-                      py: "4px",
-                      minWidth: "30px !important",
-                    },
-                    "& .MuiFormHelperText-root": {
-                      mx: 1,
-                      mt: 0.5,
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                    },
-                  }}
                 />
               )}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "10px",
+                  minHeight: "44px",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.03)"
+                      : "#ffffff",
+                  transition: "all 0.2s ease-in-out",
+                  "&:hover": {
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "primary.main",
+                    },
+                  },
+                  "&.Mui-focused": {
+                    boxShadow: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "0 0 0 3px rgba(59, 130, 246, 0.16)"
+                        : "0 0 0 3px rgba(37, 99, 235, 0.12)",
+                  },
+                },
+                "& .MuiAutocomplete-input": {
+                  minWidth: 0,
+                },
+                "& .MuiAutocomplete-endAdornment": {
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  right: "12px",
+                },
+                "& .MuiAutocomplete-popupIndicator": {
+                  color: "text.secondary",
+                  p: "4px",
+                },
+                "& .MuiAutocomplete-clearIndicator": {
+                  color: "text.secondary",
+                  p: "4px",
+                },
+                "& .MuiFormHelperText-root": {
+                  mx: 1,
+                  mt: 0.5,
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                },
+                ...sx,
+                ...cleanProps.sx,
+              }}
             />
           </Box>
         );

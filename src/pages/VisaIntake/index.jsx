@@ -91,6 +91,11 @@ export const VisaIntake = () => {
           onChange={(_, val) => setActiveTab(val)}
           tabs={tabOptions}
           variant="pills"
+          color="blue"
+          tabSx={{
+            minWidth: { xs: 120, sm: 160, md: 180 },
+            textAlign: "center",
+          }}
         />
 
         {/* RIGHT SIDE: Add Button */}

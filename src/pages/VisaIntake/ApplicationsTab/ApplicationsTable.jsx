@@ -353,6 +353,13 @@ export const ApplicationsTable = forwardRef(
 
     const table = useMaterialReactTable({
       ...defaultMrtOptions,
+      enableColumnPinning: true,
+      initialState: {
+        columnPinning: {
+          left: ["index_number"],
+          right: ["actions"],
+        },
+      },
       columns,
       data: applicationsData,
       state: {
@@ -360,6 +367,76 @@ export const ApplicationsTable = forwardRef(
         showSkeletons: isLoading,
       },
       enablePagination: false,
+      renderTopToolbarCustomActions: () => (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            flexWrap: "wrap",
+            p: 0.5,
+          }}
+        >
+          <GlobalSearchInput
+            value={searchQuery}
+            onChange={setSearch}
+            placeholder={t("search")}
+            onRefetch={refetch}
+            isFetching={isFetching}
+          />
+          <Badge color="primary" variant="dot" invisible={!isFilterActive}>
+            <Button
+              variant={isFilterActive ? "contained" : "outlined"}
+              startIcon={<FilterListIcon />}
+              onClick={openDrawer}
+              sx={{ borderRadius: "8px", fontWeight: 600, height: "40px" }}
+            >
+              {t("filter")}
+            </Button>
+          </Badge>
+
+          <Autocomplete
+            size="small"
+            options={countryOptions}
+            getOptionLabel={(option) => option.label || ""}
+            value={
+              countryOptions.find((c) => c.guid === activeCountryGuid) || null
+            }
+            onChange={(_, newValue) => {
+              setSelectedCountryGuid(newValue ? newValue.guid : "");
+              setPage(1);
+            }}
+            isOptionEqualToValue={(option, val) =>
+              option.guid === (val?.guid ?? val)
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder={t("columns.country")}
+                sx={{
+                  width: 220,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "10px",
+                    height: "40px",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.05)"
+                        : "#ffffff",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255,255,255,0.12)"
+                          : "#E2E8F0",
+                    },
+                  },
+                }}
+              />
+            )}
+          />
+        </Box>
+      ),
       renderCreateRowDialogContent: ({ table }) => (
         <VisaIntakeModal
           open={Boolean(table.getState().creatingRow)}
@@ -384,84 +461,6 @@ export const ApplicationsTable = forwardRef(
 
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            flexWrap: "wrap",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              flexWrap: "wrap",
-            }}
-          >
-            <GlobalSearchInput
-              value={searchQuery}
-              onChange={setSearch}
-              placeholder={t("search")}
-              onRefetch={refetch}
-              isFetching={isFetching}
-            />
-            <Badge color="primary" variant="dot" invisible={!isFilterActive}>
-              <Button
-                variant={isFilterActive ? "contained" : "outlined"}
-                startIcon={<FilterListIcon />}
-                onClick={openDrawer}
-                sx={{ borderRadius: "8px", fontWeight: 600, height: "40px" }}
-              >
-                {t("filter")}
-              </Button>
-            </Badge>
-
-            <Autocomplete
-              size="small"
-              options={countryOptions}
-              getOptionLabel={(option) => option.label || ""}
-              value={
-                countryOptions.find((c) => c.guid === activeCountryGuid) || null
-              }
-              onChange={(_, newValue) => {
-                setSelectedCountryGuid(newValue ? newValue.guid : "");
-                setPage(1);
-              }}
-              isOptionEqualToValue={(option, val) =>
-                option.guid === (val?.guid ?? val)
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder={t("columns.country") || "Ýurt saýlaň..."}
-                  sx={{
-                    width: 220,
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "10px",
-                      height: "40px",
-                      fontSize: "0.875rem",
-                      fontWeight: 600,
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.05)"
-                          : "#ffffff",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.12)"
-                            : "#E2E8F0",
-                      },
-                    },
-                  }}
-                />
-              )}
-            />
-          </Box>
-        </Box>
-
         <MaterialReactTable table={table} />
 
         <Pagination

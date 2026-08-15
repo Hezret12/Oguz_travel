@@ -269,11 +269,6 @@ const Users = () => {
     muiTableBodyRowProps: ({ row }) => ({
       onClick: row.getToggleSelectedHandler(),
     }),
-    muiTablePaperProps: {
-      sx: () => ({
-        ...defaultMrtOptions.muiTablePaperProps?.sx,
-      }),
-    },
     renderCreateRowDialogContent: ({ table }) => <AddUserModal table={table} />,
     renderEditRowDialogContent: ({ table, row }) => (
       <EditUserModal table={table} row={row} />

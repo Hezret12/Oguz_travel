@@ -1,3 +1,6 @@
+import { createElement } from "react";
+import TableEmptyState from "../components/TableEmptyState";
+
 export const getDefaultMRTOptions = () => ({
   layoutMode: "table",
   editDisplayMode: "modal",
@@ -33,43 +36,61 @@ export const getDefaultMRTOptions = () => ({
       enableHiding: true,
     },
   },
-  muiTableBodyProps: {
-    sx: (theme) => ({
-      backgroundColor: theme.palette.background.default,
-      color: theme.palette.text.secondary,
-    }),
-  },
-  muiTableBodyRowProps: () => ({
-    sx: (theme) => ({
-      cursor: "pointer",
-      transition: "background-color 0.2s ease",
-      "&:hover": {
-        backgroundColor:
-          theme.palette.mode === "dark"
-            ? "rgba(255,255,255,0.08)"
-            : `${theme.palette.action.hover} !important`,
-      },
-    }),
+  mrtTheme: (theme) => ({
+    baseBackgroundColor: theme.palette.background.paper,
+    pinnedRowBackgroundColor: theme.palette.background.paper,
+    selectedRowBackgroundColor:
+      theme.palette.mode === "dark"
+        ? "rgba(20, 184, 166, 0.12)"
+        : "rgba(14, 133, 132, 0.08)",
   }),
   muiTablePaperProps: {
-    sx: {
+    sx: (theme) => ({
       display: "flex",
       flexDirection: "column",
       height: "calc(100vh - 190px)",
       width: "100%",
       border: "1px solid",
-      borderColor: (theme) =>
-        theme.palette.mode === "dark" ? "#1e1e1e" : "#e5e7eb",
-    },
+      borderColor: "divider",
+      backgroundColor: theme.palette.background.paper,
+      boxShadow: "none",
+      borderRadius: "12px",
+      overflow: "hidden",
+    }),
   },
+  muiTableProps: {
+    sx: (theme) => ({
+      backgroundColor: theme.palette.background.paper,
+    }),
+  },
+  muiTableBodyProps: {
+    sx: (theme) => ({
+      backgroundColor: theme.palette.background.paper,
+      color: theme.palette.text.primary,
+    }),
+  },
+  muiTableBodyRowProps: () => ({
+    sx: (theme) => ({
+      cursor: "pointer",
+      backgroundColor: theme.palette.background.paper,
+      transition: "background-color 0.15s ease",
+      "&:hover": {
+        backgroundColor:
+          theme.palette.mode === "dark"
+            ? "rgba(255, 255, 255, 0.05)"
+            : "rgba(0, 0, 0, 0.03) !important",
+      },
+    }),
+  }),
 
-  // renderEmptyRowsFallback: () => NoData(),
+  renderEmptyRowsFallback: () => createElement(TableEmptyState),
 
   muiTableContainerProps: {
     sx: (theme) => ({
       flex: 1,
       overflow: "auto",
       position: "relative",
+      backgroundColor: theme.palette.background.paper,
       "&::-webkit-scrollbar": {
         width: "8px",
       },
@@ -90,33 +111,36 @@ export const getDefaultMRTOptions = () => ({
     }),
   },
   muiTableHeadProps: {
-    sx: {
+    sx: (theme) => ({
       position: "sticky",
       top: 0,
       zIndex: 10,
-      backgroundColor: "white",
-    },
+      backgroundColor: theme.palette.background.paper,
+    }),
   },
   muiTableHeadCellProps: ({ column }) => {
     const isPinned = column.getIsPinned();
     return {
       sx: (theme) => {
+        const isDark = theme.palette.mode === "dark";
         const base = {
-          fontSize: "15px",
-          fontWeight: 600,
+          fontSize: "14px",
+          fontWeight: 650,
+          backgroundColor: isDark ? "#11192A" : "#FFFFFF",
+          color: isDark ? "#F8FAFC" : "#334155",
+          borderBottom: `1px solid ${theme.palette.divider}`,
         };
         if (!isPinned) return base;
-        const isDark = theme.palette.mode === "dark";
         return {
           ...base,
           boxShadow:
             isPinned === "left"
               ? isDark
                 ? "4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
-                : "4px 0 8px -2px rgba(0, 0, 0, 0.08) !important"
+                : "4px 0 8px -2px rgba(0, 0, 0, 0.06) !important"
               : isDark
                 ? "-4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
-                : "-4px 0 8px -2px rgba(0, 0, 0, 0.08) !important",
+                : "-4px 0 8px -2px rgba(0, 0, 0, 0.06) !important",
         };
       },
     };
@@ -125,17 +149,23 @@ export const getDefaultMRTOptions = () => ({
     const isPinned = column.getIsPinned();
     return {
       sx: (theme) => {
-        if (!isPinned) return {};
         const isDark = theme.palette.mode === "dark";
+        const base = {
+          backgroundColor: isDark ? "#11192A" : "#FFFFFF",
+          color: isDark ? "#E2E8F0" : "#1E293B",
+          borderBottom: `1px solid ${theme.palette.divider}`,
+        };
+        if (!isPinned) return base;
         return {
+          ...base,
           boxShadow:
             isPinned === "left"
               ? isDark
                 ? "4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
-                : "4px 0 8px -2px rgba(0, 0, 0, 0.08) !important"
+                : "4px 0 8px -2px rgba(0, 0, 0, 0.06) !important"
               : isDark
                 ? "-4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
-                : "-4px 0 8px -2px rgba(0, 0, 0, 0.08) !important",
+                : "-4px 0 8px -2px rgba(0, 0, 0, 0.06) !important",
         };
       },
     };
@@ -161,9 +191,10 @@ export const getDefaultMRTOptions = () => ({
   },
   paginationDisplayMode: "custom",
   muiTopToolbarProps: {
-    sx: {
+    sx: (theme) => ({
       overflow: "visible",
-    },
+      backgroundColor: theme.palette.background.paper,
+    }),
   },
   // defaultColumn: {
   //     maxSize: 600,

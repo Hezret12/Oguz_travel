@@ -1,16 +1,18 @@
 import { useState, useMemo, useCallback } from "react";
-import { Box, Paper } from "@mui/material";
+import { Box, Paper, Button, useTheme } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
 import { FileBox, FileSpreadsheet } from "lucide-react";
-import PageHeader from "../../../components/PageHeader";
 import CustomTabs from "../../../components/CustomTabs";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 import StatusChip from "../../../components/StatusChip";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
+import DeleteDialog from "../../../components/DeleteDialog";
+import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useLocale } from "../../../hooks/useLocale";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useDateFormat } from "../../../functions/generalHelpers";
@@ -32,10 +34,12 @@ import {
 
 const ReferralLetterPage = () => {
   const { t } = useLocale();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
 
-  // Tab State: 'stock' | 'reports'
+  // Tab State: 'reports' | 'stock'
   const [activeTab, setActiveTab] = useState("reports");
 
   // Search & Pagination States
@@ -43,39 +47,7 @@ const ReferralLetterPage = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  // Modal States
-  const [isStockModalOpen, setIsStockModalOpen] = useState(false);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
-
-  // 1. Fetch Reports (Hat Stoky) from API /api/v1/report/get-all-reports
-  const stockParams = useMemo(() => {
-    const params = { page, limit };
-    if (searchQuery.trim()) params.search = searchQuery.trim();
-    return params;
-  }, [page, limit, searchQuery]);
-
-  const {
-    data: rawStockData,
-    totalItems: stockTotal = 0,
-    isLoading: isStockLoading,
-  } = usePagginationGet({
-    apiFn: getAllReportsApi,
-    key: ["reports", stockParams],
-    params: stockParams,
-  });
-
-  // Extract array for Stock List
-  const stockList = useMemo(() => {
-    let list = rawStockData;
-    if (!Array.isArray(list)) {
-      if (Array.isArray(list?.data)) list = list.data;
-      else if (Array.isArray(list?.data?.data)) list = list.data.data;
-      else return [];
-    }
-    return list;
-  }, [rawStockData]);
-
-  // 2. Fetch Report Shares (Ýüzlenme Hasabaty) from API /api/v1/report-share/get-all-report-shares
+  // 1. Fetch Report Shares (Ýüzlenme Hasabaty)
   const reportParams = useMemo(() => {
     const params = { page, limit };
     if (searchQuery.trim()) params.search = searchQuery.trim();
@@ -85,14 +57,16 @@ const ReferralLetterPage = () => {
   const {
     data: rawReportData,
     totalItems: reportTotal = 0,
+    pageCount: reportPageCount = 1,
     isLoading: isReportLoading,
+    isFetching: isReportFetching,
+    refetch: refetchReports,
   } = usePagginationGet({
     apiFn: getAllReportSharesApi,
     key: ["reportShares", reportParams],
     params: reportParams,
   });
 
-  // Extract array for Report List
   const reportList = useMemo(() => {
     let list = rawReportData;
     if (!Array.isArray(list)) {
@@ -103,35 +77,66 @@ const ReferralLetterPage = () => {
     return list;
   }, [rawReportData]);
 
+  // 2. Fetch Letter Stock (Hat Stoky)
+  const stockParams = useMemo(() => {
+    const params = { page, limit };
+    if (searchQuery.trim()) params.search = searchQuery.trim();
+    return params;
+  }, [page, limit, searchQuery]);
+
+  const {
+    data: rawStockData,
+    totalItems: stockTotal = 0,
+    pageCount: stockPageCount = 1,
+    isLoading: isStockLoading,
+    isFetching: isStockFetching,
+    refetch: refetchStock,
+  } = usePagginationGet({
+    apiFn: getAllReportsApi,
+    key: ["reports", stockParams],
+    params: stockParams,
+  });
+
+  const stockList = useMemo(() => {
+    let list = rawStockData;
+    if (!Array.isArray(list)) {
+      if (Array.isArray(list?.data)) list = list.data;
+      else if (Array.isArray(list?.data?.data)) list = list.data.data;
+      else return [];
+    }
+    return list;
+  }, [rawStockData]);
+
   // Delete hooks
-  const { mutate: deleteStock } = useDelete({
+  const { mutate: deleteStock, isPending: isDeletingStock } = useDelete({
     deleteFn: deleteReportApi,
     queryKey: "reports",
     idKey: "guid",
     isPaginated: true,
   });
 
-  const { mutate: deleteReportShare } = useDelete({
+  const { mutate: deleteReportShare, isPending: isDeletingReport } = useDelete({
     deleteFn: deleteReportShareApi,
     queryKey: "reportShares",
     idKey: "guid",
     isPaginated: true,
   });
 
-  const handleTabChange = useCallback((event, newValue) => {
+  const stockDeleteDialog = useDeleteDialog({
+    onConfirm: (item) => deleteStock(item.guid || item.id),
+  });
+
+  const reportDeleteDialog = useDeleteDialog({
+    onConfirm: (item) => deleteReportShare(item.guid || item.id),
+  });
+
+  const handleTabChange = useCallback((_, newValue) => {
     setActiveTab(newValue);
+    setSearchQuery("");
     setPage(1);
   }, []);
 
-  const handleOpenActiveModal = useCallback(() => {
-    if (activeTab === "stock") {
-      setIsStockModalOpen(true);
-    } else {
-      setIsReportModalOpen(true);
-    }
-  }, [activeTab]);
-
-  // MRT Columns for Report Shares Tab (Ýüzlenme Hasabaty)
+  // Columns for Report Shares Tab (Ýüzlenme Hasabaty)
   const reportsColumns = useMemo(
     () => [
       {
@@ -139,15 +144,16 @@ const ReferralLetterPage = () => {
         id: "index_number",
         header: "#",
         size: 60,
+        enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => row.index + 1,
+        Cell: ({ row }) => (page - 1) * limit + row.index + 1,
       },
       {
         accessorKey: "datetime",
         id: "datetime",
-        header: "Sene",
-        size: 120,
+        header: t("columns.date") || "Sene",
+        size: 130,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -155,7 +161,7 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "assignment_opr",
         id: "submittedBy",
-        header: "Tabşyran",
+        header: t("referralLetter.submittedBy") || "Tabşyran (Operator)",
         size: 180,
         Cell: ({ row }) =>
           row.original?.assignment_opr?.fullName ||
@@ -166,7 +172,7 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "receiver_opr",
         id: "receivedBy",
-        header: "Kabul eden",
+        header: t("referralLetter.receivedBy") || "Kabul eden (Operator)",
         size: 180,
         Cell: ({ row }) =>
           row.original?.receiver_opr?.fullName ||
@@ -177,7 +183,7 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "start_yh_number",
         id: "startNo",
-        header: "ÝH №-den",
+        header: t("referralLetter.startNo") || "ÝH №-den",
         size: 130,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -186,7 +192,7 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "end_yh_number",
         id: "endNo",
-        header: "ÝH № çenli",
+        header: t("referralLetter.endNo") || "ÝH № çenli",
         size: 130,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -195,7 +201,7 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "total_count",
         id: "quantity",
-        header: "Mukdary",
+        header: t("referralLetter.quantity") || "Mukdary",
         size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -204,7 +210,7 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "status",
         id: "status",
-        header: "Status",
+        header: t("columns.status") || "Status",
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -227,15 +233,30 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "note",
         id: "note",
-        header: "Bellik",
+        header: t("columns.note") || "Bellik",
         size: 180,
         Cell: ({ cell }) => cell.getValue() || "—",
       },
+      {
+        id: "actions",
+        header: t("columns.actions") || "Hereketler",
+        size: 90,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row, table }) => (
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={(rowObj) => reportDeleteDialog.open(rowObj)}
+          />
+        ),
+      },
     ],
-    [formatChange]
+    [formatChange, page, limit, t, reportDeleteDialog]
   );
 
-  // MRT Columns for Stock Tab (Hat Stoky)
+  // Columns for Stock Tab (Hat Stoky)
   const stockColumns = useMemo(
     () => [
       {
@@ -243,21 +264,22 @@ const ReferralLetterPage = () => {
         id: "index_number",
         header: "#",
         size: 60,
+        enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => row.index + 1,
+        Cell: ({ row }) => (page - 1) * limit + row.index + 1,
       },
       {
         accessorKey: "name",
         id: "batchName",
-        header: "Partiýanyň ady",
+        header: t("referralLetter.batchName") || "Partiýanyň ady",
         size: 220,
         Cell: ({ row }) => row.original?.name || row.original?.batchName || "—",
       },
       {
         accessorKey: "start_yh_number",
         id: "startNo",
-        header: "Başlangyç ÝH №",
+        header: t("referralLetter.startNo") || "Başlangyç ÝH №",
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -266,7 +288,7 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "end_yh_number",
         id: "endNo",
-        header: "Soňky ÝH №",
+        header: t("referralLetter.endNo") || "Soňky ÝH №",
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -275,7 +297,7 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "total_letter",
         id: "count",
-        header: "Umumy mukdary",
+        header: t("referralLetter.totalCount") || "Umumy mukdary",
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -286,14 +308,29 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "createdAt",
         id: "createdAt",
-        header: "Sene",
+        header: t("columns.date") || "Sene",
         size: 130,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
+      {
+        id: "actions",
+        header: t("columns.actions") || "Hereketler",
+        size: 90,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row, table }) => (
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={(rowObj) => stockDeleteDialog.open(rowObj)}
+          />
+        ),
+      },
     ],
-    [formatChange]
+    [formatChange, page, limit, t, stockDeleteDialog]
   );
 
   // Reports Table Instance
@@ -302,38 +339,68 @@ const ReferralLetterPage = () => {
     columns: reportsColumns,
     data: reportList,
     state: {
-      isLoading: isReportLoading,
-    },
-    enableStickyHeader: true,
-    muiTableContainerProps: {
-      sx: {
-        flexGrow: 1,
-        minHeight: 0,
-        overflowY: "auto",
+      isLoading: isReportLoading || isReportFetching,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
       },
     },
-    muiTablePaperProps: {
-      elevation: 0,
-      sx: {
-        borderRadius: "14px",
-        border: "1px solid",
-        borderColor: (theme) =>
-          theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
+    manualPagination: true,
+    pageCount: reportPageCount,
+    rowCount: reportTotal,
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
       },
     },
+    renderTopToolbarCustomActions: () => (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap", mt: 0.5 }}>
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={(val) => {
+            setSearchQuery(val);
+            setPage(1);
+          }}
+          placeholder={t("search") || "Gözleg..."}
+          disabled={isReportLoading}
+          onRefetch={refetchReports}
+          isFetching={isReportFetching}
+        />
+      </Box>
+    ),
+    renderBottomToolbar: ({ table }) => {
+      const { pageIndex } = table.getState().pagination;
+      return (
+        <Box
+          sx={(tTheme) => ({
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 2,
+            py: 0.75,
+            minHeight: "52px",
+            borderTop: `1px solid ${tTheme.palette.divider}`,
+            backgroundColor: tTheme.palette.background.paper,
+          })}
+        >
+          <Box />
+          <Pagination
+            pageIndex={pageIndex}
+            pageCount={reportPageCount}
+            pageSize={limit}
+            totalRows={reportTotal}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
+          />
+        </Box>
+      );
+    },
+    renderCreateRowDialogContent: ({ table }) => (
+      <AddReferralReportModal table={table} />
+    ),
     renderEditRowDialogContent: ({ table, row }) => (
       <EditReferralReportModal table={table} row={row} />
-    ),
-    renderRowActions: ({ row, table }) => (
-      <ColumnActionButtons
-        row={row}
-        table={table}
-        onDelete={() => deleteReportShare(row.original.guid || row.original.id)}
-      />
     ),
   });
 
@@ -343,38 +410,68 @@ const ReferralLetterPage = () => {
     columns: stockColumns,
     data: stockList,
     state: {
-      isLoading: isStockLoading,
-    },
-    enableStickyHeader: true,
-    muiTableContainerProps: {
-      sx: {
-        flexGrow: 1,
-        minHeight: 0,
-        overflowY: "auto",
+      isLoading: isStockLoading || isStockFetching,
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
       },
     },
-    muiTablePaperProps: {
-      elevation: 0,
-      sx: {
-        borderRadius: "14px",
-        border: "1px solid",
-        borderColor: (theme) =>
-          theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
+    manualPagination: true,
+    pageCount: stockPageCount,
+    rowCount: stockTotal,
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
       },
     },
+    renderTopToolbarCustomActions: () => (
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap", mt: 0.5 }}>
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={(val) => {
+            setSearchQuery(val);
+            setPage(1);
+          }}
+          placeholder={t("search") || "Gözleg..."}
+          disabled={isStockLoading}
+          onRefetch={refetchStock}
+          isFetching={isStockFetching}
+        />
+      </Box>
+    ),
+    renderBottomToolbar: ({ table }) => {
+      const { pageIndex } = table.getState().pagination;
+      return (
+        <Box
+          sx={(tTheme) => ({
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 2,
+            py: 0.75,
+            minHeight: "52px",
+            borderTop: `1px solid ${tTheme.palette.divider}`,
+            backgroundColor: tTheme.palette.background.paper,
+          })}
+        >
+          <Box />
+          <Pagination
+            pageIndex={pageIndex}
+            pageCount={stockPageCount}
+            pageSize={limit}
+            totalRows={stockTotal}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
+          />
+        </Box>
+      );
+    },
+    renderCreateRowDialogContent: ({ table }) => (
+      <AddLetterStockModal table={table} />
+    ),
     renderEditRowDialogContent: ({ table, row }) => (
       <EditLetterStockModal table={table} row={row} />
-    ),
-    renderRowActions: ({ row, table }) => (
-      <ColumnActionButtons
-        row={row}
-        table={table}
-        onDelete={() => deleteStock(row.original.guid || row.original.id)}
-      />
     ),
   });
 
@@ -382,43 +479,37 @@ const ReferralLetterPage = () => {
     () => [
       {
         value: "reports",
-        label: "Ýüzlenme hasabaty",
+        label: t("referralLetter.reportsTab") || "Ýüzlenme hasabaty",
         icon: <FileSpreadsheet size={18} />,
         badge: reportTotal || reportList.length,
       },
       {
         value: "stock",
-        label: "Hat stoky",
+        label: t("referralLetter.stockTab") || "Hat stoky",
         icon: <FileBox size={18} />,
         badge: stockTotal || stockList.length,
       },
     ],
-    [reportTotal, reportList.length, stockTotal, stockList.length]
+    [t, reportTotal, reportList.length, stockTotal, stockList.length]
   );
 
-  const currentTotal = activeTab === "reports" ? reportTotal : stockTotal;
+  const handleAddClick = () => {
+    if (activeTab === "stock") {
+      stockTable.setCreatingRow(true);
+    } else {
+      reportsTable.setCreatingRow(true);
+    }
+  };
+
+  const addButtonText = useMemo(() => {
+    return activeTab === "stock"
+      ? (t("referralLetter.addStock") || "Täze hat stoky goşmak")
+      : (t("referralLetter.addReport") || "Täze hasabat goşmak");
+  }, [activeTab, t]);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        gap: 1.75,
-        overflow: "hidden",
-      }}
-    >
-      {/* Page Header */}
-      <PageHeader
-        title={t("sidebar.referalLetters") || "Ýüzlenme hatlary"}
-        pageTitle="Ýüzlenme Hatlary Hasabaty | Oguz Travel"
-        addButtonText={
-          activeTab === "stock" ? "Täze hat stoky goşmak" : "Täze hasabat goşmak"
-        }
-        onAddClick={handleOpenActiveModal}
-      />
-
-      {/* Top Filter & CustomTabs Header Bar */}
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, p: 3 }}>
+      {/* Top Header Bar: CustomTabs on LEFT, Add button on RIGHT */}
       <Paper
         elevation={0}
         sx={{
@@ -426,74 +517,61 @@ const ReferralLetterPage = () => {
           px: 2,
           borderRadius: "14px",
           border: "1px solid",
-          borderColor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.08)"
-              : "#E2E8F0",
-          backgroundColor: (theme) =>
-            theme.palette.mode === "dark" ? "rgba(15, 23, 42, 0.6)" : "#FFFFFF",
+          borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+          backgroundColor: isDark ? "rgba(15, 23, 42, 0.6)" : "#FFFFFF",
           display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          alignItems: { xs: "stretch", md: "center" },
+          alignItems: "center",
           justifyContent: "space-between",
-          gap: 1.5,
+          gap: 2,
+          flexWrap: "wrap",
         }}
       >
-        <Box sx={{ flexGrow: 1, maxWidth: { md: 450 } }}>
-          <GlobalSearchInput
-            value={searchQuery}
-            onChange={(val) => {
-              setSearchQuery(val);
-              setPage(1);
-            }}
-          />
-        </Box>
-
+        {/* LEFT SIDE: CustomTabs with Blue Theme */}
         <CustomTabs
           value={activeTab}
           onChange={handleTabChange}
           tabs={tabsConfig}
+          variant="pills"
+          color="blue"
+          tabSx={{
+            minWidth: { xs: 130, sm: 160, md: 180 },
+            textAlign: "center",
+          }}
         />
+
+        {/* RIGHT SIDE: Add Button */}
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleAddClick}
+          sx={{ borderRadius: "8px", fontWeight: 600, px: 2.5, height: "40px" }}
+        >
+          {addButtonText}
+        </Button>
       </Paper>
 
-      {/* Table Container with Internal Scroll */}
-      <Box
-        sx={{
-          flexGrow: 1,
-          minHeight: 0,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        {activeTab === "reports" ? (
-          <MaterialReactTable table={reportsTable} />
-        ) : (
-          <MaterialReactTable table={stockTable} />
-        )}
-      </Box>
-
-      {/* Pagination Footer */}
-      {currentTotal > 0 && (
-        <Pagination
-          totalItems={currentTotal}
-          page={page}
-          limit={limit}
-          setPage={setPage}
-          setPageSize={setLimit}
-        />
+      {/* Table Section */}
+      {activeTab === "reports" ? (
+        <MaterialReactTable table={reportsTable} />
+      ) : (
+        <MaterialReactTable table={stockTable} />
       )}
 
-      {/* Modal 1: Add Letter Stock */}
-      <AddLetterStockModal
-        open={isStockModalOpen}
-        close={() => setIsStockModalOpen(false)}
+      {/* Delete Dialogs */}
+      <DeleteDialog
+        open={reportDeleteDialog.isOpen}
+        onClose={reportDeleteDialog.close}
+        onConfirm={reportDeleteDialog.confirm}
+        isLoading={isDeletingReport}
+        description={t("referralLetter.deleteReportConfirm") || "Bu hasabaty pozmak isleýärsiňizmi?"}
       />
 
-      {/* Modal 2: Add Referral Report */}
-      <AddReferralReportModal
-        open={isReportModalOpen}
-        close={() => setIsReportModalOpen(false)}
+      <DeleteDialog
+        open={stockDeleteDialog.isOpen}
+        onClose={stockDeleteDialog.close}
+        onConfirm={stockDeleteDialog.confirm}
+        isLoading={isDeletingStock}
+        description={t("referralLetter.deleteStockConfirm") || "Bu hat stokyny pozmak isleýärsiňizmi?"}
       />
     </Box>
   );

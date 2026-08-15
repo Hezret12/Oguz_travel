@@ -19,8 +19,9 @@ import { addReportShareApi } from "../../../api/queries/post";
  * AddReferralReportModal - Modal 2 for adding new report share entry
  * Connected to Swagger CreateReportShareDto endpoint /api/v1/report-share/add-report-share
  */
-const AddReferralReportModal = ({ open, close }) => {
+const AddReferralReportModal = ({ open, close, table }) => {
   const { t } = useLocale();
+  const isModalOpen = open !== undefined ? Boolean(open) : Boolean(table?.getState().creatingRow);
 
   const statusOptions = useMemo(
     () => [
@@ -64,35 +65,35 @@ const AddReferralReportModal = ({ open, close }) => {
     }));
   }, [employees]);
 
+  const handleClose = () => {
+    if (table) table.setCreatingRow(null);
+    reset();
+    close?.();
+  };
+
   const { mutate: createReportShare, isPending } = useCreate({
     apiFn: addReportShareApi,
     key: "reportShares",
     onSuccess: () => {
-      reset();
-      close();
+      handleClose();
     },
   });
 
   const handleFormSubmit = (data) => {
     createReportShare({
       datetime: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
-      total_count: Number(data.quantity || 0),
-      assignment_opr_guid: data.assignment_opr_guid || undefined,
-      receiver_opr_guid: data.receiver_opr_guid || undefined,
+      assignment_opr_guid: data.assignment_opr_guid,
+      receiver_opr_guid: data.receiver_opr_guid,
       start_yh_number: Number(data.startNo || 0),
       end_yh_number: Number(data.endNo || 0),
+      total_count: Number(data.quantity || 0),
       status: Number(data.status || 1),
       note: data.note || "",
     });
   };
 
-  const handleClose = () => {
-    reset();
-    close();
-  };
-
   return (
-    <CustomDialog open={open} close={handleClose} widthX={560}>
+    <CustomDialog open={isModalOpen} close={handleClose} widthX={640}>
       <CustomDialogHeader variant="h5" title={t("referralLetter.addReport")} />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         <Grid container spacing={2.25}>

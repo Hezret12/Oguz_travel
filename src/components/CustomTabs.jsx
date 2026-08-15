@@ -22,6 +22,7 @@ const CustomTabs = ({
   variant = "line",
   size = "medium",
   fullWidth = false,
+  color,
   sx = {},
   tabSx = {},
   children,
@@ -29,7 +30,12 @@ const CustomTabs = ({
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const primaryColor = theme.palette.primary.main;
+  const primaryColor =
+    color === "blue"
+      ? isDark
+        ? "#3B82F6"
+        : "#2563EB"
+      : color || theme.palette.primary.main;
 
   // Sizes configuration
   const minHeight = size === "small" ? 34 : 38;

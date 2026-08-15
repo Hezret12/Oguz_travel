@@ -1,5 +1,4 @@
 import { Box } from "@mui/material";
-import { useEffect } from "react";
 import { useWatch } from "react-hook-form";
 import AppAutocomplete from "../../../components/AppAutocomplete";
 import CustomTextField from "../../../components/CustomTextField";
@@ -14,20 +13,20 @@ const UserInformationTab = ({
   isEdit,
 }) => {
   const { t } = useLocale();
-  const [selectedEmployeeId, rawIsExternalUser] = useWatch({
+  const [rawIsExternalUser] = useWatch({
     control,
-    name: ["employee_guid", "isExternalUser"],
+    name: ["isExternalUser"],
   });
   const isExternalUser = Boolean(rawIsExternalUser);
 
-  useEffect(() => {
-    if (isExternalUser) {
-      setValue("employee_guid", "", { shouldValidate: true, shouldDirty: true });
-      return;
-    }
+  const employeeOptions = employees.map((emp) => ({
+    label: emp.officeName ? `${emp.fullName}   (${emp.officeName})` : emp.fullName,
+    value: emp.id,
+  }));
 
-    if (selectedEmployeeId) {
-      const emp = employees.find((e) => e.id === selectedEmployeeId);
+  const handleEmployeeChange = (employeeId) => {
+    if (!isEdit && employeeId) {
+      const emp = employees.find((e) => e.id === employeeId);
       if (emp?.phoneNumber) {
         const rawPhone = emp.phoneNumber.replace(/\s/g, "");
         const formattedPhone = rawPhone.startsWith("+993") ? rawPhone : `+993${rawPhone}`;
@@ -35,21 +34,25 @@ const UserInformationTab = ({
           shouldValidate: true,
           shouldDirty: true,
         });
-      } else if (!isEdit) {
+      } else {
         setValue("phone_number", "", {
           shouldValidate: true,
           shouldDirty: true,
         });
       }
-    } else if (!isEdit) {
+    } else if (!isEdit && !employeeId) {
       setValue("phone_number", "", { shouldValidate: true, shouldDirty: true });
     }
-  }, [selectedEmployeeId, employees, setValue, isEdit, isExternalUser]);
+  };
 
-  const employeeOptions = employees.map((emp) => ({
-    label: emp.officeName ? `${emp.fullName}   (${emp.officeName})` : emp.fullName,
-    value: emp.id,
-  }));
+  const handleExternalUserChange = (checked) => {
+    if (checked) {
+      setValue("employee_guid", "", { shouldValidate: true, shouldDirty: true });
+      if (!isEdit) {
+        setValue("phone_number", "", { shouldValidate: true, shouldDirty: true });
+      }
+    }
+  };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
@@ -61,6 +64,7 @@ const UserInformationTab = ({
         options={employeeOptions}
         required={!isExternalUser}
         disabled={isEdit || isExternalUser}
+        onValueChange={handleEmployeeChange}
       />
 
       <PhoneNumberField
@@ -103,6 +107,7 @@ const UserInformationTab = ({
           name="isExternalUser"
           control={control}
           label={t("users.isExternalUser")}
+          onValueChange={handleExternalUserChange}
         />
 
         <CustomCheckbox
@@ -116,4 +121,3 @@ const UserInformationTab = ({
 };
 
 export default UserInformationTab;
-

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Tab, Tabs } from "@mui/material";
@@ -29,38 +29,61 @@ const EditUserModal = ({ table, row }) => {
     key: "employees",
   });
 
-  // Map API shape → shape expected by UserInformationTab
-  const employees = rawEmployees.map((emp) => ({
-    id: emp.guid,
-    fullName: emp.fullName,
-    officeName: selectedLang(emp.office?.fullName) ?? "",
-    phoneNumber: emp.phone_number ?? "",
-  }));
+  const rowData = row?.original;
+  const rowEmp = rowData?.employee;
+
+  // Map API shape → shape expected by UserInformationTab, ensuring row's employee is always included immediately
+  const employees = useMemo(() => {
+    const list = (rawEmployees || []).map((emp) => ({
+      id: emp.guid,
+      fullName: emp.fullName,
+      officeName: selectedLang(emp.office?.fullName) ?? "",
+      phoneNumber: emp.phone_number ?? "",
+    }));
+
+    if (rowEmp && rowEmp.guid && !list.some((e) => e.id === rowEmp.guid)) {
+      list.unshift({
+        id: rowEmp.guid,
+        fullName: rowEmp.fullName,
+        officeName: selectedLang(rowEmp.office?.fullName) ?? "",
+        phoneNumber: rowEmp.phone_number ?? "",
+      });
+    }
+
+    return list;
+  }, [rawEmployees, rowEmp, selectedLang]);
+
+  const isEmp = Boolean(rowData?.employee_guid || rowEmp?.guid);
+  const rawPhone = rowData?.phone_number || rowData?.phoneNumber || rowEmp?.phone_number || "";
+  const formattedPhone = rawPhone
+    ? (rawPhone.startsWith("+993") ? rawPhone : `+993${rawPhone.replace(/\s/g, "")}`)
+    : "";
+
+  const initialValues = useMemo(() => {
+    return {
+      guid: rowData?.guid || rowData?.user_guid || "",
+      employee_guid: rowData?.employee_guid || rowEmp?.guid || "",
+      phone_number: formattedPhone,
+      isActive: rowData?.isActive ?? true,
+      isExternalUser: rowData?.isExternalUser ?? !isEmp,
+      isAdmin: Boolean(rowData?.isAdmin || rowData?.user_is_admin || rowData?.role === "admin" || rowData?.role === "Admin"),
+      permissions: Array.isArray(rowData?.permissions) ? rowData.permissions : [],
+    };
+  }, [rowData, rowEmp, isEmp, formattedPhone]);
 
   const { control, handleSubmit, watch, setValue } = useForm({
-    defaultValues: {
-      guid: row?.original?.guid || row?.original?.user_guid || "",
-      employee_guid: row?.original?.employee_guid || row?.original?.employee?.guid || "",
-      phone_number: row?.original?.phoneNumber
-        ? (row.original.phoneNumber.startsWith("+993")
-          ? row.original.phoneNumber
-          : `+993${row.original.phoneNumber.replace(/\s/g, "")}`)
-        : "",
-      isActive: row?.original?.isActive ?? true,
-      isExternalUser: row?.original?.isExternalUser ?? !(row?.original?.employee_guid || row?.original?.employee?.guid),
-      isAdmin: Boolean(row?.original?.isAdmin || row?.original?.user_is_admin || row?.original?.role === "admin"),
-      permissions: row?.original?.permissions || [],
-    },
+    defaultValues: initialValues,
+    values: initialValues,
     resolver: yupResolver(editUser),
     mode: "onSubmit",
   });
 
-  const { mutate: updateUser, isLoading: submitLoading } = useUpdate({
+  const { mutate: updateUser, isPending: submitLoading } = useUpdate({
     apiFn: updateUserApi,
     key: "users",
-    idKey: "user_guid",
+    idKey: "guid",
     onSuccessUpdate: () => {
-      table.setEditingRow(null);
+      table?.setEditingRow(null);
     },
   });
 
@@ -68,6 +91,8 @@ const EditUserModal = ({ table, row }) => {
     try {
       const formattedData = {
         ...data,
+        guid: rowData?.guid || data.guid,
+        user_guid: rowData?.guid || data.guid,
         isAdmin: Boolean(data.isAdmin),
         user_is_admin: Boolean(data.isAdmin),
         role: data.isAdmin ? "admin" : "user",

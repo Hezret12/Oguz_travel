@@ -1,9 +1,9 @@
-import { useCallback, useMemo, useState, forwardRef, useImperativeHandle } from "react";
+import { useCallback, useMemo, useState, forwardRef, useImperativeHandle, memo } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Chip, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
+import { Box, Chip, MenuItem, Select, FormControl, InputLabel, Tooltip } from "@mui/material";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
@@ -17,6 +17,126 @@ import CreateCustomFieldModal from "./CreateCustomFieldModal";
 import EditCustomFieldModal from "./EditCustomFieldModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
+import { ChevronDown } from "lucide-react";
+
+const OptionsCell = memo(({ options }) => {
+  if (!Array.isArray(options) || options.length === 0) return "";
+
+  const maxVisible = 3;
+  const visible = options.slice(0, maxVisible);
+  const remaining = options.length - maxVisible;
+
+  const tooltipContent = (
+    <Box sx={{ p: 0.5, maxWidth: 300 }}>
+      <Box
+        sx={{
+          fontSize: "0.72rem",
+          fontWeight: 650,
+          color: "text.secondary",
+          mb: 0.75,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+        }}
+      >
+        {options.length} Seçenek
+      </Box>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.6 }}>
+        {options.map((opt, idx) => (
+          <Chip
+            key={idx}
+            label={opt}
+            size="small"
+            sx={{
+              height: 22,
+              fontSize: "0.72rem",
+              fontWeight: 500,
+              borderRadius: "5px",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "#F1F5F9",
+              border: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "1px solid rgba(255, 255, 255, 0.12)"
+                  : "1px solid #E2E8F0",
+              color: "text.primary",
+            }}
+          />
+        ))}
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Tooltip
+      title={tooltipContent}
+      arrow
+      placement="top"
+      enterDelay={150}
+      leaveTouchDelay={3000}
+    >
+      <Box
+        sx={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 0.6,
+          maxWidth: "100%",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          verticalAlign: "middle",
+          cursor: "pointer",
+        }}
+      >
+        {visible.map((opt, idx) => (
+          <Chip
+            key={idx}
+            label={opt}
+            size="small"
+            sx={{
+              height: 22,
+              fontSize: "0.7rem",
+              borderRadius: "5px",
+              maxWidth: 95,
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.06)"
+                  : "#F1F5F9",
+              border: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "1px solid rgba(255, 255, 255, 0.1)"
+                  : "1px solid #E2E8F0",
+              color: "text.primary",
+              "& .MuiChip-label": {
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                px: 1,
+              },
+            }}
+          />
+        ))}
+        {remaining > 0 && (
+          <Chip
+            label={`+${remaining}`}
+            size="small"
+            color="primary"
+            variant="outlined"
+            sx={{
+              height: 22,
+              fontSize: "0.7rem",
+              fontWeight: 700,
+              borderRadius: "5px",
+              flexShrink: 0,
+              px: 0.25,
+            }}
+          />
+        )}
+      </Box>
+    </Tooltip>
+  );
+});
+
+OptionsCell.displayName = "OptionsCell";
 
 export const CustomFieldsTable = forwardRef((props, ref) => {
   const { t } = useLocale();
@@ -26,6 +146,7 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
   const [limit, setPageSize] = useState(40);
   const [searchQuery, setSearch] = useState("");
   const [fieldTypeFilter, setFieldTypeFilter] = useState("");
+  const [isFieldTypeSelectOpen, setIsFieldTypeSelectOpen] = useState(false);
 
   const params = useMemo(
     () => ({
@@ -120,25 +241,10 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
       {
         id: "options",
         header: t("customFields.options"),
-        size: 200,
+        size: 220,
         accessorFn: (row) =>
-          Array.isArray(row.options) ? row.options.join(", ") : "-",
-        Cell: ({ row }) => {
-          const opts = row.original.options;
-          if (!Array.isArray(opts) || opts.length === 0) return "-";
-          return (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {opts.map((opt, idx) => (
-                <Chip
-                  key={idx}
-                  label={opt}
-                  size="small"
-                  sx={{ height: 22, fontSize: "0.7rem", borderRadius: "4px" }}
-                />
-              ))}
-            </Box>
-          );
-        },
+          Array.isArray(row.options) ? row.options.join(", ") : "",
+        Cell: ({ row }) => <OptionsCell options={row.original.options} />,
       },
       {
         id: "sort_order",
@@ -170,6 +276,13 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    enableColumnPinning: true,
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
+      },
+    },
     columns,
     data: fieldsData,
     state: {
@@ -177,6 +290,76 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
       showSkeletons: isLoading,
     },
     enablePagination: false,
+    renderTopToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          p: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("search")}
+          onRefetch={refetch}
+          isFetching={isFetching}
+        />
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel id="field-type-filter-label">
+            {t("customFields.fieldType")}
+          </InputLabel>
+          <Select
+            labelId="field-type-filter-label"
+            value={fieldTypeFilter}
+            label={t("customFields.fieldType")}
+            onChange={(e) => setFieldTypeFilter(e.target.value)}
+            open={isFieldTypeSelectOpen}
+            onOpen={() => setIsFieldTypeSelectOpen(true)}
+            onClose={() => setIsFieldTypeSelectOpen(false)}
+            IconComponent={() => (
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "absolute",
+                  right: 12,
+                  top: "calc(50% - 9px)",
+                  color: "text.secondary",
+                  pointerEvents: "none",
+                  transform: isFieldTypeSelectOpen ? "rotate(180deg)" : "none",
+                  transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease",
+                }}
+              >
+                <ChevronDown size={18} />
+              </Box>
+            )}
+            MenuProps={{
+              slotProps: {
+                paper: {
+                  sx: {
+                    borderRadius: "12px",
+                    marginTop: "6px",
+                    maxHeight: 300,
+                  },
+                },
+              },
+            }}
+            sx={{ borderRadius: "8px", height: "40px" }}
+          >
+            <MenuItem value="">{t("all")}</MenuItem>
+            <MenuItem value="text">{t("customFields.typeText")}</MenuItem>
+            <MenuItem value="number">{t("customFields.typeNumber")}</MenuItem>
+            <MenuItem value="date">{t("customFields.typeDate")}</MenuItem>
+            <MenuItem value="select">{t("customFields.typeSelect")}</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+    ),
     renderCreateRowDialogContent: ({ table }) => (
       <CreateCustomFieldModal
         open={Boolean(table.getState().creatingRow)}
@@ -199,41 +382,6 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-          flexWrap: "wrap",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
-          <GlobalSearchInput
-            value={searchQuery}
-            onChange={setSearch}
-            placeholder={t("search")}
-            onRefetch={refetch}
-            isFetching={isFetching}
-          />
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <InputLabel>{t("customFields.fieldType")}</InputLabel>
-            <Select
-              value={fieldTypeFilter}
-              label={t("customFields.fieldType")}
-              onChange={(e) => setFieldTypeFilter(e.target.value)}
-              sx={{ borderRadius: "8px" }}
-            >
-              <MenuItem value="">{t("all")}</MenuItem>
-              <MenuItem value="text">{t("customFields.typeText")}</MenuItem>
-              <MenuItem value="number">{t("customFields.typeNumber")}</MenuItem>
-              <MenuItem value="date">{t("customFields.typeDate")}</MenuItem>
-              <MenuItem value="select">{t("customFields.typeSelect")}</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Box>
-
       <MaterialReactTable table={table} />
 
       <Pagination

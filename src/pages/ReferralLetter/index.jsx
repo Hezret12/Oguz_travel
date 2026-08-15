@@ -9,6 +9,7 @@ import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
 import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
+import TableEmptyState from "../../components/TableEmptyState";
 import StackedCell from "../../components/inputs/StackCell";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import FilterDrawer from "../../components/FilterDrawer";
@@ -345,7 +346,7 @@ const ReferalLetter = () => {
     },
     muiTableBodyProps: {
       sx: (theme) => ({
-        backgroundColor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.secondary,
         opacity: isLoading || isFetching ? 0 : 1,
         pointerEvents: isLoading || isFetching ? "none" : "auto",
@@ -384,20 +385,7 @@ const ReferalLetter = () => {
     },
     renderEmptyRowsFallback: () => {
       if (isLoading || isFetching) return null;
-      return (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            p: 4,
-            color: "text.secondary",
-            fontWeight: 500,
-          }}
-        >
-          {t("noData")}
-        </Box>
-      );
+      return <TableEmptyState onResetFilters={resetFilters} />;
     },
     renderCreateRowDialogContent: ({ table }) => (
       <AddReferralLetterModal table={table} />

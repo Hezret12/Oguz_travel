@@ -10,8 +10,9 @@ import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { useLocale } from "../../../hooks/useLocale";
 import { addReportApi } from "../../../api/queries/post";
 
-const AddLetterStockModal = ({ open, close }) => {
+const AddLetterStockModal = ({ open, close, table }) => {
   const { t } = useLocale();
+  const isModalOpen = open !== undefined ? Boolean(open) : Boolean(table?.getState().creatingRow);
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
@@ -36,12 +37,17 @@ const AddLetterStockModal = ({ open, close }) => {
     return 1;
   }, [watchStartNo, watchEndNo]);
 
+  const handleClose = () => {
+    if (table) table.setCreatingRow(null);
+    reset();
+    close?.();
+  };
+
   const { mutate: createReport, isPending } = useCreate({
     apiFn: addReportApi,
     key: "reports",
     onSuccess: () => {
-      reset();
-      close();
+      handleClose();
     },
   });
 
@@ -55,13 +61,8 @@ const AddLetterStockModal = ({ open, close }) => {
     });
   };
 
-  const handleClose = () => {
-    reset();
-    close();
-  };
-
   return (
-    <CustomDialog open={open} close={handleClose} widthX={520}>
+    <CustomDialog open={isModalOpen} close={handleClose} widthX={520}>
       <CustomDialogHeader variant="h5" title={t("referralLetter.addLetterStock")} />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}>
