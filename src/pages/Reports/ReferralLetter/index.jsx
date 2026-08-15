@@ -479,7 +479,7 @@ const ReferralLetterPage = () => {
     () => [
       {
         value: "reports",
-        label: t("referralLetter.reportsTab") || "Ýüzlenme hasabaty",
+        label: t("referralLetter.reportsTab"),
         icon: <FileSpreadsheet size={18} />,
         badge: reportTotal || reportList.length,
       },
