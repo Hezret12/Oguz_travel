@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
@@ -11,13 +11,11 @@ import {
   useColorScheme,
   TextField,
 } from '@mui/material';
-import { Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { getRoleHomePath } from '../../utils/auth';
 
-import { Helmet } from 'react-helmet-async';
 import { handleError, hdlErrResMsg, hdlSuccessResMsg } from '../../functions/generalHelpers';
 import { loginApi } from '../../api/queries/post';
 import { useValidShema } from '../../functions/useValidShema';
@@ -67,7 +65,7 @@ export default function Login() {
             tableNames: payload?.tableNames || null,
           });
           hdlSuccessResMsg(response);
-          navigate(getRoleHomePath(authenticatedUser.role), { replace: true });
+          navigate(getRoleHomePath(authenticatedUser?.role), { replace: true });
         } else {
           hdlErrResMsg(response);
         }
@@ -90,8 +88,8 @@ export default function Login() {
   const textColor = isDark ? '#DDDDDD' : '#ffffff';
 
   const pageBg = isDark
-    ? 'linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.22) 100%)'
-    : 'linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.10) 100%)';
+    ? 'linear-gradient(180deg, rgba(2, 16, 22, 0.45) 0%, rgba(1, 24, 32, 0.60) 100%)'
+    : 'linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(0, 0, 0, 0.04) 100%)';
 
   return (
     <Box
@@ -104,7 +102,7 @@ export default function Login() {
         justifyContent: 'center',
         backgroundImage: `${pageBg}, url('/loginBanner.jpg')`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundPosition: { xs: 'center 62%', sm: 'center 64%', md: 'center 66%' },
         backgroundRepeat: 'no-repeat',
         position: 'relative',
         overflowX: 'hidden',
@@ -114,10 +112,6 @@ export default function Login() {
         transition: 'background 0.4s ease',
       }}
     >
-      <Helmet>
-        <title>{t('login.title')} | Oguz Travel</title>
-        <link rel="preload" as="image" href="/loginBanner.jpg" />
-      </Helmet>
 
       {/* Decorative sweep lines */}
       {[20, 50, 80].map((top, i) => (
@@ -170,24 +164,24 @@ export default function Login() {
           height: 'auto',
           borderRadius: { xs: '24px', sm: '28px', md: '32px' },
           background: isDark
-            ? 'rgba(0, 15, 20, 0.18)'
-            : 'rgba(255, 255, 255, 0.08)',
+            ? 'rgba(0, 15, 20, 0.28)'
+            : 'rgba(255, 255, 255, 0.04)',
           border: isDark
             ? '1px solid rgba(255, 255, 255, 0.16)'
-            : '1px solid rgba(255, 255, 255, 0.32)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+            : '1px solid rgba(255, 255, 255, 0.25)',
+          backdropFilter: isDark ? 'blur(10px)' : 'blur(4px)',
+          WebkitBackdropFilter: isDark ? 'blur(10px)' : 'blur(4px)',
           boxShadow: isDark
-            ? '0 20px 50px rgba(0, 0, 0, 0.35)'
-            : '0 20px 50px rgba(0, 0, 0, 0.20)',
+            ? '0 20px 45px rgba(0, 0, 0, 0.45)'
+            : '0 15px 35px rgba(0, 0, 0, 0.12)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          pt: { xs: '32px', sm: '42px', md: '48px' },
+          pt: { xs: '32px', sm: '40px', md: '44px' },
           pb: { xs: '32px', sm: '42px', md: '48px' },
           px: { xs: '24px', sm: '40px', md: '48px' },
-          gap: { xs: '24px', sm: '32px', md: '36px' },
+          gap: { xs: '36px', sm: '48px', md: '56px' },
           animation: 'cardAppear 0.55s cubic-bezier(0.16, 1, 0.3, 1) both',
           '@keyframes cardAppear': {
             '0%': {
@@ -214,7 +208,7 @@ export default function Login() {
         >
           <OguzLogo
             sx={{
-              width: { xs: 180, sm: 230, md: 250 },
+              width: { xs: 180, sm: 220, md: 240 },
               height: 'auto',
               display: 'block',
               filter: 'drop-shadow(0 4px 16px rgba(0, 0, 0, 0.20))',
