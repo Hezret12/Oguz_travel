@@ -11,12 +11,9 @@ export function AuthProvider({ children }) {
   const queryClient = useQueryClient();
   const hasToken = Boolean(Cookies.get('accessToken') || Cookies.get('refreshToken'));
 
-  // TanStack Query for Current Auth User (/auth/me)
   const {
     data: user = null,
     isLoading,
-    isFetching,
-    dataUpdatedAt,
     refetch: refetchUser,
   } = useQuery({
     queryKey: ['authUser'],
@@ -60,7 +57,6 @@ export function AuthProvider({ children }) {
     retry: false,
   });
 
-  // Loading is only true if we don't have stored session data at all on first load
   const loading = isLoading && !user;
 
   const login = useCallback(
@@ -105,18 +101,14 @@ export function AuthProvider({ children }) {
   );
 
   const logout = useCallback(() => {
-    // 1. Synchronously clear session & cookies immediately
     clearSession();
 
-    // 2. Cancel in-flight background queries and reset authUser in cache
     queryClient.cancelQueries();
     queryClient.setQueryData(['authUser'], null);
 
-    // 3. Remove all cached query data safely
     queryClient.removeQueries();
 
-    // 4. Fire-and-forget server logout in background without blocking UI navigation
-    logoutApi().catch(() => {});
+    logoutApi().catch(() => { });
   }, [queryClient]);
 
   const value = useMemo(
