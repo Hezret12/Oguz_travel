@@ -1,18 +1,14 @@
 import { Box } from "@mui/material";
 
 import { useTranslation } from "react-i18next";
-import { Helmet } from "react-helmet-async";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 
 const AdminDashboard = () => {
   const { t } = useTranslation();
+  useDocumentTitle(`${t("sidebar.adminDashboard")} | Oguz Travel`);
 
   return (
     <Box sx={{ py: 2 }}>
-      <Helmet>
-        <title>
-          {t("pages.admin.title") || "Admin Dashboard"} | Oguz Travel
-        </title>
-      </Helmet>
       {/* Welcome Header */}
     </Box>
   );

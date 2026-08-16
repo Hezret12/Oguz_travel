@@ -1,19 +1,16 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { Helmet } from "react-helmet-async";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonText, onFilterClick, children }) => {
+  useDocumentTitle(pageTitle);
+
   const showAddButton = Boolean(onAddClick);
   const showFilterButton = Boolean(onFilterClick);
 
   return (
     <>
-    {pageTitle && (
-      <Helmet>
-        <title>{pageTitle}</title>
-      </Helmet>
-    )}
     <Stack
       direction="row"
       sx={{ py: 2, width: "100%", alignItems: "center", justifyContent: "space-between" }}

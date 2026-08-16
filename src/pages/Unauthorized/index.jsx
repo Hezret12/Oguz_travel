@@ -3,11 +3,13 @@ import { Box, Typography, Button, Paper } from '@mui/material';
 import GppBadIcon from '@mui/icons-material/GppBad';
 import { useAuth } from '../../context/AuthContext';
 import { getRoleHomePath } from '../../utils/auth';
-import { Helmet } from 'react-helmet-async';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const Unauthorized = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useDocumentTitle('Yetkisiz Erişim | Oguz Travel');
 
   const handleGoHome = () => {
     navigate(getRoleHomePath(user?.role), { replace: true });
@@ -23,9 +25,6 @@ const Unauthorized = () => {
         p: 2,
       }}
     >
-      <Helmet>
-        <title>Yetkisiz Erişim | Oguz Travel</title>
-      </Helmet>
       <Paper
         elevation={0}
         sx={{

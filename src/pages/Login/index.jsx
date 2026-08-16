@@ -21,6 +21,7 @@ import { Helmet } from 'react-helmet-async';
 import { handleError, hdlErrResMsg, hdlSuccessResMsg } from '../../functions/generalHelpers';
 import { loginApi } from '../../api/queries/post';
 import { useValidShema } from '../../functions/useValidShema';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
 import ThemeToggle from '../../components/ThemeToggle';
 
@@ -39,6 +40,8 @@ export default function Login() {
   const { login } = useAuth();
   const { loginValidSchema } = useValidShema();
   const { mode } = useColorScheme();
+
+  useDocumentTitle(`${t('login.title')} | Oguz Travel`);
 
   const {
     control,
@@ -87,8 +90,8 @@ export default function Login() {
   const textColor = isDark ? '#DDDDDD' : '#ffffff';
 
   const pageBg = isDark
-    ? 'linear-gradient(135deg, rgba(2, 24, 25, 0.64) 0%, rgba(2, 44, 69, 0.48) 100%)'
-    : 'linear-gradient(135deg, rgba(11, 79, 74, 0.64) 0%, rgba(0, 95, 120, 0.56) 50%, rgba(0, 150, 137, 0.48) 100%)';
+    ? 'linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.22) 100%)'
+    : 'linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.10) 100%)';
 
   return (
     <Box
@@ -106,8 +109,8 @@ export default function Login() {
         position: 'relative',
         overflowX: 'hidden',
         overflowY: 'auto',
-        px: { xs: 2, sm: 3 },
-        py: { xs: 7, sm: 4 },
+        px: { xs: 2, sm: 3, md: 4 },
+        py: { xs: 5, sm: 6 },
         transition: 'background 0.4s ease',
       }}
     >
@@ -116,53 +119,23 @@ export default function Login() {
         <link rel="preload" as="image" href="/loginBanner.jpg" />
       </Helmet>
 
-      {/* Glow circles */}
-      <Box
-        sx={{
-          position: 'absolute',
-          width: { xs: 280, sm: 500 },
-          height: { xs: 280, sm: 500 },
-          borderRadius: '50%',
-          background: isDark
-            ? 'radial-gradient(circle, rgba(43,181,160,0.12) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(43,181,160,0.15) 0%, transparent 70%)',
-          top: '-100px',
-          right: '-80px',
-          pointerEvents: 'none',
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          width: { xs: 240, sm: 400 },
-          height: { xs: 240, sm: 400 },
-          borderRadius: '50%',
-          background: isDark
-            ? 'radial-gradient(circle, rgba(37,99,235,0.10) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%)',
-          bottom: '-60px',
-          left: '-60px',
-          pointerEvents: 'none',
-        }}
-      />
-
       {/* Decorative sweep lines */}
-      {[25, 50, 75].map((top, i) => (
+      {[20, 50, 80].map((top, i) => (
         <Box
           key={top}
           sx={{
             display: { xs: 'none', md: 'block' },
             position: 'absolute',
-            width: 340,
+            width: 360,
             height: 2,
             borderRadius: '9999px',
-            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.20)' : '#FFFFFF33',
+            backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.22)',
             top: `${top}vh`,
             left: 0,
             pointerEvents: 'none',
-            animation: `sweepRight 12s linear infinite ${i * 4}s`,
+            animation: `sweepRight 14s linear infinite ${i * 4.5}s`,
             '@keyframes sweepRight': {
-              '0%':   { transform: 'translateX(-380px)', opacity: 0 },
+              '0%':   { transform: 'translateX(-400px)', opacity: 0 },
               '10%':  { opacity: 0.8 },
               '90%':  { opacity: 0.8 },
               '100%': { transform: 'translateX(100vw)',  opacity: 0 },
@@ -171,15 +144,15 @@ export default function Login() {
         />
       ))}
 
-      {/* Top-right controls */}
+      {/* Top-right controls with glass backdrop */}
       <Box
         sx={{
           position: 'absolute',
-          top: { xs: 12, sm: 20 },
-          right: { xs: 12, sm: 24 },
+          top: { xs: 16, sm: 24 },
+          right: { xs: 16, sm: 28 },
           display: 'flex',
           alignItems: 'center',
-          gap: { xs: 0.75, sm: 1 },
+          gap: { xs: 1, sm: 1.25 },
           zIndex: 10,
         }}
       >
@@ -187,57 +160,72 @@ export default function Login() {
         <ThemeToggle variant="login" />
       </Box>
 
-      {/* Card */}
+      {/* Glassmorphic Login Card */}
       <Box
         component="form"
         onSubmit={handleSubmit(onSubmit)}
         sx={{
           width: '100%',
-          maxWidth: { xs: 390, sm: 460, md: 480 },
+          maxWidth: { xs: '100%', sm: 490, md: 530, lg: 550 },
           height: 'auto',
-          borderRadius: { xs: '20px', sm: '24px' },
+          borderRadius: { xs: '24px', sm: '28px', md: '32px' },
           background: isDark
-            ? 'linear-gradient(135deg, rgba(2, 24, 25, 0.64) 0%, rgba(2, 44, 69, 0.48) 100%), var(--Button-main-10, #04070B1A)'
-            : 'var(--Button-main-10, #7676761A)',
+            ? 'rgba(0, 15, 20, 0.18)'
+            : 'rgba(255, 255, 255, 0.08)',
           border: isDark
-            ? '1px solid var(--Button-main-20, #5B626833)'
-            : '1px solid var(--Button-main-20, #FFFFFF33)',
-          backdropFilter: 'blur(10px)',
+            ? '1px solid rgba(255, 255, 255, 0.16)'
+            : '1px solid rgba(255, 255, 255, 0.32)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
           boxShadow: isDark
-            ? '0px 25px 50px 0px rgba(0, 0, 0, 0.25)'
-            : '0px 25px 50px 0px #00000040',
+            ? '0 20px 50px rgba(0, 0, 0, 0.35)'
+            : '0 20px 50px rgba(0, 0, 0, 0.20)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          pt: { xs: '28px', sm: '36px' },
-          pb: { xs: '28px', sm: '36px' },
-          px: { xs: '20px', sm: '36px' },
-          gap: { xs: '24px', sm: '36px', md: '44px' },
-          transition: 'background 0.4s ease, box-shadow 0.4s ease',
+          pt: { xs: '32px', sm: '42px', md: '48px' },
+          pb: { xs: '32px', sm: '42px', md: '48px' },
+          px: { xs: '24px', sm: '40px', md: '48px' },
+          gap: { xs: '24px', sm: '32px', md: '36px' },
+          animation: 'cardAppear 0.55s cubic-bezier(0.16, 1, 0.3, 1) both',
+          '@keyframes cardAppear': {
+            '0%': {
+              opacity: 0,
+              transform: 'translateY(24px) scale(0.97)',
+            },
+            '100%': {
+              opacity: 1,
+              transform: 'translateY(0) scale(1)',
+            },
+          },
+          transition: 'background 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease',
         }}
       >
-        {/* Logo */}
+        {/* Logo & Header */}
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            pt: { xs: '4px', sm: '12px' },
+            pt: { xs: '4px', sm: '8px' },
+            width: '100%',
           }}
         >
           <OguzLogo
             sx={{
-              width: { xs: 165, sm: 220 },
+              width: { xs: 180, sm: 230, md: 250 },
               height: 'auto',
               display: 'block',
+              filter: 'drop-shadow(0 4px 16px rgba(0, 0, 0, 0.20))',
               '& path': { fill: '#FFFFFF !important' },
             }}
           />
         </Box>
 
-        <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 2.8 } }}>
+        <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 3 } }}>
 
+          {/* Phone number field */}
           <Box sx={{ width: '100%' }}>
             <PhoneNumberField
               control={control}
@@ -248,7 +236,7 @@ export default function Login() {
             />
           </Box>
 
-          {/* Password */}
+          {/* Password field */}
           <Box sx={{ width: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.8 }}>
               <Typography
@@ -264,17 +252,31 @@ export default function Login() {
                 {t('columns.password')}
               </Typography>
               {isCapsLockOn && (
-                <Typography
-                  variant="caption"
+                <Box
                   sx={{
-                    color: '#facc15',
-                    fontSize: '0.725rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.02em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    px: 1,
+                    py: 0.25,
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(250, 204, 21, 0.15)',
+                    border: '1px solid rgba(250, 204, 21, 0.35)',
                   }}
                 >
-                  ⇪ Caps Lock ON
-                </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: '#facc15',
+                      fontSize: '0.725rem',
+                      fontWeight: 600,
+                      letterSpacing: '0.02em',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    ⇪ Caps Lock ON
+                  </Typography>
+                </Box>
               )}
             </Box>
             <Controller
@@ -303,8 +305,13 @@ export default function Login() {
                             edge="end"
                             disabled={loginMutation.isPending}
                             sx={{
-                              color: isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.40)',
+                              color: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.65)',
                               padding: 1,
+                              transition: 'color 0.2s ease, transform 0.15s ease',
+                              '&:hover': {
+                                color: '#ffffff',
+                                transform: 'scale(1.08)',
+                              },
                             }}
                           >
                             {passwordVisibility ? (
@@ -312,14 +319,14 @@ export default function Login() {
                                 component="img"
                                 src={closeEyeIcon}
                                 alt="Hide password"
-                                sx={{ width: 32, height: 'auto', display: 'block', opacity: isDark ? 0.7 : 0.55 }}
+                                sx={{ width: 32, height: 'auto', display: 'block', opacity: 0.85 }}
                               />
                             ) : (
                               <Box
                                 component="img"
                                 src={eyeIcon}
                                 alt="Show password"
-                                sx={{ width: 32, height: 'auto', display: 'block', opacity: isDark ? 0.7 : 0.55 }}
+                                sx={{ width: 32, height: 'auto', display: 'block', opacity: 0.85 }}
                               />
                             )}
                           </IconButton>
@@ -331,22 +338,25 @@ export default function Login() {
                     position: 'relative',
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '16px',
-                      backgroundColor: 'transparent',
-                      borderColor: isDark ? '#8A8A8A' : '#BEBEBE',
+                      backgroundColor: isDark ? 'rgba(0, 0, 0, 0.18)' : 'rgba(255, 255, 255, 0.08)',
+                      borderColor: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.35)',
                       fontSize: '1rem',
                       color: textColor,
-                      height: { xs: 48, sm: 50 },
+                      height: { xs: 48, sm: 52 },
                       paddingLeft: '16px',
                       paddingRight: '16px',
                       gap: '10px',
-                      transition: 'background-color 0.3s ease, border-color 0.3s ease',
+                      transition: 'background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
                       '& fieldset': {
-                        borderColor: isDark ? '#8A8A8A' : '#BEBEBE',
+                        borderColor: isDark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.35)',
                         transition: 'border-color 0.3s ease',
                       },
                       '&:hover fieldset': { borderColor: '#15C3C2' },
-                      '&.Mui-focused': { backgroundColor: '#0E858433' },
-                      '&.Mui-focused fieldset': { borderColor: '#15C3C2', borderWidth: 1 },
+                      '&.Mui-focused': {
+                        backgroundColor: isDark ? 'rgba(14, 133, 132, 0.22)' : 'rgba(14, 133, 132, 0.18)',
+                        boxShadow: '0 0 0 3px rgba(21, 195, 194, 0.25)',
+                      },
+                      '&.Mui-focused fieldset': { borderColor: '#15C3C2', borderWidth: 1.5 },
                     },
                     '& .MuiOutlinedInput-input': {
                       padding: '10px 0px',
@@ -376,9 +386,9 @@ export default function Login() {
             type="submit"
             disabled={loginMutation.isPending}
             sx={{
-              mt: { xs: 1, sm: 1.5 },
+              mt: { xs: 1.5, sm: 2 },
               width: '100%',
-              height: { xs: 48, sm: 52 },
+              height: { xs: 50, sm: 54 },
               border: 'none',
               borderRadius: '16px',
               background: loginMutation.isPending
@@ -391,14 +401,14 @@ export default function Login() {
               fontSize: { xs: '1rem', sm: '1.05rem' },
               fontWeight: 700,
               letterSpacing: '0.04em',
-              padding: '10px',
+              padding: '10px 20px',
               cursor: loginMutation.isPending ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 1.5,
               boxShadow: '0 4px 20px rgba(43,181,160,0.35)',
-              transition: 'opacity 0.2s, transform 0.15s, box-shadow 0.2s',
+              transition: 'opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease',
               '&:hover:not(:disabled)': {
                 opacity: 0.92,
                 transform: 'translateY(-1px)',
@@ -410,7 +420,7 @@ export default function Login() {
             }}
           >
             {loginMutation.isPending ? (
-              <CircularProgress size={20} sx={{ color: '#fff' }} />
+              <CircularProgress size={22} sx={{ color: '#fff' }} />
             ) : (
               t('login.title')
             )}

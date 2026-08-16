@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Paper } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
-import { Helmet } from 'react-helmet-async';
 import { useLocale } from '../../hooks/useLocale';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 
 const NotFound = () => {
   const navigate = useNavigate();
   const { t } = useLocale();
+
+  useDocumentTitle(`${t('notFound.title')} | Oguz Travel`);
 
   return (
     <Box
@@ -19,9 +21,6 @@ const NotFound = () => {
         p: 2,
       }}
     >
-      <Helmet>
-        <title>{t('notFound.title')} | Oguz Travel</title>
-      </Helmet>
       <Paper
         elevation={0}
         sx={{

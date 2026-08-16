@@ -57,28 +57,27 @@ const baseFieldStyles = {
   login: {
     '& .MuiOutlinedInput-root': {
       borderRadius: '16px',
-      backgroundColor: 'transparent',
+      backgroundColor: (theme) =>
+        theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.18)' : 'rgba(255, 255, 255, 0.08)',
       fontSize: '1rem',
       color: '#ffffff',
-      height: { xs: 48, sm: 50 },
+      height: { xs: 48, sm: 52 },
       paddingLeft: '14px',
       paddingRight: '16px',
       gap: 0,
-      transition: 'background-color 0.3s ease, border-color 0.3s ease',
+      transition: 'background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
       '& fieldset': {
-        borderColor: (theme) => (theme.palette.mode === 'dark' ? '#8A8A8A' : '#BEBEBE'),
+        borderColor: (theme) =>
+          theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.35)',
         transition: 'border-color 0.3s ease',
       },
       '&:hover fieldset': { borderColor: '#15C3C2' },
       '&.Mui-focused': {
         backgroundColor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(59, 130, 246, 0.12)' : '#0E858433',
-        boxShadow: (theme) =>
-          theme.palette.mode === 'dark'
-            ? '0 0 0 3px rgba(59, 130, 246, 0.16)'
-            : '0 0 0 3px rgba(37, 99, 235, 0.12)',
+          theme.palette.mode === 'dark' ? 'rgba(14, 133, 132, 0.22)' : 'rgba(14, 133, 132, 0.18)',
+        boxShadow: '0 0 0 3px rgba(21, 195, 194, 0.25)',
       },
-      '&.Mui-focused fieldset': { borderColor: '#15C3C2', borderWidth: 1 },
+      '&.Mui-focused fieldset': { borderColor: '#15C3C2', borderWidth: 1.5 },
     },
     '& .MuiOutlinedInput-input': {
       padding: '10px 0px',

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Box } from "@mui/material";
-import { Helmet } from "react-helmet-async";
 import dayjs from "dayjs";
 
 import useReportData from "./hooks/useReportData";
 import useReportTheme from "./hooks/useReportTheme";
+import { useDocumentTitle } from "../../../hooks/useDocumentTitle";
 import { formatNumber, formatCompact } from "../../../functions/generalHelpers";
 import { useQuery } from "@tanstack/react-query";
 import { getTurkishQuarterApi } from "../../../api/queries/getters";
@@ -22,6 +22,7 @@ const scrollbarSx = {
 const getCurrentQuarter = () => Math.floor(new Date().getMonth() / 3) + 1;
 
 const TurkishAirlinesReport = () => {
+  useDocumentTitle("Turkish Airlines - Oguz Travel");
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedQuarter, setSelectedQuarter] = useState(getCurrentQuarter());
 
@@ -78,10 +79,6 @@ const TurkishAirlinesReport = () => {
         },
       }}
     >
-      <Helmet>
-        <title>Turkish Airlines - Oguz Travel</title>
-      </Helmet>
-
       <ReportHeader
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
