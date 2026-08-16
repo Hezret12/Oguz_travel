@@ -15,21 +15,43 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Home } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSidebarItems } from '../hooks/useSidebarItems';
 import LanguageSwitcher from './LanguageSwitcher';
 import ThemeToggle from './ThemeToggle';
 import NotificationPopover from './NotificationPopover';
 
+function getRouteBreadcrumb(pathname, sidebarItems, defaultTitle) {
+  for (const item of sidebarItems) {
+    if (item.path && item.path === pathname) {
+      return { text: item.text, parentText: null, path: item.path };
+    }
+    if (item.children) {
+      for (const child of item.children) {
+        if (child.path === pathname || pathname.startsWith(child.path + '/')) {
+          return { text: child.text, parentText: item.text, path: child.path };
+        }
+      }
+    }
+  }
+
+  if (pathname === '/') return { text: defaultTitle, parentText: null, path: '/' };
+  return null;
+}
 
 const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const sidebarItems = useSidebarItems();
 
   const [anchorElUser, setAnchorElUser] = useState(null);
+
+  const currentRouteInfo = getRouteBreadcrumb(location.pathname, sidebarItems, t('sidebar.adminDashboard'));
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -70,32 +92,142 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        {/* Sidebar collapse toggle */}
-        <IconButton
-          onClick={onSidebarCollapse}
-          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          sx={{
-            height: 38,
-            borderRadius: '10px',
-            color: (theme) =>
-              theme.palette.mode === 'dark'
-                ? 'rgba(255,255,255,0.7)'
-                : '#334155',
-            '&:hover': {
-              backgroundColor: (theme) =>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.25 } }}>
+          <IconButton
+            onClick={onSidebarCollapse}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            sx={{
+              height: 38,
+              width: 38,
+              borderRadius: '10px',
+              color: (theme) =>
                 theme.palette.mode === 'dark'
-                  ? 'rgba(255,255,255,0.08)'
-                  : 'rgba(0,0,0,0.06)',
-            },
-            transition: 'all 0.2s ease',
-          }}
-        >
-          {sidebarCollapsed ? (
-            <MenuIcon sx={{ fontSize: 22 }} />
-          ) : (
-            <MenuOpenIcon sx={{ fontSize: 22 }} />
-          )}
-        </IconButton>
+                  ? 'rgba(255,255,255,0.7)'
+                  : '#334155',
+              '&:hover': {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.08)'
+                    : 'rgba(0,0,0,0.06)',
+              },
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {sidebarCollapsed ? (
+              <MenuIcon sx={{ fontSize: 22 }} />
+            ) : (
+              <MenuOpenIcon sx={{ fontSize: 22 }} />
+            )}
+          </IconButton>
+
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{
+              height: 18,
+              my: 'auto',
+              borderColor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.12)'
+                  : 'rgba(0, 0, 0, 0.12)',
+            }}
+          />
+
+          {/* Breadcrumbs Navigation */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <Tooltip title={t('sidebar.adminDashboard') || 'Home'}>
+              <IconButton
+                size="small"
+                onClick={() => navigate('/')}
+                sx={{
+                  p: '6px',
+                  borderRadius: '8px',
+                  color: location.pathname === '/'
+                    ? (theme) => theme.palette.mode === 'dark' ? '#2DD4BF' : '#0E8584'
+                    : 'text.secondary',
+                  backgroundColor: location.pathname === '/'
+                    ? (theme) => theme.palette.mode === 'dark' ? 'rgba(20, 184, 166, 0.12)' : 'rgba(14, 133, 132, 0.08)'
+                    : 'transparent',
+                  '&:hover': {
+                    color: (theme) => theme.palette.mode === 'dark' ? '#2DD4BF' : '#0E8584',
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.08)'
+                        : 'rgba(0, 0, 0, 0.04)',
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <Home size={18} />
+              </IconButton>
+            </Tooltip>
+
+            {currentRouteInfo && currentRouteInfo.path !== '/' && (
+              <>
+                <Typography
+                  component="span"
+                  sx={{
+                    color: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.25)'
+                        : 'rgba(0, 0, 0, 0.25)',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    userSelect: 'none',
+                  }}
+                >
+                  /
+                </Typography>
+
+                {currentRouteInfo.parentText && (
+                  <>
+                    <Typography
+                      variant="body2"
+                      noWrap
+                      sx={{
+                        color: 'text.secondary',
+                        fontSize: { xs: '0.78rem', sm: '0.84rem' },
+                        fontWeight: 500,
+                        display: { xs: 'none', sm: 'inline-block' },
+                      }}
+                    >
+                      {currentRouteInfo.parentText}
+                    </Typography>
+                    <Typography
+                      component="span"
+                      sx={{
+                        color: (theme) =>
+                          theme.palette.mode === 'dark'
+                            ? 'rgba(255, 255, 255, 0.25)'
+                            : 'rgba(0, 0, 0, 0.25)',
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        userSelect: 'none',
+                        display: { xs: 'none', sm: 'inline-block' },
+                      }}
+                    >
+                      /
+                    </Typography>
+                  </>
+                )}
+
+                <Typography
+                  variant="body2"
+                  noWrap
+                  sx={{
+                    color: 'text.primary',
+                    fontWeight: 650,
+                    fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                    letterSpacing: '-0.01em',
+                    maxWidth: { xs: 120, sm: 200, md: 300 },
+                  }}
+                >
+                  {currentRouteInfo.text}
+                </Typography>
+              </>
+            )}
+          </Box>
+        </Box>
 
         {/* Right side items: Notifications, Language switcher, Dark/Light mode toggle, User menu */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -165,8 +297,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                           bgcolor: '#10B981',
                           borderRadius: '50%',
                           border: (theme) =>
-                            `2px solid ${
-                              theme.palette.mode === 'dark' ? '#11192A' : '#ffffff'
+                            `2px solid ${theme.palette.mode === 'dark' ? '#11192A' : '#ffffff'
                             }`,
                         }}
                       />

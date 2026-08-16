@@ -217,7 +217,7 @@ export default function Login() {
           />
         </Box>
 
-        <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 3 } }}>
+        <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 3.5 } }}>
 
           {/* Phone number field */}
           <Box sx={{ width: '100%' }}>
@@ -363,10 +363,14 @@ export default function Login() {
                       transition: 'background-color 5000s ease-in-out 0s',
                     },
                     '& .MuiFormHelperText-root': {
+                      position: 'absolute',
+                      bottom: '-20px',
+                      left: 4,
+                      margin: 0,
                       color: '#f87171',
                       fontSize: '0.75rem',
-                      ml: 0.5,
-                      mt: 0.5,
+                      fontWeight: 500,
+                      lineHeight: 1.2,
                     },
                   }}
                 />
