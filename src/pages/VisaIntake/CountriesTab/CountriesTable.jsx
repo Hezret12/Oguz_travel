@@ -174,20 +174,17 @@ export const CountriesTable = forwardRef((props, ref) => {
       showSkeletons: isLoading,
     },
     enablePagination: false,
-    enableBottomToolbar: true,
+    enableBottomToolbar: pageCount > 1,
     renderBottomToolbarCustomActions: () => (
       <Box
-        sx={(theme) => ({
+        sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           width: "100%",
           px: 2,
           py: 0.75,
-          minHeight: "52px",
-          borderTop: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
-        })}
+        }}
       >
         <Box />
         <Pagination
