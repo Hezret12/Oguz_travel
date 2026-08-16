@@ -453,6 +453,8 @@
     "fieldType": "Meýdança görnüşi",
     "options": "Opsiýalar",
     "sortOrder": "Tertip belgisi",
+    "fieldKey": "Meýdança açary",
+    "isRequired": "Hökmanylygy",
     "typeText": "Tekst (Text)",
     "typeNumber": "San (Number)",
     "typeDate": "Sene (Date)",

@@ -310,7 +310,16 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
     muiTablePaperProps: {
-      sx: () => ({
+      sx: (theme) => ({
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: "none",
+        borderRadius: "12px",
+        overflow: "hidden",
         height: "calc(100vh - 238px)",
       }),
     },

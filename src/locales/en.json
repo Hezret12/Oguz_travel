@@ -453,6 +453,8 @@
     "fieldType": "Field Type",
     "options": "Options",
     "sortOrder": "Sort Order",
+    "fieldKey": "Field Key",
+    "isRequired": "Required",
     "typeText": "Text",
     "typeNumber": "Number",
     "typeDate": "Date",

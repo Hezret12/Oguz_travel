@@ -61,14 +61,12 @@ export const getDefaultMRTOptions = () => ({
   muiTableProps: {
     sx: (theme) => ({
       backgroundColor: theme.palette.background.paper,
-      height: "100%",
     }),
   },
   muiTableBodyProps: {
     sx: (theme) => ({
       backgroundColor: theme.palette.background.paper,
       color: theme.palette.text.primary,
-      height: "100%",
     }),
   },
   muiTableBodyRowProps: () => ({
