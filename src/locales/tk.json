@@ -472,5 +472,19 @@
     "title": "404 - Sahypa Tapylmady",
     "desc": "Gözleýän sahypaňyz aýrylan, ady üýtgedilen ýa-da wagtlaýyn elýeterli däl bolup biler.",
     "goHome": "Baş Sahypa"
+  },
+  "login": {
+    "title": "Giriş",
+    "welcomeTitle": "Giriş",
+    "submit": "Giriş",
+    "loginButton": "Giriş",
+    "validation": {
+      "phoneNumberRequired": "Telefon belgisi zerurdyr",
+      "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",
+      "phoneNumberInvalid": "Nädogry telefon belgisi (61/62/63/64/65/71/12 bilen başlamaly we 8 sany bolmaly)",
+      "passwordRequired": "Parol zerurdyr",
+      "passwordTooShort": "Parol gaty gysga (iň az 5 simwol)",
+      "passwordMaxLength": "Parol uzyn (iň köp 20 simwol)"
+    }
   }
 }

@@ -112,7 +112,7 @@ export default function Login() {
       }}
     >
       <Helmet>
-        <title>{t('pages.login.welcomeTitle')} | Oguz Travel</title>
+        <title>{t('login.welcomeTitle')} | Oguz Travel</title>
         <link rel="preload" as="image" href="/loginBanner.jpg" />
       </Helmet>
 
@@ -406,7 +406,7 @@ export default function Login() {
             {loginMutation.isPending ? (
               <CircularProgress size={20} sx={{ color: '#fff' }} />
             ) : (
-              t('pages.login.loginButton')
+              t('login.submit')
             )}
           </Box>
         </Box>

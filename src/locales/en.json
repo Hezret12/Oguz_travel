@@ -472,5 +472,19 @@
     "title": "404 - Page Not Found",
     "desc": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
     "goHome": "Go to Home"
+  },
+  "login": {
+    "title": "Login",
+    "welcomeTitle": "Login",
+    "submit": "Sign In",
+    "loginButton": "Sign In",
+    "validation": {
+      "phoneNumberRequired": "Phone number is required",
+      "phoneNumberLength": "Phone number must be 8 digits",
+      "phoneNumberInvalid": "Invalid phone number (must start with 61/62/63/64/65/71/12)",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password is too short (min 5 characters)",
+      "passwordMaxLength": "Password is too long (max 20 characters)"
+    }
   }
 }

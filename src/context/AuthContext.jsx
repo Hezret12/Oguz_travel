@@ -1,6 +1,5 @@
-/* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Cookies from 'js-cookie';
 import { clearSession, getStoredSession, normalizeUser, persistSession } from '../utils/auth';
 import { getMeApi } from '../api/queries/getters';
@@ -64,15 +63,6 @@ export function AuthProvider({ children }) {
   // Loading is only true if we don't have stored session data at all on first load
   const loading = isLoading && !user;
 
-  // TanStack Mutation for Logout (/auth/logout)
-  const logoutMutation = useMutation({
-    mutationFn: logoutApi,
-    onSettled: () => {
-      clearSession();
-      queryClient.clear(); // Clears all cached queries on logout for privacy/security
-    },
-  });
-
   const login = useCallback(
     (sessionData) => {
       const {
@@ -115,8 +105,19 @@ export function AuthProvider({ children }) {
   );
 
   const logout = useCallback(() => {
-    logoutMutation.mutate();
-  }, [logoutMutation]);
+    // 1. Synchronously clear session & cookies immediately
+    clearSession();
+
+    // 2. Cancel in-flight background queries and reset authUser in cache
+    queryClient.cancelQueries();
+    queryClient.setQueryData(['authUser'], null);
+
+    // 3. Remove all cached query data safely
+    queryClient.removeQueries();
+
+    // 4. Fire-and-forget server logout in background without blocking UI navigation
+    logoutApi().catch(() => {});
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({

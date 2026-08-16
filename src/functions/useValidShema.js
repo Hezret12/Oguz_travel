@@ -15,16 +15,16 @@ export const useValidShema = () => {
 
   const loginValidSchema = yup.object({
     phone: phoneNumberRequiredValidSchema({
-      requiredMessage: t("pages.login.validation.phoneNumberRequired"),
-      lengthMessage: t("pages.login.validation.phoneNumberLength"),
-      invalidMessage: t("pages.login.validation.phoneNumberInvalid"),
+      requiredMessage: t("login.validation.phoneNumberRequired"),
+      lengthMessage: t("login.validation.phoneNumberLength"),
+      invalidMessage: t("login.validation.phoneNumberInvalid"),
     }),
     password: passwordRequiredValidSchema({
-      requiredMessage: t("pages.login.validation.passwordRequired"),
+      requiredMessage: t("login.validation.passwordRequired"),
       minLength: 5,
-      minMessage: t("pages.login.validation.passwordTooShort"),
+      minMessage: t("login.validation.passwordTooShort"),
       maxLength: 20,
-      maxMessage: t("pages.login.validation.passwordMaxLength"),
+      maxMessage: t("login.validation.passwordMaxLength"),
     }),
   });
 
