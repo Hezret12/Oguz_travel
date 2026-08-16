@@ -475,9 +475,6 @@
   },
   "login": {
     "title": "Giriş",
-    "welcomeTitle": "Giriş",
-    "submit": "Giriş",
-    "loginButton": "Giriş",
     "validation": {
       "phoneNumberRequired": "Telefon belgisi zerurdyr",
       "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",

@@ -59,7 +59,7 @@ const baseFieldStyles = {
       borderRadius: '16px',
       backgroundColor: 'transparent',
       fontSize: '1rem',
-      color: 'inherit',
+      color: '#ffffff',
       height: { xs: 48, sm: 50 },
       paddingLeft: '14px',
       paddingRight: '16px',
@@ -82,6 +82,13 @@ const baseFieldStyles = {
     },
     '& .MuiOutlinedInput-input': {
       padding: '10px 0px',
+      color: '#ffffff !important',
+      WebkitTextFillColor: '#ffffff !important',
+    },
+    '& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus, & input:-webkit-autofill:active': {
+      WebkitTextFillColor: '#ffffff !important',
+      WebkitBoxShadow: '0 0 0 1000px transparent inset !important',
+      transition: 'background-color 5000s ease-in-out 0s',
     },
     '& .MuiFormHelperText-root': {
       color: '#f87171',
@@ -217,7 +224,13 @@ const PhoneNumberField = ({
                     letterSpacing: variant === 'login' ? '0.12em' : '0.02em',
                   },
                   '& .MuiOutlinedInput-input': {
-                    color: variant === 'login' ? textColor : 'text.primary',
+                    color: variant === 'login' ? `${textColor} !important` : 'text.primary',
+                    WebkitTextFillColor: variant === 'login' ? `${textColor} !important` : undefined,
+                  },
+                  '& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus, & input:-webkit-autofill:active': {
+                    WebkitTextFillColor: variant === 'login' ? `${textColor} !important` : undefined,
+                    WebkitBoxShadow: variant === 'login' ? '0 0 0 1000px transparent inset !important' : undefined,
+                    transition: 'background-color 5000s ease-in-out 0s',
                   },
                 },
                 variantStyles,

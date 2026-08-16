@@ -475,9 +475,6 @@
   },
   "login": {
     "title": "Вход",
-    "welcomeTitle": "Вход",
-    "submit": "Войти",
-    "loginButton": "Войти",
     "validation": {
       "phoneNumberRequired": "Номер телефона обязателен",
       "phoneNumberLength": "Номер телефона должен состоять из 8 цифр",

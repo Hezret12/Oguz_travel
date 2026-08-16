@@ -112,7 +112,7 @@ export default function Login() {
       }}
     >
       <Helmet>
-        <title>{t('login.welcomeTitle')} | Oguz Travel</title>
+        <title>{t('login.title')} | Oguz Travel</title>
         <link rel="preload" as="image" href="/loginBanner.jpg" />
       </Helmet>
 
@@ -350,7 +350,13 @@ export default function Login() {
                     },
                     '& .MuiOutlinedInput-input': {
                       padding: '10px 0px',
-                      color: textColor,
+                      color: `${textColor} !important`,
+                      WebkitTextFillColor: `${textColor} !important`,
+                    },
+                    '& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus, & input:-webkit-autofill:active': {
+                      WebkitTextFillColor: `${textColor} !important`,
+                      WebkitBoxShadow: '0 0 0 1000px transparent inset !important',
+                      transition: 'background-color 5000s ease-in-out 0s',
                     },
                     '& .MuiFormHelperText-root': {
                       color: '#f87171',
@@ -406,7 +412,7 @@ export default function Login() {
             {loginMutation.isPending ? (
               <CircularProgress size={20} sx={{ color: '#fff' }} />
             ) : (
-              t('login.submit')
+              t('login.title')
             )}
           </Box>
         </Box>
