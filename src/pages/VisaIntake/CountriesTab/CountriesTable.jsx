@@ -83,34 +83,25 @@ export const CountriesTable = forwardRef((props, ref) => {
         id: "code",
         header: t("columns.code"),
         size: 80,
-        accessorFn: (row) => row.code || "",
-        Cell: ({ cell }) => (
-          <Chip
-            label={cell.getValue()}
-            size="small"
-            color="primary"
-            variant="outlined"
-            sx={{ fontWeight: 700, borderRadius: "6px" }}
-          />
-        ),
+        accessorKey: "code",
       },
       {
         id: "nameTm",
         header: t("columns.countryNameTm"),
         size: 180,
-        accessorFn: (row) => row.name?.tk,
+        accessorKey: "name.tk",
       },
       {
         id: "nameRu",
         header: t("columns.countryNameRu"),
         size: 180,
-        accessorFn: (row) => row.name?.ru,
+        accessorKey: "name.ru",
       },
       {
         id: "nameEn",
         header: t("columns.countryNameEn"),
         size: 180,
-        accessorFn: (row) => row.name?.en,
+        accessorKey: "name.en",
       },
       {
         id: "custom_fields_count",
@@ -168,13 +159,6 @@ export const CountriesTable = forwardRef((props, ref) => {
         overflow: "hidden",
         height: "calc(100vh - 238px)",
       }),
-    },
-    enableColumnPinning: true,
-    initialState: {
-      columnPinning: {
-        left: ["index_number"],
-        right: ["actions"],
-      },
     },
     columns,
     data: countriesData,

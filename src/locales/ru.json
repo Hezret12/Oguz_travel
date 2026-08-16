@@ -334,6 +334,9 @@
     "addCountryTitle": "Добавление новой страны",
     "editCountryTitle": "Редактирование страны",
     "countriesManagement": "Управление странами",
+    "selectCountryPrompt": "Выберите страну",
+    "selectCountryDescription": "Пожалуйста, выберите страну сверху, чтобы увидеть заявления",
+    "selectCountryPlaceholder": "Выберите страну...",
     "defaultFieldsInfoTitle": "Стандартные поля:",
     "defaultFieldsInfoDesc": "Клиент, Дата подачи, Оператор 1, Оператор 2 и Примечание добавляются автоматически.",
     "fields": {

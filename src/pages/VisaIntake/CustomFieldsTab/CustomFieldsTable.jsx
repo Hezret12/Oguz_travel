@@ -215,28 +215,19 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
         id: "labelTm",
         header: t("customFields.labelTm"),
         size: 160,
-        accessorFn: (row) =>
-          typeof row.labelTm === "string"
-            ? row.labelTm
-            : row.labelTm?.tk || row.labelTm?.name || "-",
+        accessorFn: (row) => row.field_label?.tk
       },
       {
         id: "labelRu",
         header: t("customFields.labelRu"),
         size: 160,
-        accessorFn: (row) =>
-          typeof row.labelRu === "string"
-            ? row.labelRu
-            : row.labelRu?.ru || row.labelRu?.name || "-",
+        accessorFn: (row) => row.field_label?.ru
       },
       {
         id: "labelEn",
         header: t("customFields.labelEn"),
         size: 160,
-        accessorFn: (row) =>
-          typeof row.labelEn === "string"
-            ? row.labelEn
-            : row.labelEn?.en || row.labelEn?.name || "-",
+        accessorFn: (row) => row.field_label?.en,
       },
       {
         id: "fieldType",
@@ -322,13 +313,6 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
         overflow: "hidden",
         height: "calc(100vh - 238px)",
       }),
-    },
-    enableColumnPinning: true,
-    initialState: {
-      columnPinning: {
-        left: ["index_number"],
-        right: ["actions"],
-      },
     },
     columns,
     data: fieldsData,

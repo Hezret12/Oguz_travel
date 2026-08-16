@@ -334,6 +334,9 @@
     "addCountryTitle": "Add New Country",
     "editCountryTitle": "Edit Country Information",
     "countriesManagement": "Country Settings",
+    "selectCountryPrompt": "Select a Country",
+    "selectCountryDescription": "Please select a country from the header to view applications",
+    "selectCountryPlaceholder": "Select a country...",
     "defaultFieldsInfoTitle": "Standard Fields:",
     "defaultFieldsInfoDesc": "Client, Application date, Operator 1, Operator 2, and Notes are automatically included.",
     "fields": {

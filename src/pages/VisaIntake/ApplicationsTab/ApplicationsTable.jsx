@@ -16,8 +16,10 @@ import {
   Badge,
   Autocomplete,
   TextField,
+  Typography,
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import { ChevronDown, Globe } from "lucide-react";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -29,6 +31,7 @@ import {
   getAllReceivingsApi,
   getCountryVisaFieldsApi,
   getCountriesApi,
+  getAllEmployeeApi,
 } from "../../../api/queries/getters";
 import { deleteReceivingApi } from "../../../api/queries/delete";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
@@ -36,10 +39,48 @@ import DeleteDialog from "../../../components/DeleteDialog";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 import StackedCell from "../../../components/inputs/StackCell";
-import StatusChip from "../../../components/StatusChip";
-import { PROCESSED_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
+import TableEmptyState from "../../../components/TableEmptyState";
 import { sortVisaFields } from "../../../functions/visaCountryFieldConfigs";
 import VisaIntakeModal from "./VisaIntakeModal";
+
+const SelectCountryPrompt = ({ t }) => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 1.5,
+      p: 4,
+      minHeight: "calc(100vh - 360px)",
+      textAlign: "center",
+    }}
+  >
+    <Box
+      sx={{
+        width: 64,
+        height: 64,
+        borderRadius: "16px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "primary.main",
+        backgroundColor: (theme) =>
+          theme.palette.mode === "dark"
+            ? "rgba(45, 212, 191, 0.1)"
+            : "rgba(14, 133, 132, 0.08)",
+      }}
+    >
+      <Globe size={32} />
+    </Box>
+    <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
+      {t("visaIntake.selectCountryPrompt")}
+    </Typography>
+    <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 400 }}>
+      {t("visaIntake.selectCountryDescription")}
+    </Typography>
+  </Box>
+);
 
 export const ApplicationsTable = forwardRef(
   (
@@ -67,7 +108,6 @@ export const ApplicationsTable = forwardRef(
     const activeCountryGuid = countryGuid || selectedCountryGuid;
 
     const countryParams = useMemo(() => ({ page: 1, limit: 100 }), []);
-
     const { data: countriesData = [] } = usePagginationGet({
       apiFn: getCountriesApi,
       key: "countriesList",
@@ -107,6 +147,34 @@ export const ApplicationsTable = forwardRef(
       return sortVisaFields(rawVisaFields);
     }, [rawVisaFields]);
 
+    const employeeParams = useMemo(() => ({ page: 1, limit: 100 }), []);
+    const { data: employees = [] } = useGet({
+      apiFn: getAllEmployeeApi,
+      key: "employees",
+      params: employeeParams,
+    });
+
+    const employeeMap = useMemo(() => {
+      const map = new Map();
+      const list = Array.isArray(employees) ? employees : [];
+      list.forEach((emp) => {
+        if (emp.guid) {
+          const officeShort = emp.office?.shortName
+            ? selectedLang(emp.office.shortName) ||
+              selectedLang(emp.office.fullName) ||
+              ""
+            : emp.office?.fullName
+              ? selectedLang(emp.office.fullName)
+              : "";
+          map.set(emp.guid, {
+            fullName: emp.fullName,
+            office: officeShort,
+          });
+        }
+      });
+      return map;
+    }, [employees, selectedLang]);
+
     const params = useMemo(
       () => ({
         page,
@@ -119,7 +187,7 @@ export const ApplicationsTable = forwardRef(
     );
 
     const {
-      data: applicationsData = [],
+      data: rawApplicationsData = [],
       isLoading,
       isFetching,
       refetch,
@@ -129,7 +197,13 @@ export const ApplicationsTable = forwardRef(
       apiFn: getAllReceivingsApi,
       key: ["receivings", params, refetchKey],
       params,
+      options: { enabled: Boolean(activeCountryGuid) },
     });
+
+    const applicationsData = useMemo(() => {
+      if (!activeCountryGuid) return [];
+      return Array.isArray(rawApplicationsData) ? rawApplicationsData : [];
+    }, [activeCountryGuid, rawApplicationsData]);
 
     const { mutate: deleteReceiving, isPending: isDeleting } = useDelete({
       deleteFn: deleteReceivingApi,
@@ -147,10 +221,11 @@ export const ApplicationsTable = forwardRef(
       [deleteDialog],
     );
 
+    // Columns Definition
     const columns = useMemo(() => {
       const cols = [
         {
-          accessorFn: (row, index) => (page - 1) * limit + index + 1,
+          accessorKey: "index_number",
           id: "index_number",
           header: "№",
           size: 50,
@@ -158,144 +233,222 @@ export const ApplicationsTable = forwardRef(
         },
       ];
 
+      const fieldMap = new Map();
+      if (Array.isArray(sortedFields)) {
+        sortedFields.forEach((f) => {
+          const key = f.fieldKey || f.field_key || f.guid;
+          if (key) fieldMap.set(key, f);
+        });
+      }
+      const appDateField = fieldMap.get("application_date");
+      const appDateLabel =
+        (appDateField && selectedLang(appDateField.labelTm)) ||
+        (appDateField && typeof appDateField.labelTm === "string"
+          ? appDateField.labelTm
+          : null) ||
+        t("visaIntake.fields.applicationDate");
+
+      cols.push({
+        id: "application_date",
+        header: appDateLabel,
+        size: 140,
+        accessorFn: (row) =>
+          row.application_date ?? row.custom_field_values?.application_date,
+        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+      });
+
+      const acceptedOprField = fieldMap.get("accepted_opr_guid");
+      const acceptedOprLabel =
+        (acceptedOprField && selectedLang(acceptedOprField.labelTm)) ||
+        (acceptedOprField && typeof acceptedOprField.labelTm === "string"
+          ? acceptedOprField.labelTm
+          : null);
+
+      cols.push({
+        id: "accepted_opr_guid",
+        header: acceptedOprLabel,
+        size: 170,
+        accessorFn: (row) =>
+          row.operator?.fullName ||
+          row.accepted_operator?.fullName ||
+          row.operator_name ||
+          "-",
+        Cell: ({ row }) => {
+          const oprGuid = row?.original?.accepted_opr_guid;
+          const empFromMap = oprGuid ? employeeMap.get(oprGuid) : null;
+          const emp =
+            row?.original?.operator || row?.original?.accepted_operator;
+          const fullName =
+            emp?.fullName ||
+            empFromMap?.fullName ||
+            row?.original?.operator_name;
+          const officeShort = emp?.office?.shortName
+            ? selectedLang(emp.office.shortName) || ""
+            : emp?.office?.fullName
+              ? selectedLang(emp.office.fullName)
+              : empFromMap?.office || "";
+          if (!fullName) return "-";
+          return <StackedCell primary={fullName} secondary={officeShort} />;
+        },
+      });
+
+      const receivedOprField = fieldMap.get("received_opr_guid");
+      const receivedOprLabel =
+        (receivedOprField && selectedLang(receivedOprField.labelTm)) ||
+        (receivedOprField && typeof receivedOprField.labelTm === "string"
+          ? receivedOprField.labelTm
+          : null) ||
+        "Kabul ediji (Operator)";
+
+      cols.push({
+        id: "received_opr_guid",
+        header: receivedOprLabel,
+        size: 170,
+        accessorFn: (row) =>
+          row.operator2?.fullName ||
+          row.receiver_operator?.fullName ||
+          row.received_operator?.fullName ||
+          "-",
+        Cell: ({ row }) => {
+          const oprGuid = row?.original?.received_opr_guid;
+          const empFromMap = oprGuid ? employeeMap.get(oprGuid) : null;
+          const emp = row?.original?.received_operator;
+          const fullName = emp?.fullName || empFromMap?.fullName;
+          const officeShort = emp?.office?.shortName
+            ? selectedLang(emp.office.shortName) ||
+              selectedLang(emp.office.fullName) ||
+              ""
+            : emp?.office?.fullName
+              ? selectedLang(emp.office.fullName)
+              : empFromMap?.office || "";
+          if (!fullName) return "-";
+          return <StackedCell primary={fullName} secondary={officeShort} />;
+        },
+      });
+
+      const clientField = fieldMap.get("client_guid") || fieldMap.get("client");
+      const clientLabel =
+        (clientField && selectedLang(clientField.labelTm)) ||
+        (clientField && typeof clientField.labelTm === "string"
+          ? clientField.labelTm
+          : null) ||
+        t("columns.client");
+
+      cols.push({
+        id: "client",
+        header: clientLabel,
+        size: 180,
+        accessorFn: (row) => row.client?.fullName,
+      });
+
+      cols.push({
+        id: "passport_number",
+        header: t("columns.passportNumber"),
+        size: 140,
+        accessorFn: (row) => row.passport_number,
+      });
+      cols.push({
+        id: "dateOfBirth",
+        header: t("columns.dateOfBirth"),
+        size: 130,
+        accessorFn: (row) =>
+          row.dateOfBirth ||
+          row.client?.dateOfBirth ||
+          row.birth_date ||
+          row.custom_field_values?.dateOfBirth ||
+          row.custom_field_values?.birth_date,
+        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+      });
+
+      const standardKeys = new Set([
+        "index_number",
+        "application_date",
+        "accepted_opr_guid",
+        "received_opr_guid",
+        "client_guid",
+        "client",
+        "client_name",
+        "passport_number",
+        "dateOfBirth",
+        "birth_date",
+        "note",
+        "notes",
+        "is_processed",
+        "actions",
+      ]);
+
       if (sortedFields && sortedFields.length > 0) {
         sortedFields.forEach((field, index) => {
           const fieldKey =
             field.fieldKey || field.field_key || field.guid || `col_${index}`;
-          const headerLabel =
-            selectedLang(field.labelTm) || field.labelTm || fieldKey;
+          if (!standardKeys.has(fieldKey)) {
+            const headerLabel =
+              selectedLang(field.labelTm) ||
+              (typeof field.labelTm === "string" ? field.labelTm : null) ||
+              fieldKey;
 
-          if (fieldKey === "client_guid") {
-            cols.push({
-              id: "client_guid",
-              header: headerLabel,
-              size: 180,
-              accessorFn: (row) =>
-                row.client?.fullName ||
-                row.client_name ||
-                row.client_guid ||
-                "-",
-              Cell: ({ row }) => (
-                <StackedCell
-                  primary={row?.original?.client?.fullName}
-                  secondary={row?.original?.client?.passport_number}
-                />
-              ),
-            });
-          } else if (fieldKey === "accepted_opr_guid") {
-            cols.push({
-              id: fieldKey,
-              header: headerLabel,
-              size: 160,
-              accessorFn: (row) => row.operator?.fullName,
-            });
-          } else if (fieldKey === "received_opr_guid") {
-            cols.push({
-              id: fieldKey,
-              header: headerLabel,
-              size: 160,
-              accessorFn: (row) => row.operator2?.fullName,
-            });
-          } else if (field.fieldType === "date") {
-            cols.push({
-              id: fieldKey,
-              header: headerLabel,
-              size: 130,
-              accessorFn: (row) =>
-                row[fieldKey] ?? row.custom_field_values?.[fieldKey],
-              Cell: ({ cell }) =>
-                formatChange(cell.getValue(), { dateOnly: true }),
-            });
-          } else if (field.fieldType === "select") {
-            cols.push({
-              id: fieldKey,
-              header: headerLabel,
-              size: 140,
-              accessorFn: (row) =>
-                row[fieldKey] ?? row.custom_field_values?.[fieldKey] ?? "-",
-              Cell: ({ cell }) => {
-                const val = cell.getValue();
-                if (!val || val === "-") return "-";
-                return (
-                  <Chip
-                    label={val}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                    sx={{ fontWeight: 600, borderRadius: "6px" }}
-                  />
-                );
-              },
-            });
-          } else {
-            cols.push({
-              id: fieldKey,
-              header: headerLabel,
-              size: 150,
-              accessorFn: (row) =>
-                row[fieldKey] ?? row.custom_field_values?.[fieldKey] ?? "-",
-            });
+            if (field.fieldType === "date") {
+              cols.push({
+                id: fieldKey,
+                header: headerLabel,
+                size: 130,
+                accessorFn: (row) =>
+                  row[fieldKey] ?? row.custom_field_values?.[fieldKey],
+                Cell: ({ cell }) =>
+                  formatChange(cell.getValue(), { dateOnly: true }),
+              });
+            } else if (field.fieldType === "select") {
+              cols.push({
+                id: fieldKey,
+                header: headerLabel,
+                size: 140,
+                accessorFn: (row) =>
+                  row[fieldKey] ?? row.custom_field_values?.[fieldKey] ?? "-",
+                Cell: ({ cell }) => {
+                  const val = cell.getValue();
+                  if (!val || val === "-") return "-";
+                  return (
+                    <Chip
+                      label={val}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                      sx={{ fontWeight: 600, borderRadius: "6px" }}
+                    />
+                  );
+                },
+              });
+            } else {
+              cols.push({
+                id: fieldKey,
+                header: headerLabel,
+                size: 150,
+                accessorFn: (row) =>
+                  row[fieldKey] ?? row.custom_field_values?.[fieldKey] ?? "-",
+              });
+            }
           }
         });
-      } else {
-        cols.push(
-          {
-            id: "client_name",
-            header: t("columns.client"),
-            size: 180,
-            accessorFn: (row) => row.client?.fullName,
-          },
-          {
-            id: "passport_number",
-            header: t("columns.passportNumber"),
-            size: 140,
-            accessorFn: (row) => row.client?.passport_number,
-          },
-          {
-            id: "application_date",
-            header: t("visaIntake.fields.applicationDate"),
-            size: 130,
-            accessorFn: (row) => row.application_date,
-            Cell: ({ cell }) =>
-              formatChange(cell.getValue(), { dateOnly: true }),
-          },
-          {
-            id: "operator_name",
-            header: t("columns.operator"),
-            size: 160,
-            accessorFn: (row) => row.operator?.fullName,
-          },
-          {
-            id: "visa_category",
-            header: t("visaIntake.fields.visaCategory"),
-            size: 140,
-            accessorFn: (row) => row.visa_category,
-            Cell: ({ cell }) => (
-              <Chip
-                label={cell.getValue()}
-                size="small"
-                color="primary"
-                variant="outlined"
-                sx={{ fontWeight: 600, borderRadius: "6px" }}
-              />
-            ),
-          },
-        );
       }
+      const noteField = fieldMap.get("note");
+      const noteLabel =
+        (noteField && selectedLang(noteField.labelTm)) ||
+        (noteField && typeof noteField.labelTm === "string"
+          ? noteField.labelTm
+          : null) ||
+        t("visaIntake.fields.notes", "Bellikler");
 
       cols.push({
-        id: "is_processed",
-        header: t("visaIntake.fields.isProcessed"),
-        size: 120,
-        accessorFn: (row) => (row.is_processed ? "TRUE" : "FALSE"),
-        Cell: ({ cell }) => (
-          <StatusChip
-            status={cell.getValue()}
-            config={PROCESSED_STATUS_CONFIG}
-          />
-        ),
+        id: "note",
+        header: noteLabel,
+        size: 160,
+        accessorFn: (row) =>
+          row.note ??
+          row.notes ??
+          row.custom_field_values?.note ??
+          row.custom_field_values?.notes ??
+          "-",
       });
-
       cols.push({
         id: "actions",
         header: t("columns.actions"),
@@ -315,7 +468,6 @@ export const ApplicationsTable = forwardRef(
               row={row}
               table={table}
               onDelete={handleDeleteClick}
-              showPayment={true}
             />
           </Box>
         ),
@@ -323,9 +475,8 @@ export const ApplicationsTable = forwardRef(
 
       return cols;
     }, [
-      page,
-      limit,
       sortedFields,
+      employeeMap,
       selectedLang,
       t,
       formatChange,
@@ -366,11 +517,17 @@ export const ApplicationsTable = forwardRef(
       columns,
       data: applicationsData,
       state: {
-        isLoading,
-        showSkeletons: isLoading,
+        isLoading: Boolean(activeCountryGuid && isLoading),
+        showSkeletons: Boolean(activeCountryGuid && isLoading),
       },
       enablePagination: false,
       enableBottomToolbar: pageCount > 1,
+      renderEmptyRowsFallback: () =>
+        !activeCountryGuid ? (
+          <SelectCountryPrompt t={t} />
+        ) : (
+          <TableEmptyState />
+        ),
       renderBottomToolbarCustomActions: () => (
         <Box
           sx={{
@@ -422,6 +579,7 @@ export const ApplicationsTable = forwardRef(
 
           <Autocomplete
             size="small"
+            popupIcon={<ChevronDown size={18} />}
             options={countryOptions}
             getOptionLabel={(option) => option.label || ""}
             value={
@@ -437,7 +595,10 @@ export const ApplicationsTable = forwardRef(
             renderInput={(params) => (
               <TextField
                 {...params}
-                placeholder={t("columns.country")}
+                placeholder={t(
+                  "visaIntake.selectCountryPlaceholder",
+                  "Ýurt saýlaň...",
+                )}
                 sx={{
                   width: 220,
                   "& .MuiOutlinedInput-root": {
@@ -464,8 +625,7 @@ export const ApplicationsTable = forwardRef(
       ),
       renderCreateRowDialogContent: ({ table }) => (
         <VisaIntakeModal
-          open={Boolean(table.getState().creatingRow)}
-          close={() => table.setCreatingRow(null)}
+          table={table}
           onRefresh={refetch}
           countryGuid={activeCountryGuid}
         />

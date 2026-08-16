@@ -172,30 +172,38 @@ export const VisaIntakeModal = ({
     options: { enabled: Boolean(effectiveCountryGuid) },
   });
 
+  const employeeParams = useMemo(() => ({ page: 1, limit: 100 }), []);
   const { data: employees = [] } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
+    params: employeeParams,
   });
+
+  const employeeOptions = useMemo(() => {
+    const list = Array.isArray(employees)
+      ? employees
+      : Array.isArray(employees?.data)
+      ? employees.data
+      : [];
+    return list.map((emp) => {
+      const officeObj = emp.office;
+      const officeShort = officeObj
+        ? selectedLang(officeObj.shortName) ||
+          selectedLang(officeObj.fullName) ||
+          (typeof officeObj.shortName === "string" ? officeObj.shortName : "") ||
+          (typeof officeObj.fullName === "string" ? officeObj.fullName : "") ||
+          (typeof officeObj === "string" ? officeObj : "")
+        : "";
+      const label = officeShort
+        ? `${emp.fullName} (${officeShort})`
+        : emp.fullName || "";
+      return { label, value: emp.guid };
+    });
+  }, [employees, selectedLang]);
 
   const sortedFields = useMemo(() => {
     return sortVisaFields(rawFields);
   }, [rawFields]);
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang]
-  );
 
   const initialValues = useMemo(() => {
     const defaults = {};

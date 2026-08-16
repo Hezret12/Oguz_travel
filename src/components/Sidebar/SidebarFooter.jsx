@@ -1,7 +1,17 @@
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { LogOut, MapPin } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { useLocale } from "../../hooks/useLocale";
 
-const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
+const SidebarFooter = ({ collapsed, onLogout }) => {
+  const { user } = useAuth();
+  const { selectedLang } = useLocale();
+
+  const officeName =
+    selectedLang(user?.office?.shortName) ||
+    selectedLang(user?.office?.fullName) ||
+    (typeof user?.office === "string" ? user.office : null);
+
   if (collapsed) {
     return (
       <Box
@@ -11,7 +21,7 @@ const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
           flexDirection: "column",
           alignItems: "center",
           borderTop: "1px solid",
-          borderColor: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.06)",
+          borderColor: "divider",
         }}
       >
         <Tooltip title="Logout" placement="right">
@@ -40,43 +50,31 @@ const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
       sx={{
         p: "12px 14px",
         borderTop: "1px solid",
-        borderColor: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.06)",
+        borderColor: "divider",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         gap: 1,
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, minWidth: 0 }}>
-        <MapPin size={15} style={{ color: isDark ? "#2DD4BF" : "#0E8584", flexShrink: 0 }} />
-        <Box sx={{ minWidth: 0 }}>
+      {officeName && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, minWidth: 0 }}>
+          <MapPin size={15} style={{ color: "#0E8584", flexShrink: 0 }} />
           <Typography
             variant="caption"
             noWrap
             sx={{
               fontSize: "0.76rem",
               fontWeight: 650,
-              color: isDark ? "#F8FAFC" : "#0F172A",
+              color: "text.primary",
               display: "block",
               lineHeight: 1.2,
             }}
           >
-            Aşgabat
-          </Typography>
-          <Typography
-            variant="caption"
-            noWrap
-            sx={{
-              fontSize: "0.66rem",
-              color: "text.secondary",
-              display: "block",
-              lineHeight: 1.1,
-            }}
-          >
-            Baş Ofis
+            {officeName}
           </Typography>
         </Box>
-      </Box>
+      )}
 
       <Tooltip title="Logout">
         <IconButton
@@ -87,6 +85,7 @@ const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
             height: 32,
             borderRadius: "8px",
             color: "text.secondary",
+            ml: officeName ? 0 : "auto",
             "&:hover": {
               color: "#EF4444",
               backgroundColor: "rgba(239, 68, 68, 0.08)",

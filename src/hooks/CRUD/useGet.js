@@ -17,7 +17,13 @@ export const useGet = ({ apiFn, key, params = {}, options = {} }) => {
   });
 
   const rawData = query?.data?.data;
-  const data = Array.isArray(rawData) ? rawData : (rawData?.items || []);
+  const data = Array.isArray(rawData)
+    ? rawData
+    : Array.isArray(rawData?.data)
+    ? rawData.data
+    : Array.isArray(rawData?.items)
+    ? rawData.items
+    : rawData?.data ?? (typeof rawData === "object" && rawData !== null ? rawData : []);
 
   return { ...query, data };
 };

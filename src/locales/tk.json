@@ -334,6 +334,9 @@
     "addCountryTitle": "Täze Ýurt Goşmak",
     "editCountryTitle": "Ýurt Maglumatlaryny Üýtgetmek",
     "countriesManagement": "Ýurtlar",
+    "selectCountryPrompt": "Ýurt saýlaň",
+    "selectCountryDescription": "Arzalary görmek üçin ýokardan ýurt saýlaň",
+    "selectCountryPlaceholder": "Ýurt saýlaň...",
     "defaultFieldsInfoTitle": "Standart Meýdançalar:",
     "defaultFieldsInfoDesc": "Müşderi, Arza berlen senesi, Operator 1, Operator 2 we Bellikler awtomatiki birikdirilýär.",
     "fields": {
