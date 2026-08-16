@@ -66,10 +66,14 @@ const sharedInputSx = {
     py: "10px",
   },
   "& .MuiFormHelperText-root": {
+    position: "absolute",
+    bottom: "-20px",
+    left: 0,
     mx: 1,
-    mt: 0.5,
+    mt: 0,
     fontSize: "0.75rem",
     fontWeight: 500,
+    lineHeight: 1.2,
   },
 };
 
