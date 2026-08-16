@@ -23,7 +23,7 @@ export const CountriesTable = forwardRef((props, ref) => {
   const defaultMrtOptions = getDefaultMRTOptions();
 
   const [page, setPage] = useState(1);
-  const [limit, setPageSize] = useState(40);
+  const [limit] = useState(40);
   const [searchQuery, setSearch] = useState("");
 
   const params = useMemo(
@@ -41,11 +41,18 @@ export const CountriesTable = forwardRef((props, ref) => {
     isFetching,
     refetch,
     totalItems = 0,
+    pageCount = 1,
   } = usePagginationGet({
     apiFn: getCountriesApi,
     key: ["countries", params],
     params,
   });
+
+  const [prevSearch, setPrevSearch] = useState(searchQuery);
+  if (searchQuery !== prevSearch) {
+    setPrevSearch(searchQuery);
+    setPage(1);
+  }
 
   const { mutate: deleteCountry, isPending: isDeleting } = useDelete({
     deleteFn: deleteCountryApi,
@@ -167,7 +174,27 @@ export const CountriesTable = forwardRef((props, ref) => {
       showSkeletons: isLoading,
     },
     enablePagination: false,
-    enableBottomToolbar: false,
+    enableBottomToolbar: true,
+    renderBottomToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          px: 1,
+          py: 0.5,
+        }}
+      >
+        <Box />
+        <Pagination
+          pageIndex={page - 1}
+          pageCount={pageCount}
+          totalRows={totalItems}
+          onPageChange={(newIndex) => setPage(newIndex + 1)}
+        />
+      </Box>
+    ),
     renderTopToolbarCustomActions: () => (
       <Box
         sx={{
@@ -208,16 +235,8 @@ export const CountriesTable = forwardRef((props, ref) => {
   }));
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <>
       <MaterialReactTable table={table} />
-
-      <Pagination
-        totalItems={totalItems}
-        page={page}
-        limit={limit}
-        setPage={setPage}
-        setPageSize={setPageSize}
-      />
 
       <DeleteDialog
         open={deleteDialog.isOpen}
@@ -227,7 +246,7 @@ export const CountriesTable = forwardRef((props, ref) => {
         title={t("visaIntake.deleteCountryTitle")}
         description={t("deleteConfirm.employee")}
       />
-    </Box>
+    </>
   );
 });
 

@@ -10,12 +10,34 @@ export function usePagginationGet({ apiFn, key, params }) {
   });
 
   const responseBody = data?.data;
+  const rawData = responseBody?.data ?? (Array.isArray(responseBody) ? responseBody : []);
+  const list = Array.isArray(rawData) ? rawData : [];
+
+  const totalItems =
+    responseBody?.meta?.totalItems ??
+    responseBody?.totalItems ??
+    responseBody?.totalCount ??
+    responseBody?.total ??
+    list.length;
+
+  const calculatedPageCount =
+    responseBody?.meta?.totalPages ??
+    responseBody?.pageCount ??
+    responseBody?.totalPages ??
+    (params?.limit ? Math.ceil(totalItems / params.limit) : 1);
+  const pageCount = calculatedPageCount || 1;
+
+  const currentPage =
+    responseBody?.meta?.currentPage ??
+    responseBody?.currentPage ??
+    params?.page ??
+    1;
 
   return {
-    data: responseBody?.data ?? [],
-    totalItems: responseBody?.meta?.totalItems ?? 0,
-    pageCount: responseBody?.meta?.totalPages ?? 0,
-    currentPage: responseBody?.meta?.currentPage ?? 1,
+    data: list,
+    totalItems,
+    pageCount,
+    currentPage,
     isLoading,
     isFetching,
     isError,

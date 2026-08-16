@@ -143,7 +143,7 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
   const defaultMrtOptions = getDefaultMRTOptions();
 
   const [page, setPage] = useState(1);
-  const [limit, setPageSize] = useState(40);
+  const [limit] = useState(40);
   const [searchQuery, setSearch] = useState("");
   const [fieldTypeFilter, setFieldTypeFilter] = useState("");
   const [isFieldTypeSelectOpen, setIsFieldTypeSelectOpen] = useState(false);
@@ -153,6 +153,7 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
       page,
       limit,
       field_type: fieldTypeFilter || undefined,
+      search: searchQuery || undefined,
       option_search: searchQuery || undefined,
     }),
     [page, limit, fieldTypeFilter, searchQuery]
@@ -164,11 +165,20 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
     isFetching,
     refetch,
     totalItems = 0,
+    pageCount = 1,
   } = usePagginationGet({
     apiFn: getCustomFieldsApi,
     key: ["customFields", params],
     params,
   });
+
+  const [prevSearch, setPrevSearch] = useState(searchQuery);
+  const [prevFilter, setPrevFilter] = useState(fieldTypeFilter);
+  if (searchQuery !== prevSearch || fieldTypeFilter !== prevFilter) {
+    setPrevSearch(searchQuery);
+    setPrevFilter(fieldTypeFilter);
+    setPage(1);
+  }
 
   const { mutate: deleteCustomField, isPending: isDeleting } = useDelete({
     deleteFn: deleteCustomFieldApi,
@@ -196,44 +206,58 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
         enableSorting: false,
       },
       {
+        id: "fieldKey",
+        header: t("customFields.fieldKey"),
+        size: 150,
+        accessorFn: (row) => row.fieldKey || row.field_key,
+      },
+      {
         id: "labelTm",
         header: t("customFields.labelTm"),
-        size: 180,
-        accessorFn: (row) => row.field_label?.tk,
+        size: 160,
+        accessorFn: (row) =>
+          typeof row.labelTm === "string"
+            ? row.labelTm
+            : row.labelTm?.tk || row.labelTm?.name || "-",
       },
       {
         id: "labelRu",
         header: t("customFields.labelRu"),
-        size: 180,
-        accessorFn: (row) => row.field_label?.ru,
+        size: 160,
+        accessorFn: (row) =>
+          typeof row.labelRu === "string"
+            ? row.labelRu
+            : row.labelRu?.ru || row.labelRu?.name || "-",
       },
       {
         id: "labelEn",
         header: t("customFields.labelEn"),
-        size: 180,
-        accessorFn: (row) => row.field_label?.en,
+        size: 160,
+        accessorFn: (row) =>
+          typeof row.labelEn === "string"
+            ? row.labelEn
+            : row.labelEn?.en || row.labelEn?.name || "-",
       },
       {
-        id: "field_type",
+        id: "fieldType",
         header: t("customFields.fieldType"),
-        size: 140,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-        accessorFn: (row) => row.field_type || row.fieldType || "text",
+        size: 120,
+        accessorFn: (row) => row.fieldType || row.field_type,
         Cell: ({ cell }) => {
-          const type = String(cell.getValue() || "text").toUpperCase();
-          let color = "default";
-          if (type === "TEXT") color = "primary";
-          if (type === "NUMBER") color = "success";
-          if (type === "DATE") color = "info";
-          if (type === "SELECT") color = "warning";
+          const type = cell.getValue();
+          const colorMap = {
+            text: "primary",
+            number: "secondary",
+            date: "warning",
+            select: "success",
+          };
           return (
             <Chip
               label={type}
               size="small"
-              color={color}
+              color={colorMap[type] || "default"}
               variant="outlined"
-              sx={{ fontWeight: 600, fontSize: "0.75rem", borderRadius: "6px" }}
+              sx={{ fontWeight: 600, borderRadius: "6px" }}
             />
           );
         },
@@ -241,18 +265,27 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
       {
         id: "options",
         header: t("customFields.options"),
-        size: 220,
-        accessorFn: (row) =>
-          Array.isArray(row.options) ? row.options.join(", ") : "",
-        Cell: ({ row }) => <OptionsCell options={row.original.options} />,
+        size: 200,
+        accessorFn: (row) => row.options,
+        Cell: ({ cell }) => <OptionsCell options={cell.getValue()} />,
       },
       {
-        id: "sort_order",
-        header: t("customFields.sortOrder"),
+        id: "isRequired",
+        header: t("customFields.isRequired"),
         size: 100,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-        accessorFn: (row) => row.sort_order ?? 0,
+        accessorFn: (row) =>
+          row.isRequired || row.is_required ? "Hawa" : "Ýok",
+        Cell: ({ cell }) => {
+          const isReq = cell.getValue() === "Hawa";
+          return (
+            <Chip
+              label={cell.getValue()}
+              size="small"
+              color={isReq ? "error" : "default"}
+              sx={{ fontWeight: 600, borderRadius: "6px" }}
+            />
+          );
+        },
       },
       {
         id: "actions",
@@ -295,7 +328,27 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
       showSkeletons: isLoading,
     },
     enablePagination: false,
-    enableBottomToolbar: false,
+    enableBottomToolbar: true,
+    renderBottomToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          px: 1,
+          py: 0.5,
+        }}
+      >
+        <Box />
+        <Pagination
+          pageIndex={page - 1}
+          pageCount={pageCount}
+          totalRows={totalItems}
+          onPageChange={(newIndex) => setPage(newIndex + 1)}
+        />
+      </Box>
+    ),
     renderTopToolbarCustomActions: () => (
       <Box
         sx={{
@@ -387,16 +440,8 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
   }));
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <>
       <MaterialReactTable table={table} />
-
-      <Pagination
-        totalItems={totalItems}
-        page={page}
-        limit={limit}
-        setPage={setPage}
-        setPageSize={setPageSize}
-      />
 
       <DeleteDialog
         open={deleteDialog.isOpen}
@@ -406,11 +451,10 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
         title={t("customFields.deleteTitle")}
         description={t("deleteConfirm.employee")}
       />
-    </Box>
+    </>
   );
 });
 
 CustomFieldsTable.displayName = "CustomFieldsTable";
 
 export default CustomFieldsTable;
-

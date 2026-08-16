@@ -59,7 +59,7 @@ export const ApplicationsTable = forwardRef(
     const defaultMrtOptions = getDefaultMRTOptions();
 
     const [page, setPage] = useState(1);
-    const [limit, setPageSize] = useState(40);
+    const [limit] = useState(40);
     const [selectedCountryGuid, setSelectedCountryGuid] = useState(
       countryGuid || "",
     );
@@ -124,6 +124,7 @@ export const ApplicationsTable = forwardRef(
       isFetching,
       refetch,
       totalItems = 0,
+      pageCount = 1,
     } = usePagginationGet({
       apiFn: getAllReceivingsApi,
       key: ["receivings", params, refetchKey],
@@ -331,6 +332,14 @@ export const ApplicationsTable = forwardRef(
       handleDeleteClick,
     ]);
 
+    const [prevSearch, setPrevSearch] = useState(searchQuery);
+    const [prevCountry, setPrevCountry] = useState(activeCountryGuid);
+    if (searchQuery !== prevSearch || activeCountryGuid !== prevCountry) {
+      setPrevSearch(searchQuery);
+      setPrevCountry(activeCountryGuid);
+      setPage(1);
+    }
+
     const table = useMaterialReactTable({
       ...defaultMrtOptions,
       muiTablePaperProps: {
@@ -352,7 +361,27 @@ export const ApplicationsTable = forwardRef(
         showSkeletons: isLoading,
       },
       enablePagination: false,
-      enableBottomToolbar: false,
+      enableBottomToolbar: true,
+      renderBottomToolbarCustomActions: () => (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+            px: 1,
+            py: 0.5,
+          }}
+        >
+          <Box />
+          <Pagination
+            pageIndex={page - 1}
+            pageCount={pageCount}
+            totalRows={totalItems}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
+          />
+        </Box>
+      ),
       renderTopToolbarCustomActions: () => (
         <Box
           sx={{
@@ -446,16 +475,8 @@ export const ApplicationsTable = forwardRef(
     }));
 
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <>
         <MaterialReactTable table={table} />
-
-        <Pagination
-          totalItems={totalItems}
-          page={page}
-          limit={limit}
-          setPage={setPage}
-          setPageSize={setPageSize}
-        />
 
         <DeleteDialog
           open={deleteDialog.isOpen}
@@ -465,7 +486,7 @@ export const ApplicationsTable = forwardRef(
           title={t("visaIntake.deleteApplicationTitle")}
           description={t("deleteConfirm.employee")}
         />
-      </Box>
+      </>
     );
   },
 );
