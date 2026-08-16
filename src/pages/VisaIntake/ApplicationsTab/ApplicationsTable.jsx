@@ -176,44 +176,24 @@ export const ApplicationsTable = forwardRef(
                 "-",
               Cell: ({ row }) => (
                 <StackedCell
-                  primary={
-                    row.original.client?.fullName ||
-                    row.original.client_name ||
-                    row.original.client_guid ||
-                    "-"
-                  }
-                  secondary={
-                    row.original.client?.passport_number ||
-                    row.original.passport_number ||
-                    ""
-                  }
+                  primary={row?.original?.client?.fullName}
+                  secondary={row?.original?.client?.passport_number}
                 />
               ),
             });
-          } else if (
-            fieldKey === "operator_guid" ||
-            fieldKey === "accepted_opr_guid"
-          ) {
+          } else if (fieldKey === "accepted_opr_guid") {
             cols.push({
               id: fieldKey,
               header: headerLabel,
               size: 160,
-              accessorFn: (row) =>
-                row.operator?.fullName ||
-                row.operator_fullName ||
-                row.operator_name ||
-                "-",
+              accessorFn: (row) => row.operator?.fullName,
             });
-          } else if (
-            fieldKey === "operator2_guid" ||
-            fieldKey === "received_opr_guid"
-          ) {
+          } else if (fieldKey === "received_opr_guid") {
             cols.push({
               id: fieldKey,
               header: headerLabel,
               size: 160,
-              accessorFn: (row) =>
-                row.operator2?.fullName || row.operator2_name || "-",
+              accessorFn: (row) => row.operator2?.fullName,
             });
           } else if (field.fieldType === "date") {
             cols.push({
@@ -353,6 +333,11 @@ export const ApplicationsTable = forwardRef(
 
     const table = useMaterialReactTable({
       ...defaultMrtOptions,
+      muiTablePaperProps: {
+        sx: () => ({
+          height: "calc(100vh - 238px)",
+        }),
+      },
       enableColumnPinning: true,
       initialState: {
         columnPinning: {
@@ -367,6 +352,7 @@ export const ApplicationsTable = forwardRef(
         showSkeletons: isLoading,
       },
       enablePagination: false,
+      enableBottomToolbar: false,
       renderTopToolbarCustomActions: () => (
         <Box
           sx={{

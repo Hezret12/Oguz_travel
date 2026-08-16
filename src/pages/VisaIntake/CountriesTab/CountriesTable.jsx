@@ -148,6 +148,11 @@ export const CountriesTable = forwardRef((props, ref) => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    muiTablePaperProps: {
+      sx: () => ({
+        height: "calc(100vh - 238px)",
+      }),
+    },
     enableColumnPinning: true,
     initialState: {
       columnPinning: {
@@ -162,6 +167,7 @@ export const CountriesTable = forwardRef((props, ref) => {
       showSkeletons: isLoading,
     },
     enablePagination: false,
+    enableBottomToolbar: false,
     renderTopToolbarCustomActions: () => (
       <Box
         sx={{
