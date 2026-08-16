@@ -177,19 +177,23 @@ export const CountriesTable = forwardRef((props, ref) => {
     enableBottomToolbar: true,
     renderBottomToolbarCustomActions: () => (
       <Box
-        sx={{
+        sx={(theme) => ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           width: "100%",
-          px: 1,
-          py: 0.5,
-        }}
+          px: 2,
+          py: 0.75,
+          minHeight: "52px",
+          borderTop: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+        })}
       >
         <Box />
         <Pagination
           pageIndex={page - 1}
           pageCount={pageCount}
+          pageSize={limit}
           totalRows={totalItems}
           onPageChange={(newIndex) => setPage(newIndex + 1)}
         />
