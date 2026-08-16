@@ -457,5 +457,20 @@
     "typeNumber": "San (Number)",
     "typeDate": "Sene (Date)",
     "typeSelect": "Saýlawly (Select)"
+  },
+  "errorBoundary": {
+    "networkErrorTitle": "Baglanyşyk Ýalňyşlygy",
+    "genericErrorTitle": "Ýalňyşlyk Ýüze Çykdy",
+    "networkErrorDesc": "Sahypa bölekleri ýüklenende tor ýa-da internet baglanyşygynda näsazlyk ýüze çykdy. Sahypany täzelemegi synap görüň.",
+    "genericErrorDesc": "Sahypa ýüklenende garaşylmadyk ýalňyşlyk ýüze çykdy. Mesele dowam etse ulgam dolandyryjysyna ýüz tutuň.",
+    "retry": "Täzeden synanyş",
+    "goHome": "Baş Sahypa",
+    "copyError": "Ýalňyşlygy göçürip al",
+    "copied": "Ýalňyşlyk göçürildi!"
+  },
+  "notFound": {
+    "title": "404 - Sahypa Tapylmady",
+    "desc": "Gözleýän sahypaňyz aýrylan, ady üýtgedilen ýa-da wagtlaýyn elýeterli däl bolup biler.",
+    "goHome": "Baş Sahypa"
   }
 }

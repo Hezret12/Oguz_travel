@@ -191,41 +191,48 @@ export default function AppUserAutocomplete({
               style: { maxHeight: "240px", overflow: "auto" },
             },
           }}
-          renderTags={(selectedOptions, getTagProps) => {
-            return selectedOptions.map((opt, idx) => {
-              const tagProps = { ...getTagProps({ index: idx }) };
-              const tagKey = tagProps.key;
-              delete tagProps.key;
+          {...(multiple
+            ? {
+                renderTags: (selectedOptions, getTagProps) => {
+                  return selectedOptions.map((opt, idx) => {
+                    const tagProps = { ...getTagProps({ index: idx }) };
+                    const tagKey = tagProps.key;
+                    delete tagProps.key;
+                    delete tagProps.renderTags;
+                    delete tagProps.ownerState;
 
-              return (
-                <Chip
-                  {...tagProps}
-                  key={tagKey || opt.value || idx}
-                  label={opt.label}
-                  size="small"
-                  sx={{
-                    borderRadius: "6px",
-                    height: "24px",
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    maxWidth: "130px",
-                    my: 0.25,
-                    mr: 0.5,
-                  }}
-                />
-              );
-            });
-          }}
+                    return (
+                      <Chip
+                        {...tagProps}
+                        key={tagKey || opt.value || idx}
+                        label={opt.label}
+                        size="small"
+                        sx={{
+                          borderRadius: "6px",
+                          height: "24px",
+                          fontSize: "0.75rem",
+                          fontWeight: 500,
+                          maxWidth: "130px",
+                          my: 0.25,
+                          mr: 0.5,
+                        }}
+                      />
+                    );
+                  });
+                },
+              }
+            : {})}
           renderOption={(optionProps, option, { selected, index }) => {
-            const cleaned = { ...optionProps };
+            const { key, ...cleanOptionProps } = optionProps;
+            delete cleanOptionProps.renderTags;
+            delete cleanOptionProps.ownerState;
             const optionKey =
-              cleaned.key ||
+              key ||
               option?.value ||
               `${option?.label || "opt"}-${index}`;
-            delete cleaned.key;
 
             return (
-              <li key={optionKey} {...cleaned}>
+              <li key={optionKey} {...cleanOptionProps}>
                 {multiple && (
                   <Checkbox
                     icon={icon}
@@ -240,31 +247,40 @@ export default function AppUserAutocomplete({
               </li>
             );
           }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              placeholder={
-                multiple &&
-                Array.isArray(selectedValue) &&
-                selectedValue.length > 0
-                  ? ""
-                  : placeholder
-              }
-              error={hasError}
-              helperText={error?.message}
-              fullWidth={fullWidth}
-              size={size}
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {isLoading || isFetchingNextPage ? (
-                      <CircularProgress color="inherit" size={18} sx={{ mr: 1 }} />
-                    ) : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                ),
-              }}
+          renderInput={(params) => {
+            const { slotProps: paramsSlotProps, ...textFieldProps } = params;
+            delete textFieldProps.renderTags;
+            delete textFieldProps.ownerState;
+            const inputSlotProps = paramsSlotProps?.input || params.InputProps || {};
+
+            return (
+              <TextField
+                {...textFieldProps}
+                placeholder={
+                  multiple &&
+                  Array.isArray(selectedValue) &&
+                  selectedValue.length > 0
+                    ? ""
+                    : placeholder
+                }
+                error={hasError}
+                helperText={error?.message}
+                fullWidth={fullWidth}
+                size={size}
+                slotProps={{
+                  ...paramsSlotProps,
+                  input: {
+                    ...inputSlotProps,
+                    endAdornment: (
+                      <>
+                        {isLoading || isFetchingNextPage ? (
+                          <CircularProgress color="inherit" size={18} sx={{ mr: 1 }} />
+                        ) : null}
+                        {inputSlotProps?.endAdornment}
+                      </>
+                    ),
+                  },
+                }}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "10px",
@@ -294,7 +310,8 @@ export default function AppUserAutocomplete({
                 },
               }}
             />
-          )}
+            );
+          }}
         />
       </Box>
     );

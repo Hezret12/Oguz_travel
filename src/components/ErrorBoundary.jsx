@@ -1,12 +1,27 @@
+import { useState } from 'react';
 import { useRouteError, useNavigate } from 'react-router-dom';
-import { Box, Button, Typography, Paper, Container } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Paper,
+  Container,
+  IconButton,
+  Tooltip,
+} from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HomeIcon from '@mui/icons-material/Home';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
+import toast from 'react-hot-toast';
+import { useLocale } from '../hooks/useLocale';
 
 const ErrorBoundary = () => {
   const error = useRouteError();
   const navigate = useNavigate();
+  const { t } = useLocale();
+  const [copied, setCopied] = useState(false);
 
   console.error('Captured Route Error:', error);
 
@@ -16,13 +31,44 @@ const ErrorBoundary = () => {
 
   const handleGoHome = () => {
     navigate('/', { replace: true });
-    window.location.reload(); // Force a clean refresh to clear memory errors
+    window.location.reload();
   };
 
-  // Determine if it's a chunk loading failure (network error)
   const isChunkError =
     error?.message?.includes('Failed to fetch dynamically imported module') ||
     error?.name === 'ChunkLoadError';
+
+  const errorText =
+    error?.stack ||
+    error?.message ||
+    error?.statusText ||
+    (typeof error === 'object' ? JSON.stringify(error, null, 2) : String(error || ''));
+
+  const handleCopyError = async () => {
+    const fullErrorPayload = [
+      `URL: ${window.location.href}`,
+      `Time: ${new Date().toISOString()}`,
+      `Error: ${errorText}`,
+    ].join('\n');
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(fullErrorPayload);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = fullErrorPayload;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      toast.success(t('errorBoundary.copied'));
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy error:', err);
+    }
+  };
 
   return (
     <Box
@@ -31,8 +77,7 @@ const ErrorBoundary = () => {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'dark' ? '#1E293B' : '#F8FAFC',
+        backgroundColor: 'background.default',
         p: 3,
       }}
     >
@@ -46,12 +91,9 @@ const ErrorBoundary = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'dark' ? '#2F4B71' : '#ffffff',
-            border: (theme) =>
-              theme.palette.mode === 'dark'
-                ? '1px solid rgba(255, 255, 255, 0.05)'
-                : '1px solid rgba(0, 0, 0, 0.05)',
+            backgroundColor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
           }}
         >
           <Box
@@ -81,47 +123,92 @@ const ErrorBoundary = () => {
             gutterBottom
             sx={{
               fontWeight: 700,
-              color: (theme) => (theme.palette.mode === 'dark' ? '#ffffff' : '#1E293B'),
+              color: 'text.primary',
               fontFamily: 'Outfit, Inter, sans-serif',
             }}
           >
-            {isChunkError ? 'Bağlantı Hatası' : 'Bir Hata Oluştu'}
+            {isChunkError
+              ? t('errorBoundary.networkErrorTitle')
+              : t('errorBoundary.genericErrorTitle')}
           </Typography>
 
           <Typography
             variant="body1"
             sx={{
-              mb: 4,
-              color: (theme) => (theme.palette.mode === 'dark' ? '#bbbbbb' : '#555555'),
+              mb: 3,
+              color: 'text.secondary',
             }}
           >
             {isChunkError
-              ? 'Sayfa bileşenleri yüklenirken bir ağ veya internet bağlantısı sorunu oluştu. Lütfen sayfayı yenilemeyi deneyin.'
-              : 'Sayfa yüklenirken beklenmeyen bir hata meydana geldi. Sorun devam ederse lütfen yöneticinizle iletişime geçin.'}
+              ? t('errorBoundary.networkErrorDesc')
+              : t('errorBoundary.genericErrorDesc')}
           </Typography>
 
-          {/* Technical details toggle (Optional/Compact) */}
+          {/* Technical error display with copy button */}
           {error && (
-            <Typography
-              variant="caption"
+            <Box
               sx={{
+                position: 'relative',
+                width: '100%',
                 p: 2,
+                pr: 6,
                 mb: 4,
                 borderRadius: 2,
-                fontFamily: 'monospace',
-                fontSize: '0.75rem',
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(0,0,0,0.2)'
-                    : 'rgba(0,0,0,0.03)',
-                color: (theme) =>
-                  theme.palette.mode === 'dark' ? '#ef9a9a' : '#c62828',
-                wordBreak: 'break-all',
-                maxWidth: '100%',
+                backgroundColor: 'action.hover',
+                border: '1px solid',
+                borderColor: 'divider',
+                textAlign: 'left',
               }}
             >
-              {error.statusText || error.message || String(error)}
-            </Typography>
+              <Typography
+                variant="caption"
+                component="pre"
+                sx={{
+                  m: 0,
+                  fontFamily: 'monospace',
+                  fontSize: '0.75rem',
+                  color: 'error.main',
+                  wordBreak: 'break-all',
+                  whiteSpace: 'pre-wrap',
+                  maxHeight: '160px',
+                  overflow: 'auto',
+                }}
+              >
+                {errorText}
+              </Typography>
+              <Tooltip
+                title={
+                  copied
+                    ? t('errorBoundary.copied')
+                    : t('errorBoundary.copyError')
+                }
+              >
+                <IconButton
+                  size="small"
+                  onClick={handleCopyError}
+                  aria-label={t('errorBoundary.copyError')}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    color: copied ? 'success.main' : 'text.secondary',
+                    backgroundColor: 'background.paper',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    '&:hover': {
+                      backgroundColor: 'action.hover',
+                      color: 'primary.main',
+                    },
+                  }}
+                >
+                  {copied ? (
+                    <CheckIcon sx={{ fontSize: 18 }} />
+                  ) : (
+                    <ContentCopyIcon sx={{ fontSize: 18 }} />
+                  )}
+                </IconButton>
+              </Tooltip>
+            </Box>
           )}
 
           <Box
@@ -148,7 +235,7 @@ const ErrorBoundary = () => {
                 boxShadow: 3,
               }}
             >
-              Yeniden Dene
+              {t('errorBoundary.retry')}
             </Button>
             <Button
               variant="outlined"
@@ -162,13 +249,11 @@ const ErrorBoundary = () => {
                 borderRadius: 3,
                 fontWeight: 600,
                 textTransform: 'none',
-                color: (theme) =>
-                  theme.palette.mode === 'dark' ? '#ffffff' : '#333333',
-                borderColor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
+                color: 'text.primary',
+                borderColor: 'divider',
               }}
             >
-              Ana Sayfaya Dön
+              {t('errorBoundary.goHome')}
             </Button>
           </Box>
         </Paper>

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { FormControl, MenuItem, Select, Stack, Typography, TextField } from "@mui/material";
+import { Box, FormControl, MenuItem, Select, Stack, Typography, TextField } from "@mui/material";
+import { ChevronDown } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { getAllPackageByIndexApi } from "../../../api/queries/getters";
@@ -53,9 +54,31 @@ const FilterSelect = ({
       displayEmpty
       sx={selectSx}
       slotProps={menuPaperProps}
+      IconComponent={() => (
+        <Box
+          component="span"
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "absolute",
+            right: 12,
+            top: "calc(50% - 9px)",
+            color: "text.secondary",
+            pointerEvents: "none",
+            transform: isOpen ? "rotate(180deg)" : "none",
+            transition:
+              "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease",
+          }}
+        >
+          <ChevronDown size={18} />
+        </Box>
+      )}
     >
       <MenuItem value="">
-        <em>{allText}</em>
+        <Typography sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
+          {allText}
+        </Typography>
       </MenuItem>
       {options.map((opt) => (
         <MenuItem key={opt.value} value={opt.value}>

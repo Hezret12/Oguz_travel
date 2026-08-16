@@ -457,5 +457,20 @@
     "typeNumber": "Number",
     "typeDate": "Date",
     "typeSelect": "Dropdown Select"
+  },
+  "errorBoundary": {
+    "networkErrorTitle": "Connection Error",
+    "genericErrorTitle": "Something went wrong",
+    "networkErrorDesc": "A network or internet connection issue occurred while loading page components. Please try refreshing the page.",
+    "genericErrorDesc": "An unexpected error occurred while loading the page. If the problem persists, please contact your administrator.",
+    "retry": "Retry",
+    "goHome": "Go to Home",
+    "copyError": "Copy error details",
+    "copied": "Error copied to clipboard!"
+  },
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "desc": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
+    "goHome": "Go to Home"
   }
 }

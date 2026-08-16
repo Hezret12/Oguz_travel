@@ -300,6 +300,8 @@ const GlobalClientAutocompleteField = ({
         }}
         renderInput={(params) => {
           const { slotProps: paramsSlotProps, ...textFieldProps } = params;
+          delete textFieldProps.renderTags;
+          delete textFieldProps.ownerState;
 
           return (
             <TextField

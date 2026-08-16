@@ -192,21 +192,26 @@ const AppAutocomplete = ({
               isOptionEqualToValue={(option, val) =>
                 option.value === (val?.value ?? val)
               }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  inputRef={ref}
-                  placeholder={
-                    multiple && Array.isArray(selectedValue) && selectedValue.length > 0
-                      ? ""
-                      : placeholder
-                  }
-                  error={hasError}
-                  helperText={error?.message}
-                  fullWidth={fullWidth}
-                  size={size}
-                />
-              )}
+              renderInput={(params) => {
+                const { ...textFieldProps } = params;
+                delete textFieldProps.renderTags;
+                delete textFieldProps.ownerState;
+                return (
+                  <TextField
+                    {...textFieldProps}
+                    inputRef={ref}
+                    placeholder={
+                      multiple && Array.isArray(selectedValue) && selectedValue.length > 0
+                        ? ""
+                        : placeholder
+                    }
+                    error={hasError}
+                    helperText={error?.message}
+                    fullWidth={fullWidth}
+                    size={size}
+                  />
+                );
+              }}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "10px",
