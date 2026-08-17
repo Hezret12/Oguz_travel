@@ -150,10 +150,12 @@ export const useValidShema = () => {
     title: stringRequiredValidSchema(t("validation.required")),
     description: stringRequiredValidSchema(t("validation.required")),
     assignee_guids: yup
-      .array()
-      .of(yup.string())
-      .min(1, t("validation.required"))
-      .required(t("validation.required")),
+      .mixed()
+      .test("assignee-validation", t("validation.required"), (val) => {
+        if (val === true) return true;
+        if (Array.isArray(val) && val.length > 0) return true;
+        return false;
+      }),
   });
 
   return {

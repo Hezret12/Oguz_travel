@@ -456,7 +456,9 @@
   "notifications": {
     "title": "Bildirişler",
     "create": "Bildiriş döret",
-    "assignees": "Ulanyjylar / Işgärler",
+    "sendToAll": "Ähli ulanyjylara ugrat",
+    "allUsersSelected": "Ähli ulanyjylar saýlandy",
+    "assignees": "Ulanyjylar",
     "selectUsers": "Ulanyjylary saýlaň...",
     "titlePlaceholder": "Bildirişiň temasyny ýazyň...",
     "descPlaceholder": "Bildirişiň mazmunyny giňişleýin ýazyň...",

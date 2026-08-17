@@ -456,6 +456,8 @@
   "notifications": {
     "title": "Notifications",
     "create": "Create Notification",
+    "sendToAll": "Send to all users",
+    "allUsersSelected": "All users selected",
     "assignees": "Users / Employees",
     "selectUsers": "Select users...",
     "titlePlaceholder": "Enter notification title...",

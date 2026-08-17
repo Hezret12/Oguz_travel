@@ -130,7 +130,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
     <CustomDialog open={open} close={handleClose} widthX={750}>
       <CustomDialogHeader
         variant="h5"
-        title={t("outbound.addSale") || "Satyş goşmak"}
+        title={t("outbound.addSale")}
       />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -138,7 +138,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
             <CustomDatePicker
               name="application_date"
               control={control}
-              label={t("outbound.requestDate") || "Arza senesi"}
+              label={t("outbound.requestDate")}
               required
             />
           </Grid>
@@ -146,7 +146,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
             <GlobalClientAutocomplete
               name="client_name"
               control={control}
-              label={t("outbound.clientName") || "Müşderiniň ady"}
+              label={t("outbound.clientName")}
               columns={["fullName"]}
               required
               onClientChange={(client) => setSelectedClientObj(client)}
@@ -207,7 +207,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
             <CustomSelect
               name="system"
               control={control}
-              label={t("outbound.source") || "Ulgam"}
+              label={t("outbound.source")}
               options={SOURCE_OPTIONS}
               required
             />

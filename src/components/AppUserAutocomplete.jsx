@@ -13,7 +13,7 @@ import { ChevronDown } from "lucide-react";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
-import { useInfiniteGet } from "../hooks/CRUD/useInfiniteGet";
+import { useInfiniteGet } from "../hooks/useInfiniteGet";
 import { getAllUsersApi } from "../api/queries/getters";
 import { useDebounce } from "../hooks/useDebounce";
 
@@ -35,7 +35,7 @@ export default function AppUserAutocomplete({
   initialOptions = [],
 }) {
   const [inputValue, setInputValue] = useState("");
-  const debouncedSearch = useDebounce(inputValue, 400);
+  const debouncedSearch = useDebounce(inputValue, 350);
 
   const {
     data: rawUsersData,
@@ -79,6 +79,7 @@ export default function AppUserAutocomplete({
         employeeGuid: usr?.employee_guid || emp?.guid,
         label: fullName,
         name: fullName,
+        phone: usr?.phone_number || emp?.phone_number || "",
         initials: (fullName || "User").slice(0, 2).toUpperCase(),
         color: "#0E8584",
       };
@@ -146,10 +147,11 @@ export default function AppUserAutocomplete({
           id={`${name || "user"}-autocomplete`}
           multiple={multiple}
           disableCloseOnSelect={multiple}
+          openOnFocus
           disabled={disabled}
           options={options}
           value={selectedValue}
-          filterOptions={(x) => x} // Disable local filter so API search results dictate options
+          filterOptions={(x) => x}
           popupIcon={<ChevronDown size={18} />}
           loading={isLoading || isFetchingNextPage}
           onInputChange={(_, newInputValue, reason) => {
@@ -167,7 +169,6 @@ export default function AppUserAutocomplete({
           onChange={(_, newValue) => {
             if (multiple) {
               const selectedArr = Array.isArray(newValue) ? newValue : [];
-              // Preserve selected options into selectedMap
               const newMap = { ...selectedMap };
               selectedArr.forEach((item) => {
                 if (item?.value) newMap[item.value] = item;
@@ -241,21 +242,39 @@ export default function AppUserAutocomplete({
                     checked={selected}
                   />
                 )}
-                <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
-                  {option.label}
-                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <Typography variant="body2" sx={{ fontSize: "0.875rem", fontWeight: 500 }}>
+                    {option.label}
+                  </Typography>
+                  {option.phone && (
+                    <Typography variant="caption" sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
+                      {option.phone}
+                    </Typography>
+                  )}
+                </Box>
               </li>
             );
           }}
           renderInput={(params) => {
-            const { slotProps: paramsSlotProps, ...textFieldProps } = params;
-            delete textFieldProps.renderTags;
-            delete textFieldProps.ownerState;
-            const inputSlotProps = paramsSlotProps?.input || params.InputProps || {};
+            const { InputProps, inputProps, ...otherParams } = params;
+            delete otherParams.renderTags;
+            delete otherParams.ownerState;
 
             return (
               <TextField
-                {...textFieldProps}
+                {...otherParams}
+                inputProps={inputProps}
+                InputProps={{
+                  ...InputProps,
+                  endAdornment: (
+                    <>
+                      {isLoading || isFetchingNextPage ? (
+                        <CircularProgress color="inherit" size={18} sx={{ mr: 1 }} />
+                      ) : null}
+                      {InputProps?.endAdornment}
+                    </>
+                  ),
+                }}
                 placeholder={
                   multiple &&
                   Array.isArray(selectedValue) &&
@@ -267,53 +286,39 @@ export default function AppUserAutocomplete({
                 helperText={error?.message}
                 fullWidth={fullWidth}
                 size={size}
-                slotProps={{
-                  ...paramsSlotProps,
-                  input: {
-                    ...inputSlotProps,
-                    endAdornment: (
-                      <>
-                        {isLoading || isFetchingNextPage ? (
-                          <CircularProgress color="inherit" size={18} sx={{ mr: 1 }} />
-                        ) : null}
-                        {inputSlotProps?.endAdornment}
-                      </>
-                    ),
-                  },
-                }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "10px",
-                  minHeight: "44px",
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.03)"
-                      : "#ffffff",
-                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                  "&:hover": {
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "primary.main",
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "10px",
+                    minHeight: "44px",
+                    backgroundColor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.03)"
+                        : "#ffffff",
+                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "primary.main",
+                      },
+                    },
+                    "&.Mui-focused": {
+                      boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.12)",
                     },
                   },
-                  "&.Mui-focused": {
-                    boxShadow: "0 0 0 3px rgba(37, 99, 235, 0.12)",
+                  "& .MuiOutlinedInput-input": {
+                    py: "4px",
                   },
-                },
-                "& .MuiOutlinedInput-input": {
-                  py: "4px",
-                },
-                "& .MuiFormHelperText-root": {
-                  position: "absolute",
-                  bottom: "-20px",
-                  left: 0,
-                  mx: 1,
-                  mt: 0,
-                  fontSize: "0.75rem",
-                  fontWeight: 500,
-                  lineHeight: 1.2,
-                },
-              }}
-            />
+                  "& .MuiFormHelperText-root": {
+                    position: "absolute",
+                    bottom: "-20px",
+                    left: 0,
+                    mx: 1,
+                    mt: 0,
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    lineHeight: 1.2,
+                  },
+                }}
+              />
             );
           }}
         />

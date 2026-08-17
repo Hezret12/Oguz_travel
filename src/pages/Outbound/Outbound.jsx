@@ -57,7 +57,7 @@ const OutboundPage = () => {
       <PageHeader
         title={t("outbound.title") || "Outbound satuwlar"}
         pageTitle={`${t("outbound.title") || "Outbound"} | Oguz Travel`}
-        addButtonText={t("outbound.addSale") || "Goş"}
+        addButtonText={t("outbound.addSale")}
         filterButtonText={t("filter")}
         onAddClick={() => setIsAddOpen(true)}
         onFilterClick={openDrawer}

@@ -3,11 +3,13 @@ import { Outlet } from 'react-router-dom';
 import { Box, CssBaseline } from '@mui/material';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar/Sidebar';
+import { useNotificationWatcher } from '../hooks/useNotificationWatcher';
 
 const SIDEBAR_W  = 280;
 const SIDEBAR_CW = 68;
 
 const DashboardLayout = () => {
+  useNotificationWatcher();
   const [mobileOpen, setMobileOpen] = useState(false);
   // We track collapsed state here so the main content shifts accordingly
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
