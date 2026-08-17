@@ -40,9 +40,7 @@ const formatDate = (value) => {
 const Clients = () => {
   const { t } = useLocale();
   const { user } = useAuth();
-  const isAdmin = Boolean(
-    user?.role === "admin" || user?.user_is_admin || user?.isAdmin,
-  );
+  const isAdmin = Boolean(user?.role === "admin");
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
   const [selectedDocClient, setSelectedDocClient] = useState(null);
@@ -139,7 +137,7 @@ const Clients = () => {
         accessorFn: (row) => row.fullName,
         id: "fullName",
         header: t("columns.fullName"),
-        size: 180
+        size: 180,
       },
       {
         accessorFn: (row) => row.phone_number,
@@ -382,12 +380,6 @@ const Clients = () => {
           />
         </Box>
       );
-    },
-
-    muiTablePaperProps: {
-      sx: () => ({
-        ...defaultMrtOptions.muiTablePaperProps?.sx,
-      }),
     },
     renderCreateRowDialogContent: ({ table }) => <AddClient table={table} />,
     renderEditRowDialogContent: ({ table, row }) => (

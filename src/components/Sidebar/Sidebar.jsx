@@ -61,7 +61,7 @@ const SidebarPanel = ({
         transition: "padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           alignItems: "center",
@@ -78,7 +78,7 @@ const SidebarPanel = ({
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         />
-      </Box>
+      </Box> */}
     </Box>
 
     {/* Scrollable Navigation List */}
