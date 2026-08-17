@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Grid, Box, Typography, IconButton, Paper, FormControlLabel, Switch } from "@mui/material";
-import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import ImageIcon from "@mui/icons-material/Image";
+import { Grid, Box, Typography, Paper, FormControlLabel, Switch } from "@mui/material";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import TaskFileUpload, { TaskFileList } from "../../../components/inputs/TaskFileUpload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale } from "../../../hooks/useLocale";
 import { useAuth } from "../../../context/AuthContext";
@@ -23,7 +21,7 @@ import CustomDatePicker from "../../../components/CustomDatePicker";
 const AddClient = ({ table }) => {
   const { t } = useLocale();
   const { user } = useAuth();
-  const isAdmin = Boolean(user?.role === "admin" || user?.user_is_admin || user?.isAdmin);
+  const isAdmin = Boolean(user?.role === "admin");
 
   const { clientValidShema } = useValidShema();
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -52,17 +50,6 @@ const AddClient = ({ table }) => {
     mode: "onSubmit",
   });
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length > 0) {
-      setSelectedFiles((prev) => [...prev, ...files]);
-    }
-  };
-
-  const handleRemoveFile = (indexToRemove) => {
-    setSelectedFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
-  };
-
   const closeDialog = () => {
     if (table) {
       table.setCreatingRow(null);
@@ -84,7 +71,9 @@ const AddClient = ({ table }) => {
           }
         });
         selectedFiles.forEach((file) => {
-          formData.append("images", file);
+          if (file instanceof File) {
+            formData.append("images", file);
+          }
         });
 
         await createClient(formData);
@@ -167,31 +156,57 @@ const AddClient = ({ table }) => {
             />
           </Grid>
 
-          {/* Admin-only VIP Client Switch */}
           {isAdmin && (
-            <Grid size={12}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  py: 1,
-                  px: 2,
-                  borderRadius: "10px",
+                  mb: 0.75,
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    color: "text.primary",
+                  }}
+                >
+                  VIP Müşteri
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {t("onlyAdmin", "Diňe Admin üçin")}
+                </Typography>
+              </Box>
+
+              <Paper
+                variant="outlined"
+                sx={{
+                  minHeight: "44px",
+                  height: "44px",
+                  borderRadius: "7px",
+                  px: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  boxSizing: "border-box",
+                  borderColor: "divider",
                   bgcolor: (theme) =>
                     theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.03)"
-                      : "rgba(0, 0, 0, 0.02)",
-                  border: "1px solid",
-                  borderColor: "divider",
+                      ? "rgba(255, 255, 255, 0.02)"
+                      : "rgba(0, 0, 0, 0.015)",
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                  "&:hover": {
+                    borderColor: "warning.main",
+                  },
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-                    VIP Müşteri
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    (Diňe Admin üçin)
+                  <StarRoundedIcon sx={{ fontSize: 20, color: "warning.main" }} />
+                  <Typography variant="body2" sx={{ fontSize: "0.875rem", fontWeight: 500, color: "text.primary" }}>
+                    VIP Status
                   </Typography>
                 </Box>
                 <Controller
@@ -212,172 +227,29 @@ const AddClient = ({ table }) => {
                     />
                   )}
                 />
-              </Box>
+              </Paper>
             </Grid>
           )}
 
-          {/* Images File Upload Zone */}
-          <Grid size={12}>
-            <Typography
-              variant="body2"
-              sx={{ mb: 1, fontWeight: 600, color: "text.primary" }}
-            >
-              {t("clients.documents", "Resminamalar / Suratlar (images)")}
-            </Typography>
-
-            <Paper
-              variant="outlined"
-              component="label"
-              sx={{
-                py: 2.5,
-                px: 3,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 1,
-                borderRadius: "12px",
-                borderStyle: "dashed",
-                borderWidth: 1.5,
-                borderColor: (theme) =>
-                  theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)",
-                cursor: "pointer",
-                bgcolor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.015)"
-                    : "#FAFBFD",
-                "&:hover": {
-                  borderColor: "primary.main",
-                  bgcolor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(37, 99, 235, 0.06)"
-                      : "rgba(37, 99, 235, 0.03)",
-                  "& .upload-icon": {
-                    transform: "scale(1.1)",
-                    color: "primary.main",
-                  },
-                },
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              }}
-            >
-              <input
-                type="file"
-                hidden
-                multiple
-                onChange={handleFileChange}
-                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
-              />
-              <Box
-                className="upload-icon"
-                sx={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  bgcolor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(37, 99, 235, 0.15)"
-                      : "rgba(37, 99, 235, 0.08)",
-                  color: "primary.main",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <CloudUploadOutlinedIcon sx={{ fontSize: 22 }} />
-              </Box>
-              <Box sx={{ textAlign: "center" }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
-                  {t("uploadFileClick", "Faýllary saýlamak üçin basyň")}
-                </Typography>
-                <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.25, display: "block" }}>
-                  PNG, JPG, PDF, DOC, XLS
-                </Typography>
-              </Box>
-            </Paper>
-
-            {selectedFiles.length > 0 && (
-              <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
-                {selectedFiles.map((file, idx) => {
-                  const isImage = file.type.startsWith("image/");
-                  const fileSizeKb = (file.size / 1024).toFixed(1);
-                  return (
-                    <Paper
-                      key={`${file.name}-${idx}`}
-                      variant="outlined"
-                      sx={{
-                        p: 1.25,
-                        px: 1.75,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        borderRadius: "10px",
-                        borderColor: "divider",
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.03)"
-                            : "#F9FAFB",
-                        transition: "all 0.15s ease",
-                        "&:hover": {
-                          borderColor: "primary.light",
-                        },
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, overflow: "hidden" }}>
-                        <Box
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: "8px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            bgcolor: isImage
-                              ? "rgba(16, 185, 129, 0.1)"
-                              : "rgba(37, 99, 235, 0.1)",
-                            color: isImage ? "#10B981" : "primary.main",
-                            flexShrink: 0,
-                          }}
-                        >
-                          {isImage ? (
-                            <ImageIcon sx={{ fontSize: 18 }} />
-                          ) : (
-                            <InsertDriveFileIcon sx={{ fontSize: 18 }} />
-                          )}
-                        </Box>
-                        <Box sx={{ overflow: "hidden" }}>
-                          <Typography
-                            variant="body2"
-                            noWrap
-                            sx={{ fontWeight: 600, fontSize: "0.85rem", maxWidth: "340px" }}
-                          >
-                            {file.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {fileSizeKb} KB
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRemoveFile(idx)}
-                        sx={{
-                          color: "text.secondary",
-                          borderRadius: "6px",
-                          "&:hover": {
-                            color: "error.main",
-                            bgcolor: "rgba(239, 68, 68, 0.08)",
-                          },
-                        }}
-                      >
-                        <DeleteOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    </Paper>
-                  );
-                })}
-              </Box>
-            )}
+          {/* Task-style File Upload */}
+          <Grid size={{ xs: 12, sm: isAdmin ? 6 : 12 }}>
+            <TaskFileUpload
+              files={selectedFiles}
+              onChange={setSelectedFiles}
+              label={t("clients.documents", "Resminamalar / Suratlar")}
+              hideList
+            />
           </Grid>
+
+          {/* Task-style File List Previews */}
+          {selectedFiles.length > 0 && (
+            <Grid size={12}>
+              <TaskFileList
+                files={selectedFiles}
+                onChange={setSelectedFiles}
+              />
+            </Grid>
+          )}
         </Grid>
 
         <FooterButton
