@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import {
   Box,
   Typography,
@@ -7,15 +7,17 @@ import {
   Stack,
   useTheme,
   CircularProgress,
+  Chip,
 } from "@mui/material";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import CustomTabs from "../../components/CustomTabs";
-import Pagination from "../../components/Pagination";
+import PageHeader from "../../components/PageHeader";
 import NotificationListItem from "./Contents/NotificationListItem";
+import AddNotificationModal from "./Contents/AddNotificationModal";
 
 import { useLocale } from "../../hooks/useLocale";
 import { useDebounce } from "../../hooks/useDebounce";
-import { usePagginationGet } from "../../hooks/usePagginationGet";
+import { useInfiniteGet } from "../../hooks/useInfiniteGet";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { getAllNotificationsApi } from "../../api/queries/getters";
@@ -24,35 +26,29 @@ import { deleteNotificationApi } from "../../api/queries/delete";
 
 import NotificationsOffOutlinedIcon from "@mui/icons-material/NotificationsOffOutlined";
 
+const PAGE_SIZE = 20;
+
 const NotificationPage = () => {
   const { t } = useLocale();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearch = useDebounce(searchQuery, 400);
-
-  const [activeTab, setActiveTab] = useState("all"); // 'all' | 'unread' | 'read'
-
-  // Pagination State
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const debouncedSearch = useDebounce(searchQuery, 350);
+  const [activeTab, setActiveTab] = useState("all");
 
   const handleSearchChange = useCallback((val) => {
     setSearchQuery(val);
-    setPage(1);
   }, []);
 
-  const handleTabChange = useCallback((e, val) => {
+  const handleTabChange = useCallback((_e, val) => {
     setActiveTab(val);
-    setPage(1);
   }, []);
 
-  // Build params for API query: page, limit, search, isRead
   const queryParams = useMemo(() => {
     const params = {
-      page,
-      limit,
+      limit: PAGE_SIZE,
     };
 
     if (debouncedSearch && debouncedSearch.trim()) {
@@ -66,32 +62,54 @@ const NotificationPage = () => {
     }
 
     return params;
-  }, [page, limit, debouncedSearch, activeTab]);
+  }, [debouncedSearch, activeTab]);
 
-  // Server-side paginated GET request for notifications
   const {
     data: apiNotificationsResponse,
     totalItems,
-    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading,
-  } = usePagginationGet({
+    isFetching,
+    refetch,
+  } = useInfiniteGet({
     apiFn: getAllNotificationsApi,
     key: "notificationsPage",
     params: queryParams,
   });
 
-  // Mutation hooks for updating & deleting notifications
   const markReadMutation = useUpdate({
     apiFn: markNotificationReadApi,
     key: "notificationsPage",
     idKey: "guid",
+    isInfiniteQuery: true,
   });
 
   const deleteMutation = useDelete({
     deleteFn: deleteNotificationApi,
     queryKey: "notificationsPage",
     idKey: "guid",
+    isInfiniteQuery: true,
   });
+
+  // IntersectionObserver to auto-fetch next page on reaching bottom
+  const observerRef = useRef(null);
+  const lastItemRef = useCallback(
+    (node) => {
+      if (isLoading || isFetchingNextPage) return;
+      if (observerRef.current) observerRef.current.disconnect();
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      });
+
+      if (node) observerRef.current.observe(node);
+    },
+    [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage],
+  );
 
   const notificationsList = useMemo(() => {
     return apiNotificationsResponse.map((item) => {
@@ -138,24 +156,22 @@ const NotificationPage = () => {
     async (id) => {
       try {
         await markReadMutation.mutateAsync({ task_guids: [id], guid: id, isRead: true });
-        refetch();
       } catch (err) {
         console.warn("API mark notification read error:", err);
       }
     },
-    [markReadMutation, refetch],
+    [markReadMutation],
   );
 
   const handleDelete = useCallback(
-    async (id) => {
+    async (guid) => {
       try {
-        await deleteMutation.mutateAsync({ guid: id });
-        refetch();
+        await deleteMutation.mutateAsync(guid);
       } catch (err) {
         console.warn("API delete notification error:", err);
       }
     },
-    [deleteMutation, refetch],
+    [deleteMutation],
   );
 
   const notificationTabs = useMemo(
@@ -164,7 +180,7 @@ const NotificationPage = () => {
       { value: "unread", label: t("notifications.unread") },
       { value: "read", label: t("notifications.read") },
     ],
-    [t]
+    [t],
   );
 
   return (
@@ -177,6 +193,15 @@ const NotificationPage = () => {
         overflow: "hidden",
       }}
     >
+      {/* Top Page Header with Create Button */}
+      <PageHeader
+        title={t("notifications.title")}
+        pageTitle={t("notifications.title")}
+        addButtonText={t("notifications.create")}
+        onAddClick={() => setIsAddModalOpen(true)}
+      />
+
+      {/* Top Filter & Search Header */}
       <Paper
         elevation={0}
         sx={{
@@ -184,12 +209,12 @@ const NotificationPage = () => {
           px: 2,
           borderRadius: "14px",
           border: "1px solid",
-          borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-          backgroundColor: isDark ? "rgba(15, 23, 42, 0.6)" : "#FFFFFF",
+          borderColor: "divider",
+          backgroundColor: "background.paper",
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           alignItems: { xs: "stretch", md: "center" },
-          justify: "space-between",
+          justifyContent: "space-between",
           gap: 1.5,
         }}
       >
@@ -197,30 +222,66 @@ const NotificationPage = () => {
           <GlobalSearchInput
             value={searchQuery}
             onChange={handleSearchChange}
+            onRefetch={refetch}
+            isFetching={isFetching}
           />
         </Box>
 
-        <CustomTabs
-          value={activeTab}
-          onChange={handleTabChange}
-          tabs={notificationTabs}
-        />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          {totalItems > 0 && (
+            <Chip
+              size="small"
+              label={`${totalItems} ${t("notifications.title")}`}
+              sx={{
+                fontWeight: 600,
+                fontSize: "0.75rem",
+                bgcolor: (th) =>
+                  th.palette.mode === "dark"
+                    ? "rgba(20, 184, 166, 0.16)"
+                    : "rgba(14, 133, 132, 0.08)",
+                color: "primary.main",
+              }}
+            />
+          )}
+
+          <CustomTabs
+            value={activeTab}
+            onChange={handleTabChange}
+            tabs={notificationTabs}
+          />
+        </Box>
       </Paper>
 
-      {/* Notifications Compact Vertical List */}
-      <Box sx={{ flexGrow: 1, overflowY: "auto", pr: 0.5 }}>
+      {/* Notifications Infinite Scroll Container */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflowY: "auto",
+          pr: 0.5,
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: (th) =>
+              th.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.15)"
+                : "rgba(0, 0, 0, 0.15)",
+            borderRadius: "4px",
+          },
+        }}
+      >
         {isLoading ? (
           <Box
             sx={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              py: 8,
+              py: 10,
             }}
           >
             <CircularProgress
               size={32}
-              sx={{ color: isDark ? "#14B8A6" : "#0E8584" }}
+              sx={{ color: "primary.main" }}
             />
           </Box>
         ) : notificationsList.length === 0 ? (
@@ -231,13 +292,14 @@ const NotificationPage = () => {
               px: 3,
               borderRadius: "16px",
               border: "1px solid",
-              borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+              borderColor: "divider",
               backgroundColor: isDark ? "rgba(15, 23, 42, 0.4)" : "#FFFFFF",
               textAlign: "center",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
+              height: "100%",
             }}
           >
             <Avatar
@@ -268,30 +330,55 @@ const NotificationPage = () => {
             </Typography>
           </Paper>
         ) : (
-          /* Compact Vertical List Rows */
           <Stack spacing={1}>
-            {notificationsList.map((item) => (
-              <NotificationListItem
-                key={item.id}
-                notification={item}
-                onToggleRead={handleToggleRead}
-                onDelete={handleDelete}
-              />
-            ))}
+            {notificationsList.map((item, index) => {
+              const isLast = index === notificationsList.length - 1;
+              return (
+                <Box key={item.id} ref={isLast ? lastItemRef : null}>
+                  <NotificationListItem
+                    notification={item}
+                    onToggleRead={handleToggleRead}
+                    onDelete={handleDelete}
+                  />
+                </Box>
+              );
+            })}
+
+            {/* Bottom Fetching Indicator */}
+            {isFetchingNextPage && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  py: 2,
+                  gap: 1,
+                }}
+              >
+                <CircularProgress size={20} sx={{ color: "primary.main" }} />
+                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
+                  {t("loading")}
+                </Typography>
+              </Box>
+            )}
+
+            {/* End of list text */}
+            {!hasNextPage && notificationsList.length > 5 && (
+              <Box sx={{ textAlign: "center", py: 2 }}>
+                <Typography variant="caption" sx={{ color: "text.disabled" }}>
+                  — {t("notifications.allLoaded")} —
+                </Typography>
+              </Box>
+            )}
           </Stack>
         )}
       </Box>
 
-      {/* Pagination Footer */}
-      {totalItems > 0 && (
-        <Pagination
-          totalItems={totalItems}
-          page={page}
-          limit={limit}
-          setPage={setPage}
-          setPageSize={setLimit}
-        />
-      )}
+      {/* Global Add Notification Modal */}
+      <AddNotificationModal
+        open={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
     </Box>
   );
 };

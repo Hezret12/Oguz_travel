@@ -455,6 +455,12 @@
   },
   "notifications": {
     "title": "Bildirişler",
+    "create": "Bildiriş döret",
+    "assignees": "Ulanyjylar / Işgärler",
+    "selectUsers": "Ulanyjylary saýlaň...",
+    "titlePlaceholder": "Bildirişiň temasyny ýazyň...",
+    "descPlaceholder": "Bildirişiň mazmunyny giňişleýin ýazyň...",
+    "allLoaded": "Ähli bildirişler görkezildi",
     "new": "täze",
     "all": "Ählisi",
     "unread": "Okalmadyklar",

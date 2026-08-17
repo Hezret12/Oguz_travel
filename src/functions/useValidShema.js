@@ -146,6 +146,16 @@ export const useValidShema = () => {
     price: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
   });
 
+  const addNotification = yup.object({
+    title: stringRequiredValidSchema(t("validation.required")),
+    description: stringRequiredValidSchema(t("validation.required")),
+    assignee_guids: yup
+      .array()
+      .of(yup.string())
+      .min(1, t("validation.required"))
+      .required(t("validation.required")),
+  });
+
   return {
     addB2BTicket,
     addTurkishAirlinesTicket,
@@ -160,6 +170,7 @@ export const useValidShema = () => {
     addTranslation,
     addTranslator,
     addOutbound,
+    addNotification,
   };
 };
 

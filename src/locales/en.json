@@ -455,6 +455,12 @@
   },
   "notifications": {
     "title": "Notifications",
+    "create": "Create Notification",
+    "assignees": "Users / Employees",
+    "selectUsers": "Select users...",
+    "titlePlaceholder": "Enter notification title...",
+    "descPlaceholder": "Describe the notification details...",
+    "allLoaded": "All notifications loaded",
     "new": "new",
     "all": "All",
     "unread": "Unread",
