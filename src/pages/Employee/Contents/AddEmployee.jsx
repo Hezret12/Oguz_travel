@@ -64,7 +64,7 @@ const AddEmployee = ({ table }) => {
       phone_number: "",
       gmail: "",
       department_guid: "",
-      position_guid: "",
+      position_guid: [],
       office_guid: "",
       address: "",
     },
@@ -143,6 +143,7 @@ const AddEmployee = ({ table }) => {
               isError={isPositionError}
               getRowId={(item) => item.guid}
               getRowLabel={(item) => selectedLang(item.name)}
+              multiple
               required
             />
           </Grid>

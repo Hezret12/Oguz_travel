@@ -7,6 +7,8 @@ import {
   Typography,
   Tooltip,
   CircularProgress,
+  Checkbox,
+  Chip,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { useState, useMemo } from "react";
@@ -63,6 +65,7 @@ const CustomSelect = ({
   size = "medium",
   disabled = false,
   required = false,
+  multiple = false,
   placeholder,
   sx = {},
   isLoading = false,
@@ -77,7 +80,6 @@ const CustomSelect = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Dışarıdan gelen getRowId / getRowLabel ile her türlü data şeklini normalize ediyoruz
   const normalizedOptions = useMemo(
     () =>
       options.map((item) => ({
@@ -107,6 +109,15 @@ const CustomSelect = ({
       rules={rules}
       render={({ field, fieldState: { error } }) => {
         const hasError = Boolean(error) || isError;
+        const selectedValue = isLoading || isError
+          ? (multiple ? [] : "")
+          : multiple
+          ? Array.isArray(field.value)
+            ? field.value
+            : field.value
+            ? [field.value]
+            : []
+          : field.value ?? "";
 
         return (
           <Box sx={{ width: "100%" }}>
@@ -190,7 +201,8 @@ const CustomSelect = ({
                 {...field}
                 inputRef={field.ref}
                 id={`${name}-select`}
-                value={isLoading || isError ? "" : (field.value ?? "")}
+                multiple={multiple}
+                value={selectedValue}
                 displayEmpty={Boolean(resolvedPlaceholder)}
                 MenuProps={{ slotProps: { paper: { sx: menuPaperSx } } }}
                 open={isOpen}
@@ -226,7 +238,8 @@ const CustomSelect = ({
                   if (
                     selected === undefined ||
                     selected === null ||
-                    selected === ""
+                    selected === "" ||
+                    (Array.isArray(selected) && selected.length === 0)
                   ) {
                     return (
                       <Typography
@@ -239,6 +252,74 @@ const CustomSelect = ({
                       </Typography>
                     );
                   }
+
+                  if (Array.isArray(selected)) {
+                    const allLabels = selected
+                      .map((val) => normalizedOptions.find((opt) => opt.id === val)?.label ?? val)
+                      .join(", ");
+                    const visibleItems = selected.slice(0, 2);
+                    const remainingCount = selected.length - 2;
+
+                    return (
+                      <Tooltip title={selected.length > 1 ? allLabels : ""} arrow placement="top">
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                            overflow: "hidden",
+                            maxWidth: "calc(100% - 24px)",
+                          }}
+                        >
+                          {visibleItems.map((val) => {
+                            const selectedOption = normalizedOptions.find((opt) => opt.id === val);
+                            return (
+                              <Chip
+                                key={val}
+                                size="small"
+                                label={selectedOption?.label ?? val}
+                                sx={{
+                                  height: "22px",
+                                  fontSize: "0.75rem",
+                                  fontWeight: 600,
+                                  borderRadius: "6px",
+                                  maxWidth: remainingCount > 0 ? "110px" : "150px",
+                                  "& .MuiChip-label": {
+                                    px: 0.75,
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  },
+                                  bgcolor: (theme) =>
+                                    theme.palette.mode === "dark"
+                                      ? "rgba(255, 255, 255, 0.08)"
+                                      : "rgba(0, 0, 0, 0.06)",
+                                }}
+                              />
+                            );
+                          })}
+                          {remainingCount > 0 && (
+                            <Chip
+                              size="small"
+                              label={`+${remainingCount}`}
+                              sx={{
+                                height: "22px",
+                                fontSize: "0.75rem",
+                                fontWeight: 700,
+                                borderRadius: "6px",
+                                bgcolor: (theme) =>
+                                  theme.palette.mode === "dark"
+                                    ? "rgba(20, 184, 166, 0.2)"
+                                    : "rgba(14, 133, 132, 0.12)",
+                                color: "primary.main",
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </Tooltip>
+                    );
+                  }
+
                   const selectedOption = normalizedOptions.find(
                     (opt) => opt.id === selected,
                   );
@@ -266,7 +347,7 @@ const CustomSelect = ({
                 }}
                 {...props}
               >
-                {field.value &&
+                {!multiple && field.value &&
                   !normalizedOptions.some((opt) => opt.id === field.value) && (
                     <MenuItem
                       key={field.value}
@@ -281,8 +362,19 @@ const CustomSelect = ({
                     return renderOption(option.raw, option);
                   }
                   const optionColor = option.color || option.raw?.color;
+                  const isSelected = multiple
+                    ? (Array.isArray(field.value) ? field.value : []).includes(option.id)
+                    : field.value === option.id;
+
                   return (
                     <MenuItem key={option.id} value={option.id}>
+                      {multiple && (
+                        <Checkbox
+                          checked={isSelected}
+                          size="small"
+                          sx={{ mr: 1, p: 0 }}
+                        />
+                      )}
                       <Box
                         sx={{
                           display: "flex",

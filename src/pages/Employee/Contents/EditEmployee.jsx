@@ -70,7 +70,17 @@ const EditEmployee = ({ table, row }) => {
         : "",
       gmail: row?.original?.gmail || "",
       department_guid: row?.original?.department_guid || row?.original?.department?.guid || "",
-      position_guid: row?.original?.position_guid || row?.original?.position?.guid || "",
+      position_guid: Array.isArray(row?.original?.positions)
+        ? row.original.positions.map((p) => p.guid)
+        : Array.isArray(row?.original?.position)
+        ? row.original.position.map((p) => p.guid)
+        : Array.isArray(row?.original?.position_guid)
+        ? row.original.position_guid
+        : row?.original?.position_guid
+        ? [row.original.position_guid]
+        : row?.original?.position?.guid
+        ? [row.original.position.guid]
+        : [],
       office_guid: row?.original?.office_guid || row?.original?.office?.guid || "",
       address: row?.original?.address || "",
     },
@@ -150,6 +160,7 @@ const EditEmployee = ({ table, row }) => {
               isError={isPositionError}
               getRowId={(item) => item.guid}
               getRowLabel={(item) => selectedLang(item.name)}
+              multiple
               required
             />
           </Grid>

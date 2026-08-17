@@ -6,7 +6,7 @@ import { useLocale } from "../../hooks/useLocale";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
-import { Box, Chip } from "@mui/material";
+import { Box, Chip, Tooltip } from "@mui/material";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import AddEmployee from "./Contents/AddEmployee";
 import EditEmployee from "./Contents/EditEmployee";
@@ -159,10 +159,92 @@ const Employee = () => {
         size: 150,
       },
       {
-        accessorFn: (row) => selectedLang(row.position?.name),
+        accessorFn: (row) => {
+          if (Array.isArray(row.positions) && row.positions.length > 0) {
+            return row.positions.map((p) => selectedLang(p.name)).join(", ");
+          }
+          if (Array.isArray(row.position) && row.position.length > 0) {
+            return row.position.map((p) => selectedLang(p.name)).join(", ");
+          }
+          return selectedLang(row.position?.name) || "-";
+        },
         id: "position",
         header: t("columns.position"),
-        size: 150,
+        size: 180,
+        Cell: ({ row }) => {
+          const raw = row.original;
+          const posList = Array.isArray(raw.positions)
+            ? raw.positions
+            : Array.isArray(raw.position)
+            ? raw.position
+            : raw.position
+            ? [raw.position]
+            : [];
+
+          if (posList.length === 0) return "-";
+          if (posList.length === 1) {
+            return selectedLang(posList[0]?.name) || "-";
+          }
+
+          const allPositionNames = posList
+            .map((p) => selectedLang(p?.name))
+            .filter(Boolean)
+            .join(", ");
+          const visibleList = posList.slice(0, 2);
+          const remainingCount = posList.length - 2;
+
+          return (
+            <Tooltip title={allPositionNames} arrow placement="top">
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  maxWidth: "100%",
+                  overflow: "hidden",
+                }}
+              >
+                {visibleList.map((p, idx) => (
+                  <Chip
+                    key={p.guid || idx}
+                    size="small"
+                    label={selectedLang(p?.name)}
+                    sx={{
+                      height: "22px",
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      borderRadius: "6px",
+                      maxWidth: remainingCount > 0 ? "110px" : "150px",
+                      "& .MuiChip-label": {
+                        px: 0.75,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      },
+                    }}
+                  />
+                ))}
+                {remainingCount > 0 && (
+                  <Chip
+                    size="small"
+                    label={`+${remainingCount}`}
+                    sx={{
+                      height: "22px",
+                      fontSize: "0.75rem",
+                      fontWeight: 700,
+                      borderRadius: "6px",
+                      bgcolor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(20, 184, 166, 0.2)"
+                          : "rgba(14, 133, 132, 0.12)",
+                      color: "primary.main",
+                    }}
+                  />
+                )}
+              </Box>
+            </Tooltip>
+          );
+        },
       },
       {
         accessorFn: (row) => selectedLang(row.office?.fullName),
