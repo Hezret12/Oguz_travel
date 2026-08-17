@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Paper } from '@mui/material';
 import GppBadIcon from '@mui/icons-material/GppBad';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from "../../context/useAuth";
 import { getRoleHomePath } from '../../utils/auth';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 

@@ -37,7 +37,7 @@ import { CustomDialog } from "./CustomDialog";
 import { CustomDialogHeader } from "./CustomDialogHeader";
 import { FooterButton } from "./FooterButton";
 import { useLocale } from "../../hooks/useLocale";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useDateFormat } from "../../functions/generalHelpers";
 import { updatePassportApi } from "../../api/queries/patch";
 import { BASE_URL } from "../../api/axiosIntance";

@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { useCallback } from "react";
 
 // Handle error

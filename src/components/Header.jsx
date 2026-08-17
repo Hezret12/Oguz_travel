@@ -18,7 +18,7 @@ import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import { ChevronDown, Home } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { useSidebarItems } from '../hooks/useSidebarItems';
 import LanguageSwitcher from './LanguageSwitcher';
 import ThemeToggle from './ThemeToggle';

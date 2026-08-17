@@ -5,7 +5,7 @@ import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import TaskFileUpload, { TaskFileList } from "../../../components/inputs/TaskFileUpload";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale } from "../../../hooks/useLocale";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../../../context/useAuth";
 import { useValidShema } from "../../../functions/useValidShema";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";

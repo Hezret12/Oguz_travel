@@ -1,6 +1,6 @@
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { LogOut, MapPin } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../hooks/useLocale";
 
 const SidebarFooter = ({ collapsed, onLogout }) => {

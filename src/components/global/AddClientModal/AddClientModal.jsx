@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useLocale } from '../../../hooks/useLocale';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../context/useAuth';
 import { useValidShema } from '../../../functions/useValidShema';
 import { CustomDialog } from '../../Dialog/CustomDialog';
 import { CustomDialogHeader } from '../../Dialog/CustomDialogHeader';

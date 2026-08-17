@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 import { getRoleHomePath } from '../../utils/auth';
 
 import { handleError, hdlErrResMsg, hdlSuccessResMsg } from '../../functions/generalHelpers';

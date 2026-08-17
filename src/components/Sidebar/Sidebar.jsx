@@ -4,8 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useColorScheme, Box, List } from "@mui/material";
 import SidebarItem from "./SidebarItem";
 import SidebarFooter from "./SidebarFooter";
-import OguzLogo from "../../assets/icons/OguzLogo";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useNavItems } from "../../hooks/useSidebarItems";
 
 const SIDEBAR_W = 280;

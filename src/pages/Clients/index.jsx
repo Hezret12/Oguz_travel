@@ -8,7 +8,7 @@ import {
 import toast from "react-hot-toast";
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../hooks/useLocale";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
