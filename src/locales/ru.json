@@ -175,7 +175,21 @@
     "vipFileRestricted": "Документы VIP-клиента доступны только администратору.",
     "vipFileRestrictedNotice": "Загруженные документы VIP-клиента могут просматриваться только администратором.",
     "passportModalTitle": "Паспорт и документы",
-    "fileTypeHint": "PNG, JPG, PDF (макс. 10MB)"
+    "fileTypeHint": "PNG, JPG, PDF (макс. 10MB)",
+    "activePassport": "Текущий паспорт",
+    "passportHistory": "История паспортов",
+    "noPassportHistory": "Нет истории паспортов",
+    "passportExpired": "Срок действия паспорта истек",
+    "passportValid": "Действующий паспорт",
+    "passportExpiresSoon": "Срок действия истекает",
+    "daysRemaining": "дней осталось",
+    "daysExpired": "дней назад истек",
+    "currentScan": "Текущий скан паспорта",
+    "uploadNewScan": "Загрузить новый скан паспорта",
+    "archivedAt": "Дата архивации",
+    "passportNumberShort": "Паспорт №",
+    "updatePassportBtn": "Обновить паспорт",
+    "historyCount": "Всего в архиве"
   },
   "users": {
     "title": "Ulanyjylar",

@@ -2,7 +2,6 @@ import { memo, useCallback } from "react";
 import {
   Box,
   Typography,
-  Paper,
   FormControl,
   Select,
   MenuItem,
@@ -11,7 +10,6 @@ import {
   alpha,
   useTheme,
 } from "@mui/material";
-import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
@@ -50,8 +48,6 @@ const ReportHeader = ({
   selectedQuarter,
   onQuarterChange,
   teal,
-  paperSx,
-  selectSx,
 }) => {
   const { t, currentLanguage } = useLocale();
   const theme = useTheme();

@@ -14,11 +14,6 @@ import ReportSummaryCards from "./Contents/ReportSummaryCards";
 import ReportCharts from "./Contents/ReportCharts";
 import ReportTable from "./Contents/ReportTable";
 
-const scrollbarSx = {
-  "&::-webkit-scrollbar": { width: 6, height: 6 },
-  "&::-webkit-scrollbar-thumb": { borderRadius: 3 },
-};
-
 const getCurrentQuarter = () => Math.floor(new Date().getMonth() / 3) + 1;
 
 const TurkishAirlinesReport = () => {
@@ -50,7 +45,6 @@ const TurkishAirlinesReport = () => {
   } = useReportData(selectedDate);
 
   const {
-    isDark,
     colors,
     paperSx,
     selectSx,

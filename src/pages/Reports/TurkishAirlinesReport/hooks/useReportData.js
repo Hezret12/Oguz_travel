@@ -40,7 +40,7 @@ const selectStatus = (res) => {
 };
 
 const useReportData = (selectedDate) => {
-  const { t, currentLanguage, selectedLang } = useLocale();
+  const { t, selectedLang } = useLocale();
 
   const validDate = useMemo(() => {
     if (!selectedDate) return dayjs();

@@ -175,7 +175,21 @@
     "vipFileRestricted": "VIP müşderiniň resminamalary diňe Admin üçin elýeterli.",
     "vipFileRestrictedNotice": "VIP müşderiniň ýüklenen resminamalary diňe Admin tarapyndan görülip bilner.",
     "passportModalTitle": "Pasport we resminamalar",
-    "fileTypeHint": "PNG, JPG, PDF (maks. 10MB)"
+    "fileTypeHint": "PNG, JPG, PDF (maks. 10MB)",
+    "activePassport": "Häzirki pasport",
+    "passportHistory": "Pasport taryhy",
+    "noPassportHistory": "Öňki pasport taryhy ýok",
+    "passportExpired": "Möhleti geçen pasport",
+    "passportValid": "Güýjünde bolan pasport",
+    "passportExpiresSoon": "Möhleti ýakynlaşdy",
+    "daysRemaining": "gün galdy",
+    "daysExpired": "gün öň doldy",
+    "currentScan": "Häzirki pasport skany",
+    "uploadNewScan": "Täze pasport skanyny ýüklemek",
+    "archivedAt": "Arhiwlenen wagty",
+    "passportNumberShort": "Pasport №",
+    "updatePassportBtn": "Pasporty täzelemek",
+    "historyCount": "Jemi arhiw"
   },
   "users": {
     "title": "Ulanyjylar",

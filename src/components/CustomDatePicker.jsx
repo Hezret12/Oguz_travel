@@ -130,7 +130,7 @@ const CustomDatePicker = ({
               slotProps={{
                 textField: {
                   fullWidth: true,
-                  size: "small",
+                  size,
                   error: hasError,
                   helperText: error?.message,
                   inputRef: field.ref,

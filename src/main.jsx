@@ -27,7 +27,7 @@ const queryClient = new QueryClient({
 
 import { Provider } from 'react-redux';
 import store from './store';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './context/AuthProvider';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>

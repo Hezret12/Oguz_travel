@@ -175,7 +175,21 @@
     "vipFileRestricted": "VIP client documents are only accessible to Admins.",
     "vipFileRestrictedNotice": "Uploaded documents of VIP clients can only be viewed by Admins.",
     "passportModalTitle": "Passport & Documents",
-    "fileTypeHint": "PNG, JPG, PDF (max. 10MB)"
+    "fileTypeHint": "PNG, JPG, PDF (max. 10MB)",
+    "activePassport": "Active Passport",
+    "passportHistory": "Passport History",
+    "noPassportHistory": "No passport history",
+    "passportExpired": "Passport Expired",
+    "passportValid": "Valid Passport",
+    "passportExpiresSoon": "Expires Soon",
+    "daysRemaining": "days remaining",
+    "daysExpired": "days expired",
+    "currentScan": "Current Passport Scan",
+    "uploadNewScan": "Upload New Passport Scan",
+    "archivedAt": "Archived At",
+    "passportNumberShort": "Passport №",
+    "updatePassportBtn": "Update Passport",
+    "historyCount": "Total Archive"
   },
   "users": {
     "title": "Ulanyjylar",
