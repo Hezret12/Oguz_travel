@@ -26,6 +26,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
   const { mutate: createCountry, isLoading } = useCreate({
     apiFn: createCountryApi,
     key: "countries",
+    invalidateQueries: ["countryVisaFields", "receivings", "customFields"],
     onSuccess: () => {
       onRefresh?.();
       onClose?.();
@@ -73,7 +74,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
   };
 
   return (
-    <CustomDialog widthX={750} open={open} close={onClose}>
+    <CustomDialog widthX={800} open={open} close={onClose}>
       <CustomDialogHeader variant="h5" title={t("visaIntake.addCountryTitle")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -92,8 +93,8 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
             {t("visaIntake.defaultFieldsInfoDesc")}
           </Alert>
 
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid container spacing={1.5}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="code"
                 control={control}
@@ -102,7 +103,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="nameTm"
                 control={control}
@@ -111,7 +112,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="nameRu"
                 control={control}
@@ -119,7 +120,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <CustomTextField
                 name="nameEn"
                 control={control}

@@ -9,6 +9,7 @@ import { useLocale } from "../../../hooks/useLocale";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
+import { useDebounce } from "../../../hooks/useDebounce";
 import { getCountriesApi } from "../../../api/queries/getters";
 import { deleteCountryApi } from "../../../api/queries/delete";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
@@ -23,16 +24,17 @@ export const CountriesTable = forwardRef((props, ref) => {
   const defaultMrtOptions = getDefaultMRTOptions();
 
   const [page, setPage] = useState(1);
-  const [limit] = useState(40);
+  const [limit, setPageSize] = useState(20);
   const [searchQuery, setSearch] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 400);
 
   const params = useMemo(
     () => ({
       page,
       limit,
-      search: searchQuery || undefined,
+      search: debouncedSearch || undefined,
     }),
-    [page, limit, searchQuery]
+    [page, limit, debouncedSearch]
   );
 
   const {
@@ -44,13 +46,13 @@ export const CountriesTable = forwardRef((props, ref) => {
     pageCount = 1,
   } = usePagginationGet({
     apiFn: getCountriesApi,
-    key: ["countries", params],
+    key: "countries",
     params,
   });
 
-  const [prevSearch, setPrevSearch] = useState(searchQuery);
-  if (searchQuery !== prevSearch) {
-    setPrevSearch(searchQuery);
+  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
+  if (debouncedSearch !== prevSearch) {
+    setPrevSearch(debouncedSearch);
     setPage(1);
   }
 
@@ -59,6 +61,7 @@ export const CountriesTable = forwardRef((props, ref) => {
     queryKey: "countries",
     idKey: "guid",
     isPaginated: true,
+    invalidateQueries: ["countryVisaFields", "receivings", "customFields"],
   });
 
   const deleteDialog = useDeleteDialog({
@@ -146,6 +149,8 @@ export const CountriesTable = forwardRef((props, ref) => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    memoMode: "rows",
+    autoResetPageIndex: false,
     muiTablePaperProps: {
       sx: (theme) => ({
         display: "flex",
@@ -167,7 +172,7 @@ export const CountriesTable = forwardRef((props, ref) => {
       showSkeletons: isLoading,
     },
     enablePagination: false,
-    enableBottomToolbar: pageCount > 1,
+    enableBottomToolbar: true,
     renderBottomToolbarCustomActions: () => (
       <Box
         sx={{
@@ -186,6 +191,7 @@ export const CountriesTable = forwardRef((props, ref) => {
           pageSize={limit}
           totalRows={totalItems}
           onPageChange={(newIndex) => setPage(newIndex + 1)}
+          setPageSize={setPageSize}
         />
       </Box>
     ),

@@ -71,6 +71,7 @@
     "passportExpiryDate": "Gutarýan senesi",
     "passportCountryOfIssue": "Berlen ýurdy",
     "dateTime": "Senesi",
+    "date": "Senesi",
     "paymentStatus": "Töleg görnüşi",
     "gender": "Jynsy",
     "employee": "Işgär",
@@ -277,6 +278,7 @@
     "submittedBy": "Tabşyran",
     "receivedBy": "Kabul eden",
     "quantity": "Mukdary",
+    "totalCount": "Mukdary",
     "totalQuantity": "Umumy mukdary",
     "letterUnit": "sany hat",
     "statusSold": "Satyldy",
@@ -337,6 +339,7 @@
     "selectCountryPrompt": "Ýurt saýlaň",
     "selectCountryDescription": "Arzalary görmek üçin ýokardan ýurt saýlaň",
     "selectCountryPlaceholder": "Ýurt saýlaň...",
+    "selectCountryToAdd": "Arza goşmak üçin ilki bilen ýurt saýlaň",
     "defaultFieldsInfoTitle": "Standart Meýdançalar:",
     "defaultFieldsInfoDesc": "Müşderi, Arza berlen senesi, Operator 1, Operator 2 we Bellikler awtomatiki birikdirilýär.",
     "fields": {
@@ -362,7 +365,7 @@
       "bookingDatetime": "Bron senesi we wagty",
       "travelDate": "Syýahat senesi",
       "partner": "Hyzmatdaş",
-      "notes": "Bellikler",
+      "notes": "Bellik",
       "visaQueueInfo": "Wiza we nobat maglumaty",
       "isProcessed": "Işlenen ýagdaýy",
       "schengenCountry": "Şengen ýurdy",
@@ -461,7 +464,9 @@
     "typeText": "Tekst (Text)",
     "typeNumber": "San (Number)",
     "typeDate": "Sene (Date)",
-    "typeSelect": "Saýlawly (Select)"
+    "typeSelect": "Saýlawly (Select)",
+    "searchPlaceholder": "Meýdança gözleň...",
+    "emptyState": "Heniz meýdança saýlanmady"
   },
   "errorBoundary": {
     "networkErrorTitle": "Baglanyşyk Ýalňyşlygy",

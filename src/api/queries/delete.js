@@ -110,11 +110,13 @@ export const deleteNotificationApi = async (data) => {
 };
 
 export const deleteReportApi = async (guid) => {
-  return await api.deletePrivate('/report/delete-report', guid);
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/report/delete-report', { guid: actualGuid });
 };
 
 export const deleteReportShareApi = async (guid) => {
-  return await api.deletePrivate('/report-share/delete-report-share', guid);
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/report-share/delete-report-share', { guid: actualGuid });
 };
 
 export const deleteCountryApi = async (guid) => {

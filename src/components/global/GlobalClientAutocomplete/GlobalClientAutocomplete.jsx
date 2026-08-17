@@ -6,6 +6,7 @@ import {
   CircularProgress,
   TextField,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import AddIcon from "@mui/icons-material/Add";
@@ -194,15 +195,27 @@ const GlobalClientAutocompleteField = ({
   return (
     <>
       {label && (
-        <Typography
-          variant="body2"
-          sx={{ mb: 0.75, fontWeight: 600, fontSize: "0.875rem" }}
-        >
-          {label}
-          {required && (
-            <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
-          )}
-        </Typography>
+        <Tooltip title={label} arrow placement="top-start">
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              mb: 0.75,
+              fontWeight: 600,
+              fontSize: "0.875rem",
+              color: "text.primary",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              cursor: "default",
+            }}
+          >
+            {label}
+            {required && (
+              <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
+            )}
+          </Typography>
+        </Tooltip>
       )}
       <Autocomplete
         value={selectedClient}

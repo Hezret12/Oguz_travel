@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
-import { Box, Paper, Button, useTheme } from "@mui/material";
+import { Box, Paper, Button, useTheme, Badge } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -11,6 +12,7 @@ import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 import StatusChip from "../../../components/StatusChip";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
+import FilterDrawer from "../../../components/FilterDrawer";
 import DeleteDialog from "../../../components/DeleteDialog";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useLocale } from "../../../hooks/useLocale";
@@ -21,8 +23,14 @@ import AddLetterStockModal from "./AddLetterStockModal";
 import AddReferralReportModal from "./AddReferralReportModal";
 import EditLetterStockModal from "./EditLetterStockModal";
 import EditReferralReportModal from "./EditReferralReportModal";
+import ReferralLetterFilter from "./Contents/ReferralLetterFilter";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
+import { usePageFilters } from "../../../hooks/usePageFilters";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
+import {
+  referralLetterFilterActions,
+  referralLetterFilterSelectors,
+} from "../../../store/slices/filters/referralLetterFilterSlice";
 import {
   getAllReportsApi,
   getAllReportSharesApi,
@@ -39,23 +47,34 @@ const ReferralLetterPage = () => {
   const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
 
-  // Tab State: 'reports' | 'stock'
   const [activeTab, setActiveTab] = useState("reports");
 
-  // Search & Pagination States
-  const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-
-  // 1. Fetch Report Shares (Ýüzlenme Hasabaty)
-  const reportParams = useMemo(() => {
-    const params = { page, limit };
-    if (searchQuery.trim()) params.search = searchQuery.trim();
-    return params;
-  }, [page, limit, searchQuery]);
+  const {
+    applied,
+    draft,
+    queryParams,
+    isDrawerOpen,
+    openDrawer,
+    closeDrawer,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    searchQuery,
+    setSearch,
+    page,
+    limit,
+    setPage,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = usePageFilters({
+    actions: referralLetterFilterActions,
+    selectors: referralLetterFilterSelectors,
+  });
 
   const {
-    data: rawReportData,
+    data: reportList = [],
     totalItems: reportTotal = 0,
     pageCount: reportPageCount = 1,
     isLoading: isReportLoading,
@@ -63,29 +82,12 @@ const ReferralLetterPage = () => {
     refetch: refetchReports,
   } = usePagginationGet({
     apiFn: getAllReportSharesApi,
-    key: ["reportShares", reportParams],
-    params: reportParams,
+    key: "reportShares",
+    params: queryParams,
   });
 
-  const reportList = useMemo(() => {
-    let list = rawReportData;
-    if (!Array.isArray(list)) {
-      if (Array.isArray(list?.data)) list = list.data;
-      else if (Array.isArray(list?.data?.data)) list = list.data.data;
-      else return [];
-    }
-    return list;
-  }, [rawReportData]);
-
-  // 2. Fetch Letter Stock (Hat Stoky)
-  const stockParams = useMemo(() => {
-    const params = { page, limit };
-    if (searchQuery.trim()) params.search = searchQuery.trim();
-    return params;
-  }, [page, limit, searchQuery]);
-
   const {
-    data: rawStockData,
+    data: stockList = [],
     totalItems: stockTotal = 0,
     pageCount: stockPageCount = 1,
     isLoading: isStockLoading,
@@ -93,19 +95,9 @@ const ReferralLetterPage = () => {
     refetch: refetchStock,
   } = usePagginationGet({
     apiFn: getAllReportsApi,
-    key: ["reports", stockParams],
-    params: stockParams,
+    key: "reports",
+    params: queryParams,
   });
-
-  const stockList = useMemo(() => {
-    let list = rawStockData;
-    if (!Array.isArray(list)) {
-      if (Array.isArray(list?.data)) list = list.data;
-      else if (Array.isArray(list?.data?.data)) list = list.data.data;
-      else return [];
-    }
-    return list;
-  }, [rawStockData]);
 
   // Delete hooks
   const { mutate: deleteStock, isPending: isDeletingStock } = useDelete({
@@ -132,11 +124,10 @@ const ReferralLetterPage = () => {
 
   const handleTabChange = useCallback((_, newValue) => {
     setActiveTab(newValue);
-    setSearchQuery("");
+    setSearch("");
     setPage(1);
-  }, []);
+  }, [setSearch, setPage]);
 
-  // Columns for Report Shares Tab (Ýüzlenme Hasabaty)
   const reportsColumns = useMemo(
     () => [
       {
@@ -147,70 +138,63 @@ const ReferralLetterPage = () => {
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => (page - 1) * limit + row.index + 1,
       },
       {
         accessorKey: "datetime",
         id: "datetime",
-        header: t("columns.date") || "Sene",
+        header: t("columns.date"),
         size: 130,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorKey: "assignment_opr",
+        accessorKey: "reportAS_operator",
         id: "submittedBy",
-        header: t("referralLetter.submittedBy") || "Tabşyran (Operator)",
+        header: t("referralLetter.submittedBy"),
         size: 180,
-        Cell: ({ row }) =>
-          row.original?.assignment_opr?.fullName ||
-          `${row.original?.assignment_opr?.firstName || ""} ${row.original?.assignment_opr?.lastName || ""}`.trim() ||
-          row.original?.submittedBy ||
-          "—",
+        Cell: ({ row }) => row.original?.reportAS_operator?.fullName || "",
       },
       {
-        accessorKey: "receiver_opr",
+        accessorKey: "reportRE_operator",
         id: "receivedBy",
-        header: t("referralLetter.receivedBy") || "Kabul eden (Operator)",
+        header: t("referralLetter.receivedBy"),
         size: 180,
-        Cell: ({ row }) =>
-          row.original?.receiver_opr?.fullName ||
-          `${row.original?.receiver_opr?.firstName || ""} ${row.original?.receiver_opr?.lastName || ""}`.trim() ||
-          row.original?.receivedBy ||
-          "—",
+        Cell: ({ row }) => row.original?.reportRE_operator?.fullName || "",
       },
       {
         accessorKey: "start_yh_number",
         id: "startNo",
-        header: t("referralLetter.startNo") || "ÝH №-den",
+        header: t("referralLetter.startNo"),
         size: 130,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => row.original?.start_yh_number || row.original?.startNo || "—",
+        Cell: ({ row }) => row.original?.start_yh_number || "",
       },
       {
         accessorKey: "end_yh_number",
         id: "endNo",
-        header: t("referralLetter.endNo") || "ÝH № çenli",
+        header: t("referralLetter.endNo"),
         size: 130,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => row.original?.end_yh_number || row.original?.endNo || "—",
+        Cell: ({ row }) => row.original?.end_yh_number || "",
       },
       {
         accessorKey: "total_count",
         id: "quantity",
-        header: t("referralLetter.quantity") || "Mukdary",
+        header: t("referralLetter.quantity"),
         size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => <strong>{row.original?.total_count || row.original?.quantity || 0} sany</strong>,
+        Cell: ({ row }) => (
+          <strong>{row.original?.total_count || 0} sany</strong>
+        ),
       },
       {
         accessorKey: "status",
         id: "status",
-        header: t("columns.status") || "Status",
+        header: t("columns.status"),
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -233,13 +217,13 @@ const ReferralLetterPage = () => {
       {
         accessorKey: "note",
         id: "note",
-        header: t("columns.note") || "Bellik",
+        header: t("columns.note"),
         size: 180,
-        Cell: ({ cell }) => cell.getValue() || "—",
+        Cell: ({ cell }) => cell.getValue() || "",
       },
       {
         id: "actions",
-        header: t("columns.actions") || "Hereketler",
+        header: t("columns.actions"),
         size: 90,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
@@ -253,10 +237,9 @@ const ReferralLetterPage = () => {
         ),
       },
     ],
-    [formatChange, page, limit, t, reportDeleteDialog]
+    [t, formatChange, reportDeleteDialog],
   );
 
-  // Columns for Stock Tab (Hat Stoky)
   const stockColumns = useMemo(
     () => [
       {
@@ -267,56 +250,62 @@ const ReferralLetterPage = () => {
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => (page - 1) * limit + row.index + 1,
       },
       {
         accessorKey: "name",
         id: "batchName",
-        header: t("referralLetter.batchName") || "Partiýanyň ady",
+        header: t("referralLetter.batchName"),
         size: 220,
-        Cell: ({ row }) => row.original?.name || row.original?.batchName || "—",
+        Cell: ({ row }) => row.original?.name || "",
       },
       {
         accessorKey: "start_yh_number",
         id: "startNo",
-        header: t("referralLetter.startNo") || "Başlangyç ÝH №",
+        header: t("referralLetter.startNo"),
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => row.original?.start_yh_number || row.original?.startNo || "—",
+        Cell: ({ row }) => row.original?.start_yh_number || "",
       },
       {
         accessorKey: "end_yh_number",
         id: "endNo",
-        header: t("referralLetter.endNo") || "Soňky ÝH №",
+        header: t("referralLetter.endNo"),
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => row.original?.end_yh_number || row.original?.endNo || "—",
+        Cell: ({ row }) => row.original?.end_yh_number || "",
       },
       {
         accessorKey: "total_letter",
         id: "count",
-        header: t("referralLetter.totalCount") || "Umumy mukdary",
+        header: t("referralLetter.totalCount"),
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => (
-          <strong>{row.original?.total_letter || row.original?.count || 0} sany hat</strong>
+          <strong>{row.original?.total_letter || 0} sany hat</strong>
         ),
       },
       {
         accessorKey: "createdAt",
         id: "createdAt",
-        header: t("columns.date") || "Sene",
+        header: t("columns.date"),
         size: 130,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
       {
+        accessorKey: "note",
+        id: "note",
+        header: t("columns.note"),
+        size: 180,
+        Cell: ({ cell }) => cell.getValue() || "",
+      },
+      {
         id: "actions",
-        header: t("columns.actions") || "Hereketler",
+        header: t("columns.actions"),
         size: 90,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
@@ -330,7 +319,7 @@ const ReferralLetterPage = () => {
         ),
       },
     ],
-    [formatChange, page, limit, t, stockDeleteDialog]
+    [formatChange, t, stockDeleteDialog],
   );
 
   // Reports Table Instance
@@ -338,6 +327,28 @@ const ReferralLetterPage = () => {
     ...defaultMrtOptions,
     columns: reportsColumns,
     data: reportList,
+    enableColumnPinning: false,
+    muiTablePaperProps: {
+      sx: (tTheme) => ({
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 250px)",
+        width: "100%",
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: tTheme.palette.background.paper,
+        boxShadow: "none",
+        borderRadius: "12px",
+        overflow: "hidden",
+      }),
+    },
+    initialState: {
+      density: "compact",
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
+      },
+    },
     state: {
       isLoading: isReportLoading || isReportFetching,
       pagination: {
@@ -348,22 +359,23 @@ const ReferralLetterPage = () => {
     manualPagination: true,
     pageCount: reportPageCount,
     rowCount: reportTotal,
-    enableColumnPinning: true,
-    initialState: {
-      columnPinning: {
-        left: ["index_number"],
-        right: ["actions"],
-      },
-    },
     renderTopToolbarCustomActions: () => (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap", mt: 0.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
         <GlobalSearchInput
           value={searchQuery}
           onChange={(val) => {
-            setSearchQuery(val);
+            setSearch(val);
             setPage(1);
           }}
-          placeholder={t("search") || "Gözleg..."}
+          placeholder={t("search")}
           disabled={isReportLoading}
           onRefetch={refetchReports}
           isFetching={isReportFetching}
@@ -409,6 +421,28 @@ const ReferralLetterPage = () => {
     ...defaultMrtOptions,
     columns: stockColumns,
     data: stockList,
+    enableColumnPinning: false,
+    muiTablePaperProps: {
+      sx: (tTheme) => ({
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 250px)",
+        width: "100%",
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: tTheme.palette.background.paper,
+        boxShadow: "none",
+        borderRadius: "12px",
+        overflow: "hidden",
+      }),
+    },
+    initialState: {
+      density: "compact",
+      pagination: {
+        pageIndex: page - 1,
+        pageSize: limit,
+      },
+    },
     state: {
       isLoading: isStockLoading || isStockFetching,
       pagination: {
@@ -419,22 +453,23 @@ const ReferralLetterPage = () => {
     manualPagination: true,
     pageCount: stockPageCount,
     rowCount: stockTotal,
-    enableColumnPinning: true,
-    initialState: {
-      columnPinning: {
-        left: ["index_number"],
-        right: ["actions"],
-      },
-    },
     renderTopToolbarCustomActions: () => (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap", mt: 0.5 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          mt: 0.5,
+        }}
+      >
         <GlobalSearchInput
           value={searchQuery}
           onChange={(val) => {
-            setSearchQuery(val);
+            setSearch(val);
             setPage(1);
           }}
-          placeholder={t("search") || "Gözleg..."}
+          placeholder={t("search")}
           disabled={isStockLoading}
           onRefetch={refetchStock}
           isFetching={isStockFetching}
@@ -490,8 +525,18 @@ const ReferralLetterPage = () => {
         badge: stockTotal || stockList.length,
       },
     ],
-    [t, reportTotal, reportList.length, stockTotal, stockList.length]
+    [t, reportTotal, reportList.length, stockTotal, stockList.length],
   );
+
+  const activeFiltersCount = useMemo(() => {
+    return Object.entries(applied).filter(
+      ([key, value]) =>
+        key !== "search" &&
+        value !== undefined &&
+        value !== null &&
+        value !== "",
+    ).length;
+  }, [applied]);
 
   const handleAddClick = () => {
     if (activeTab === "stock") {
@@ -503,8 +548,8 @@ const ReferralLetterPage = () => {
 
   const addButtonText = useMemo(() => {
     return activeTab === "stock"
-      ? (t("referralLetter.addStock"))
-      : (t("referralLetter.addReport"));
+      ? t("referralLetter.addStock")
+      : t("referralLetter.addReport");
   }, [activeTab, t]);
 
   return (
@@ -537,14 +582,36 @@ const ReferralLetterPage = () => {
           }}
         />
 
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddClick}
-          sx={{ borderRadius: "8px", fontWeight: 600, px: 2.5, height: "40px" }}
-        >
-          {addButtonText}
-        </Button>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          {activeTab === "reports" && (
+            <Badge badgeContent={activeFiltersCount} color="primary">
+              <Button
+                variant="outlined"
+                color="inherit"
+                startIcon={<FilterListIcon />}
+                onClick={openDrawer}
+                sx={{
+                  borderRadius: "8px",
+                  fontWeight: 600,
+                  px: 2,
+                  height: "40px",
+                  borderColor: "divider",
+                }}
+              >
+                {t("filter")}
+              </Button>
+            </Badge>
+          )}
+
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleAddClick}
+            sx={{ borderRadius: "8px", fontWeight: 600, px: 2.5, height: "40px" }}
+          >
+            {addButtonText}
+          </Button>
+        </Box>
       </Paper>
 
       {activeTab === "reports" ? (
@@ -552,6 +619,25 @@ const ReferralLetterPage = () => {
       ) : (
         <MaterialReactTable table={stockTable} />
       )}
+
+      <FilterDrawer
+        open={isDrawerOpen}
+        onClose={cancelFilters}
+        onApply={() => {
+          applyFilters();
+          closeDrawer();
+        }}
+        onReset={resetFilters}
+        onCancel={cancelFilters}
+      >
+        <ReferralLetterFilter
+          filters={draft}
+          selectsOpen={selectsOpen}
+          onFilterChange={setDraftFilter}
+          onSelectOpen={openSelect}
+          onSelectClose={closeSelect}
+        />
+      </FilterDrawer>
 
       <DeleteDialog
         open={reportDeleteDialog.isOpen}

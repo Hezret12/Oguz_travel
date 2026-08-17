@@ -1,63 +1,47 @@
 export const DEFAULT_VISA_FIELDS = [
-    {
+  {
     fieldKey: "client_guid",
-    labelTm: "Müşderi",
-    labelRu: "ФИО клиента",
-    labelEn: "Client full name",
+    label: { tk: "Müşderi", ru: "ФИО клиента", en: "Client full name" },
     fieldType: "client_autocomplete",
     isDefault: true,
     gridSize: 12,
-    aliases: ["clientfullname", "client_guid", "client", "müşderi", "фио клиента", "клиент"],
   },
   {
     fieldKey: "accepted_opr_guid",
-    labelTm: "Tabşyryjy (Operator)",
-    labelRu: "Оператор",
-    labelEn: "Operator",
+    label: { tk: "Tabşyryjy (Operator)", ru: "Оператор", en: "Operator" },
     fieldType: "autocomplete",
     optionsKey: "employees",
     isDefault: true,
     gridSize: 6,
-    aliases: ["accepted_opr_guid", "operator", "operator_guid", "оператор", "сотрудник", "assignment_operator"],
   },
   {
     fieldKey: "received_opr_guid",
-    labelTm: "Kabul ediji (Operator)",
-    labelRu: "Оператор 2",
-    labelEn: "Operator 2",
+    label: { tk: "Kabul ediji (Operator)", ru: "Оператор 2", en: "Operator 2" },
     fieldType: "autocomplete",
     optionsKey: "employees",
     isDefault: true,
     gridSize: 6,
-    aliases: ["received_opr_guid", "recieved_opr_guid", "operator2", "operator2_guid", "receiver_operator", "kabul ediji", "оператор 2"],
   },
   {
     fieldKey: "application_date",
-    labelTm: "Arza berlen senesi",
-    labelRu: "Дата подачи",
-    labelEn: "Application date",
+    label: { tk: "Arza senesi", ru: "Дата подачи", en: "Application date" },
     fieldType: "date",
     isDefault: true,
     gridSize: 4,
-    aliases: ["applicationdate", "application_date", "arza senesi", "дата подачи", "дата заявления"],
   },
   {
     fieldKey: "note",
-    labelTm: "Bellikler",
-    labelRu: "Примечание",
-    labelEn: "Notes",
+    label: { tk: "Bellik", ru: "Примечание", en: "Note" },
     fieldType: "text",
     isDefault: true,
     gridSize: 12,
     multiline: true,
-    rows: 2,
-    aliases: ["note", "notes", "bellik", "bellikler", "primecaniye", "заметки", "примечание"],
   },
 ];
 
 export const isClientField = (field) => {
   const key = typeof field === "string" ? field : field?.fieldKey;
-  return key === "client_guid";
+  return key === "client_guid" || key === "client";
 };
 
 export const isNotesField = (field) => {
@@ -67,57 +51,32 @@ export const isNotesField = (field) => {
 
 export const isOperatorField = (field) => {
   const key = typeof field === "string" ? field : field?.fieldKey;
-  return (
-    key === "accepted_opr_guid" ||
-    key === "operator" ||
-    key === "operator_guid" ||
-    key === "assignment_operator"
-  );
+  return key === "accepted_opr_guid" || key === "operator" || key === "operator_guid";
 };
 
 export const isOperator2Field = (field) => {
   const key = typeof field === "string" ? field : field?.fieldKey;
-  return (
-    key === "received_opr_guid" ||
-    key === "recieved_opr_guid" ||
-    key === "operator2" ||
-    key === "operator2_guid" ||
-    key === "receiver_operator"
-  );
+  return key === "received_opr_guid" || key === "operator2" || key === "operator2_guid";
 };
 
 export const ensureAllVisaFields = (apiFields = []) => {
   const fields = Array.isArray(apiFields)
     ? apiFields
         .filter(Boolean)
-        .map((f) => {
-          const key = f.fieldKey || f.field_key || f.guid || f.id;
-          const labelTm = f.labelTm || f.field_label?.tk || (typeof f.field_label === "string" ? f.field_label : key);
-          const labelRu = f.labelRu || f.field_label?.ru || labelTm;
-          const labelEn = f.labelEn || f.field_label?.en || labelTm;
-          const fieldType = f.fieldType || f.field_type || "text";
-          return {
-            ...f,
-            fieldKey: key,
-            labelTm,
-            labelRu,
-            labelEn,
-            fieldType,
-          };
-        })
+        .map((f) => ({
+          ...f,
+          fieldKey: f.fieldKey || f.field_key || f.guid,
+          label: f.field_label || f.label || f.labelTm || f.fieldKey,
+          fieldType: f.fieldType || f.field_type || "text",
+        }))
     : [];
 
-  let clientField = fields.find((f) => isClientField(f)) || DEFAULT_VISA_FIELDS[0];
-  let opr1Field = fields.find((f) => isOperatorField(f)) || DEFAULT_VISA_FIELDS[1];
-  let opr2Field = fields.find((f) => isOperator2Field(f)) || DEFAULT_VISA_FIELDS[2];
-  let appDateField = fields.find((f) => f.fieldKey === "application_date") || DEFAULT_VISA_FIELDS[3];
-  let notesField = fields.find((f) => isNotesField(f)) || DEFAULT_VISA_FIELDS[4];
-
-  if (clientField) clientField = { ...clientField, fieldKey: "client_guid", gridSize: 12 };
-  if (opr1Field) opr1Field = { ...opr1Field, fieldKey: "accepted_opr_guid", gridSize: 6 };
-  if (opr2Field) opr2Field = { ...opr2Field, fieldKey: "received_opr_guid", gridSize: 6 };
-  if (appDateField) appDateField = { ...appDateField, fieldKey: "application_date", gridSize: 4 };
-  if (notesField) notesField = { ...notesField, fieldKey: "note", multiline: true, gridSize: 12 };
+  const clientField = fields.find(isClientField) || DEFAULT_VISA_FIELDS[0];
+  const opr1Field = fields.find(isOperatorField) || DEFAULT_VISA_FIELDS[1];
+  const opr2Field = fields.find(isOperator2Field) || DEFAULT_VISA_FIELDS[2];
+  const appDateField =
+    fields.find((f) => f.fieldKey === "application_date") || DEFAULT_VISA_FIELDS[3];
+  const notesField = fields.find(isNotesField) || DEFAULT_VISA_FIELDS[4];
 
   const dynamicFields = fields.filter(
     (f) =>
@@ -126,228 +85,20 @@ export const ensureAllVisaFields = (apiFields = []) => {
       !isNotesField(f) &&
       !isOperatorField(f) &&
       !isOperator2Field(f) &&
-      f.fieldKey !== "application_date"
+      f.fieldKey !== "application_date",
   );
 
-  return [clientField, opr1Field, opr2Field, appDateField, ...dynamicFields, notesField];
+  return [
+    { ...clientField, fieldKey: "client_guid" },
+    { ...opr1Field, fieldKey: "accepted_opr_guid" },
+    { ...opr2Field, fieldKey: "received_opr_guid" },
+    { ...appDateField, fieldKey: "application_date" },
+    ...dynamicFields,
+    { ...notesField, fieldKey: "note" },
+  ];
 };
 
 export const sortVisaFields = ensureAllVisaFields;
-
-export const CANONICAL_RECURRING_FIELDS = [
-  {
-    fieldKey: "docs_submitted_by",
-    labelTm: "Tabşyran",
-    labelRu: "Кем сдано",
-    labelEn: "Handed over by",
-    fieldType: "autocomplete",
-    optionsKey: "employees",
-    isDefault: false,
-    gridSize: 4,
-    aliases: [
-      "кем здана", "кем сдана", "кем сдано", "кем здано",
-      "zdana", "sdana", "tabşyryldy", "kim tabşyrdy", "tabşyran"
-    ],
-  },
-  {
-    fieldKey: "docs_submitted_date",
-    labelTm: "Tabşyrylan senesi",
-    labelRu: "Дата сдачи",
-    labelEn: "Submitted date",
-    fieldType: "date",
-    isDefault: false,
-    gridSize: 4,
-    aliases: [
-      "zdana senesi", "zdan senesi", "дата сдачи", "дата подачи документов",
-      "tabsyrylan senesi", "tabşyrylan senesi"
-    ],
-  },
-  {
-    fieldKey: "form_filled_date",
-    labelTm: "Forma doldurylan senesi",
-    labelRu: "Дата заполнения анкеты",
-    labelEn: "Form filled date",
-    fieldType: "date",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["анкета заполн", "дата заполнения анкеты", "forma doldurylan senesi"],
-  },
-  {
-    fieldKey: "form_filled_by",
-    labelTm: "Forma dolduran",
-    labelRu: "Кем заполнена анкета",
-    labelEn: "Form filled by",
-    fieldType: "autocomplete",
-    optionsKey: "employees",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["анкету заполнил", "kem zapolnena", "forma dolduran"],
-  },
-  {
-    fieldKey: "telex_date",
-    labelTm: "Teleks senesi",
-    labelRu: "Дата телекса",
-    labelEn: "Telex date",
-    fieldType: "date",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["telex date", "telex senesi", "дата телекса", "телекс дата", "телекс"],
-  },
-  {
-    fieldKey: "telex_number",
-    labelTm: "Teleks belgisi",
-    labelRu: "Номер телекса",
-    labelEn: "Telex number",
-    fieldType: "text",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["telex number", "telex belgisi", "номер телекса", "телекс №"],
-  },
-  {
-    fieldKey: "barcode",
-    labelTm: "Barkod",
-    labelRu: "Штрихкод",
-    labelEn: "Barcode",
-    fieldType: "text",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["barcode", "barkod", "штрихкод", "штрих код", "штрих-код", "bar kod"],
-  },
-  {
-    fieldKey: "visa_kind",
-    labelTm: "Wiza görnüşi (Tizlik)",
-    labelRu: "Срочность визы",
-    labelEn: "Visa speed/kind",
-    fieldType: "select",
-    optionsKey: "visaKinds",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["visa kind", "срочность", "виза вид", "tizlik"],
-  },
-  {
-    fieldKey: "multiplicity",
-    labelTm: "Kratnost (Geçiş sany)",
-    labelRu: "Кратность визы",
-    labelEn: "Visa multiplicity",
-    fieldType: "select",
-    optionsKey: "multiplicities",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["multiplicity", "kratnost", "кратность", "кратность визы", "однократная", "многократная"],
-  },
-  {
-    fieldKey: "visa_duration_days",
-    labelTm: "Wiza möhleti (Gün)",
-    labelRu: "Srok wizy (дней)",
-    labelEn: "Visa duration (days)",
-    fieldType: "number",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["duration", "srok", "срок визы", "срок", "дней", "mohleki", "möhleti"],
-  },
-  {
-    fieldKey: "visa_issued_date",
-    labelTm: "Wiza çykan senesi",
-    labelRu: "Дата выдачи визы",
-    labelEn: "Visa issued date",
-    fieldType: "date",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["issued date", "дата выдачи", "виза вышла", "wiza cykan senesi"],
-  },
-  {
-    fieldKey: "visa_received_by",
-    labelTm: "Wizany alan",
-    labelRu: "Кем получена виза",
-    labelEn: "Visa received by",
-    fieldType: "autocomplete",
-    optionsKey: "employees",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["received by", "кто получил", "визу получил", "wizany alan"],
-  },
-  {
-    fieldKey: "expected_date",
-    labelTm: "Garaşylýan sene",
-    labelRu: "Ожидаемая дата",
-    labelEn: "Expected date",
-    fieldType: "date",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["expected date", "ожидаемая дата", "garasylyan sene"],
-  },
-  {
-    fieldKey: "booking_datetime",
-    labelTm: "Bron wagty",
-    labelRu: "Дата/время брони",
-    labelEn: "Booking date/time",
-    fieldType: "text",
-    isDefault: false,
-    gridSize: 6,
-    aliases: ["booking", "бронь", "время брони", "bron wagty"],
-  },
-  {
-    fieldKey: "travel_date",
-    labelTm: "Gidilýän sene",
-    labelRu: "Дата поездки",
-    labelEn: "Travel date",
-    fieldType: "date",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["travel date", "дата поездки", "gidilyan sene"],
-  },
-  {
-    fieldKey: "partner",
-    labelTm: "Önümçilik hyzmatdaşy",
-    labelRu: "Партнер",
-    labelEn: "Partner",
-    fieldType: "text",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["partner", "партнер", "hyzmatdas"],
-  },
-  {
-    fieldKey: "visa_queue_info",
-    labelTm: "Nobat maglumaty",
-    labelRu: "Информация об очереди",
-    labelEn: "Queue info",
-    fieldType: "text",
-    isDefault: false,
-    gridSize: 6,
-    aliases: ["queue info", "очередь", "nobat maglumaty"],
-  },
-  {
-    fieldKey: "is_processed",
-    labelTm: "Işlenen ýagdaýy",
-    labelRu: "Статус обработки",
-    labelEn: "Is processed",
-    fieldType: "select",
-    optionsKey: "processedStatuses",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["is processed", "статус обработки", "islenen yagdayy"],
-  },
-  {
-    fieldKey: "queue_date",
-    labelTm: "Nobat alnan senesi",
-    labelRu: "Дата очереди",
-    labelEn: "Queue date",
-    fieldType: "date",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["queue date", "дата очереди", "nobat senesi"],
-  },
-  {
-    fieldKey: "schengen_country",
-    labelTm: "Şengen ýurdy",
-    labelRu: "Страна Шенгена",
-    labelEn: "Schengen country",
-    fieldType: "text",
-    isDefault: false,
-    gridSize: 4,
-    aliases: ["sengen yurdy", "страна шенгена"],
-  },
-];
 
 export const slugifyFieldKey = (text) => {
   if (!text || typeof text !== "string") return "";
@@ -372,459 +123,64 @@ export const normalizeFieldString = (str) => {
     .replace(/ç/g, "c")
     .replace(/ň/g, "n")
     .replace(/ž/g, "z")
-    .replace(/рожд/g, "рождения")
-    .replace(/очеред/g, "ocered")
-    .replace(/очередь/g, "ocered")
     .replace(/\s+/g, " ");
 };
 
 export const findMatchingCatalogField = (input, catalog = []) => {
   if (!input) return null;
-
-  if (typeof input === "object") {
-    if (input.guid || input.id || input.fieldKey) return input;
-  }
+  if (typeof input === "object" && (input.guid || input.fieldKey)) return input;
 
   const rawStr = String(input);
   const normInput = normalizeFieldString(rawStr);
   if (!normInput) return null;
 
-  const pool = [
-    ...(Array.isArray(catalog) ? catalog : []),
-    ...CANONICAL_RECURRING_FIELDS,
-    ...DEFAULT_VISA_FIELDS,
-  ];
-
-  for (const field of pool) {
-    if (!field) continue;
-
-    const normKey = normalizeFieldString(field.fieldKey);
-    const normTm = normalizeFieldString(field.labelTm);
-    const normRu = normalizeFieldString(field.labelRu);
-    const normEn = normalizeFieldString(field.labelEn);
-
-    if (
-      normInput === normKey ||
-      normInput === normTm ||
-      normInput === normRu ||
-      normInput === normEn
-    ) {
-      return field;
-    }
-
-    if (Array.isArray(field.aliases)) {
-      for (const alias of field.aliases) {
-        if (normalizeFieldString(alias) === normInput) {
-          return field;
-        }
-      }
-    }
-  }
-
-  return null;
+  const pool = [...(Array.isArray(catalog) ? catalog : []), ...DEFAULT_VISA_FIELDS];
+  return (
+    pool.find((field) => {
+      if (!field) return false;
+      return (
+        normalizeFieldString(field.fieldKey) === normInput ||
+        normalizeFieldString(field.label?.tk) === normInput ||
+        normalizeFieldString(field.label) === normInput
+      );
+    }) || null
+  );
 };
 
 export const getVisaFieldLabel = (field, currentLanguage = "tk") => {
   if (!field) return "";
-  const match = findMatchingCatalogField(field) || (typeof field === "object" ? field : null);
-  if (!match) return typeof field === "string" ? field : field.fieldKey || "";
-
-  if (currentLanguage === "ru") {
-    return match.labelRu || match.labelTm || match.labelEn || match.fieldKey || "";
+  if (typeof field === "object") {
+    const lbl = field.field_label || field.label;
+    if (typeof lbl === "object" && lbl !== null) {
+      return lbl[currentLanguage] || lbl.tk || lbl.ru || lbl.en || field.fieldKey || "";
+    }
+    return lbl || field.fieldKey || "";
   }
-  if (currentLanguage === "en") {
-    return match.labelEn || match.labelTm || match.labelRu || match.fieldKey || "";
-  }
-  return match.labelTm || match.labelRu || match.labelEn || match.fieldKey || "";
-};
-
-export const VISA_FIELD_DEFS = {
-  application_date: {
-    type: 'date',
-    labelKey: 'visaIntake.fields.applicationDate',
-    gridSize: 4,
-  },
-  operator: {
-    type: 'autocomplete',
-    labelKey: 'visaIntake.fields.operator',
-    optionsKey: 'employees',
-    gridSize: 4,
-  },
-  client_guid: {
-    type: 'client_autocomplete',
-    labelKey: 'visaIntake.fields.clientFullName',
-    gridSize: 12,
-  },
-  birth_date: {
-    type: 'date',
-    labelKey: 'visaIntake.fields.birthDate',
-    gridSize: 4,
-  },
-  passport_number: {
-    type: 'text',
-    labelKey: 'visaIntake.fields.passportNumber',
-    gridSize: 4,
-  },
-  visa_category: {
-    type: 'select',
-    labelKey: 'visaIntake.fields.visaCategory',
-    optionsKey: 'visaCategories',
-    gridSize: 4,
-  },
-  visa_kind: {
-    type: 'select',
-    labelKey: 'visaIntake.fields.visaKind',
-    optionsKey: 'visaKinds',
-    gridSize: 4,
-  },
-  multiplicity: {
-    type: 'select',
-    labelKey: 'visaIntake.fields.multiplicity',
-    optionsKey: 'multiplicities',
-    gridSize: 4,
-  },
-  visa_duration_days: {
-    type: 'number',
-    labelKey: 'visaIntake.fields.visaDurationDays',
-    gridSize: 4,
-  },
-  form_filled_date: {
-    type: 'date',
-    labelKey: 'visaIntake.fields.formFilledDate',
-    gridSize: 4,
-  },
-  form_filled_by: {
-    type: 'autocomplete',
-    labelKey: 'visaIntake.fields.formFilledBy',
-    optionsKey: 'employees',
-    gridSize: 4,
-  },
-  docs_submitted_date: {
-    type: 'date',
-    labelKey: 'visaIntake.fields.docsSubmittedDate',
-    gridSize: 4,
-  },
-  docs_submitted_by: {
-    type: 'autocomplete',
-    labelKey: 'visaIntake.fields.docsSubmittedBy',
-    optionsKey: 'employees',
-    gridSize: 4,
-  },
-  telex_date: {
-    type: 'date',
-    labelKey: 'visaIntake.fields.telexDate',
-    gridSize: 4,
-  },
-  telex_number: {
-    type: 'text',
-    labelKey: 'visaIntake.fields.telexNumber',
-    gridSize: 4,
-  },
-  barcode: {
-    type: 'text',
-    labelKey: 'visaIntake.fields.barcode',
-    gridSize: 4,
-  },
-  visa_issued_date: {
-    type: 'date',
-    labelKey: 'visaIntake.fields.visaIssuedDate',
-    gridSize: 4,
-  },
-  visa_received_by: {
-    type: 'autocomplete',
-    labelKey: 'visaIntake.fields.visaReceivedBy',
-    optionsKey: 'employees',
-    gridSize: 4,
-  },
-  expected_date: {
-    type: 'date',
-    labelKey: 'visaIntake.fields.expectedDate',
-    gridSize: 4,
-  },
-  booking_datetime: {
-    type: 'text',
-    labelKey: 'visaIntake.fields.bookingDatetime',
-    gridSize: 6,
-  },
-  travel_date: {
-    type: 'date',
-    labelKey: 'visaIntake.fields.travelDate',
-    gridSize: 4,
-  },
-  partner: {
-    type: 'text',
-    labelKey: 'visaIntake.fields.partner',
-    gridSize: 4,
-  },
-  notes: {
-    type: 'text',
-    labelKey: 'visaIntake.fields.notes',
-    gridSize: 12,
-    multiline: true,
-    rows: 2,
-  },
-  visa_queue_info: {
-    type: 'text',
-    labelKey: 'visaIntake.fields.visaQueueInfo',
-    gridSize: 6,
-  },
-  is_processed: {
-    type: 'select',
-    labelKey: 'visaIntake.fields.isProcessed',
-    optionsKey: 'processedStatuses',
-    gridSize: 4,
-  },
-  schengen_country: {
-    type: 'text',
-    labelKey: 'visaIntake.fields.schengenCountry',
-    gridSize: 4,
-  },
-  queue_date: {
-    type: 'date',
-    labelKey: 'visaIntake.fields.queueDate',
-    gridSize: 4,
-  },
+  return String(field);
 };
 
 export const VISA_SELECT_OPTIONS = {
   visaCategories: [
-    { value: 'TOURISM', label: 'Tourism' },
-    { value: 'BUSINESS', label: 'Business' },
-    { value: 'STUDENT', label: 'Student' },
-    { value: 'TRANSIT', label: 'Transit' },
-    { value: 'FAMILY', label: 'Family' },
-    { value: 'WORK', label: 'Work' },
-    { value: 'MEDICAL', label: 'Medical' },
-    { value: 'PV-1', label: 'PV-1' },
+    { value: "TOURISM", label: "Tourism" },
+    { value: "BUSINESS", label: "Business" },
+    { value: "STUDENT", label: "Student" },
+    { value: "TRANSIT", label: "Transit" },
+    { value: "FAMILY", label: "Family" },
+    { value: "WORK", label: "Work" },
+    { value: "MEDICAL", label: "Medical" },
+    { value: "PV-1", label: "PV-1" },
   ],
   visaKinds: [
-    { value: 'EXPRESS', label: 'Express' },
-    { value: 'REGULAR', label: 'Regular' },
+    { value: "EXPRESS", label: "Express" },
+    { value: "REGULAR", label: "Regular" },
   ],
   multiplicities: [
-    { value: 'SINGLE', label: 'Single' },
-    { value: 'DOUBLE', label: 'Double' },
-    { value: 'MULTI', label: 'Multi' },
+    { value: "SINGLE", label: "Single" },
+    { value: "DOUBLE", label: "Double" },
+    { value: "MULTI", label: "Multi" },
   ],
   processedStatuses: [
-    { value: 'TRUE', label: 'Işlenen' },
-    { value: 'FALSE', label: 'Işlenmedik' },
+    { value: "TRUE", label: "Işlenen" },
+    { value: "FALSE", label: "Işlenmedik" },
   ],
 };
-
-export const VISA_COUNTRY_CONFIGS = {
-  UZB: {
-    label: 'Uzbekistan',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_kind', 'multiplicity',
-      'visa_duration_days', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'telex_date', 'barcode',
-      'telex_number', 'travel_date', 'partner', 'notes',
-    ],
-  },
-  RUS: {
-    label: 'Russia',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_kind', 'visa_duration_days',
-      'form_filled_by', 'docs_submitted_date', 'docs_submitted_by',
-      'visa_issued_date', 'visa_received_by', 'travel_date',
-    ],
-  },
-  eRUS: {
-    label: 'e-Russia',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_duration_days',
-      'form_filled_by', 'docs_submitted_date', 'docs_submitted_by',
-      'visa_issued_date', 'visa_received_by', 'travel_date',
-    ],
-  },
-  CHN: {
-    label: 'China',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_kind', 'multiplicity',
-      'visa_duration_days', 'form_filled_date', 'form_filled_by',
-      'visa_issued_date', 'docs_submitted_date', 'notes',
-    ],
-  },
-  IRN: {
-    label: 'Iran',
-    fields: [
-      'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_kind', 'multiplicity',
-      'visa_duration_days', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'visa_received_by',
-    ],
-  },
-  BAE: {
-    label: 'UAE',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'docs_submitted_date',
-      'docs_submitted_by', 'expected_date', 'visa_issued_date',
-    ],
-  },
-  VIET: {
-    label: 'Vietnam',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_duration_days',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'travel_date',
-    ],
-  },
-  THAI: {
-    label: 'Thailand',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'visa_received_by',
-    ],
-  },
-  BEL: {
-    label: 'Belgium',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'visa_received_by',
-    ],
-  },
-  IND: {
-    label: 'India',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'visa_received_by',
-    ],
-  },
-  SCH: {
-    label: 'Schengen',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'schengen_country', 'visa_category', 'visa_kind',
-      'multiplicity', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'queue_date', 'visa_issued_date',
-      'visa_received_by', 'notes',
-    ],
-  },
-  KAZ: {
-    label: 'Kazakhstan',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'visa_received_by',
-    ],
-  },
-  USA: {
-    label: 'USA',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'booking_datetime', 'docs_submitted_by', 'docs_submitted_date',
-      'visa_issued_date', 'visa_received_by',
-    ],
-  },
-  AZE: {
-    label: 'Azerbaijan',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_duration_days',
-      'docs_submitted_date', 'docs_submitted_by', 'expected_date',
-      'travel_date', 'visa_issued_date', 'visa_received_by',
-    ],
-  },
-  eARMENIA: {
-    label: 'e-Armenia',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_kind', 'visa_duration_days',
-      'form_filled_by', 'docs_submitted_date', 'docs_submitted_by',
-      'visa_issued_date', 'visa_received_by', 'travel_date',
-    ],
-  },
-  UMRA: {
-    label: 'Umra',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_kind', 'multiplicity',
-      'visa_duration_days', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'telex_date', 'barcode',
-      'telex_number', 'travel_date', 'partner', 'notes',
-    ],
-  },
-  ENG: {
-    label: 'England',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'visa_received_by',
-    ],
-  },
-  SRILANKA: {
-    label: 'Sri Lanka',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'visa_kind', 'multiplicity',
-      'visa_duration_days', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'telex_date', 'barcode',
-      'telex_number', 'travel_date', 'partner', 'notes',
-    ],
-  },
-  TAJ: {
-    label: 'Tajikistan',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'visa_received_by',
-    ],
-  },
-  KOR: {
-    label: 'South Korea',
-    fields: ['operator', 'client_guid', 'visa_queue_info', 'is_processed'],
-  },
-  INDONESIA: {
-    label: 'Indonesia',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'visa_received_by',
-    ],
-  },
-  JAP: {
-    label: 'Japan',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'expected_date',
-      'visa_issued_date', 'visa_received_by',
-    ],
-  },
-  KIR: {
-    label: 'Kyrgyzstan',
-    fields: [
-      'application_date', 'operator', 'client_guid', 'birth_date',
-      'passport_number', 'visa_category', 'form_filled_date', 'form_filled_by',
-      'docs_submitted_date', 'docs_submitted_by', 'visa_issued_date',
-      'visa_received_by',
-    ],
-  },
-  ROM: {
-    label: 'Romania',
-    fields: ['operator', 'client_guid', 'visa_queue_info', 'is_processed'],
-  },
-};
-
-export const VISA_COUNTRY_OPTIONS = Object.entries(VISA_COUNTRY_CONFIGS).map(
-  ([key, cfg]) => ({ value: key, label: cfg.label })
-);

@@ -30,12 +30,18 @@ const EditReferralReportModal = ({ table, row }) => {
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      date: row?.original?.datetime || row?.original?.date || null,
-      quantity: row?.original?.total_count || row?.original?.quantity || "",
-      assignment_opr_guid: row?.original?.assignment_opr_guid || row?.original?.assignment_opr?.guid || "",
-      receiver_opr_guid: row?.original?.receiver_opr_guid || row?.original?.receiver_opr?.guid || "",
-      startNo: row?.original?.start_yh_number || row?.original?.startNo || "",
-      endNo: row?.original?.end_yh_number || row?.original?.endNo || "",
+      date: row?.original?.datetime || null,
+      quantity: row?.original?.total_count || "",
+      assignment_opr_guid:
+        row?.original?.assignment_opr_guid ||
+        row?.original?.reportAS_operator?.guid ||
+        "",
+      receiver_opr_guid:
+        row?.original?.receiver_opr_guid ||
+        row?.original?.reportRE_operator?.guid ||
+        "",
+      startNo: row?.original?.start_yh_number || "",
+      endNo: row?.original?.end_yh_number || "",
       status: row?.original?.status || 1,
       note: row?.original?.note || "",
     },
@@ -43,21 +49,20 @@ const EditReferralReportModal = ({ table, row }) => {
 
   useEffect(() => {
     if (row?.original) {
-      let rawStatus = row.original.status;
-      if (typeof rawStatus === "string") {
-        if (rawStatus.toUpperCase().includes("SAT")) rawStatus = 1;
-        else if (rawStatus.toUpperCase().includes("ZY")) rawStatus = 2;
-        else if (rawStatus.toUpperCase().includes("YIT")) rawStatus = 3;
-        else rawStatus = 1;
-      }
       reset({
-        date: row.original.datetime || row.original.date || null,
-        quantity: row.original.total_count ?? row.original.quantity ?? "",
-        assignment_opr_guid: row.original.assignment_opr_guid || row.original.assignment_opr?.guid || "",
-        receiver_opr_guid: row.original.receiver_opr_guid || row.original.receiver_opr?.guid || "",
-        startNo: String(row.original.start_yh_number ?? row.original.startNo ?? ""),
-        endNo: String(row.original.end_yh_number ?? row.original.endNo ?? ""),
-        status: Number(rawStatus || 1),
+        date: row.original.datetime || null,
+        quantity: row.original.total_count ?? "",
+        assignment_opr_guid:
+          row.original.assignment_opr_guid ||
+          row.original.reportAS_operator?.guid ||
+          "",
+        receiver_opr_guid:
+          row.original.receiver_opr_guid ||
+          row.original.reportRE_operator?.guid ||
+          "",
+        startNo: String(row.original.start_yh_number ?? ""),
+        endNo: String(row.original.end_yh_number ?? ""),
+        status: Number(row.original.status || 1),
         note: row.original.note || "",
       });
     }
@@ -119,7 +124,6 @@ const EditReferralReportModal = ({ table, row }) => {
               name="date"
               control={control}
               label={t("columns.dateTime")}
-              size="medium"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>

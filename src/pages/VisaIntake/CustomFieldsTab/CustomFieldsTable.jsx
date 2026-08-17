@@ -9,6 +9,7 @@ import { useLocale } from "../../../hooks/useLocale";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
+import { useDebounce } from "../../../hooks/useDebounce";
 import { getCustomFieldsApi } from "../../../api/queries/getters";
 import { deleteCustomFieldApi } from "../../../api/queries/delete";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
@@ -143,8 +144,9 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
   const defaultMrtOptions = getDefaultMRTOptions();
 
   const [page, setPage] = useState(1);
-  const [limit] = useState(40);
+  const [limit, setPageSize] = useState(20);
   const [searchQuery, setSearch] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 400);
   const [fieldTypeFilter, setFieldTypeFilter] = useState("");
   const [isFieldTypeSelectOpen, setIsFieldTypeSelectOpen] = useState(false);
 
@@ -153,10 +155,10 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
       page,
       limit,
       field_type: fieldTypeFilter || undefined,
-      search: searchQuery || undefined,
-      option_search: searchQuery || undefined,
+      search: debouncedSearch || undefined,
+      option_search: debouncedSearch || undefined,
     }),
-    [page, limit, fieldTypeFilter, searchQuery]
+    [page, limit, fieldTypeFilter, debouncedSearch]
   );
 
   const {
@@ -168,14 +170,14 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
     pageCount = 1,
   } = usePagginationGet({
     apiFn: getCustomFieldsApi,
-    key: ["customFields", params],
+    key: "customFields",
     params,
   });
 
-  const [prevSearch, setPrevSearch] = useState(searchQuery);
+  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
   const [prevFilter, setPrevFilter] = useState(fieldTypeFilter);
-  if (searchQuery !== prevSearch || fieldTypeFilter !== prevFilter) {
-    setPrevSearch(searchQuery);
+  if (debouncedSearch !== prevSearch || fieldTypeFilter !== prevFilter) {
+    setPrevSearch(debouncedSearch);
     setPrevFilter(fieldTypeFilter);
     setPage(1);
   }
@@ -185,6 +187,7 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
     queryKey: "customFields",
     idKey: "guid",
     isPaginated: true,
+    invalidateQueries: ["countries", "countryVisaFields", "receivings"],
   });
 
   const deleteDialog = useDeleteDialog({
@@ -300,6 +303,8 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    memoMode: "rows",
+    autoResetPageIndex: false,
     muiTablePaperProps: {
       sx: (theme) => ({
         display: "flex",
@@ -321,7 +326,7 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
       showSkeletons: isLoading,
     },
     enablePagination: false,
-    enableBottomToolbar: pageCount > 1,
+    enableBottomToolbar: true,
     renderBottomToolbarCustomActions: () => (
       <Box
         sx={{
@@ -340,6 +345,7 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
           pageSize={limit}
           totalRows={totalItems}
           onPageChange={(newIndex) => setPage(newIndex + 1)}
+          setPageSize={setPageSize}
         />
       </Box>
     ),

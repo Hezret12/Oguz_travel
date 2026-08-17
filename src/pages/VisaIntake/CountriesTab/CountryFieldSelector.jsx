@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useMemo, useRef, useState } from "react";
 import { Controller, useWatch } from "react-hook-form";
 import {
   Autocomplete,
@@ -11,13 +11,14 @@ import {
   Paper,
   Tooltip,
   Button,
+  alpha,
 } from "@mui/material";
 import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-
 import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
+import SearchIcon from "@mui/icons-material/Search";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { getCustomFieldsApi } from "../../../api/queries/getters";
@@ -28,16 +29,22 @@ import {
   normalizeFieldString,
 } from "../../../functions/visaCountryFieldConfigs";
 
-
-
 const getItemKey = (item) => item?.guid || item?.fieldKey;
 
+/** Custom root slot — strips non-DOM props MUI Autocomplete leaks */
+const AutocompleteRoot = forwardRef(function AutocompleteRoot(props, ref) {
+  const domProps = { ...props };
+  delete domProps.renderTags;
+  delete domProps.ownerState;
+  delete domProps.ListboxProps;
+  return <div ref={ref} {...domProps} />;
+});
 
-
-
-const ReorderableFieldItem = ({
+/* ── Draggable selected-field row ─────────────────────────────────── */
+const SelectedFieldItem = ({
   index,
   label,
+  fieldType,
   onRemove,
   isDragging,
   dragOverIndex,
@@ -55,74 +62,103 @@ const ReorderableFieldItem = ({
       alignItems: "center",
       justifyContent: "space-between",
       px: 1.5,
-      py: 0.7,
+      py: 0.6,
       borderRadius: "8px",
       border: "1px solid",
       borderColor: dragOverIndex === index ? "primary.main" : "divider",
       backgroundColor: isDragging ? "action.selected" : "background.paper",
       boxShadow: isDragging
-        ? "0px 4px 12px rgba(0, 0, 0, 0.12)"
-        : "0px 1px 2px rgba(0, 0, 0, 0.03)",
-      opacity: isDragging ? 0.6 : 1,
+        ? "0 4px 12px rgba(0,0,0,0.12)"
+        : "0 1px 2px rgba(0,0,0,0.03)",
+      opacity: isDragging ? 0.55 : 1,
       cursor: "grab",
-      transition: "all 0.18s ease-in-out",
+      transition: "all 0.15s ease",
       "&:hover": {
         backgroundColor: "action.hover",
-        borderColor: "primary.main",
-        boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.06)",
+        borderColor: "primary.light",
       },
       "&:active": { cursor: "grabbing" },
     }}
   >
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-      <DragIndicatorIcon sx={{ fontSize: 18, color: "text.disabled" }} />
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0, flex: 1 }}>
+      <DragIndicatorIcon sx={{ fontSize: 16, color: "text.disabled", flexShrink: 0 }} />
       <Chip
-        label={`#${index + 1}`}
+        label={index + 1}
         size="small"
         color="primary"
-        sx={{ height: 22, fontWeight: 700, fontSize: "0.7rem", borderRadius: "6px" }}
+        sx={{
+          height: 20,
+          minWidth: 20,
+          fontWeight: 700,
+          fontSize: "0.7rem",
+          borderRadius: "6px",
+          flexShrink: 0,
+          "& .MuiChip-label": { px: 0.6 },
+        }}
       />
-      <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 500,
+          color: "text.primary",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
         {label}
       </Typography>
+      {fieldType && (
+        <Chip
+          label={String(fieldType).toUpperCase()}
+          size="small"
+          sx={{
+            height: 18,
+            fontSize: "0.6rem",
+            fontWeight: 700,
+            borderRadius: "4px",
+            backgroundColor: fieldType === "date" ? "info.main" : "action.hover",
+            color: fieldType === "date" ? "info.contrastText" : "text.secondary",
+            flexShrink: 0,
+            "& .MuiChip-label": { px: 0.5 },
+          }}
+        />
+      )}
     </Box>
-
-    <Tooltip title="Poz">
+    <Tooltip title="Poz" arrow>
       <IconButton
         size="small"
         color="error"
         onClick={() => onRemove(index)}
-        sx={{ p: 0.4, borderRadius: "6px" }}
+        sx={{ p: 0.3, ml: 0.5, flexShrink: 0 }}
       >
-        <CloseIcon fontSize="small" />
+        <CloseIcon sx={{ fontSize: 16 }} />
       </IconButton>
     </Tooltip>
   </Box>
 );
 
-
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  CountryFieldSelector                                              */
+/* ═══════════════════════════════════════════════════════════════════ */
 export const CountryFieldSelector = ({ control, name = "fields" }) => {
   const { t } = useLocale();
 
-
   const [candidateString, setCandidateString] = useState(null);
   const [pendingUpdateFn, setPendingUpdateFn] = useState(null);
-
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 400);
 
-
   const [accumulatedFields, setAccumulatedFields] = useState([]);
 
-
+  /* Reset page on search change (React 19-safe in-render state adjustment) */
   const [prevSearch, setPrevSearch] = useState(debouncedSearch);
   if (debouncedSearch !== prevSearch) {
     setPrevSearch(debouncedSearch);
     setPage(1);
   }
-
 
   const { data: pageData = [], isLoading, isFetching, pageCount } = usePagginationGet({
     apiFn: getCustomFieldsApi,
@@ -130,10 +166,9 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     params: { limit: 20, page, search: debouncedSearch || undefined },
   });
 
-
+  /* Accumulate pages (React 19-safe) */
   const [prevDataKey, setPrevDataKey] = useState("");
   const currentDataKey = `${debouncedSearch}_${page}_${pageData?.length ?? 0}_${pageData?.[0]?.guid ?? ""}`;
-
   if (currentDataKey !== prevDataKey) {
     setPrevDataKey(currentDataKey);
     if (Array.isArray(pageData)) {
@@ -149,9 +184,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     }
   }
 
-
   const fieldValue = useWatch({ control, name, defaultValue: [] });
-
 
   const mergedOptions = useMemo(() => {
     const list = Array.isArray(accumulatedFields) ? [...accumulatedFields] : [];
@@ -170,12 +203,10 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     return list;
   }, [accumulatedFields, fieldValue]);
 
-
   const getFieldLabel = useCallback((item) => {
     if (typeof item === "string") return item;
     return item.field_label?.tk || item.fieldKey || "";
   }, []);
-
 
   const customFilterOptions = useCallback((options, state) => {
     const rawQuery = state.inputValue?.trim();
@@ -208,10 +239,8 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
     if (!hasExact && rawQuery) {
       filtered.push(rawQuery);
     }
-
     return filtered;
   }, []);
-
 
   const handleListboxScroll = useCallback(
     (event) => {
@@ -221,16 +250,14 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
         setPage((p) => p + 1);
       }
     },
-    [page, pageCount, isFetching, isLoading]
+    [page, pageCount, isFetching, isLoading],
   );
-
 
   const handleInputChange = useCallback((_, value, reason) => {
     if (reason === "input" || reason === "clear") {
       setSearchInput(value);
     }
   }, []);
-
 
   const isOptionEqual = useCallback((option, val) => {
     if (typeof option === "string" || typeof val === "string") {
@@ -255,27 +282,22 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
           dragIndexRef.current = index;
           e.dataTransfer.effectAllowed = "move";
         };
-
         const handleDragOver = (e, index) => {
           e.preventDefault();
           e.dataTransfer.dropEffect = "move";
           if (dragOverIndex !== index) setDragOverIndex(index);
         };
-
         const handleDragEnd = () => {
           const fromIndex = dragIndexRef.current;
           const toIndex = dragOverIndex;
           dragIndexRef.current = null;
           setDragOverIndex(null);
-
           if (fromIndex == null || toIndex == null || fromIndex === toIndex) return;
           const arr = [...value];
           const [moved] = arr.splice(fromIndex, 1);
           arr.splice(toIndex, 0, moved);
           onChange(arr);
         };
-
-
         const handleRemove = (index) => onChange(value.filter((_, i) => i !== index));
         const handleClearAll = () => onChange([]);
 
@@ -305,35 +327,60 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
         };
 
         return (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}>
-
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1.5,
+              border: "1px solid",
+              borderColor: error ? "error.main" : "divider",
+              borderRadius: "12px",
+              p: 2,
+              backgroundColor: (theme) => alpha(theme.palette.background.default, 0.5),
+            }}
+          >
+            {/* ── Header ──────────────────────────────────────────── */}
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "text.primary" }}>
-                {t("customFields.title")}
-              </Typography>
-              {selectedCount > 0 && (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary" }}>
+                  {t("customFields.title")}
+                </Typography>
+                {selectedCount > 0 && (
                   <Chip
-                    label={`${selectedCount} saýlandy`}
+                    label={selectedCount}
                     size="small"
                     color="primary"
-                    variant="outlined"
-                    sx={{ borderRadius: "6px", fontWeight: 600, fontSize: "0.75rem" }}
+                    sx={{
+                      height: 22,
+                      fontWeight: 700,
+                      fontSize: "0.75rem",
+                      borderRadius: "6px",
+                      "& .MuiChip-label": { px: 0.7 },
+                    }}
                   />
-                  <Button
-                    size="small"
-                    color="error"
-                    startIcon={<DeleteSweepIcon style={{ fontSize: 16 }} />}
-                    onClick={handleClearAll}
-                    sx={{ textTransform: "none", fontSize: "0.75rem", py: 0.2, px: 0.8, minWidth: "auto" }}
-                  >
-                    {t("clearAll")}
-                  </Button>
-                </Box>
+                )}
+              </Box>
+              {selectedCount > 0 && (
+                <Button
+                  size="small"
+                  color="error"
+                  startIcon={<DeleteSweepIcon sx={{ fontSize: 16 }} />}
+                  onClick={handleClearAll}
+                  sx={{
+                    textTransform: "none",
+                    fontSize: "0.75rem",
+                    py: 0.2,
+                    px: 1,
+                    minWidth: "auto",
+                    borderRadius: "6px",
+                  }}
+                >
+                  {t("clearAll")}
+                </Button>
               )}
             </Box>
 
-
+            {/* ── Search Autocomplete (NO inline tags — fixed height) */}
             <Autocomplete
               multiple
               freeSolo
@@ -342,16 +389,24 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               loading={isLoading || isFetching}
               inputValue={searchInput}
               onInputChange={handleInputChange}
+              slots={{ root: AutocompleteRoot }}
               slotProps={{
-                listbox: { onScroll: handleListboxScroll },
+                listbox: {
+                  onScroll: handleListboxScroll,
+                  sx: { maxHeight: 280 },
+                },
               }}
               filterOptions={customFilterOptions}
               getOptionLabel={getFieldLabel}
               isOptionEqualToValue={isOptionEqual}
               value={value}
               onChange={handleChange}
+              /* Hide tags completely — selected items shown in list below */
+              renderTags={() => null}
               renderOption={(props, option, { selected }) => {
                 const { key: optionKey, ...otherProps } = props;
+                delete otherProps.renderTags;
+                delete otherProps.ownerState;
                 const isNew = typeof option === "string";
                 const label = getFieldLabel(option);
                 const fieldType = option.field_type || "text";
@@ -367,18 +422,17 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                         alignItems: "center",
                         gap: 1,
                         px: 1.5,
-                        py: 1,
+                        py: 0.8,
                         borderRadius: "6px",
                         my: 0.2,
                         color: "primary.main",
                         fontWeight: 600,
-                        backgroundColor: "action.hover",
-                        "&:hover": { backgroundColor: "action.selected" },
+                        "&:hover": { backgroundColor: "action.hover" },
                       }}
                     >
                       <AddBoxOutlinedIcon color="primary" fontSize="small" />
                       <Typography variant="body2" sx={{ fontWeight: 600, color: "primary.main" }}>
-                        + {t("customFields.addTitle")}: "{option}"
+                        + {t("customFields.addTitle")}: &quot;{option}&quot;
                       </Typography>
                     </Box>
                   );
@@ -394,7 +448,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                       alignItems: "center",
                       justifyContent: "space-between",
                       px: 1.5,
-                      py: 1,
+                      py: 0.8,
                       gap: 1.5,
                       borderRadius: "6px",
                       my: 0.2,
@@ -402,7 +456,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                       "&:hover": { backgroundColor: "action.hover" },
                     }}
                   >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: 1 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: 1, minWidth: 0 }}>
                       {selected ? (
                         <CheckCircleOutlinedIcon color="primary" sx={{ fontSize: 18 }} />
                       ) : (
@@ -413,12 +467,19 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                             borderRadius: "50%",
                             border: "1.5px solid",
                             borderColor: "divider",
+                            flexShrink: 0,
                           }}
                         />
                       )}
                       <Typography
                         variant="body2"
-                        sx={{ fontWeight: selected ? 600 : 400, color: "text.primary" }}
+                        sx={{
+                          fontWeight: selected ? 600 : 400,
+                          color: "text.primary",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
                       >
                         {label}
                       </Typography>
@@ -428,75 +489,58 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                       size="small"
                       sx={{
                         height: 20,
-                        fontSize: "0.65rem",
+                        fontSize: "0.6rem",
                         fontWeight: 700,
                         borderRadius: "4px",
-                        backgroundColor: fieldType === "date" ? "info.soft" : "action.hover",
-                        color: "text.secondary",
+                        backgroundColor: fieldType === "date" ? "info.main" : "action.hover",
+                        color: fieldType === "date" ? "info.contrastText" : "text.secondary",
+                        flexShrink: 0,
+                        "& .MuiChip-label": { px: 0.5 },
                       }}
                     />
                   </Box>
                 );
               }}
-              renderTags={(tagValue, getTagProps) =>
-                tagValue.map((option, index) => {
-                  const isNew = typeof option === "string";
-                  const label = getFieldLabel(option);
-                  const tagProps = { ...getTagProps({ index }) };
-                  const tagKey = tagProps.key;
-                  delete tagProps.key;
-                  delete tagProps.renderTags;
-                  delete tagProps.ownerState;
-
-                  return (
-                    <Chip
-                      key={tagKey || `tag-${getItemKey(option) || option}-${index}`}
-                      {...tagProps}
-                      label={label}
-                      size="small"
-                      icon={
-                        isNew ? (
-                          <AddBoxOutlinedIcon style={{ fontSize: 16 }} />
-                        ) : (
-                          <CheckCircleOutlinedIcon style={{ fontSize: 16 }} />
-                        )
-                      }
-                      color={isNew ? "secondary" : "primary"}
-                      variant={isNew ? "outlined" : "filled"}
-                      sx={{
-                        borderRadius: "8px",
-                        fontWeight: 500,
-                        fontSize: "0.8rem",
-                        maxWidth: "100%",
-                        my: "2px",
-                        "& .MuiChip-label": {
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        },
-                      }}
-                    />
-                  );
-                })
-              }
               renderInput={(params) => {
-                const { slotProps: paramsSlotProps, ...textFieldProps } = params;
+                const textFieldProps = { ...params };
+                const paramsSlotProps = textFieldProps.slotProps;
+                delete textFieldProps.slotProps;
+                delete textFieldProps.renderTags;
+                delete textFieldProps.ownerState;
+
+                const inputSlotProps = paramsSlotProps?.input
+                  ? { ...paramsSlotProps.input }
+                  : {};
+                delete inputSlotProps.renderTags;
+                delete inputSlotProps.ownerState;
+
+                const cleanedInputProps = textFieldProps.InputProps
+                  ? { ...textFieldProps.InputProps }
+                  : {};
+                delete textFieldProps.InputProps;
+                delete cleanedInputProps.renderTags;
+                delete cleanedInputProps.ownerState;
+
                 return (
                   <TextField
                     {...textFieldProps}
-                    placeholder="Meýdança saýlaň ýa-da gözleň..."
+                    placeholder={t("customFields.searchPlaceholder", "Meýdança gözleň...")}
                     error={Boolean(error)}
-                    helperText={error?.message || "Ýurt üçin meýdançalary saýlaň."}
+                    helperText={error?.message}
                     slotProps={{
                       ...paramsSlotProps,
                       input: {
-                        ...paramsSlotProps?.input,
+                        ...cleanedInputProps,
+                        ...inputSlotProps,
+                        startAdornment: (
+                          <SearchIcon sx={{ fontSize: 20, color: "text.disabled", mr: 0.5, flexShrink: 0 }} />
+                        ),
                         endAdornment: (
                           <>
                             {(isLoading || isFetching) && (
-                              <CircularProgress color="inherit" size={20} />
+                              <CircularProgress color="inherit" size={18} />
                             )}
-                            {paramsSlotProps?.input?.endAdornment}
+                            {inputSlotProps?.endAdornment || cleanedInputProps?.endAdornment}
                           </>
                         ),
                       },
@@ -504,15 +548,8 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "10px",
-                        display: "flex",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        gap: "6px",
-                        maxHeight: selectedCount > 3 ? "160px" : "none",
-                        overflowY: selectedCount > 3 ? "auto" : "visible",
-                        py: 1,
-                        px: 1.5,
-                        alignContent: "flex-start",
+                        height: "42px",
+                        fontSize: "0.875rem",
                       },
                     }}
                   />
@@ -520,51 +557,66 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               }}
             />
 
-
-            {selectedCount > 0 && (
-              <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 1 }}>
-                <Typography
-                  variant="caption"
-                  sx={{ fontWeight: 600, color: "text.secondary", px: 0.5 }}
-                >
-                  Saýlanan meýdançalaryň sıralamasy:
+            {/* ── Selected fields list with drag reorder (STATIC FIXED HEIGHT) ─── */}
+            {selectedCount > 0 ? (
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 1,
+                  borderRadius: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0.5,
+                  height: 220,
+                  overflowY: "auto",
+                  borderColor: "divider",
+                  "&::-webkit-scrollbar": { width: 5 },
+                  "&::-webkit-scrollbar-thumb": {
+                    borderRadius: 3,
+                    backgroundColor: "action.disabled",
+                  },
+                }}
+              >
+                {value.map((item, index) => (
+                  <SelectedFieldItem
+                    key={
+                      typeof item === "string"
+                        ? `sel-${item}-${index}`
+                        : `sel-${getItemKey(item) || index}`
+                    }
+                    index={index}
+                    label={getFieldLabel(item)}
+                    fieldType={typeof item === "object" ? item.field_type : null}
+                    isDragging={dragIndexRef.current === index}
+                    dragOverIndex={dragOverIndex}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDragEnd={handleDragEnd}
+                    onRemove={handleRemove}
+                  />
+                ))}
+              </Paper>
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: 220,
+                  borderRadius: "10px",
+                  border: "1px dashed",
+                  borderColor: "divider",
+                  color: "text.disabled",
+                  backgroundColor: "action.hover",
+                }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {t("customFields.emptyState", "Heniz meýdança saýlanmady")}
                 </Typography>
-                <Paper
-                  variant="outlined"
-                  sx={{
-                    p: 1,
-                    borderRadius: "10px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 0.8,
-                    maxHeight: 240,
-                    overflowY: "auto",
-                    backgroundColor: "action.hover",
-                    borderColor: "divider",
-                  }}
-                >
-                  {value.map((item, index) => (
-                    <ReorderableFieldItem
-                      key={
-                        typeof item === "string"
-                          ? `reorder-${item}-${index}`
-                          : `reorder-${getItemKey(item) || index}-${index}`
-                      }
-                      index={index}
-                      label={getFieldLabel(item)}
-                      isDragging={dragIndexRef.current === index}
-                      dragOverIndex={dragOverIndex}
-                      onDragStart={handleDragStart}
-                      onDragOver={handleDragOver}
-                      onDragEnd={handleDragEnd}
-                      onRemove={handleRemove}
-                    />
-                  ))}
-                </Paper>
               </Box>
             )}
 
-
+            {/* ── Create custom field modal ───────────────────────── */}
             {Boolean(candidateString) && (
               <CreateCustomFieldModal
                 open={true}

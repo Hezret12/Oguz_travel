@@ -71,6 +71,7 @@
     "passportExpiryDate": "Дата окончания паспорта",
     "passportCountryOfIssue": "Страна выдачи паспорта",
     "dateTime": "Senesi",
+    "date": "Дата",
     "paymentStatus": "Статус оплаты",
     "gender": "Пол",
     "employee": "Сотрудник",
@@ -277,6 +278,7 @@
     "submittedBy": "Сдал",
     "receivedBy": "Принял",
     "quantity": "Количество",
+    "totalCount": "Количество",
     "totalQuantity": "Общее количество",
     "letterUnit": "шт. писем",
     "statusSold": "Продано",
@@ -337,6 +339,7 @@
     "selectCountryPrompt": "Выберите страну",
     "selectCountryDescription": "Пожалуйста, выберите страну сверху, чтобы увидеть заявления",
     "selectCountryPlaceholder": "Выберите страну...",
+    "selectCountryToAdd": "Сначала выберите страну, чтобы добавить заявку",
     "defaultFieldsInfoTitle": "Стандартные поля:",
     "defaultFieldsInfoDesc": "Клиент, Дата подачи, Оператор 1, Оператор 2 и Примечание добавляются автоматически.",
     "fields": {
@@ -461,7 +464,9 @@
     "typeText": "Текст (Text)",
     "typeNumber": "Число (Number)",
     "typeDate": "Дата (Date)",
-    "typeSelect": "Выпадающий список (Select)"
+    "typeSelect": "Выпадающий список (Select)",
+    "searchPlaceholder": "Поиск полей...",
+    "emptyState": "Поля ещё не выбраны"
   },
   "errorBoundary": {
     "networkErrorTitle": "Ошибка подключения",

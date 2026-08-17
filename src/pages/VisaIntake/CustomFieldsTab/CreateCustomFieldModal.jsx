@@ -25,6 +25,7 @@ export const CreateCustomFieldModal = ({
   const { mutate: createCustomField, isPending } = useCreate({
     apiFn: addCustomFieldApi,
     key: "customFields",
+    invalidateQueries: ["countries", "countryVisaFields", "receivings"],
     onSuccess: (res) => {
       const createdItem = res?.data?.data || res?.data || res;
       if (onSave) {

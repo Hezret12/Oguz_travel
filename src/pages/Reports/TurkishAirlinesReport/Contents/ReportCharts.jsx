@@ -99,6 +99,7 @@ const ReportCharts = ({
   formatNumber,
   monthQuoted,
   selectedQuarter,
+  onQuarterChange,
   teal,
   accent,
   borderCol,
@@ -224,103 +225,214 @@ const ReportCharts = ({
             {isStatusLoading ? (
               <Skeleton variant="rectangular" height={260} sx={{ borderRadius: 2 }} />
             ) : statusChartData && statusChartData.length > 0 ? (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1, flexWrap: { xs: "wrap", sm: "nowrap" } }}>
-                <Box sx={{ width: { xs: "100%", sm: 200 }, height: 230, display: "flex", justifyContent: "center", alignItems: "center", position: "relative" }}>
-                  <PieChart
-                    series={[
-                      {
-                        data: statusChartData,
-                        innerRadius: 48,
-                        outerRadius: 82,
-                        paddingAngle: 3,
-                        cornerRadius: 5,
-                        highlightScope: { faded: "global", highlighted: "item" },
-                        faded: { innerRadius: 36, additionalRadius: -28, color: "gray" },
-                        valueFormatter: (v) => `${v.value} (${v.percentage || ""})`,
-                      },
-                    ]}
-                    height={230}
-                    margin={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                    slotProps={{ legend: { hidden: true } }}
-                    onHighlightChange={(item) => setHighlightedItem(item)}
-                  />
+              <Grid
+                container
+                spacing={{ xs: 2.5, md: 3 }}
+                sx={{ flex: 1, py: 1, width: "100%", m: 0, alignItems: "center" }}
+              >
+                {/* Left Column: Donut Chart with Centered Metric */}
+                <Grid
+                  size={{ xs: 12, sm: 5 }}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    p: 0,
+                  }}
+                >
                   <Box
                     sx={{
-                      position: "absolute",
-                      top: "50%",
-                      left: { xs: "50%", sm: "100px" },
-                      transform: "translate(-50%, -50%)",
-                      textAlign: "center",
-                      pointerEvents: "none",
+                      width: 190,
+                      height: 190,
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      position: "relative",
                     }}
                   >
-                    <Typography
-                      variant="h6"
-                      sx={{ fontWeight: 800, color: isDark ? "#FFF" : "#0F172A", lineHeight: 1 }}
-                    >
-                      {highlightedSlice ? highlightedSlice.value : totalStatusCount}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontSize: 11 }}
-                    >
-                      {highlightedSlice ? highlightedSlice.statusName : (t("report.turkishAirlines.total") || "Jemi")}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 1.5, minWidth: { sm: 160 } }}>
-                  {statusChartData.map((item) => (
-                    <Box
-                      key={item.id}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: 1,
-                        py: 0.5,
-                        px: 1,
-                        borderRadius: 1.5,
-                        transition: "background-color 0.15s ease",
-                        "&:hover": {
-                          backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#F8FAFC",
+                    <PieChart
+                      hideLegend
+                      slotProps={{
+                        legend: { hidden: true },
+                      }}
+                      series={[
+                        {
+                          data: (statusChartData.filter((d) => d.value > 0).length > 0
+                            ? statusChartData.filter((d) => d.value > 0)
+                            : [{ id: "empty", value: 1, color: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0" }]
+                          ).map((item) => ({
+                            id: item.id,
+                            value: item.value,
+                            color: item.color,
+                            label: "", // Empty to strictly prevent canvas legend rendering
+                          })),
+                          innerRadius: 54,
+                          outerRadius: 82,
+                          paddingAngle: 4,
+                          cornerRadius: 6,
+                          highlightScope: { faded: "global", highlighted: "item" },
+                          faded: { innerRadius: 48, additionalRadius: -8, color: "gray" },
                         },
+                      ]}
+                      width={190}
+                      height={190}
+                      margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
+                      onHighlightChange={(item) => setHighlightedItem(item)}
+                    />
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        textAlign: "center",
+                        pointerEvents: "none",
                       }}
                     >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Box
-                          sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: "50%",
-                            backgroundColor: item.color,
-                            flexShrink: 0,
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            color: isDark ? "rgba(255,255,255,0.85)" : "#334155",
-                            fontSize: 13,
-                          }}
-                        >
-                          {item.statusName}
-                        </Typography>
-                      </Box>
                       <Typography
-                        variant="body2"
+                        variant="h5"
                         sx={{
-                          fontWeight: 700,
-                          color: item.color,
-                          fontSize: 13,
+                          fontWeight: 800,
+                          color: isDark ? "#FFF" : "#0F172A",
+                          lineHeight: 1.1,
+                          fontSize: "1.45rem",
                         }}
                       >
-                        {item.value} ({item.percentage})
+                        {highlightedSlice ? highlightedSlice.value : totalStatusCount}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: isDark ? "rgba(255,255,255,0.5)" : "#64748B",
+                          fontSize: 11,
+                          fontWeight: 600,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.5px",
+                          display: "block",
+                          mt: 0.2,
+                        }}
+                      >
+                        {highlightedSlice
+                          ? highlightedSlice.statusName
+                          : (t("report.turkishAirlines.total") || "Jemi")}
                       </Typography>
                     </Box>
-                  ))}
-                </Box>
-              </Box>
+                  </Box>
+                </Grid>
+
+                {/* Right Column: Status Items Breakdown with Percent Bars */}
+                <Grid
+                  size={{ xs: 12, sm: 7 }}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    p: { xs: 0, sm: "0 8px" },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 1.2,
+                      width: "100%",
+                    }}
+                  >
+                    {statusChartData.map((item) => {
+                      const pctNum = parseFloat(String(item.percentage || "0").replace("%", "")) || 0;
+                      return (
+                        <Box
+                          key={item.id}
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 0.6,
+                            p: 1.2,
+                            borderRadius: "10px",
+                            backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "#F8FAFC",
+                            border: (theme) => `1px solid ${theme.palette.divider}`,
+                            transition: "all 0.15s ease",
+                            "&:hover": {
+                              backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
+                              transform: "translateX(2px)",
+                            },
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                              <Box
+                                sx={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: "50%",
+                                  backgroundColor: item.color,
+                                  flexShrink: 0,
+                                }}
+                              />
+                              <Typography
+                                sx={{
+                                  fontWeight: 700,
+                                  color: "text.primary",
+                                  fontSize: 13,
+                                }}
+                              >
+                                {item.statusName}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                              <Typography
+                                sx={{
+                                  fontWeight: 800,
+                                  color: item.value > 0 ? item.color : "text.secondary",
+                                  fontSize: 13,
+                                }}
+                              >
+                                {item.value}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  fontSize: 12,
+                                  fontWeight: 600,
+                                  color: "text.secondary",
+                                }}
+                              >
+                                ({item.percentage})
+                              </Typography>
+                            </Box>
+                          </Box>
+
+                          {/* Visual Progress Bar */}
+                          <Box
+                            sx={{
+                              width: "100%",
+                              height: 4,
+                              borderRadius: 2,
+                              backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                              overflow: "hidden",
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: `${Math.min(pctNum, 100)}%`,
+                                height: "100%",
+                                backgroundColor: item.color,
+                                borderRadius: 2,
+                                transition: "width 0.5s ease-in-out",
+                              }}
+                            />
+                          </Box>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </Grid>
+              </Grid>
             ) : (
               <EmptyState
                 icon={<PieChartRoundedIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />}
@@ -447,6 +559,7 @@ const ReportCharts = ({
         <Grid size={{ xs: 12, lg: 6 }}>
           <QuarterReportCard
             selectedQuarter={selectedQuarter}
+            onQuarterChange={onQuarterChange}
             paperSx={paperSx}
             teal={teal}
           />

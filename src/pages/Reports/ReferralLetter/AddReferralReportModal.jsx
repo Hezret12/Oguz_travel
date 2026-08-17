@@ -34,7 +34,7 @@ const AddReferralReportModal = ({ open, close, table }) => {
 
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      date: null,
+      date: new Date().toISOString(),
       quantity: "",
       assignment_opr_guid: "",
       receiver_opr_guid: "",
@@ -67,7 +67,16 @@ const AddReferralReportModal = ({ open, close, table }) => {
 
   const handleClose = () => {
     if (table) table.setCreatingRow(null);
-    reset();
+    reset({
+      date: new Date().toISOString(),
+      quantity: "",
+      assignment_opr_guid: "",
+      receiver_opr_guid: "",
+      startNo: "",
+      endNo: "",
+      status: 1,
+      note: "",
+    });
     close?.();
   };
 
@@ -102,7 +111,6 @@ const AddReferralReportModal = ({ open, close, table }) => {
               name="date"
               control={control}
               label={t("columns.dateTime")}
-              size="medium"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>

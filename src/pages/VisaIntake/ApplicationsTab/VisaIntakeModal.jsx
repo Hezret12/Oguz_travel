@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Grid, CircularProgress, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
@@ -10,17 +10,14 @@ import FooterButton from "../../../components/Dialog/FooterButton";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
 import CustomDatePicker from "../../../components/CustomDatePicker";
-import AppAutocomplete from "../../../components/AppAutocomplete";
 import GlobalClientAutocomplete from "../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
+import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { addReceivingApi } from "../../../api/queries/post";
 import { updateReceivingApi } from "../../../api/queries/patch";
-import {
-  getAllEmployeeApi,
-  getCountryVisaFieldsApi,
-} from "../../../api/queries/getters";
+import { getCountryVisaFieldsApi } from "../../../api/queries/getters";
 import {
   sortVisaFields,
   isOperatorField,
@@ -32,19 +29,23 @@ const DynamicVisaField = ({
   control,
   selectedLang,
   initialClient,
-  employeeOptions = [],
 }) => {
   const fieldKey = field.fieldKey;
-  const label = selectedLang(field.labelTm) || field.labelTm || fieldKey;
+  const label = selectedLang(field.label) || field.fieldKey;
 
-  if (isOperatorField(fieldKey) || isOperator2Field(fieldKey)) {
+  if (
+    isOperatorField(fieldKey) ||
+    isOperator2Field(fieldKey) ||
+    field.fieldType === "autocomplete" ||
+    field.optionsKey === "employees"
+  ) {
     return (
       <Grid size={{ xs: 12, sm: 6 }}>
-        <AppAutocomplete
+        <GlobalEmployeeAutocomplete
           name={fieldKey}
           control={control}
           label={label}
-          options={employeeOptions}
+          required={field.is_required}
         />
       </Grid>
     );
@@ -121,19 +122,6 @@ const DynamicVisaField = ({
     );
   }
 
-  if (field.fieldType === "autocomplete" || field.optionsKey === "employees") {
-    return (
-      <Grid size={{ xs: 12, sm: 4 }}>
-        <AppAutocomplete
-          name={fieldKey}
-          control={control}
-          label={label}
-          options={employeeOptions}
-        />
-      </Grid>
-    );
-  }
-
   return (
     <Grid size={{ xs: 12, sm: 4 }}>
       <CustomTextField
@@ -172,35 +160,6 @@ export const VisaIntakeModal = ({
     options: { enabled: Boolean(effectiveCountryGuid) },
   });
 
-  const employeeParams = useMemo(() => ({ page: 1, limit: 100 }), []);
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-    params: employeeParams,
-  });
-
-  const employeeOptions = useMemo(() => {
-    const list = Array.isArray(employees)
-      ? employees
-      : Array.isArray(employees?.data)
-      ? employees.data
-      : [];
-    return list.map((emp) => {
-      const officeObj = emp.office;
-      const officeShort = officeObj
-        ? selectedLang(officeObj.shortName) ||
-          selectedLang(officeObj.fullName) ||
-          (typeof officeObj.shortName === "string" ? officeObj.shortName : "") ||
-          (typeof officeObj.fullName === "string" ? officeObj.fullName : "") ||
-          (typeof officeObj === "string" ? officeObj : "")
-        : "";
-      const label = officeShort
-        ? `${emp.fullName} (${officeShort})`
-        : emp.fullName || "";
-      return { label, value: emp.guid };
-    });
-  }, [employees, selectedLang]);
-
   const sortedFields = useMemo(() => {
     return sortVisaFields(rawFields);
   }, [rawFields]);
@@ -212,58 +171,47 @@ export const VisaIntakeModal = ({
       const key = field.fieldKey;
 
       if (itemData) {
-        let val = itemData[key];
-        if (val === undefined || val === null) {
-          val = itemData.custom_field_values?.[key];
-        }
+        const val = itemData[key] ?? itemData.custom_field_values?.[key];
 
         if (key === "client_guid") {
-          defaults[key] = itemData.client_guid || itemData.client?.guid || "";
-        } else if (key === "operator_guid" || key === "accepted_opr_guid") {
-          defaults[key] =
-            itemData.operator_guid ||
-            itemData.operator?.guid ||
-            itemData.accepted_opr_guid ||
-            "";
-        } else if (key === "operator2_guid" || key === "received_opr_guid") {
-          defaults[key] =
-            itemData.operator2_guid ||
-            itemData.operator2?.guid ||
-            itemData.received_opr_guid ||
-            "";
-        } else if (key === "visa_type" || key === "visa_category") {
-          defaults[key] =
-            itemData.visa_type ||
-            itemData.visa_category ||
-            itemData.custom_field_values?.visa_type ||
-            itemData.custom_field_values?.visa_category ||
-            "";
+          defaults[key] = itemData.client_guid || "";
+        } else if (key === "accepted_opr_guid") {
+          defaults[key] = itemData.accepted_opr_guid || itemData.operator_guid || "";
+        } else if (key === "received_opr_guid") {
+          defaults[key] = itemData.received_opr_guid || itemData.operator2_guid || "";
         } else if (val !== undefined && val !== null) {
-          if (field.fieldType === "date") {
-            defaults[key] = val ? dayjs(val) : null;
-          } else {
-            defaults[key] = val;
-          }
+          defaults[key] = field.fieldType === "date" ? (val ? dayjs(val) : null) : val;
         } else {
           defaults[key] = field.fieldType === "date" ? null : "";
         }
       } else {
-        if (field.fieldType === "date") {
-          defaults[key] = key === "application_date" ? dayjs() : null;
-        } else {
-          defaults[key] = "";
-        }
+        defaults[key] = field.fieldType === "date" ? null : "";
       }
     });
 
     return defaults;
   }, [sortedFields, itemData]);
 
-  const { control, handleSubmit } = useForm({
+  const isModalOpen =
+    open !== undefined
+      ? Boolean(open)
+      : Boolean(
+          table &&
+            (table.getState().creatingRow ||
+              table.getState().editingRow?.id === row?.id)
+        );
+
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: initialValues,
-    values: initialValues,
     mode: "onSubmit",
   });
+
+  const [prevModalKey, setPrevModalKey] = useState(null);
+  const currentModalKey = isModalOpen ? itemData?.guid || "new" : null;
+  if (currentModalKey !== prevModalKey) {
+    setPrevModalKey(currentModalKey);
+    reset(initialValues);
+  }
 
   const { mutate: createReceiving, isPending: isCreating } = useCreate({
     apiFn: addReceivingApi,
@@ -351,15 +299,6 @@ export const VisaIntakeModal = ({
     }
   };
 
-  const isModalOpen =
-    open !== undefined
-      ? Boolean(open)
-      : Boolean(
-          table &&
-            (table.getState().creatingRow ||
-              table.getState().editingRow?.id === row?.id)
-        );
-
   const initialClient = useMemo(() => {
     if (itemData?.client) return itemData.client;
     if (itemData?.client_guid) {
@@ -402,7 +341,6 @@ export const VisaIntakeModal = ({
                   control={control}
                   selectedLang={selectedLang}
                   initialClient={initialClient}
-                  employeeOptions={employeeOptions}
                 />
               ))}
             </Grid>

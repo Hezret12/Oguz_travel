@@ -17,6 +17,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getTurkishQuarterApi } from "../../../../api/queries/getters";
 import { formatNumber } from "../../../../functions/generalHelpers";
 
+import { Chip } from "@mui/material";
+
 const QUARTER_LABELS = {
   1: "Q1 · Jan – Mar",
   2: "Q2 · Apr – Jun",
@@ -24,7 +26,7 @@ const QUARTER_LABELS = {
   4: "Q4 · Oct – Dec",
 };
 
-export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
+export default function QuarterReportCard({ selectedQuarter, onQuarterChange, paperSx, teal }) {
   const { t } = useLocale();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -83,36 +85,65 @@ export default function QuarterReportCard({ selectedQuarter, paperSx, teal }) {
       }}
     >
       {/* Header */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, mb: 2.5 }}>
-        <Box
-          sx={{
-            width: 40,
-            height: 40,
-            borderRadius: 2,
-            bgcolor: alpha(teal, 0.12),
-            color: teal,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: `1px solid ${alpha(teal, 0.18)}`,
-          }}
-        >
-          <EmojiEventsRoundedIcon sx={{ fontSize: 22 }} />
-        </Box>
-        <Box>
-          <Typography
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, mb: 2.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+          <Box
             sx={{
-              fontWeight: 700,
-              fontSize: "0.9rem",
-              lineHeight: 1.2,
-              color: valueColor,
+              width: 40,
+              height: 40,
+              borderRadius: 2,
+              bgcolor: alpha(teal, 0.12),
+              color: teal,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: `1px solid ${alpha(teal, 0.18)}`,
             }}
           >
-            {t("report.turkishAirlines.quarterReport") || "Quarter Comparison"}
-          </Typography>
-          <Typography sx={{ fontSize: 12, color: subText, fontWeight: 600, mt: 0.2 }}>
-            {QUARTER_LABELS[quarter]}
-          </Typography>
+            <EmojiEventsRoundedIcon sx={{ fontSize: 22 }} />
+          </Box>
+          <Box>
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                lineHeight: 1.2,
+                color: valueColor,
+              }}
+            >
+              {t("report.turkishAirlines.quarterReport") || "Quarter Comparison"}
+            </Typography>
+            <Typography sx={{ fontSize: 12, color: subText, fontWeight: 600, mt: 0.2 }}>
+              {QUARTER_LABELS[quarter]}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Quick Quarter Switcher Buttons */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          {[1, 2, 3, 4].map((q) => {
+            const isActive = quarter === q;
+            return (
+              <Chip
+                key={q}
+                label={`Q${q}`}
+                size="small"
+                onClick={() => onQuarterChange?.(q)}
+                sx={{
+                  fontWeight: 800,
+                  fontSize: 11.5,
+                  cursor: "pointer",
+                  backgroundColor: isActive ? teal : isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
+                  color: isActive ? "#FFF" : isDark ? "rgba(255,255,255,0.7)" : "#475569",
+                  border: `1px solid ${isActive ? teal : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0"}`,
+                  "&:hover": {
+                    backgroundColor: isActive ? teal : alpha(teal, 0.12),
+                    color: isActive ? "#FFF" : teal,
+                  },
+                }}
+              />
+            );
+          })}
         </Box>
       </Box>
 

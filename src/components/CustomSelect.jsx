@@ -5,6 +5,7 @@ import {
   FormHelperText,
   Box,
   Typography,
+  Tooltip,
   CircularProgress,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
@@ -110,28 +111,35 @@ const CustomSelect = ({
         return (
           <Box sx={{ width: "100%" }}>
             {label && (
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 0.75,
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  color: "text.primary",
-                }}
-              >
-                {label}
-                {required && (
-                  <span
-                    style={{
-                      color: "#ef4444",
-                      marginLeft: "4px",
-                      fontSize: "17px",
-                    }}
-                  >
-                    *
-                  </span>
-                )}
-              </Typography>
+              <Tooltip title={label} arrow placement="top-start">
+                <Typography
+                  variant="body2"
+                  noWrap
+                  sx={{
+                    mb: 0.75,
+                    fontWeight: 600,
+                    fontSize: "0.875rem",
+                    color: "text.primary",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    cursor: "default",
+                  }}
+                >
+                  {label}
+                  {required && (
+                    <span
+                      style={{
+                        color: "#ef4444",
+                        marginLeft: "4px",
+                        fontSize: "17px",
+                      }}
+                    >
+                      *
+                    </span>
+                  )}
+                </Typography>
+              </Tooltip>
             )}
 
             <FormControl

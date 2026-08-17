@@ -184,7 +184,7 @@ export const getAllNotificationsApi = async (params = {}) => {
 };
 
 export const getAllReportsApi = async (params = {}) => {
-  return await api.getPrivate('/report/get-all-reports', params);
+  return await api.getPrivate('/report/get-all-report', params);
 };
 
 export const getAllReportSharesApi = async (params = {}) => {

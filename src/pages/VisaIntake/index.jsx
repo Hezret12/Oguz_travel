@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from "react";
-import { Box, Paper, Button, useTheme } from "@mui/material";
+import { Box, Paper, Button, Tooltip, useTheme } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useLocale } from "../../hooks/useLocale";
 import CustomTabs from "../../components/CustomTabs";
@@ -34,6 +34,10 @@ export const VisaIntake = () => {
     resetFilters,
     searchQuery,
     setSearch,
+    page,
+    limit,
+    setPage,
+    setPageSize,
     selectsOpen,
     openSelect,
     closeSelect,
@@ -61,6 +65,15 @@ export const VisaIntake = () => {
     if (activeTab === "custom_fields") return t("customFields.addTitle");
     return t("visaIntake.addApplication");
   }, [activeTab, t]);
+
+  const [selectedCountryGuid, setSelectedCountryGuid] = useState("");
+
+  const isAddDisabled = useMemo(() => {
+    if (activeTab === "applications") {
+      return !selectedCountryGuid;
+    }
+    return false;
+  }, [activeTab, selectedCountryGuid]);
 
   const handleAddClick = () => {
     activeTabRef.current?.openCreateModal?.();
@@ -99,24 +112,47 @@ export const VisaIntake = () => {
         />
 
         {/* RIGHT SIDE: Add Button */}
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddClick}
-          sx={{ borderRadius: "8px", fontWeight: 600, px: 2.5, height: "40px" }}
+        <Tooltip
+          title={isAddDisabled ? t("visaIntake.selectCountryToAdd") : ""}
+          arrow
+          disableHoverListener={!isAddDisabled}
         >
-          {addButtonText}
-        </Button>
+          <span>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleAddClick}
+              disabled={isAddDisabled}
+              sx={{
+                borderRadius: "8px",
+                fontWeight: 600,
+                px: 2.5,
+                height: "40px",
+                "&.Mui-disabled": {
+                  opacity: 0.6,
+                },
+              }}
+            >
+              {addButtonText}
+            </Button>
+          </span>
+        </Tooltip>
       </Paper>
 
       {activeTab === "applications" && (
         <ApplicationsTable
           ref={activeTabRef}
+          countryGuid={selectedCountryGuid}
+          onCountryChange={setSelectedCountryGuid}
           queryParams={queryParams}
           searchQuery={searchQuery}
           setSearch={setSearch}
           openDrawer={openDrawer}
           isFilterActive={isFilterActive}
+          page={page}
+          limit={limit}
+          setPage={setPage}
+          setPageSize={setPageSize}
         />
       )}
 

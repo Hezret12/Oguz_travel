@@ -1,9 +1,9 @@
 import {
   useCallback,
   useMemo,
-  useState,
   forwardRef,
   useImperativeHandle,
+  startTransition,
 } from "react";
 import {
   MaterialReactTable,
@@ -29,7 +29,6 @@ import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import {
   getAllReceivingsApi,
-  getCountryVisaFieldsApi,
   getCountriesApi,
   getAllEmployeeApi,
 } from "../../../api/queries/getters";
@@ -50,35 +49,38 @@ const SelectCountryPrompt = ({ t }) => (
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      gap: 1.5,
-      p: 4,
-      minHeight: "calc(100vh - 360px)",
-      textAlign: "center",
+      py: 10,
+      px: 3,
+      gap: 2,
     }}
   >
     <Box
       sx={{
-        width: 64,
-        height: 64,
-        borderRadius: "16px",
+        width: 72,
+        height: 72,
+        borderRadius: "50%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        color: "primary.main",
-        backgroundColor: (theme) =>
-          theme.palette.mode === "dark"
-            ? "rgba(45, 212, 191, 0.1)"
-            : "rgba(14, 133, 132, 0.08)",
+        backgroundColor: "primary.main",
+        color: "primary.contrastText",
+        opacity: 0.85,
+        boxShadow: "0 8px 24px rgba(21, 101, 192, 0.25)",
       }}
     >
-      <Globe size={32} />
+      <Globe size={38} />
     </Box>
-    <Typography variant="h6" sx={{ fontWeight: 600, color: "text.primary" }}>
-      {t("visaIntake.selectCountryPrompt")}
-    </Typography>
-    <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 400 }}>
-      {t("visaIntake.selectCountryDescription")}
-    </Typography>
+    <Box sx={{ textAlign: "center", maxWidth: 440 }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+        {t("visaIntake.selectCountryPrompt", "Ýurt saýlaň")}
+      </Typography>
+      <Typography variant="body2" sx={{ color: "text.secondary" }}>
+        {t(
+          "visaIntake.selectCountryDescription",
+          "Arzalary görmek üçin ýokardan ýurt saýlaň",
+        )}
+      </Typography>
+    </Box>
   </Box>
 );
 
@@ -89,9 +91,13 @@ export const ApplicationsTable = forwardRef(
       searchQuery = "",
       setSearch,
       openDrawer,
-      refetchKey,
       countryGuid,
+      onCountryChange,
       isFilterActive = false,
+      page = 1,
+      limit = 20,
+      setPage,
+      setPageSize,
     },
     ref,
   ) => {
@@ -99,18 +105,12 @@ export const ApplicationsTable = forwardRef(
     const { formatChange } = useDateFormat();
     const defaultMrtOptions = getDefaultMRTOptions();
 
-    const [page, setPage] = useState(1);
-    const [limit] = useState(40);
-    const [selectedCountryGuid, setSelectedCountryGuid] = useState(
-      countryGuid || "",
-    );
-
-    const activeCountryGuid = countryGuid || selectedCountryGuid;
+    const activeCountryGuid = countryGuid || "";
 
     const countryParams = useMemo(() => ({ page: 1, limit: 100 }), []);
     const { data: countriesData = [] } = usePagginationGet({
       apiFn: getCountriesApi,
-      key: "countriesList",
+      key: "countries",
       params: countryParams,
     });
 
@@ -134,18 +134,14 @@ export const ApplicationsTable = forwardRef(
       });
     }, [countriesData, selectedLang]);
 
-    const { data: rawVisaFields = [] } = useGet({
-      apiFn: () =>
-        activeCountryGuid
-          ? getCountryVisaFieldsApi(activeCountryGuid)
-          : Promise.resolve([]),
-      key: ["countryVisaFields", activeCountryGuid],
-      options: { enabled: Boolean(activeCountryGuid) },
-    });
+    const selectedCountry = useMemo(() => {
+      const list = Array.isArray(countriesData) ? countriesData : [];
+      return list.find((c) => c.guid === activeCountryGuid) || null;
+    }, [countriesData, activeCountryGuid]);
 
     const sortedFields = useMemo(() => {
-      return sortVisaFields(rawVisaFields);
-    }, [rawVisaFields]);
+      return sortVisaFields(selectedCountry?.custom_fields || []);
+    }, [selectedCountry]);
 
     const employeeParams = useMemo(() => ({ page: 1, limit: 100 }), []);
     const { data: employees = [] } = useGet({
@@ -177,13 +173,10 @@ export const ApplicationsTable = forwardRef(
 
     const params = useMemo(
       () => ({
-        page,
-        limit,
-        search: searchQuery || undefined,
         country_guid: activeCountryGuid || undefined,
         ...queryParams,
       }),
-      [page, limit, searchQuery, activeCountryGuid, queryParams],
+      [activeCountryGuid, queryParams],
     );
 
     const {
@@ -195,7 +188,7 @@ export const ApplicationsTable = forwardRef(
       pageCount = 1,
     } = usePagginationGet({
       apiFn: getAllReceivingsApi,
-      key: ["receivings", params, refetchKey],
+      key: "receivings",
       params,
       options: { enabled: Boolean(activeCountryGuid) },
     });
@@ -204,6 +197,17 @@ export const ApplicationsTable = forwardRef(
       if (!activeCountryGuid) return [];
       return Array.isArray(rawApplicationsData) ? rawApplicationsData : [];
     }, [activeCountryGuid, rawApplicationsData]);
+
+    const handleCountrySelect = useCallback(
+      (_, newValue) => {
+        const newGuid = newValue ? newValue.guid : "";
+        startTransition(() => {
+          onCountryChange?.(newGuid);
+          setPage?.(1);
+        });
+      },
+      [onCountryChange, setPage],
+    );
 
     const { mutate: deleteReceiving, isPending: isDeleting } = useDelete({
       deleteFn: deleteReceivingApi,
@@ -240,18 +244,16 @@ export const ApplicationsTable = forwardRef(
           if (key) fieldMap.set(key, f);
         });
       }
+
       const appDateField = fieldMap.get("application_date");
       const appDateLabel =
-        (appDateField && selectedLang(appDateField.labelTm)) ||
-        (appDateField && typeof appDateField.labelTm === "string"
-          ? appDateField.labelTm
-          : null) ||
+        selectedLang(appDateField?.label) ||
         t("visaIntake.fields.applicationDate");
 
       cols.push({
         id: "application_date",
         header: appDateLabel,
-        size: 140,
+        size: 90,
         accessorFn: (row) =>
           row.application_date ?? row.custom_field_values?.application_date,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
@@ -259,104 +261,67 @@ export const ApplicationsTable = forwardRef(
 
       const acceptedOprField = fieldMap.get("accepted_opr_guid");
       const acceptedOprLabel =
-        (acceptedOprField && selectedLang(acceptedOprField.labelTm)) ||
-        (acceptedOprField && typeof acceptedOprField.labelTm === "string"
-          ? acceptedOprField.labelTm
-          : null);
+        selectedLang(acceptedOprField?.label) ||
+        t("visaIntake.fields.operator", "Tabşyryjy (Operator)");
 
       cols.push({
         id: "accepted_opr_guid",
         header: acceptedOprLabel,
-        size: 170,
+        size: 220,
         accessorFn: (row) =>
-          row.operator?.fullName ||
-          row.accepted_operator?.fullName ||
-          row.operator_name ||
-          "-",
+          employeeMap.get(row.accepted_opr_guid || row.operator_guid)?.fullName || "-",
         Cell: ({ row }) => {
-          const oprGuid = row?.original?.accepted_opr_guid;
-          const empFromMap = oprGuid ? employeeMap.get(oprGuid) : null;
-          const emp =
-            row?.original?.operator || row?.original?.accepted_operator;
-          const fullName =
-            emp?.fullName ||
-            empFromMap?.fullName ||
-            row?.original?.operator_name;
-          const officeShort = emp?.office?.shortName
-            ? selectedLang(emp.office.shortName) || ""
-            : emp?.office?.fullName
-              ? selectedLang(emp.office.fullName)
-              : empFromMap?.office || "";
-          if (!fullName) return "-";
-          return <StackedCell primary={fullName} secondary={officeShort} />;
+          const oprGuid = row?.original?.accepted_opr_guid || row?.original?.operator_guid;
+          const emp = oprGuid ? employeeMap.get(oprGuid) : null;
+          if (!emp?.fullName) return "-";
+          return <StackedCell primary={emp.fullName} secondary={emp.office} />;
         },
       });
 
       const receivedOprField = fieldMap.get("received_opr_guid");
       const receivedOprLabel =
-        (receivedOprField && selectedLang(receivedOprField.labelTm)) ||
-        (receivedOprField && typeof receivedOprField.labelTm === "string"
-          ? receivedOprField.labelTm
-          : null) ||
+        selectedLang(receivedOprField?.label) ||
         "Kabul ediji (Operator)";
 
       cols.push({
         id: "received_opr_guid",
         header: receivedOprLabel,
-        size: 170,
+        size: 220,
         accessorFn: (row) =>
-          row.operator2?.fullName ||
-          row.receiver_operator?.fullName ||
-          row.received_operator?.fullName ||
-          "-",
+          employeeMap.get(row.received_opr_guid || row.operator2_guid)?.fullName || "-",
         Cell: ({ row }) => {
-          const oprGuid = row?.original?.received_opr_guid;
-          const empFromMap = oprGuid ? employeeMap.get(oprGuid) : null;
-          const emp = row?.original?.received_operator;
-          const fullName = emp?.fullName || empFromMap?.fullName;
-          const officeShort = emp?.office?.shortName
-            ? selectedLang(emp.office.shortName) ||
-              selectedLang(emp.office.fullName) ||
-              ""
-            : emp?.office?.fullName
-              ? selectedLang(emp.office.fullName)
-              : empFromMap?.office || "";
-          if (!fullName) return "-";
-          return <StackedCell primary={fullName} secondary={officeShort} />;
+          const oprGuid = row?.original?.received_opr_guid || row?.original?.operator2_guid;
+          const emp = oprGuid ? employeeMap.get(oprGuid) : null;
+          if (!emp?.fullName) return "-";
+          return <StackedCell primary={emp.fullName} secondary={emp.office} />;
         },
       });
 
-      const clientField = fieldMap.get("client_guid") || fieldMap.get("client");
+      const clientField = fieldMap.get("client_guid");
       const clientLabel =
-        (clientField && selectedLang(clientField.labelTm)) ||
-        (clientField && typeof clientField.labelTm === "string"
-          ? clientField.labelTm
-          : null) ||
-        t("columns.client");
+        selectedLang(clientField?.label) || t("columns.client");
 
       cols.push({
         id: "client",
         header: clientLabel,
-        size: 180,
-        accessorFn: (row) => row.client?.fullName,
+        size: 220,
+        accessorFn: (row) => row.client?.fullName || row.client_name || "-",
       });
 
       cols.push({
         id: "passport_number",
         header: t("columns.passportNumber"),
-        size: 140,
-        accessorFn: (row) => row.passport_number,
+        size: 100,
+        accessorFn: (row) => row.passport_number || row.client?.passport_number || "-",
       });
       cols.push({
         id: "dateOfBirth",
         header: t("columns.dateOfBirth"),
-        size: 130,
+        size: 100,
         accessorFn: (row) =>
           row.dateOfBirth ||
           row.client?.dateOfBirth ||
-          row.birth_date ||
-          row.custom_field_values?.dateOfBirth ||
-          row.custom_field_values?.birth_date,
+          row.custom_field_values?.dateOfBirth,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       });
 
@@ -367,13 +332,9 @@ export const ApplicationsTable = forwardRef(
         "received_opr_guid",
         "client_guid",
         "client",
-        "client_name",
         "passport_number",
         "dateOfBirth",
-        "birth_date",
         "note",
-        "notes",
-        "is_processed",
         "actions",
       ]);
 
@@ -382,10 +343,7 @@ export const ApplicationsTable = forwardRef(
           const fieldKey =
             field.fieldKey || field.field_key || field.guid || `col_${index}`;
           if (!standardKeys.has(fieldKey)) {
-            const headerLabel =
-              selectedLang(field.labelTm) ||
-              (typeof field.labelTm === "string" ? field.labelTm : null) ||
-              fieldKey;
+            const headerLabel = selectedLang(field.label) || fieldKey;
 
             if (field.fieldType === "date") {
               cols.push({
@@ -432,11 +390,7 @@ export const ApplicationsTable = forwardRef(
       }
       const noteField = fieldMap.get("note");
       const noteLabel =
-        (noteField && selectedLang(noteField.labelTm)) ||
-        (noteField && typeof noteField.labelTm === "string"
-          ? noteField.labelTm
-          : null) ||
-        t("visaIntake.fields.notes", "Bellikler");
+        selectedLang(noteField?.label) || t("columns.note");
 
       cols.push({
         id: "note",
@@ -483,16 +437,10 @@ export const ApplicationsTable = forwardRef(
       handleDeleteClick,
     ]);
 
-    const [prevSearch, setPrevSearch] = useState(searchQuery);
-    const [prevCountry, setPrevCountry] = useState(activeCountryGuid);
-    if (searchQuery !== prevSearch || activeCountryGuid !== prevCountry) {
-      setPrevSearch(searchQuery);
-      setPrevCountry(activeCountryGuid);
-      setPage(1);
-    }
-
     const table = useMaterialReactTable({
       ...defaultMrtOptions,
+      memoMode: "rows",
+      autoResetPageIndex: false,
       muiTablePaperProps: {
         sx: (theme) => ({
           display: "flex",
@@ -521,7 +469,7 @@ export const ApplicationsTable = forwardRef(
         showSkeletons: Boolean(activeCountryGuid && isLoading),
       },
       enablePagination: false,
-      enableBottomToolbar: pageCount > 1,
+      enableBottomToolbar: Boolean(activeCountryGuid),
       renderEmptyRowsFallback: () =>
         !activeCountryGuid ? (
           <SelectCountryPrompt t={t} />
@@ -545,7 +493,8 @@ export const ApplicationsTable = forwardRef(
             pageCount={pageCount}
             pageSize={limit}
             totalRows={totalItems}
-            onPageChange={(newIndex) => setPage(newIndex + 1)}
+            onPageChange={(newIndex) => setPage?.(newIndex + 1)}
+            setPageSize={setPageSize}
           />
         </Box>
       ),
@@ -585,10 +534,7 @@ export const ApplicationsTable = forwardRef(
             value={
               countryOptions.find((c) => c.guid === activeCountryGuid) || null
             }
-            onChange={(_, newValue) => {
-              setSelectedCountryGuid(newValue ? newValue.guid : "");
-              setPage(1);
-            }}
+            onChange={handleCountrySelect}
             isOptionEqualToValue={(option, val) =>
               option.guid === (val?.guid ?? val)
             }

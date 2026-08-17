@@ -4,10 +4,10 @@ export const referralLetterFilterSlice = createFilterSlice({
   name: 'referralLetterFilters',
   defaultFilters: {
     search: '',
-    received_opr_guid: '',
-    departure_date: '',
-    return_date: '',
-    contract_date: '',
+    assignment_opr_guid: '',
+    receiver_opr_guid: '',
+    status: '',
+    datetime: '',
   },
   defaultPageSize: 10,
 });

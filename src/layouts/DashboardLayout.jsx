@@ -48,13 +48,14 @@ const DashboardLayout = () => {
           backgroundColor: 'background.default',
           height: 'calc(100vh - 64px)',
           minHeight: 0,
-          overflow: 'hidden',
+          overflowY: 'auto',
+          overflowX: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
-        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
+        <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
           <Outlet />
         </Box>
       </Box>

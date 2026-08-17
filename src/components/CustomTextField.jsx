@@ -1,4 +1,4 @@
-import { Box, TextField, Typography } from '@mui/material';
+import { Box, TextField, Typography, Tooltip } from '@mui/material';
 import { Controller } from 'react-hook-form';
 
 const CustomTextField = ({
@@ -38,18 +38,25 @@ const CustomTextField = ({
         return (
           <Box sx={{ width: '100%' }}>
             {label && (
-              <Typography
-                variant="body2"
-                component="div"
-                sx={{
-                  mb: 0.75,
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                }}
-              >
-                {label}
-                {required && <span style={{ color: '#ef4444', marginLeft: '4px', fontSize: '17px' }}>*</span>}
-              </Typography>
+              <Tooltip title={label} arrow placement="top-start">
+                <Typography
+                  variant="body2"
+                  component="div"
+                  noWrap
+                  sx={{
+                    mb: 0.75,
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    cursor: 'default',
+                  }}
+                >
+                  {label}
+                  {required && <span style={{ color: '#ef4444', marginLeft: '4px', fontSize: '17px' }}>*</span>}
+                </Typography>
+              </Tooltip>
             )}
             <TextField
               {...field}

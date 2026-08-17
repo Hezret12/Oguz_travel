@@ -62,21 +62,11 @@ const TurkishAirlinesReport = () => {
   return (
     <Box
       sx={{
-        flexGrow: 1,
-        minHeight: 0,
-        height: "100%",
-        overflowY: "auto",
-        overflowX: "hidden",
+        width: "100%",
         display: "flex",
         flexDirection: "column",
         gap: 2.5,
-        pb: 6,
-        pr: 0.5,
-        ...scrollbarSx,
-        "&::-webkit-scrollbar-thumb": {
-          ...scrollbarSx["&::-webkit-scrollbar-thumb"],
-          backgroundColor: isDark ? "rgba(20,184,166,0.25)" : "#CBD5E1",
-        },
+        pb: 8,
       }}
     >
       <ReportHeader
@@ -110,6 +100,7 @@ const TurkishAirlinesReport = () => {
         formatNumber={formatNumber}
         monthQuoted={stats.monthQuoted}
         selectedQuarter={selectedQuarter}
+        onQuarterChange={setSelectedQuarter}
         teal={colors.teal}
         accent={colors.accent}
         borderCol={colors.border}

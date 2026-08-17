@@ -70,7 +70,8 @@
     "passportIssueDate": "Passport Issue Date",
     "passportExpiryDate": "Passport Expiry Date",
     "passportCountryOfIssue": "Passport Country of Issue",
-    "dateTime": "Senesi",
+    "dateTime": "Date",
+    "date": "Date",
     "paymentStatus": "Payment Status",
     "gender": "Gender",
     "employee": "Employee",
@@ -277,7 +278,8 @@
     "submittedBy": "Submitted by",
     "receivedBy": "Received by",
     "quantity": "Quantity",
-    "totalQuantity": "Total quantity",
+    "totalCount": "Quantity",
+    "totalQuantity": "Total Quantity",
     "letterUnit": "letters",
     "statusSold": "Sold",
     "statusDamaged": "Damaged",
@@ -337,6 +339,7 @@
     "selectCountryPrompt": "Select a Country",
     "selectCountryDescription": "Please select a country from the header to view applications",
     "selectCountryPlaceholder": "Select a country...",
+    "selectCountryToAdd": "Please select a country first to add an application",
     "defaultFieldsInfoTitle": "Standard Fields:",
     "defaultFieldsInfoDesc": "Client, Application date, Operator 1, Operator 2, and Notes are automatically included.",
     "fields": {
@@ -461,7 +464,9 @@
     "typeText": "Text",
     "typeNumber": "Number",
     "typeDate": "Date",
-    "typeSelect": "Dropdown Select"
+    "typeSelect": "Dropdown Select",
+    "searchPlaceholder": "Search fields...",
+    "emptyState": "No fields selected yet"
   },
   "errorBoundary": {
     "networkErrorTitle": "Connection Error",

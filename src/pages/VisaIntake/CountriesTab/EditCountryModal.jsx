@@ -52,6 +52,7 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
     apiFn: updateCountryApi,
     key: "countries",
     idKey: "guid",
+    invalidateQueries: ["countryVisaFields", "receivings", "customFields"],
     onSuccessUpdate: () => {
       onRefresh?.();
       handleClose();
@@ -112,7 +113,7 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
       : Boolean(table && table.getState().editingRow?.id === row?.id);
 
   return (
-    <CustomDialog widthX={750} open={isModalOpen} close={handleClose}>
+    <CustomDialog widthX={800} open={isModalOpen} close={handleClose}>
       <CustomDialogHeader
         variant="h5"
         title={t("visaIntake.editCountryTitle")}
