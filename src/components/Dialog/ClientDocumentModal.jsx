@@ -59,7 +59,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewModal, setPreviewModal] = useState(null); // { url, name }
 
-  // Sync state during render when client changes without useEffect cascading warnings
   const currentClientKey = open && client ? client.guid : null;
   if (currentClientKey !== prevClientKey) {
     setPrevClientKey(currentClientKey);
@@ -87,7 +86,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
     },
   });
 
-  // Calculate passport expiry status banner
   const expiryStatus = useMemo(() => {
     const expiryDate = client?.passportExpiryDate;
     if (!expiryDate) return null;
@@ -206,7 +204,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
     <CustomDialog widthX={680} open={open} close={onClose}>
       <CustomDialogHeader variant="h5" title={modalTitle} />
 
-      {/* Tabs: Active Passport vs Passport History */}
       <Box sx={{ borderBottom: "1px solid", borderColor: "divider", mt: 1 }}>
         <Tabs
           value={activeTab}
@@ -256,8 +253,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
           />
         </Tabs>
       </Box>
-
-      {/* VIP Access Restriction Notice */}
       {isRestrictedForUser && (
         <Alert
           severity="warning"
@@ -272,14 +267,12 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
         </Alert>
       )}
 
-      {/* TAB 0: Active Passport & Renewal Form */}
       {activeTab === 0 && !isRestrictedForUser && (
         <Box
           component="form"
           onSubmit={handleSubmit(submitPassportHandler)}
           sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2.5 }}
         >
-          {/* Passport Expiration Status Banner */}
           {expiryStatus && (
             <Alert
               severity={expiryStatus.severity}
@@ -307,7 +300,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
             </Alert>
           )}
 
-          {/* Current Attached Passport Scan */}
           {fullUrl && (
             <Paper
               variant="outlined"
@@ -403,7 +395,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
             </Paper>
           )}
 
-          {/* Passport Form Inputs */}
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
@@ -435,7 +426,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
             </Grid>
           </Grid>
 
-          {/* Upload New Passport Scan File Zone */}
           <Paper
             variant="outlined"
             component="label"
