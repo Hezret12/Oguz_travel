@@ -7,6 +7,7 @@
   "all": "Hemmesi",
   "search": "Gözleg",
   "save": "Ýatda sakla",
+  "download": "Ýükläp al",
   "filter": "Filter",
   "noClientFound": "Müşderi tapylmady",
   "addClient": "Täze müşterini goşmak",
@@ -172,7 +173,9 @@
     "documentDeleted": "Resminama pozuldy",
     "documentDeleteError": "Resminama pozulanda ýalňyşlyk çykdy",
     "vipFileRestricted": "VIP müşderiniň resminamalary diňe Admin üçin elýeterli.",
-    "vipFileRestrictedNotice": "VIP müşderiniň ýüklenen resminamalary diňe Admin tarapyndan görülip bilner."
+    "vipFileRestrictedNotice": "VIP müşderiniň ýüklenen resminamalary diňe Admin tarapyndan görülip bilner.",
+    "passportModalTitle": "Pasport we resminamalar",
+    "fileTypeHint": "PNG, JPG, PDF (maks. 10MB)"
   },
   "users": {
     "title": "Ulanyjylar",

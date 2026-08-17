@@ -7,6 +7,7 @@
   "all": "All",
   "search": "Search",
   "save": "Save",
+  "download": "Download",
   "filter": "Filter",
   "noClientFound": "No client found",
   "addClient": "Add new client",
@@ -172,7 +173,9 @@
     "documentDeleted": "Document deleted",
     "documentDeleteError": "Error deleting document",
     "vipFileRestricted": "VIP client documents are only accessible to Admins.",
-    "vipFileRestrictedNotice": "Uploaded documents of VIP clients can only be viewed by Admins."
+    "vipFileRestrictedNotice": "Uploaded documents of VIP clients can only be viewed by Admins.",
+    "passportModalTitle": "Passport & Documents",
+    "fileTypeHint": "PNG, JPG, PDF (max. 10MB)"
   },
   "users": {
     "title": "Ulanyjylar",

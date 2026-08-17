@@ -7,6 +7,7 @@
   "all": "Все",
   "search": "Поиск",
   "save": "Сохранить",
+  "download": "Скачать",
   "filter": "Фильтр",
   "noClientFound": "Клиент не найден",
   "addClient": "Добавить нового клиента",
@@ -172,7 +173,9 @@
     "documentDeleted": "Документ удален",
     "documentDeleteError": "Ошибка при удалении документа",
     "vipFileRestricted": "Документы VIP-клиента доступны только администратору.",
-    "vipFileRestrictedNotice": "Загруженные документы VIP-клиента могут просматриваться только администратором."
+    "vipFileRestrictedNotice": "Загруженные документы VIP-клиента могут просматриваться только администратором.",
+    "passportModalTitle": "Паспорт и документы",
+    "fileTypeHint": "PNG, JPG, PDF (макс. 10MB)"
   },
   "users": {
     "title": "Ulanyjylar",
