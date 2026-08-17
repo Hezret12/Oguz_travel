@@ -317,11 +317,6 @@ const Employee = () => {
         </Box>
       );
     },
-    muiTablePaperProps: {
-      sx: () => ({
-        ...defaultMrtOptions.muiTablePaperProps?.sx,
-      }),
-    },
     renderCreateRowDialogContent: ({ table }) => <AddEmployee table={table} />,
     renderEditRowDialogContent: ({ table, row }) => (
       <EditEmployee table={table} row={row} />
@@ -339,7 +334,6 @@ const Employee = () => {
         onFilterClick={openDrawer}
       />
 
-      {/* Filter Drawer */}
       <FilterDrawer
         open={isDrawerOpen}
         onClose={cancelFilters}
@@ -356,7 +350,6 @@ const Employee = () => {
         />
       </FilterDrawer>
 
-      {/* Delete Confirmation Dialog */}
       <DeleteDialog
         open={deleteDialog.isOpen}
         onClose={deleteDialog.close}

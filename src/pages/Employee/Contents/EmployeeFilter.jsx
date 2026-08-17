@@ -8,7 +8,6 @@ import {
 } from "../../../api/queries/getters";
 import { useLocale } from "../../../hooks/useLocale";
 
-// ─── Styles ────────────────────────────────────────────────────────────────
 const selectSx = {
   borderRadius: "8px",
   "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
@@ -31,7 +30,6 @@ const menuPaperProps = {
   },
 };
 
-// ─── Generic Filter Select ──────────────────────────────────────────────────
 const FilterSelect = ({
   label,
   name,
@@ -96,17 +94,6 @@ const FilterSelect = ({
   </FormControl>
 );
 
-// ─── EmployeeFilter ─────────────────────────────────────────────────────────
-/**
- * Self-contained filter panel for the Employee page.
- *
- * Props:
- *  - filters       → draft filter state from usePageFilters (keys: department_guid, position_guid, office_guid)
- *  - selectsOpen   → open-state map keyed by filter field name
- *  - onFilterChange(key, value) → dispatch setDraftFilter
- *  - onSelectOpen(name)
- *  - onSelectClose(name)
- */
 const EmployeeFilter = ({
   filters,
   selectsOpen,
