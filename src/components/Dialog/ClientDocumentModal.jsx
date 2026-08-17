@@ -23,13 +23,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import LockIcon from "@mui/icons-material/Lock";
 import HistoryIcon from "@mui/icons-material/History";
 import BadgeIcon from "@mui/icons-material/Badge";
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
@@ -37,20 +37,36 @@ import { CustomDialog } from "./CustomDialog";
 import { CustomDialogHeader } from "./CustomDialogHeader";
 import { FooterButton } from "./FooterButton";
 import { useLocale } from "../../hooks/useLocale";
-import { useAuth } from "../../context/useAuth";
 import { useDateFormat } from "../../functions/generalHelpers";
 import { updatePassportApi } from "../../api/queries/patch";
 import { BASE_URL } from "../../api/axiosIntance";
 import CustomTextField from "../CustomTextField";
 import CustomDatePicker from "../CustomDatePicker";
 
+const getFileUrl = (path) => {
+  if (!path || typeof path !== "string" || path === "string" || path === "[]" || path === "null") return null;
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://") ||
+    path.startsWith("blob:") ||
+    path.startsWith("data:")
+  ) {
+    return path;
+  }
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  // Remove /api/v1 prefix from BASE_URL to point to server host root (e.g. http://localhost:3002/uploads/...)
+  const rootHost = BASE_URL ? BASE_URL.replace(/\/api\/v1\/?$/, "") : "";
+  return `${rootHost}${cleanPath}`;
+};
+
+const isImageUrl = (url) => {
+  if (!url || typeof url !== "string") return false;
+  return /\.(jpe?g|png|webp|gif|bmp|svg)(\?.*)?$/i.test(url);
+};
+
 export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
   const { t } = useLocale();
   const { formatChange } = useDateFormat();
-  const { user } = useAuth();
-  const isAdmin = Boolean(user?.role === "admin" || user?.user_is_admin || user?.isAdmin);
-  const isVipClient = Boolean(client?.vip === true || client?.vip === "true" || client?.vip === 1);
-  const isRestrictedForUser = isVipClient && !isAdmin;
 
   const [activeTab, setActiveTab] = useState(0);
   const [uploading, setUploading] = useState(false);
@@ -59,6 +75,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewModal, setPreviewModal] = useState(null); // { url, name }
 
+  // Sync state during render when client changes without useEffect cascading warnings
   const currentClientKey = open && client ? client.guid : null;
   if (currentClientKey !== prevClientKey) {
     setPrevClientKey(currentClientKey);
@@ -67,15 +84,40 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
     setActiveTab(0);
   }
 
-  const fileUrl = client?.passport_file_url || client?.passportFileUrl || (Array.isArray(client?.images) ? client?.images?.[0] : null);
-  const fullUrl = fileUrl ? (fileUrl.startsWith("http") ? fileUrl : `${BASE_URL}${fileUrl}`) : null;
-  const fileName = fileUrl ? fileUrl.split("/").pop() : "";
-  const isImageFile = Boolean(
-    (fileName && /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(fileName)) ||
-    (fullUrl && /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(fullUrl))
-  );
+  // Parse active images array
+  const activeImages = useMemo(() => {
+    let list = [];
+    if (Array.isArray(client?.images)) {
+      list = client.images;
+    } else if (typeof client?.images === "string" && client.images.trim()) {
+      try {
+        const parsed = JSON.parse(client.images);
+        list = Array.isArray(parsed) ? parsed : [client.images];
+      } catch {
+        list = [client.images];
+      }
+    } else if (client?.passport_file_url) {
+      list = [client.passport_file_url];
+    } else if (client?.passportFileUrl) {
+      list = [client.passportFileUrl];
+    }
+    return list.filter((img) => typeof img === "string" && img.length > 0 && img !== "string" && img !== "[]");
+  }, [client]);
 
-  const passportHistory = Array.isArray(client?.passportHistory) ? client.passportHistory : [];
+  // Parse passport history array
+  const passportHistory = useMemo(() => {
+    if (!client?.passportHistory) return [];
+    if (Array.isArray(client.passportHistory)) return client.passportHistory;
+    if (typeof client.passportHistory === "string") {
+      try {
+        const parsed = JSON.parse(client.passportHistory);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  }, [client]);
 
   const { control, handleSubmit } = useForm({
     values: {
@@ -86,6 +128,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
     },
   });
 
+  // Calculate passport expiry status banner
   const expiryStatus = useMemo(() => {
     const expiryDate = client?.passportExpiryDate;
     if (!expiryDate) return null;
@@ -100,7 +143,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
         icon: <ErrorOutlineRoundedIcon sx={{ fontSize: 20 }} />,
         title: t("clients.passportExpired"),
         message: `${Math.abs(diffDays)} ${t("clients.daysExpired")} (${formatChange(expiryDate, { dateOnly: true })})`,
-        color: "error",
       };
     }
 
@@ -110,7 +152,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
         icon: <AccessTimeRoundedIcon sx={{ fontSize: 20 }} />,
         title: t("clients.passportExpiresSoon"),
         message: `${diffDays} ${t("clients.daysRemaining")} (${formatChange(expiryDate, { dateOnly: true })})`,
-        color: "warning",
       };
     }
 
@@ -119,7 +160,6 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
       icon: <CheckCircleOutlineRoundedIcon sx={{ fontSize: 20 }} />,
       title: t("clients.passportValid"),
       message: `${diffDays} ${t("clients.daysRemaining")} (${formatChange(expiryDate, { dateOnly: true })})`,
-      color: "success",
     };
   }, [client, t, formatChange]);
 
@@ -196,14 +236,32 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
     }
   };
 
+  const parseHistoryImages = (histItem) => {
+    if (!histItem?.images) return [];
+    if (Array.isArray(histItem.images)) {
+      return histItem.images.filter((i) => typeof i === "string" && i !== "string" && i.length > 0 && i !== "[]");
+    }
+    if (typeof histItem.images === "string" && histItem.images.trim() && histItem.images !== "string" && histItem.images !== "[]") {
+      try {
+        const parsed = JSON.parse(histItem.images);
+        return Array.isArray(parsed) ? parsed.filter((i) => typeof i === "string" && i !== "string") : [histItem.images];
+      } catch {
+        return [histItem.images];
+      }
+    }
+    return [];
+  };
+
   const modalTitle = client?.fullName
     ? `${client.fullName} — ${t("clients.passportModalTitle")}`
     : t("clients.passportModalTitle");
 
   return (
-    <CustomDialog widthX={680} open={open} close={onClose}>
+    <>
+      <CustomDialog widthX={700} open={open} close={onClose}>
       <CustomDialogHeader variant="h5" title={modalTitle} />
 
+      {/* Tabs: Active Passport vs Passport History */}
       <Box sx={{ borderBottom: "1px solid", borderColor: "divider", mt: 1 }}>
         <Tabs
           value={activeTab}
@@ -253,26 +311,15 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
           />
         </Tabs>
       </Box>
-      {isRestrictedForUser && (
-        <Alert
-          severity="warning"
-          icon={<LockIcon />}
-          sx={{
-            borderRadius: "10px",
-            my: 2,
-            fontWeight: 500,
-          }}
-        >
-          {t("clients.vipFileRestrictedNotice")}
-        </Alert>
-      )}
 
-      {activeTab === 0 && !isRestrictedForUser && (
+      {/* TAB 0: Active Passport & Renewal Form */}
+      {activeTab === 0 && (
         <Box
           component="form"
           onSubmit={handleSubmit(submitPassportHandler)}
           sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2.5 }}
         >
+          {/* Passport Expiration Status Banner */}
           {expiryStatus && (
             <Alert
               severity={expiryStatus.severity}
@@ -300,101 +347,120 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
             </Alert>
           )}
 
-          {fullUrl && (
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 1.75,
-                borderRadius: "12px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                backgroundColor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.03)"
-                    : "rgba(0, 0, 0, 0.02)",
-                borderColor: "divider",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                  overflow: "hidden",
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "10px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    bgcolor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "rgba(37, 99, 235, 0.15)"
-                        : "rgba(37, 99, 235, 0.1)",
-                    color: "primary.main",
-                    flexShrink: 0,
-                  }}
-                >
-                  <InsertDriveFileIcon sx={{ fontSize: 22 }} />
-                </Box>
-                <Box sx={{ overflow: "hidden" }}>
-                  <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
-                    {t("clients.currentScan")}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap>
-                    {fileName}
-                  </Typography>
-                </Box>
-              </Box>
+          {/* Current Attached Passport Scan(s) */}
+          {activeImages.length > 0 && (
+            <Stack spacing={1}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                {t("clients.currentScan")}:
+              </Typography>
+              {activeImages.map((rawPath, imgIdx) => {
+                const fullUrl = getFileUrl(rawPath);
+                const fileName = rawPath.split("/").pop() || `Passport_Scan_${imgIdx + 1}`;
+                const isImage = isImageUrl(fullUrl || rawPath);
 
-              <Stack direction="row" spacing={1}>
-                <IconButton
-                  size="small"
-                  color="primary"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isImageFile) {
-                      setPreviewModal({ url: fullUrl, name: fileName || t("clients.passportDocument") });
-                    } else {
-                      window.open(fullUrl, "_blank", "noopener,noreferrer");
-                    }
-                  }}
-                  title={t("clients.viewDocument")}
-                >
-                  <VisibilityIcon fontSize="small" />
-                </IconButton>
+                return (
+                  <Paper
+                    key={imgIdx}
+                    variant="outlined"
+                    sx={{
+                      p: 1.5,
+                      px: 2,
+                      borderRadius: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.03)"
+                          : "rgba(0, 0, 0, 0.02)",
+                      borderColor: "divider",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: "10px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          bgcolor: (theme) =>
+                            theme.palette.mode === "dark"
+                              ? "rgba(37, 99, 235, 0.15)"
+                              : "rgba(37, 99, 235, 0.1)",
+                          color: "primary.main",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <InsertDriveFileIcon sx={{ fontSize: 22 }} />
+                      </Box>
+                      <Box sx={{ overflow: "hidden" }}>
+                        <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
+                          {fileName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" noWrap>
+                          {client?.passport_number ? `${t("columns.passportNumber")}: ${client.passport_number}` : ""}
+                        </Typography>
+                      </Box>
+                    </Box>
 
-                <IconButton
-                  size="small"
-                  color="success"
-                  onClick={() => handleDownload(fullUrl, fileName)}
-                  title={t("clients.downloadDocument")}
-                >
-                  <DownloadIcon fontSize="small" />
-                </IconButton>
+                    <Stack direction="row" spacing={1}>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (fullUrl) {
+                            if (isImage) {
+                              setPreviewModal({ url: fullUrl, name: fileName });
+                            } else {
+                              window.open(fullUrl, "_blank", "noopener,noreferrer");
+                            }
+                          }
+                        }}
+                        title={t("clients.viewDocument")}
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
 
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={handleDeleteCurrentFile}
-                  disabled={deleting}
-                  title={t("clients.deleteDocument")}
-                >
-                  {deleting ? (
-                    <CircularProgress size={18} />
-                  ) : (
-                    <DeleteIcon fontSize="small" />
-                  )}
-                </IconButton>
-              </Stack>
-            </Paper>
+                      <IconButton
+                        size="small"
+                        color="success"
+                        onClick={() => handleDownload(fullUrl, fileName)}
+                        title={t("clients.downloadDocument")}
+                      >
+                        <DownloadIcon fontSize="small" />
+                      </IconButton>
+
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={handleDeleteCurrentFile}
+                        disabled={deleting}
+                        title={t("clients.deleteDocument")}
+                      >
+                        {deleting ? (
+                          <CircularProgress size={18} />
+                        ) : (
+                          <DeleteIcon fontSize="small" />
+                        )}
+                      </IconButton>
+                    </Stack>
+                  </Paper>
+                );
+              })}
+            </Stack>
           )}
 
+          {/* Passport Form Inputs */}
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
@@ -426,6 +492,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
             </Grid>
           </Grid>
 
+          {/* Upload New Passport Scan File Zone */}
           <Paper
             variant="outlined"
             component="label"
@@ -496,7 +563,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
               >
                 {selectedFile
                   ? selectedFile.name
-                  : fullUrl
+                  : activeImages.length > 0
                   ? t("clients.uploadNewScan")
                   : t("clients.uploadDocument")}
               </Typography>
@@ -533,7 +600,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
       )}
 
       {/* TAB 1: Passport History Archive */}
-      {activeTab === 1 && !isRestrictedForUser && (
+      {activeTab === 1 && (
         <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1.5, minHeight: 280 }}>
           {passportHistory.length === 0 ? (
             <Paper
@@ -556,7 +623,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
             </Paper>
           ) : (
             passportHistory.map((item, idx) => {
-              const histImages = Array.isArray(item.images) ? item.images : [];
+              const histImages = parseHistoryImages(item);
               const histExpiry = item.passportExpiryDate;
               const isHistExpired = histExpiry ? dayjs(histExpiry).isBefore(dayjs(), "day") : false;
 
@@ -663,9 +730,9 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                         </Typography>
                         <Stack spacing={1}>
                           {histImages.map((imgPath, imgIdx) => {
-                            const imgUrl = imgPath.startsWith("http") ? imgPath : `${BASE_URL}${imgPath}`;
+                            const imgUrl = getFileUrl(imgPath);
                             const imgName = imgPath.split("/").pop() || `Passport_Scan_${imgIdx + 1}`;
-                            const isImg = /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(imgName);
+                            const isImg = isImageUrl(imgUrl || imgPath);
 
                             return (
                               <Paper
@@ -692,10 +759,12 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                     size="small"
                                     color="primary"
                                     onClick={() => {
-                                      if (isImg) {
-                                        setPreviewModal({ url: imgUrl, name: imgName });
-                                      } else {
-                                        window.open(imgUrl, "_blank", "noopener,noreferrer");
+                                      if (imgUrl) {
+                                        if (isImg) {
+                                          setPreviewModal({ url: imgUrl, name: imgName });
+                                        } else {
+                                          window.open(imgUrl, "_blank", "noopener,noreferrer");
+                                        }
                                       }
                                     }}
                                     title={t("clients.viewDocument")}
@@ -725,12 +794,15 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
         </Box>
       )}
 
-      {/* Image Preview Lightbox Modal */}
+    </CustomDialog>
+
+      {/* Image Preview Lightbox Modal rendered at root level */}
       <Dialog
         open={Boolean(previewModal)}
         onClose={() => setPreviewModal(null)}
         maxWidth="lg"
         fullWidth
+        sx={{ zIndex: 1600 }}
         slotProps={{
           paper: {
             sx: {
@@ -744,8 +816,8 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
           },
           backdrop: {
             sx: {
-              backgroundColor: "rgba(0, 0, 0, 0.75)",
-              backdropFilter: "blur(6px)",
+              backgroundColor: "rgba(0, 0, 0, 0.8)",
+              backdropFilter: "blur(8px)",
             },
           },
         }}
@@ -766,11 +838,21 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {previewModal?.url && (
-              <Tooltip title={t("download")}>
-                <IconButton size="small" onClick={() => handleDownload(previewModal.url, previewModal.name)}>
-                  <DownloadIcon />
-                </IconButton>
-              </Tooltip>
+              <>
+                <Tooltip title={t("openInNewTab") || "Open in new tab"}>
+                  <IconButton
+                    size="small"
+                    onClick={() => window.open(previewModal.url, "_blank", "noopener,noreferrer")}
+                  >
+                    <OpenInNewIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={t("download")}>
+                  <IconButton size="small" onClick={() => handleDownload(previewModal.url, previewModal.name)}>
+                    <DownloadIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              </>
             )}
             <IconButton size="small" onClick={() => setPreviewModal(null)}>
               <CloseIcon />
@@ -798,6 +880,10 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
               component="img"
               src={previewModal.url}
               alt={previewModal.name}
+              onError={(e) => {
+                // If image fails to render (e.g. non-image mime or network), show hint
+                e.currentTarget.style.display = "none";
+              }}
               sx={{
                 maxWidth: "100%",
                 maxHeight: "80vh",
@@ -811,7 +897,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
           )}
         </Box>
       </Dialog>
-    </CustomDialog>
+    </>
   );
 };
 

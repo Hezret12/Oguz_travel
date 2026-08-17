@@ -5,10 +5,8 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import toast from "react-hot-toast";
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../hooks/useLocale";
-import { useAuth } from "../../context/useAuth";
 import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
@@ -39,8 +37,6 @@ const formatDate = (value) => {
 
 const Clients = () => {
   const { t } = useLocale();
-  const { user } = useAuth();
-  const isAdmin = Boolean(user?.role === "admin");
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
   const [selectedDocClient, setSelectedDocClient] = useState(null);
@@ -202,13 +198,6 @@ const Clients = () => {
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         Cell: ({ row, table }) => {
-          const isVip = Boolean(
-            row.original.vip === true ||
-            row.original.vip === "true" ||
-            row.original.vip === 1,
-          );
-          const isDocRestricted = isVip && !isAdmin;
-
           return (
             <Box
               sx={{
@@ -218,25 +207,13 @@ const Clients = () => {
                 gap: 1,
               }}
             >
-              <Tooltip
-                title={
-                  isDocRestricted
-                    ? t("clients.vipFileRestricted")
-                    : t("clients.documents")
-                }
-                arrow
-              >
+              <Tooltip title={t("clients.documents")} arrow>
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (isDocRestricted) {
-                      toast.error(t("clients.vipFileRestricted"));
-                      return;
-                    }
                     setSelectedDocClient(row.original);
                   }}
                   size="small"
-                  disabled={isDocRestricted}
                 >
                   <CloudUploadOutlinedIcon sx={{ fontSize: 16 }} />
                 </IconButton>
@@ -252,7 +229,7 @@ const Clients = () => {
         },
       },
     ],
-    [t, handleDeleteClick, isAdmin],
+    [t, handleDeleteClick],
   );
 
   const activeFilters = useMemo(
