@@ -44,17 +44,36 @@ const CustomTextField = ({
                   component="div"
                   noWrap
                   sx={{
+                    height: '20px',
+                    lineHeight: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
                     mb: 0.75,
                     fontWeight: 600,
                     fontSize: '0.875rem',
+                    color: 'text.primary',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                     cursor: 'default',
                   }}
                 >
-                  {label}
-                  {required && <span style={{ color: '#ef4444', marginLeft: '4px', fontSize: '17px' }}>*</span>}
+                  <span>{label}</span>
+                  {required && (
+                    <Box
+                      component="span"
+                      sx={{
+                        color: '#ef4444',
+                        ml: '4px',
+                        fontSize: '15px',
+                        lineHeight: 1,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      *
+                    </Box>
+                  )}
                 </Typography>
               </Tooltip>
             )}

@@ -1,4 +1,4 @@
-import { Box, InputAdornment, TextField, Typography, useColorScheme } from '@mui/material';
+import { Box, InputAdornment, TextField, Typography, Tooltip, useColorScheme } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { normalizePhoneInput } from '../../utils/phone';
@@ -22,7 +22,7 @@ const mergeSx = (...styles) =>
 const baseFieldStyles = {
   form: {
     '& .MuiOutlinedInput-root': {
-      borderRadius: '4px',
+      borderRadius: '7px',
       minHeight: '44px',
       backgroundColor: (theme) =>
         theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : '#ffffff',
@@ -34,24 +34,18 @@ const baseFieldStyles = {
           borderColor: 'primary.main',
         },
       },
-      '&.Mui-focused': {
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.02)' : '#ffffff',
-        boxShadow: (theme) =>
-          theme.palette.mode === 'dark'
-            ? '0 0 0 3px rgba(59, 130, 246, 0.16)'
-            : '0 0 0 3px rgba(37, 99, 235, 0.12)',
-      },
     },
     '& .MuiOutlinedInput-input': {
       py: '10px',
-      color: 'text.primary',
     },
     '& .MuiFormHelperText-root': {
+      position: 'absolute',
+      bottom: '-20px',
+      left: 0,
       mx: 1,
-      mt: 0.5,
+      mt: 0,
       fontSize: '0.75rem',
-      fontWeight: 500,
+      lineHeight: 1.2,
     },
   },
   login: {
@@ -102,26 +96,6 @@ const baseFieldStyles = {
   },
 };
 
-const baseLabelStyles = {
-  form: {
-    color: 'text.primary',
-    fontFamily: 'inherit',
-    fontWeight: 600,
-    fontSize: '0.875rem',
-    lineHeight: '1.25rem',
-    mb: 0.75,
-  },
-  login: {
-    color: 'var(--Text-btn, #FFFFFF)',
-    fontFamily: '"SF Pro", -apple-system, BlinkMacSystemFont, sans-serif',
-    fontWeight: 510,
-    fontSize: '14px',
-    lineHeight: '20px',
-    letterSpacing: '-0.01em',
-    mb: 0.8,
-  },
-};
-
 const PhoneNumberField = ({
   control,
   name = 'phone',
@@ -144,7 +118,6 @@ const PhoneNumberField = ({
     ? (isDark ? '#DDDDDD' : '#ffffff')
     : 'text.primary';
   const variantStyles = baseFieldStyles[variant] ?? baseFieldStyles.form;
-  const variantLabelStyles = baseLabelStyles[variant] ?? baseLabelStyles.form;
   const resolvedLabel = label === false ? null : (label ?? t('columns.phoneNumber'));
 
   const stripPrefix = (value) => {
@@ -153,12 +126,62 @@ const PhoneNumberField = ({
   };
 
   return (
-    <Box sx={{ width: '100%', position: 'relative', ...sx }}>
+    <Box sx={{ width: '100%', ...sx }}>
       {resolvedLabel && (
-        <Typography sx={variantLabelStyles}>
-          {resolvedLabel}
-          {required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
-        </Typography>
+        <Tooltip title={resolvedLabel} arrow placement="top-start">
+          <Typography
+            variant={variant === 'form' ? 'body2' : undefined}
+            component="div"
+            noWrap
+            sx={
+              variant === 'form'
+                ? {
+                    height: '20px',
+                    lineHeight: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: 0.75,
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    color: 'text.primary',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    cursor: 'default',
+                  }
+                : {
+                    color: 'var(--Text-btn, #FFFFFF)',
+                    fontFamily: '"SF Pro", -apple-system, BlinkMacSystemFont, sans-serif',
+                    fontWeight: 510,
+                    fontSize: '14px',
+                    lineHeight: '20px',
+                    letterSpacing: '-0.01em',
+                    mb: 0.8,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    cursor: 'default',
+                  }
+            }
+          >
+            <span>{resolvedLabel}</span>
+            {required && (
+              <Box
+                component="span"
+                sx={{
+                  color: '#ef4444',
+                  ml: '4px',
+                  fontSize: variant === 'form' ? '15px' : 'inherit',
+                  lineHeight: 1,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+              >
+                *
+              </Box>
+            )}
+          </Typography>
+        </Tooltip>
       )}
 
       <Controller
@@ -194,13 +217,14 @@ const PhoneNumberField = ({
                     >
                       <Typography
                         sx={{
-                          fontSize: '1.05rem',
-                          fontWeight: 500,
+                          fontSize: '1rem',
+                          fontWeight: 400,
                           color: textColor,
-                          lineHeight: '1.6',
+                          lineHeight: 1.5,
                           mr: '6px',
                           userSelect: 'none',
                           pointerEvents: 'none',
+                          fontFamily: 'inherit',
                         }}
                       >
                         {prefix}
@@ -212,12 +236,13 @@ const PhoneNumberField = ({
                   maxLength,
                   inputMode: 'numeric',
                   autoComplete: variant === 'login' ? 'tel' : undefined,
-                  style: { paddingLeft: 0 },
+                  style: {
+                    paddingLeft: 0,
+                  },
                 },
               }}
               sx={mergeSx(
                 {
-                  position: 'relative',
                   '& .MuiOutlinedInput-input::placeholder': {
                     color:
                       variant === 'login'
@@ -248,4 +273,3 @@ const PhoneNumberField = ({
 };
 
 export default PhoneNumberField;
-

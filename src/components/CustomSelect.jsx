@@ -114,8 +114,13 @@ const CustomSelect = ({
               <Tooltip title={label} arrow placement="top-start">
                 <Typography
                   variant="body2"
+                  component="div"
                   noWrap
                   sx={{
+                    height: "20px",
+                    lineHeight: "20px",
+                    display: "flex",
+                    alignItems: "center",
                     mb: 0.75,
                     fontWeight: 600,
                     fontSize: "0.875rem",
@@ -126,17 +131,21 @@ const CustomSelect = ({
                     cursor: "default",
                   }}
                 >
-                  {label}
+                  <span>{label}</span>
                   {required && (
-                    <span
-                      style={{
+                    <Box
+                      component="span"
+                      sx={{
                         color: "#ef4444",
-                        marginLeft: "4px",
-                        fontSize: "17px",
+                        ml: "4px",
+                        fontSize: "15px",
+                        lineHeight: 1,
+                        display: "inline-flex",
+                        alignItems: "center",
                       }}
                     >
                       *
-                    </span>
+                    </Box>
                   )}
                 </Typography>
               </Tooltip>
@@ -302,7 +311,16 @@ const CustomSelect = ({
 
               {(hasError || error?.message) && (
                 <FormHelperText
-                  sx={{ mx: 1, mt: 0.5, fontSize: "0.75rem", fontWeight: 500 }}
+                  sx={{
+                    position: "absolute",
+                    bottom: "-20px",
+                    left: 0,
+                    mx: 1,
+                    mt: 0,
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    lineHeight: 1.2,
+                  }}
                 >
                   {error?.message ?? resolvedPlaceholder}
                 </FormHelperText>
