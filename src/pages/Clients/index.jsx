@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
-import { Box, Chip, IconButton } from "@mui/material";
-import FolderSharedOutlinedIcon from "@mui/icons-material/FolderSharedOutlined";
+import { Box, Chip, IconButton, Tooltip } from "@mui/material";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -86,10 +86,8 @@ const Clients = () => {
 
   const { mutate: deleteClientMutate, isPending: isDeleting } = useDelete({
     deleteFn: deleteClient,
-    queryKey: ["clients", queryParams],
+    queryKey: "clients",
     idKey: "guid",
-    apiName: "guid",
-    isInfiniteQuery: true,
   });
 
   const deleteDialog = useDeleteDialog({
@@ -105,10 +103,10 @@ const Clients = () => {
     (key, value) => {
       if (key === "gender") {
         const label =
-          value === "Women"
-            ? t("pages.clients.genderWomen")
-            : value === "Men"
-              ? t("pages.clients.genderMen")
+          value === "Female" || value === "Women"
+            ? t("clients.genderWomen")
+            : value === "Male" || value === "Men"
+              ? t("clients.genderMen")
               : value;
         return `${t(`columns.${key}`)}: ${label}`;
       }
@@ -183,13 +181,19 @@ const Clients = () => {
         id: "gender",
         header: t("columns.gender"),
         size: 120,
-        Cell: ({ cell }) => (
-          <Box sx={{ fontWeight: 500 }}>
-            {cell.getValue() === "Women"
-              ? t("clients.genderWomen")
-              : t("clients.genderMen")}
-          </Box>
-        ),
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          if (!val) return "-";
+          return (
+            <Box sx={{ fontWeight: 500 }}>
+              {val === "Female" || val === "Women"
+                ? t("clients.genderWomen")
+                : val === "Male" || val === "Men"
+                  ? t("clients.genderMen")
+                  : val}
+            </Box>
+          );
+        },
       },
       {
         id: "actions",
@@ -214,38 +218,29 @@ const Clients = () => {
                 gap: 1,
               }}
             >
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isDocRestricted) {
-                    toast.error(t("clients.vipFileRestricted"));
-                    return;
-                  }
-                  setSelectedDocClient(row.original);
-                }}
-                size="small"
-                disabled={isDocRestricted}
-                sx={{
-                  color: isDocRestricted ? "text.disabled" : "primary.main",
-                  borderRadius: "8px",
-                  p: 0.75,
-                  transition: "all 0.2s ease",
-                  "&:hover": {
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "rgba(37, 99, 235, 0.15)"
-                        : "rgba(37, 99, 235, 0.08)",
-                    transform: "scale(1.08)",
-                  },
-                }}
+              <Tooltip
                 title={
                   isDocRestricted
                     ? t("clients.vipFileRestricted")
                     : t("clients.documents")
                 }
+                arrow
               >
-                <FolderSharedOutlinedIcon sx={{ fontSize: 18 }} />
-              </IconButton>
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isDocRestricted) {
+                      toast.error(t("clients.vipFileRestricted"));
+                      return;
+                    }
+                    setSelectedDocClient(row.original);
+                  }}
+                  size="small"
+                  disabled={isDocRestricted}
+                >
+                  <CloudUploadOutlinedIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              </Tooltip>
 
               <ColumnActionButtons
                 row={row}
@@ -419,6 +414,7 @@ const Clients = () => {
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
+        description={t("clients.deleteConfirm")}
       />
 
       <MaterialReactTable table={table} />

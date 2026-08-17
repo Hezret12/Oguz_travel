@@ -150,6 +150,9 @@
   "clients": {
     "title": "Müşderiler",
     "add": "Müşderi goşmak",
+    "edit": "Müşderini üýtgetmek",
+    "deleteTitle": "Müşderini pozmak",
+    "deleteConfirm": "Siz hakykatdan hem bu müşderini pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaz.",
     "addSuccess": "Müşderi üstünlikli goşuldy!",
     "addError": "Müşderini ýazdyrmakda ýalňyşlyk ýüze çykdy.",
     "genderWomen": "Zenan",

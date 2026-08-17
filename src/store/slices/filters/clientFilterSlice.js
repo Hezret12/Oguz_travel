@@ -9,7 +9,7 @@ export const clientFilterSlice = createFilterSlice({
     passportExpiryDate: '',
     gender: '',
   },
-  defaultPageSize: 5,
+  defaultPageSize: 40,
 });
 
 export const clientFilterActions = clientFilterSlice.actions;

@@ -146,8 +146,8 @@ const ClientFilter = ({
   const allText = t("all") ?? "All";
 
   const genderOptions = [
-    { label: t("clients.genderWomen"), value: "Women" },
-    { label: t("clients.genderMen"), value: "Men" },
+    { label: t("clients.genderWomen"), value: "Female" },
+    { label: t("clients.genderMen"), value: "Male" },
   ];
 
   return (
