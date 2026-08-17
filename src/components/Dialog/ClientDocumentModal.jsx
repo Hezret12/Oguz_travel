@@ -9,11 +9,14 @@ import {
   Typography,
   Grid,
   Alert,
+  Dialog,
+  Tooltip,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloseIcon from '@mui/icons-material/Close';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import LockIcon from '@mui/icons-material/Lock';
 import toast from 'react-hot-toast';
@@ -37,10 +40,15 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
 
   const fileUrl = client?.passport_file_url || client?.passportFileUrl || client?.images?.[0];
   const fullUrl = fileUrl ? (fileUrl.startsWith('http') ? fileUrl : `${BASE_URL}${fileUrl}`) : null;
   const fileName = fileUrl ? fileUrl.split('/').pop() : '';
+  const isImageFile = Boolean(
+    (fileName && /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(fileName)) ||
+    (fullUrl && /\.(jpe?g|png|webp|gif|bmp|svg)$/i.test(fullUrl))
+  );
 
   const { control, handleSubmit } = useForm({
     defaultValues: {
@@ -193,10 +201,14 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                   <IconButton
                     size="small"
                     color="primary"
-                    component="a"
-                    href={fullUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (isImageFile) {
+                        setImagePreviewOpen(true);
+                      } else {
+                        window.open(fullUrl, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
                     title={t('clients.viewDocument')}
                   >
                     <VisibilityIcon fontSize="small" />
@@ -346,6 +358,93 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
           </Button>
         </Box>
       </Box>
+
+      {/* Image Preview Lightbox Modal */}
+      <Dialog
+        open={imagePreviewOpen}
+        onClose={() => setImagePreviewOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "16px",
+              bgcolor: "background.paper",
+              overflow: "hidden",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
+              maxWidth: { xs: "96vw", sm: "92vw", md: "1150px" },
+              width: "100%",
+            },
+          },
+          backdrop: {
+            sx: {
+              backgroundColor: "rgba(0, 0, 0, 0.75)",
+              backdropFilter: "blur(6px)",
+            },
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            p: 2,
+            px: 2.5,
+            borderBottom: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }} noWrap>
+            {fileName || t('clients.passportDocument', 'Pasport Faýly')}
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {fullUrl && (
+              <Tooltip title={t("download", "Ýükläp al")}>
+                <IconButton size="small" onClick={handleDownload}>
+                  <DownloadIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+            <IconButton size="small" onClick={() => setImagePreviewOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            p: { xs: 1.5, sm: 2.5 },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark"
+                ? "rgba(0, 0, 0, 0.45)"
+                : "rgba(0, 0, 0, 0.03)",
+            minHeight: { xs: 350, sm: 500 },
+            maxHeight: "86vh",
+            overflow: "auto",
+          }}
+        >
+          {fullUrl && (
+            <Box
+              component="img"
+              src={fullUrl}
+              alt={fileName}
+              sx={{
+                maxWidth: "100%",
+                maxHeight: "80vh",
+                width: "auto",
+                height: "auto",
+                objectFit: "contain",
+                borderRadius: "10px",
+                boxShadow: "0 12px 36px rgba(0,0,0,0.3)",
+              }}
+            />
+          )}
+        </Box>
+      </Dialog>
     </CustomDialog>
   );
 };

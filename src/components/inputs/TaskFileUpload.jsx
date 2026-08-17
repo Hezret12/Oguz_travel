@@ -428,7 +428,7 @@ export function TaskFileList({
       <Dialog
         open={Boolean(previewModal)}
         onClose={() => setPreviewModal(null)}
-        maxWidth="md"
+        maxWidth="lg"
         fullWidth
         slotProps={{
           paper: {
@@ -436,7 +436,15 @@ export function TaskFileList({
               borderRadius: "16px",
               bgcolor: "background.paper",
               overflow: "hidden",
-              boxShadow: "0 24px 48px rgba(0,0,0,0.4)",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
+              maxWidth: { xs: "96vw", sm: "92vw", md: "1150px" },
+              width: "100%",
+            },
+          },
+          backdrop: {
+            sx: {
+              backgroundColor: "rgba(0, 0, 0, 0.75)",
+              backdropFilter: "blur(6px)",
             },
           },
         }}
@@ -476,13 +484,16 @@ export function TaskFileList({
 
         <Box
           sx={{
-            p: 2,
+            p: { xs: 1.5, sm: 2.5 },
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "background.default",
-            minHeight: 300,
-            maxHeight: "75vh",
+            bgcolor: (theme) =>
+              theme.palette.mode === "dark"
+                ? "rgba(0, 0, 0, 0.45)"
+                : "rgba(0, 0, 0, 0.03)",
+            minHeight: { xs: 350, sm: 500 },
+            maxHeight: "86vh",
             overflow: "auto",
           }}
         >
@@ -493,10 +504,13 @@ export function TaskFileList({
               alt={previewModal.name}
               sx={{
                 maxWidth: "100%",
-                maxHeight: "70vh",
+                maxHeight: "80vh",
+                width: "auto",
+                height: "auto",
                 objectFit: "contain",
-                borderRadius: "8px",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                borderRadius: "10px",
+                boxShadow: "0 12px 36px rgba(0,0,0,0.3)",
+                transition: "transform 0.2s ease",
               }}
             />
           )}
