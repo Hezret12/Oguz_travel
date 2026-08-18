@@ -17,7 +17,7 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import DescriptionIcon from "@mui/icons-material/Description";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import DownloadIcon from "@mui/icons-material/Download";
+import { Download } from "lucide-react";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import CloseIcon from "@mui/icons-material/Close";
@@ -396,7 +396,7 @@ export function TaskFileList({
                         },
                       }}
                     >
-                      <DownloadIcon sx={{ fontSize: 17 }} />
+                      <Download size={16} />
                     </IconButton>
                   </Tooltip>
 
@@ -472,7 +472,7 @@ export function TaskFileList({
                     downloadFile(previewModal.file || previewModal.url, previewModal.name)
                   }
                 >
-                  <DownloadIcon />
+                  <Download size={18} />
                 </IconButton>
               </Tooltip>
             )}

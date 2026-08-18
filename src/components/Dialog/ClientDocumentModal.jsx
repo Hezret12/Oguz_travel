@@ -18,7 +18,7 @@ import {
   AccordionDetails,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import DownloadIcon from "@mui/icons-material/Download";
+import { Download } from "lucide-react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
@@ -541,7 +541,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                   color="success"
                                   onClick={() => handleDownload(fullUrl, fileName)}
                                 >
-                                  <DownloadIcon fontSize="small" />
+                                  <Download size={18} />
                                 </IconButton>
                               </Tooltip>
 
@@ -947,7 +947,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                           color="success"
                                           onClick={() => handleDownload(imgUrl, imgName)}
                                         >
-                                          <DownloadIcon fontSize="small" />
+                                          <Download size={18} />
                                         </IconButton>
                                       </Tooltip>
                                     </Stack>
@@ -1019,7 +1019,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                 </Tooltip>
                 <Tooltip title={t("download")}>
                   <IconButton size="small" onClick={() => handleDownload(previewModal.url, previewModal.name)}>
-                    <DownloadIcon fontSize="small" />
+                    <Download size={18} />
                   </IconButton>
                 </Tooltip>
               </>
