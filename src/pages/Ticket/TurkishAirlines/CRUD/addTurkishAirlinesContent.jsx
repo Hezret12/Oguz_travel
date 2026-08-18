@@ -434,7 +434,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
                     phoneNumberName="agent.phone_number"
                     title={t("columns.agent")}
                     fullNameLabel={t("columns.agentFullName")}
-                    phoneNumberLabel={t("ticket.b2b.agentPhoneNumber")}
+                    phoneNumberLabel={t("columns.phoneNumber")}
                   />
                 </Box>
               </Box>

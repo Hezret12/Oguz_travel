@@ -204,7 +204,7 @@ const ReferalLetter = () => {
       {
         accessorFn: (row) => row.client?.passport_number ?? "",
         id: "passport_number",
-        header: t("columns.passportNumber") ?? "Passport №",
+        header: t("columns.passportNumber"),
         size: 110,
       },
       {
@@ -238,26 +238,33 @@ const ReferalLetter = () => {
                 bgcolor: isHighlighted ? "error.main" : "transparent",
                 color: isHighlighted ? "error.contrastText" : "inherit",
                 fontWeight: isHighlighted ? 700 : 400,
+                textAlign: "center",
               }}
             >
               {value}
             </Box>
           );
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "departure_date",
         id: "departure_date",
         header: t("columns.departureDate"),
-        size: 120,
+        size: 100,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "return_date",
         id: "return_date",
         header: t("columns.returnDate"),
-        size: 120,
+        size: 100,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "price",
@@ -268,7 +275,7 @@ const ReferalLetter = () => {
           const amount = cell.getValue();
           const currency = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currency] || currency;
-          return `${symbol}${Number(amount ?? 0).toFixed(2)}`;
+          return `${Number(amount ?? 0).toFixed(2)} ${symbol}`;
         },
       },
       {
@@ -276,18 +283,22 @@ const ReferalLetter = () => {
         id: "contract_number",
         header: t("columns.contract_number"),
         size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "contract_date",
         id: "contract_date",
         header: t("columns.contractDate"),
-        size: 120,
+        size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
         id: "agent",
         header: t("columns.agent"),
-        size: 150,
+        size: 170,
         accessorFn: (row) => row.agent?.name,
         Cell: ({ row }) => (
           <StackedCell

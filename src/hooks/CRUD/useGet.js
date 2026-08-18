@@ -25,5 +25,5 @@ export const useGet = ({ apiFn, key, params = {}, options = {} }) => {
     ? rawData.items
     : rawData?.data ?? (typeof rawData === "object" && rawData !== null ? rawData : []);
 
-  return { ...query, data };
+  return { ...query, rawResponse: query?.data, rawData, data };
 };

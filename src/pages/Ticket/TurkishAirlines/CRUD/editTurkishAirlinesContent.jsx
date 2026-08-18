@@ -470,9 +470,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                     phoneNumberName="agent.phone_number"
                     title={t("columns.agent") ?? "Agent"}
                     fullNameLabel={t("columns.agentFullName")}
-                    phoneNumberLabel={
-                      t("ticket.b2b.agentPhoneNumber") ?? "Agent Phone Number"
-                    }
+                    phoneNumberLabel={t("columns.phoneNumber")}
                   />
                 </Box>
               </Box>

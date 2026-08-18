@@ -12,6 +12,7 @@ import {
   Divider,
   CircularProgress,
   Pagination,
+  Skeleton,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -171,31 +172,6 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     isTranslation ||
     isTurkish;
 
-  const [localPayments, setLocalPayments] = useState([]);
-  const [editingPayment, setEditingPayment] = useState(null);
-  const [prevTicketKey, setPrevTicketKey] = useState(null);
-
-  const currentTicketKey = open && ticket ? (ticket.guid || ticket.id || "open") : null;
-  if (currentTicketKey !== prevTicketKey) {
-    setPrevTicketKey(currentTicketKey);
-    setEditingPayment(null);
-    setLocalPayments([]);
-  }
-
-  const { handleSubmit, reset, control } = useForm({
-    defaultValues: {
-      amount: "",
-      paymentDate: new Date().toISOString(),
-      description: "",
-      opr_guid: "",
-    },
-  });
-
-  const amountValue = useWatch({ control, name: "amount" });
-
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-
   const apiFn = isTranslation
     ? getAllTransPaymentApi
     : isHAR
@@ -215,6 +191,35 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     : isTurkish
     ? "turkish-payment"
     : "payment-status";
+
+  const [localPayments, setLocalPayments] = useState([]);
+  const [editingPayment, setEditingPayment] = useState(null);
+  const [prevTicketKey, setPrevTicketKey] = useState(null);
+  const queryClient = useQueryClient();
+
+  const currentTicketKey = open && ticket ? (ticket.guid || ticket.id || "open") : null;
+  if (currentTicketKey !== prevTicketKey) {
+    setPrevTicketKey(currentTicketKey);
+    setEditingPayment(null);
+    setLocalPayments([]);
+    if (currentTicketKey) {
+      queryClient.removeQueries({ queryKey: [key] });
+    }
+  }
+
+  const { handleSubmit, reset, control } = useForm({
+    defaultValues: {
+      amount: "",
+      paymentDate: new Date().toISOString(),
+      description: "",
+      opr_guid: "",
+    },
+  });
+
+  const amountValue = useWatch({ control, name: "amount" });
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
   const queryParams = useMemo(() => {
     const params = { page, limit };
@@ -236,12 +241,15 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     return params;
   }, [ticket?.guid, page, limit, isTurkish, isTranslation, isHAR, isHotel, isAirway, isRailway, isTTP, isTour, isTransfer, isPackage]);
 
-  const { data: allPayments, isLoading: paymentsLoading } = useGet({
+  const { data: allPayments, rawResponse, isLoading: paymentsLoading, refetch: refetchPayments } = useGet({
     apiFn,
     key,
     params: queryParams,
     options: {
       enabled: open && !!ticket?.guid,
+      staleTime: 0,
+      gcTime: 0,
+      refetchOnMount: "always",
     },
   });
 
@@ -262,15 +270,22 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     [employees],
   );
 
-  const queryClient = useQueryClient();
-  const rawData = queryClient.getQueryData([key, queryParams]);
+  const responseData = rawResponse?.data || rawResponse;
   const totalPages = useMemo(() => {
-    if (!rawData?.data) return 1;
-    if (rawData.data.data?.meta?.totalPages !== undefined) {
-      return rawData.data.data.meta.totalPages;
+    if (!responseData) return 1;
+    if (responseData.data?.meta?.totalPages !== undefined) {
+      return responseData.data.meta.totalPages;
     }
-    return rawData.data.meta?.totalPages ?? 1;
-  }, [rawData]);
+    if (responseData.meta?.totalPages !== undefined) {
+      return responseData.meta.totalPages;
+    }
+    return 1;
+  }, [responseData]);
+
+  const parentInvalidateKeys = useMemo(
+    () => [key, "outbound", "turkish-airlines", "translations", "tickets", "b2b-tickets"],
+    [key]
+  );
 
   const { mutate: createPayment, isPending: createLoading } = useCreate({
     apiFn: isTranslation
@@ -283,7 +298,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ? addTurkishPaymentApi
       : addPaymentApi,
     key: key,
-    invalidateQueries: [key],
+    invalidateQueries: parentInvalidateKeys,
     onSuccess: () => {
       reset({
         amount: "",
@@ -291,6 +306,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         description: "",
         opr_guid: "",
       });
+      refetchPayments?.();
     },
   });
 
@@ -306,7 +322,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       : deleteTicketPaymentApi,
     queryKey: [key, queryParams],
     idKey: "guid",
-    invalidateQueries: [key],
+    invalidateQueries: parentInvalidateKeys,
   });
 
   const { mutate: updatePayment, isPending: updateLoading } = useUpdate({
@@ -321,9 +337,10 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       : updateTicketPaymentApi,
     key: key,
     idKey: "guid",
-    invalidateQueries: [key],
+    invalidateQueries: parentInvalidateKeys,
     onSuccessUpdate: () => {
       handleCancelEdit();
+      refetchPayments?.();
     },
   });
 
@@ -372,7 +389,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   if (!ticket) return null;
 
-  const stats = rawData?.data?.stats || rawData?.data?.data?.stats || allPayments?.stats;
+  const isInitialLoading = paymentsLoading && !rawResponse;
+  const stats = responseData?.stats || responseData?.data?.stats || allPayments?.stats;
   const salesTotal = Number(
     stats?.total_sales ??
     ticket.price ??
@@ -387,6 +405,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const remaining = stats?.remaining !== undefined
     ? Number(stats.remaining)
     : (salesTotal - totalPaid);
+
+  const isFullyPaid = !isInitialLoading && remaining <= 0;
 
   const handleEditClick = (p) => {
     setEditingPayment(p);
@@ -558,19 +578,34 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
           {t("payment.clientName")}: {clientName}
         </Typography>
-        {isCredit && (
-          <Chip
-            label={t("payment.credit")}
-            color="error"
-            variant="outlined"
-            sx={{
-              borderRadius: "16px",
-              fontWeight: 600,
-              fontSize: "0.85rem",
-              mr: 5,
-              px: 0.5,
-            }}
-          />
+        {!isInitialLoading && (
+          isFullyPaid ? (
+            <Chip
+              label="Tölendi"
+              color="success"
+              variant="outlined"
+              sx={{
+                borderRadius: "16px",
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                mr: 5,
+                px: 0.5,
+              }}
+            />
+          ) : (
+            <Chip
+              label={t("payment.credit")}
+              color="error"
+              variant="outlined"
+              sx={{
+                borderRadius: "16px",
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                mr: 5,
+                px: 0.5,
+              }}
+            />
+          )
         )}
       </Box>
 
@@ -601,23 +636,35 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                   {t("payment.totalPaid")}
                 </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 700, color: "#16a34a", mt: 0.5 }}
-                >
-                  {formatCurrency(totalPaid, ticketCurrency)}
-                </Typography>
+                {isInitialLoading ? (
+                  <Skeleton variant="rounded" width="70%" height={32} sx={{ mt: 0.5 }} />
+                ) : (
+                  <Typography
+                    variant="h5"
+                    sx={{ fontWeight: 700, color: "#16a34a", mt: 0.5 }}
+                  >
+                    {formatCurrency(totalPaid, ticketCurrency)}
+                  </Typography>
+                )}
               </Grid>
               <Grid size={4}>
                 <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
                   {t("payment.remaining")}
                 </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 700, color: "#ef4444", mt: 0.5 }}
-                >
-                  {formatCurrency(remaining, ticketCurrency)}
-                </Typography>
+                {isInitialLoading ? (
+                  <Skeleton variant="rounded" width="70%" height={32} sx={{ mt: 0.5 }} />
+                ) : (
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      color: remaining > 0 ? "#ef4444" : "#16a34a",
+                      mt: 0.5,
+                    }}
+                  >
+                    {formatCurrency(remaining, ticketCurrency)}
+                  </Typography>
+                )}
               </Grid>
             </Grid>
           </Box>
@@ -791,7 +838,21 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
           </Box>
 
-          {(remaining > 0 || editingPayment) ? (
+          {isInitialLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+              <Button
+                variant="outlined"
+                onClick={handleModalClose}
+                sx={{
+                  fontWeight: 600,
+                  px: 3,
+                  textTransform: "none",
+                }}
+              >
+                {t("payment.close")}
+              </Button>
+            </Box>
+          ) : (remaining > 0 || editingPayment) ? (
             <>
               <Divider />
               <Box component="form" onSubmit={handleSubmit(handleSavePayment)} sx={{ mt: 1.5 }}>

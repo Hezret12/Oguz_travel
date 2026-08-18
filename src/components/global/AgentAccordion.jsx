@@ -29,11 +29,10 @@ const AgentAccordion = ({
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const fullName = useWatch({ control, name: fullNameName });
-  const summaryText = fullName
-    ? `${fullName}`
-    : t("agent.summary");
-
-  const resolvedTitle = title ?? t("agentForm.title");
+  const resolvedTitle = title ?? t("columns.agent");
+  const summaryText = fullName ? `${fullName}` : resolvedTitle;
+  const resolvedFullNameLabel = fullNameLabel ?? t("columns.agentFullName");
+  const resolvedPhoneNumberLabel = phoneNumberLabel ?? t("columns.phoneNumber");
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -55,7 +54,8 @@ const AgentAccordion = ({
         defaultExpanded={defaultExpanded}
         sx={{
           width: "100%",
-          border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "#e2e8f0"}`,
+          border: "1px solid",
+          borderColor: "divider",
           borderRadius: "10px !important",
           overflow: "hidden",
           boxShadow: "none",
@@ -71,7 +71,7 @@ const AgentAccordion = ({
             height: 44,
             px: 1.5,
             py: 1,
-            backgroundColor: isDark ? "rgba(255,255,255,0.02)" : "#f8fafc",
+            backgroundColor: "action.hover",
             "&.Mui-expanded": {
               minHeight: 44,
             },
@@ -125,7 +125,8 @@ const AgentAccordion = ({
         <AccordionDetails
           sx={{
             p: 1,
-            borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "#e2e8f0"}`,
+            borderTop: "1px solid",
+            borderColor: "divider",
           }}
         >
           <Box
@@ -142,17 +143,13 @@ const AgentAccordion = ({
             <CustomTextField
               name={fullNameName}
               control={control}
-              label={
-                fullNameLabel ?? t("agentForm.fullName", "Agent Full Name")
-              }
+              label={resolvedFullNameLabel}
             />
 
             <PhoneNumberField
               name={phoneNumberName}
               control={control}
-              label={
-                phoneNumberLabel ?? t("agentForm.phoneNumber", "Phone Number")
-              }
+              label={resolvedPhoneNumberLabel}
             />
           </Box>
         </AccordionDetails>

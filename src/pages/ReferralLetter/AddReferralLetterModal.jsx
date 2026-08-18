@@ -15,7 +15,7 @@ import GlobalClientAutocomplete from "../../components/global/GlobalClientAutoco
 import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllEmployeeApi } from "../../api/queries/getters";
 import CurrencyAmount from "../../components/inputs/CurrencyAmount";
-import AgentAccordion from "../../components/global/AgentAccordion";
+import PhoneNumberField from "../../components/inputs/PhoneNumber";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import LabelWithTooltip from "../../components/LabelWithTooltip";
 import { useCreate } from "../../hooks/CRUD/useCreate";
@@ -194,17 +194,17 @@ const AddReferralLetterModal = ({ table }) => {
             label={t("application_number")}
           />
 
-          <Box sx={{ gridColumn: "span 2" }}>
-            <AgentAccordion
-              control={control}
-              fullNameName="agent.name"
-              phoneNumberName="agent.phone_number"
-              title={t("columns.agent")}
-              fullNameLabel={t("columns.agentFullName")}
-              phoneNumberLabel={t("b2b.agentPhoneNumber")}
-              inline
-            />
-          </Box>
+          <CustomTextField
+            name="agent.name"
+            control={control}
+            label={t("columns.agentFullName")}
+          />
+
+          <PhoneNumberField
+            name="agent.phone_number"
+            control={control}
+            label={t("columns.phoneNumber")}
+          />
 
           <Box sx={{ gridColumn: "1 / -1" }}>
             <CustomTextField
