@@ -196,7 +196,6 @@ const Users = () => {
     manualPagination: true,
     manualFiltering: true,
     manualSorting: true,
-    enableSorting: true,
     pageCount,
     rowCount: totalItems,
 

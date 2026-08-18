@@ -18,12 +18,13 @@ import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { addAirwayApi } from "../../../../api/queries/post";
-import { SOURCE_OPTIONS, PAYMENT_OPTIONS } from "../../constants";
+import { SOURCE_OPTIONS, getPaymentOptions } from "../../constants";
 import AirwayFields from "./AirwayFields";
 
 const AddAirwayModal = ({ open = true, onClose, table }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
+  const paymentOptions = useMemo(() => getPaymentOptions(t), [t]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -57,7 +58,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
       currency: "USD",
       system: SOURCE_OPTIONS[0].value,
       note: "",
-      is_paid: "false",
+      is_paid: 2,
     },
   });
 
@@ -97,7 +98,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
       currency: data.currency || "USD",
       system: data.system || "",
       note: data.note || "",
-      is_paid: data.is_paid === "true",
+      is_paid: Number(data.is_paid) || 2,
     };
     createAirway(payload);
   };
@@ -178,7 +179,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
               name="is_paid"
               control={control}
               label={t("columns.paymentStatus")}
-              options={PAYMENT_OPTIONS}
+              options={paymentOptions}
               required
             />
           </Grid>

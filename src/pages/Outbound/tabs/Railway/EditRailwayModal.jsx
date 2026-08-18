@@ -18,12 +18,13 @@ import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
 import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { updateRailwayApi } from "../../../../api/queries/patch";
-import { SOURCE_OPTIONS, PAYMENT_OPTIONS } from "../../constants";
+import { SOURCE_OPTIONS, getPaymentOptions } from "../../constants";
 import RailwayFields from "./RailwayFields";
 
 const EditRailwayModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
+  const paymentOptions = useMemo(() => getPaymentOptions(t), [t]);
 
   const { data: employees = [], isLoading: isLoadingEmployees } = useGet({
     apiFn: getAllEmployeeApi,
@@ -68,7 +69,7 @@ const EditRailwayModal = ({ table, row }) => {
       currency: item.currency || "USD",
       system: item.system || null,
       note: item.note || "",
-      is_paid: item.is_paid != null ? String(item.is_paid) : null,
+      is_paid: (item.is_paid === true || item.is_paid === 1 || item.is_paid === "1") ? 1 : (item.is_paid === 3 || item.is_paid === "3") ? 3 : 2,
     },
   });
 
@@ -110,7 +111,7 @@ const EditRailwayModal = ({ table, row }) => {
       currency: data.currency || "USD",
       system: data.system || "",
       note: data.note || "",
-      is_paid: data.is_paid === "true",
+      is_paid: Number(data.is_paid) || 2,
     };
     updateRailway(payload);
   };
@@ -196,7 +197,7 @@ const EditRailwayModal = ({ table, row }) => {
               name="is_paid"
               control={control}
               label={t("columns.paymentStatus")}
-              options={PAYMENT_OPTIONS}
+              options={paymentOptions}
               required
             />
           </Grid>

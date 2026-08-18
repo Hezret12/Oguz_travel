@@ -18,12 +18,13 @@ import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { addPackageApi } from "../../../../api/queries/post";
-import { PAYMENT_OPTIONS } from "../../constants";
+import { PARTNER_OPTIONS, getPaymentOptions } from "../../constants";
 import PackageFields from "./PackageFields";
 
 const AddPackageModal = ({ open = true, onClose, table }) => {
   const { t, selectedLang } = useLocale();
   const { addOutbound } = useValidShema();
+  const paymentOptions = useMemo(() => getPaymentOptions(t), [t]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -53,7 +54,7 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
       currency: "USD",
       partner: "",
       note: "",
-      is_paid: "false",
+      is_paid: 2,
     },
   });
 
@@ -86,7 +87,7 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
       currency: data.currency || "USD",
       partner: data.partner || "",
       note: data.note || "",
-      is_paid: data.is_paid === "true",
+      is_paid: Number(data.is_paid) || 2,
     };
     createPackage(payload);
   };
@@ -167,7 +168,7 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
               name="is_paid"
               control={control}
               label={t("columns.paymentStatus")}
-              options={PAYMENT_OPTIONS}
+              options={paymentOptions}
               required
             />
           </Grid>

@@ -31,16 +31,36 @@ function getRouteBreadcrumb(pathname, sidebarItems, defaultTitle) {
     }
     if (item.children) {
       for (const child of item.children) {
-        if (child.path === pathname || pathname.startsWith(child.path + '/')) {
+        if (child.path === pathname) {
           return { text: child.text, parentText: item.text, path: child.path };
         }
       }
     }
   }
 
+  let bestMatch = null;
+  for (const item of sidebarItems) {
+    if (item.path && item.path !== '/' && pathname.startsWith(item.path + '/')) {
+      if (!bestMatch || item.path.length > bestMatch.path.length) {
+        bestMatch = { text: item.text, parentText: null, path: item.path };
+      }
+    }
+    if (item.children) {
+      for (const child of item.children) {
+        if (child.path && child.path !== '/' && pathname.startsWith(child.path + '/')) {
+          if (!bestMatch || child.path.length > bestMatch.path.length) {
+            bestMatch = { text: child.text, parentText: item.text, path: child.path };
+          }
+        }
+      }
+    }
+  }
+
+  if (bestMatch) return bestMatch;
   if (pathname === '/') return { text: defaultTitle, parentText: null, path: '/' };
   return null;
 }
+
 
 const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => {
   const { t } = useTranslation();
@@ -179,7 +199,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                   /
                 </Typography>
 
-                {currentRouteInfo.parentText && (
+                {currentRouteInfo.parentText && currentRouteInfo.parentText !== currentRouteInfo.text && (
                   <>
                     <Typography
                       variant="body2"

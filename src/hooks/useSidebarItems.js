@@ -19,6 +19,7 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
+import { PATHS } from "../routes/paths";
 
 export const useSidebarItems = () => {
   const { t } = useTranslation();
@@ -28,19 +29,19 @@ export const useSidebarItems = () => {
       {
         id: "dashboard",
         text: t("sidebar.adminDashboard"),
-        path: "/",
+        path: PATHS.ROOT,
         icon: createElement(LayoutDashboard, { size: 20, strokeWidth: 2.2 }),
       },
       {
         id: "tasks",
         text: t("sidebar.tasks"),
-        path: "/tasks",
+        path: PATHS.TASKS,
         icon: createElement(CheckSquare, { size: 20, strokeWidth: 2.2 }),
       },
       {
         id: "notifications",
         text: t("sidebar.notifications"),
-        path: "/notifications",
+        path: PATHS.NOTIFICATIONS,
         icon: createElement(Bell, { size: 20, strokeWidth: 2.2 }),
       },
       {
@@ -52,13 +53,13 @@ export const useSidebarItems = () => {
           {
             id: "employees",
             text: t("sidebar.employees"),
-            path: "/employee",
+            path: PATHS.EMPLOYEE.EMPLOYEES,
             icon: createElement(UserCheck, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "users",
             text: t("sidebar.users"),
-            path: "/employee/users",
+            path: PATHS.EMPLOYEE.USERS,
             icon: createElement(Users, { size: 18, strokeWidth: 2.2 }),
           },
         ],
@@ -72,13 +73,13 @@ export const useSidebarItems = () => {
           {
             id: "ticket-b2b",
             text: t("sidebar.ticketB2B"),
-            path: "/ticket/b2b",
+            path: PATHS.TICKET.B2B,
             icon: createElement(Building2, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "ticket-turkish-airlines",
             text: t("sidebar.ticketTurkishAirlines"),
-            path: "/ticket/turkish-airlines",
+            path: PATHS.TICKET.TURKISH_AIRLINES,
             icon: createElement("img", {
               src: TurkishAirlinesIcon,
               alt: "Turkish Airlines",
@@ -91,7 +92,7 @@ export const useSidebarItems = () => {
         id: "clients",
         text: t("sidebar.clients"),
         icon: createElement(Contact2, { size: 20, strokeWidth: 2.2 }),
-        path: "/clients",
+        path: PATHS.CLIENTS,
       },
       {
         id: "visa",
@@ -102,13 +103,13 @@ export const useSidebarItems = () => {
           {
             id: "visa-applications",
             text: t("sidebar.visaApplications"),
-            path: "/visa/applications",
+            path: PATHS.VISA.APPLICATIONS,
             icon: createElement(FileText, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "visa-package",
             text: t("sidebar.visa.package"),
-            path: "/visa/package",
+            path: PATHS.VISA.PACKAGE,
             icon: createElement(Package, { size: 18, strokeWidth: 2.2 }),
           },
         ],
@@ -116,19 +117,19 @@ export const useSidebarItems = () => {
       {
         id: "translation",
         text: t("sidebar.translation"),
-        path: "/translation",
+        path: PATHS.TRANSLATION,
         icon: createElement(Languages, { size: 20, strokeWidth: 2.2 }),
       },
       {
         id: "referal-letters",
         text: t("sidebar.referalLetters"),
-        path: "/referal-letters",
+        path: PATHS.REFERRAL_LETTERS,
         icon: createElement(FileCheck, { size: 20, strokeWidth: 2.2 }),
       },
       {
         id: "outbound",
         text: t("sidebar.outbound"),
-        path: "/outbound",
+        path: PATHS.OUTBOUND,
         icon: createElement(PlaneTakeoff, { size: 20, strokeWidth: 2.2 }),
       },
       {
@@ -140,7 +141,7 @@ export const useSidebarItems = () => {
           {
             id: "report-turkish-airlines",
             text: t("sidebar.reportTurkishAirlines"),
-            path: "/reports/turkish-airlines",
+            path: PATHS.REPORTS.TURKISH_AIRLINES,
             icon: createElement("img", {
               src: TurkishAirlinesIcon,
               alt: "Turkish Airlines",
@@ -150,7 +151,7 @@ export const useSidebarItems = () => {
           {
             id: "report-referral-letter",
             text: t("sidebar.reportReferralLetter", t("sidebar.referalLetters")),
-            path: "/reports/referral-letter",
+            path: PATHS.REPORTS.REFERRAL_LETTER,
             icon: createElement(FileText, { size: 18, strokeWidth: 2.2 }),
           },
         ],
@@ -158,7 +159,7 @@ export const useSidebarItems = () => {
       {
         id: "visa-intake",
         text: t("sidebar.visaIntake"),
-        path: "/intake",
+        path: PATHS.INTAKE,
         icon: createElement(ClipboardCheck, { size: 20, strokeWidth: 2.2 }),
       }
     ],
@@ -167,3 +168,4 @@ export const useSidebarItems = () => {
 };
 
 export const useNavItems = useSidebarItems;
+

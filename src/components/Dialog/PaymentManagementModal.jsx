@@ -248,6 +248,19 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     return rawData.data.meta?.totalPages ?? 1;
   }, [rawData]);
 
+  const parentInvalidateKeys = useMemo(() => {
+    if (isTranslation) return ["translations"];
+    if (isTurkish) return ["turkish-airlines"];
+    if (isHotel) return [["outbound", "hotel"], "hotel", "outbound"];
+    if (isAirway) return [["outbound", "airway"], "airway", "outbound"];
+    if (isRailway) return [["outbound", "railway"], "railway", "outbound"];
+    if (isTour) return [["outbound", "tour"], "tour", "outbound"];
+    if (isTransfer) return [["outbound", "transfer"], "transfer", "outbound"];
+    if (isPackage) return [["outbound", "package"], "package", "outbound"];
+    if (isHAR || isTTP) return ["outbound"];
+    return ["b2b", "tickets"];
+  }, [isTranslation, isTurkish, isHotel, isAirway, isRailway, isTour, isTransfer, isPackage, isHAR, isTTP]);
+
   const { mutate: createPayment, isPending: createLoading } = useCreate({
     apiFn: isTranslation
       ? addTransPaymentApi
@@ -259,7 +272,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ? addTurkishPaymentApi
       : addPaymentApi,
     key: key,
-    invalidateQueries: [key, "turkish-airlines"],
+    invalidateQueries: [key, ...parentInvalidateKeys],
     onSuccess: () => {
       reset({
         amount: "",
@@ -282,7 +295,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       : deleteTicketPaymentApi,
     queryKey: [key, queryParams],
     idKey: "guid",
-    invalidateQueries: [key, "turkish-airlines"],
+    invalidateQueries: [key, ...parentInvalidateKeys],
   });
 
   const { mutate: updatePayment, isPending: updateLoading } = useUpdate({
@@ -297,11 +310,18 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       : updateTicketPaymentApi,
     key: key,
     idKey: "guid",
-    invalidateQueries: [key, "turkish-airlines"],
+    invalidateQueries: [key, ...parentInvalidateKeys],
     onSuccessUpdate: () => {
       handleCancelEdit();
     },
   });
+
+  const handleModalClose = () => {
+    parentInvalidateKeys.forEach((k) => {
+      queryClient.invalidateQueries({ queryKey: Array.isArray(k) ? k : [k] });
+    });
+    onClose?.();
+  };
 
   const loading = paymentsLoading || createLoading || deleteLoading || updateLoading;
 
@@ -483,7 +503,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   };
 
   return (
-    <CustomDialog widthX={700} open={open} close={onClose}>
+    <CustomDialog widthX={700} open={open} close={handleModalClose}>
       {/* Header */}
       <Box
         sx={{
@@ -793,7 +813,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                   )}
                   <Button
                     variant="outlined"
-                    onClick={onClose}
+                    onClick={handleModalClose}
                     sx={{
                       fontWeight: 600,
                       px: 3,
@@ -826,7 +846,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
               <Button
                 variant="contained"
-                onClick={onClose}
+                onClick={handleModalClose}
                 sx={{
                   borderRadius: "7px",
                   fontWeight: 600,
@@ -847,7 +867,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
               variant="contained"
-              onClick={onClose}
+              onClick={handleModalClose}
               sx={{
                 borderRadius: "7px",
                 fontWeight: 600,

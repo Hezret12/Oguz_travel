@@ -37,15 +37,15 @@ export const useValidShema = () => {
     }),
   });
 
-    const editEmployee = yup.object({
+  const editEmployee = yup.object({
     fullName: stringRequiredValidSchema(t("employee.validation.fullNameRequired")),
-     phone_number: phoneNumberRequiredValidSchema({
+    phone_number: phoneNumberRequiredValidSchema({
       requiredMessage: t("users.validation.phoneNumberRequired"),
       lengthMessage: t("users.validation.phoneNumberLength"),
       invalidMessage: t("users.validation.phoneNumberInvalid"),
     }),
-    guid: guidRequiredValidSchema
-  })
+    guid: guidRequiredValidSchema(),
+  });
 
   const clientValidShema = yup.object({
     fullName: stringRequiredValidSchema(t("employee.validation.fullNameRequired")),

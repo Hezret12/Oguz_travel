@@ -25,6 +25,17 @@ export const PAYMENT_STATUS_CONFIG = {
   KREDIT: { label: "Kredit", color: "#d97706", icon: CreditCardRoundedIcon },
 };
 
+export const OUTBOUND_PAYMENT_STATUS_CONFIG = {
+  1: { label: "Tölendi", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  2: { label: "Kredit", color: "#d97706", icon: CreditCardRoundedIcon },
+  3: { label: "Gaýtaryldy", color: "#dc2626", icon: ReplayRoundedIcon },
+  TOLENDI: { label: "Tölendi", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  KREDIT: { label: "Kredit", color: "#d97706", icon: CreditCardRoundedIcon },
+  GAYTARYLDY: { label: "Gaýtaryldy", color: "#dc2626", icon: ReplayRoundedIcon },
+  TRUE: { label: "Tölendi", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  FALSE: { label: "Kredit", color: "#d97706", icon: CreditCardRoundedIcon },
+};
+
 export const TRANSLATION_STATUS_CONFIG = {
   TRUE: { label: "Gyssagly", color: "#e11d48", icon: BoltRoundedIcon },
   FALSE: { label: "Adaty", color: "#0284c7", icon: ScheduleRoundedIcon },

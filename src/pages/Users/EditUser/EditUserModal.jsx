@@ -32,7 +32,6 @@ const EditUserModal = ({ table, row }) => {
   const rowData = row?.original;
   const rowEmp = rowData?.employee;
 
-  // Map API shape → shape expected by UserInformationTab, ensuring row's employee is always included immediately
   const employees = useMemo(() => {
     const list = (rawEmployees || []).map((emp) => ({
       id: emp.guid,
@@ -66,7 +65,7 @@ const EditUserModal = ({ table, row }) => {
       phone_number: formattedPhone,
       isActive: rowData?.isActive ?? true,
       isExternalUser: rowData?.isExternalUser ?? !isEmp,
-      isAdmin: Boolean(rowData?.isAdmin || rowData?.user_is_admin || rowData?.role === "admin" || rowData?.role === "Admin"),
+      isAdmin: Boolean(rowData?.isAdmin),
       permissions: Array.isArray(rowData?.permissions) ? rowData.permissions : [],
     };
   }, [rowData, rowEmp, isEmp, formattedPhone]);

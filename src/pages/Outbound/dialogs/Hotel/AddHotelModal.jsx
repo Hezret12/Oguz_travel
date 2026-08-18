@@ -95,7 +95,7 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
       currency: data.currency || "USD",
       system: data.source || "",
       note: data.note || "",
-      is_paid: data.is_paid !== null ? Boolean(data.is_paid) : false,
+      is_paid: Number(data.is_paid) || 2,
     };
     createHotel(payload);
   };

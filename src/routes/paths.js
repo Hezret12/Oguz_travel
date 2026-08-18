@@ -2,24 +2,29 @@ export const PATHS = {
   ROOT: '/',
   LOGIN: '/login',
   UNAUTHORIZED: '/unauthorized',
-  AGENTS: '/agents',
-  BOOKINGS: '/bookings',
+  TASKS: '/tasks',
+  NOTIFICATIONS: '/notifications',
+  EMPLOYEE: {
+    ROOT: '/employee',
+    EMPLOYEES: '/employee',
+    USERS: '/employee/users',
+  },
   TICKET: {
     ROOT: '/ticket',
     B2B: '/ticket/b2b',
     TURKISH_AIRLINES: '/ticket/turkish-airlines',
   },
-  LOGS: '/logs',
-  SETTINGS: '/settings',
   CLIENTS: '/clients',
-  PLANNER: '/planner',
-  SEARCH: '/search',
-  PROFILE: '/profile',
-  NOTIFICATIONS: '/notifications',
-  EMPLOYEE: {
-    ROOT: '/employee',
-    USERS: '/employee/users',
+  VISA: {
+    ROOT: '/visa',
+    APPLICATIONS: '/visa/applications',
+    PACKAGE: '/visa/package',
+    INTAKE: '/intake',
   },
+  INTAKE: '/intake',
+  TRANSLATION: '/translation',
+  REFERRAL_LETTERS: '/referal-letters',
+  OUTBOUND: '/outbound',
   REPORTS: {
     ROOT: '/reports',
     TURKISH_AIRLINES: '/reports/turkish-airlines',
@@ -30,3 +35,4 @@ export const PATHS = {
 export function joinPath(...segments) {
   return `/${segments.filter(Boolean).join('/')}`;
 }
+

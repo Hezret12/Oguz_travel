@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -14,11 +14,14 @@ import ColumnActionButtons from "../../../../components/ColumnActionButtons";
 import { getAllRailwaysApi } from "../../../../api/queries/getters";
 import { deleteRailwayApi } from "../../../../api/queries/delete";
 import PaymentStatusCell from "../../../../components/PaymentStatusCell";
+import StatusChip from "../../../../components/StatusChip";
+import { OUTBOUND_PAYMENT_STATUS_CONFIG } from "../../../../functions/statusChipConfigs";
 import { useDateFormat } from "../../../../functions/generalHelpers";
 import { Box, Chip } from "@mui/material";
 import GlobalSearchInput from "../../../../components/GlobalSearchInput";
 import AddRailwayModal from "./AddRailwayModal";
 import EditRailwayModal from "./EditRailwayModal";
+import { PaymentManagementModal } from "../../../../components/Dialog/PaymentManagementModal";
 
 const RailwayTab = ({
   queryParams,
@@ -36,6 +39,7 @@ const RailwayTab = ({
   const { t, selectedLang } = useLocale();
   const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
+  const [paymentModalRow, setPaymentModalRow] = useState(null);
 
   const mergedParams = useMemo(
     () => ({ ...queryParams, page, limit }),
@@ -148,14 +152,48 @@ const RailwayTab = ({
         muiTableBodyCellProps: { align: "right" },
       },
       {
-        accessorKey: "profit",
         id: "profit",
         header: t("outbound.profit"),
-        size: 120,
-        Cell: ({ row, cell }) =>
-          `${Number(cell.getValue() || 0).toFixed(2)} ${row.original.currency || "USD"}`,
+        size: 110,
+        accessorFn: (row) => row.profit ?? ((row.price || 0) - (row.net_fare || 0)),
+        Cell: ({ row, cell }) => {
+          const profit = Number(cell.getValue() ?? 0);
+          const currency = row.original.currency || "USD";
+          return (
+            <Box
+              sx={{
+                fontWeight: 700,
+                fontVariantNumeric: "tabular-nums",
+                color:
+                  profit > 0
+                    ? "#16a34a"
+                    : profit < 0
+                      ? "#ef4444"
+                      : "text.secondary",
+              }}
+            >
+              {profit > 0 ? "+" : ""}
+              {profit.toFixed(2)} {currency}
+            </Box>
+          );
+        },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
+      },
+      {
+        id: "is_paid",
+        header: t("columns.paymentStatus"),
+        size: 120,
+        accessorFn: (row) => row.is_paid,
+        Cell: ({ cell }) => (
+          <StatusChip
+            status={cell.getValue()}
+            config={OUTBOUND_PAYMENT_STATUS_CONFIG}
+            size="small"
+          />
+        ),
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => {
@@ -163,11 +201,13 @@ const RailwayTab = ({
           return typeof pct === "string" ? parseFloat(pct) : pct;
         },
         id: "paidPercentage",
-        header: t("columns.paymentStatus"),
-        size: 110,
+        header: t("columns.paymentPercentage"),
+        size: 80,
         Cell: ({ row }) => (
           <PaymentStatusCell percent={row.original.paidPercentage} />
         ),
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "ticket_number",
@@ -244,6 +284,7 @@ const RailwayTab = ({
             table={table}
             onDelete={handleDeleteClick}
             showPayment={true}
+            onPaymentClick={(r) => setPaymentModalRow(r)}
           />
         ),
       },
@@ -292,21 +333,28 @@ const RailwayTab = ({
           isFetching={isFetching}
         />
 
-        {(activeFilters || []).map(([key, value]) => (
-          <Chip
-            key={key}
-            label={`${t(`outbound.${key}`, key)}: ${value}`}
-            onDelete={() => setFilter(key, "")}
-            color="primary"
-            variant="outlined"
-            size="small"
-            sx={{
-              borderRadius: "8px",
-              height: "32px",
-              fontWeight: 500,
-            }}
-          />
-        ))}
+        {(activeFilters || []).map(([key, value]) => {
+          let displayVal = value;
+          if (key === "is_paid") {
+            const num = Number(value);
+            displayVal = num === 1 ? "Tölendi" : num === 2 ? "Kredit" : num === 3 ? "Gaýtaryldy" : value;
+          }
+          return (
+            <Chip
+              key={key}
+              label={`${t(`outbound.${key}`, key)}: ${displayVal}`}
+              onDelete={() => setFilter(key, "")}
+              color="primary"
+              variant="outlined"
+              size="small"
+              sx={{
+                borderRadius: "8px",
+                height: "32px",
+                fontWeight: 500,
+              }}
+            />
+          );
+        })}
       </Box>
     ),
     renderCreateRowDialogContent: ({ table }) => (
@@ -328,6 +376,16 @@ const RailwayTab = ({
       />
       {isAddOpen && (
         <AddRailwayModal open={isAddOpen} onClose={onCloseAdd} table={table} />
+      )}
+      {Boolean(paymentModalRow) && (
+        <PaymentManagementModal
+          open={Boolean(paymentModalRow)}
+          onClose={() => {
+            setPaymentModalRow(null);
+            refetch();
+          }}
+          row={paymentModalRow}
+        />
       )}
       <MaterialReactTable table={table} />
     </>

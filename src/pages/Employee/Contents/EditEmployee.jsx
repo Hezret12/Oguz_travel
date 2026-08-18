@@ -64,24 +64,14 @@ const EditEmployee = ({ table, row }) => {
       guid: row?.original?.guid || "",
       fullName: row?.original?.fullName || "",
       phone_number: row?.original?.phone_number
-        ? (row.original.phone_number.startsWith("+993")
+        ? row.original.phone_number.startsWith("+993")
           ? row.original.phone_number
-          : `+993${row.original.phone_number.replace(/\s/g, "")}`)
+          : `+993${row.original.phone_number.replace(/\s/g, "")}`
         : "",
       gmail: row?.original?.gmail || "",
-      department_guid: row?.original?.department_guid || row?.original?.department?.guid || "",
-      position_guid: Array.isArray(row?.original?.positions)
-        ? row.original.positions.map((p) => p.guid)
-        : Array.isArray(row?.original?.position)
-        ? row.original.position.map((p) => p.guid)
-        : Array.isArray(row?.original?.position_guid)
-        ? row.original.position_guid
-        : row?.original?.position_guid
-        ? [row.original.position_guid]
-        : row?.original?.position?.guid
-        ? [row.original.position.guid]
-        : [],
-      office_guid: row?.original?.office_guid || row?.original?.office?.guid || "",
+      department_guid: row?.original?.department?.guid || "",
+      position_guids: Array.isArray(row?.original?.positions) ? row.original.positions.map((p) => p.guid) : [],
+      office_guid: row?.original?.office?.guid || "",
       address: row?.original?.address || "",
     },
     resolver: yupResolver(editEmployee),
@@ -99,7 +89,7 @@ const EditEmployee = ({ table, row }) => {
         guid: row?.original?.guid,
         fullName: data.fullName,
         phone_number: formattedPhone,
-        position_guid: data.position_guid,
+        position_guids: data.position_guids,
         office_guid: data.office_guid,
       };
 
@@ -152,7 +142,7 @@ const EditEmployee = ({ table, row }) => {
 
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomSelect
-              name="position_guid"
+              name="position_guids"
               control={control}
               label={t("columns.position")}
               options={position}

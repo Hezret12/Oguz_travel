@@ -57,9 +57,18 @@ export const CAR_TYPE_OPTIONS = [
   { value: "MINIVAN", label: "Minivan" },
 ];
 
-// Payment status options
-export const PAYMENT_OPTIONS = [
-  { value: "true", label: "Tölendi" },
-  { value: "false", label: "Kredit" },
+// Payment status options with localization support
+export const getPaymentOptions = (t) => [
+  { value: 1, label: t ? t("outbound.paid") : "Tölendi" },
+  { value: 2, label: t ? t("outbound.credit") : "Kredit" },
+  { value: 3, label: t ? t("outbound.refunded") : "Gaýtaryldy" },
 ];
+
+export const PAYMENT_OPTIONS = [
+  { value: 1, label: "Tölendi" },
+  { value: 2, label: "Kredit" },
+  { value: 3, label: "Gaýtaryldy" },
+];
+
+
 

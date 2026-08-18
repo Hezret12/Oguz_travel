@@ -20,7 +20,7 @@ import {
   MEAL_PLAN_OPTIONS,
   TRAIN_TYPE_OPTIONS,
   CAR_TYPE_OPTIONS,
-  PAYMENT_OPTIONS,
+  getPaymentOptions,
 } from "../constants";
 
 const selectSx = {
@@ -182,6 +182,7 @@ const OutboundFilter = ({
     [employees, selectedLang]
   );
 
+  const paymentOptions = useMemo(() => getPaymentOptions(t), [t]);
   const allText = t("all") ?? "All";
 
   return (
@@ -222,7 +223,7 @@ const OutboundFilter = ({
         label={t("columns.paymentStatus")}
         name="is_paid"
         value={filters.is_paid}
-        options={PAYMENT_OPTIONS}
+        options={paymentOptions}
         isOpen={selectsOpen?.is_paid ?? false}
         allText={allText}
         onChange={onFilterChange}
