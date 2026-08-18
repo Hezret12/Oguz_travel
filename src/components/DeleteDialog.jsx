@@ -106,7 +106,6 @@ const DeleteDialog = ({
         </IconButton>
       </DialogTitle>
 
-      {/* Body */}
       <DialogContent sx={{ px: 3.5, py: 0, pb: 3 }}>
         <Typography
           variant="body1"
@@ -117,7 +116,6 @@ const DeleteDialog = ({
         </Typography>
       </DialogContent>
 
-      {/* Footer */}
       <DialogActions sx={{ px: 3.5, pb: 3.5, pt: 0, gap: 1.25 }}>
         <Button
           variant="outlined"
