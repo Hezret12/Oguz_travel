@@ -99,7 +99,7 @@ const TourTab = ({
       },
       {
         id: "operator",
-        header: t("columns.operator"),
+        header: t("outbound.operator"),
         size: 200,
         accessorFn: (row) => row.operator?.fullName ?? "",
         Cell: ({ row }) => (

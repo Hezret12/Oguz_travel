@@ -99,8 +99,8 @@ const HotelTab = ({
       },
       {
         id: "operator",
-        header: t("columns.operator"),
-        size: 220,
+        header: t("outbound.operator"),
+        size: 200,
         accessorFn: (row) => row.operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell

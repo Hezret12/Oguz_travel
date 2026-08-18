@@ -195,7 +195,7 @@ const OutboundFilter = ({
       />
 
       <FilterSelect
-        label={t("columns.operator")}
+        label={t("outbound.operator")}
         name="opr_guid"
         value={filters.opr_guid}
         options={employeeOptions}

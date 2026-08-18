@@ -329,6 +329,7 @@
     "requestDate": "Request Date",
     "office": "Office",
     "clientName": "Client Name",
+    "operator": "Operator",
     "preparedBy": "Prepared By",
     "cost": "Cost",
     "price": "Price",

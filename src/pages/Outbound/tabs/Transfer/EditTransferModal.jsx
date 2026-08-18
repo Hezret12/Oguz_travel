@@ -172,7 +172,7 @@ const EditTransferModal = ({ table, row }) => {
             <CustomSelect
               name="opr_guid"
               control={control}
-              label={t("columns.operator")}
+              label={t("outbound.operator")}
               options={employeeOptions}
               isLoading={isLoadingEmployees}
               required
