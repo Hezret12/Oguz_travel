@@ -263,7 +263,7 @@ function TaskListTable({
         <MenuItem
           onClick={() => {
             if (activeTask)
-              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 1);
+              onMoveTaskStatus?.(activeTask.guid, 1);
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 1}
@@ -288,7 +288,7 @@ function TaskListTable({
         <MenuItem
           onClick={() => {
             if (activeTask)
-              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 2);
+              onMoveTaskStatus?.(activeTask.guid, 2);
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 2}
@@ -313,7 +313,7 @@ function TaskListTable({
         <MenuItem
           onClick={() => {
             if (activeTask)
-              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 3);
+              onMoveTaskStatus?.(activeTask.guid, 3);
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 3}
@@ -339,7 +339,7 @@ function TaskListTable({
 
         <MenuItem
           onClick={() => {
-            if (activeTask) onDeleteTask?.(activeTask.guid || activeTask.id);
+            if (activeTask) onDeleteTask?.(activeTask.guid);
             handleMenuClose();
           }}
           sx={{ py: 0.4, px: 1.25, minHeight: 30, color: "error.main" }}

@@ -147,8 +147,8 @@ function TaskFlowHeader({
                 color:
                   viewMode === "list"
                     ? isDark
-                      ? "#334155"
-                      : "#F1F5F9"
+                      ? "#F8FAFC"
+                      : "#0F172A"
                     : isDark
                       ? "#94A3B8"
                       : "#64748B",
@@ -165,7 +165,6 @@ function TaskFlowHeader({
             startIcon={<AddIcon />}
             onClick={onOpenCreateModal}
             sx={{
-              bgcolor: "#2563EB",
               color: "#FFFFFF",
               textTransform: "none",
               fontWeight: 600,
@@ -173,10 +172,6 @@ function TaskFlowHeader({
               borderRadius: "8px",
               px: 2.2,
               py: 0.9,
-              boxShadow: "0 2px 4px rgba(37,99,235,0.2)",
-              "&:hover": {
-                bgcolor: "#1D4ED8",
-              },
             }}
           >
             {t("task.newTask")}

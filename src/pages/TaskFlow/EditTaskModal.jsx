@@ -21,7 +21,7 @@ export default function EditTaskModal({ open, onClose, task }) {
     apiFn: updateTaskApi,
     key: "tasks",
     idKey: "guid",
-    invalidateQueries: ["tasks", "tasks-column"],
+    invalidateQueries: ["tasks", "tasks-board"],
     onSuccessUpdate: () => {
       handleCloseModal();
     }
@@ -39,7 +39,7 @@ export default function EditTaskModal({ open, onClose, task }) {
       .map((a) => {
         const usr = a?.user || a;
         const emp = usr?.employee || a?.employee;
-        const userGuid = a?.guid || usr?.guid || a?.assignee_guid || a?.id;
+        const userGuid = a?.guid || usr?.guid || a?.assignee_guid;
         const fullName =
           emp?.fullName ||
           usr?.fullName ||
@@ -98,7 +98,7 @@ export default function EditTaskModal({ open, onClose, task }) {
         : [];
 
       const currentAssignees = rawAssignees
-        .map((a) => a?.guid || a?.user?.guid || a?.assignee_guid || a?.id || a)
+        .map((a) => a?.guid || a?.user?.guid || a?.assignee_guid || a)
         .filter(Boolean);
 
       reset({

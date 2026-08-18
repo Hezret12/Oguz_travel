@@ -25,8 +25,8 @@ import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useLocale } from "../../../hooks/useLocale";
-import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { getAllTasksApi } from "../../../api/queries/getters";
 import AppAvatarGroup from "../../../components/AppAvatarGroup";
 
@@ -42,130 +42,28 @@ const getPriorityBadgeProps = (priority) => {
 
 const TaskBoardColumn = memo(function TaskBoardColumn({
   col,
-  searchQuery,
-  filterStatus,
-  filterPriority,
-  dueDate,
-  oprGuid,
+  tasks = [],
+  isLoading,
+  isFetching,
+  isFetchingNextPage,
+  hasNextPage,
+  onFetchNextPage,
   onEditTask,
   setTaskMenuAnchor,
   setActiveTask,
 }) {
   const { t } = useLocale();
-  const [page, setPage] = useState(1);
-  const [accumulatedTasks, setAccumulatedTasks] = useState([]);
   const scrollContainerRef = useRef(null);
-
-  const isStatusMatched =
-    !filterStatus ||
-    filterStatus === "all" ||
-    Number(filterStatus) === Number(col.id);
-
-  const columnParams = useMemo(() => {
-    if (!isStatusMatched) return null;
-    const params = {
-      page,
-      limit: 10,
-      status: col.id,
-      type: false,
-    };
-    if (searchQuery && searchQuery.trim()) {
-      params.search = searchQuery.trim();
-    }
-    if (filterPriority && filterPriority !== "all") {
-      params.priority = filterPriority;
-    }
-    if (dueDate) {
-      params.due_date = dueDate;
-    }
-    if (oprGuid) {
-      params.opr_guid = oprGuid;
-    }
-    return params;
-  }, [col.id, page, searchQuery, filterPriority, dueDate, oprGuid, isStatusMatched]);
-
-  const {
-    data: apiResponse,
-    totalItems = 0,
-    pageCount = 1,
-    isLoading,
-    isFetching,
-  } = usePagginationGet({
-    apiFn: getAllTasksApi,
-    key: ["tasks-column", col.id, columnParams],
-    params: columnParams || {},
-    options: {
-      enabled: isStatusMatched,
-    },
-  });
-
-  const fetchedTasks = useMemo(() => {
-    if (!isStatusMatched) return [];
-    let rawData = apiResponse;
-    if (!Array.isArray(rawData)) {
-      if (Array.isArray(rawData?.data)) rawData = rawData.data;
-      else if (Array.isArray(rawData?.data?.data)) rawData = rawData.data.data;
-      else return [];
-    }
-    if (!Array.isArray(rawData) || rawData.length === 0) return [];
-
-    if (Array.isArray(rawData[0])) {
-      const group = rawData.find((g) =>
-        Array.isArray(g) && g.some((t) => Number(t.status) === col.id)
-      );
-      return group || rawData.flat();
-    }
-    return rawData;
-  }, [apiResponse, col.id, isStatusMatched]);
-
-  const filterKey = `${searchQuery}-${filterStatus}-${filterPriority}-${dueDate}-${oprGuid}`;
-  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
-  if (filterKey !== prevFilterKey) {
-    setPrevFilterKey(filterKey);
-    setPage(1);
-  }
-
-  const fetchedFingerprint = useMemo(() => {
-    if (!fetchedTasks || fetchedTasks.length === 0) return `empty-p${page}`;
-    return (
-      fetchedTasks
-        .map(
-          (t) =>
-            `${t.guid}_${t.status}_${t.priority}_${t.title || ""}_${t.description || ""}_${t.due_date || t.dueDate || ""}_${t.updatedAt || ""}_${t.assignees?.length || 0}_${t.images?.length || 0}`
-        )
-        .join(";") + `-p${page}`
-    );
-  }, [fetchedTasks, page]);
-
-  const [prevFingerprint, setPrevFingerprint] = useState("");
-  if (fetchedFingerprint !== prevFingerprint) {
-    setPrevFingerprint(fetchedFingerprint);
-    if (page === 1) {
-      setAccumulatedTasks(fetchedTasks);
-    } else if (fetchedTasks.length > 0) {
-      setAccumulatedTasks((prev) => {
-        const newMap = new Map(fetchedTasks.map((t) => [t.guid, t]));
-        const updatedExisting = prev.map((t) => newMap.get(t.guid) || t);
-        const existingGuids = new Set(prev.map((t) => t.guid));
-        const newItems = fetchedTasks.filter((t) => !existingGuids.has(t.guid));
-        return [...updatedExisting, ...newItems];
-      });
-    } else {
-      setAccumulatedTasks([]);
-    }
-  }
-
-  const hasMorePages = page < pageCount;
 
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container || !hasMorePages || isFetching) return;
+    if (!container || !hasNextPage || isFetchingNextPage) return;
 
     const { scrollTop, scrollHeight, clientHeight } = container;
-    if (scrollTop + clientHeight >= scrollHeight - 100) {
-      setPage((prev) => prev + 1);
+    if (scrollTop + clientHeight >= scrollHeight - 80) {
+      onFetchNextPage?.();
     }
-  }, [hasMorePages, isFetching]);
+  }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
 
   const getPriorityLabel = (priority) => {
     switch (priority?.toLowerCase()) {
@@ -208,7 +106,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
           overflow: "hidden",
         }}
       >
-        {/* Column Header with Total Items Counter */}
+        {/* Column Header with Counter */}
         <Box
           sx={{
             display: "flex",
@@ -241,7 +139,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
               {col.title}
             </Typography>
             <Chip
-              label={totalItems || accumulatedTasks.length}
+              label={tasks.length}
               size="small"
               sx={{
                 height: 18,
@@ -299,14 +197,14 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
             },
           }}
         >
-          {isLoading && accumulatedTasks.length === 0 ? (
+          {isLoading && tasks.length === 0 ? (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
               <Skeleton variant="rounded" height={145} sx={{ borderRadius: "10px" }} />
               <Skeleton variant="rounded" height={145} sx={{ borderRadius: "10px" }} />
             </Box>
           ) : (
-            accumulatedTasks.map((task) => {
-              const taskId = task.guid || task.id;
+            tasks.map((task) => {
+              const taskId = task.guid;
               const priorityProps = getPriorityBadgeProps(task.priority);
 
               let formattedDate = "";
@@ -501,7 +399,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
           )}
 
           {/* Infinite scroll loading indicator */}
-          {isFetching && hasMorePages && (
+          {isFetchingNextPage && (
             <Box
               sx={{
                 display: "flex",
@@ -540,6 +438,105 @@ function TaskBoardView({
     setActiveTask(null);
   };
 
+  const filterParams = useMemo(() => {
+    const params = {
+      type: false,
+      limit: 10,
+    };
+    if (filterStatus && filterStatus !== "all") {
+      params.status = Number(filterStatus) || filterStatus;
+    }
+    if (searchQuery && searchQuery.trim()) {
+      params.search = searchQuery.trim();
+    }
+    if (filterPriority && filterPriority !== "all") {
+      params.priority = filterPriority;
+    }
+    if (dueDate) {
+      params.due_date = dueDate;
+    }
+    if (oprGuid) {
+      params.opr_guid = oprGuid;
+    }
+    return params;
+  }, [searchQuery, filterStatus, filterPriority, dueDate, oprGuid]);
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isFetching,
+  } = useInfiniteQuery({
+    queryKey: ["tasks-board", filterParams],
+    queryFn: async ({ pageParam = 1 }) => {
+      const res = await getAllTasksApi({
+        ...filterParams,
+        page: pageParam,
+      });
+      return res?.data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      const responseBody = lastPage;
+      const totalPages =
+        responseBody?.data?.totalPages ??
+        responseBody?.totalPages ??
+        responseBody?.meta?.totalPages ??
+        responseBody?.data?.meta?.totalPages;
+
+      if (totalPages !== undefined) {
+        return allPages.length < totalPages ? allPages.length + 1 : undefined;
+      }
+
+      let items = [];
+      if (Array.isArray(responseBody?.data?.data)) items = responseBody.data.data;
+      else if (Array.isArray(responseBody?.data)) items = responseBody.data;
+      else if (Array.isArray(responseBody?.items)) items = responseBody.items;
+      else if (Array.isArray(responseBody)) items = responseBody;
+
+      return items.length >= 10 ? allPages.length + 1 : undefined;
+    },
+  });
+
+  const allBoardTasks = useMemo(() => {
+    if (!data?.pages) return [];
+    return data.pages.flatMap((page) => {
+      const responseBody = page;
+      let raw = [];
+      if (Array.isArray(responseBody?.data?.data)) raw = responseBody.data.data;
+      else if (Array.isArray(responseBody?.data)) raw = responseBody.data;
+      else if (Array.isArray(responseBody?.items)) raw = responseBody.items;
+      else if (Array.isArray(responseBody)) raw = responseBody;
+
+      if (Array.isArray(raw[0])) {
+        return raw.flatMap((statusGroup, index) => {
+          if (!Array.isArray(statusGroup)) return [];
+          const expectedStatus = index + 1;
+          return statusGroup.map((task) => ({
+            ...task,
+            status: task.status ?? expectedStatus,
+          }));
+        });
+      }
+      return raw;
+    });
+  }, [data]);
+
+  const columnTasksMap = useMemo(() => {
+    const map = { 1: [], 2: [], 3: [] };
+    allBoardTasks.forEach((task) => {
+      const st = Number(task.status) || 1;
+      if (map[st]) {
+        map[st].push(task);
+      } else {
+        map[st] = [task];
+      }
+    });
+    return map;
+  }, [allBoardTasks]);
+
   return (
     <Box
       sx={{
@@ -563,22 +560,30 @@ function TaskBoardView({
           pb: 0.5,
         }}
       >
-        {columns.map((col) => (
-          <TaskBoardColumn
-            key={col.id}
-            col={col}
-            searchQuery={searchQuery}
-            filterStatus={filterStatus}
-            filterPriority={filterPriority}
-            dueDate={dueDate}
-            oprGuid={oprGuid}
-            onMoveTaskStatus={onMoveTaskStatus}
-            onEditTask={onEditTask}
-            onDeleteTask={onDeleteTask}
-            setTaskMenuAnchor={setTaskMenuAnchor}
-            setActiveTask={setActiveTask}
-          />
-        ))}
+        {columns.map((col) => {
+          const isStatusMatched =
+            !filterStatus ||
+            filterStatus === "all" ||
+            Number(filterStatus) === Number(col.id);
+
+          if (!isStatusMatched) return null;
+
+          return (
+            <TaskBoardColumn
+              key={col.id}
+              col={col}
+              tasks={columnTasksMap[col.id] || []}
+              isLoading={isLoading}
+              isFetching={isFetching}
+              isFetchingNextPage={isFetchingNextPage}
+              hasNextPage={hasNextPage}
+              onFetchNextPage={fetchNextPage}
+              onEditTask={onEditTask}
+              setTaskMenuAnchor={setTaskMenuAnchor}
+              setActiveTask={setActiveTask}
+            />
+          );
+        })}
       </Grid>
 
       {/* Context Menu for Task Edit / Status Switch / Actions */}
@@ -625,7 +630,7 @@ function TaskBoardView({
         <MenuItem
           onClick={() => {
             if (activeTask)
-              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 1);
+              onMoveTaskStatus?.(activeTask.guid, 1);
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 1}
@@ -650,7 +655,7 @@ function TaskBoardView({
         <MenuItem
           onClick={() => {
             if (activeTask)
-              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 2);
+              onMoveTaskStatus?.(activeTask.guid, 2);
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 2}
@@ -675,7 +680,7 @@ function TaskBoardView({
         <MenuItem
           onClick={() => {
             if (activeTask)
-              onMoveTaskStatus?.(activeTask.guid || activeTask.id, 3);
+              onMoveTaskStatus?.(activeTask.guid, 3);
             handleMenuClose();
           }}
           selected={Number(activeTask?.status) === 3}
@@ -701,7 +706,7 @@ function TaskBoardView({
 
         <MenuItem
           onClick={() => {
-            if (activeTask) onDeleteTask?.(activeTask.guid || activeTask.id);
+            if (activeTask) onDeleteTask?.(activeTask.guid);
             handleMenuClose();
           }}
           sx={{ py: 0.85, px: 1.5, minHeight: 36, color: "error.main" }}
