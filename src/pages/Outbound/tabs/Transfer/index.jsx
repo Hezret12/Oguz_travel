@@ -98,13 +98,13 @@ const TransferTab = ({
       {
         id: "client_name",
         header: t("outbound.clientName"),
-        size: 210,
+        size: 220,
         accessorFn: (row) => row.client?.fullName || "",
       },
       {
         id: "operator",
         header: t("outbound.operator"),
-        size: 200,
+        size: 220,
         accessorFn: (row) => row.operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -119,7 +119,7 @@ const TransferTab = ({
       {
         id: "prepared_by",
         header: t("outbound.preparedBy"),
-        size: 200,
+        size: 220,
         accessorFn: (row) => row.preparedOpr?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -154,7 +154,7 @@ const TransferTab = ({
       {
         id: "profit",
         header: t("outbound.profit"),
-        size: 110,
+        size: 130,
         accessorFn: (row) => row.profit ?? ((row.price || 0) - (row.net_fare || 0)),
         Cell: ({ row, cell }) => {
           const profit = Number(cell.getValue() ?? 0);

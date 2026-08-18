@@ -274,8 +274,9 @@
     "paymentDate": "Töleg senesi",
     "description": "Bellik",
     "close": "Ýap",
-    "nonCreditMessage": "Bu bilet doly tölenen ýa-da kredit däl.",
-    "credit": "Kredit"
+    "nonCreditMessage": "This ticket is fully paid or not on credit.",
+    "credit": "Credit",
+    "amountExceedsRemaining": "Entered amount cannot exceed the remaining balance!"
   },
   "b2b": {
     "title": "B2B",

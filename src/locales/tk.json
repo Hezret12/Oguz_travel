@@ -278,7 +278,8 @@
     "description": "Bellik",
     "close": "Ýap",
     "nonCreditMessage": "Bu bilet doly tölenen ýa-da kredit däl.",
-    "credit": "Kredit"
+    "credit": "Kredit",
+    "amountExceedsRemaining": "Girizilen möçber galan bergiden köp bolup bilmeýär!"
   },
   "b2b": {
     "title": "B2B",

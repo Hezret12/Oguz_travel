@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Box } from "@mui/material";
 import { useQueryClient, useIsFetching } from "@tanstack/react-query";
 import { useLocale } from "../../hooks/useLocale";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import { usePageFilters } from "../../hooks/usePageFilters";
 
 import CreateTaskModal from "./CreateTaskModal";
@@ -28,6 +29,7 @@ import { deleteTaskApi } from "../../api/queries/delete";
 
 export default function TaskFlow() {
   const { t } = useLocale();
+  useDocumentTitle(t("sidebar.taskFlow") || "Task Flow");
 
   const [viewMode, setViewMode] = useState("board");
   const [isModalOpen, setIsModalOpen] = useState(false);

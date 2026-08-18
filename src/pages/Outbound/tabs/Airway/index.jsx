@@ -183,7 +183,7 @@ const AirwayTab = ({
       {
         id: "is_paid",
         header: t("columns.paymentStatus"),
-        size: 120,
+        size: 130,
         accessorFn: (row) => row.is_paid,
         Cell: ({ cell }) => (
           <StatusChip

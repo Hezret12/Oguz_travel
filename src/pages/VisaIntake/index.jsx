@@ -2,6 +2,7 @@ import { useState, useMemo, useRef } from "react";
 import { Box, Paper, Button, Tooltip, useTheme } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { useLocale } from "../../hooks/useLocale";
+import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import CustomTabs from "../../components/CustomTabs";
 import FilterDrawer from "../../components/FilterDrawer";
 import { usePageFilters } from "../../hooks/usePageFilters";
@@ -59,6 +60,18 @@ export const VisaIntake = () => {
     ],
     [t],
   );
+
+  const pageTitle = useMemo(() => {
+    if (activeTab === "countries") {
+      return `${t("visaIntake.countriesManagement")} | ${t("visaIntake.title")}`;
+    }
+    if (activeTab === "custom_fields") {
+      return `${t("customFields.title")} | ${t("visaIntake.title")}`;
+    }
+    return t("visaIntake.title");
+  }, [activeTab, t]);
+
+  useDocumentTitle(pageTitle);
 
   const addButtonText = useMemo(() => {
     if (activeTab === "countries") return t("visaIntake.createCountry");

@@ -274,8 +274,9 @@
     "paymentDate": "Töleg senesi",
     "description": "Bellik",
     "close": "Ýap",
-    "nonCreditMessage": "Bu bilet doly tölenen ýa-da kredit däl.",
-    "credit": "Kredit"
+    "nonCreditMessage": "Этот билет полностью оплачен или не является кредитным.",
+    "credit": "Кредит",
+    "amountExceedsRemaining": "Введенная сумма не может превышать оставшуюся задолженность!"
   },
   "b2b": {
     "title": "B2B",

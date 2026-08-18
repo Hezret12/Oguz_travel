@@ -16,6 +16,8 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditIcon from "@mui/icons-material/Edit";
+import dayjs from "dayjs";
+import toast from "react-hot-toast";
 
 import { CustomDialog } from "./CustomDialog";
 import CustomTextField from "../CustomTextField";
@@ -58,12 +60,8 @@ const formatCurrency = (val, currencyCode = "USD") => {
 
 const formatDateToDisplay = (dateStr) => {
   if (!dateStr) return "";
-  const cleanDate = dateStr.includes("T") ? dateStr.split("T")[0] : dateStr;
-  const parts = cleanDate.split("-");
-  if (parts.length === 3) {
-    return `${parts[2]}.${parts[1]}.${parts[0]}`;
-  }
-  return dateStr;
+  const d = dayjs(dateStr);
+  return d.isValid() ? d.format("DD.MM.YYYY HH:mm") : dateStr;
 };
 
 const methodMap = {
@@ -86,31 +84,10 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const clientName = ticket?.client?.fullName || ticket?.clientId || "Client";
   const { t } = useLocale();
 
-  const isTranslation = ticket && ("source_to_target" in ticket || "page_count" in ticket || "completed_page_count" in ticket);
-  const ticketCurrency = ticket?.currency || (isTranslation ? "TMT" : "USD");
-  const currencySymbol = CURRENCY_SYMBOLS[ticketCurrency] || ticketCurrency;
-
-  const isCredit =
-    ticket?.is_paid === false ||
-    ticket?.payment_types === "credit" ||
-    ticket?.payment_status?.toLowerCase() === "kredit";
-
-  const [localPayments, setLocalPayments] = useState([]);
-  const [editingPayment, setEditingPayment] = useState(null);
-
-  const { handleSubmit, reset, control } = useForm({
-    defaultValues: {
-      amount: "",
-      paymentDate: new Date().toISOString(),
-      description: "",
-      opr_guid: "",
-    },
-  });
-
-  const amountValue = useWatch({ control, name: "amount" });
-
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const isTranslation = useMemo(() => {
+    if (!ticket) return false;
+    return "source_to_target" in ticket || "page_count" in ticket || "completed_page_count" in ticket;
+  }, [ticket]);
 
   const isTurkish = useMemo(() => {
     if (!ticket) return false;
@@ -145,7 +122,15 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   const isAirway = useMemo(() => {
     if (!ticket) return false;
-    if ("train_type" in ticket) return false;
+    if (
+      "train_type" in ticket ||
+      "hotel_name" in ticket ||
+      "transfer_type" in ticket ||
+      "tour_name" in ticket ||
+      "partner" in ticket
+    ) {
+      return false;
+    }
     return "passenger_count" in ticket || "airway_guid" in ticket;
   }, [ticket]);
 
@@ -171,6 +156,45 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   }, [ticket]);
 
   const isTTP = isTour || isTransfer || isPackage;
+
+  const ticketCurrency = ticket?.currency || (isTranslation ? "TMT" : "USD");
+  const currencySymbol = CURRENCY_SYMBOLS[ticketCurrency] || ticketCurrency;
+
+  const isCredit =
+    ticket?.is_paid === false ||
+    ticket?.is_paid === 2 ||
+    ticket?.is_paid === "2" ||
+    ticket?.payment_types === "credit" ||
+    ticket?.payment_status?.toLowerCase() === "kredit" ||
+    isHAR ||
+    isTTP ||
+    isTranslation ||
+    isTurkish;
+
+  const [localPayments, setLocalPayments] = useState([]);
+  const [editingPayment, setEditingPayment] = useState(null);
+  const [prevTicketKey, setPrevTicketKey] = useState(null);
+
+  const currentTicketKey = open && ticket ? (ticket.guid || ticket.id || "open") : null;
+  if (currentTicketKey !== prevTicketKey) {
+    setPrevTicketKey(currentTicketKey);
+    setEditingPayment(null);
+    setLocalPayments([]);
+  }
+
+  const { handleSubmit, reset, control } = useForm({
+    defaultValues: {
+      amount: "",
+      paymentDate: new Date().toISOString(),
+      description: "",
+      opr_guid: "",
+    },
+  });
+
+  const amountValue = useWatch({ control, name: "amount" });
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
   const apiFn = isTranslation
     ? getAllTransPaymentApi
@@ -248,19 +272,6 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     return rawData.data.meta?.totalPages ?? 1;
   }, [rawData]);
 
-  const parentInvalidateKeys = useMemo(() => {
-    if (isTranslation) return ["translations"];
-    if (isTurkish) return ["turkish-airlines"];
-    if (isHotel) return [["outbound", "hotel"], "hotel", "outbound"];
-    if (isAirway) return [["outbound", "airway"], "airway", "outbound"];
-    if (isRailway) return [["outbound", "railway"], "railway", "outbound"];
-    if (isTour) return [["outbound", "tour"], "tour", "outbound"];
-    if (isTransfer) return [["outbound", "transfer"], "transfer", "outbound"];
-    if (isPackage) return [["outbound", "package"], "package", "outbound"];
-    if (isHAR || isTTP) return ["outbound"];
-    return ["b2b", "tickets"];
-  }, [isTranslation, isTurkish, isHotel, isAirway, isRailway, isTour, isTransfer, isPackage, isHAR, isTTP]);
-
   const { mutate: createPayment, isPending: createLoading } = useCreate({
     apiFn: isTranslation
       ? addTransPaymentApi
@@ -272,7 +283,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ? addTurkishPaymentApi
       : addPaymentApi,
     key: key,
-    invalidateQueries: [key, ...parentInvalidateKeys],
+    invalidateQueries: [key],
     onSuccess: () => {
       reset({
         amount: "",
@@ -295,7 +306,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       : deleteTicketPaymentApi,
     queryKey: [key, queryParams],
     idKey: "guid",
-    invalidateQueries: [key, ...parentInvalidateKeys],
+    invalidateQueries: [key],
   });
 
   const { mutate: updatePayment, isPending: updateLoading } = useUpdate({
@@ -310,16 +321,13 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       : updateTicketPaymentApi,
     key: key,
     idKey: "guid",
-    invalidateQueries: [key, ...parentInvalidateKeys],
+    invalidateQueries: [key],
     onSuccessUpdate: () => {
       handleCancelEdit();
     },
   });
 
   const handleModalClose = () => {
-    parentInvalidateKeys.forEach((k) => {
-      queryClient.invalidateQueries({ queryKey: Array.isArray(k) ? k : [k] });
-    });
     onClose?.();
   };
 
@@ -337,31 +345,48 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
     return list.filter((p) => {
       if (isTranslation) {
-        return p.translation_guid === ticket.guid;
+        return p.translation_guid === ticket.guid || p.translationGuid === ticket.guid || p.translation?.guid === ticket.guid;
       }
       if (isHAR) {
-        if (isHotel) return p.hotel_guid === ticket.guid;
-        if (isAirway) return p.airway_guid === ticket.guid;
-        if (isRailway) return p.railway_guid === ticket.guid;
+        if (isHotel) return p.hotel_guid === ticket.guid || p.hotelGuid === ticket.guid || p.hotel?.guid === ticket.guid;
+        if (isAirway) return p.airway_guid === ticket.guid || p.airwayGuid === ticket.guid || p.airway?.guid === ticket.guid;
+        if (isRailway) return p.railway_guid === ticket.guid || p.railwayGuid === ticket.guid || p.railway?.guid === ticket.guid;
       }
       if (isTTP) {
-        if (isTour) return p.tour_guid === ticket.guid;
-        if (isTransfer) return p.transfer_guid === ticket.guid;
-        if (isPackage) return p.package_guid === ticket.guid;
+        if (isTour) return p.tour_guid === ticket.guid || p.tourGuid === ticket.guid || p.tour?.guid === ticket.guid;
+        if (isTransfer) return p.transfer_guid === ticket.guid || p.transferGuid === ticket.guid || p.transfer?.guid === ticket.guid;
+        if (isPackage) return p.package_guid === ticket.guid || p.packageGuid === ticket.guid || p.package?.guid === ticket.guid;
       }
       if (isTurkish) {
-        return p.turkish_airline_guid === ticket.guid || p.ta_guid === ticket.guid;
+        return (
+          p.turkish_airline_guid === ticket.guid ||
+          p.turkishAirlineGuid === ticket.guid ||
+          p.ta_guid === ticket.guid ||
+          p.turkish_airline?.guid === ticket.guid
+        );
       }
-      return p.b2b_guid === ticket.guid;
+      return p.b2b_guid === ticket.guid || p.b2bGuid === ticket.guid || p.b2b?.guid === ticket.guid;
     });
   }, [allPayments, ticket, localPayments, isTurkish, isTranslation, isHAR, isHotel, isAirway, isRailway, isTTP, isTour, isTransfer, isPackage]);
 
 
   if (!ticket) return null;
 
-  const salesTotal = Number(ticket.price ?? ticket.total_price ?? ticket.sale_price ?? ticket.saleFare ?? 0);
-  const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-  const remaining = salesTotal - totalPaid;
+  const stats = rawData?.data?.stats || rawData?.data?.data?.stats || allPayments?.stats;
+  const salesTotal = Number(
+    stats?.total_sales ??
+    ticket.price ??
+    ticket.total_price ??
+    ticket.sale_price ??
+    ticket.saleFare ??
+    0
+  );
+  const totalPaid = stats?.total_paid !== undefined
+    ? Number(stats.total_paid)
+    : payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const remaining = stats?.remaining !== undefined
+    ? Number(stats.remaining)
+    : (salesTotal - totalPaid);
 
   const handleEditClick = (p) => {
     setEditingPayment(p);
@@ -385,9 +410,26 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   const handleSavePayment = async (data) => {
     const { amount, paymentDate, description, opr_guid } = data;
-    if (!amount || Number(amount) <= 0) return;
+    const numAmount = Number(amount);
+    if (!amount || numAmount <= 0) return;
 
-    const ticketGuid = ticket?.guid || ticket?.turkish_airline_guid || ticket?.ta_guid;
+    if (!editingPayment && remaining > 0 && numAmount > remaining) {
+      toast.error(
+        `${t("payment.amountExceedsRemaining") || "Girizilen möçber galan bergiden köp bolup bilmeýär!"} (${formatCurrency(remaining, ticketCurrency)})`
+      );
+      return;
+    }
+
+    const ticketGuid =
+      ticket?.guid ||
+      ticket?.turkish_airline_guid ||
+      ticket?.ta_guid ||
+      ticket?.hotel_guid ||
+      ticket?.airway_guid ||
+      ticket?.railway_guid ||
+      ticket?.tour_guid ||
+      ticket?.transfer_guid ||
+      ticket?.package_guid;
     const resolvedOprGuid =
       opr_guid ||
       ticket?.assigned_opr_guid ||

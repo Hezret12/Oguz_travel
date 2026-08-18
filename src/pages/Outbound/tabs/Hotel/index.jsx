@@ -150,7 +150,7 @@ const HotelTab = ({
       {
         id: "profit",
         header: t("outbound.profit"),
-        size: 110,
+        size: 130,
         accessorFn: (row) => row.profit ?? ((row.price || 0) - (row.net_fare || 0)),
         Cell: ({ row, cell }) => {
           const profit = Number(cell.getValue() ?? 0);
