@@ -26,8 +26,8 @@ const DeleteDialog = ({
   const { t } = useLocale();
 
   const resolvedDescription = description ?? t("deleteDialog.description") ?? "Are you sure you want to delete this record? This action cannot be undone.";
-  const resolvedConfirm     = confirmText ?? t("delete")                   ?? "Delete";
-  const resolvedCancel      = cancelText  ?? t("cancel")                   ?? "Cancel";
+  const resolvedConfirm = confirmText ?? t("delete") ?? "Delete";
+  const resolvedCancel = cancelText ?? t("cancel") ?? "Cancel";
 
   return (
     <Dialog
@@ -62,7 +62,6 @@ const DeleteDialog = ({
         },
       }}
     >
-      {/* Header */}
       <DialogTitle
         sx={{
           m: 0,
@@ -75,7 +74,6 @@ const DeleteDialog = ({
           gap: 1.5,
         }}
       >
-        {/* Warning icon + title */}
         <Typography
           component="div"
           sx={{ display: "flex", alignItems: "center", gap: 1.25 }}
