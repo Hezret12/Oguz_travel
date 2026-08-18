@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { Box } from "@mui/material";
+import { useQueryClient, useIsFetching } from "@tanstack/react-query";
 import { useLocale } from "../../hooks/useLocale";
 import { usePageFilters } from "../../hooks/usePageFilters";
 
@@ -11,6 +12,8 @@ import TaskListTable from "./Contents/TaskListTable";
 import TaskFilter from "./Contents/TaskFilter";
 import FilterDrawer from "../../components/FilterDrawer";
 import Pagination from "../../components/Pagination";
+import DeleteDialog from "../../components/DeleteDialog";
+import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 
 import {
   taskFilterActions,
@@ -193,16 +196,32 @@ export default function TaskFlow() {
     [updateTaskMutation],
   );
 
-  const handleDeleteTask = useCallback(
-    async (taskId) => {
-      try {
-        await deleteTaskMutation.mutateAsync(taskId);
-      } catch (err) {
-        console.log(err);
-      }
+  const deleteDialog = useDeleteDialog({
+    onConfirm: (target) => {
+      const guid = typeof target === "string" ? target : target?.guid;
+      if (guid) deleteTaskMutation.mutate(guid);
     },
-    [deleteTaskMutation],
+  });
+
+  const handleDeleteTask = useCallback(
+    (taskOrGuid) => {
+      deleteDialog.open(taskOrGuid);
+    },
+    [deleteDialog],
   );
+
+  const queryClient = useQueryClient();
+  const isBoardFetching = useIsFetching({ queryKey: ["tasks-board"] }) > 0;
+
+  const handleRefetch = useCallback(() => {
+    if (viewMode === "board") {
+      queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
+    } else {
+      refetch();
+    }
+  }, [viewMode, queryClient, refetch]);
+
+  const isCurrentFetching = viewMode === "board" ? isBoardFetching : isFetching;
 
   const hasActiveFilters = useMemo(() => {
     return Boolean(
@@ -230,6 +249,8 @@ export default function TaskFlow() {
         setSearchQuery={setSearch}
         onFilterClick={openDrawer}
         hasActiveFilters={hasActiveFilters}
+        onRefetch={handleRefetch}
+        isFetching={isCurrentFetching}
       />
 
       <FilterDrawer
@@ -315,6 +336,14 @@ export default function TaskFlow() {
         open={isEditModalOpen}
         onClose={handleCloseEditModal}
         task={editingTask}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteDialog
+        open={deleteDialog.isOpen}
+        isLoading={deleteTaskMutation.isPending}
+        onClose={deleteDialog.close}
+        onConfirm={deleteDialog.confirm}
       />
     </Box>
   );

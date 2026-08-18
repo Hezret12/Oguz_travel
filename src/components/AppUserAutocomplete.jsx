@@ -116,7 +116,12 @@ export default function AppUserAutocomplete({
     [hasNextPage, isFetchingNextPage, fetchNextPage]
   );
 
-  const renderAutocompleteField = ({ value, onChange, error }) => {
+  const renderAutocompleteField = ({
+    value,
+    onChange,
+    error,
+    inputRef,
+  }) => {
     const hasError = Boolean(error);
     const currentValues = Array.isArray(value) ? value : value ? [value] : [];
 
@@ -256,25 +261,14 @@ export default function AppUserAutocomplete({
             );
           }}
           renderInput={(params) => {
-            const { InputProps, inputProps, ...otherParams } = params;
+            const { InputProps, slotProps: paramsSlotProps, ...otherParams } = params;
             delete otherParams.renderTags;
             delete otherParams.ownerState;
 
             return (
               <TextField
                 {...otherParams}
-                inputProps={inputProps}
-                InputProps={{
-                  ...InputProps,
-                  endAdornment: (
-                    <>
-                      {isLoading || isFetchingNextPage ? (
-                        <CircularProgress color="inherit" size={18} sx={{ mr: 1 }} />
-                      ) : null}
-                      {InputProps?.endAdornment}
-                    </>
-                  ),
-                }}
+                inputRef={inputRef}
                 placeholder={
                   multiple &&
                   Array.isArray(selectedValue) &&
@@ -286,6 +280,21 @@ export default function AppUserAutocomplete({
                 helperText={error?.message}
                 fullWidth={fullWidth}
                 size={size}
+                slotProps={{
+                  ...paramsSlotProps,
+                  input: {
+                    ...InputProps,
+                    ...paramsSlotProps?.input,
+                    endAdornment: (
+                      <>
+                        {isLoading || isFetchingNextPage ? (
+                          <CircularProgress color="inherit" size={18} sx={{ mr: 1 }} />
+                        ) : null}
+                        {paramsSlotProps?.input?.endAdornment || InputProps?.endAdornment}
+                      </>
+                    ),
+                  },
+                }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "10px",
@@ -331,8 +340,8 @@ export default function AppUserAutocomplete({
       <Controller
         name={name}
         control={control}
-        render={({ field: { onChange, value }, fieldState: { error } }) =>
-          renderAutocompleteField({ value, onChange, error })
+        render={({ field: { onChange, value, ref }, fieldState: { error } }) =>
+          renderAutocompleteField({ value, onChange, error, inputRef: ref })
         }
       />
     );

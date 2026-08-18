@@ -22,6 +22,8 @@ function TaskFlowHeader({
   setSearchQuery,
   onFilterClick,
   hasActiveFilters = false,
+  onRefetch,
+  isFetching = false,
 }) {
   const { t } = useLocale();
   const theme = useTheme();
@@ -51,6 +53,8 @@ function TaskFlowHeader({
           <GlobalSearchInput
             value={searchQuery}
             onChange={setSearchQuery}
+            onRefetch={onRefetch}
+            isFetching={isFetching}
           />
           {onFilterClick && (
             <Button

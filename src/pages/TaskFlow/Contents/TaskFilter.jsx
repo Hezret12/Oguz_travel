@@ -156,9 +156,7 @@ export default function TaskFilter({
   const priorityOptions = useMemo(
     () => [
       { label: t("task.priorityUrgent", "Gyssagly"), value: "urgent" },
-      { label: t("task.priorityHigh", "High"), value: "high" },
       { label: t("task.priorityMedium", "Medium"), value: "medium" },
-      { label: t("task.priorityLow", "Low"), value: "low" },
     ],
     [t]
   );
@@ -166,7 +164,7 @@ export default function TaskFilter({
   return (
     <Stack spacing={2.5}>
       <FilterSelect
-        label={t("columns.status", "Status")}
+        label={t("columns.status")}
         name="status"
         value={currentFilters.status}
         options={statusOptions}
@@ -177,7 +175,7 @@ export default function TaskFilter({
         onClose={handleSelectClose}
       />
       <FilterSelect
-        label={t("task.priority", "Priority")}
+        label={t("task.priority")}
         name="priority"
         value={currentFilters.priority}
         options={priorityOptions}
@@ -188,13 +186,13 @@ export default function TaskFilter({
         onClose={handleSelectClose}
       />
       <FilterDatePicker
-        label={t("task.dueDate", "Due Date")}
+        label={t("task.dueDate")}
         name="due_date"
         value={currentFilters.due_date}
         onChange={handleFilterChange}
       />
       <AppUserAutocomplete
-        label={t("task.assignees", "Assignees")}
+        label={t("task.assignees")}
         value={currentFilters.opr_guid}
         onChange={(val) => handleFilterChange("opr_guid", val)}
         multiple={false}

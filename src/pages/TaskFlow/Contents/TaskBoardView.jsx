@@ -275,6 +275,8 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: "vertical",
                             overflow: "hidden",
+                            wordBreak: "break-word",
+                            overflowWrap: "break-word",
                             "&:hover": { color: "primary.main" },
                           }}
                           onClick={() => onEditTask?.(task)}
@@ -307,6 +309,8 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
                             WebkitLineClamp: 1,
                             WebkitBoxOrient: "vertical",
                             overflow: "hidden",
+                            wordBreak: "break-word",
+                            overflowWrap: "break-word",
                             lineHeight: 1.35,
                           }}
                         >
@@ -502,7 +506,9 @@ function TaskBoardView({
 
   const allBoardTasks = useMemo(() => {
     if (!data?.pages) return [];
-    return data.pages.flatMap((page) => {
+    const taskMap = new Map();
+
+    data.pages.forEach((page) => {
       const responseBody = page;
       let raw = [];
       if (Array.isArray(responseBody?.data?.data)) raw = responseBody.data.data;
@@ -511,17 +517,28 @@ function TaskBoardView({
       else if (Array.isArray(responseBody)) raw = responseBody;
 
       if (Array.isArray(raw[0])) {
-        return raw.flatMap((statusGroup, index) => {
-          if (!Array.isArray(statusGroup)) return [];
+        raw.forEach((statusGroup, index) => {
+          if (!Array.isArray(statusGroup)) return;
           const expectedStatus = index + 1;
-          return statusGroup.map((task) => ({
-            ...task,
-            status: task.status ?? expectedStatus,
-          }));
+          statusGroup.forEach((task) => {
+            if (task?.guid) {
+              taskMap.set(task.guid, {
+                ...task,
+                status: task.status ?? expectedStatus,
+              });
+            }
+          });
+        });
+      } else {
+        raw.forEach((task) => {
+          if (task?.guid) {
+            taskMap.set(task.guid, task);
+          }
         });
       }
-      return raw;
     });
+
+    return Array.from(taskMap.values());
   }, [data]);
 
   const columnTasksMap = useMemo(() => {
