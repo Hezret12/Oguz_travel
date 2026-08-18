@@ -120,6 +120,12 @@ export const useSidebarItems = () => {
         icon: createElement(Languages, { size: 20, strokeWidth: 2.2 }),
       },
       {
+        id: "referal-letters",
+        text: t("sidebar.referalLetters"),
+        path: "/referal-letters",
+        icon: createElement(FileCheck, { size: 20, strokeWidth: 2.2 }),
+      },
+      {
         id: "outbound",
         text: t("sidebar.outbound"),
         path: "/outbound",
@@ -143,9 +149,9 @@ export const useSidebarItems = () => {
           },
           {
             id: "report-referral-letter",
-            text: t("sidebar.referalLetters"),
+            text: t("sidebar.reportReferralLetter", t("sidebar.referalLetters")),
             path: "/reports/referral-letter",
-            icon: createElement(FileCheck, { size: 18, strokeWidth: 2.2 }),
+            icon: createElement(FileText, { size: 18, strokeWidth: 2.2 }),
           },
         ],
       },

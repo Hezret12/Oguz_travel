@@ -39,7 +39,8 @@ const TicketTurkishAirlinesPage = lazyRetry(() => import('../pages/Ticket/Turkis
 const NotFoundPage = lazyRetry(() => import('../pages/NotFound'));
 const UnauthorizedPage = lazyRetry(() => import('../pages/Unauthorized'));
 const VisaPage = lazyRetry(() => import('../pages/Visa'));
-const ReferralLetter = lazyRetry(() => import('../pages/Reports/ReferralLetter/index'));
+const ReferralLetterPage = lazyRetry(() => import('../pages/ReferralLetter'));
+const ReferralLetterReportPage = lazyRetry(() => import('../pages/Reports/ReferralLetter/index'));
 const PackagePage = lazyRetry(() => import('../pages/Visa/Package/Package'));
 const TranslatePage = lazyRetry(() => import('../pages/Translate'));
 const OutboundPage = lazyRetry(() => import('../pages/Outbound/Outbound'));
@@ -98,7 +99,8 @@ const Employee = Loadable(EmployeePage);
 const Clients = Loadable(ClientsPage);
 const Users = Loadable(UsersPage);
 const Visa = Loadable(VisaPage);
-const Referral = Loadable(ReferralLetter);
+const ReferralLetter = Loadable(ReferralLetterPage);
+const ReferralLetterReport = Loadable(ReferralLetterReportPage);
 const Package = Loadable(PackagePage);
 const Translate = Loadable(TranslatePage);
 const Outbound = Loadable(OutboundPage);
@@ -143,7 +145,8 @@ const router = createBrowserRouter([
               { path: 'employee/users', element: <Users /> },
               { path: 'clients', element: <Clients /> },
               { path: 'visa/applications', element: <Visa /> },
-              { path: 'visa/referal-letters', element: <Referral /> },
+              { path: 'referal-letters', element: <ReferralLetter /> },
+              { path: 'referral-letters', element: <Navigate to="/referal-letters" replace /> },
               { path: 'visa/package', element: <Package /> },
               { path: 'translation', element: <Translate /> },
               { path: 'outbound', element: <Outbound /> },
@@ -158,7 +161,7 @@ const router = createBrowserRouter([
               },
               { path: 'intake', element: <Intake /> },
               { path: 'reports/turkish-airlines', element: <TurkishReport /> },
-              { path: 'reports/referral-letter', element: <Referral /> },
+              { path: 'reports/referral-letter', element: <ReferralLetterReport /> },
               { path: 'notifications', element: <Notification /> },
               { path: 'unauthorized', element: <Unauthorized /> },
             ],
