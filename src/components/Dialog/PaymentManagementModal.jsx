@@ -35,7 +35,7 @@ const CURRENCY_SYMBOLS = {
   USD: "$",
   EUR: "€",
   TRY: "₺",
-  TMT: "TMT",
+  TMT: "m",
   RUB: "₽",
   AED: "AED",
 };
@@ -48,11 +48,12 @@ const getNextLocalPaymentGuid = () => {
 
 const formatCurrency = (val, currencyCode = "USD") => {
   const num = Number(val || 0);
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currencyCode,
-    maximumFractionDigits: 0,
-  }).format(num);
+  const formattedNum = num.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const symbol = CURRENCY_SYMBOLS[currencyCode] || currencyCode || "USD";
+  return `${formattedNum} ${symbol}`;
 };
 
 const formatDateToDisplay = (dateStr) => {
@@ -385,6 +386,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         const payload = {
           guid: editingPayment.guid,
           amount: Number(amount),
+          currency: ticketCurrency,
           payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
@@ -413,6 +415,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               ? {
                   ...p,
                   amount: Number(amount),
+                  currency: ticketCurrency,
                   payment_date: resolvedPaymentDate,
                   note: description?.trim() || "",
                   opr_guid: resolvedOprGuid,
@@ -426,6 +429,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       if (ticketGuid) {
         const payload = {
           amount: Number(amount),
+          currency: ticketCurrency,
           payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
@@ -451,6 +455,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         const newPayment = {
           guid: getNextLocalPaymentGuid(),
           amount: Number(amount),
+          currency: ticketCurrency,
           payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
