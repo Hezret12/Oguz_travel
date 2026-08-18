@@ -284,7 +284,7 @@ const PackageTab = ({
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
-        description={t("deleteConfirm")}
+        description={t("outbound.deleteConfirm")}
       />
       {isAddOpen && (
         <AddPackageModal open={isAddOpen} onClose={onCloseAdd} table={table} />

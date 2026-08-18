@@ -94,13 +94,13 @@ const HotelTab = ({
       {
         id: "client_name",
         header: t("outbound.clientName"),
-        size: 210,
+        size: 220,
         accessorFn: (row) => row.client?.fullName || row.client_name || "",
       },
       {
         id: "operator",
         header: t("columns.operator"),
-        size: 200,
+        size: 220,
         accessorFn: (row) => row.operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -112,7 +112,7 @@ const HotelTab = ({
       {
         id: "prepared_by",
         header: t("columns.operatorTwo"),
-        size: 200,
+        size: 220,
         accessorFn: (row) => row.preparedOpr?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -312,7 +312,7 @@ const HotelTab = ({
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
-        description={t("deleteConfirm")}
+        description={t("outbound.deleteConfirm")}
       />
       {isAddOpen && (
         <AddHotelModal open={isAddOpen} onClose={onCloseAdd} table={table} />

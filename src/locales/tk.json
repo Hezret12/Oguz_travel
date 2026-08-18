@@ -54,6 +54,9 @@
   "deleteConfirm": {
     "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz."
   },
+  "deleteDialog": {
+    "description": "Siz hakykatdan hem bu ýazgyny pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaz."
+  },
   "columns": {
     "code": "Kody",
     "countryNameTm": "Ýurt ady (TM)",
@@ -344,7 +347,8 @@
     "tourName": "Tur ady",
     "transferType": "Transfer görnüşi",
     "carType": "Maşyn görnüşi",
-    "note": "Bellik"
+    "note": "Bellik",
+    "deleteConfirm": "Siz hakykatdan hem bu satyşy pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaz."
   },
   "visaIntake": {
     "title": "Kabul ediji bölümi",

@@ -52,7 +52,10 @@
     "invalidReturnDate": "Return date cannot be before departure date"
   },
   "deleteConfirm": {
-    "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz."
+    "employee": "Вы действительно хотите удалить этого сотрудника? Это действие нельзя отменить."
+  },
+  "deleteDialog": {
+    "description": "Вы действительно хотите удалить эту запись? Это действие нельзя отменить."
   },
   "columns": {
     "code": "Код",
@@ -344,7 +347,8 @@
     "tourName": "Название тура",
     "transferType": "Тип трансфера",
     "carType": "Класс авто",
-    "note": "Примечание"
+    "note": "Примечание",
+    "deleteConfirm": "Вы действительно хотите удалить эту продажу? Это действие нельзя отменить."
   },
   "visaIntake": {
     "title": "Прием документов",

@@ -52,7 +52,10 @@
     "invalidReturnDate": "Return date cannot be before departure date"
   },
   "deleteConfirm": {
-    "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz."
+    "employee": "Are you sure you want to delete this employee? This action cannot be undone."
+  },
+  "deleteDialog": {
+    "description": "Are you sure you want to delete this record? This action cannot be undone."
   },
   "columns": {
     "code": "Code",
@@ -344,7 +347,8 @@
     "tourName": "Tour Name",
     "transferType": "Transfer Type",
     "carType": "Car Type",
-    "note": "Note"
+    "note": "Note",
+    "deleteConfirm": "Are you sure you want to delete this sale? This action cannot be undone."
   },
   "visaIntake": {
     "title": "Visa Intake",

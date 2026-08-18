@@ -298,7 +298,7 @@ const TourTab = ({
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
-        description={t("deleteConfirm")}
+        description={t("outbound.deleteConfirm")}
       />
       {isAddOpen && (
         <AddTourModal open={isAddOpen} onClose={onCloseAdd} table={table} />

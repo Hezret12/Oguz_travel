@@ -66,11 +66,11 @@ const DeleteDialog = ({
       <DialogTitle
         sx={{
           m: 0,
-          px: 3,
-          pt: 3,
+          px: 3.5,
+          pt: 3.5,
           pb: 2,
           display: "flex",
-          alignItems: "flex-start",
+          alignItems: "center",
           justifyContent: "space-between",
           gap: 1.5,
         }}
@@ -81,11 +81,11 @@ const DeleteDialog = ({
           sx={{ display: "flex", alignItems: "center", gap: 1.25 }}
         >
           <WarningAmberRoundedIcon
-            sx={{ fontSize: 22, color: "error.main", flexShrink: 0 }}
+            sx={{ fontSize: 24, color: "error.main", flexShrink: 0 }}
           />
           <Typography
             variant="h6"
-            sx={{ fontWeight: 700, fontSize: "1rem", color: "text.primary" }}
+            sx={{ fontWeight: 700, fontSize: "1.15rem", color: "text.primary" }}
           >
             {t('delete')}
           </Typography>
@@ -98,36 +98,40 @@ const DeleteDialog = ({
           aria-label="close"
           sx={{
             color: "text.secondary",
-            width: 28,
-            height: 28,
+            width: 30,
+            height: 30,
             flexShrink: 0,
             "&:hover": { color: "text.primary" },
           }}
         >
-          <CloseIcon sx={{ fontSize: 16 }} />
+          <CloseIcon sx={{ fontSize: 18 }} />
         </IconButton>
       </DialogTitle>
 
       {/* Body */}
-      <DialogContent sx={{ px: 3, py: 0, pb: 2.5 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.65 }}>
+      <DialogContent sx={{ px: 3.5, py: 0, pb: 3 }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ fontSize: "0.95rem", lineHeight: 1.65, fontWeight: 400 }}
+        >
           {resolvedDescription}
         </Typography>
       </DialogContent>
 
       {/* Footer */}
-      <DialogActions sx={{ px: 3, pb: 2.5, pt: 0, gap: 1 }}>
+      <DialogActions sx={{ px: 3.5, pb: 3.5, pt: 0, gap: 1.25 }}>
         <Button
           variant="outlined"
           onClick={onClose}
           disabled={isLoading}
           sx={{
             flex: 1,
-            borderRadius: "9px",
+            borderRadius: "10px",
             textTransform: "none",
             fontWeight: 600,
-            fontSize: "14px",
-            height: "38px",
+            fontSize: "14.5px",
+            height: "40px",
             borderColor: "divider",
             color: "text.primary",
             "&:hover": {
@@ -146,18 +150,18 @@ const DeleteDialog = ({
           disableElevation
           startIcon={
             isLoading ? (
-              <CircularProgress size={15} color="inherit" />
+              <CircularProgress size={16} color="inherit" />
             ) : (
-              <DeleteOutlineIcon sx={{ fontSize: "17px !important" }} />
+              <DeleteOutlineIcon sx={{ fontSize: "18px !important" }} />
             )
           }
           sx={{
             flex: 1,
-            borderRadius: "9px",
+            borderRadius: "10px",
             textTransform: "none",
             fontWeight: 600,
-            fontSize: "14px",
-            height: "38px",
+            fontSize: "14.5px",
+            height: "40px",
             backgroundColor: "#ef4444",
             color: "#fff",
             boxShadow: "0 2px 8px rgba(239,68,68,0.28)",
