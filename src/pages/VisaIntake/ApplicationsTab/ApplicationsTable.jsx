@@ -18,8 +18,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import { ChevronDown, Globe } from "lucide-react";
+import { Funnel, ChevronDown, Globe } from "lucide-react";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -518,7 +517,7 @@ export const ApplicationsTable = forwardRef(
           <Badge color="primary" variant="dot" invisible={!isFilterActive}>
             <Button
               variant={isFilterActive ? "contained" : "outlined"}
-              startIcon={<FilterListIcon />}
+              startIcon={<Funnel size={16} />}
               onClick={openDrawer}
               sx={{ borderRadius: "8px", fontWeight: 600, height: "40px" }}
             >

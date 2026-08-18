@@ -9,7 +9,7 @@ import {
 import ViewWeekIcon from "@mui/icons-material/ViewWeek";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import AddIcon from "@mui/icons-material/Add";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import { Funnel } from "lucide-react";
 
 import { useLocale } from "../../../hooks/useLocale";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
@@ -61,7 +61,7 @@ function TaskFlowHeader({
                   variant="dot"
                   invisible={!hasActiveFilters}
                 >
-                  <FilterListIcon sx={{ fontSize: "17px !important" }} />
+                  <Funnel size={16} />
                 </Badge>
               }
               onClick={onFilterClick}

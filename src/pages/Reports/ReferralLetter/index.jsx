@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { Box, Paper, Button, useTheme, Badge } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import { Funnel } from "lucide-react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -588,7 +588,7 @@ const ReferralLetterPage = () => {
               <Button
                 variant="outlined"
                 color="inherit"
-                startIcon={<FilterListIcon />}
+                startIcon={<Funnel size={16} />}
                 onClick={openDrawer}
                 sx={{
                   borderRadius: "8px",

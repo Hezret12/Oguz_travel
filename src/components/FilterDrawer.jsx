@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import { Funnel } from "lucide-react";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CheckIcon from "@mui/icons-material/Check";
 import { useLocale } from "../hooks/useLocale";
@@ -65,7 +65,7 @@ const FilterDrawer = ({
         }}
       >
         <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-          <FilterListIcon fontSize="small" />
+          <Funnel size={18} />
           <Typography variant="h6" fontWeight={600} fontSize="1.1rem">
             {t("filter")}
           </Typography>

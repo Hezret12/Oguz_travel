@@ -43,6 +43,9 @@ const OutboundPage = () => {
     setPage,
     setPageSize,
     queryParams,
+    selectsOpen,
+    openSelect,
+    closeSelect,
   } = usePageFilters({
     actions: outboundFilterActions,
     selectors: outboundFilterSelectors,
@@ -55,7 +58,7 @@ const OutboundPage = () => {
   return (
     <>
       <PageHeader
-        title={t("outbound.title") || "Outbound satuwlar"}
+        title={t("outbound.title")}
         pageTitle={`${t("outbound.title") || "Outbound"} | Oguz Travel`}
         addButtonText={t("outbound.addSale")}
         filterButtonText={t("filter")}
@@ -92,9 +95,12 @@ const OutboundPage = () => {
         onCancel={cancelFilters}
       >
         <OutboundFilter
+          activeTab={activeTab}
           filters={draft}
-          selectsOpen={queryParams}
+          selectsOpen={selectsOpen}
           onFilterChange={setDraftFilter}
+          onSelectOpen={openSelect}
+          onSelectClose={closeSelect}
         />
       </FilterDrawer>
 

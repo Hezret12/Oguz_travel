@@ -18,7 +18,7 @@ import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { addPackageApi } from "../../../../api/queries/post";
-import { PARTNER_OPTIONS, PAYMENT_OPTIONS } from "../../constants";
+import { PAYMENT_OPTIONS } from "../../constants";
 import PackageFields from "./PackageFields";
 
 const AddPackageModal = ({ open = true, onClose, table }) => {
@@ -51,7 +51,7 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
       net_fare: 0,
       price: 0,
       currency: "USD",
-      partner: PARTNER_OPTIONS[0].value,
+      partner: "",
       note: "",
       is_paid: "false",
     },
@@ -193,11 +193,10 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
           </Grid>
 
           <Grid size={6}>
-            <CustomSelect
+            <CustomTextField
               name="partner"
               control={control}
-              label={t("outbound.partner") || "Hyzmatdaş"}
-              options={PARTNER_OPTIONS}
+              label={t("outbound.partner")}
               required
             />
           </Grid>

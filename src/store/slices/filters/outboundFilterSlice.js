@@ -4,12 +4,19 @@ export const outboundFilterSlice = createFilterSlice({
   name: 'outboundFilters',
   defaultFilters: {
     search: '',
-    start_date: '',
-    end_date: '',
-    office_guid: '',
-    opr_guid: '',
+    application_date: null,
+    opr_guid: null,
+    prepared_opr_guid: null,
+    is_paid: null,
+    system: null,
+    meal_plan: null,
+    ticket_type: null,
+    train_type: null,
+    transfer_type: null,
+    machine_type: null,
+    partner: null,
   },
-  defaultPageSize: 20,
+  defaultPageSize: 40,
 });
 
 export const outboundFilterActions = outboundFilterSlice.actions;

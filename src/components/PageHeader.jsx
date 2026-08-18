@@ -1,6 +1,6 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import { Funnel } from "lucide-react";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonText, onFilterClick, children }) => {
@@ -36,7 +36,7 @@ const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonT
           {showFilterButton && (
             <Button
               variant="outlined"
-              startIcon={<FilterListIcon sx={{ fontSize: "17px !important" }} />}
+              startIcon={<Funnel size={16} />}
               onClick={onFilterClick}
               disableElevation
               sx={{

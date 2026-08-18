@@ -1,9 +1,27 @@
 import { useMemo } from "react";
-import { Box, FormControl, MenuItem, Select, Stack, Typography, TextField } from "@mui/material";
+import {
+  Box,
+  Divider,
+  FormControl,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ChevronDown } from "lucide-react";
+import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllEmployeeApi, getAllOfficeApi } from "../../../api/queries/getters";
+import { getAllEmployeeApi } from "../../../api/queries/getters";
+import {
+  SOURCE_OPTIONS,
+  TICKET_TYPE_OPTIONS,
+  MEAL_PLAN_OPTIONS,
+  TRAIN_TYPE_OPTIONS,
+  CAR_TYPE_OPTIONS,
+  PAYMENT_OPTIONS,
+} from "../constants";
 
 const selectSx = {
   borderRadius: "8px",
@@ -89,7 +107,7 @@ const FilterSelect = ({
   </FormControl>
 );
 
-const FilterDate = ({ label, name, value, onChange }) => (
+const FilterDatePicker = ({ label, name, value, onChange }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -97,17 +115,36 @@ const FilterDate = ({ label, name, value, onChange }) => (
     >
       {label}
     </Typography>
-    <TextField
-      type="date"
-      size="small"
-      value={value ?? ""}
-      onChange={(e) => onChange(name, e.target.value)}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          borderRadius: "10px",
-          "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-          "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
+    <DatePicker
+      value={value ? dayjs(value) : null}
+      onChange={(newValue) => {
+        onChange(
+          name,
+          newValue && newValue.isValid()
+            ? newValue.format("YYYY-MM-DD")
+            : ""
+        );
+      }}
+      format="DD.MM.YYYY"
+      views={["year", "month", "day"]}
+      slotProps={{
+        textField: {
+          fullWidth: true,
+          size: "small",
+          sx: {
+            "& .MuiInputBase-root": {
+              fontSize: "0.9rem",
+              height: "40px",
+              minHeight: "40px",
+              borderRadius: "8px",
+            },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
+            "& .MuiInputAdornment-root .MuiIconButton-root": {
+              color: "primary.main",
+            },
+          },
         },
       }}
     />
@@ -115,8 +152,9 @@ const FilterDate = ({ label, name, value, onChange }) => (
 );
 
 const OutboundFilter = ({
-  filters,
-  selectsOpen,
+  activeTab = "hotel",
+  filters = {},
+  selectsOpen = {},
   onFilterChange,
   onSelectOpen,
   onSelectClose,
@@ -126,11 +164,6 @@ const OutboundFilter = ({
   const { data: employees = [] } = useGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
-  });
-
-  const { data: offices = [] } = useGet({
-    apiFn: getAllOfficeApi,
-    key: "offices",
   });
 
   const employeeOptions = useMemo(
@@ -149,56 +182,205 @@ const OutboundFilter = ({
     [employees, selectedLang]
   );
 
-  const officeOptions = useMemo(
-    () =>
-      (offices || []).map((off) => ({
-        value: off.guid,
-        label: selectedLang(off.shortName) || selectedLang(off.fullName) || "",
-      })),
-    [offices, selectedLang]
-  );
-
   const allText = t("all") ?? "All";
 
   return (
     <Stack spacing={2.5}>
-      <FilterDate
-        label={t("columns.startDate") || "Başlangyç sene"}
-        name="start_date"
-        value={filters.start_date}
-        onChange={onFilterChange}
-      />
-
-      <FilterDate
-        label={t("columns.endDate") || "Gutarýan sene"}
-        name="end_date"
-        value={filters.end_date}
+      {/* ================= GLOBAL / ORTAK FİLTRELER ================= */}
+      <FilterDatePicker
+        label={t("outbound.requestDate")}
+        name="application_date"
+        value={filters.application_date}
         onChange={onFilterChange}
       />
 
       <FilterSelect
-        label={t("outbound.office") || "Ofis"}
-        name="office_guid"
-        value={filters.office_guid}
-        options={officeOptions}
-        isOpen={selectsOpen?.office_guid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
-      />
-
-      <FilterSelect
-        label={t("outbound.operator") || "Operator"}
-        name="operator_guid"
-        value={filters.operator_guid}
+        label={t("columns.operator")}
+        name="opr_guid"
+        value={filters.opr_guid}
         options={employeeOptions}
-        isOpen={selectsOpen?.operator_guid ?? false}
+        isOpen={selectsOpen?.opr_guid ?? false}
         allText={allText}
         onChange={onFilterChange}
         onOpen={onSelectOpen}
         onClose={onSelectClose}
       />
+
+      <FilterSelect
+        label={t("outbound.preparedBy")}
+        name="prepared_opr_guid"
+        value={filters.prepared_opr_guid}
+        options={employeeOptions}
+        isOpen={selectsOpen?.prepared_opr_guid ?? false}
+        allText={allText}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
+      />
+
+      <FilterSelect
+        label={t("columns.paymentStatus")}
+        name="is_paid"
+        value={filters.is_paid}
+        options={PAYMENT_OPTIONS}
+        isOpen={selectsOpen?.is_paid ?? false}
+        allText={allText}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
+      />
+
+      {/* ================= TAB'E GÖRE DEĞİŞEN SELECT FİLTRELERİ ================= */}
+      {activeTab !== "package" && <Divider sx={{ my: 0.5 }} />}
+
+      {/* 1. HOTEL TAB */}
+      {activeTab === "hotel" && (
+        <>
+          <FilterSelect
+            label={t("outbound.source")}
+            name="system"
+            value={filters.system}
+            options={SOURCE_OPTIONS}
+            isOpen={selectsOpen?.system ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+          <FilterSelect
+            label={t("outbound.mealPlan")}
+            name="meal_plan"
+            value={filters.meal_plan}
+            options={MEAL_PLAN_OPTIONS}
+            isOpen={selectsOpen?.meal_plan ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+        </>
+      )}
+
+      {/* 2. AIRWAY TAB */}
+      {activeTab === "airway" && (
+        <>
+          <FilterSelect
+            label={t("outbound.source")}
+            name="system"
+            value={filters.system}
+            options={SOURCE_OPTIONS}
+            isOpen={selectsOpen?.system ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+          <FilterSelect
+            label={t("outbound.ticketType")}
+            name="ticket_type"
+            value={filters.ticket_type}
+            options={TICKET_TYPE_OPTIONS}
+            isOpen={selectsOpen?.ticket_type ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+        </>
+      )}
+
+      {/* 3. RAILWAY TAB */}
+      {activeTab === "railway" && (
+        <>
+          <FilterSelect
+            label={t("outbound.source")}
+            name="system"
+            value={filters.system}
+            options={SOURCE_OPTIONS}
+            isOpen={selectsOpen?.system ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+          <FilterSelect
+            label={t("outbound.ticketType")}
+            name="ticket_type"
+            value={filters.ticket_type}
+            options={TICKET_TYPE_OPTIONS}
+            isOpen={selectsOpen?.ticket_type ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+          <FilterSelect
+            label={t("outbound.trainType")}
+            name="train_type"
+            value={filters.train_type}
+            options={TRAIN_TYPE_OPTIONS}
+            isOpen={selectsOpen?.train_type ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+        </>
+      )}
+
+      {/* 4. TOUR TAB */}
+      {activeTab === "tour" && (
+        <FilterSelect
+          label={t("outbound.source")}
+          name="system"
+          value={filters.system}
+          options={SOURCE_OPTIONS}
+          isOpen={selectsOpen?.system ?? false}
+          allText={allText}
+          onChange={onFilterChange}
+          onOpen={onSelectOpen}
+          onClose={onSelectClose}
+        />
+      )}
+
+      {/* 5. TRANSFER TAB */}
+      {activeTab === "transfer" && (
+        <>
+          <FilterSelect
+            label={t("outbound.source")}
+            name="system"
+            value={filters.system}
+            options={SOURCE_OPTIONS}
+            isOpen={selectsOpen?.system ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+          <FilterSelect
+            label={t("outbound.transferType")}
+            name="transfer_type"
+            value={filters.transfer_type}
+            options={TICKET_TYPE_OPTIONS}
+            isOpen={selectsOpen?.transfer_type ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+          <FilterSelect
+            label={t("outbound.carType")}
+            name="machine_type"
+            value={filters.machine_type}
+            options={CAR_TYPE_OPTIONS}
+            isOpen={selectsOpen?.machine_type ?? false}
+            allText={allText}
+            onChange={onFilterChange}
+            onOpen={onSelectOpen}
+            onClose={onSelectClose}
+          />
+        </>
+      )}
     </Stack>
   );
 };
