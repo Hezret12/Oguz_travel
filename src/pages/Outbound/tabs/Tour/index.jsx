@@ -114,7 +114,7 @@ const TourTab = ({
       },
       {
         id: "prepared_by",
-        header: t("columns.operatorTwo"),
+        header: t("outbound.preparedBy"),
         size: 200,
         accessorFn: (row) => row.preparedOpr?.fullName ?? "",
         Cell: ({ row }) => (

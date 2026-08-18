@@ -111,8 +111,8 @@ const HotelTab = ({
       },
       {
         id: "prepared_by",
-        header: t("columns.operatorTwo"),
-        size: 220,
+        header: t("outbound.preparedBy"),
+        size: 200,
         accessorFn: (row) => row.preparedOpr?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell

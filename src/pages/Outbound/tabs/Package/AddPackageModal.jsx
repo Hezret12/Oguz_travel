@@ -155,7 +155,7 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
             <CustomSelect
               name="prepared_opr_guid"
               control={control}
-              label={t("columns.operatorTwo")}
+              label={t("outbound.preparedBy")}
               options={employeeOptions}
               isLoading={isLoadingEmployees}
               required
