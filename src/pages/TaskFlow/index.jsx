@@ -101,14 +101,14 @@ export default function TaskFlow() {
     apiFn: updateTaskApi,
     key: "tasks",
     idKey: "guid",
-    invalidateQueries: ["tasks"],
+    invalidateQueries: ["tasks", "tasks-column"],
   });
 
   const deleteTaskMutation = useDelete({
     deleteFn: deleteTaskApi,
     queryKey: "tasks",
     idKey: "guid",
-    invalidateQueries: ["tasks"],
+    invalidateQueries: ["tasks", "tasks-column"],
   });
 
   const columns = useMemo(

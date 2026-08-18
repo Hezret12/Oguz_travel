@@ -20,6 +20,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const createMutation = useCreate({
     apiFn: addTaskApi,
     key: "tasks",
+    invalidateQueries: ["tasks-column"],
     onSuccess: () => {
       onCreateTask?.();
       handleCloseDialog();

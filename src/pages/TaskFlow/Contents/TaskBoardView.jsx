@@ -61,7 +61,6 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     filterStatus === "all" ||
     Number(filterStatus) === Number(col.id);
 
-  // Build query params for this specific column's status & filters
   const columnParams = useMemo(() => {
     if (!isStatusMatched) return null;
     const params = {
@@ -85,7 +84,6 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     return params;
   }, [col.id, page, searchQuery, filterPriority, dueDate, oprGuid, isStatusMatched]);
 
-  // Fetch paginated tasks independently for this column
   const {
     data: apiResponse,
     totalItems = 0,
@@ -101,7 +99,6 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     },
   });
 
-  // Extract raw tasks array from API response
   const fetchedTasks = useMemo(() => {
     if (!isStatusMatched) return [];
     let rawData = apiResponse;
@@ -121,7 +118,6 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     return rawData;
   }, [apiResponse, col.id, isStatusMatched]);
 
-  // Reset column page when global filters change (in-render state adjustment)
   const filterKey = `${searchQuery}-${filterStatus}-${filterPriority}-${dueDate}-${oprGuid}`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
   if (filterKey !== prevFilterKey) {
@@ -129,27 +125,33 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     setPage(1);
   }
 
-  // Build a stable serialized key for the fetched data to detect actual changes
-  const fetchedKey = useMemo(() => {
-    if (!fetchedTasks || fetchedTasks.length === 0) return `empty-${page}`;
-    return fetchedTasks.map((t) => t.guid || t.id).join(",") + `-p${page}`;
+  const fetchedFingerprint = useMemo(() => {
+    if (!fetchedTasks || fetchedTasks.length === 0) return `empty-p${page}`;
+    return (
+      fetchedTasks
+        .map(
+          (t) =>
+            `${t.guid}_${t.status}_${t.priority}_${t.title || ""}_${t.description || ""}_${t.due_date || t.dueDate || ""}_${t.updatedAt || ""}_${t.assignees?.length || 0}_${t.images?.length || 0}`
+        )
+        .join(";") + `-p${page}`
+    );
   }, [fetchedTasks, page]);
 
-  // Accumulate tasks using serialized key comparison (stable string, no infinite loop)
-  const [prevFetchedKey, setPrevFetchedKey] = useState("");
-  if (fetchedKey !== prevFetchedKey) {
-    setPrevFetchedKey(fetchedKey);
+  const [prevFingerprint, setPrevFingerprint] = useState("");
+  if (fetchedFingerprint !== prevFingerprint) {
+    setPrevFingerprint(fetchedFingerprint);
     if (page === 1) {
       setAccumulatedTasks(fetchedTasks);
     } else if (fetchedTasks.length > 0) {
       setAccumulatedTasks((prev) => {
-        const existingGuids = new Set(prev.map((t) => t.guid || t.id));
-        const newUnique = fetchedTasks.filter(
-          (t) => !existingGuids.has(t.guid || t.id)
-        );
-        if (newUnique.length === 0) return prev;
-        return [...prev, ...newUnique];
+        const newMap = new Map(fetchedTasks.map((t) => [t.guid, t]));
+        const updatedExisting = prev.map((t) => newMap.get(t.guid) || t);
+        const existingGuids = new Set(prev.map((t) => t.guid));
+        const newItems = fetchedTasks.filter((t) => !existingGuids.has(t.guid));
+        return [...updatedExisting, ...newItems];
       });
+    } else {
+      setAccumulatedTasks([]);
     }
   }
 

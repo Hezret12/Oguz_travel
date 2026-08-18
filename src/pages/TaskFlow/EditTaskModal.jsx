@@ -21,6 +21,7 @@ export default function EditTaskModal({ open, onClose, task }) {
     apiFn: updateTaskApi,
     key: "tasks",
     idKey: "guid",
+    invalidateQueries: ["tasks", "tasks-column"],
     onSuccessUpdate: () => {
       handleCloseModal();
     }
