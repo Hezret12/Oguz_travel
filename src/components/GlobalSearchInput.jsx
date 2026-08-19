@@ -3,21 +3,53 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 import IconButton from '@mui/material/IconButton';
+import { useState, useEffect } from 'react';
 
 const GlobalSearchInput = ({
-  value,
+  value = '',
   onChange,
   placeholder = '',
   disabled = false,
   onRefetch,
   isFetching = false,
+  debounceMs = 350,
   sx,
 }) => {
+  const [localValue, setLocalValue] = useState(value ?? '');
+
+  // React 19 State Synchronization: sync localValue when external prop changes (e.g. on reset)
+  const [prevPropValue, setPrevPropValue] = useState(value ?? '');
+  if (value !== prevPropValue) {
+    setPrevPropValue(value ?? '');
+    setLocalValue(value ?? '');
+  }
+
+  useEffect(() => {
+    if (localValue === value) return;
+
+    const handler = setTimeout(() => {
+      onChange?.(localValue);
+    }, debounceMs);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [localValue, value, onChange, debounceMs]);
+
+  const handleInputChange = (e) => {
+    setLocalValue(e.target.value);
+  };
+
+  const handleClear = () => {
+    setLocalValue('');
+    onChange?.('');
+  };
+
   return (
     <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, ...sx }}>
       <TextField
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={localValue}
+        onChange={handleInputChange}
         placeholder={placeholder}
         disabled={disabled}
         size="small"
@@ -39,11 +71,11 @@ const GlobalSearchInput = ({
                 <SearchIcon fontSize="small" color="action" />
               </InputAdornment>
             ),
-            endAdornment: value ? (
+            endAdornment: localValue ? (
               <InputAdornment position="end">
                 <IconButton
                   size="small"
-                  onClick={() => onChange('')}
+                  onClick={handleClear}
                   edge="end"
                   aria-label="Clear all"
                 >

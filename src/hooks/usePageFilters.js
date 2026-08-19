@@ -17,15 +17,12 @@ export function usePageFilters({ actions, selectors }) {
   const debouncedQueryParams = useMemo(() => {
     const params = {
       ...queryParams,
-      ...(applied.search !== undefined ? { search: debouncedSearch || undefined } : {}),
     };
-    Object.keys(params).forEach((k) => {
-      if (params[k] === undefined || params[k] === '') {
-        delete params[k];
-      }
-    });
+    if (debouncedSearch && debouncedSearch.trim() !== '') {
+      params.search = debouncedSearch.trim();
+    }
     return params;
-  }, [queryParams, debouncedSearch, applied.search]);
+  }, [queryParams, debouncedSearch]);
 
   const openDrawer = useCallback(
     () => dispatch(actions.openDrawer()),

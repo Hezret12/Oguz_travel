@@ -16,7 +16,12 @@ import EditTranslateModal from "./EditTranslateModal";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
-import { getAllTranslationsApi } from "../../api/queries/getters";
+import { useGet } from "../../hooks/CRUD/useGet";
+import {
+  getAllTranslationsApi,
+  getAllEmployeeApi,
+  getAllTranslatorsApi,
+} from "../../api/queries/getters";
 import {
   translateFilterActions,
   translateFilterSelectors,
@@ -33,10 +38,20 @@ import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { deleteTranslationApi } from "../../api/queries/delete";
 import { PaymentManagementModal } from "../../components/Dialog/PaymentManagementModal";
+import dayjs from "dayjs";
+
+const FILTER_LABEL_KEYS = {
+  opr_guid: "columns.operator",
+  translator_guid: "columns.translator",
+  received_day: "columns.receivedDay",
+  received_time: "columns.receivedTime",
+  completed_day: "columns.completedDay",
+  completed_time: "columns.completedTime",
+};
 
 const TranslatePage = () => {
   const { t, selectedLang } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
   const [paymentModalRow, setPaymentModalRow] = useState(null);
@@ -68,7 +83,7 @@ const TranslatePage = () => {
   });
 
   const {
-    data: translationsData,
+    data: translations = [],
     isLoading,
     isFetching,
     refetch,
@@ -80,7 +95,59 @@ const TranslatePage = () => {
     params: queryParams,
   });
 
-  const translations = useMemo(() => translationsData?.data ?? translationsData ?? [], [translationsData]);
+  // Auxiliary data for filter chip labels
+  const { data: employees = [] } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "employees",
+  });
+
+  const { data: translators = [] } = useGet({
+    apiFn: getAllTranslatorsApi,
+    key: "translators",
+  });
+
+  const employeeMap = useMemo(
+    () => new Map(employees.map((e) => [e.guid, e.fullName])),
+    [employees]
+  );
+
+  const translatorMap = useMemo(
+    () => new Map(translators.map((tr) => [tr.guid, tr.fullName])),
+    [translators]
+  );
+
+  const getFilterChipLabel = useCallback(
+    (key, value) => {
+      const translationKey = FILTER_LABEL_KEYS[key] || `columns.${key}`;
+      const fieldTitle = t(translationKey);
+      let displayVal = value;
+
+      if (key === "opr_guid") {
+        displayVal = employeeMap.get(value) || value;
+      } else if (key === "translator_guid") {
+        displayVal = translatorMap.get(value) || value;
+      } else if (key === "received_day" || key === "completed_day") {
+        displayVal = dayjs(value).isValid()
+          ? dayjs(value).format("DD.MM.YYYY")
+          : value;
+      }
+
+      return `${fieldTitle}: ${displayVal}`;
+    },
+    [t, employeeMap, translatorMap]
+  );
+
+  const activeFilters = useMemo(
+    () =>
+      Object.entries(applied).filter(
+        ([key, value]) =>
+          key !== "search" &&
+          value !== undefined &&
+          value !== null &&
+          value !== "",
+      ),
+    [applied],
+  );
 
   const { mutate: deleteTranslation, isPending: isDeleting } = useDelete({
     deleteFn: deleteTranslationApi,
@@ -95,15 +162,6 @@ const TranslatePage = () => {
   const handleDeleteClick = useCallback(
     (item) => deleteDialog.open(item),
     [deleteDialog],
-  );
-
-  const activeFilters = useMemo(
-    () =>
-      Object.entries(applied).filter(
-        // eslint-disable-next-line no-unused-vars
-        ([_, value]) => value !== undefined && value !== null && value !== "",
-      ),
-    [applied],
   );
 
   const columns = useMemo(
@@ -376,7 +434,7 @@ const TranslatePage = () => {
         {activeFilters.map(([key, value]) => (
           <Chip
             key={key}
-            label={`${t(`columns.${key}`, key)}: ${value}`}
+            label={getFilterChipLabel(key, value)}
             onDelete={() => setFilter(key, "")}
             color="primary"
             variant="outlined"

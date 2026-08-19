@@ -3,7 +3,6 @@ import { createFilterSlice } from './createFilterSlice';
 export const translateFilterSlice = createFilterSlice({
   name: 'translateFilters',
   defaultFilters: {
-    search: '',
     received_day: '',
     received_time: '',
     opr_guid: '',

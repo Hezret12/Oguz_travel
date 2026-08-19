@@ -99,7 +99,7 @@ export function createFilterSlice({ name, defaultFilters, defaultPageSize = 20 }
       const params = { page, limit };
 
       Object.entries(applied).forEach(([key, value]) => {
-        if (value !== '' && value !== null && value !== undefined) {
+        if (key !== 'search' && value !== '' && value !== null && value !== undefined) {
           params[key] = value;
         }
       });
