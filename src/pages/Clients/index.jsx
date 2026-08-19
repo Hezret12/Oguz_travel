@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { Box, Chip, IconButton, Tooltip } from "@mui/material";
-import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import { FileUp } from "lucide-react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -27,7 +27,6 @@ import DeleteDialog from "../../components/DeleteDialog";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { deleteClient } from "../../api/queries/delete";
-import { actions } from "../../utils/helperConstant";
 
 const formatDate = (value) => {
   if (!value) return "";
@@ -194,7 +193,7 @@ const Clients = () => {
       {
         id: "actions",
         header: t("columns.actions"),
-        size: actions,
+        size: 115,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         Cell: ({ row, table }) => {
@@ -211,11 +210,40 @@ const Clients = () => {
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation();
+                    e.currentTarget.blur();
                     setSelectedDocClient(row.original);
                   }}
                   size="small"
+                  aria-label={t("clients.documents")}
+                  sx={(theme) => ({
+                    borderRadius: "7px",
+                    border:
+                      theme.palette.mode === "dark"
+                        ? "1px solid rgba(99, 102, 241, 0.35)"
+                        : "1px solid rgba(79, 70, 229, 0.30)",
+                    background:
+                      theme.palette.mode === "dark"
+                        ? "linear-gradient(135deg, rgba(99, 102, 241, 0.16) 0%, rgba(79, 70, 229, 0.08) 100%)"
+                        : "linear-gradient(135deg, rgba(99, 102, 241, 0.14) 0%, rgba(79, 70, 229, 0.06) 100%)",
+                    color: theme.palette.mode === "dark" ? "#818cf8" : "#4f46e5",
+                    transition: "all 0.18s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      background:
+                        theme.palette.mode === "dark"
+                          ? "linear-gradient(135deg, rgba(99, 102, 241, 0.28) 0%, rgba(79, 70, 229, 0.18) 100%)"
+                          : "linear-gradient(135deg, rgba(99, 102, 241, 0.24) 0%, rgba(79, 70, 229, 0.14) 100%)",
+                      borderColor:
+                        theme.palette.mode === "dark" ? "#818cf8" : "#6366f1",
+                      transform: "translateY(-1.5px)",
+                      boxShadow:
+                        theme.palette.mode === "dark"
+                          ? "0 3px 12px rgba(99, 102, 241, 0.35)"
+                          : "0 3px 10px rgba(79, 70, 229, 0.25)",
+                    },
+                    "&:active": { transform: "scale(0.94)" },
+                  })}
                 >
-                  <CloudUploadOutlinedIcon sx={{ fontSize: 16 }} />
+                  <FileUp size={15} strokeWidth={2.2} />
                 </IconButton>
               </Tooltip>
 

@@ -46,7 +46,14 @@ import CustomTextField from "../CustomTextField";
 import CustomDatePicker from "../CustomDatePicker";
 
 const getFileUrl = (path) => {
-  if (!path || typeof path !== "string" || path === "string" || path === "[]" || path === "null") return null;
+  if (
+    !path ||
+    typeof path !== "string" ||
+    path === "string" ||
+    path === "[]" ||
+    path === "null"
+  )
+    return null;
   if (
     path.startsWith("http://") ||
     path.startsWith("https://") ||
@@ -60,7 +67,10 @@ const getFileUrl = (path) => {
   return `${rootHost}${cleanPath}`;
 };
 
-const isImageUrl = (url) => Boolean(url && /\.(jpe?g|png|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(String(url)));
+const isImageUrl = (url) =>
+  Boolean(
+    url && /\.(jpe?g|png|webp|gif|bmp|svg|avif)(\?.*)?$/i.test(String(url)),
+  );
 const isPdfUrl = (url) => Boolean(url && /\.pdf(\?.*)?$/i.test(String(url)));
 const isPreviewable = (url) => isImageUrl(url) || isPdfUrl(url);
 
@@ -106,7 +116,13 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
     } else if (client?.passportFileUrl) {
       list = [client.passportFileUrl];
     }
-    return list.filter((img) => typeof img === "string" && img.length > 0 && img !== "string" && img !== "[]");
+    return list.filter(
+      (img) =>
+        typeof img === "string" &&
+        img.length > 0 &&
+        img !== "string" &&
+        img !== "[]",
+    );
   }, [client]);
 
   const passportHistory = useMemo(() => {
@@ -134,7 +150,8 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
   const { control, handleSubmit } = useForm({
     values: {
       passport_number: client?.passport_number || "",
-      passportIssueDate: client?.passportIssueDate || client?.passport_issue_date || null,
+      passportIssueDate:
+        client?.passportIssueDate || client?.passport_issue_date || null,
       passportExpiryDate: client?.passportExpiryDate || null,
       passportCountryOfIssue: client?.passportCountryOfIssue || "",
     },
@@ -217,10 +234,23 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
       setUploading(true);
       const formData = new FormData();
       formData.append("guid", client.guid);
-      if (data.passport_number) formData.append("passport_number", data.passport_number.trim());
-      if (data.passportIssueDate) formData.append("passportIssueDate", formatDatePayload(data.passportIssueDate));
-      if (data.passportExpiryDate) formData.append("passportExpiryDate", formatDatePayload(data.passportExpiryDate));
-      if (data.passportCountryOfIssue) formData.append("passportCountryOfIssue", data.passportCountryOfIssue.trim());
+      if (data.passport_number)
+        formData.append("passport_number", data.passport_number.trim());
+      if (data.passportIssueDate)
+        formData.append(
+          "passportIssueDate",
+          formatDatePayload(data.passportIssueDate),
+        );
+      if (data.passportExpiryDate)
+        formData.append(
+          "passportExpiryDate",
+          formatDatePayload(data.passportExpiryDate),
+        );
+      if (data.passportCountryOfIssue)
+        formData.append(
+          "passportCountryOfIssue",
+          data.passportCountryOfIssue.trim(),
+        );
 
       if (selectedFile) {
         formData.append("images", selectedFile);
@@ -260,12 +290,22 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
   const parseHistoryImages = (histItem) => {
     if (!histItem?.images) return [];
     if (Array.isArray(histItem.images)) {
-      return histItem.images.filter((i) => typeof i === "string" && i !== "string" && i.length > 0 && i !== "[]");
+      return histItem.images.filter(
+        (i) =>
+          typeof i === "string" && i !== "string" && i.length > 0 && i !== "[]",
+      );
     }
-    if (typeof histItem.images === "string" && histItem.images.trim() && histItem.images !== "string" && histItem.images !== "[]") {
+    if (
+      typeof histItem.images === "string" &&
+      histItem.images.trim() &&
+      histItem.images !== "string" &&
+      histItem.images !== "[]"
+    ) {
       try {
         const parsed = JSON.parse(histItem.images);
-        return Array.isArray(parsed) ? parsed.filter((i) => typeof i === "string" && i !== "string") : [histItem.images];
+        return Array.isArray(parsed)
+          ? parsed.filter((i) => typeof i === "string" && i !== "string")
+          : [histItem.images];
       } catch {
         return [histItem.images];
       }
@@ -282,7 +322,9 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
       <CustomDialog widthX={740} open={open} close={onClose}>
         <CustomDialogHeader variant="h5" title={modalTitle} />
 
-        <Box sx={{ borderBottom: "1px solid", borderColor: "divider", mt: 0.5 }}>
+        <Box
+          sx={{ borderBottom: "1px solid", borderColor: "divider", mt: 0.5 }}
+        >
           <Tabs
             value={activeTab}
             onChange={(_, next) => setActiveTab(next)}
@@ -444,7 +486,9 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                     <Stack spacing={1}>
                       {activeImages.map((rawPath, imgIdx) => {
                         const fullUrl = getFileUrl(rawPath);
-                        const fileName = rawPath.split("/").pop() || `Passport_Scan_${imgIdx + 1}`;
+                        const fileName =
+                          rawPath.split("/").pop() ||
+                          `Passport_Scan_${imgIdx + 1}`;
                         const isImg = isImageUrl(fullUrl || rawPath);
                         const isPdf = isPdfUrl(fullUrl || rawPath);
 
@@ -504,16 +548,31 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                 )}
                               </Box>
                               <Box sx={{ overflow: "hidden", minWidth: 0 }}>
-                                <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600, fontSize: "0.85rem" }}>
+                                <Typography
+                                  variant="subtitle2"
+                                  noWrap
+                                  sx={{ fontWeight: 600, fontSize: "0.85rem" }}
+                                >
                                   {fileName}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                                  {client?.passport_number ? `${t("columns.passportNumber")}: ${client.passport_number}` : t("clients.passportDocument")}
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  noWrap
+                                  sx={{ display: "block" }}
+                                >
+                                  {client?.passport_number
+                                    ? `${t("columns.passportNumber")}: ${client.passport_number}`
+                                    : t("clients.passportDocument")}
                                 </Typography>
                               </Box>
                             </Box>
 
-                            <Stack direction="row" spacing={0.75} sx={{ flexShrink: 0 }}>
+                            <Stack
+                              direction="row"
+                              spacing={0.75}
+                              sx={{ flexShrink: 0 }}
+                            >
                               {isPreviewable(fullUrl || rawPath) && (
                                 <Tooltip title={t("clients.viewDocument")}>
                                   <IconButton
@@ -539,7 +598,9 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                 <IconButton
                                   size="small"
                                   color="success"
-                                  onClick={() => handleDownload(fullUrl, fileName)}
+                                  onClick={() =>
+                                    handleDownload(fullUrl, fileName)
+                                  }
                                 >
                                   <Download size={18} />
                                 </IconButton>
@@ -598,7 +659,15 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                         borderColor: "primary.main",
                       }}
                     >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0, flex: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1.5,
+                          minWidth: 0,
+                          flex: 1,
+                        }}
+                      >
                         {selectedFilePreviewUrl ? (
                           <Box
                             component="img"
@@ -630,7 +699,11 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                           </Box>
                         )}
                         <Box sx={{ minWidth: 0, overflow: "hidden" }}>
-                          <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600, fontSize: "0.85rem" }}>
+                          <Typography
+                            variant="subtitle2"
+                            noWrap
+                            sx={{ fontWeight: 600, fontSize: "0.85rem" }}
+                          >
                             {selectedFile.name}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
@@ -694,7 +767,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                       className="upload-icon"
                       sx={{
                         width: 38,
-                        height: 38,
+                        height: 13,
                         borderRadius: "50%",
                         display: "flex",
                         alignItems: "center",
@@ -715,7 +788,11 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                           ? t("clients.uploadNewScan")
                           : t("clients.uploadDocument")}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: "block", mt: 0.25 }}
+                      >
                         {t("clients.fileTypeHint")}
                       </Typography>
                     </Box>
@@ -723,18 +800,23 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                 )}
               </Box>
 
-              <Box sx={{ pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
-                <FooterButton
-                  loading={uploading}
-                  onCancel={onClose}
-                  saveText={t("clients.updatePassportBtn")}
-                />
-              </Box>
+              <FooterButton
+                loading={uploading}
+                onCancel={onClose}
+                saveText={t("clients.updatePassportBtn")}
+              />
             </Box>
           )}
 
           {activeTab === 1 && (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, minHeight: 280 }}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.5,
+                minHeight: 280,
+              }}
+            >
               {passportHistory.length === 0 ? (
                 <Paper
                   variant="outlined"
@@ -754,11 +836,20 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                     my: "auto",
                   }}
                 >
-                  <HistoryIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1.5 }} />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                  <HistoryIcon
+                    sx={{ fontSize: 48, color: "text.disabled", mb: 1.5 }}
+                  />
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: 600, color: "text.secondary" }}
+                  >
                     {t("clients.noPassportHistory")}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 0.5 }}
+                  >
                     {t("noDataDesc")}
                   </Typography>
                 </Paper>
@@ -766,7 +857,9 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                 passportHistory.map((item, idx) => {
                   const histImages = parseHistoryImages(item);
                   const histExpiry = item.passportExpiryDate;
-                  const isHistExpired = histExpiry ? dayjs(histExpiry).isBefore(dayjs(), "day") : false;
+                  const isHistExpired = histExpiry
+                    ? dayjs(histExpiry).isBefore(dayjs(), "day")
+                    : false;
 
                   return (
                     <Accordion
@@ -801,14 +894,28 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                             gap: 1,
                           }}
                         >
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                              {item.passport_number || t("clients.passportDocument")}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ fontWeight: 700 }}
+                            >
+                              {item.passport_number ||
+                                t("clients.passportDocument")}
                             </Typography>
                             <Chip
                               size="small"
                               label={`#${item.passport_count || idx + 1}`}
-                              sx={{ height: "20px", fontSize: "11px", fontWeight: 700 }}
+                              sx={{
+                                height: "20px",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                              }}
                             />
                             {isHistExpired && (
                               <Chip
@@ -816,13 +923,21 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                 label={t("clients.passportExpired")}
                                 color="error"
                                 variant="outlined"
-                                sx={{ height: "20px", fontSize: "11px", fontWeight: 600 }}
+                                sx={{
+                                  height: "20px",
+                                  fontSize: "11px",
+                                  fontWeight: 600,
+                                }}
                               />
                             )}
                           </Box>
                           {item.archivedAt && (
-                            <Typography variant="caption" color="text.secondary">
-                              {t("clients.archivedAt")}: {formatChange(item.archivedAt)}
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {t("clients.archivedAt")}:{" "}
+                              {formatChange(item.archivedAt)}
                             </Typography>
                           )}
                         </Box>
@@ -830,48 +945,98 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                       <AccordionDetails sx={{ px: 2.5, py: 2 }}>
                         <Grid container spacing={2}>
                           <Grid size={{ xs: 6, sm: 3 }}>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {t("columns.passportNumber")}
                             </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 600 }}
+                            >
                               {item.passport_number || "-"}
                             </Typography>
                           </Grid>
                           <Grid size={{ xs: 6, sm: 3 }}>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {t("columns.passportCountryOfIssue")}
                             </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 600 }}
+                            >
                               {item.passportCountryOfIssue || "-"}
                             </Typography>
                           </Grid>
                           <Grid size={{ xs: 6, sm: 3 }}>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {t("columns.passportIssueDate")}
                             </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                              {item.passportIssueDate ? formatChange(item.passportIssueDate, { dateOnly: true }) : "-"}
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 600 }}
+                            >
+                              {item.passportIssueDate
+                                ? formatChange(item.passportIssueDate, {
+                                    dateOnly: true,
+                                  })
+                                : "-"}
                             </Typography>
                           </Grid>
                           <Grid size={{ xs: 6, sm: 3 }}>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {t("columns.passportExpiryDate")}
                             </Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: isHistExpired ? "error.main" : "text.primary" }}>
-                              {item.passportExpiryDate ? formatChange(item.passportExpiryDate, { dateOnly: true }) : "-"}
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 600,
+                                color: isHistExpired
+                                  ? "error.main"
+                                  : "text.primary",
+                              }}
+                            >
+                              {item.passportExpiryDate
+                                ? formatChange(item.passportExpiryDate, {
+                                    dateOnly: true,
+                                  })
+                                : "-"}
                             </Typography>
                           </Grid>
                         </Grid>
 
                         {histImages.length > 0 && (
-                          <Box sx={{ mt: 2, pt: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: "block", mb: 1 }}>
+                          <Box
+                            sx={{
+                              mt: 2,
+                              pt: 1.5,
+                              borderTop: "1px solid",
+                              borderColor: "divider",
+                            }}
+                          >
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ fontWeight: 600, display: "block", mb: 1 }}
+                            >
                               {t("clients.documents")} ({histImages.length}):
                             </Typography>
                             <Stack spacing={1}>
                               {histImages.map((imgPath, imgIdx) => {
                                 const imgUrl = getFileUrl(imgPath);
-                                const imgName = imgPath.split("/").pop() || `Passport_Scan_${imgIdx + 1}`;
+                                const imgName =
+                                  imgPath.split("/").pop() ||
+                                  `Passport_Scan_${imgIdx + 1}`;
                                 const isPdf = isPdfUrl(imgUrl || imgPath);
                                 const isImg = isImageUrl(imgUrl || imgPath);
 
@@ -893,7 +1058,15 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                       borderColor: "divider",
                                     }}
                                   >
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0, flex: 1 }}>
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 1.25,
+                                        minWidth: 0,
+                                        flex: 1,
+                                      }}
+                                    >
                                       <Box
                                         sx={{
                                           width: 32,
@@ -905,25 +1078,41 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                           bgcolor: isPdf
                                             ? "rgba(239, 68, 68, 0.12)"
                                             : "rgba(37, 99, 235, 0.1)",
-                                          color: isPdf ? "#EF4444" : "primary.main",
+                                          color: isPdf
+                                            ? "#EF4444"
+                                            : "primary.main",
                                           flexShrink: 0,
                                         }}
                                       >
                                         {isPdf ? (
-                                          <PictureAsPdfIcon sx={{ fontSize: 18 }} />
+                                          <PictureAsPdfIcon
+                                            sx={{ fontSize: 18 }}
+                                          />
                                         ) : isImg ? (
                                           <ImageIcon sx={{ fontSize: 18 }} />
                                         ) : (
-                                          <InsertDriveFileIcon sx={{ fontSize: 18 }} />
+                                          <InsertDriveFileIcon
+                                            sx={{ fontSize: 18 }}
+                                          />
                                         )}
                                       </Box>
-                                      <Typography variant="caption" noWrap sx={{ fontWeight: 600, maxWidth: 320 }}>
+                                      <Typography
+                                        variant="caption"
+                                        noWrap
+                                        sx={{ fontWeight: 600, maxWidth: 320 }}
+                                      >
                                         {imgName}
                                       </Typography>
                                     </Box>
-                                    <Stack direction="row" spacing={0.75} sx={{ flexShrink: 0 }}>
+                                    <Stack
+                                      direction="row"
+                                      spacing={0.75}
+                                      sx={{ flexShrink: 0 }}
+                                    >
                                       {isPreviewable(imgUrl || imgPath) && (
-                                        <Tooltip title={t("clients.viewDocument")}>
+                                        <Tooltip
+                                          title={t("clients.viewDocument")}
+                                        >
                                           <IconButton
                                             size="small"
                                             color="primary"
@@ -932,7 +1121,9 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                                 setPreviewModal({
                                                   url: imgUrl,
                                                   name: imgName,
-                                                  isPdf: isPdfUrl(imgUrl || imgPath),
+                                                  isPdf: isPdfUrl(
+                                                    imgUrl || imgPath,
+                                                  ),
                                                 });
                                               }
                                             }}
@@ -941,11 +1132,15 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                                           </IconButton>
                                         </Tooltip>
                                       )}
-                                      <Tooltip title={t("clients.downloadDocument")}>
+                                      <Tooltip
+                                        title={t("clients.downloadDocument")}
+                                      >
                                         <IconButton
                                           size="small"
                                           color="success"
-                                          onClick={() => handleDownload(imgUrl, imgName)}
+                                          onClick={() =>
+                                            handleDownload(imgUrl, imgName)
+                                          }
                                         >
                                           <Download size={18} />
                                         </IconButton>
@@ -1012,13 +1207,24 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                 <Tooltip title={t("openInNewTab") || "Open in new tab"}>
                   <IconButton
                     size="small"
-                    onClick={() => window.open(previewModal.url, "_blank", "noopener,noreferrer")}
+                    onClick={() =>
+                      window.open(
+                        previewModal.url,
+                        "_blank",
+                        "noopener,noreferrer",
+                      )
+                    }
                   >
                     <OpenInNewIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title={t("download")}>
-                  <IconButton size="small" onClick={() => handleDownload(previewModal.url, previewModal.name)}>
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      handleDownload(previewModal.url, previewModal.name)
+                    }
+                  >
                     <Download size={18} />
                   </IconButton>
                 </Tooltip>
@@ -1040,14 +1246,16 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
               theme.palette.mode === "dark"
                 ? "rgba(0, 0, 0, 0.45)"
                 : "rgba(0, 0, 0, 0.03)",
-            minHeight: previewModal?.isPdf ? { xs: 450, sm: 600 } : { xs: 350, sm: 500 },
+            minHeight: previewModal?.isPdf
+              ? { xs: 450, sm: 600 }
+              : { xs: 350, sm: 500 },
             height: previewModal?.isPdf ? { xs: "75vh", sm: "80vh" } : "auto",
             maxHeight: "86vh",
             overflow: "hidden",
           }}
         >
-          {previewModal?.url && (
-            previewModal.isPdf ? (
+          {previewModal?.url &&
+            (previewModal.isPdf ? (
               <Box
                 component="iframe"
                 src={`${previewModal.url}#toolbar=1`}
@@ -1077,8 +1285,7 @@ export const ClientDocumentModal = ({ open, onClose, client, onRefresh }) => {
                   boxShadow: "0 12px 36px rgba(0,0,0,0.3)",
                 }}
               />
-            )
-          )}
+            ))}
         </Box>
       </Dialog>
     </>
