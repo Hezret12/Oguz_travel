@@ -1,7 +1,6 @@
 import { Box } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMemo } from "react";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
@@ -12,13 +11,10 @@ import { useValidShema } from "../../../functions/useValidShema";
 import GlobalAutoCompleteClient from "../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import AgentAccordion from "../../../components/global/AgentAccordion";
-import AppAutocomplete from "../../../components/AppAutocomplete";
+import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { addB2BApi } from "../../../api/queries/post";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
-import {
-  getAllStatusApi,
-  getAllEmployeeApi,
-} from "../../../api/queries/getters";
+import { getAllStatusApi } from "../../../api/queries/getters";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import CurrencyAmount from "../../../components/inputs/CurrencyAmount";
@@ -52,30 +48,6 @@ const AddB2BTicketDialog = ({ table }) => {
     apiFn: getAllStatusApi,
     key: "status",
   });
-
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return {
-          label,
-          value: emp.guid,
-        };
-      }),
-    [employees, selectedLang],
-  );
 
   const { mutate: createB2B, isLoading: isSubmit } = useCreate({
     apiFn: addB2BApi,
@@ -209,18 +181,16 @@ const AddB2BTicketDialog = ({ table }) => {
                 gap: 2,
               }}
             >
-              <AppAutocomplete
+              <GlobalEmployeeAutocomplete
                 name="assignment_opr_guid"
                 control={control}
                 label={t("columns.operator")}
-                options={employeeOptions}
               />
 
-              <AppAutocomplete
+              <GlobalEmployeeAutocomplete
                 name="receiver_opr_guid"
                 control={control}
                 label={t("columns.operatorTwo")}
-                options={employeeOptions}
               />
 
               <CustomDatePicker

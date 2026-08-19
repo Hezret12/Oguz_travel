@@ -5,10 +5,8 @@ import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 import { useGet } from "../../../../hooks/CRUD/useGet";
-import {
-  getAllEmployeeApi,
-  getAllStatusApi,
-} from "../../../../api/queries/getters";
+import { getAllStatusApi } from "../../../../api/queries/getters";
+import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 
 const selectSx = {
   borderRadius: "8px",
@@ -143,26 +141,11 @@ const B2BFilter = ({
 }) => {
   const { t, selectedLang } = useLocale();
 
-  // Fetch Employees for operators
-  const { data: employees = [], isLoading: isEmployeeLoading } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
   // Fetch Statuses
   const { data: statuses = [], isLoading: isStatusLoading } = useGet({
     apiFn: getAllStatusApi,
     key: "status",
   });
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => ({
-        label: emp.fullName,
-        value: emp.guid,
-      })),
-    [employees]
-  );
 
   const statusOptions = useMemo(
     () =>
@@ -206,31 +189,23 @@ const B2BFilter = ({
       />
 
       {/* Operator 1 (Assignment) */}
-      <FilterSelect
-        label={t("columns.operator")}
+      <GlobalEmployeeAutocomplete
         name="assignment_opr_guid"
-        value={filters?.assignment_opr_guid}
-        options={employeeOptions}
-        isOpen={Boolean(selectsOpen?.assignment_opr_guid)}
-        isLoading={isEmployeeLoading}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
+        value={filters?.assignment_opr_guid ?? ""}
+        onChange={(val) => onFilterChange("assignment_opr_guid", val)}
+        label={t("columns.operator")}
+        placeholder={allText}
+        size="small"
       />
 
       {/* Operator 2 (Receiver) */}
-      <FilterSelect
-        label={t("columns.operatorTwo")}
+      <GlobalEmployeeAutocomplete
         name="receiver_opr_guid"
-        value={filters?.receiver_opr_guid}
-        options={employeeOptions}
-        isOpen={Boolean(selectsOpen?.receiver_opr_guid)}
-        isLoading={isEmployeeLoading}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
+        value={filters?.receiver_opr_guid ?? ""}
+        onChange={(val) => onFilterChange("receiver_opr_guid", val)}
+        label={t("columns.operatorTwo")}
+        placeholder={allText}
+        size="small"
       />
 
       {/* Status */}
