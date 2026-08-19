@@ -120,7 +120,7 @@ const AddB2BTicketDialog = ({ table }) => {
   };
 
   return (
-    <CustomDialog widthX={760} open={true} close={closeDialog}>
+    <CustomDialog widthX={800} open={true} close={closeDialog}>
       <Box
         sx={{
           display: "flex",
