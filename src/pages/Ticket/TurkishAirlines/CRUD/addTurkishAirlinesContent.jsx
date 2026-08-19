@@ -235,22 +235,9 @@ const AddTurkishAirlinesContent = ({ table }) => {
                     "fullName",
                     "phone_number",
                     "passport_number",
+                    "dateOfBirth",
+                    "passportExpiryDate",
                     "passportCountryOfIssue",
-                    {
-                      key: "passportExpiryDate",
-                      label:
-                        t("columns.passportExpiryDate") ??
-                        "Passport Expiry Date",
-                      format: (value) => {
-                        if (!value) return "";
-                        const dateOnly = value.split("T")[0];
-                        const parts = dateOnly.split("-");
-                        if (parts.length === 3) {
-                          return `${parts[2]}.${parts[1]}.${parts[0]}`;
-                        }
-                        return dateOnly;
-                      },
-                    },
                   ]}
                 />
               </Grid>

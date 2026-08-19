@@ -32,26 +32,71 @@ const normalizeClient = (client) => ({
 
 const KEY_MAP = {
   phone_number: "phoneNumber",
+  phoneNumber: "phoneNumber",
   passport_number: "passportNumber",
+  passportNumber: "passportNumber",
   date_of_birth: "dateOfBirth",
+  dateOfBirth: "dateOfBirth",
+  dateofbirth: "dateOfBirth",
+  passport_country: "passportCountryOfIssue",
+  passportCountry: "passportCountryOfIssue",
+  passportCountryOfIssue: "passportCountryOfIssue",
+  passport_expiry_date: "passportExpiryDate",
+  passportexpireDate: "passportExpiryDate",
+  passportExpireDate: "passportExpiryDate",
+  passportExpiryDate: "passportExpiryDate",
+  passport_issue_date: "passportIssueDate",
+  passportIssueDate: "passportIssueDate",
+};
+
+const formatDateValue = (value) => {
+  if (!value) return "";
+  const dateOnly = String(value).split("T")[0];
+  const parts = dateOnly.split("-");
+  if (parts.length === 3) {
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
+  }
+  return dateOnly;
 };
 
 const resolveColumn = (column, t) => {
   if (typeof column === "string") {
-    const translationKey = KEY_MAP[column] || column;
-    return { key: column, label: t(`columns.${translationKey}`, column) };
+    const rawKey = column;
+    const translationKey = KEY_MAP[rawKey] || rawKey;
+    const isDateField =
+      translationKey === "dateOfBirth" ||
+      translationKey === "passportExpiryDate" ||
+      translationKey === "passportIssueDate";
+
+    return {
+      key: rawKey,
+      propKey: translationKey,
+      label: t(`columns.${translationKey}`, rawKey),
+      format: isDateField ? formatDateValue : undefined,
+    };
   }
-  const translationKey = KEY_MAP[column.key] || column.key;
+  const rawKey = column.key;
+  const translationKey = KEY_MAP[rawKey] || rawKey;
+  const isDateField =
+    translationKey === "dateOfBirth" ||
+    translationKey === "passportExpiryDate" ||
+    translationKey === "passportIssueDate";
+
   return {
-    key: column.key,
-    label: column.label ?? t(`columns.${translationKey}`, column.key),
-    format: column.format,
+    key: rawKey,
+    propKey: translationKey,
+    label: column.label ?? t(`columns.${translationKey}`, rawKey),
+    format: column.format || (isDateField ? formatDateValue : undefined),
   };
 };
 
 const getColumnValue = (client, column, t) => {
-  const { key, format } = resolveColumn(column, t);
-  const rawValue = client?.[key];
+  const { key, propKey, format } = resolveColumn(column, t);
+  const rawValue =
+    client?.[key] ??
+    client?.[propKey] ??
+    (key === "phone_number" ? client?.phoneNumber : undefined) ??
+    (key === "passport_number" ? client?.passportNumber : undefined);
 
   if (format) return format(rawValue, client);
   return rawValue ?? "";
@@ -93,9 +138,20 @@ const HighlightedText = ({ text, query }) => {
 };
 
 const COLUMN_FLEX = {
-  fullName: "0 0 40%",
-  phone_number: "0 0 30%",
-  passport_number: "0 0 30%",
+  fullName: "1.5 1 0%",
+  phone_number: "1 1 0%",
+  phoneNumber: "1 1 0%",
+  passport_number: "1 1 0%",
+  passportNumber: "1 1 0%",
+  dateOfBirth: "1 1 0%",
+  dateofbirth: "1 1 0%",
+  date_of_birth: "1 1 0%",
+  passportExpiryDate: "1 1 0%",
+  passportexpireDate: "1 1 0%",
+  passport_expiry_date: "1 1 0%",
+  passportCountry: "1 1 0%",
+  passportCountryOfIssue: "1 1 0%",
+  passport_country: "1 1 0%",
 };
 
 const getColumnFlex = (key) => COLUMN_FLEX[key] || "1 1 0%";
