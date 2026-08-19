@@ -6,7 +6,8 @@ import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllTranslatorsApi, getAllEmployeeApi } from "../../../api/queries/getters";
+import { getAllTranslatorsApi } from "../../../api/queries/getters";
+import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 
 const selectSx = {
   borderRadius: "8px",
@@ -181,33 +182,12 @@ const TranslateFilter = ({
   onSelectOpen,
   onSelectClose,
 }) => {
-  const { t, selectedLang } = useLocale();
-
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
+  const { t } = useLocale();
 
   const { data: translators = [] } = useGet({
     apiFn: getAllTranslatorsApi,
     key: "translators",
   });
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang]
-  );
 
   const translatorOptions = useMemo(
     () => (translators || []).map((tr) => ({ value: tr.guid, label: tr.fullName })),
@@ -232,16 +212,13 @@ const TranslateFilter = ({
         onChange={onFilterChange}
       />
 
-      <FilterSelect
-        label={t("columns.operator") || "Operator"}
+      <GlobalEmployeeAutocomplete
         name="opr_guid"
-        value={filters.opr_guid}
-        options={employeeOptions}
-        isOpen={selectsOpen?.opr_guid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
+        value={filters?.opr_guid ?? ""}
+        onChange={(val) => onFilterChange("opr_guid", val)}
+        label={t("columns.operator") || "Operator"}
+        placeholder={allText}
+        size="small"
       />
 
       <FilterTimePicker

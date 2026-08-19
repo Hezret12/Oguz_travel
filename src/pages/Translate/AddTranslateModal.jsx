@@ -22,17 +22,15 @@ import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
 import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
+import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { useCreate } from "../../hooks/CRUD/useCreate";
-import {
-  getAllTranslatorsApi,
-  getAllEmployeeApi,
-} from "../../api/queries/getters";
+import { getAllTranslatorsApi } from "../../api/queries/getters";
 import { addTranslationApi, addTranslatorApi } from "../../api/queries/post";
 import CustomDatePicker from "../../components/CustomDatePicker";
 
 const AddTranslateModal = ({ table }) => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const { addTranslation } = useValidShema();
   const queryClient = useQueryClient();
 
@@ -40,12 +38,6 @@ const AddTranslateModal = ({ table }) => {
   const [translatorDialogOpen, setTranslatorDialogOpen] = useState(false);
   const [translatorInputValue, setTranslatorInputValue] = useState("");
   const [translatorInputError, setTranslatorInputError] = useState("");
-
-  // Fetch Dropdown Data
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
 
   const { data: translators = [] } = useGet({
     apiFn: getAllTranslatorsApi,
@@ -139,22 +131,6 @@ const AddTranslateModal = ({ table }) => {
     createTranslator({ fullName: val });
   };
 
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-          selectedLang(emp.office.fullName) ||
-          ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang]
-  );
-
   const translatorOptions = useMemo(
     () =>
       (translators || []).map((tr) => ({ value: tr.guid, label: tr.fullName })),
@@ -229,11 +205,10 @@ const AddTranslateModal = ({ table }) => {
             </Grid>
 
             <Grid size={6}>
-              <CustomSelect
+              <GlobalEmployeeAutocomplete
                 name="opr_guid"
                 control={control}
                 label={t("columns.operator") || "Operator"}
-                options={employeeOptions}
                 required
               />
             </Grid>

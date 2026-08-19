@@ -13,10 +13,7 @@ import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { useLocale } from "../../../hooks/useLocale";
 import { addReportShareApi } from "../../../api/queries/post";
 
-/**
- * AddReferralReportModal - Modal 2 for adding new report share entry
- * Connected to Swagger CreateReportShareDto endpoint /api/v1/report-share/add-report-share
- */
+
 const AddReferralReportModal = ({ open, close, table }) => {
   const { t } = useLocale();
   const isModalOpen = open !== undefined ? Boolean(open) : Boolean(table?.getState().creatingRow);
