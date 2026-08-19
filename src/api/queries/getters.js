@@ -111,7 +111,7 @@ export const getAllPackageByIndexApi = async (index) => {
 };
 
 export const getAllTranslationsApi = async (params = {}) => {
-  return await api.getPrivate('/general-translation/get-translations', params);
+  return await api.getPrivate('/general-translation/get-trans-search-filter', params);
 };
 
 export const getAllTranslatorsApi = async (params = {}) => {
