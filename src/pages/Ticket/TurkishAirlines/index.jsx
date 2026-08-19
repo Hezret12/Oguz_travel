@@ -226,11 +226,13 @@ const TurkishAirlines = () => {
           const dateOnly = val.split("T")[0];
           return formatChange(dateOnly, { dateOnly: true });
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         id: "operator",
         header: t("columns.operator"),
-        size: 190,
+        size: 220,
         accessorFn: (row) => row.ta_assignment_operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -244,7 +246,7 @@ const TurkishAirlines = () => {
       {
         id: "op2",
         header: t("columns.operatorTwo"),
-        size: 190,
+        size: 220,
         accessorFn: (row) => row.ta_receiver_operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -258,7 +260,7 @@ const TurkishAirlines = () => {
       {
         id: "fullName",
         header: t("columns.client"),
-        size: 200,
+        size: 220,
         accessorFn: (row) => row.client?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -276,12 +278,16 @@ const TurkishAirlines = () => {
           const val = cell.getValue();
           return val ? formatChange(val.split("T")[0], { dateOnly: true }) : "";
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => row.client?.passport_number ?? "",
         id: "passportId",
         header: t("columns.passportNumber"),
-        size: 130,
+        size: 120,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => row.client?.passportCountryOfIssue ?? "",
@@ -293,11 +299,13 @@ const TurkishAirlines = () => {
         accessorFn: (row) => row.client?.passportExpiryDate ?? "",
         id: "pdoe",
         header: t("columns.passportExpiryDate"),
-        size: 110,
+        size: 100,
         Cell: ({ cell }) => {
           const val = cell.getValue();
           return val ? formatChange(val.split("T")[0], { dateOnly: true }) : "";
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => getStatusKey(row),
@@ -316,7 +324,7 @@ const TurkishAirlines = () => {
         header: t("columns.paymentStatus"),
         size: 110,
         Cell: ({ row }) => (
-          <PaymentStatusCell percent={row.original.payment_percent} />
+          <PaymentStatusCell percent={row.original.paidPercentage} />
         ),
       },
       {
@@ -385,21 +393,29 @@ const TurkishAirlines = () => {
         accessorKey: "pnr",
         header: "PNR",
         size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "ticket_number",
         header: t("columns.ticketNo"),
         size: 160,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "route",
         header: t("columns.route"),
         size: 180,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "class",
         header: t("columns.cabinClass"),
         size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "flight_date",
@@ -409,12 +425,16 @@ const TurkishAirlines = () => {
           const val = cell.getValue();
           return val ? formatChange(val.split("T")[0], { dateOnly: true }) : "";
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => selectedLang(row?.office?.shortName) ?? "",
         id: "office_guid",
         header: t("kassa"),
         size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "agent",
