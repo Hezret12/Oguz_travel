@@ -85,7 +85,6 @@ const AddB2BTicketDialog = ({ table }) => {
     mode: "onSubmit",
   });
 
-  // const selectedCurrency = watch("currency") || "USD";
   const selectedCurrency = useWatch({ control, name: "currency" }) || "USD";
 
   const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
@@ -253,7 +252,7 @@ const AddB2BTicketDialog = ({ table }) => {
               <CustomSelect
                 name="travel_type"
                 control={control}
-                label={t("columns.tripType") ?? "Trip Type"}
+                label={t("columns.tripType")}
                 options={TRIP_TYPE_OPTIONS}
               />
             </Box>
