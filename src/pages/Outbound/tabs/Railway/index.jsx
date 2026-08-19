@@ -98,13 +98,13 @@ const RailwayTab = ({
       {
         id: "client_name",
         header: t("outbound.clientName"),
-        size: 210,
+        size: 220,
         accessorFn: (row) => row.client?.fullName || "",
       },
       {
         id: "operator",
         header: t("outbound.operator"),
-        size: 200,
+        size: 220,
         accessorFn: (row) => row.operator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -119,7 +119,7 @@ const RailwayTab = ({
       {
         id: "prepared_by",
         header: t("outbound.preparedBy"),
-        size: 200,
+        size: 220,
         accessorFn: (row) => row.preparedOpr?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
