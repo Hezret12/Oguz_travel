@@ -13,23 +13,17 @@ import CustomSelect from "../../../../components/CustomSelect";
 import FooterButton from "../../../../components/Dialog/FooterButton";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
 import GlobalClientAutocomplete from "../../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
+import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
-import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
-import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { updateTourApi } from "../../../../api/queries/patch";
 import { SOURCE_OPTIONS, getPaymentOptions } from "../../constants";
 import TourFields from "./TourFields";
 
 const EditTourModal = ({ table, row }) => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const { addOutbound } = useValidShema();
   const paymentOptions = useMemo(() => getPaymentOptions(t), [t]);
-
-  const { data: employees = [], isLoading: isLoadingEmployees } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
 
   const item = useMemo(() => row?.original || {}, [row?.original]);
 
@@ -40,6 +34,12 @@ const EditTourModal = ({ table, row }) => {
     }
     return null;
   }, [item]);
+
+  const initialOperator = useMemo(() => item.operator || null, [item.operator]);
+  const initialPreparedOpr = useMemo(
+    () => item.preparedOpr || item.prepared_opr || item.prepared_operator || null,
+    [item.preparedOpr, item.prepared_opr, item.prepared_operator]
+  );
 
   const [selectedClientObj, setSelectedClientObj] = useState(initialClient);
 
@@ -110,22 +110,6 @@ const EditTourModal = ({ table, row }) => {
     updateTour(payload);
   };
 
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang],
-  );
-
   const currencySymbol =
     {
       USD: "$",
@@ -166,22 +150,20 @@ const EditTourModal = ({ table, row }) => {
             />
           </Grid>
           <Grid size={6}>
-            <CustomSelect
+            <GlobalEmployeeAutocomplete
               name="opr_guid"
               control={control}
               label={t("outbound.operator")}
-              options={employeeOptions}
-              isLoading={isLoadingEmployees}
+              initialEmployee={initialOperator}
               required
             />
           </Grid>
           <Grid size={6}>
-            <CustomSelect
+            <GlobalEmployeeAutocomplete
               name="prepared_opr_guid"
               control={control}
               label={t("outbound.preparedBy")}
-              options={employeeOptions}
-              isLoading={isLoadingEmployees}
+              initialEmployee={initialPreparedOpr}
               required
             />
           </Grid>

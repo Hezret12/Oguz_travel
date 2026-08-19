@@ -8,6 +8,7 @@ import {
   Typography,
   Tooltip,
 } from "@mui/material";
+import OverflowTooltipLabel from "../../OverflowTooltipLabel";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import AddIcon from "@mui/icons-material/Add";
 import { ChevronDown } from "lucide-react";
@@ -195,27 +196,7 @@ const GlobalClientAutocompleteField = ({
   return (
     <>
       {label && (
-        <Tooltip title={label} arrow placement="top-start">
-          <Typography
-            variant="body2"
-            noWrap
-            sx={{
-              mb: 0.75,
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              color: "text.primary",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              cursor: "default",
-            }}
-          >
-            {label}
-            {required && (
-              <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
-            )}
-          </Typography>
-        </Tooltip>
+        <OverflowTooltipLabel label={label} required={required} />
       )}
       <Autocomplete
         value={selectedClient}

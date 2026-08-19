@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { useWatch } from "react-hook-form";
-import AppAutocomplete from "../../../components/AppAutocomplete";
+import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomCheckbox from "../../../components/CustomCheckbox";
 import PhoneNumberField from "../../../components/inputs/PhoneNumber";
@@ -8,9 +8,9 @@ import { useLocale } from "../../../hooks/useLocale";
 
 const UserInformationTab = ({
   control,
-  employees = [],
   setValue,
   isEdit,
+  initialEmployee = null,
 }) => {
   const { t } = useLocale();
   const [rawIsExternalUser] = useWatch({
@@ -19,28 +19,19 @@ const UserInformationTab = ({
   });
   const isExternalUser = Boolean(rawIsExternalUser);
 
-  const employeeOptions = employees.map((emp) => ({
-    label: emp.officeName ? `${emp.fullName}   (${emp.officeName})` : emp.fullName,
-    value: emp.id,
-  }));
-
-  const handleEmployeeChange = (employeeId) => {
-    if (!isEdit && employeeId) {
-      const emp = employees.find((e) => e.id === employeeId);
-      if (emp?.phoneNumber) {
-        const rawPhone = emp.phoneNumber.replace(/\s/g, "");
-        const formattedPhone = rawPhone.startsWith("+993") ? rawPhone : `+993${rawPhone}`;
-        setValue("phone_number", formattedPhone, {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-      } else {
-        setValue("phone_number", "", {
-          shouldValidate: true,
-          shouldDirty: true,
-        });
-      }
-    } else if (!isEdit && !employeeId) {
+  const handleEmployeeChange = (employee) => {
+    if (!isEdit && employee) {
+      const rawPhone = employee.phone_number || "";
+      const formattedPhone = rawPhone
+        ? rawPhone.startsWith("+993")
+          ? rawPhone
+          : `+993${rawPhone.replace(/\s/g, "")}`
+        : "";
+      setValue("phone_number", formattedPhone, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    } else if (!isEdit && !employee) {
       setValue("phone_number", "", { shouldValidate: true, shouldDirty: true });
     }
   };
@@ -56,15 +47,14 @@ const UserInformationTab = ({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
-      <AppAutocomplete
+      <GlobalEmployeeAutocomplete
         name="employee_guid"
         control={control}
         label={t("columns.employee")}
-        placeholder={t("users.selectEmployee")}
-        options={employeeOptions}
         required={!isExternalUser}
         disabled={isEdit || isExternalUser}
-        onValueChange={handleEmployeeChange}
+        initialEmployee={initialEmployee}
+        onEmployeeChange={handleEmployeeChange}
       />
 
       <PhoneNumberField
@@ -83,7 +73,7 @@ const UserInformationTab = ({
         label={t("columns.password")}
         placeholder={
           isEdit
-            ? (t("users.passwordEditPlaceholder"))
+            ? t("users.passwordEditPlaceholder")
             : "******"
         }
         required={!isEdit}

@@ -48,7 +48,9 @@ export default function TaskFlow() {
     searchQuery,
     setSearch,
     page,
+    limit,
     setPage,
+    setPageSize,
     selectsOpen,
     openSelect,
     closeSelect,
@@ -307,7 +309,7 @@ export default function TaskFlow() {
       </Box>
 
       {/* Shared App Pagination for Table View */}
-      {viewMode === "list" && pageCount > 1 && (
+      {viewMode === "list" && totalItems > 0 && (
         <Box
           sx={{
             pt: 1.5,
@@ -318,10 +320,11 @@ export default function TaskFlow() {
           }}
         >
           <Pagination
-            pageIndex={page - 1}
-            pageCount={pageCount}
-            totalRows={totalItems}
-            onPageChange={(newIndex) => setPage(newIndex + 1)}
+            totalItems={totalItems}
+            page={page}
+            limit={limit}
+            setPage={setPage}
+            setPageSize={setPageSize}
           />
         </Box>
       )}

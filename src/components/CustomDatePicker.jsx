@@ -1,4 +1,5 @@
-import { Box, Typography, Tooltip } from "@mui/material";
+import { Box } from "@mui/material";
+import OverflowTooltipLabel from "./OverflowTooltipLabel";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { Controller } from "react-hook-form";
@@ -85,44 +86,7 @@ const CustomDatePicker = ({
             }}
           >
             {label && (
-              <Tooltip title={label} arrow placement="top-start">
-                <Typography
-                  variant="body2"
-                  component="div"
-                  noWrap
-                  sx={{
-                    height: "20px",
-                    lineHeight: "20px",
-                    display: "flex",
-                    alignItems: "center",
-                    mb: 0.75,
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    color: "text.primary",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    cursor: "default",
-                  }}
-                >
-                  <span>{label}</span>
-                  {required && (
-                    <Box
-                      component="span"
-                      sx={{
-                        color: "#ef4444",
-                        ml: "4px",
-                        fontSize: "15px",
-                        lineHeight: 1,
-                        display: "inline-flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      *
-                    </Box>
-                  )}
-                </Typography>
-              </Tooltip>
+              <OverflowTooltipLabel label={label} required={required} />
             )}
             <PickerComponent
               value={field.value ? dayjs(field.value) : null}

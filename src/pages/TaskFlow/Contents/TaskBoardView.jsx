@@ -65,15 +65,20 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     }
   }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
 
-  const getPriorityLabel = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case "urgent":
-        return t("task.priorityUrgent", "Urgent");
-      case "medium":
-      default:
-        return t("task.priorityMedium", "Medium");
-    }
-  };
+  const getPriorityLabel = useCallback(
+    (priority) => {
+      switch (priority?.toLowerCase()) {
+        case "urgent":
+          return t("task.priorityUrgent", "Urgent");
+        case "low":
+          return t("task.priorityLow", "Low");
+        case "medium":
+        default:
+          return t("task.priorityMedium", "Medium");
+      }
+    },
+    [t]
+  );
 
   return (
     <Grid

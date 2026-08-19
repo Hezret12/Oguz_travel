@@ -5,10 +5,9 @@ import {
   CircularProgress,
   TextField,
   Typography,
-  Chip,
-  Tooltip,
 } from "@mui/material";
-import { ChevronDown, Building2, User } from "lucide-react";
+import OverflowTooltipLabel from "../../OverflowTooltipLabel";
+import { ChevronDown, User } from "lucide-react";
 import { Controller } from "react-hook-form";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 import { getAllEmployeeApi } from "../../../api/queries/getters";
@@ -64,12 +63,6 @@ const getOfficeName = (office, selectedLang) => {
 
 const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
   const officeName = getOfficeName(employee?.office, selectedLang);
-  const positionName =
-    Array.isArray(employee?.positions) && employee.positions.length > 0
-      ? selectedLang(employee.positions[0]?.name) ||
-        employee.positions[0]?.name?.tk ||
-        ""
-      : "";
 
   return (
     <Box
@@ -113,7 +106,7 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
           <HighlightedText text={employee?.fullName} query={query} />
         </Typography>
 
-        {(positionName || employee?.phone_number) && (
+        {employee?.phone_number && (
           <Typography
             variant="caption"
             noWrap
@@ -122,43 +115,207 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
               fontSize: "0.75rem",
             }}
           >
-            {positionName
-              ? `${positionName}${
-                  employee?.phone_number ? ` • ${employee.phone_number}` : ""
-                }`
-              : employee?.phone_number}
+            {employee.phone_number || ""}
           </Typography>
         )}
       </Box>
 
       {/* Right: Office Name */}
-      {officeName && (
-        <Chip
-          icon={<Building2 size={12} />}
-          label={officeName}
-          size="small"
-          variant="outlined"
-          sx={{
-            ml: "auto",
-            flexShrink: 0,
-            fontWeight: 600,
-            fontSize: "0.75rem",
-            height: "24px",
-            borderRadius: "6px",
-            borderColor: (theme) =>
-              theme.palette.mode === "dark"
-                ? "rgba(255, 255, 255, 0.15)"
-                : "rgba(0, 0, 0, 0.12)",
-            backgroundColor: (theme) =>
-              theme.palette.mode === "dark"
-                ? "rgba(255, 255, 255, 0.04)"
-                : "rgba(0, 0, 0, 0.02)",
-            "& .MuiChip-icon": {
-              color: "primary.main",
-            },
-          }}
+      {officeName && <Typography variant="caption">{officeName}</Typography>}
+    </Box>
+  );
+};
+
+const EmployeeAutocompleteBase = ({
+  value,
+  onChange,
+  onEmployeeChange,
+  combinedOptions,
+  formatEmployeeLabel,
+  searchQuery,
+  setSearchQuery,
+  isFetching,
+  disabled,
+  handleListboxScroll,
+  selectedLang,
+  label,
+  required,
+  error,
+  helperText,
+  size = "medium",
+  sx = {},
+  t,
+}) => {
+  const selectedEmployee =
+    combinedOptions.find((emp) => (emp?.guid || emp?.id) === value) || null;
+
+  const isSmall = size === "small";
+
+  return (
+    <Box sx={{ width: "100%", ...sx }}>
+      {label && (
+        <OverflowTooltipLabel
+          label={label}
+          required={required}
+          fontSize={isSmall ? "0.8125rem" : "0.875rem"}
         />
       )}
+      <Autocomplete
+        value={selectedEmployee}
+        options={combinedOptions}
+        loading={isFetching}
+        disabled={disabled}
+        size={size}
+        clearOnBlur={false}
+        autoHighlight
+        popupIcon={<ChevronDown size={isSmall ? 16 : 18} />}
+        getOptionKey={(option) =>
+          option?.guid || option?.id || option?.fullName
+        }
+        isOptionEqualToValue={(option, val) =>
+          (option?.guid || option?.id) === (val?.guid || val?.id)
+        }
+        getOptionLabel={(option) => formatEmployeeLabel(option)}
+        filterOptions={(options) => options}
+        onInputChange={(_, newInputValue, reason) => {
+          if (reason === "input") {
+            setSearchQuery(newInputValue);
+          } else if (reason === "reset" || reason === "clear") {
+            setSearchQuery("");
+          }
+        }}
+        onChange={(_, employee) => {
+          const guid = employee?.guid || employee?.id || "";
+          onChange?.(guid);
+          onEmployeeChange?.(employee || null);
+        }}
+        slotProps={{
+          listbox: {
+            onScroll: handleListboxScroll,
+          },
+        }}
+        noOptionsText={
+          !isFetching && (
+            <Box
+              sx={{
+                py: 2,
+                px: 2,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: 1,
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.03)",
+                  color: "text.secondary",
+                }}
+              >
+                <User size={18} />
+              </Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  color: "text.secondary",
+                  fontSize: "0.8125rem",
+                }}
+              >
+                {t("noEmployeeFound")}
+              </Typography>
+            </Box>
+          )
+        }
+        renderOption={(props, option) => {
+          const { key, ...optionProps } = props;
+          delete optionProps.renderTags;
+          delete optionProps.ownerState;
+          const selected = optionProps["aria-selected"] === "true";
+          const optionKey = option?.guid || option?.id || key;
+          return (
+            <Box
+              component="li"
+              key={optionKey}
+              {...optionProps}
+              sx={{ p: "4px 8px !important" }}
+            >
+              <EmployeeOption
+                employee={option}
+                query={searchQuery}
+                selected={selected}
+                selectedLang={selectedLang}
+              />
+            </Box>
+          );
+        }}
+        renderInput={(params) => {
+          const { slotProps: paramsSlotProps, ...textFieldProps } = params;
+          delete textFieldProps.renderTags;
+          delete textFieldProps.ownerState;
+
+          return (
+            <TextField
+              {...textFieldProps}
+              size={size}
+              error={Boolean(error)}
+              helperText={helperText}
+              fullWidth
+              slotProps={{
+                ...paramsSlotProps,
+                input: {
+                  ...paramsSlotProps?.input,
+                  endAdornment: (
+                    <>
+                      {isFetching && (
+                        <CircularProgress
+                          color="inherit"
+                          size={16}
+                          sx={{ mr: 1 }}
+                        />
+                      )}
+                      {paramsSlotProps?.input?.endAdornment}
+                    </>
+                  ),
+                },
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: isSmall ? "8px" : "10px",
+                  minHeight: isSmall ? "40px" : "44px",
+                  height: isSmall ? "40px" : undefined,
+                  fontSize: isSmall ? "0.875rem" : undefined,
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.03)"
+                      : "#ffffff",
+                  transition: "all 0.2s ease-in-out",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "divider",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "primary.main",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "primary.main",
+                  },
+                },
+              }}
+            />
+          );
+        }}
+      />
     </Box>
   );
 };
@@ -166,49 +323,49 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
 export const GlobalEmployeeAutocomplete = ({
   name,
   control,
+  value,
+  onChange,
   label,
   placeholder,
   required = false,
   disabled = false,
   initialEmployee = null,
   onEmployeeChange,
+  size = "medium",
+  error,
+  helperText,
   sx = {},
 }) => {
   const { t, selectedLang } = useLocale();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 400);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["employees", "autocomplete", debouncedSearch],
-    queryFn: ({ pageParam = 1 }) =>
-      getAllEmployeeApi({
-        page: pageParam,
-        limit: 40,
-        ...(debouncedSearch.trim() ? { search: debouncedSearch.trim() } : {}),
-      }),
-    getNextPageParam: (lastPage, allPages) => {
-      const responseBody = lastPage?.data;
-      const meta = responseBody?.meta || responseBody?.data;
-      const totalPages =
-        meta?.totalPages ??
-        responseBody?.totalPages ??
-        responseBody?.data?.totalPages;
-      const currentPage = allPages.length;
-      if (totalPages && currentPage < totalPages) {
-        return currentPage + 1;
-      }
-      return undefined;
-    },
-    initialPageParam: 1,
-    placeholderData: keepPreviousData,
-    staleTime: 30_000,
-  });
+  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["employees", "autocomplete", debouncedSearch],
+      queryFn: ({ pageParam = 1 }) =>
+        getAllEmployeeApi({
+          page: pageParam,
+          limit: 40,
+          ...(debouncedSearch.trim() ? { search: debouncedSearch.trim() } : {}),
+        }),
+      getNextPageParam: (lastPage, allPages) => {
+        const responseBody = lastPage?.data;
+        const meta = responseBody?.meta || responseBody?.data;
+        const totalPages =
+          meta?.totalPages ??
+          responseBody?.totalPages ??
+          responseBody?.data?.totalPages;
+        const currentPage = allPages.length;
+        if (totalPages && currentPage < totalPages) {
+          return currentPage + 1;
+        }
+        return undefined;
+      },
+      initialPageParam: 1,
+      placeholderData: keepPreviousData,
+      staleTime: 30_000,
+    });
 
   const employees = useMemo(() => {
     if (!data?.pages) return [];
@@ -274,189 +431,59 @@ export const GlobalEmployeeAutocomplete = ({
     [hasNextPage, isFetchingNextPage, fetchNextPage],
   );
 
+  if (control && name) {
+    return (
+      <Controller
+        control={control}
+        name={name}
+        render={({ field, fieldState }) => (
+          <EmployeeAutocompleteBase
+            value={field.value}
+            onChange={field.onChange}
+            onEmployeeChange={onEmployeeChange}
+            combinedOptions={combinedOptions}
+            formatEmployeeLabel={formatEmployeeLabel}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            isFetching={isFetching}
+            disabled={disabled}
+            handleListboxScroll={handleListboxScroll}
+            selectedLang={selectedLang}
+            label={label}
+            placeholder={placeholder}
+            required={required}
+            error={Boolean(fieldState.error)}
+            helperText={fieldState.error?.message}
+            size={size}
+            sx={sx}
+            t={t}
+          />
+        )}
+      />
+    );
+  }
+
   return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field, fieldState }) => {
-        const selectedEmployee =
-          combinedOptions.find(
-            (emp) => (emp?.guid || emp?.id) === field.value,
-          ) || null;
-
-        return (
-          <Box sx={{ width: "100%", ...sx }}>
-            {label && (
-              <Tooltip title={label} arrow placement="top-start">
-                <Typography
-                  variant="body2"
-                  noWrap
-                  sx={{
-                    mb: 0.75,
-                    fontWeight: 600,
-                    fontSize: "0.875rem",
-                    color: "text.primary",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    cursor: "default",
-                  }}
-                >
-                  {label}
-                  {required && (
-                    <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
-                  )}
-                </Typography>
-              </Tooltip>
-            )}
-            <Autocomplete
-              value={selectedEmployee}
-              options={combinedOptions}
-              loading={isFetching}
-              disabled={disabled}
-              clearOnBlur={false}
-              autoHighlight
-              popupIcon={<ChevronDown size={18} />}
-              getOptionKey={(option) =>
-                option?.guid || option?.id || option?.fullName
-              }
-              isOptionEqualToValue={(option, val) =>
-                (option?.guid || option?.id) === (val?.guid || val?.id)
-              }
-              getOptionLabel={(option) => formatEmployeeLabel(option)}
-              filterOptions={(options) => options}
-              onInputChange={(_, newInputValue, reason) => {
-                if (reason === "input") {
-                  setSearchQuery(newInputValue);
-                } else if (reason === "reset" || reason === "clear") {
-                  setSearchQuery("");
-                }
-              }}
-              onChange={(_, employee) => {
-                const guid = employee?.guid || employee?.id || "";
-                field.onChange(guid);
-                onEmployeeChange?.(employee || null);
-              }}
-              slotProps={{
-                listbox: {
-                  onScroll: handleListboxScroll,
-                },
-              }}
-              noOptionsText={
-                !isFetching && (
-                  <Box
-                    sx={{
-                      py: 2,
-                      px: 2,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      textAlign: "center",
-                      gap: 1,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.05)"
-                            : "rgba(0, 0, 0, 0.03)",
-                        color: "text.secondary",
-                      }}
-                    >
-                      <User size={20} />
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 600, color: "text.secondary" }}
-                    >
-                      {t("noEmployeeFound", "Işgär tapylmady")}
-                    </Typography>
-                  </Box>
-                )
-              }
-              renderOption={(props, option) => {
-                const { key, ...optionProps } = props;
-                delete optionProps.renderTags;
-                delete optionProps.ownerState;
-                const selected = optionProps["aria-selected"] === "true";
-                const optionKey = option?.guid || option?.id || key;
-                return (
-                  <Box
-                    component="li"
-                    key={optionKey}
-                    {...optionProps}
-                    sx={{ p: "4px 8px !important" }}
-                  >
-                    <EmployeeOption
-                      employee={option}
-                      query={searchQuery}
-                      selected={selected}
-                      selectedLang={selectedLang}
-                    />
-                  </Box>
-                );
-              }}
-              renderInput={(params) => {
-                const { slotProps: paramsSlotProps, ...textFieldProps } = params;
-                delete textFieldProps.renderTags;
-                delete textFieldProps.ownerState;
-
-                return (
-                  <TextField
-                    {...textFieldProps}
-                    placeholder={
-                      placeholder || t("selectEmployee", "Işgär saýlaň...")
-                    }
-                    error={Boolean(fieldState.error)}
-                    helperText={fieldState.error?.message}
-                    fullWidth
-                    slotProps={{
-                      ...paramsSlotProps,
-                      input: {
-                        ...paramsSlotProps?.input,
-                        endAdornment: (
-                          <>
-                            {isFetching && (
-                              <CircularProgress
-                                color="inherit"
-                                size={16}
-                                sx={{ mr: 1 }}
-                              />
-                            )}
-                            {paramsSlotProps?.input?.endAdornment}
-                          </>
-                        ),
-                      },
-                    }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "10px",
-                        minHeight: "44px",
-                        backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.03)"
-                            : "#ffffff",
-                        transition: "all 0.2s ease-in-out",
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "primary.main",
-                        },
-                      },
-                    }}
-                  />
-                );
-              }}
-            />
-          </Box>
-        );
-      }}
+    <EmployeeAutocompleteBase
+      value={value}
+      onChange={onChange}
+      onEmployeeChange={onEmployeeChange}
+      combinedOptions={combinedOptions}
+      formatEmployeeLabel={formatEmployeeLabel}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      isFetching={isFetching}
+      disabled={disabled}
+      handleListboxScroll={handleListboxScroll}
+      selectedLang={selectedLang}
+      label={label}
+      placeholder={placeholder}
+      required={required}
+      error={error}
+      helperText={helperText}
+      size={size}
+      sx={sx}
+      t={t}
     />
   );
 };

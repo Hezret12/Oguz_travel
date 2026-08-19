@@ -1,4 +1,5 @@
-import { Box, InputAdornment, TextField, Typography, Tooltip, useColorScheme } from '@mui/material';
+import { Box, InputAdornment, TextField, Typography, useColorScheme } from '@mui/material';
+import OverflowTooltipLabel from '../OverflowTooltipLabel';
 import { Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { normalizePhoneInput } from '../../utils/phone';
@@ -128,60 +129,23 @@ const PhoneNumberField = ({
   return (
     <Box sx={{ width: '100%', ...sx }}>
       {resolvedLabel && (
-        <Tooltip title={resolvedLabel} arrow placement="top-start">
-          <Typography
-            variant={variant === 'form' ? 'body2' : undefined}
-            component="div"
-            noWrap
-            sx={
-              variant === 'form'
-                ? {
-                    height: '20px',
-                    lineHeight: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    mb: 0.75,
-                    fontWeight: 600,
-                    fontSize: '0.875rem',
-                    color: 'text.primary',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    cursor: 'default',
-                  }
-                : {
-                    color: 'var(--Text-btn, #FFFFFF)',
-                    fontFamily: '"SF Pro", -apple-system, BlinkMacSystemFont, sans-serif',
-                    fontWeight: 510,
-                    fontSize: '14px',
-                    lineHeight: '20px',
-                    letterSpacing: '-0.01em',
-                    mb: 0.8,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    cursor: 'default',
-                  }
-            }
-          >
-            <span>{resolvedLabel}</span>
-            {required && (
-              <Box
-                component="span"
-                sx={{
-                  color: '#ef4444',
-                  ml: '4px',
-                  fontSize: variant === 'form' ? '15px' : 'inherit',
-                  lineHeight: 1,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                }}
-              >
-                *
-              </Box>
-            )}
-          </Typography>
-        </Tooltip>
+        <OverflowTooltipLabel
+          label={resolvedLabel}
+          required={required}
+          sx={
+            variant === 'login'
+              ? {
+                  color: 'var(--Text-btn, #FFFFFF)',
+                  fontFamily: '"SF Pro", -apple-system, BlinkMacSystemFont, sans-serif',
+                  fontWeight: 510,
+                  fontSize: '14px',
+                  lineHeight: '20px',
+                  letterSpacing: '-0.01em',
+                  mb: 0.8,
+                }
+              : {}
+          }
+        />
       )}
 
       <Controller

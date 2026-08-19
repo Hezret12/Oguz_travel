@@ -13,16 +13,15 @@ import CustomSelect from "../../../../components/CustomSelect";
 import FooterButton from "../../../../components/Dialog/FooterButton";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
 import GlobalClientAutocomplete from "../../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
+import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
-import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
-import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { addTourApi } from "../../../../api/queries/post";
 import { SOURCE_OPTIONS, getPaymentOptions } from "../../constants";
 import TourFields from "./TourFields";
 
 const AddTourModal = ({ open = true, onClose, table }) => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const { addOutbound } = useValidShema();
   const paymentOptions = useMemo(() => getPaymentOptions(t), [t]);
 
@@ -30,11 +29,6 @@ const AddTourModal = ({ open = true, onClose, table }) => {
     if (onClose) onClose();
     if (table) table.setCreatingRow(null);
   };
-
-  const { data: employees = [], isLoading: isLoadingEmployees } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
 
   const {
     control,
@@ -99,22 +93,6 @@ const AddTourModal = ({ open = true, onClose, table }) => {
     createTour(payload);
   };
 
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang],
-  );
-
   const currencySymbol =
     {
       USD: "$",
@@ -150,22 +128,18 @@ const AddTourModal = ({ open = true, onClose, table }) => {
             />
           </Grid>
           <Grid size={6}>
-            <CustomSelect
+            <GlobalEmployeeAutocomplete
               name="opr_guid"
               control={control}
               label={t("outbound.operator")}
-              options={employeeOptions}
-              isLoading={isLoadingEmployees}
               required
             />
           </Grid>
           <Grid size={6}>
-            <CustomSelect
+            <GlobalEmployeeAutocomplete
               name="prepared_opr_guid"
               control={control}
               label={t("outbound.preparedBy")}
-              options={employeeOptions}
-              isLoading={isLoadingEmployees}
               required
             />
           </Grid>

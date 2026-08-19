@@ -12,8 +12,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
-import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllEmployeeApi } from "../../../api/queries/getters";
+import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import {
   SOURCE_OPTIONS,
   TICKET_TYPE_OPTIONS,
@@ -159,28 +158,7 @@ const OutboundFilter = ({
   onSelectOpen,
   onSelectClose,
 }) => {
-  const { t, selectedLang } = useLocale();
-
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang]
-  );
+  const { t } = useLocale();
 
   const paymentOptions = useMemo(() => getPaymentOptions(t), [t]);
   const allText = t("all") ?? "All";
@@ -195,28 +173,22 @@ const OutboundFilter = ({
         onChange={onFilterChange}
       />
 
-      <FilterSelect
-        label={t("outbound.operator")}
+      <GlobalEmployeeAutocomplete
         name="opr_guid"
-        value={filters.opr_guid}
-        options={employeeOptions}
-        isOpen={selectsOpen?.opr_guid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
+        value={filters.opr_guid ?? ""}
+        onChange={(val) => onFilterChange("opr_guid", val)}
+        label={t("outbound.operator")}
+        placeholder={allText}
+        size="small"
       />
 
-      <FilterSelect
-        label={t("outbound.preparedBy")}
+      <GlobalEmployeeAutocomplete
         name="prepared_opr_guid"
-        value={filters.prepared_opr_guid}
-        options={employeeOptions}
-        isOpen={selectsOpen?.prepared_opr_guid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
+        value={filters.prepared_opr_guid ?? ""}
+        onChange={(val) => onFilterChange("prepared_opr_guid", val)}
+        label={t("outbound.preparedBy")}
+        placeholder={allText}
+        size="small"
       />
 
       <FilterSelect

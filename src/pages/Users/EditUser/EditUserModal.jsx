@@ -9,8 +9,6 @@ import { CustomForm } from "../../../components/Dialog/CustomForm";
 import FooterButton from "../../../components/Dialog/FooterButton";
 
 import { useLocale } from "../../../hooks/useLocale";
-import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllEmployeeApi } from "../../../api/queries/getters";
 import { useValidShema } from "../../../functions/useValidShema";
 
 import UserInformationTab from "../AddUser/UserInformationTab";
@@ -20,37 +18,22 @@ import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { updateUserApi } from "../../../api/queries/patch";
 
 const EditUserModal = ({ table, row }) => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const { editUser } = useValidShema();
   const [activeTab, setActiveTab] = useState(0);
-
-  const { data: rawEmployees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
 
   const rowData = row?.original;
   const rowEmp = rowData?.employee;
 
-  const employees = useMemo(() => {
-    const list = (rawEmployees || []).map((emp) => ({
-      id: emp.guid,
-      fullName: emp.fullName,
-      officeName: selectedLang(emp.office?.fullName) ?? "",
-      phoneNumber: emp.phone_number ?? "",
-    }));
-
-    if (rowEmp && rowEmp.guid && !list.some((e) => e.id === rowEmp.guid)) {
-      list.unshift({
-        id: rowEmp.guid,
-        fullName: rowEmp.fullName,
-        officeName: selectedLang(rowEmp.office?.fullName) ?? "",
-        phoneNumber: rowEmp.phone_number ?? "",
-      });
-    }
-
-    return list;
-  }, [rawEmployees, rowEmp, selectedLang]);
+  const initialEmployee = useMemo(() => {
+    if (!rowEmp?.guid) return null;
+    return {
+      guid: rowEmp.guid,
+      fullName: rowEmp.fullName || "",
+      phone_number: rowEmp.phone_number || "",
+      office: rowEmp.office || null,
+    };
+  }, [rowEmp]);
 
   const isEmp = Boolean(rowData?.employee_guid || rowEmp?.guid);
   const rawPhone = rowData?.phone_number || rowData?.phoneNumber || rowEmp?.phone_number || "";
@@ -70,7 +53,7 @@ const EditUserModal = ({ table, row }) => {
     };
   }, [rowData, rowEmp, isEmp, formattedPhone]);
 
-  const { control, handleSubmit, watch, setValue } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues: initialValues,
     values: initialValues,
     resolver: yupResolver(editUser),
@@ -150,10 +133,9 @@ const EditUserModal = ({ table, row }) => {
               {activeTab === 0 ? (
                 <UserInformationTab
                   control={control}
-                  employees={employees}
-                  watch={watch}
                   setValue={setValue}
                   isEdit={true}
+                  initialEmployee={initialEmployee}
                 />
               ) : (
                 <UserAccessTab control={control} />

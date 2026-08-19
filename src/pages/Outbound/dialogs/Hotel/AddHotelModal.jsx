@@ -13,27 +13,21 @@ import CustomSelect from "../../../../components/CustomSelect";
 import FooterButton from "../../../../components/Dialog/FooterButton";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
 import GlobalClientAutocomplete from "../../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
+import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
-import { useGet } from "../../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
-import { getAllEmployeeApi } from "../../../../api/queries/getters";
 import { addHotelApi } from "../../../../api/queries/post";
 import { SOURCE_OPTIONS, PAYMENT_OPTIONS } from "../../constants";
 import HotelFields from "../fields/HotelFields";
 
 const AddHotelModal = ({ open = true, onClose, table }) => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const { addOutbound } = useValidShema();
 
   const handleClose = () => {
     if (onClose) onClose();
     if (table) table.setCreatingRow(null);
   };
-
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
 
 
   const {
@@ -100,18 +94,6 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
     createHotel(payload);
   };
 
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) || selectedLang(emp.office.fullName) || ""
-          : "";
-        const label = officeShort ? `${emp.fullName} (${officeShort})` : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang]
-  );
-
   const currencySymbol = {
     USD: "$",
     EUR: "€",
@@ -138,10 +120,10 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
             />
           </Grid>
           <Grid size={6}>
-            <CustomSelect name="opr_guid" control={control} label={t("outbound.operator") || "Operator"} options={employeeOptions} required />
+            <GlobalEmployeeAutocomplete name="opr_guid" control={control} label={t("outbound.operator") || "Operator"} required />
           </Grid>
           <Grid size={6}>
-            <CustomSelect name="prepared_opr_guid" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} options={employeeOptions} required />
+            <GlobalEmployeeAutocomplete name="prepared_opr_guid" control={control} label={t("outbound.preparedBy") || "Taýýarlan"} required />
           </Grid>
           <Grid size={4}>
             <CustomSelect name="source" control={control} label={t("outbound.source") || "Ulgam"} options={SOURCE_OPTIONS} required />
