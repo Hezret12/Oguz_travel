@@ -1,18 +1,16 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Grid } from "@mui/material";
 import { useForm } from "react-hook-form";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import CustomSelect from "../../../components/CustomSelect";
-import AppAutocomplete from "../../../components/AppAutocomplete";
+import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { FooterButton } from "../../../components/Dialog/FooterButton";
-import { useGet } from "../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { useLocale } from "../../../hooks/useLocale";
-import { getAllEmployeeApi } from "../../../api/queries/getters";
 import { updateReportShareApi } from "../../../api/queries/patch";
 
 const EditReferralReportModal = ({ table, row }) => {
@@ -28,10 +26,10 @@ const EditReferralReportModal = ({ table, row }) => {
     [t]
   );
 
-  const { control, handleSubmit, reset } = useForm({
-    defaultValues: {
+  const initialValues = useMemo(() => {
+    return {
       date: row?.original?.datetime || null,
-      quantity: row?.original?.total_count || "",
+      quantity: row?.original?.total_count ?? "",
       assignment_opr_guid:
         row?.original?.assignment_opr_guid ||
         row?.original?.reportAS_operator?.guid ||
@@ -40,52 +38,23 @@ const EditReferralReportModal = ({ table, row }) => {
         row?.original?.receiver_opr_guid ||
         row?.original?.reportRE_operator?.guid ||
         "",
-      startNo: row?.original?.start_yh_number || "",
-      endNo: row?.original?.end_yh_number || "",
-      status: row?.original?.status || 1,
+      startNo: String(row?.original?.start_yh_number ?? ""),
+      endNo: String(row?.original?.end_yh_number ?? ""),
+      status: Number(row?.original?.status || 1),
       note: row?.original?.note || "",
-    },
+    };
+  }, [row]);
+
+  const { control, handleSubmit, reset } = useForm({
+    defaultValues: initialValues,
   });
 
-  useEffect(() => {
-    if (row?.original) {
-      reset({
-        date: row.original.datetime || null,
-        quantity: row.original.total_count ?? "",
-        assignment_opr_guid:
-          row.original.assignment_opr_guid ||
-          row.original.reportAS_operator?.guid ||
-          "",
-        receiver_opr_guid:
-          row.original.receiver_opr_guid ||
-          row.original.reportRE_operator?.guid ||
-          "",
-        startNo: String(row.original.start_yh_number ?? ""),
-        endNo: String(row.original.end_yh_number ?? ""),
-        status: Number(row.original.status || 1),
-        note: row.original.note || "",
-      });
-    }
-  }, [row, reset]);
-
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
-  const employeeOptions = useMemo(() => {
-    let list = employees;
-    if (Array.isArray(employees?.data)) list = employees.data;
-    if (!Array.isArray(list)) return [];
-    return list.map((emp) => ({
-      value: emp.guid || emp.id,
-      label:
-        emp.fullName ||
-        `${emp.firstName || ""} ${emp.lastName || ""}`.trim() ||
-        emp.name ||
-        "Employee",
-    }));
-  }, [employees]);
+  const [prevRowId, setPrevRowId] = useState(null);
+  const currentRowId = isModalOpen && row?.original ? row.original.guid || row.original.id : null;
+  if (currentRowId !== prevRowId) {
+    setPrevRowId(currentRowId);
+    reset(initialValues);
+  }
 
   const { mutate: updateReportShare, isPending } = useUpdate({
     apiFn: updateReportShareApi,
@@ -136,19 +105,19 @@ const EditReferralReportModal = ({ table, row }) => {
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <AppAutocomplete
+            <GlobalEmployeeAutocomplete
               name="assignment_opr_guid"
               control={control}
               label={t("referralLetter.submittedBy")}
-              options={employeeOptions}
+              required
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <AppAutocomplete
+            <GlobalEmployeeAutocomplete
               name="receiver_opr_guid"
               control={control}
               label={t("referralLetter.receivedBy")}
-              options={employeeOptions}
+              required
             />
           </Grid>
 

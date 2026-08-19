@@ -9,11 +9,9 @@ import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../components/Dialog/CustomForm";
 import CustomTextField from "../../components/CustomTextField";
-import CustomSelect from "../../components/CustomSelect";
 import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
-import { useGet } from "../../hooks/CRUD/useGet";
-import { getAllEmployeeApi } from "../../api/queries/getters";
+import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CurrencyAmount from "../../components/inputs/CurrencyAmount";
 import PhoneNumberField from "../../components/inputs/PhoneNumber";
 import CustomDatePicker from "../../components/CustomDatePicker";
@@ -22,29 +20,8 @@ import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addReferralLetterApi } from "../../api/queries/post";
 
 const AddReferralLetterModal = ({ table }) => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const { addReferralLetter } = useValidShema();
-
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-          selectedLang(emp.office.fullName) ||
-          ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang],
-  );
 
   const { mutate: createReferralLetter, isPending: isSubmit } = useCreate({
     apiFn: addReferralLetterApi,
@@ -119,11 +96,10 @@ const AddReferralLetterModal = ({ table }) => {
             />
           </Box>
 
-          <CustomSelect
+          <GlobalEmployeeAutocomplete
             name="received_opr_guid"
             control={control}
             label={t("columns.operatorTwo")}
-            options={employeeOptions}
             required
           />
 

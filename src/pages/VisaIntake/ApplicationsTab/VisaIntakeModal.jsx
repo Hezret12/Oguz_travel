@@ -21,7 +21,7 @@ import { getCountryVisaFieldsApi } from "../../../api/queries/getters";
 import {
   sortVisaFields,
   isOperatorField,
-  isOperator2Field,
+  isNotesField,
 } from "../../../functions/visaCountryFieldConfigs";
 
 const DynamicVisaField = ({
@@ -35,7 +35,6 @@ const DynamicVisaField = ({
 
   if (
     isOperatorField(fieldKey) ||
-    isOperator2Field(fieldKey) ||
     field.fieldType === "autocomplete" ||
     field.optionsKey === "employees"
   ) {
@@ -51,7 +50,7 @@ const DynamicVisaField = ({
     );
   }
 
-  if (fieldKey === "note" || field.multiline) {
+  if (isNotesField(field) || fieldKey === "note" || field.multiline) {
     return (
       <Grid size={12}>
         <CustomTextField
@@ -177,8 +176,6 @@ export const VisaIntakeModal = ({
           defaults[key] = itemData.client_guid || "";
         } else if (key === "accepted_opr_guid") {
           defaults[key] = itemData.accepted_opr_guid || itemData.operator_guid || "";
-        } else if (key === "received_opr_guid") {
-          defaults[key] = itemData.received_opr_guid || itemData.operator2_guid || "";
         } else if (val !== undefined && val !== null) {
           defaults[key] = field.fieldType === "date" ? (val ? dayjs(val) : null) : val;
         } else {
@@ -275,8 +272,6 @@ export const VisaIntakeModal = ({
         payload.client_guid = formattedVal || null;
       } else if (key === "operator_guid" || key === "accepted_opr_guid") {
         payload.operator_guid = formattedVal || null;
-      } else if (key === "operator2_guid" || key === "received_opr_guid") {
-        payload.operator2_guid = formattedVal || null;
       } else if (key === "office_guid") {
         payload.office_guid = formattedVal || null;
       } else if (key === "visa_type" || key === "visa_category") {

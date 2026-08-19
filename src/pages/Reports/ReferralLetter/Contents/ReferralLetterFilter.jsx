@@ -4,8 +4,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
-import { useGet } from "../../../../hooks/CRUD/useGet";
-import { getAllEmployeeApi } from "../../../../api/queries/getters";
+import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 
 const selectSx = {
   borderRadius: "8px",
@@ -139,28 +138,7 @@ const ReferralLetterFilter = ({
   onSelectOpen,
   onSelectClose,
 }) => {
-  const { t, selectedLang } = useLocale();
-
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang]
-  );
+  const { t } = useLocale();
 
   const statusOptions = useMemo(
     () => [
@@ -182,28 +160,24 @@ const ReferralLetterFilter = ({
         onChange={onFilterChange}
       />
 
-      <FilterSelect
-        label={t("referralLetter.submittedBy")}
+      {/* Operator 1 (Assignment) */}
+      <GlobalEmployeeAutocomplete
         name="assignment_opr_guid"
-        value={filters.assignment_opr_guid}
-        options={employeeOptions}
-        isOpen={selectsOpen?.assignment_opr_guid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
+        value={filters?.assignment_opr_guid ?? ""}
+        onChange={(val) => onFilterChange("assignment_opr_guid", val)}
+        label={t("referralLetter.submittedBy")}
+        placeholder={allText}
+        size="small"
       />
 
-      <FilterSelect
-        label={t("referralLetter.receivedBy")}
+      {/* Operator 2 (Receiver) */}
+      <GlobalEmployeeAutocomplete
         name="receiver_opr_guid"
-        value={filters.receiver_opr_guid}
-        options={employeeOptions}
-        isOpen={selectsOpen?.receiver_opr_guid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
+        value={filters?.receiver_opr_guid ?? ""}
+        onChange={(val) => onFilterChange("receiver_opr_guid", val)}
+        label={t("referralLetter.receivedBy")}
+        placeholder={allText}
+        size="small"
       />
 
       <FilterSelect

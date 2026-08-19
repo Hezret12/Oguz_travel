@@ -4,15 +4,13 @@ import { useForm } from "react-hook-form";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import CustomSelect from "../../../components/CustomSelect";
-import AppAutocomplete from "../../../components/AppAutocomplete";
+import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { FooterButton } from "../../../components/Dialog/FooterButton";
-import { useGet } from "../../../hooks/CRUD/useGet";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { useLocale } from "../../../hooks/useLocale";
-import { getAllEmployeeApi } from "../../../api/queries/getters";
 import { addReportShareApi } from "../../../api/queries/post";
 
 /**
@@ -44,26 +42,6 @@ const AddReferralReportModal = ({ open, close, table }) => {
       note: "",
     },
   });
-
-  // Fetch employees for assignment & receiver dropdowns
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
-  const employeeOptions = useMemo(() => {
-    let list = employees;
-    if (Array.isArray(employees?.data)) list = employees.data;
-    if (!Array.isArray(list)) return [];
-    return list.map((emp) => ({
-      value: emp.guid || emp.id,
-      label:
-        emp.fullName ||
-        `${emp.firstName || ""} ${emp.lastName || ""}`.trim() ||
-        emp.name ||
-        "Employee",
-    }));
-  }, [employees]);
 
   const handleClose = () => {
     if (table) table.setCreatingRow(null);
@@ -123,19 +101,19 @@ const AddReferralReportModal = ({ open, close, table }) => {
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <AppAutocomplete
+            <GlobalEmployeeAutocomplete
               name="assignment_opr_guid"
               control={control}
               label={t("referralLetter.submittedBy")}
-              options={employeeOptions}
+              required
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <AppAutocomplete
+            <GlobalEmployeeAutocomplete
               name="receiver_opr_guid"
               control={control}
               label={t("referralLetter.receivedBy")}
-              options={employeeOptions}
+              required
             />
           </Grid>
 
