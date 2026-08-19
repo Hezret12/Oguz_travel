@@ -192,6 +192,20 @@ const AppAutocomplete = ({
               isOptionEqualToValue={(option, val) =>
                 option.value === (val?.value ?? val)
               }
+              slotProps={{
+                paper: {
+                  sx: {
+                    borderRadius: "12px",
+                    marginTop: "6px",
+                    boxShadow: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "0 10px 30px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.12)"
+                        : "0 10px 28px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.08)",
+                    backgroundImage: "none",
+                  },
+                },
+                ...cleanProps.slotProps,
+              }}
               renderInput={(params) => {
                 const { ...textFieldProps } = params;
                 delete textFieldProps.renderTags;

@@ -190,6 +190,17 @@ const EmployeeAutocompleteBase = ({
           onEmployeeChange?.(employee || null);
         }}
         slotProps={{
+          paper: {
+            sx: {
+              borderRadius: "12px",
+              marginTop: "6px",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 10px 30px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.12)"
+                  : "0 10px 28px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.08)",
+              backgroundImage: "none",
+            },
+          },
           listbox: {
             onScroll: handleListboxScroll,
           },
