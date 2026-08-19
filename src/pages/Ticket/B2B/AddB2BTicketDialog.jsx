@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
@@ -85,9 +85,12 @@ const AddB2BTicketDialog = ({ table }) => {
     mode: "onSubmit",
   });
 
-  const selectedCurrency = useWatch({ control, name: "currency" }) || "USD";
+  const [selectedCurrency] = useWatch({
+    control,
+    name: ["currency"],
+  });
 
-  const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
+  const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || "$";
 
   const closeDialog = () => {
     if (table) {
@@ -144,9 +147,6 @@ const AddB2BTicketDialog = ({ table }) => {
               overflowX: "hidden",
               pr: 1,
               mr: -0.5,
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 2.5,
               scrollbarWidth: "thin",
               scrollbarColor: (theme) =>
                 theme.palette.mode === "dark"
@@ -161,202 +161,182 @@ const AddB2BTicketDialog = ({ table }) => {
               },
             }}
           >
-            <Box sx={{ flex: { xs: "1 1 100%" }, mt: 1 }}>
-              <GlobalAutoCompleteClient
-                control={control}
-                name="client_guid"
-                label={t("columns.client")}
-                columns={["fullName", "phoneNumber", "passport_number"]}
-              />
-            </Box>
+            <Grid container spacing={2} sx={{ mt: 0.25 }}>
+              <Grid size={{ xs: 12 }}>
+                <GlobalAutoCompleteClient
+                  control={control}
+                  name="client_guid"
+                  label={t("columns.client")}
+                  columns={["fullName", "phoneNumber", "passport_number"]}
+                />
+              </Grid>
 
-            <Box
-              sx={{
-                flex: {
-                  xs: "1 1 100%",
-                },
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 2,
-              }}
-            >
-              <GlobalEmployeeAutocomplete
-                name="assignment_opr_guid"
-                control={control}
-                label={t("columns.operator")}
-              />
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <GlobalEmployeeAutocomplete
+                  name="assignment_opr_guid"
+                  control={control}
+                  label={t("columns.operator")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <GlobalEmployeeAutocomplete
+                  name="receiver_opr_guid"
+                  control={control}
+                  label={t("columns.operatorTwo")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomDatePicker
+                  name="datetime"
+                  control={control}
+                  label={t("columns.issueDate")}
+                />
+              </Grid>
 
-              <GlobalEmployeeAutocomplete
-                name="receiver_opr_guid"
-                control={control}
-                label={t("columns.operatorTwo")}
-              />
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomTextField
+                  name="airline"
+                  control={control}
+                  label={t("columns.airline")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomTextField
+                  name="route"
+                  control={control}
+                  label={t("columns.route")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomDatePicker
+                  name="flight_date"
+                  control={control}
+                  label={t("columns.flightDate")}
+                />
+              </Grid>
 
-              <CustomDatePicker
-                name="datetime"
-                control={control}
-                label={t("columns.issueDate")}
-              />
-            </Box>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomSelect
+                  name="status_guid"
+                  control={control}
+                  label={t("columns.status")}
+                  options={status}
+                  isLoading={isStatusLoading}
+                  isError={isStatusError}
+                  getRowId={(item) => item.guid}
+                  getRowLabel={(item) => selectedLang(item.name)}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomTextField
+                  name="class"
+                  control={control}
+                  label={t("columns.cabinClass")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomSelect
+                  name="travel_type"
+                  control={control}
+                  label={t("columns.tripType")}
+                  options={TRIP_TYPE_OPTIONS}
+                />
+              </Grid>
 
-            <Box
-              sx={{
-                flex: "1 1 100%",
-                display: "flex",
-                gap: 1.5,
-              }}
-            >
-              <CustomTextField
-                name="airline"
-                control={control}
-                label={t("columns.airline")}
-              />
-
-              <CustomTextField
-                name="route"
-                control={control}
-                label={t("columns.route")}
-              />
-              <CustomDatePicker
-                name="flight_date"
-                control={control}
-                label={t("columns.flightDate")}
-              />
-            </Box>
-
-            <Box
-              sx={{
-                flex: { xs: "1 1 100%" },
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 1.5,
-              }}
-            >
-              <CustomSelect
-                name="status_guid"
-                control={control}
-                label={t("columns.status")}
-                options={status}
-                isLoading={isStatusLoading}
-                isError={isStatusError}
-                getRowId={(item) => item.guid}
-                getRowLabel={(item) => selectedLang(item.name)}
-              />
-
-              <CustomTextField
-                name="class"
-                control={control}
-                label={t("columns.cabinClass")}
-              />
-
-              <CustomSelect
-                name="travel_type"
-                control={control}
-                label={t("columns.tripType")}
-                options={TRIP_TYPE_OPTIONS}
-              />
-            </Box>
-
-            <Box
-              sx={{
-                flex: "1 1 100%",
-                display: "flex",
-                gap: 1.5,
-              }}
-            >
-              <CurrencyAmount
-                name="net_price"
-                control={control}
-                label={t("columns.netFare")}
-                currency={selectedCurrency}
-                onCurrencyChange={(curr) => setValue("currency", curr)}
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "7px",
-                    minHeight: "44px",
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "rgba(255, 255, 255, 0.03)"
-                        : "#ffffff",
-                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                    pr: 0.5,
-                    "&:hover": {
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CurrencyAmount
+                  name="net_price"
+                  control={control}
+                  label={t("columns.netFare")}
+                  currency={selectedCurrency}
+                  onCurrencyChange={(curr) => setValue("currency", curr)}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "7px",
+                      minHeight: "44px",
                       backgroundColor: (theme) =>
                         theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.05)"
+                          ? "rgba(255, 255, 255, 0.03)"
                           : "#ffffff",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "primary.main",
+                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                      pr: 0.5,
+                      "&:hover": {
+                        backgroundColor: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "rgba(255, 255, 255, 0.05)"
+                            : "#ffffff",
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "primary.main",
+                        },
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "rgba(255, 255, 255, 0.02)"
+                            : "#ffffff",
+                        boxShadow: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "0 0 0 3px rgba(59, 130, 246, 0.16)"
+                            : "0 0 0 3px rgba(37, 99, 235, 0.12)",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderWidth: 1.5,
                       },
                     },
-                    "&.Mui-focused": {
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.02)"
-                          : "#ffffff",
-                      boxShadow: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "0 0 0 3px rgba(59, 130, 246, 0.16)"
-                          : "0 0 0 3px rgba(37, 99, 235, 0.12)",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderWidth: 1.5,
-                    },
-                  },
-                }}
-              />
+                  }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomTextField
+                  name="sale_price"
+                  control={control}
+                  type="number"
+                  label={t("columns.saleFare")}
+                  startIcon={currencySymbol}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomSelect
+                  name="is_paid"
+                  control={control}
+                  label={t("columns.paymentStatus")}
+                  options={PAYMENT_OPTIONS}
+                />
+              </Grid>
 
-              <CustomTextField
-                name="sale_price"
-                control={control}
-                type="number"
-                label={t("columns.saleFare")}
-                startIcon={currencySymbol}
-              />
-              <CustomSelect
-                name="is_paid"
-                control={control}
-                label={t("columns.paymentStatus")}
-                options={PAYMENT_OPTIONS}
-              />
-            </Box>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomTextField
+                  name="card"
+                  control={control}
+                  label={t("columns.card") ?? "Cart"}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomTextField
+                  name="pnr"
+                  control={control}
+                  label={t("columns.pnr")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <AgentAccordion
+                  control={control}
+                  fullNameName="agent.name"
+                  phoneNumberName="agent.phone_number"
+                  title={t("columns.agent")}
+                  fullNameLabel={t("columns.agentFullName")}
+                  phoneNumberLabel={t("columns.phoneNumber")}
+                />
+              </Grid>
 
-            <Box
-              sx={{
-                flex: "1 1 100%",
-                display: "flex",
-                gap: 1.5,
-              }}
-            >
-              <CustomTextField
-                name="card"
-                control={control}
-                label={t("columns.card") ?? "Cart"}
-              />
-
-              <CustomTextField
-                name="pnr"
-                control={control}
-                label={t("columns.pnr")}
-              />
-
-              <AgentAccordion
-                control={control}
-                fullNameName="agent.name"
-                phoneNumberName="agent.phone_number"
-                title={t("columns.agent")}
-                fullNameLabel={t("columns.agentFullName")}
-                phoneNumberLabel={t("columns.phoneNumber")}
-              />
-            </Box>
-
-            <Box sx={{ flex: { xs: "1 1 100%" } }}>
-              <CustomTextField
-                name="note"
-                control={control}
-                label={t("columns.note")}
-              />
-            </Box>
+              <Grid size={{ xs: 12 }}>
+                <CustomTextField
+                  name="note"
+                  control={control}
+                  label={t("columns.note")}
+                />
+              </Grid>
+            </Grid>
           </Box>
 
           <FooterButton
