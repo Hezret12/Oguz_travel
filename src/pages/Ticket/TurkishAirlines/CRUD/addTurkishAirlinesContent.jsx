@@ -239,7 +239,8 @@ const AddTurkishAirlinesContent = ({ table }) => {
                     {
                       key: "passportExpiryDate",
                       label:
-                        t("columns.passportExpiryDate") ?? "Passport Expiry Date",
+                        t("columns.passportExpiryDate") ??
+                        "Passport Expiry Date",
                       format: (value) => {
                         if (!value) return "";
                         const dateOnly = value.split("T")[0];
@@ -251,6 +252,22 @@ const AddTurkishAirlinesContent = ({ table }) => {
                       },
                     },
                   ]}
+                />
+              </Grid>
+
+              {/* Row 6: Operators */}
+              <Grid size={{ xs: 12, md: 6 }}>
+                <GlobalEmployeeAutocomplete
+                  name="assignment_opr_guid"
+                  control={control}
+                  label={t("columns.operator")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <GlobalEmployeeAutocomplete
+                  name="receiver_opr_guid"
+                  control={control}
+                  label={t("columns.operatorTwo")}
                 />
               </Grid>
 
@@ -426,22 +443,6 @@ const AddTurkishAirlinesContent = ({ table }) => {
                   title={t("columns.agent")}
                   fullNameLabel={t("columns.agentFullName")}
                   phoneNumberLabel={t("columns.phoneNumber")}
-                />
-              </Grid>
-
-              {/* Row 6: Operators */}
-              <Grid size={{ xs: 12, md: 6 }}>
-                <GlobalEmployeeAutocomplete
-                  name="assignment_opr_guid"
-                  control={control}
-                  label={t("columns.operator")}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <GlobalEmployeeAutocomplete
-                  name="receiver_opr_guid"
-                  control={control}
-                  label={t("columns.operatorTwo")}
                 />
               </Grid>
 

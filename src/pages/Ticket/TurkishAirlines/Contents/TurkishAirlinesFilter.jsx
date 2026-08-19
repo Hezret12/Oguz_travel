@@ -6,10 +6,11 @@ import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import {
-  getAllEmployeeApi,
   getAllStatusApi,
   getAllOfficeApi,
 } from "../../../../api/queries/getters";
+import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
+import { getBooleanPaymentFilterOptions } from "../../../../functions/generalHelpers";
 
 const selectSx = {
   borderRadius: "8px",
@@ -39,6 +40,7 @@ const FilterSelect = ({
   value,
   options = [],
   isOpen,
+  isLoading,
   allText,
   onChange,
   onOpen,
@@ -58,6 +60,7 @@ const FilterSelect = ({
       onOpen={() => onOpen?.(name)}
       onClose={() => onClose?.(name)}
       displayEmpty
+      disabled={isLoading}
       sx={selectSx}
       slotProps={menuPaperProps}
       IconComponent={() => (
@@ -142,32 +145,17 @@ export const TurkishAirlinesFilter = ({
 }) => {
   const { t, selectedLang } = useLocale();
 
-  // Fetch Employees for operators
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
   // Fetch Statuses
-  const { data: statuses = [] } = useGet({
+  const { data: statuses = [], isLoading: isStatusLoading } = useGet({
     apiFn: getAllStatusApi,
     key: "statuses",
   });
 
   // Fetch Offices
-  const { data: offices = [] } = useGet({
+  const { data: offices = [], isLoading: isOfficeLoading } = useGet({
     apiFn: getAllOfficeApi,
     key: "offices",
   });
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => ({
-        label: emp.fullName,
-        value: emp.guid,
-      })),
-    [employees]
-  );
 
   const statusOptions = useMemo(
     () =>
@@ -193,12 +181,11 @@ export const TurkishAirlinesFilter = ({
   );
 
   const isPaidOptions = useMemo(
-    () => [
-      { label: t("paymentPaid"), value: "true" },
-      { label: t("paymentCredit"), value: "false" },
-    ],
+    () => getBooleanPaymentFilterOptions(t),
     [t]
   );
+
+  const allText = t("all");
 
   const handleDateChange = (name, val) => {
     onFilterChange(name, val);
@@ -215,29 +202,23 @@ export const TurkishAirlinesFilter = ({
       />
 
       {/* Operator 1 (Assignment) */}
-      <FilterSelect
-        label={t("columns.operator")}
+      <GlobalEmployeeAutocomplete
         name="assignment_opr_guid"
-        value={filters?.assignment_opr_guid}
-        options={employeeOptions}
-        isOpen={Boolean(selectsOpen.assignment_opr_guid)}
-        allText={t("all")}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
+        value={filters?.assignment_opr_guid ?? ""}
+        onChange={(val) => onFilterChange("assignment_opr_guid", val)}
+        label={t("columns.operator")}
+        placeholder={allText}
+        size="small"
       />
 
       {/* Operator 2 (Receiver) */}
-      <FilterSelect
-        label={t("columns.operatorTwo")}
+      <GlobalEmployeeAutocomplete
         name="receiver_opr_guid"
-        value={filters?.receiver_opr_guid}
-        options={employeeOptions}
-        isOpen={Boolean(selectsOpen.receiver_opr_guid)}
-        allText={t("all")}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
+        value={filters?.receiver_opr_guid ?? ""}
+        onChange={(val) => onFilterChange("receiver_opr_guid", val)}
+        label={t("columns.operatorTwo")}
+        placeholder={allText}
+        size="small"
       />
 
       {/* Status */}
@@ -247,7 +228,8 @@ export const TurkishAirlinesFilter = ({
         value={filters?.status_guid}
         options={statusOptions}
         isOpen={Boolean(selectsOpen.status_guid)}
-        allText={t("all")}
+        isLoading={isStatusLoading}
+        allText={allText}
         onChange={onFilterChange}
         onOpen={onSelectOpen}
         onClose={onSelectClose}
@@ -268,7 +250,7 @@ export const TurkishAirlinesFilter = ({
         value={filters?.is_paid}
         options={isPaidOptions}
         isOpen={Boolean(selectsOpen.is_paid)}
-        allText={t("all")}
+        allText={allText}
         onChange={onFilterChange}
         onOpen={onSelectOpen}
         onClose={onSelectClose}
@@ -281,7 +263,8 @@ export const TurkishAirlinesFilter = ({
         value={filters?.office_guid}
         options={officeOptions}
         isOpen={Boolean(selectsOpen.office_guid)}
-        allText={t("all")}
+        isLoading={isOfficeLoading}
+        allText={allText}
         onChange={onFilterChange}
         onOpen={onSelectOpen}
         onClose={onSelectClose}

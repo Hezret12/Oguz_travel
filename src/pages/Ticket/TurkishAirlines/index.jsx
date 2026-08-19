@@ -194,9 +194,8 @@ const TurkishAirlines = () => {
   const { mutate: deleteTurkishAirlinesMutate, isPending: isDeleting } =
     useDelete({
       deleteFn: deleteTurkishAirlinesApi,
-      queryKey: ["turkish-airlines", queryParams],
+      queryKey: "turkish-airlines",
       idKey: "guid",
-      isInfiniteQuery: true,
     });
 
   const deleteDialog = useDeleteDialog({
