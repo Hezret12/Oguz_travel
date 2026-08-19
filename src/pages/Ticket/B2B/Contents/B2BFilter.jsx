@@ -7,6 +7,7 @@ import { useLocale } from "../../../../hooks/useLocale";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { getAllStatusApi } from "../../../../api/queries/getters";
 import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
+import { getBooleanPaymentFilterOptions } from "../../../../functions/generalHelpers";
 
 const selectSx = {
   borderRadius: "8px",
@@ -165,10 +166,7 @@ const B2BFilter = ({
   );
 
   const isPaidOptions = useMemo(
-    () => [
-      { label: t("paymentPaid"), value: "true" },
-      { label: t("paymentCredit"), value: "false" },
-    ],
+    () => getBooleanPaymentFilterOptions(t),
     [t]
   );
 

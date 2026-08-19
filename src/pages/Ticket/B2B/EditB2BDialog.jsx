@@ -17,16 +17,13 @@ import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { getAllStatusApi } from "../../../api/queries/getters";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import CustomDatePicker from "../../../components/CustomDatePicker";
+import { useMemo } from "react";
 import CurrencyAmount from "../../../components/inputs/CurrencyAmount";
+import { getBooleanPaymentOptions } from "../../../functions/generalHelpers";
 
 const TRIP_TYPE_OPTIONS = [
   { label: "One Way", value: 0 },
   { label: "Round Trip", value: 1 },
-];
-
-const PAYMENT_OPTIONS = [
-  { label: "Tolendi", value: true },
-  { label: "Kredit", value: false },
 ];
 
 const CURRENCY_SYMBOLS = {
@@ -39,6 +36,8 @@ const CURRENCY_SYMBOLS = {
 const EditB2BDialog = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addB2BTicket } = useValidShema();
+
+  const paymentOptions = useMemo(() => getBooleanPaymentOptions(t), [t]);
 
   const {
     data: status,
@@ -307,7 +306,7 @@ const EditB2BDialog = ({ table, row }) => {
                   name="is_paid"
                   control={control}
                   label={t("columns.paymentStatus")}
-                  options={PAYMENT_OPTIONS}
+                  options={paymentOptions}
                 />
               </Grid>
 

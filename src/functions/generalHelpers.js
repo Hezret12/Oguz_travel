@@ -83,3 +83,20 @@ export const formatCompact = (val) => {
   if (Math.abs(num) >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
   return String(num);
 };
+
+/**
+ * Standard translated payment status options (boolean values for forms)
+ */
+export const getBooleanPaymentOptions = (t) => [
+  { label: t("paymentPaid"), value: true },
+  { label: t("paymentCredit"), value: false },
+];
+
+/**
+ * Standard translated payment status options (string values for filters)
+ */
+export const getBooleanPaymentFilterOptions = (t) => [
+  { label: t("paymentPaid"), value: "true" },
+  { label: t("paymentCredit"), value: "false" },
+];
+
