@@ -1,5 +1,5 @@
 import { useMemo, useRef } from "react";
-import { Box } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -13,17 +13,17 @@ import FooterButton from "../../../../components/Dialog/FooterButton";
 import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
 import { CustomForm } from "../../../../components/Dialog/CustomForm";
 import AgentAccordion from "../../../../components/global/AgentAccordion";
-import AppAutocomplete from "../../../../components/AppAutocomplete";
+import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
 import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
 import { updateTurkishAirlinesApi } from "../../../../api/queries/patch";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import {
-  getAllEmployeeApi,
   getAllStatusApi,
   getAllOfficeApi,
 } from "../../../../api/queries/getters";
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
+import { getBooleanPaymentOptions } from "../../../../functions/generalHelpers";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -37,13 +37,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
   const { addTurkishAirlinesTicket } = useValidShema();
   const isAdjustedFareManualRef = useRef(false);
 
-  const paymentOptions = useMemo(
-    () => [
-      { label: t("pages.ticket.payment.paid", "Tolendi"), value: true },
-      { label: t("pages.ticket.payment.credit", "Kredit"), value: false },
-    ],
-    [t],
-  );
+  const paymentOptions = useMemo(() => getBooleanPaymentOptions(t), [t]);
 
   // Fetch status options from the API
   const {
@@ -55,12 +49,6 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
     key: "status",
   });
 
-  // Fetch employee options from the API
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
   const {
     data: offices = [],
     isLoading: isOfficeLoading,
@@ -69,25 +57,6 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
     apiFn: getAllOfficeApi,
     key: "office",
   });
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return {
-          label,
-          value: emp.guid,
-        };
-      }),
-    [employees, selectedLang],
-  );
 
   const { mutate: updateTurkishAirlines, isPending: isSubmit } = useUpdate({
     apiFn: updateTurkishAirlinesApi,
@@ -166,9 +135,11 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
     mode: "onSubmit",
   });
 
-  const selectedCurrency = useWatch({ control, name: "currency" }) || "USD";
-  const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || selectedCurrency;
-  const isPaidValue = useWatch({ control, name: "is_paid" });
+  const [selectedCurrency, isPaidValue] = useWatch({
+    control,
+    name: ["currency", "is_paid"],
+  });
+  const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || "$";
 
   const handleTotalAmountChange = (event) => {
     const nextValue = event?.target?.value ?? event ?? "";
@@ -246,116 +217,122 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
     }
   };
 
-  const fieldItemSx = (span = 1) => ({
-    gridColumn: {
-      xs: "1 / -1",
-      md: span === 2 ? "span 2" : "span 1",
-      lg: span === 3 ? "span 3" : span === 2 ? "span 2" : "span 1",
-    },
-  });
-
   return (
     <CustomDialog widthX={1000} open={true} close={closeDialog}>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
+          minHeight: 0,
         }}
       >
         <CustomDialogHeader variant="h5" title={t("turkish.editTicket")} />
 
-        <CustomForm handleSubmit={handleSubmit(submitHandler)}>
+        <CustomForm
+          handleSubmit={handleSubmit(submitHandler)}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+          }}
+        >
           <Box
             sx={{
               flex: 1,
-              overflow: "auto",
-              maxHeight: "calc(100vh - 310px)",
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                md: "repeat(2, minmax(0, 1fr))",
-                lg: "repeat(3, minmax(0, 1fr))",
+              minHeight: 0,
+              maxHeight: "calc(100vh - 270px)",
+              overflowY: "auto",
+              overflowX: "hidden",
+              pr: 1,
+              mr: -0.5,
+              scrollbarWidth: "thin",
+              scrollbarColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.2) transparent"
+                  : "rgba(0, 0, 0, 0.2) transparent",
+              "&::-webkit-scrollbar": {
+                width: "6px",
               },
-              gap: 2.5,
-              pr: 0.5,
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "divider",
+                borderRadius: "999px",
+              },
             }}
           >
-            <Box sx={fieldItemSx(3)}>
-              <GlobalAutoCompleteClient
-                control={control}
-                name="client_guid"
-                label={t("columns.client") ?? "Client"}
-                initialClient={row?.original?.client}
-                columns={[
-                  "fullName",
-                  "phone_number",
-                  "passport_number",
-                  "passportCountryOfIssue",
-                  {
-                    key: "passportExpiryDate",
-                    label:
-                      t("columns.passportExpiryDate") ?? "Passport Expiry Date",
-                    format: (value) => {
-                      if (!value) return "";
-                      const dateOnly = value.split("T")[0];
-                      const parts = dateOnly.split("-");
-                      if (parts.length === 3) {
-                        return `${parts[2]}.${parts[1]}.${parts[0]}`;
-                      }
-                      return dateOnly;
+            <Grid container spacing={2} sx={{ mt: 0.25 }}>
+              <Grid size={{ xs: 12 }}>
+                <GlobalAutoCompleteClient
+                  control={control}
+                  name="client_guid"
+                  label={t("columns.client")}
+                  initialClient={row?.original?.client}
+                  columns={[
+                    "fullName",
+                    "phone_number",
+                    "passport_number",
+                    "passportCountryOfIssue",
+                    {
+                      key: "passportExpiryDate",
+                      label:
+                        t("columns.passportExpiryDate") ?? "Passport Expiry Date",
+                      format: (value) => {
+                        if (!value) return "";
+                        const dateOnly = value.split("T")[0];
+                        const parts = dateOnly.split("-");
+                        if (parts.length === 3) {
+                          return `${parts[2]}.${parts[1]}.${parts[0]}`;
+                        }
+                        return dateOnly;
+                      },
                     },
-                  },
-                ]}
-              />
-            </Box>
+                  ]}
+                />
+              </Grid>
 
-            <Box sx={fieldItemSx(3)}>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    md: "repeat(4, minmax(0, 1fr))",
-                  },
-                  gap: 2,
-                }}
-              >
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomTextField
                   name="milesSmiles"
                   control={control}
                   label={t("columns.milesSmiles") ?? "MILES & SMILES"}
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomDatePicker
                   name="datetime"
                   control={control}
                   label={t("columns.issueDate")}
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomTextField
                   name="ticket_number"
                   control={control}
                   label={t("columns.ticketNo") ?? "TICKET #"}
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomTextField
                   name="pnr"
                   control={control}
                   label={t("columns.pnr") ?? "PNR"}
                 />
+              </Grid>
 
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomTextField
                   name="route"
                   control={control}
                   label={t("columns.route") ?? "Route"}
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomDatePicker
                   name="flight_date"
                   control={control}
                   label={t("columns.flightDate")}
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomSelect
                   name="status_guid"
                   control={control}
@@ -366,13 +343,16 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   getRowId={(item) => item.guid}
                   getRowLabel={(item) => selectedLang(item.name)}
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomTextField
                   name="class"
                   control={control}
                   label={t("columns.cabinClass") ?? "Class"}
                 />
+              </Grid>
 
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CurrencyAmount
                   name="base_fare"
                   control={control}
@@ -384,25 +364,19 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                       borderRadius: "7px",
                       minHeight: "44px",
                       backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.03)"
-                          : "#ffffff",
+                        theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
                       transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                       pr: 0.5,
                       "&:hover": {
                         backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.05)"
-                            : "#ffffff",
+                          theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "#ffffff",
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "primary.main",
                         },
                       },
                       "&.Mui-focused": {
                         backgroundColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(255, 255, 255, 0.02)"
-                            : "#ffffff",
+                          theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.02)" : "#ffffff",
                         boxShadow: (theme) =>
                           theme.palette.mode === "dark"
                             ? "0 0 0 3px rgba(59, 130, 246, 0.16)"
@@ -414,7 +388,8 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                     },
                   }}
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomTextField
                   name="total_price"
                   control={control}
@@ -423,7 +398,8 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   onChange={handleTotalAmountChange}
                   startIcon={currencySymbol}
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomSelect
                   name="office_guid"
                   control={control}
@@ -437,14 +413,17 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                     selectedLang(item?.fullName)
                   }
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomSelect
                   name="is_paid"
                   control={control}
                   label={t("columns.paymentStatus")}
                   options={paymentOptions}
                 />
+              </Grid>
 
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomTextField
                   name="accepted_price"
                   control={control}
@@ -453,7 +432,8 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   startIcon={currencySymbol}
                   disabled={isPaidValue === false}
                 />
-
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomTextField
                   name="returned_price"
                   control={control}
@@ -462,54 +442,43 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   startIcon={currencySymbol}
                   disabled={isPaidValue === false}
                 />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 12, md: 6 }}>
+                <AgentAccordion
+                  control={control}
+                  fullNameName="agent.name"
+                  phoneNumberName="agent.phone_number"
+                  title={t("columns.agent")}
+                  fullNameLabel={t("columns.agentFullName")}
+                  phoneNumberLabel={t("columns.phoneNumber")}
+                />
+              </Grid>
 
-                <Box sx={{ gridColumn: { xs: "1 / -1", md: "span 2" } }}>
-                  <AgentAccordion
-                    control={control}
-                    fullNameName="agent.name"
-                    phoneNumberName="agent.phone_number"
-                    title={t("columns.agent") ?? "Agent"}
-                    fullNameLabel={t("columns.agentFullName")}
-                    phoneNumberLabel={t("columns.phoneNumber")}
-                  />
-                </Box>
-              </Box>
-            </Box>
-
-            <Box sx={fieldItemSx(3)}>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    lg: "repeat(2, minmax(0, 1fr))",
-                  },
-                  gap: 2,
-                }}
-              >
-                <AppAutocomplete
+              <Grid size={{ xs: 12, md: 6 }}>
+                <GlobalEmployeeAutocomplete
                   name="assignment_opr_guid"
                   control={control}
                   label={t("columns.operator")}
-                  options={employeeOptions}
+                  initialEmployee={row?.original?.ta_assignment_operator || row?.original?.assignment_operator}
                 />
-
-                <AppAutocomplete
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <GlobalEmployeeAutocomplete
                   name="receiver_opr_guid"
                   control={control}
                   label={t("columns.operatorTwo")}
-                  options={employeeOptions}
+                  initialEmployee={row?.original?.ta_receiver_operator || row?.original?.receiver_operator}
                 />
-              </Box>
-            </Box>
+              </Grid>
 
-            <Box sx={fieldItemSx(3)}>
-              <CustomTextField
-                name="note"
-                control={control}
-                label={t("columns.note")}
-              />
-            </Box>
+              <Grid size={{ xs: 12 }}>
+                <CustomTextField
+                  name="note"
+                  control={control}
+                  label={t("columns.note")}
+                />
+              </Grid>
+            </Grid>
           </Box>
 
           <FooterButton
