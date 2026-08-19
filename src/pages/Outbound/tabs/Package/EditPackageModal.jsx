@@ -17,7 +17,7 @@ import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmpl
 import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
 import { updatePackageApi } from "../../../../api/queries/patch";
-import { PARTNER_OPTIONS, getPaymentOptions } from "../../constants";
+import { getPaymentOptions } from "../../constants";
 import PackageFields from "./PackageFields";
 
 const EditPackageModal = ({ table, row }) => {

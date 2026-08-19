@@ -93,7 +93,6 @@ export default function TaskFlow() {
   const {
     data: apiTasksResponse,
     totalItems,
-    pageCount,
     refetch,
     isLoading,
     isFetching,

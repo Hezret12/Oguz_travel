@@ -201,7 +201,9 @@ export default function AppUserAutocomplete({
             ? {
                 renderTags: (selectedOptions, getTagProps) => {
                   return selectedOptions.map((opt, idx) => {
-                    const { key: tagKey, renderTags: _rt, ownerState: _os, ...tagProps } = getTagProps({ index: idx });
+                    const { key: tagKey, ...tagProps } = getTagProps({ index: idx });
+                    delete tagProps.renderTags;
+                    delete tagProps.ownerState;
 
                     return (
                       <Chip
@@ -225,7 +227,9 @@ export default function AppUserAutocomplete({
               }
             : {})}
           renderOption={(optionProps, option, { selected, index }) => {
-            const { key, renderTags: _rt2, ownerState: _os2, ...cleanOptionProps } = optionProps;
+            const { key, ...cleanOptionProps } = optionProps;
+            delete cleanOptionProps.renderTags;
+            delete cleanOptionProps.ownerState;
             const optionKey =
               key ||
               option?.value ||
@@ -255,7 +259,9 @@ export default function AppUserAutocomplete({
             );
           }}
           renderInput={(params) => {
-            const { InputProps, slotProps: paramsSlotProps, renderTags: _rt3, ownerState: _os3, ...otherParams } = params;
+            const { InputProps, slotProps: paramsSlotProps, ...otherParams } = params;
+            delete otherParams.renderTags;
+            delete otherParams.ownerState;
 
             return (
               <TextField

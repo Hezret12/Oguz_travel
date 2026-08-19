@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useLocale } from "../../../../hooks/useLocale";
 import { useValidShema } from "../../../../functions/useValidShema";
 import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
-import GlobalAutoCompleteClient from "../../../../components/global/GlobalAutoCompleteClient/GlobalAutoCompleteClient";
+import GlobalAutoCompleteClient from "../../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import CustomTextField from "../../../../components/CustomTextField";
 import CustomSelect from "../../../../components/CustomSelect";
 import FooterButton from "../../../../components/Dialog/FooterButton";

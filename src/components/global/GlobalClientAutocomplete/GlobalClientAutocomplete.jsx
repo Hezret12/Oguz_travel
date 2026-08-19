@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, forwardRef } from "react";
 import {
   Autocomplete,
   Box,
@@ -6,7 +6,6 @@ import {
   CircularProgress,
   TextField,
   Typography,
-  Tooltip,
 } from "@mui/material";
 import OverflowTooltipLabel from "../../OverflowTooltipLabel";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
@@ -31,14 +30,24 @@ const normalizeClient = (client) => ({
   passport_number: client?.passport_number ?? "",
 });
 
-const resolveColumn = (column, t) =>
-  typeof column === "string"
-    ? { key: column, label: t(`columns.${column}`, column) }
-    : {
-      key: column.key,
-      label: column.label ?? t(`columns.${column.key}`, column.key),
-      format: column.format,
-    };
+const KEY_MAP = {
+  phone_number: "phoneNumber",
+  passport_number: "passportNumber",
+  date_of_birth: "dateOfBirth",
+};
+
+const resolveColumn = (column, t) => {
+  if (typeof column === "string") {
+    const translationKey = KEY_MAP[column] || column;
+    return { key: column, label: t(`columns.${translationKey}`, column) };
+  }
+  const translationKey = KEY_MAP[column.key] || column.key;
+  return {
+    key: column.key,
+    label: column.label ?? t(`columns.${translationKey}`, column.key),
+    format: column.format,
+  };
+};
 
 const getColumnValue = (client, column, t) => {
   const { key, format } = resolveColumn(column, t);
@@ -83,42 +92,59 @@ const HighlightedText = ({ text, query }) => {
   );
 };
 
+const COLUMN_FLEX = {
+  fullName: "0 0 40%",
+  phone_number: "0 0 30%",
+  passport_number: "0 0 30%",
+};
+
+const getColumnFlex = (key) => COLUMN_FLEX[key] || "1 1 0%";
+
 const ClientOption = ({ client, columns, query, selected, t }) => (
   <Box
     sx={(theme) => ({
-      display: "grid",
-      gridTemplateColumns: `repeat(auto-fit, minmax(${columns.length > 2 ? 130 : 190}px, 1fr))`,
+      display: "flex",
+      alignItems: "center",
       gap: { xs: 1, sm: 1.5 },
       width: "100%",
       px: 1.5,
-      py: 1.25,
+      py: 1,
       border: "1px solid",
-      borderColor: selected ? "primary.main" : "divider",
+      borderColor: selected ? "primary.main" : "transparent",
       borderRadius: 1.5,
+      cursor: "pointer",
+      backgroundColor: selected
+        ? theme.palette.mode === "dark"
+          ? "rgba(59, 130, 246, 0.08)"
+          : "rgba(37, 99, 235, 0.06)"
+        : "transparent",
       boxShadow: selected ? `0 0 0 1px ${theme.palette.primary.main}` : "none",
       transition:
         "background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease",
+      "&:hover": {
+        backgroundColor: selected
+          ? theme.palette.mode === "dark"
+            ? "rgba(59, 130, 246, 0.12)"
+            : "rgba(37, 99, 235, 0.08)"
+          : theme.palette.mode === "dark"
+            ? "rgba(255, 255, 255, 0.04)"
+            : "rgba(0, 0, 0, 0.03)",
+        borderColor: selected ? "primary.main" : "divider",
+      },
     })}
   >
     {columns.map((column, colIdx) => {
-      const { key, label } = resolveColumn(column, t);
+      const { key } = resolveColumn(column, t);
       const value = getColumnValue(client, column, t);
 
       return (
-        <Box key={key ? `${key}-${colIdx}` : colIdx} sx={{ minWidth: 0 }}>
-          <Typography
-            component="span"
-            variant="caption"
-            sx={{
-              display: "block",
-              mb: 0.25,
-              fontWeight: 700,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-            }}
-          >
-            {label}
-          </Typography>
+        <Box
+          key={key ? `${key}-${colIdx}` : colIdx}
+          sx={{
+            flex: getColumnFlex(key),
+            minWidth: 0,
+          }}
+        >
           <Typography
             component="span"
             variant="body2"
@@ -135,6 +161,58 @@ const ClientOption = ({ client, columns, query, selected, t }) => (
     })}
   </Box>
 );
+
+const ListboxWithHeader = forwardRef(function ListboxWithHeader(
+  { children, columns: lbColumns, t: lbT, ...rest },
+  ref,
+) {
+  delete rest.ownerState;
+  return (
+    <ul ref={ref} {...rest} style={{ ...rest.style, padding: 0 }}>
+      {lbColumns && lbColumns.length > 0 && (
+        <Box
+          component="li"
+          aria-hidden
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: { xs: 1, sm: 1.5 },
+            px: 2.5,
+            py: 0.75,
+            backgroundColor: "background.paper",
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            pointerEvents: "none",
+          }}
+        >
+          {lbColumns.map((column, idx) => {
+            const { key, label } = resolveColumn(column, lbT);
+            return (
+              <Typography
+                key={key || idx}
+                variant="caption"
+                sx={{
+                  flex: getColumnFlex(key),
+                  fontWeight: 700,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  color: "text.secondary",
+                  minWidth: 0,
+                }}
+              >
+                {label}
+              </Typography>
+            );
+          })}
+        </Box>
+      )}
+      {children}
+    </ul>
+  );
+});
 
 const GlobalClientAutocompleteField = ({
   field,
@@ -164,7 +242,7 @@ const GlobalClientAutocompleteField = ({
   }
 
   const selectedClient =
-    clients.find((client) => (client.guid || client.id) === field.value) ?? createdClient;
+    clients.find((client) => (client.guid) === field.value) ?? createdClient;
 
   const selectClient = (client) => {
     setCreatedClient(client);
@@ -208,8 +286,8 @@ const GlobalClientAutocompleteField = ({
         clearOnBlur={false}
         autoHighlight
         popupIcon={<ChevronDown size={18} />}
-        getOptionKey={(option) => option?.guid || option?.id || getClientSummary(option, columns, t)}
-        isOptionEqualToValue={(option, value) => (option?.guid || option?.id) === (value?.guid || value?.id)}
+        getOptionKey={(option) => option?.guid || getClientSummary(option, columns, t)}
+        isOptionEqualToValue={(option, value) => (option?.guid) === (value?.guid)}
         getOptionLabel={(option) => getClientSummary(option, columns, t)}
         filterOptions={(options) => options}
         noOptionsText={
@@ -276,7 +354,7 @@ const GlobalClientAutocompleteField = ({
           const selected = optionProps["aria-selected"] === "true";
           const optionKey = option?.guid || option?.id || key;
           return (
-            <li key={optionKey} {...optionProps} style={{ padding: "4px 8px" }}>
+            <li key={optionKey} {...optionProps} style={{ padding: "4px 8px", cursor: "pointer" }}>
               <ClientOption
                 client={option}
                 columns={columns}
@@ -338,13 +416,20 @@ const GlobalClientAutocompleteField = ({
                 htmlInput: {
                   ...paramsSlotProps?.htmlInput,
                   "aria-label":
-                    label ?? placeholder ?? t("columns.client", "Client"),
+                    label ?? placeholder ?? t("columns.client"),
                 },
               }}
             />
           );
         }}
+        slots={{
+          listbox: ListboxWithHeader,
+        }}
         slotProps={{
+          listbox: {
+            columns,
+            t,
+          },
           paper: {
             elevation: 8,
             sx: {
@@ -445,7 +530,7 @@ const GlobalAutoCompleteClient = ({
     const normalized = items.map(normalizeClient);
     const seen = new Set();
     return normalized.filter((client, idx) => {
-      const key = client?.guid || client?.id || `${client?.fullName}-${client?.phone_number}-${idx}`;
+      const key = client?.guid || `${client?.fullName}-${client?.phone_number}-${idx}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;

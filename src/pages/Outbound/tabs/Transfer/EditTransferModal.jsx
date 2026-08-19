@@ -171,16 +171,6 @@ const EditTransferModal = ({ table, row }) => {
               required
             />
           </Grid>
-          <Grid size={6}>
-            <CustomSelect
-              name="prepared_opr_guid"
-              control={control}
-              label={t("outbound.preparedBy")}
-              options={employeeOptions}
-              isLoading={isLoadingEmployees}
-              required
-            />
-          </Grid>
 
           <Grid size={4}>
             <CustomSelect

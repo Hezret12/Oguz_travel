@@ -9,7 +9,7 @@ import FooterButton from "../../../components/Dialog/FooterButton";
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { useLocale } from "../../../hooks/useLocale";
 import { useValidShema } from "../../../functions/useValidShema";
-import GlobalAutoCompleteClient from "../../../components/global/GlobalAutoCompleteClient/GlobalAutoCompleteClient";
+import GlobalAutoCompleteClient from "../../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import AgentAccordion from "../../../components/global/AgentAccordion";
 import AppAutocomplete from "../../../components/AppAutocomplete";
@@ -156,18 +156,38 @@ const AddB2BTicketDialog = ({ table }) => {
       >
         <CustomDialogHeader variant="h5" title={t("b2b.addTicket")} />
 
-        <CustomForm handleSubmit={handleSubmit(submitHandler)}>
+        <CustomForm
+          handleSubmit={handleSubmit(submitHandler)}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+          }}
+        >
           <Box
             sx={{
               flex: 1,
               minHeight: 0,
+              maxHeight: "calc(100vh - 270px)",
               overflowY: "auto",
               overflowX: "hidden",
               pr: 1,
-              mr: -1,
+              mr: -0.5,
               display: "flex",
               flexWrap: "wrap",
               gap: 2.5,
+              scrollbarWidth: "thin",
+              scrollbarColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.2) transparent"
+                  : "rgba(0, 0, 0, 0.2) transparent",
+              "&::-webkit-scrollbar": {
+                width: "6px",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "divider",
+                borderRadius: "999px",
+              },
             }}
           >
             <Box sx={{ flex: { xs: "1 1 100%" }, mt: 1 }}>

@@ -12,7 +12,6 @@ import Pagination from "../../../components/Pagination";
 import StackedCell from "../../../components/inputs/StackCell";
 import {
   colSize,
-  nameColSize,
   ordNumColSize,
   price,
   route,
@@ -22,9 +21,7 @@ import AddB2BTicketDialog from "./AddB2BTicketDialog";
 import EditB2BDialog from "./EditB2BDialog";
 import StatusChip from "../../../components/StatusChip";
 
-import {
-  SALE_STATUS_CONFIG,
-} from "../../../functions/statusChipConfigs";
+import { SALE_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import { usePageFilters } from "../../../hooks/usePageFilters";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -34,13 +31,18 @@ import {
 } from "../../../store/slices/filters/b2bFilterSlice";
 import FilterDrawer from "../../../components/FilterDrawer";
 import B2BFilter from "./Contents/B2BFilter";
-import { getAllB2BApi, getAllEmployeeApi, getAllStatusApi } from "../../../api/queries/getters";
+import {
+  getAllB2BApi,
+  getAllEmployeeApi,
+  getAllStatusApi,
+} from "../../../api/queries/getters";
 import DeleteDialog from "../../../components/DeleteDialog";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { deleteB2BApi } from "../../../api/queries/delete";
 import PaymentStatusCell from "../../../components/PaymentStatusCell";
 import { useDateFormat } from "../../../functions/generalHelpers";
+import { PaymentManagementModal } from "../../../components/Dialog/PaymentManagementModal";
 
 const formatDate = (value) => {
   if (!value) return "";
@@ -55,12 +57,12 @@ const CURRENCY_SYMBOLS = {
   RUB: "₽",
 };
 
-
 const B2B = () => {
   const { t, selectedLang } = useLocale();
   const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
+  const [paymentModalRow, setPaymentModalRow] = useState(null);
 
   const {
     applied,
@@ -218,7 +220,7 @@ const B2B = () => {
         accessorFn: (row) => row.assignment_operator?.fullName,
         id: "assignment_operator",
         header: t("columns.operator"),
-        size: 200,
+        size: 220,
         Cell: ({ row }) => {
           return (
             <StackedCell
@@ -234,7 +236,7 @@ const B2B = () => {
         accessorFn: (row) => row.receiver_operator?.fullName,
         id: "receiver_operator",
         header: t("columns.operatorTwo"),
-        size: 200,
+        size: 220,
         Cell: ({ row }) => {
           return (
             <StackedCell
@@ -250,7 +252,7 @@ const B2B = () => {
         accessorFn: (row) => row.client?.fullName,
         id: "client",
         header: t("columns.client"),
-        size: nameColSize,
+        size: 220,
         Cell: ({ row }) => {
           return (
             <StackedCell
@@ -276,14 +278,18 @@ const B2B = () => {
       },
       {
         accessorFn: (row) => {
-          const pct = row.paidPercentage;
+          const pct = row.paidPercentage ?? row.payment_percent;
           return typeof pct === "string" ? parseFloat(pct) : pct;
         },
         id: "paidPercentage",
         header: t("columns.paymentStatus"),
         size: 110,
         Cell: ({ row }) => (
-          <PaymentStatusCell percent={row.original.paidPercentage} />
+          <PaymentStatusCell
+            percent={
+              row.original.paidPercentage ?? row.original.payment_percent
+            }
+          />
         ),
       },
       {
@@ -294,7 +300,7 @@ const B2B = () => {
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          return `${symbol}${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number(cell.getValue() ?? 0))}`;
+          return `${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number(cell.getValue() ?? 0))} ${symbol}`;
         },
         muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
@@ -307,7 +313,7 @@ const B2B = () => {
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          return `${symbol}${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number(cell.getValue() ?? 0))}`;
+          return `${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(Number(cell.getValue() ?? 0))} ${symbol}`;
         },
         muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
@@ -336,10 +342,10 @@ const B2B = () => {
             >
               {profit > 0 ? "+" : ""}
               {profit < 0 ? "-" : ""}
-              {symbol}
               {new Intl.NumberFormat("en-US", {
                 maximumFractionDigits: 0,
               }).format(Math.abs(profit))}
+              {symbol}
             </Box>
           );
         },
@@ -435,6 +441,7 @@ const B2B = () => {
             row={row}
             table={table}
             showPayment={true}
+            onPaymentClick={(r) => setPaymentModalRow(r)}
             onDelete={handleDeleteClick}
           />
         ),
@@ -459,6 +466,8 @@ const B2B = () => {
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
     enableColumnPinning: true,
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     initialState: {
       columnPinning: {
         left: ["index_number"],
@@ -573,12 +582,6 @@ const B2B = () => {
         </Box>
       );
     },
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddB2BTicketDialog table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditB2BDialog table={table} row={row} />
-    ),
   });
 
   return (
@@ -618,7 +621,23 @@ const B2B = () => {
         isLoading={isDeleting}
       />
 
+      {Boolean(paymentModalRow) && (
+        <PaymentManagementModal
+          open={Boolean(paymentModalRow)}
+          onClose={() => {
+            setPaymentModalRow(null);
+            refetch();
+          }}
+          row={paymentModalRow}
+        />
+      )}
+
       <MaterialReactTable table={table} />
+
+      {table.getState().creatingRow && <AddB2BTicketDialog table={table} />}
+      {table.getState().editingRow && (
+        <EditB2BDialog table={table} row={table.getState().editingRow} />
+      )}
     </Box>
   );
 };

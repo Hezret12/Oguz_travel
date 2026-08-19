@@ -37,7 +37,10 @@ const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonT
             <Button
               variant="outlined"
               startIcon={<Funnel size={16} />}
-              onClick={onFilterClick}
+              onClick={(e) => {
+                e.currentTarget.blur();
+                onFilterClick(e);
+              }}
               disableElevation
               sx={{
                 height: "40px",
@@ -55,7 +58,10 @@ const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonT
             <Button
               variant="contained"
               startIcon={<AddIcon sx={{ fontSize: "18px !important" }} />}
-              onClick={onAddClick}
+              onClick={(e) => {
+                e.currentTarget.blur();
+                onAddClick(e);
+              }}
               disableElevation
               sx={{
                 height: "40px",

@@ -83,11 +83,11 @@ export const getAllUsersApi = async (params = {}) => {
 };
 
 export const getAllPaymentStatusApi = async (params = {}) => {
-  return await api.getPrivate('/ticket-payment/getAll-ticket-payment', params);
+  return await api.getPrivate('/ticket-payment/get-all-ticket-payment', params);
 };
 
 export const getAllTurkishAirlinesApi = async (params = {}) => {
-  return await api.getPrivate('/turkish-airlines/get-all-turkish-airlines', params);
+  return await api.getPrivate('/turkish-airlines/get-tukish-airlines', params);
 };
 
 export const getAllVisaPackagesApi = async (params = {}) => {
@@ -164,7 +164,7 @@ export const getTurkishAirlinesStatusMonthApi = async (params = {}) => {
 };
 
 export const getAllTurkishPaymentApi = async (params = {}) => {
-  return await api.getPrivate('/turkish-payment/getAll-turkish-payment', params);
+  return await api.getPrivate('/turkish-payment/get-all-turkish-payment', params);
 };
 
 export const getTurkishQuarterApi = async (params = {}) => {
