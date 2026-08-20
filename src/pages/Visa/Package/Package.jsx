@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Box } from "@mui/material";
-import toast from "react-hot-toast";
 import DocumentList from "./DocumentList";
 import DocumentEditor from "./DocumentEditor";
 import {
@@ -68,7 +67,6 @@ const Package = () => {
         setActiveDocument(deserialized);
       }
       refetch();
-      toast.success("Dokument üstünlikli döredildi!");
     },
   });
 
@@ -84,7 +82,6 @@ const Package = () => {
         setActiveDocument(deserialized);
       }
       refetch();
-      toast.success("Dokument üstünlikli ýatda saklandy!");
     },
   });
 

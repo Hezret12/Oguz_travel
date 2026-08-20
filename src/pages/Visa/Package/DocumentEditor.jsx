@@ -7,15 +7,20 @@ import {
   Paper,
   CircularProgress,
   Grid,
+  Tooltip,
 } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import DynamicTable from "./DynamicTable";
 import DocumentPreviewModal from "./DocumentPreviewModal";
 import { createDocumentsTable, createPricesTable } from "./constants";
+import { useLocale } from "../../../hooks/useLocale";
 
 const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) => {
+  const { t } = useLocale();
+
   const [docData, setDocData] = useState(() => {
     let tables = initialDocument.tables || [];
     if (tables.length === 0) {
@@ -54,7 +59,7 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
   const handleSaveClick = () => {
     const updated = {
       ...docData,
-      title: docData.title?.trim() || "Täze wiza dokumenti",
+      title: docData.title?.trim() || t("visaDocument.newDocument"),
       updatedAt: new Date().toISOString(),
     };
     onSave(updated);
@@ -102,11 +107,11 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
               },
             }}
           >
-            Yza
+            {t("visaDocument.back")}
           </Button>
 
           <Typography variant="h6" sx={{ fontWeight: 700, fontSize: "1.15rem" }}>
-            {isEditMode ? "Dokumenti düzetmek" : "Täze wiza dokumenti"}
+            {isEditMode ? t("visaDocument.editDocument") : t("visaDocument.newDocument")}
           </Typography>
         </Box>
 
@@ -131,7 +136,7 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
               },
             }}
           >
-            Word Önizleme
+            {t("visaDocument.preview")}
           </Button>
 
           <Button
@@ -154,7 +159,7 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
               py: 0.8,
             }}
           >
-            {isSaving ? "Ýatlanýar..." : "Ýatda sakla"}
+            {isSaving ? t("visaDocument.saving") : t("visaDocument.save")}
           </Button>
         </Box>
       </Box>
@@ -191,21 +196,32 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
               mb: 2.5,
             }}
           >
-            Esasy maglumatlar
+            {t("visaDocument.basicInfo")}
           </Typography>
 
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, sm: 7 }}>
-              <Box sx={{ mb: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1 }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.88rem" }}>
-                  Dokumentiň ady *
+                  {t("visaDocument.docTitle")} *
                 </Typography>
+                <Tooltip title={t("visaDocument.docTitleHelper")} placement="top" arrow>
+                  <HelpOutlineRoundedIcon
+                    sx={{
+                      fontSize: 15,
+                      color: "text.secondary",
+                      cursor: "pointer",
+                      opacity: 0.65,
+                      "&:hover": { opacity: 1, color: "primary.main" },
+                    }}
+                  />
+                </Tooltip>
               </Box>
               <TextField
                 fullWidth
                 value={docData.title || ""}
                 onChange={handleTitleChange}
-                placeholder="Meselem: Hytaý Wiza Paketi"
+                placeholder={t("visaDocument.docTitlePlaceholder")}
                 slotProps={{
                   input: {
                     sx: {
@@ -221,16 +237,27 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
             </Grid>
 
             <Grid size={{ xs: 12, sm: 5 }}>
-              <Box sx={{ mb: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1 }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.88rem" }}>
-                  Ýurt / Ugur *
+                  {t("visaDocument.country")} *
                 </Typography>
+                <Tooltip title={t("visaDocument.countryHelper")} placement="top" arrow>
+                  <HelpOutlineRoundedIcon
+                    sx={{
+                      fontSize: 15,
+                      color: "text.secondary",
+                      cursor: "pointer",
+                      opacity: 0.65,
+                      "&:hover": { opacity: 1, color: "primary.main" },
+                    }}
+                  />
+                </Tooltip>
               </Box>
               <TextField
                 fullWidth
                 value={docData.country || ""}
                 onChange={handleCountryChange}
-                placeholder="Meselem: Hytaý, BAE, Saud Arabystany"
+                placeholder={t("visaDocument.countryPlaceholder")}
                 slotProps={{
                   input: {
                     sx: {
@@ -268,13 +295,21 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
             p: { xs: 2.5, sm: 3.5 },
           }}
         >
-          <Box sx={{ mb: 1.5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1.25 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: "1rem", color: "text.primary" }}>
-              Umumy bellik
+              {t("visaDocument.generalNote")}
             </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.84rem" }}>
-              Dokumentiň ahyrynda görkeziljek goşmaça düşündirişler (islege görä)
-            </Typography>
+            <Tooltip title={t("visaDocument.generalNoteHelper")} placement="top" arrow>
+              <HelpOutlineRoundedIcon
+                sx={{
+                  fontSize: 15,
+                  color: "text.secondary",
+                  cursor: "pointer",
+                  opacity: 0.65,
+                  "&:hover": { opacity: 1, color: "primary.main" },
+                }}
+              />
+            </Tooltip>
           </Box>
 
           <TextField
@@ -283,7 +318,7 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
             rows={4}
             value={docData.generalNote || ""}
             onChange={handleGeneralNoteChange}
-            placeholder="Goşmaça umumy bellikler we şertler..."
+            placeholder={t("visaDocument.generalNotePlaceholder")}
             slotProps={{
               input: {
                 sx: {

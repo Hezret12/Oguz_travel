@@ -11,6 +11,7 @@ import {
   Divider,
   TextField,
   Paper,
+  Tooltip,
 } from "@mui/material";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
@@ -23,9 +24,13 @@ import ContentCutRoundedIcon from "@mui/icons-material/ContentCutRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ViewColumnRoundedIcon from "@mui/icons-material/ViewColumnRounded";
 import TableRowsRoundedIcon from "@mui/icons-material/TableRowsRounded";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import { createNewCell } from "./constants";
+import { useLocale } from "../../../hooks/useLocale";
 
 const DynamicTable = ({ table, tableIndex, onUpdate }) => {
+  const { t } = useLocale();
+
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [activeCellCoord, setActiveCellCoord] = useState(null); // { r: rowIndex, c: colIndex }
 
@@ -264,14 +269,27 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
         }}
       >
         <Box sx={{ flex: 1, minWidth: "260px" }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.88rem", mb: 1 }}>
-            Tablisa {tableIndex + 1} ady *
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.88rem" }}>
+              {t("visaDocument.tableTitle", { number: tableIndex + 1 })} *
+            </Typography>
+            <Tooltip title={t("visaDocument.tableTitleHelper")} placement="top" arrow>
+              <HelpOutlineRoundedIcon
+                sx={{
+                  fontSize: 15,
+                  color: "text.secondary",
+                  cursor: "pointer",
+                  opacity: 0.65,
+                  "&:hover": { opacity: 1, color: "primary.main" },
+                }}
+              />
+            </Tooltip>
+          </Box>
           <TextField
             fullWidth
             value={table.title ?? `TABLISA ${tableIndex + 1}`}
             onChange={(e) => onUpdate({ ...table, title: e.target.value })}
-            placeholder={`Tablisa ${tableIndex + 1} ady`}
+            placeholder={t("visaDocument.tableTitlePlaceholder", { number: tableIndex + 1 })}
             slotProps={{
               input: {
                 sx: {
@@ -309,7 +327,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
               },
             }}
           >
-            Setir goş
+            {t("visaDocument.addRow")}
           </Button>
 
           <Button
@@ -332,7 +350,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
               },
             }}
           >
-            Sütün goş
+            {t("visaDocument.addColumn")}
           </Button>
         </Box>
       </Box>
@@ -444,7 +462,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                               multiline
                               value={cell.text || ""}
                               onChange={(e) => handleCellTextChange(rIdx, cIdx, e.target.value)}
-                              placeholder={isHeaderRow ? "Sütün ady..." : "..."}
+                              placeholder={isHeaderRow ? t("visaDocument.columnNamePlaceholder") : t("visaDocument.cellPlaceholder")}
                               slotProps={{
                                 input: {
                                   disableUnderline: true,
@@ -497,16 +515,29 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
 
       {/* Table Note Area */}
       <Box>
-        <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.88rem", mb: 1 }}>
-          Tablisa bellikleri (islege görä)
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.88rem" }}>
+            {t("visaDocument.tableNote")}
+          </Typography>
+          <Tooltip title={t("visaDocument.tableNoteHelper")} placement="top" arrow>
+            <HelpOutlineRoundedIcon
+              sx={{
+                fontSize: 15,
+                color: "text.secondary",
+                cursor: "pointer",
+                opacity: 0.65,
+                "&:hover": { opacity: 1, color: "primary.main" },
+              }}
+            />
+          </Tooltip>
+        </Box>
         <TextField
           fullWidth
           multiline
           rows={3}
           value={table.note || ""}
           onChange={(e) => onUpdate({ ...table, note: e.target.value })}
-          placeholder="Meselem: Resminamalar iňlis ýa-da rus dilinde terjime edilmeli..."
+          placeholder={t("visaDocument.tableNotePlaceholder")}
           slotProps={{
             input: {
               sx: {
@@ -544,7 +575,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
       >
         <Box sx={{ px: 2, py: 0.5 }}>
           <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, fontSize: "0.72rem" }}>
-            Öýjük hereketleri
+            {t("visaDocument.cellActions")}
           </Typography>
         </Box>
 
@@ -552,14 +583,14 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
           <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
             <ArrowForwardRoundedIcon sx={{ fontSize: 17 }} />
           </ListItemIcon>
-          <ListItemText primary="Saga birikdir" slotProps={{ primary: { fontSize: "0.85rem" } }} />
+          <ListItemText primary={t("visaDocument.mergeRight")} slotProps={{ primary: { fontSize: "0.85rem" } }} />
         </MenuItem>
 
         <MenuItem onClick={handleMergeDown} sx={{ py: 0.8, fontSize: "0.85rem" }}>
           <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
             <ArrowDownwardRoundedIcon sx={{ fontSize: 17 }} />
           </ListItemIcon>
-          <ListItemText primary="Aşakyna birikdir" slotProps={{ primary: { fontSize: "0.85rem" } }} />
+          <ListItemText primary={t("visaDocument.mergeDown")} slotProps={{ primary: { fontSize: "0.85rem" } }} />
         </MenuItem>
 
         {canSplit && (
@@ -567,7 +598,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
             <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
               <ContentCutRoundedIcon sx={{ fontSize: 17 }} />
             </ListItemIcon>
-            <ListItemText primary="Böl (split)" slotProps={{ primary: { fontSize: "0.85rem" } }} />
+            <ListItemText primary={t("visaDocument.splitCell")} slotProps={{ primary: { fontSize: "0.85rem" } }} />
           </MenuItem>
         )}
 
@@ -577,7 +608,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
             <Divider sx={{ my: 0.5 }} />
             <Box sx={{ px: 2, py: 0.5 }}>
               <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, fontSize: "0.72rem" }}>
-                Ýerini çalyş
+                {t("visaDocument.reorder")}
               </Typography>
             </Box>
 
@@ -586,7 +617,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                 <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
                   <KeyboardArrowLeftRoundedIcon sx={{ fontSize: 17 }} />
                 </ListItemIcon>
-                <ListItemText primary="Sütüni çepe göçür" slotProps={{ primary: { fontSize: "0.85rem" } }} />
+                <ListItemText primary={t("visaDocument.moveColLeft")} slotProps={{ primary: { fontSize: "0.85rem" } }} />
               </MenuItem>
             )}
 
@@ -595,7 +626,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                 <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
                   <KeyboardArrowRightRoundedIcon sx={{ fontSize: 17 }} />
                 </ListItemIcon>
-                <ListItemText primary="Sütüni saga göçür" slotProps={{ primary: { fontSize: "0.85rem" } }} />
+                <ListItemText primary={t("visaDocument.moveColRight")} slotProps={{ primary: { fontSize: "0.85rem" } }} />
               </MenuItem>
             )}
 
@@ -611,7 +642,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                 <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
                   <KeyboardArrowUpRoundedIcon sx={{ fontSize: 17 }} />
                 </ListItemIcon>
-                <ListItemText primary="Setiri ýokaryk göçür" slotProps={{ primary: { fontSize: "0.85rem" } }} />
+                <ListItemText primary={t("visaDocument.moveRowUp")} slotProps={{ primary: { fontSize: "0.85rem" } }} />
               </MenuItem>
             )}
 
@@ -627,7 +658,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                 <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
                   <KeyboardArrowDownRoundedIcon sx={{ fontSize: 17 }} />
                 </ListItemIcon>
-                <ListItemText primary="Setiri aşak göçür" slotProps={{ primary: { fontSize: "0.85rem" } }} />
+                <ListItemText primary={t("visaDocument.moveRowDown")} slotProps={{ primary: { fontSize: "0.85rem" } }} />
               </MenuItem>
             )}
           </>
@@ -639,14 +670,14 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
           <ListItemIcon sx={{ minWidth: 28, color: "error.main" }}>
             <TableRowsRoundedIcon sx={{ fontSize: 17 }} />
           </ListItemIcon>
-          <ListItemText primary="Setiri poz" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
+          <ListItemText primary={t("visaDocument.deleteRow")} slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
         </MenuItem>
 
         <MenuItem onClick={handleDeleteColumn} sx={{ py: 0.8, color: "error.main" }}>
           <ListItemIcon sx={{ minWidth: 28, color: "error.main" }}>
             <ViewColumnRoundedIcon sx={{ fontSize: 17 }} />
           </ListItemIcon>
-          <ListItemText primary="Sütni poz" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
+          <ListItemText primary={t("visaDocument.deleteColumn")} slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
         </MenuItem>
       </Menu>
     </Paper>

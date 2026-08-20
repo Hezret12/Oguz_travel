@@ -1,9 +1,9 @@
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 
-const OguzLogo = ({ sx, iconOnly = false, ...props }) => {
+const OguzLogo = ({ sx, iconOnly = false, forceLight = false, ...props }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+  const isDark = !forceLight && theme.palette.mode === 'dark';
 
   return (
     <Box
