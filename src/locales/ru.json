@@ -311,6 +311,7 @@
     "reportTurkishAirlines": "Turkish Airlines",
     "reportReferralLetter": "Рекомендательные письма",
     "visa": {
+      "title": "Виза",
       "package": "Пакеты",
       "packages": "Пакеты"
     }

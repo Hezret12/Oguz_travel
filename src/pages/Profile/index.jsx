@@ -64,6 +64,32 @@ const ProfilePage = () => {
     },
   });
 
+  // Sync user & connected employee details when auth loads
+  useEffect(() => {
+    if (user) {
+      setProfile((prev) => {
+        const isDefaultName = !prev.full_name || prev.full_name === DEFAULT_PROFILE.full_name;
+        const isDefaultRole = !prev.role || prev.role === DEFAULT_PROFILE.role;
+        const isDefaultEmail = !prev.contact?.email || prev.contact?.email === DEFAULT_PROFILE.contact.email;
+        const isDefaultPhone = !prev.contact?.phone || prev.contact?.phone === DEFAULT_PROFILE.contact.phone;
+        const isDefaultLocation = !prev.contact?.location || prev.contact?.location === DEFAULT_PROFILE.contact.location;
+
+        return {
+          ...prev,
+          full_name: isDefaultName ? (user.name || user.fullName || DEFAULT_PROFILE.full_name) : prev.full_name,
+          role: isDefaultRole ? (user.position || user.position_name || DEFAULT_PROFILE.role) : prev.role,
+          avatar_url: prev.avatar_url || user.avatar_url || "",
+          contact: {
+            ...prev.contact,
+            email: isDefaultEmail ? (user.email || DEFAULT_PROFILE.contact.email) : prev.contact?.email,
+            phone: isDefaultPhone ? (user.phone_number || DEFAULT_PROFILE.contact.phone) : prev.contact?.phone,
+            location: isDefaultLocation ? (user.office || user.department || DEFAULT_PROFILE.contact.location) : prev.contact?.location,
+          },
+        };
+      });
+    }
+  }, [user]);
+
   // When server data arrives, merge into local state
   useEffect(() => {
     if (serverProfileData && typeof serverProfileData === "object" && Object.keys(serverProfileData).length > 0) {

@@ -17,12 +17,70 @@ export function normalizeUser(rawUser) {
   if (!rawUser) return null;
 
   const role = resolveUserRole(rawUser);
+  const emp = rawUser.employee || {};
+
+  const name =
+    emp.fullName ||
+    emp.name ||
+    rawUser.name ||
+    rawUser.fullName ||
+    rawUser.employee_name ||
+    rawUser.user_name ||
+    rawUser.phone_number ||
+    rawUser.phone ||
+    '';
+
+  const email =
+    emp.email ||
+    rawUser.email ||
+    rawUser.user_email ||
+    '';
+
+  const phone_number =
+    emp.phone_number ||
+    emp.phone ||
+    rawUser.phone_number ||
+    rawUser.phone ||
+    '';
+
+  const position =
+    (typeof emp.position === 'object' ? emp.position?.name : emp.position) ||
+    (typeof rawUser.position === 'object' ? rawUser.position?.name : rawUser.position) ||
+    rawUser.position_name ||
+    '';
+
+  const department =
+    (typeof emp.department === 'object' ? emp.department?.name : emp.department) ||
+    (typeof rawUser.department === 'object' ? rawUser.department?.name : rawUser.department) ||
+    rawUser.department_name ||
+    '';
+
+  const office =
+    (typeof emp.office === 'object' ? emp.office?.name || emp.office?.shortName : emp.office) ||
+    (typeof rawUser.office === 'object' ? rawUser.office?.name : rawUser.office) ||
+    rawUser.office_name ||
+    '';
+
+  const avatar_url =
+    emp.avatar_url ||
+    emp.avatar ||
+    rawUser.avatar_url ||
+    rawUser.avatar ||
+    '';
 
   return {
     ...rawUser,
+    guid: rawUser.guid || rawUser.id,
     role,
-    name: rawUser.name ?? rawUser.employee_name ?? rawUser.user_name ?? rawUser.phone_number ?? rawUser.phone ?? '',
-    email: rawUser.email ?? rawUser.user_email ?? '',
+    name,
+    fullName: name,
+    email,
+    phone_number,
+    position,
+    department,
+    office,
+    avatar_url,
+    employee_guid: emp.guid || emp.id || rawUser.employee_guid || null,
   };
 }
 

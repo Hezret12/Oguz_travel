@@ -40,62 +40,6 @@ export const useSidebarItems = () => {
         icon: createElement(CheckSquare, { size: 20, strokeWidth: 2.2 }),
       },
       {
-        id: "notifications",
-        text: t("sidebar.notifications"),
-        path: PATHS.NOTIFICATIONS,
-        icon: createElement(Bell, { size: 20, strokeWidth: 2.2 }),
-      },
-      {
-        id: "profile",
-        text: t("sidebar.profile") || "Profil",
-        path: PATHS.PROFILE,
-        icon: createElement(UserCircle, { size: 20, strokeWidth: 2.2 }),
-      },
-      {
-        id: "employee",
-        isGroup: true,
-        text: t("sidebar.employee"),
-        icon: createElement(UserCog, { size: 20, strokeWidth: 2.2 }),
-        children: [
-          {
-            id: "employees",
-            text: t("sidebar.employees"),
-            path: PATHS.EMPLOYEE.EMPLOYEES,
-            icon: createElement(UserCheck, { size: 18, strokeWidth: 2.2 }),
-          },
-          {
-            id: "users",
-            text: t("sidebar.users"),
-            path: PATHS.EMPLOYEE.USERS,
-            icon: createElement(Users, { size: 18, strokeWidth: 2.2 }),
-          },
-        ],
-      },
-      {
-        id: "ticket",
-        isGroup: true,
-        text: t("sidebar.ticket"),
-        icon: createElement(Ticket, { size: 20, strokeWidth: 2.2 }),
-        children: [
-          {
-            id: "ticket-b2b",
-            text: t("sidebar.ticketB2B"),
-            path: PATHS.TICKET.B2B,
-            icon: createElement(Building2, { size: 18, strokeWidth: 2.2 }),
-          },
-          {
-            id: "ticket-turkish-airlines",
-            text: t("sidebar.ticketTurkishAirlines"),
-            path: PATHS.TICKET.TURKISH_AIRLINES,
-            icon: createElement("img", {
-              src: TurkishAirlinesIcon,
-              alt: "Turkish Airlines",
-              style: { width: 30, height: 28, objectFit: "contain" },
-            }),
-          },
-        ],
-      },
-      {
         id: "clients",
         text: t("sidebar.clients"),
         icon: createElement(Contact2, { size: 20, strokeWidth: 2.2 }),
@@ -118,6 +62,36 @@ export const useSidebarItems = () => {
             text: t("sidebar.visa.package"),
             path: PATHS.VISA.PACKAGE,
             icon: createElement(Package, { size: 18, strokeWidth: 2.2 }),
+          },
+        ],
+      },
+      {
+        id: "visa-intake",
+        text: t("sidebar.visaIntake"),
+        path: PATHS.INTAKE,
+        icon: createElement(ClipboardCheck, { size: 20, strokeWidth: 2.2 }),
+      },
+      {
+        id: "ticket",
+        isGroup: true,
+        text: t("sidebar.ticket"),
+        icon: createElement(Ticket, { size: 20, strokeWidth: 2.2 }),
+        children: [
+          {
+            id: "ticket-b2b",
+            text: t("sidebar.ticketB2B"),
+            path: PATHS.TICKET.B2B,
+            icon: createElement(Building2, { size: 18, strokeWidth: 2.2 }),
+          },
+          {
+            id: "ticket-turkish-airlines",
+            text: t("sidebar.ticketTurkishAirlines"),
+            path: PATHS.TICKET.TURKISH_AIRLINES,
+            icon: createElement("img", {
+              src: TurkishAirlinesIcon,
+              alt: "Turkish Airlines",
+              style: { width: 30, height: 28, objectFit: "contain" },
+            }),
           },
         ],
       },
@@ -164,15 +138,40 @@ export const useSidebarItems = () => {
         ],
       },
       {
-        id: "visa-intake",
-        text: t("sidebar.visaIntake"),
-        path: PATHS.INTAKE,
-        icon: createElement(ClipboardCheck, { size: 20, strokeWidth: 2.2 }),
-      }
+        id: "employee",
+        isGroup: true,
+        text: t("sidebar.employee"),
+        icon: createElement(UserCog, { size: 20, strokeWidth: 2.2 }),
+        children: [
+          {
+            id: "employees",
+            text: t("sidebar.employees"),
+            path: PATHS.EMPLOYEE.EMPLOYEES,
+            icon: createElement(UserCheck, { size: 18, strokeWidth: 2.2 }),
+          },
+          {
+            id: "users",
+            text: t("sidebar.users"),
+            path: PATHS.EMPLOYEE.USERS,
+            icon: createElement(Users, { size: 18, strokeWidth: 2.2 }),
+          },
+        ],
+      },
+      {
+        id: "notifications",
+        text: t("sidebar.notifications"),
+        path: PATHS.NOTIFICATIONS,
+        icon: createElement(Bell, { size: 20, strokeWidth: 2.2 }),
+      },
+      {
+        id: "profile",
+        text: t("sidebar.profile") || "Profil",
+        path: PATHS.PROFILE,
+        icon: createElement(UserCircle, { size: 20, strokeWidth: 2.2 }),
+      },
     ],
     [t],
   );
 };
 
 export const useNavItems = useSidebarItems;
-
