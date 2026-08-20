@@ -18,6 +18,15 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { useLocale } from "../../hooks/useLocale";
 
+const formatText = (val) => {
+  if (!val) return "";
+  if (typeof val === "string") return val;
+  if (typeof val === "object") {
+    return val.fullName || val.name || val.shortName || val.title || "";
+  }
+  return String(val);
+};
+
 const CVPrintPreviewModal = ({ open, onClose, profile }) => {
   const { t } = useLocale();
 
@@ -34,9 +43,15 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
   const certifications = profile.certifications || [];
   const languages = profile.languages || [];
   const references = profile.references || [];
-  const summary = profile.personal_summary || profile.personalSummary;
-  const fullName = profile.full_name || profile.fullName;
+  const summary = formatText(profile.personal_summary || profile.personalSummary);
+  const fullName = formatText(profile.full_name || profile.fullName);
+  const role = formatText(profile.role);
   const avatarUrl = profile.avatar_url || profile.avatarUrl;
+  const emailStr = formatText(contact.email);
+  const phoneStr = formatText(contact.phone);
+  const locationStr = formatText(contact.location);
+  const websiteStr = formatText(contact.website);
+  const linkedinStr = formatText(contact.linkedin);
 
   return (
     <Dialog

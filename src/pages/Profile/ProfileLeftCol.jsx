@@ -18,6 +18,15 @@ import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
 
+const formatText = (val) => {
+  if (!val) return "";
+  if (typeof val === "string") return val;
+  if (typeof val === "object") {
+    return val.fullName || val.name || val.shortName || val.title || "";
+  }
+  return String(val);
+};
+
 const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
   const { t } = useLocale();
   const fileInputRef = useRef(null);
@@ -43,6 +52,15 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
     };
     reader.readAsDataURL(file);
   };
+
+  const fullNameStr = formatText(profile.full_name || profile.fullName);
+  const roleStr = formatText(profile.role);
+  const statusStr = formatText(profile.status);
+  const emailStr = formatText(contact.email);
+  const phoneStr = formatText(contact.phone);
+  const locationStr = formatText(contact.location);
+  const websiteStr = formatText(contact.website);
+  const linkedinStr = formatText(contact.linkedin);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -99,7 +117,7 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
             >
               <Avatar
                 src={profile.avatar_url || profile.avatarUrl}
-                alt={profile.full_name || profile.fullName}
+                alt={fullNameStr}
                 sx={{
                   width: 110,
                   height: 110,
@@ -111,7 +129,7 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
                   bgcolor: "#0c8a7b",
                 }}
               >
-                {(profile.full_name || profile.fullName)?.charAt(0) || "U"}
+                {fullNameStr.charAt(0) || "U"}
               </Avatar>
 
               {/* Hover Camera Overlay */}
@@ -146,7 +164,7 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
             mb: 0.5,
           }}
         >
-          {profile.full_name || profile.fullName}
+          {fullNameStr}
         </Typography>
 
         <Typography
@@ -158,12 +176,12 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
             mb: 2,
           }}
         >
-          {profile.role}
+          {roleStr}
         </Typography>
 
-        {profile.status && (
+        {statusStr && (
           <Chip
-            label={profile.status}
+            label={statusStr}
             size="small"
             sx={{
               bgcolor: (theme) =>
@@ -220,47 +238,47 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
         </Box>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
-          {contact.email && (
+          {emailStr && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <MailOutlineRoundedIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
               <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {contact.email}
+                {emailStr}
               </Typography>
             </Box>
           )}
 
-          {contact.phone && (
+          {phoneStr && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <PhoneOutlinedIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
               <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {contact.phone}
+                {phoneStr}
               </Typography>
             </Box>
           )}
 
-          {contact.location && (
+          {locationStr && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <LocationOnOutlinedIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
               <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {contact.location}
+                {locationStr}
               </Typography>
             </Box>
           )}
 
-          {contact.website && (
+          {websiteStr && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <LanguageOutlinedIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
               <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {contact.website}
+                {websiteStr}
               </Typography>
             </Box>
           )}
 
-          {contact.linkedin && (
+          {linkedinStr && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <LinkedInIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
               <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {contact.linkedin}
+                {linkedinStr}
               </Typography>
             </Box>
           )}

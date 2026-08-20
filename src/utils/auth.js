@@ -13,6 +13,15 @@ export function resolveUserRole(rawUser) {
   return 'user';
 }
 
+function extractText(val) {
+  if (!val) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val === 'object') {
+    return val.fullName || val.name || val.shortName || val.title || '';
+  }
+  return String(val);
+}
+
 export function normalizeUser(rawUser) {
   if (!rawUser) return null;
 
@@ -20,52 +29,52 @@ export function normalizeUser(rawUser) {
   const emp = rawUser.employee || {};
 
   const name =
-    emp.fullName ||
-    emp.name ||
-    rawUser.name ||
-    rawUser.fullName ||
-    rawUser.employee_name ||
-    rawUser.user_name ||
-    rawUser.phone_number ||
-    rawUser.phone ||
+    extractText(emp.fullName) ||
+    extractText(emp.name) ||
+    extractText(rawUser.name) ||
+    extractText(rawUser.fullName) ||
+    extractText(rawUser.employee_name) ||
+    extractText(rawUser.user_name) ||
+    extractText(rawUser.phone_number) ||
+    extractText(rawUser.phone) ||
     '';
 
   const email =
-    emp.email ||
-    rawUser.email ||
-    rawUser.user_email ||
+    extractText(emp.email) ||
+    extractText(rawUser.email) ||
+    extractText(rawUser.user_email) ||
     '';
 
   const phone_number =
-    emp.phone_number ||
-    emp.phone ||
-    rawUser.phone_number ||
-    rawUser.phone ||
+    extractText(emp.phone_number) ||
+    extractText(emp.phone) ||
+    extractText(rawUser.phone_number) ||
+    extractText(rawUser.phone) ||
     '';
 
   const position =
-    (typeof emp.position === 'object' ? emp.position?.name : emp.position) ||
-    (typeof rawUser.position === 'object' ? rawUser.position?.name : rawUser.position) ||
-    rawUser.position_name ||
+    extractText(emp.position) ||
+    extractText(rawUser.position) ||
+    extractText(rawUser.position_name) ||
     '';
 
   const department =
-    (typeof emp.department === 'object' ? emp.department?.name : emp.department) ||
-    (typeof rawUser.department === 'object' ? rawUser.department?.name : rawUser.department) ||
-    rawUser.department_name ||
+    extractText(emp.department) ||
+    extractText(rawUser.department) ||
+    extractText(rawUser.department_name) ||
     '';
 
   const office =
-    (typeof emp.office === 'object' ? emp.office?.name || emp.office?.shortName : emp.office) ||
-    (typeof rawUser.office === 'object' ? rawUser.office?.name : rawUser.office) ||
-    rawUser.office_name ||
+    extractText(emp.office) ||
+    extractText(rawUser.office) ||
+    extractText(rawUser.office_name) ||
     '';
 
   const avatar_url =
-    emp.avatar_url ||
-    emp.avatar ||
-    rawUser.avatar_url ||
-    rawUser.avatar ||
+    extractText(emp.avatar_url) ||
+    extractText(emp.avatar) ||
+    extractText(rawUser.avatar_url) ||
+    extractText(rawUser.avatar) ||
     '';
 
   return {
