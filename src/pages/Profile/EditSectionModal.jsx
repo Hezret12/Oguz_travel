@@ -1,428 +1,595 @@
 import { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
   Box,
   Typography,
   IconButton,
   Chip,
-  InputAdornment,
+  Button,
+  Grid,
 } from "@mui/material";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import CustomTextField from "../../components/CustomTextField";
+import { CustomDialog } from "../../components/Dialog/CustomDialog";
+import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
+import { CustomForm } from "../../components/Dialog/CustomForm";
+import { FooterButton } from "../../components/Dialog/FooterButton";
+import { useLocale } from "../../hooks/useLocale";
 
 const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) => {
-  const [formData, setFormData] = useState({});
-  const [skillInput, setSkillInput] = useState("");
+  const { t } = useLocale();
+
+  const { control, handleSubmit, reset, setValue } = useForm({
+    defaultValues: {
+      fullName: "",
+      role: "",
+      status: "",
+      avatarUrl: "",
+      email: "",
+      phone: "",
+      location: "",
+      website: "",
+      linkedin: "",
+      personalSummary: "",
+      referencesText: "",
+    },
+  });
+
+  // Dynamic Array States for Skills, Experience, Education, Certifications, Languages
+  const [skillsList, setSkillsList] = useState([]);
+  const [newSkillInput, setNewSkillInput] = useState("");
+  const [experienceList, setExperienceList] = useState([]);
+  const [educationList, setEducationList] = useState([]);
+  const [certificationsList, setCertificationsList] = useState([]);
+  const [languagesList, setLanguagesList] = useState([]);
 
   useEffect(() => {
     if (open && profileData) {
-      if (sectionKey === "basic") {
-        setFormData({
-          fullName: profileData.fullName || "",
-          role: profileData.role || "",
-          status: profileData.status || "",
-          avatarUrl: profileData.avatarUrl || "",
-        });
-      } else if (sectionKey === "contact") {
-        setFormData({ ...(profileData.contact || {}) });
-      } else if (sectionKey === "skills") {
-        setFormData({ skills: [...(profileData.skills || [])] });
-      } else if (sectionKey === "summary") {
-        setFormData({ personalSummary: profileData.personalSummary || "" });
-      } else if (sectionKey === "experience") {
-        setFormData({
-          workExperience: JSON.parse(JSON.stringify(profileData.workExperience || [])),
-        });
-      } else if (sectionKey === "education") {
-        setFormData({
-          education: JSON.parse(JSON.stringify(profileData.education || [])),
-        });
-      } else if (sectionKey === "certifications") {
-        setFormData({
-          certifications: JSON.parse(JSON.stringify(profileData.certifications || [])),
-        });
-      } else if (sectionKey === "languages") {
-        setFormData({
-          languages: JSON.parse(JSON.stringify(profileData.languages || [])),
-        });
-      } else if (sectionKey === "references") {
-        setFormData({
-          references: JSON.parse(JSON.stringify(profileData.references || [])),
-        });
-      }
+      const contact = profileData.contact || {};
+      reset({
+        fullName: profileData.fullName || "",
+        role: profileData.role || "",
+        status: profileData.status || "",
+        avatarUrl: profileData.avatarUrl || "",
+        email: contact.email || "",
+        phone: contact.phone || "",
+        location: contact.location || "",
+        website: contact.website || "",
+        linkedin: contact.linkedin || "",
+        personalSummary: profileData.personalSummary || "",
+        referencesText: (profileData.references || []).map((r) => r.text || "").join("\n"),
+      });
+
+      setSkillsList([...(profileData.skills || [])]);
+      setExperienceList(JSON.parse(JSON.stringify(profileData.workExperience || [])));
+      setEducationList(JSON.parse(JSON.stringify(profileData.education || [])));
+      setCertificationsList(JSON.parse(JSON.stringify(profileData.certifications || [])));
+      setLanguagesList(JSON.parse(JSON.stringify(profileData.languages || [])));
+      setNewSkillInput("");
     }
-  }, [open, sectionKey, profileData]);
+  }, [open, profileData, reset]);
 
   if (!open) return null;
 
-  const handleSave = () => {
-    let updated = { ...profileData };
-    if (sectionKey === "basic") {
-      updated = { ...updated, ...formData };
-    } else if (sectionKey === "contact") {
-      updated.contact = { ...formData };
-    } else if (sectionKey === "skills") {
-      updated.skills = formData.skills || [];
-    } else if (sectionKey === "summary") {
-      updated.personalSummary = formData.personalSummary || "";
-    } else if (sectionKey === "experience") {
-      updated.workExperience = formData.workExperience || [];
-    } else if (sectionKey === "education") {
-      updated.education = formData.education || [];
-    } else if (sectionKey === "certifications") {
-      updated.certifications = formData.certifications || [];
-    } else if (sectionKey === "languages") {
-      updated.languages = formData.languages || [];
-    } else if (sectionKey === "references") {
-      updated.references = formData.references || [];
+  const getSectionTitle = () => {
+    switch (sectionKey) {
+      case "basic":
+        return "Esasy Maglumatlary Üýtgetmek";
+      case "contact":
+        return "Habarlaşmak Maglumatlary";
+      case "skills":
+        return "Ukyplar we Tejribeler (Skills)";
+      case "summary":
+        return "Gysgaça Maglumat (Personal Summary)";
+      case "experience":
+        return "Iş Tejribesi (Work Experience)";
+      case "education":
+        return "Bilimi (Education)";
+      case "certifications":
+        return "Sertifikatlar we Sylaglar";
+      case "languages":
+        return "Diller (Languages)";
+      case "references":
+        return "Maslahatçylar (References)";
+      default:
+        return "Maglumatlary Üýtgetmek";
     }
+  };
+
+  const handleFormSubmit = (data) => {
+    let updated = { ...profileData };
+
+    if (sectionKey === "basic") {
+      updated.fullName = data.fullName;
+      updated.role = data.role;
+      updated.status = data.status;
+      updated.avatarUrl = data.avatarUrl;
+    } else if (sectionKey === "contact") {
+      updated.contact = {
+        email: data.email,
+        phone: data.phone,
+        location: data.location,
+        website: data.website,
+        linkedin: data.linkedin,
+      };
+    } else if (sectionKey === "summary") {
+      updated.personalSummary = data.personalSummary;
+    } else if (sectionKey === "skills") {
+      updated.skills = skillsList;
+    } else if (sectionKey === "experience") {
+      updated.workExperience = experienceList;
+    } else if (sectionKey === "education") {
+      updated.education = educationList;
+    } else if (sectionKey === "certifications") {
+      updated.certifications = certificationsList;
+    } else if (sectionKey === "languages") {
+      updated.languages = languagesList;
+    } else if (sectionKey === "references") {
+      updated.references = (data.referencesText || "")
+        .split("\n")
+        .filter(Boolean)
+        .map((text) => ({ id: `ref-${Math.random()}`, text }));
+    }
+
     onSave(updated);
-    toast.success("Maglumatlar üstünlikli täzelendi!");
+    toast.success("Maglumatlar üstünlikli ýatda saklandy!");
     onClose();
   };
 
   // Skill Add / Remove
   const handleAddSkill = () => {
-    const trimmed = skillInput.trim();
+    const trimmed = newSkillInput.trim();
     if (!trimmed) return;
-    if ((formData.skills || []).includes(trimmed)) return;
-    setFormData((prev) => ({
-      ...prev,
-      skills: [...(prev.skills || []), trimmed],
-    }));
-    setSkillInput("");
+    if (skillsList.includes(trimmed)) return;
+    setSkillsList((prev) => [...prev, trimmed]);
+    setNewSkillInput("");
   };
 
   const handleRemoveSkill = (skillToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: (prev.skills || []).filter((s) => s !== skillToRemove),
-    }));
+    setSkillsList((prev) => prev.filter((s) => s !== skillToRemove));
   };
 
-  // Work Experience Helpers
+  // Experience Helpers
   const handleAddExperience = () => {
-    setFormData((prev) => ({
+    setExperienceList((prev) => [
       ...prev,
-      workExperience: [
-        ...(prev.workExperience || []),
-        {
-          id: `exp-${Date.now()}`,
-          role: "",
-          company: "",
-          location: "",
-          period: "",
-          bullets: [""],
-        },
-      ],
-    }));
+      {
+        id: `exp-${Date.now()}`,
+        role: "",
+        company: "",
+        location: "",
+        period: "",
+        bullets: [""],
+      },
+    ]);
   };
 
   const handleUpdateExperience = (idx, field, val) => {
-    setFormData((prev) => {
-      const list = [...(prev.workExperience || [])];
+    setExperienceList((prev) => {
+      const list = [...prev];
       list[idx] = { ...list[idx], [field]: val };
-      return { ...prev, workExperience: list };
+      return list;
     });
   };
 
   const handleRemoveExperience = (idx) => {
-    setFormData((prev) => ({
-      ...prev,
-      workExperience: (prev.workExperience || []).filter((_, i) => i !== idx),
-    }));
+    setExperienceList((prev) => prev.filter((_, i) => i !== idx));
   };
 
   // Education Helpers
   const handleAddEducation = () => {
-    setFormData((prev) => ({
+    setEducationList((prev) => [
       ...prev,
-      education: [
-        ...(prev.education || []),
-        {
-          id: `edu-${Date.now()}`,
-          degree: "",
-          school: "",
-          period: "",
-        },
-      ],
-    }));
+      {
+        id: `edu-${Date.now()}`,
+        degree: "",
+        school: "",
+        period: "",
+      },
+    ]);
   };
 
-  // Language Helpers
-  const handleAddLanguage = () => {
-    setFormData((prev) => ({
-      ...prev,
-      languages: [
-        ...(prev.languages || []),
-        {
-          id: `lang-${Date.now()}`,
-          name: "",
-          level: "Fluent",
-        },
-      ],
-    }));
+  const handleUpdateEducation = (idx, field, val) => {
+    setEducationList((prev) => {
+      const list = [...prev];
+      list[idx] = { ...list[idx], [field]: val };
+      return list;
+    });
+  };
+
+  const handleRemoveEducation = (idx) => {
+    setEducationList((prev) => prev.filter((_, i) => i !== idx));
   };
 
   // Certification Helpers
   const handleAddCertification = () => {
-    setFormData((prev) => ({
+    setCertificationsList((prev) => [
       ...prev,
-      certifications: [
-        ...(prev.certifications || []),
-        {
-          id: `cert-${Date.now()}`,
-          title: "",
-          year: new Date().getFullYear().toString(),
-        },
-      ],
-    }));
+      {
+        id: `cert-${Date.now()}`,
+        title: "",
+        year: new Date().getFullYear().toString(),
+      },
+    ]);
+  };
+
+  const handleUpdateCertification = (idx, field, val) => {
+    setCertificationsList((prev) => {
+      const list = [...prev];
+      list[idx] = { ...list[idx], [field]: val };
+      return list;
+    });
+  };
+
+  const handleRemoveCertification = (idx) => {
+    setCertificationsList((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  // Language Helpers
+  const handleAddLanguage = () => {
+    setLanguagesList((prev) => [
+      ...prev,
+      {
+        id: `lang-${Date.now()}`,
+        name: "",
+        level: "Fluent",
+      },
+    ]);
+  };
+
+  const handleUpdateLanguage = (idx, field, val) => {
+    setLanguagesList((prev) => {
+      const list = [...prev];
+      list[idx] = { ...list[idx], [field]: val };
+      return list;
+    });
+  };
+
+  const handleRemoveLanguage = (idx) => {
+    setLanguagesList((prev) => prev.filter((_, i) => i !== idx));
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      slotProps={{
-        paper: {
-          sx: {
-            borderRadius: "16px",
-            p: 1,
-            maxHeight: "85vh",
-          },
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          pb: 1,
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          {sectionKey === "basic" && "Esasy Maglumatlary Üýtgetmek"}
-          {sectionKey === "contact" && "Habarlaşmak Maglumatlary"}
-          {sectionKey === "skills" && "Ukyplar we Tejribeler (Skills)"}
-          {sectionKey === "summary" && "Gysgaça Maglumat (Personal Summary)"}
-          {sectionKey === "experience" && "Iş Tejribesi (Work Experience)"}
-          {sectionKey === "education" && "Bilimi (Education)"}
-          {sectionKey === "certifications" && "Sertifikatlar we Sylaglar"}
-          {sectionKey === "languages" && "Diller (Languages)"}
-          {sectionKey === "references" && "Maslahatçylar (References)"}
-        </Typography>
-        <IconButton size="small" onClick={onClose}>
-          <CloseRoundedIcon />
-        </IconButton>
-      </DialogTitle>
-
-      <DialogContent dividers sx={{ py: 2.5 }}>
+    <CustomDialog open={open} close={onClose} widthX={640}>
+      <CustomDialogHeader variant="h5" title={getSectionTitle()} />
+      <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         {/* 1. Basic Info */}
         {sectionKey === "basic" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <TextField
-              label="Doly Adyňyz"
-              fullWidth
-              size="small"
-              value={formData.fullName || ""}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            />
-            <TextField
-              label="Wezipäňiz / Hünäriňiz"
-              fullWidth
-              size="small"
-              value={formData.role || ""}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            />
-            <TextField
-              label="Ýagdaýy (Status, meselem: Available for hire)"
-              fullWidth
-              size="small"
-              value={formData.status || ""}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-            />
-            <TextField
-              label="Avatar / Surat URL"
-              fullWidth
-              size="small"
-              value={formData.avatarUrl || ""}
-              onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-            />
-          </Box>
+          <Grid container spacing={2.25}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="fullName"
+                control={control}
+                label="Doly Adyňyz"
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="role"
+                control={control}
+                label="Wezipäňiz / Hünäriňiz"
+                required
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="status"
+                control={control}
+                label="Ýagdaýy / Status"
+                placeholder="Meselem: Available for hire"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="avatarUrl"
+                control={control}
+                label="Avatar / Surat URL"
+                placeholder="https://..."
+              />
+            </Grid>
+          </Grid>
         )}
 
         {/* 2. Contact Info */}
         {sectionKey === "contact" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <TextField
-              label="Email"
-              fullWidth
-              size="small"
-              value={formData.email || ""}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
-            <TextField
-              label="Telefon belgisi"
-              fullWidth
-              size="small"
-              value={formData.phone || ""}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            />
-            <TextField
-              label="Salgy / Ýerleşýän ýeri"
-              fullWidth
-              size="small"
-              value={formData.location || ""}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            />
-            <TextField
-              label="Web sahypa / Portfolio"
-              fullWidth
-              size="small"
-              value={formData.website || ""}
-              onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-            />
-            <TextField
-              label="LinkedIn Profil"
-              fullWidth
-              size="small"
-              value={formData.linkedin || ""}
-              onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-            />
-          </Box>
+          <Grid container spacing={2.25}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="email"
+                control={control}
+                label="Email"
+                placeholder="hello@example.com"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="phone"
+                control={control}
+                label="Telefon belgisi"
+                placeholder="+993 (65) 12-34-56"
+              />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <CustomTextField
+                name="location"
+                control={control}
+                label="Salgy / Ýerleşýän ýeri"
+                placeholder="Aşgabat, Türkmenistan"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="website"
+                control={control}
+                label="Web sahypa / Portfolio"
+                placeholder="mysite.design"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="linkedin"
+                control={control}
+                label="LinkedIn Profil"
+                placeholder="linkedin.com/in/user"
+              />
+            </Grid>
+          </Grid>
         )}
 
-        {/* 3. Skills */}
-        {sectionKey === "skills" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <TextField
-                label="Täze ukyp ýazyň"
-                fullWidth
-                size="small"
-                value={skillInput}
-                onChange={(e) => setSkillInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddSkill();
-                  }
-                }}
+        {/* 3. Personal Summary */}
+        {sectionKey === "summary" && (
+          <Grid container spacing={2.25}>
+            <Grid size={{ xs: 12 }}>
+              <CustomTextField
+                name="personalSummary"
+                control={control}
+                label="Gysgaça terjimehalyňyz"
+                multiline
+                rows={5}
+                placeholder="Tejribäňiz we hünär başarnyklaryňyz barada gysgaça beýan..."
               />
+            </Grid>
+          </Grid>
+        )}
+
+        {/* 4. Skills */}
+        {sectionKey === "skills" && (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+            <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-end" }}>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", mb: 0.75 }}>
+                  Täze ukyp goşmak
+                </Typography>
+                <input
+                  type="text"
+                  value={newSkillInput}
+                  onChange={(e) => setNewSkillInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddSkill();
+                    }
+                  }}
+                  placeholder="Meselem: Amadeus, Figma, React..."
+                  style={{
+                    width: "100%",
+                    height: "44px",
+                    padding: "0 14px",
+                    borderRadius: "7px",
+                    border: "1px solid rgba(0, 0, 0, 0.23)",
+                    fontSize: "0.875rem",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    backgroundColor: "transparent",
+                    color: "inherit",
+                  }}
+                />
+              </Box>
               <Button
                 variant="contained"
                 onClick={handleAddSkill}
-                sx={{ borderRadius: "8px", textTransform: "none", bgcolor: "#0c8a7b" }}
+                sx={{
+                  height: "44px",
+                  px: 3,
+                  borderRadius: "7px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  bgcolor: "#0E8584",
+                  border: "0.5px solid #2CA7A6",
+                  color: "#ffffff",
+                  "&:hover": { bgcolor: "#0C7776" },
+                }}
               >
                 Goş
               </Button>
             </Box>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-              {(formData.skills || []).map((skill, idx) => (
-                <Chip
-                  key={idx}
-                  label={skill}
-                  onDelete={() => handleRemoveSkill(skill)}
-                  sx={{ borderRadius: "8px", fontWeight: 600 }}
-                />
-              ))}
+
+            <Box>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, mb: 1, display: "block" }}>
+                Häzirki ukyplar ({skillsList.length}):
+              </Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {skillsList.map((skill, idx) => (
+                  <Chip
+                    key={idx}
+                    label={skill}
+                    onDelete={() => handleRemoveSkill(skill)}
+                    sx={{
+                      borderRadius: "7px",
+                      fontWeight: 600,
+                      backgroundColor: "rgba(14, 133, 132, 0.12)",
+                      color: "#0E8584",
+                      "& .MuiChip-deleteIcon": {
+                        color: "#0E8584",
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
             </Box>
           </Box>
-        )}
-
-        {/* 4. Summary */}
-        {sectionKey === "summary" && (
-          <TextField
-            label="Gysgaça terjimehalyňyz"
-            fullWidth
-            multiline
-            rows={5}
-            value={formData.personalSummary || ""}
-            onChange={(e) => setFormData({ ...formData, personalSummary: e.target.value })}
-          />
         )}
 
         {/* 5. Work Experience */}
         {sectionKey === "experience" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {(formData.workExperience || []).map((exp, idx) => (
+            {experienceList.map((exp, idx) => (
               <Box
                 key={exp.id || idx}
                 sx={{
-                  p: 2,
+                  p: 2.5,
                   border: "1px solid",
                   borderColor: "divider",
-                  borderRadius: "12px",
+                  borderRadius: "10px",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.02)" : "#fafafa",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 1.5,
-                  position: "relative",
+                  gap: 2,
                 }}
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0E8584" }}>
                     Wezipe #{idx + 1}
                   </Typography>
                   <IconButton size="small" color="error" onClick={() => handleRemoveExperience(idx)}>
                     <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
                   </IconButton>
                 </Box>
-                <TextField
-                  label="Wezipe (Role)"
-                  size="small"
-                  fullWidth
-                  value={exp.role || ""}
-                  onChange={(e) => handleUpdateExperience(idx, "role", e.target.value)}
-                />
-                <TextField
-                  label="Kompaniýa (Company)"
-                  size="small"
-                  fullWidth
-                  value={exp.company || ""}
-                  onChange={(e) => handleUpdateExperience(idx, "company", e.target.value)}
-                />
-                <TextField
-                  label="Ýerleşýän ýeri (Location)"
-                  size="small"
-                  fullWidth
-                  value={exp.location || ""}
-                  onChange={(e) => handleUpdateExperience(idx, "location", e.target.value)}
-                />
-                <TextField
-                  label="Döwri (Meselem: Jan 2021 - Present)"
-                  size="small"
-                  fullWidth
-                  value={exp.period || ""}
-                  onChange={(e) => handleUpdateExperience(idx, "period", e.target.value)}
-                />
-                <TextField
-                  label="Açyklama / Ýeten netijeleriňiz (Her setire bir punkt)"
-                  size="small"
-                  fullWidth
-                  multiline
-                  rows={3}
-                  value={(exp.bullets || []).join("\n")}
-                  onChange={(e) =>
-                    handleUpdateExperience(idx, "bullets", e.target.value.split("\n"))
-                  }
-                />
+
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
+                      Wezipe (Role)
+                    </Typography>
+                    <input
+                      type="text"
+                      value={exp.role || ""}
+                      onChange={(e) => handleUpdateExperience(idx, "role", e.target.value)}
+                      placeholder="Senior Product Designer"
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                        padding: "0 12px",
+                        borderRadius: "7px",
+                        border: "1px solid rgba(0, 0, 0, 0.2)",
+                        fontSize: "0.875rem",
+                        boxSizing: "border-box",
+                        backgroundColor: "transparent",
+                        color: "inherit",
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
+                      Kompaniýa (Company)
+                    </Typography>
+                    <input
+                      type="text"
+                      value={exp.company || ""}
+                      onChange={(e) => handleUpdateExperience(idx, "company", e.target.value)}
+                      placeholder="Oguz Travel"
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                        padding: "0 12px",
+                        borderRadius: "7px",
+                        border: "1px solid rgba(0, 0, 0, 0.2)",
+                        fontSize: "0.875rem",
+                        boxSizing: "border-box",
+                        backgroundColor: "transparent",
+                        color: "inherit",
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
+                      Ýerleşýän ýeri (Location)
+                    </Typography>
+                    <input
+                      type="text"
+                      value={exp.location || ""}
+                      onChange={(e) => handleUpdateExperience(idx, "location", e.target.value)}
+                      placeholder="Ashgabat / Remote"
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                        padding: "0 12px",
+                        borderRadius: "7px",
+                        border: "1px solid rgba(0, 0, 0, 0.2)",
+                        fontSize: "0.875rem",
+                        boxSizing: "border-box",
+                        backgroundColor: "transparent",
+                        color: "inherit",
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
+                      Döwri (Period)
+                    </Typography>
+                    <input
+                      type="text"
+                      value={exp.period || ""}
+                      onChange={(e) => handleUpdateExperience(idx, "period", e.target.value)}
+                      placeholder="Jan 2021 - Present"
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                        padding: "0 12px",
+                        borderRadius: "7px",
+                        border: "1px solid rgba(0, 0, 0, 0.2)",
+                        fontSize: "0.875rem",
+                        boxSizing: "border-box",
+                        backgroundColor: "transparent",
+                        color: "inherit",
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
+                      Açyklama / Ýeten netijeleriňiz (Her setire bir punkt)
+                    </Typography>
+                    <textarea
+                      rows={3}
+                      value={(exp.bullets || []).join("\n")}
+                      onChange={(e) => handleUpdateExperience(idx, "bullets", e.target.value.split("\n"))}
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        borderRadius: "7px",
+                        border: "1px solid rgba(0, 0, 0, 0.2)",
+                        fontSize: "0.875rem",
+                        boxSizing: "border-box",
+                        backgroundColor: "transparent",
+                        color: "inherit",
+                        fontFamily: "inherit",
+                      }}
+                    />
+                  </Grid>
+                </Grid>
               </Box>
             ))}
+
             <Button
               variant="outlined"
               startIcon={<AddRoundedIcon />}
               onClick={handleAddExperience}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600 }}
+              sx={{
+                borderRadius: "7px",
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#0E8584",
+                color: "#0E8584",
+                "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
+              }}
             >
               Täze iş tejribesini goş
             </Button>
@@ -432,59 +599,115 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
         {/* 6. Education */}
         {sectionKey === "education" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-            {(formData.education || []).map((edu, idx) => (
+            {educationList.map((edu, idx) => (
               <Box
                 key={edu.id || idx}
                 sx={{
-                  p: 2,
+                  p: 2.5,
                   border: "1px solid",
                   borderColor: "divider",
-                  borderRadius: "12px",
+                  borderRadius: "10px",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.02)" : "#fafafa",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 1.5,
+                  gap: 2,
                 }}
               >
-                <TextField
-                  label="Hünäri / Derejesi (Degree)"
-                  size="small"
-                  fullWidth
-                  value={edu.degree || ""}
-                  onChange={(e) => {
-                    const list = [...(formData.education || [])];
-                    list[idx].degree = e.target.value;
-                    setFormData({ ...formData, education: list });
-                  }}
-                />
-                <TextField
-                  label="Okuw jaýy (University / School)"
-                  size="small"
-                  fullWidth
-                  value={edu.school || ""}
-                  onChange={(e) => {
-                    const list = [...(formData.education || [])];
-                    list[idx].school = e.target.value;
-                    setFormData({ ...formData, education: list });
-                  }}
-                />
-                <TextField
-                  label="Gutarylan ýyly / Maglumat"
-                  size="small"
-                  fullWidth
-                  value={edu.period || ""}
-                  onChange={(e) => {
-                    const list = [...(formData.education || [])];
-                    list[idx].period = e.target.value;
-                    setFormData({ ...formData, education: list });
-                  }}
-                />
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0E8584" }}>
+                    Bilim #{idx + 1}
+                  </Typography>
+                  <IconButton size="small" color="error" onClick={() => handleRemoveEducation(idx)}>
+                    <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+                  </IconButton>
+                </Box>
+
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
+                      Hünäri / Derejesi (Degree)
+                    </Typography>
+                    <input
+                      type="text"
+                      value={edu.degree || ""}
+                      onChange={(e) => handleUpdateEducation(idx, "degree", e.target.value)}
+                      placeholder="Bachelor of Science in CS"
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                        padding: "0 12px",
+                        borderRadius: "7px",
+                        border: "1px solid rgba(0, 0, 0, 0.2)",
+                        fontSize: "0.875rem",
+                        boxSizing: "border-box",
+                        backgroundColor: "transparent",
+                        color: "inherit",
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
+                      Okuw jaýy (University)
+                    </Typography>
+                    <input
+                      type="text"
+                      value={edu.school || ""}
+                      onChange={(e) => handleUpdateEducation(idx, "school", e.target.value)}
+                      placeholder="Magtymguly adyndaky TDU"
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                        padding: "0 12px",
+                        borderRadius: "7px",
+                        border: "1px solid rgba(0, 0, 0, 0.2)",
+                        fontSize: "0.875rem",
+                        boxSizing: "border-box",
+                        backgroundColor: "transparent",
+                        color: "inherit",
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid size={{ xs: 12 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
+                      Gutarylan senesi / Maglumat
+                    </Typography>
+                    <input
+                      type="text"
+                      value={edu.period || ""}
+                      onChange={(e) => handleUpdateEducation(idx, "period", e.target.value)}
+                      placeholder="Graduated: 2020 • GPA: 3.8"
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                        padding: "0 12px",
+                        borderRadius: "7px",
+                        border: "1px solid rgba(0, 0, 0, 0.2)",
+                        fontSize: "0.875rem",
+                        boxSizing: "border-box",
+                        backgroundColor: "transparent",
+                        color: "inherit",
+                      }}
+                    />
+                  </Grid>
+                </Grid>
               </Box>
             ))}
+
             <Button
               variant="outlined"
               startIcon={<AddRoundedIcon />}
               onClick={handleAddEducation}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600 }}
+              sx={{
+                borderRadius: "7px",
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#0E8584",
+                color: "#0E8584",
+                "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
+              }}
             >
               Täze bilim goş
             </Button>
@@ -494,37 +717,60 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
         {/* 7. Certifications */}
         {sectionKey === "certifications" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {(formData.certifications || []).map((cert, idx) => (
+            {certificationsList.map((cert, idx) => (
               <Box key={cert.id || idx} sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-                <TextField
-                  label="Sertifikat ady"
-                  size="small"
-                  fullWidth
+                <input
+                  type="text"
                   value={cert.title || ""}
-                  onChange={(e) => {
-                    const list = [...(formData.certifications || [])];
-                    list[idx].title = e.target.value;
-                    setFormData({ ...formData, certifications: list });
+                  onChange={(e) => handleUpdateCertification(idx, "title", e.target.value)}
+                  placeholder="Sertifikat ady"
+                  style={{
+                    flex: 1,
+                    height: "40px",
+                    padding: "0 12px",
+                    borderRadius: "7px",
+                    border: "1px solid rgba(0, 0, 0, 0.2)",
+                    fontSize: "0.875rem",
+                    boxSizing: "border-box",
+                    backgroundColor: "transparent",
+                    color: "inherit",
                   }}
                 />
-                <TextField
-                  label="Ýyly"
-                  size="small"
-                  sx={{ width: 120 }}
+                <input
+                  type="text"
                   value={cert.year || ""}
-                  onChange={(e) => {
-                    const list = [...(formData.certifications || [])];
-                    list[idx].year = e.target.value;
-                    setFormData({ ...formData, certifications: list });
+                  onChange={(e) => handleUpdateCertification(idx, "year", e.target.value)}
+                  placeholder="Ýyly"
+                  style={{
+                    width: "110px",
+                    height: "40px",
+                    padding: "0 12px",
+                    borderRadius: "7px",
+                    border: "1px solid rgba(0, 0, 0, 0.2)",
+                    fontSize: "0.875rem",
+                    boxSizing: "border-box",
+                    backgroundColor: "transparent",
+                    color: "inherit",
                   }}
                 />
+                <IconButton size="small" color="error" onClick={() => handleRemoveCertification(idx)}>
+                  <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+                </IconButton>
               </Box>
             ))}
+
             <Button
               variant="outlined"
               startIcon={<AddRoundedIcon />}
               onClick={handleAddCertification}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600 }}
+              sx={{
+                borderRadius: "7px",
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#0E8584",
+                color: "#0E8584",
+                "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
+              }}
             >
               Sertifikat goş
             </Button>
@@ -534,37 +780,60 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
         {/* 8. Languages */}
         {sectionKey === "languages" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {(formData.languages || []).map((lang, idx) => (
+            {languagesList.map((lang, idx) => (
               <Box key={lang.id || idx} sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-                <TextField
-                  label="Dil ady"
-                  size="small"
-                  fullWidth
+                <input
+                  type="text"
                   value={lang.name || ""}
-                  onChange={(e) => {
-                    const list = [...(formData.languages || [])];
-                    list[idx].name = e.target.value;
-                    setFormData({ ...formData, languages: list });
+                  onChange={(e) => handleUpdateLanguage(idx, "name", e.target.value)}
+                  placeholder="Dil ady (meselem: English)"
+                  style={{
+                    flex: 1,
+                    height: "40px",
+                    padding: "0 12px",
+                    borderRadius: "7px",
+                    border: "1px solid rgba(0, 0, 0, 0.2)",
+                    fontSize: "0.875rem",
+                    boxSizing: "border-box",
+                    backgroundColor: "transparent",
+                    color: "inherit",
                   }}
                 />
-                <TextField
-                  label="Derejesi (Meselem: Native, Fluent, Intermediate)"
-                  size="small"
-                  fullWidth
+                <input
+                  type="text"
                   value={lang.level || ""}
-                  onChange={(e) => {
-                    const list = [...(formData.languages || [])];
-                    list[idx].level = e.target.value;
-                    setFormData({ ...formData, languages: list });
+                  onChange={(e) => handleUpdateLanguage(idx, "level", e.target.value)}
+                  placeholder="Derejesi (Native / Fluent)"
+                  style={{
+                    width: "140px",
+                    height: "40px",
+                    padding: "0 12px",
+                    borderRadius: "7px",
+                    border: "1px solid rgba(0, 0, 0, 0.2)",
+                    fontSize: "0.875rem",
+                    boxSizing: "border-box",
+                    backgroundColor: "transparent",
+                    color: "inherit",
                   }}
                 />
+                <IconButton size="small" color="error" onClick={() => handleRemoveLanguage(idx)}>
+                  <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+                </IconButton>
               </Box>
             ))}
+
             <Button
               variant="outlined"
               startIcon={<AddRoundedIcon />}
               onClick={handleAddLanguage}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600 }}
+              sx={{
+                borderRadius: "7px",
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#0E8584",
+                color: "#0E8584",
+                "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
+              }}
             >
               Dil goş
             </Button>
@@ -573,47 +842,24 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
 
         {/* 9. References */}
         {sectionKey === "references" && (
-          <TextField
-            label="Maslahatçylar (References)"
-            fullWidth
-            multiline
-            rows={3}
-            value={
-              (formData.references || []).map((r) => r.text || "").join("\n") || ""
-            }
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                references: e.target.value.split("\n").map((t) => ({ id: `ref-${Math.random()}`, text: t })),
-              })
-            }
-          />
+          <Grid container spacing={2.25}>
+            <Grid size={{ xs: 12 }}>
+              <CustomTextField
+                name="referencesText"
+                control={control}
+                label="Maslahatçylar (References - her setire biri)"
+                multiline
+                rows={4}
+                placeholder="Available upon request."
+              />
+            </Grid>
+          </Grid>
         )}
-      </DialogContent>
 
-      <DialogActions sx={{ p: 2, gap: 1 }}>
-        <Button
-          variant="outlined"
-          onClick={onClose}
-          sx={{ borderRadius: "8px", textTransform: "none", color: "text.secondary" }}
-        >
-          Ýatyrmak
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          sx={{
-            borderRadius: "8px",
-            textTransform: "none",
-            fontWeight: 700,
-            bgcolor: "#0c8a7b",
-            "&:hover": { bgcolor: "#096e62" },
-          }}
-        >
-          Ýatda sakla
-        </Button>
-      </DialogActions>
-    </Dialog>
+        {/* Standard Project Footer Buttons */}
+        <FooterButton onCancel={onClose} saveText={t("save") || "Ýatda sakla"} />
+      </CustomForm>
+    </CustomDialog>
   );
 };
 
