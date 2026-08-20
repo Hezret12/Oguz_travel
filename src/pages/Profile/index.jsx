@@ -10,6 +10,7 @@ import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/useAuth";
+import { useLocale } from "../../hooks/useLocale";
 import ProfileLeftCol from "./ProfileLeftCol";
 import ProfileRightCol from "./ProfileRightCol";
 import EditSectionModal from "./EditSectionModal";
@@ -18,6 +19,7 @@ import { DEFAULT_PROFILE, STORAGE_KEY_PROFILE } from "./constants";
 
 const ProfilePage = () => {
   const { user } = useAuth();
+  const { t } = useLocale();
 
   const [profile, setProfile] = useState(() => {
     try {
@@ -60,7 +62,7 @@ const ProfilePage = () => {
 
   const handleManualSave = () => {
     localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(profile));
-    toast.success("Profil maglumatlary üstünlikli ýatda saklandy!");
+    toast.success(t("profile.saveSuccess"));
   };
 
   const handleDownloadJson = () => {
@@ -71,7 +73,7 @@ const ProfilePage = () => {
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
-    toast.success("CV faýly üstünlikli ýüklendi!");
+    toast.success(t("profile.downloadSuccess"));
   };
 
   return (
@@ -109,7 +111,7 @@ const ProfilePage = () => {
               lineHeight: 1.2,
             }}
           >
-            CV Builder & Profile
+            {t("profile.cvBuilder")}
           </Typography>
           <Typography
             variant="body2"
@@ -120,7 +122,7 @@ const ProfilePage = () => {
               mt: 0.25,
             }}
           >
-            Build, edit, and export your resume & profile
+            {t("profile.cvBuilderSubtitle")}
           </Typography>
         </Box>
 
@@ -146,7 +148,7 @@ const ProfilePage = () => {
               },
             }}
           >
-            Download Data
+            {t("profile.downloadData")}
           </Button>
 
           <Button
@@ -178,7 +180,7 @@ const ProfilePage = () => {
               },
             }}
           >
-            Print CV
+            {t("profile.printCv")}
           </Button>
 
           <Button
@@ -197,7 +199,7 @@ const ProfilePage = () => {
               "&:hover": { bgcolor: "#1e293b" },
             }}
           >
-            Ýatda sakla
+            {t("save")}
           </Button>
         </Box>
       </Box>

@@ -7,8 +7,6 @@ import {
   Typography,
   IconButton,
   Avatar,
-  Chip,
-  Divider,
 } from "@mui/material";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
@@ -18,8 +16,11 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import { useLocale } from "../../hooks/useLocale";
 
 const CVPrintPreviewModal = ({ open, onClose, profile }) => {
+  const { t } = useLocale();
+
   if (!profile) return null;
 
   const handlePrint = () => {
@@ -87,10 +88,10 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           </Box>
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-              {profile.fullName || "CV"} — Terjimehal Önizleme
+              {profile.fullName} — {t("profile.previewTitle")}
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
-              Standart A4 Çap & PDF Formaty
+              {t("profile.previewSubtitle")}
             </Typography>
           </Box>
         </Box>
@@ -127,7 +128,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               },
             }}
           >
-            Çap et (Print CV)
+            {t("profile.printCv")}
           </Button>
 
           <IconButton
@@ -161,8 +162,8 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           id="printable-cv-sheet"
           sx={{
             width: "100%",
-            maxWidth: "794px", // Standard A4 width ratio
-            minHeight: "1123px", // Standard A4 height
+            maxWidth: "794px",
+            minHeight: "1123px",
             backgroundColor: "#ffffff",
             color: "#1e293b",
             p: { xs: 4, sm: 6 },
@@ -212,7 +213,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                   mb: 0.5,
                 }}
               >
-                {profile.fullName || "Adyňyz Familýaňyz"}
+                {profile.fullName}
               </Typography>
 
               <Typography
@@ -224,7 +225,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                   mb: 1.5,
                 }}
               >
-                {profile.role || "Wezipe / Hünär"}
+                {profile.role}
               </Typography>
 
               {/* Contact Icons Ribbon */}
@@ -287,7 +288,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                   pb: 0.5,
                 }}
               >
-                Personal Summary
+                {t("profile.personalSummary")}
               </Typography>
               <Typography
                 sx={{
@@ -328,7 +329,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                       pb: 0.5,
                     }}
                   >
-                    Work Experience
+                    {t("profile.workExperience")}
                   </Typography>
 
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -383,7 +384,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                       pb: 0.5,
                     }}
                   >
-                    Education
+                    {t("profile.education")}
                   </Typography>
 
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
@@ -426,7 +427,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                       pb: 0.5,
                     }}
                   >
-                    Skills
+                    {t("profile.skills")}
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
                     {skills.map((skill, idx) => (
@@ -465,7 +466,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                       pb: 0.5,
                     }}
                   >
-                    Certifications
+                    {t("profile.certifications")}
                   </Typography>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                     {certifications.map((cert, idx) => (
@@ -497,7 +498,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                       pb: 0.5,
                     }}
                   >
-                    Languages
+                    {t("profile.languages")}
                   </Typography>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                     {languages.map((lang, idx) => (
@@ -529,7 +530,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                       pb: 0.5,
                     }}
                   >
-                    References
+                    {t("profile.references")}
                   </Typography>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
                     {references.map((ref, idx) => (

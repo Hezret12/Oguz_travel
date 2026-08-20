@@ -8,8 +8,10 @@ import {
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import { useLocale } from "../../hooks/useLocale";
 
 const ProfileRightCol = ({ profile, onEditSection }) => {
+  const { t } = useLocale();
   const experiences = profile.workExperience || [];
   const educations = profile.education || [];
   const certifications = profile.certifications || [];
@@ -40,9 +42,9 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
               fontSize: "1rem",
             }}
           >
-            Personal Summary
+            {t("profile.personalSummary")}
           </Typography>
-          <Tooltip title="Düşündirişi üýtget" placement="top">
+          <Tooltip title={t("profile.editTitleSummary")} placement="top">
             <IconButton
               size="small"
               onClick={() => onEditSection("summary")}
@@ -64,7 +66,7 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
             lineHeight: 1.65,
           }}
         >
-          {profile.personalSummary || "Gysgaça maglumat ýok."}
+          {profile.personalSummary || t("profile.noSummary")}
         </Typography>
       </Paper>
 
@@ -90,9 +92,9 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
               fontSize: "1rem",
             }}
           >
-            Work Experience
+            {t("profile.workExperience")}
           </Typography>
-          <Tooltip title="Iş tejribesini üýtget" placement="top">
+          <Tooltip title={t("profile.editTitleExperience")} placement="top">
             <IconButton
               size="small"
               onClick={() => onEditSection("experience")}
@@ -173,9 +175,9 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
               fontSize: "1rem",
             }}
           >
-            Education
+            {t("profile.education")}
           </Typography>
-          <Tooltip title="Bilimi üýtget" placement="top">
+          <Tooltip title={t("profile.editTitleEducation")} placement="top">
             <IconButton
               size="small"
               onClick={() => onEditSection("education")}
@@ -232,9 +234,9 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
               fontSize: "1rem",
             }}
           >
-            Certifications & Awards
+            {t("profile.certifications")}
           </Typography>
-          <Tooltip title="Sertifikatlary üýtget" placement="top">
+          <Tooltip title={t("profile.editTitleCertifications")} placement="top">
             <IconButton
               size="small"
               onClick={() => onEditSection("certifications")}
@@ -284,9 +286,9 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
               fontSize: "1rem",
             }}
           >
-            Languages
+            {t("profile.languages")}
           </Typography>
-          <Tooltip title="Dilleri üýtget" placement="top">
+          <Tooltip title={t("profile.editTitleLanguages")} placement="top">
             <IconButton
               size="small"
               onClick={() => onEditSection("languages")}
@@ -336,9 +338,9 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
               fontSize: "1rem",
             }}
           >
-            References
+            {t("profile.references")}
           </Typography>
-          <Tooltip title="Maslahatçylary üýtget" placement="top">
+          <Tooltip title={t("profile.editTitleReferences")} placement="top">
             <IconButton
               size="small"
               onClick={() => onEditSection("references")}
@@ -373,7 +375,7 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
               "&:hover": { backgroundColor: "transparent", textDecoration: "underline" },
             }}
           >
-            Add reference
+            {t("profile.addReference")}
           </Button>
         </Box>
       </Paper>

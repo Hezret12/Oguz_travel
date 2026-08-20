@@ -13,8 +13,10 @@ import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import { useLocale } from "../../hooks/useLocale";
 
 const ProfileLeftCol = ({ profile, onEditSection }) => {
+  const { t } = useLocale();
   const contact = profile.contact || {};
   const skills = profile.skills || [];
 
@@ -34,7 +36,7 @@ const ProfileLeftCol = ({ profile, onEditSection }) => {
           boxShadow: "0 4px 20px rgba(0, 0, 0, 0.02)",
         }}
       >
-        <Tooltip title="Maglumatlary üýtget" placement="top">
+        <Tooltip title={t("profile.editTitleBasic")} placement="top">
           <IconButton
             size="small"
             onClick={() => onEditSection("basic")}
@@ -80,7 +82,7 @@ const ProfileLeftCol = ({ profile, onEditSection }) => {
             mb: 0.5,
           }}
         >
-          {profile.fullName || "Ulanyjy"}
+          {profile.fullName}
         </Typography>
 
         <Typography
@@ -92,7 +94,7 @@ const ProfileLeftCol = ({ profile, onEditSection }) => {
             mb: 2,
           }}
         >
-          {profile.role || "Wezipe"}
+          {profile.role}
         </Typography>
 
         {profile.status && (
@@ -137,9 +139,9 @@ const ProfileLeftCol = ({ profile, onEditSection }) => {
               fontSize: "0.95rem",
             }}
           >
-            Contact
+            {t("profile.contact")}
           </Typography>
-          <Tooltip title="Habarlaşmagy üýtget" placement="top">
+          <Tooltip title={t("profile.editTitleContact")} placement="top">
             <IconButton
               size="small"
               onClick={() => onEditSection("contact")}
@@ -223,9 +225,9 @@ const ProfileLeftCol = ({ profile, onEditSection }) => {
               fontSize: "0.95rem",
             }}
           >
-            Skills
+            {t("profile.skills")}
           </Typography>
-          <Tooltip title="Ukyplary üýtget" placement="top">
+          <Tooltip title={t("profile.editTitleSkills")} placement="top">
             <IconButton
               size="small"
               onClick={() => onEditSection("skills")}

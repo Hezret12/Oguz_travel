@@ -21,7 +21,7 @@ import { useLocale } from "../../hooks/useLocale";
 const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) => {
   const { t } = useLocale();
 
-  const { control, handleSubmit, reset, setValue } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       fullName: "",
       role: "",
@@ -76,25 +76,25 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
   const getSectionTitle = () => {
     switch (sectionKey) {
       case "basic":
-        return "Esasy Maglumatlary Üýtgetmek";
+        return t("profile.editTitleBasic");
       case "contact":
-        return "Habarlaşmak Maglumatlary";
+        return t("profile.editTitleContact");
       case "skills":
-        return "Ukyplar we Tejribeler (Skills)";
+        return t("profile.editTitleSkills");
       case "summary":
-        return "Gysgaça Maglumat (Personal Summary)";
+        return t("profile.editTitleSummary");
       case "experience":
-        return "Iş Tejribesi (Work Experience)";
+        return t("profile.editTitleExperience");
       case "education":
-        return "Bilimi (Education)";
+        return t("profile.editTitleEducation");
       case "certifications":
-        return "Sertifikatlar we Sylaglar";
+        return t("profile.editTitleCertifications");
       case "languages":
-        return "Diller (Languages)";
+        return t("profile.editTitleLanguages");
       case "references":
-        return "Maslahatçylar (References)";
+        return t("profile.editTitleReferences");
       default:
-        return "Maglumatlary Üýtgetmek";
+        return t("edit");
     }
   };
 
@@ -134,7 +134,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
     }
 
     onSave(updated);
-    toast.success("Maglumatlar üstünlikli ýatda saklandy!");
+    toast.success(t("profile.saveSuccess"));
     onClose();
   };
 
@@ -252,7 +252,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
   };
 
   return (
-    <CustomDialog open={open} close={onClose} widthX={640}>
+    <CustomDialog open={open} close={onClose} widthX={660}>
       <CustomDialogHeader variant="h5" title={getSectionTitle()} />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
         {/* 1. Basic Info */}
@@ -262,7 +262,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
               <CustomTextField
                 name="fullName"
                 control={control}
-                label="Doly Adyňyz"
+                label={t("profile.fullName")}
                 required
               />
             </Grid>
@@ -270,7 +270,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
               <CustomTextField
                 name="role"
                 control={control}
-                label="Wezipäňiz / Hünäriňiz"
+                label={t("profile.role")}
                 required
               />
             </Grid>
@@ -278,16 +278,14 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
               <CustomTextField
                 name="status"
                 control={control}
-                label="Ýagdaýy / Status"
-                placeholder="Meselem: Available for hire"
+                label={t("profile.status")}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="avatarUrl"
                 control={control}
-                label="Avatar / Surat URL"
-                placeholder="https://..."
+                label={t("profile.avatarUrl")}
               />
             </Grid>
           </Grid>
@@ -300,40 +298,35 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
               <CustomTextField
                 name="email"
                 control={control}
-                label="Email"
-                placeholder="hello@example.com"
+                label={t("profile.email")}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="phone"
                 control={control}
-                label="Telefon belgisi"
-                placeholder="+993 (65) 12-34-56"
+                label={t("profile.phone")}
               />
             </Grid>
             <Grid size={{ xs: 12 }}>
               <CustomTextField
                 name="location"
                 control={control}
-                label="Salgy / Ýerleşýän ýeri"
-                placeholder="Aşgabat, Türkmenistan"
+                label={t("profile.location")}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="website"
                 control={control}
-                label="Web sahypa / Portfolio"
-                placeholder="mysite.design"
+                label={t("profile.website")}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 name="linkedin"
                 control={control}
-                label="LinkedIn Profil"
-                placeholder="linkedin.com/in/user"
+                label={t("profile.linkedin")}
               />
             </Grid>
           </Grid>
@@ -346,10 +339,9 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
               <CustomTextField
                 name="personalSummary"
                 control={control}
-                label="Gysgaça terjimehalyňyz"
+                label={t("profile.personalSummary")}
                 multiline
                 rows={5}
-                placeholder="Tejribäňiz we hünär başarnyklaryňyz barada gysgaça beýan..."
               />
             </Grid>
           </Grid>
@@ -361,7 +353,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
             <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-end" }}>
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", mb: 0.75 }}>
-                  Täze ukyp goşmak
+                  {t("profile.addSkill")}
                 </Typography>
                 <input
                   type="text"
@@ -373,7 +365,6 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                       handleAddSkill();
                     }
                   }}
-                  placeholder="Meselem: Amadeus, Figma, React..."
                   style={{
                     width: "100%",
                     height: "44px",
@@ -403,13 +394,13 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                   "&:hover": { bgcolor: "#0C7776" },
                 }}
               >
-                Goş
+                {t("profile.addSkill")}
               </Button>
             </Box>
 
             <Box>
               <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, mb: 1, display: "block" }}>
-                Häzirki ukyplar ({skillsList.length}):
+                {t("profile.currentSkills")} ({skillsList.length}):
               </Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {skillsList.map((skill, idx) => (
@@ -453,7 +444,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0E8584" }}>
-                    Wezipe #{idx + 1}
+                    #{idx + 1}
                   </Typography>
                   <IconButton size="small" color="error" onClick={() => handleRemoveExperience(idx)}>
                     <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
@@ -463,13 +454,12 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      Wezipe (Role)
+                      {t("profile.roleLabel")}
                     </Typography>
                     <input
                       type="text"
                       value={exp.role || ""}
                       onChange={(e) => handleUpdateExperience(idx, "role", e.target.value)}
-                      placeholder="Senior Product Designer"
                       style={{
                         width: "100%",
                         height: "40px",
@@ -486,13 +476,12 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      Kompaniýa (Company)
+                      {t("profile.company")}
                     </Typography>
                     <input
                       type="text"
                       value={exp.company || ""}
                       onChange={(e) => handleUpdateExperience(idx, "company", e.target.value)}
-                      placeholder="Oguz Travel"
                       style={{
                         width: "100%",
                         height: "40px",
@@ -509,13 +498,12 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      Ýerleşýän ýeri (Location)
+                      {t("profile.location")}
                     </Typography>
                     <input
                       type="text"
                       value={exp.location || ""}
                       onChange={(e) => handleUpdateExperience(idx, "location", e.target.value)}
-                      placeholder="Ashgabat / Remote"
                       style={{
                         width: "100%",
                         height: "40px",
@@ -532,13 +520,12 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      Döwri (Period)
+                      {t("profile.period")}
                     </Typography>
                     <input
                       type="text"
                       value={exp.period || ""}
                       onChange={(e) => handleUpdateExperience(idx, "period", e.target.value)}
-                      placeholder="Jan 2021 - Present"
                       style={{
                         width: "100%",
                         height: "40px",
@@ -555,7 +542,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
 
                   <Grid size={{ xs: 12 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      Açyklama / Ýeten netijeleriňiz (Her setire bir punkt)
+                      {t("profile.bullets")}
                     </Typography>
                     <textarea
                       rows={3}
@@ -591,7 +578,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                 "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
               }}
             >
-              Täze iş tejribesini goş
+              {t("profile.addExperience")}
             </Button>
           </Box>
         )}
@@ -616,7 +603,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0E8584" }}>
-                    Bilim #{idx + 1}
+                    #{idx + 1}
                   </Typography>
                   <IconButton size="small" color="error" onClick={() => handleRemoveEducation(idx)}>
                     <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
@@ -626,13 +613,12 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                 <Grid container spacing={2}>
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      Hünäri / Derejesi (Degree)
+                      {t("profile.degree")}
                     </Typography>
                     <input
                       type="text"
                       value={edu.degree || ""}
                       onChange={(e) => handleUpdateEducation(idx, "degree", e.target.value)}
-                      placeholder="Bachelor of Science in CS"
                       style={{
                         width: "100%",
                         height: "40px",
@@ -649,13 +635,12 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      Okuw jaýy (University)
+                      {t("profile.school")}
                     </Typography>
                     <input
                       type="text"
                       value={edu.school || ""}
                       onChange={(e) => handleUpdateEducation(idx, "school", e.target.value)}
-                      placeholder="Magtymguly adyndaky TDU"
                       style={{
                         width: "100%",
                         height: "40px",
@@ -672,13 +657,12 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
 
                   <Grid size={{ xs: 12 }}>
                     <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      Gutarylan senesi / Maglumat
+                      {t("profile.period")}
                     </Typography>
                     <input
                       type="text"
                       value={edu.period || ""}
                       onChange={(e) => handleUpdateEducation(idx, "period", e.target.value)}
-                      placeholder="Graduated: 2020 • GPA: 3.8"
                       style={{
                         width: "100%",
                         height: "40px",
@@ -709,7 +693,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                 "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
               }}
             >
-              Täze bilim goş
+              {t("profile.addEducation")}
             </Button>
           </Box>
         )}
@@ -723,7 +707,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                   type="text"
                   value={cert.title || ""}
                   onChange={(e) => handleUpdateCertification(idx, "title", e.target.value)}
-                  placeholder="Sertifikat ady"
+                  placeholder={t("profile.certTitle")}
                   style={{
                     flex: 1,
                     height: "40px",
@@ -740,7 +724,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                   type="text"
                   value={cert.year || ""}
                   onChange={(e) => handleUpdateCertification(idx, "year", e.target.value)}
-                  placeholder="Ýyly"
+                  placeholder={t("profile.year")}
                   style={{
                     width: "110px",
                     height: "40px",
@@ -772,7 +756,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                 "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
               }}
             >
-              Sertifikat goş
+              {t("profile.addCertification")}
             </Button>
           </Box>
         )}
@@ -786,7 +770,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                   type="text"
                   value={lang.name || ""}
                   onChange={(e) => handleUpdateLanguage(idx, "name", e.target.value)}
-                  placeholder="Dil ady (meselem: English)"
+                  placeholder={t("profile.languageName")}
                   style={{
                     flex: 1,
                     height: "40px",
@@ -803,7 +787,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                   type="text"
                   value={lang.level || ""}
                   onChange={(e) => handleUpdateLanguage(idx, "level", e.target.value)}
-                  placeholder="Derejesi (Native / Fluent)"
+                  placeholder={t("profile.languageLevel")}
                   style={{
                     width: "140px",
                     height: "40px",
@@ -835,7 +819,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
                 "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
               }}
             >
-              Dil goş
+              {t("profile.addLanguage")}
             </Button>
           </Box>
         )}
@@ -847,17 +831,16 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
               <CustomTextField
                 name="referencesText"
                 control={control}
-                label="Maslahatçylar (References - her setire biri)"
+                label={t("profile.references")}
                 multiline
                 rows={4}
-                placeholder="Available upon request."
               />
             </Grid>
           </Grid>
         )}
 
         {/* Standard Project Footer Buttons */}
-        <FooterButton onCancel={onClose} saveText={t("save") || "Ýatda sakla"} />
+        <FooterButton onCancel={onClose} saveText={t("save")} />
       </CustomForm>
     </CustomDialog>
   );
