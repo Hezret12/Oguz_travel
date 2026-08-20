@@ -13,6 +13,7 @@ import { useAuth } from "../../context/useAuth";
 import ProfileLeftCol from "./ProfileLeftCol";
 import ProfileRightCol from "./ProfileRightCol";
 import EditSectionModal from "./EditSectionModal";
+import CVPrintPreviewModal from "./CVPrintPreviewModal";
 import { DEFAULT_PROFILE, STORAGE_KEY_PROFILE } from "./constants";
 
 const ProfilePage = () => {
@@ -42,6 +43,7 @@ const ProfilePage = () => {
   });
 
   const [activeModalSection, setActiveModalSection] = useState(null);
+  const [cvPrintOpen, setCvPrintOpen] = useState(false);
 
   // Sync to localStorage
   useEffect(() => {
@@ -61,15 +63,11 @@ const ProfilePage = () => {
     toast.success("Profil maglumatlary üstünlikli ýatda saklandy!");
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   const handleDownloadJson = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(profile, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `${profile.fullName.replace(/\s+/g, "_")}_CV.json`);
+    downloadAnchor.setAttribute("download", `${(profile.fullName || "CV").replace(/\s+/g, "_")}_CV.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -153,7 +151,7 @@ const ProfilePage = () => {
 
           <Button
             variant="contained"
-            onClick={handlePrint}
+            onClick={() => setCvPrintOpen(true)}
             startIcon={<PrintRoundedIcon sx={{ fontSize: 18 }} />}
             sx={{
               borderRadius: "10px",
@@ -223,7 +221,7 @@ const ProfilePage = () => {
         </Grid>
       </Grid>
 
-      {/* Dynamic Edit Modal */}
+      {/* Dynamic Section Edit Modal */}
       <EditSectionModal
         open={Boolean(activeModalSection)}
         sectionKey={activeModalSection}
@@ -232,24 +230,12 @@ const ProfilePage = () => {
         onSave={handleUpdateProfile}
       />
 
-      {/* Print Stylesheet for Clean A4 CV Export */}
-      <style>
-        {`
-          @media print {
-            .no-print, header, nav, aside {
-              display: none !important;
-            }
-            body {
-              background: #ffffff !important;
-              color: #000000 !important;
-            }
-            #profile-cv-page-container {
-              padding: 0 !important;
-              margin: 0 !important;
-            }
-          }
-        `}
-      </style>
+      {/* Professional A4 CV Print & PDF Preview Modal */}
+      <CVPrintPreviewModal
+        open={cvPrintOpen}
+        onClose={() => setCvPrintOpen(false)}
+        profile={profile}
+      />
     </Box>
   );
 };
