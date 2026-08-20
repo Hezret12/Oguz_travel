@@ -12,11 +12,12 @@ import { useLocale } from "../../hooks/useLocale";
 
 const ProfileRightCol = ({ profile, onEditSection }) => {
   const { t } = useLocale();
-  const experiences = profile.workExperience || [];
+  const experiences = profile.work_experience || profile.workExperience || [];
   const educations = profile.education || [];
   const certifications = profile.certifications || [];
   const languages = profile.languages || [];
   const references = profile.references || [];
+  const summary = profile.personal_summary || profile.personalSummary;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -66,7 +67,7 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
             lineHeight: 1.65,
           }}
         >
-          {profile.personalSummary || t("profile.noSummary")}
+          {summary || t("profile.noSummary")}
         </Typography>
       </Paper>
 

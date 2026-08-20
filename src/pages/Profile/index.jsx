@@ -4,6 +4,7 @@ import {
   Typography,
   Button,
   Grid,
+  CircularProgress,
 } from "@mui/material";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
@@ -11,6 +12,10 @@ import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../hooks/useLocale";
+import { useGet } from "../../hooks/CRUD/useGet";
+import { useUpdate } from "../../hooks/CRUD/useUpdate";
+import { getUserProfileApi } from "../../api/queries/getters";
+import { updateUserProfileApi } from "../../api/queries/patch";
 import ProfileLeftCol from "./ProfileLeftCol";
 import ProfileRightCol from "./ProfileRightCol";
 import EditSectionModal from "./EditSectionModal";
@@ -21,6 +26,7 @@ const ProfilePage = () => {
   const { user } = useAuth();
   const { t } = useLocale();
 
+  // Local state initialized with fallback
   const [profile, setProfile] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
@@ -31,10 +37,9 @@ const ProfilePage = () => {
       // Fallback
     }
 
-    // Default template with current logged-in user name if available
     return {
       ...DEFAULT_PROFILE,
-      fullName: user?.name || user?.fullName || DEFAULT_PROFILE.fullName,
+      full_name: user?.name || user?.fullName || DEFAULT_PROFILE.full_name,
       role: user?.position || user?.position_name || DEFAULT_PROFILE.role,
       contact: {
         ...DEFAULT_PROFILE.contact,
@@ -47,6 +52,49 @@ const ProfilePage = () => {
   const [activeModalSection, setActiveModalSection] = useState(null);
   const [cvPrintOpen, setCvPrintOpen] = useState(false);
 
+  // 1. Fetch Profile from Backend via useGet
+  const { data: serverProfileData, isLoading: isProfileLoading } = useGet({
+    apiFn: getUserProfileApi,
+    key: "userProfile",
+    options: {
+      retry: false, // fallback to localStorage/defaults smoothly if backend not yet created
+    },
+  });
+
+  // When server data arrives, merge into local state
+  useEffect(() => {
+    if (serverProfileData && typeof serverProfileData === "object" && Object.keys(serverProfileData).length > 0) {
+      setProfile((prev) => ({
+        ...prev,
+        ...serverProfileData,
+        full_name: serverProfileData.full_name || serverProfileData.fullName || prev.full_name,
+        avatar_url: serverProfileData.avatar_url || serverProfileData.avatarUrl || prev.avatar_url,
+        personal_summary:
+          serverProfileData.personal_summary ||
+          serverProfileData.personalSummary ||
+          prev.personal_summary,
+        work_experience:
+          serverProfileData.work_experience ||
+          serverProfileData.workExperience ||
+          prev.work_experience,
+        references_text:
+          serverProfileData.references_text ||
+          (serverProfileData.references || []).map((r) => r.text || "").join("\n") ||
+          prev.references_text,
+      }));
+    }
+  }, [serverProfileData]);
+
+  // 2. Update Profile to Backend via useUpdate
+  const { mutate: mutateUpdateProfile, isPending: isUpdating } = useUpdate({
+    apiFn: updateUserProfileApi,
+    key: "userProfile",
+    idKey: "guid",
+    onSuccessUpdate: () => {
+      toast.success(t("profile.saveSuccess"));
+    },
+  });
+
   // Sync to localStorage
   useEffect(() => {
     try {
@@ -58,10 +106,21 @@ const ProfilePage = () => {
 
   const handleUpdateProfile = (updatedProfile) => {
     setProfile(updatedProfile);
+    // Send to API
+    try {
+      mutateUpdateProfile(updatedProfile);
+    } catch {
+      // Local fallback
+    }
   };
 
   const handleManualSave = () => {
     localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(profile));
+    try {
+      mutateUpdateProfile(profile);
+    } catch {
+      // Local fallback
+    }
     toast.success(t("profile.saveSuccess"));
   };
 
@@ -69,7 +128,10 @@ const ProfilePage = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(profile, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `${(profile.fullName || "CV").replace(/\s+/g, "_")}_CV.json`);
+    downloadAnchor.setAttribute(
+      "download",
+      `${(profile.full_name || profile.fullName || "CV").replace(/\s+/g, "_")}_CV.json`
+    );
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -186,7 +248,14 @@ const ProfilePage = () => {
           <Button
             variant="contained"
             onClick={handleManualSave}
-            startIcon={<SaveRoundedIcon sx={{ fontSize: 18 }} />}
+            disabled={isUpdating}
+            startIcon={
+              isUpdating ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <SaveRoundedIcon sx={{ fontSize: 18 }} />
+              )
+            }
             sx={{
               borderRadius: "10px",
               textTransform: "none",
@@ -211,6 +280,9 @@ const ProfilePage = () => {
           <ProfileLeftCol
             profile={profile}
             onEditSection={(section) => setActiveModalSection(section)}
+            onAvatarChange={(newAvatarUrl) => {
+              handleUpdateProfile({ ...profile, avatar_url: newAvatarUrl });
+            }}
           />
         </Grid>
 
@@ -228,6 +300,7 @@ const ProfilePage = () => {
         open={Boolean(activeModalSection)}
         sectionKey={activeModalSection}
         profileData={profile}
+        isSaving={isUpdating}
         onClose={() => setActiveModalSection(null)}
         onSave={handleUpdateProfile}
       />

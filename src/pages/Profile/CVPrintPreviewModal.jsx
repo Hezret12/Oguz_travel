@@ -29,11 +29,14 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
 
   const contact = profile.contact || {};
   const skills = profile.skills || [];
-  const experiences = profile.workExperience || [];
+  const experiences = profile.work_experience || profile.workExperience || [];
   const educations = profile.education || [];
   const certifications = profile.certifications || [];
   const languages = profile.languages || [];
   const references = profile.references || [];
+  const summary = profile.personal_summary || profile.personalSummary;
+  const fullName = profile.full_name || profile.fullName;
+  const avatarUrl = profile.avatar_url || profile.avatarUrl;
 
   return (
     <Dialog
@@ -186,8 +189,8 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
             }}
           >
             <Avatar
-              src={profile.avatarUrl}
-              alt={profile.fullName}
+              src={avatarUrl}
+              alt={fullName}
               sx={{
                 width: 90,
                 height: 90,
@@ -198,7 +201,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                 fontWeight: 700,
               }}
             >
-              {profile.fullName?.charAt(0) || "U"}
+              {fullName?.charAt(0) || "U"}
             </Avatar>
 
             <Box sx={{ flexGrow: 1 }}>
@@ -213,7 +216,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                   mb: 0.5,
                 }}
               >
-                {profile.fullName}
+                {fullName}
               </Typography>
 
               <Typography
@@ -274,7 +277,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           </Box>
 
           {/* 2. Personal Summary Section */}
-          {profile.personalSummary && (
+          {summary && (
             <Box>
               <Typography
                 sx={{
@@ -298,7 +301,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                   textAlign: "justify",
                 }}
               >
-                {profile.personalSummary}
+                {summary}
               </Typography>
             </Box>
           )}

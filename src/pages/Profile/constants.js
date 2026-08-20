@@ -1,10 +1,10 @@
 export const STORAGE_KEY_PROFILE = "oguz_travel_user_profile";
 
 export const DEFAULT_PROFILE = {
-  fullName: "Tanzir Rahman",
+  full_name: "Tanzir Rahman",
   role: "Senior Product Designer",
   status: "Available for hire",
-  avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
+  avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80",
   contact: {
     email: "hello@example.com",
     phone: "+993 (65) 12-34-56",
@@ -22,9 +22,9 @@ export const DEFAULT_PROFILE = {
     "Amadeus GDS",
     "Visa Operations",
   ],
-  personalSummary:
+  personal_summary:
     "Results-driven product designer with 8+ years of experience building scalable design systems and user-centered experiences for enterprise SaaS platforms. Passionate about bridging the gap between design and engineering through clear documentation and collaborative workflows.",
-  workExperience: [
+  work_experience: [
     {
       id: "exp-1",
       role: "Senior Product Designer",
@@ -76,4 +76,5 @@ export const DEFAULT_PROFILE = {
   references: [
     { id: "ref-1", text: "Available upon request." },
   ],
+  references_text: "Available upon request.",
 };

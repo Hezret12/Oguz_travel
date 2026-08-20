@@ -179,3 +179,7 @@ export const updateReceivingApi = async (data) => {
 export const updateCustomFieldApi = async (data) => {
   return await api.patchPrivate('/custom_fields/update-custom-field', data);
 };
+
+export const updateUserProfileApi = async (data) => {
+  return await api.patchPrivate('/user/update-user-profile', data);
+};

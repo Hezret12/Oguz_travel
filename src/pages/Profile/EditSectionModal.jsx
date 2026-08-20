@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -6,10 +6,12 @@ import {
   Chip,
   Button,
   Grid,
+  Avatar,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
-import { useForm } from "react-hook-form";
+import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
+import { useForm, useWatch } from "react-hook-form";
 import toast from "react-hot-toast";
 import CustomTextField from "../../components/CustomTextField";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
@@ -18,24 +20,28 @@ import { CustomForm } from "../../components/Dialog/CustomForm";
 import { FooterButton } from "../../components/Dialog/FooterButton";
 import { useLocale } from "../../hooks/useLocale";
 
-const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) => {
+const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSaving = false }) => {
   const { t } = useLocale();
+  const fileInputRef = useRef(null);
 
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset, setValue } = useForm({
     defaultValues: {
-      fullName: "",
+      full_name: "",
       role: "",
       status: "",
-      avatarUrl: "",
+      avatar_url: "",
       email: "",
       phone: "",
       location: "",
       website: "",
       linkedin: "",
-      personalSummary: "",
-      referencesText: "",
+      personal_summary: "",
+      references_text: "",
     },
   });
+
+  const watchedAvatarUrl = useWatch({ control, name: "avatar_url" });
+  const watchedFullName = useWatch({ control, name: "full_name" });
 
   // Dynamic Array States for Skills, Experience, Education, Certifications, Languages
   const [skillsList, setSkillsList] = useState([]);
@@ -48,22 +54,30 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
   useEffect(() => {
     if (open && profileData) {
       const contact = profileData.contact || {};
+      const refText =
+        profileData.references_text ||
+        (profileData.references || []).map((r) => r.text || "").join("\n");
+
       reset({
-        fullName: profileData.fullName || "",
+        full_name: profileData.full_name || profileData.fullName || "",
         role: profileData.role || "",
         status: profileData.status || "",
-        avatarUrl: profileData.avatarUrl || "",
+        avatar_url: profileData.avatar_url || profileData.avatarUrl || "",
         email: contact.email || "",
         phone: contact.phone || "",
         location: contact.location || "",
         website: contact.website || "",
         linkedin: contact.linkedin || "",
-        personalSummary: profileData.personalSummary || "",
-        referencesText: (profileData.references || []).map((r) => r.text || "").join("\n"),
+        personal_summary: profileData.personal_summary || profileData.personalSummary || "",
+        references_text: refText || "",
       });
 
       setSkillsList([...(profileData.skills || [])]);
-      setExperienceList(JSON.parse(JSON.stringify(profileData.workExperience || [])));
+      setExperienceList(
+        JSON.parse(
+          JSON.stringify(profileData.work_experience || profileData.workExperience || [])
+        )
+      );
       setEducationList(JSON.parse(JSON.stringify(profileData.education || [])));
       setCertificationsList(JSON.parse(JSON.stringify(profileData.certifications || [])));
       setLanguagesList(JSON.parse(JSON.stringify(profileData.languages || [])));
@@ -72,6 +86,30 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
   }, [open, profileData, reset]);
 
   if (!open) return null;
+
+  const handleImageFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t("profile.photoHint"));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result;
+      if (dataUrl) {
+        setValue("avatar_url", dataUrl, { shouldDirty: true });
+        toast.success(t("profile.saveSuccess"));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setValue("avatar_url", "", { shouldDirty: true });
+  };
 
   const getSectionTitle = () => {
     switch (sectionKey) {
@@ -99,13 +137,31 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
   };
 
   const handleFormSubmit = (data) => {
-    let updated = { ...profileData };
+    let updated = {
+      ...profileData,
+      full_name: profileData.full_name || profileData.fullName,
+      role: profileData.role,
+      status: profileData.status,
+      avatar_url: profileData.avatar_url || profileData.avatarUrl,
+      contact: { ...(profileData.contact || {}) },
+      skills: [...skillsList],
+      personal_summary: profileData.personal_summary || profileData.personalSummary,
+      work_experience: [...experienceList],
+      education: [...educationList],
+      certifications: [...certificationsList],
+      languages: [...languagesList],
+      references: (data.references_text || "")
+        .split("\n")
+        .filter(Boolean)
+        .map((text) => ({ id: `ref-${Math.random()}`, text })),
+      references_text: data.references_text || "",
+    };
 
     if (sectionKey === "basic") {
-      updated.fullName = data.fullName;
+      updated.full_name = data.full_name;
       updated.role = data.role;
       updated.status = data.status;
-      updated.avatarUrl = data.avatarUrl;
+      updated.avatar_url = data.avatar_url;
     } else if (sectionKey === "contact") {
       updated.contact = {
         email: data.email,
@@ -115,11 +171,11 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
         linkedin: data.linkedin,
       };
     } else if (sectionKey === "summary") {
-      updated.personalSummary = data.personalSummary;
+      updated.personal_summary = data.personal_summary;
     } else if (sectionKey === "skills") {
       updated.skills = skillsList;
     } else if (sectionKey === "experience") {
-      updated.workExperience = experienceList;
+      updated.work_experience = experienceList;
     } else if (sectionKey === "education") {
       updated.education = educationList;
     } else if (sectionKey === "certifications") {
@@ -127,14 +183,14 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
     } else if (sectionKey === "languages") {
       updated.languages = languagesList;
     } else if (sectionKey === "references") {
-      updated.references = (data.referencesText || "")
+      updated.references_text = data.references_text;
+      updated.references = (data.references_text || "")
         .split("\n")
         .filter(Boolean)
         .map((text) => ({ id: `ref-${Math.random()}`, text }));
     }
 
     onSave(updated);
-    toast.success(t("profile.saveSuccess"));
     onClose();
   };
 
@@ -255,12 +311,107 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
     <CustomDialog open={open} close={onClose} widthX={660}>
       <CustomDialogHeader variant="h5" title={getSectionTitle()} />
       <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
-        {/* 1. Basic Info */}
+        {/* 1. Basic Info & Photo Upload */}
         {sectionKey === "basic" && (
           <Grid container spacing={2.25}>
+            {/* Interactive Avatar Upload Box */}
+            <Grid size={{ xs: 12 }}>
+              <Box
+                sx={{
+                  p: 2.5,
+                  borderRadius: "12px",
+                  border: "1px dashed",
+                  borderColor: (theme) =>
+                    theme.palette.mode === "dark" ? "rgba(255,255,255,0.18)" : "#cbd5e1",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark" ? "rgba(255,255,255,0.02)" : "#f8fafc",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Avatar
+                  src={watchedAvatarUrl}
+                  alt={watchedFullName}
+                  sx={{
+                    width: 76,
+                    height: 76,
+                    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
+                    border: "2px solid #0E8584",
+                    fontSize: "1.75rem",
+                    fontWeight: 700,
+                    bgcolor: "#0E8584",
+                  }}
+                >
+                  {watchedFullName?.charAt(0) || "U"}
+                </Avatar>
+
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary" }}>
+                    {t("profile.avatarUrl")}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1.5 }}>
+                    {t("profile.photoHint")}
+                  </Typography>
+
+                  <Box sx={{ display: "flex", gap: 1.25, alignItems: "center" }}>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageFileChange}
+                      accept="image/png, image/jpeg, image/webp"
+                      style={{ display: "none" }}
+                    />
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => fileInputRef.current?.click()}
+                      startIcon={<PhotoCameraRoundedIcon sx={{ fontSize: 17 }} />}
+                      sx={{
+                        borderRadius: "7px",
+                        textTransform: "none",
+                        fontWeight: 600,
+                        fontSize: "0.8rem",
+                        bgcolor: "#0E8584",
+                        border: "0.5px solid #2CA7A6",
+                        color: "#ffffff",
+                        "&:hover": { bgcolor: "#0C7776" },
+                      }}
+                    >
+                      {watchedAvatarUrl ? t("profile.changePhoto") : t("profile.uploadPhoto")}
+                    </Button>
+
+                    {watchedAvatarUrl && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={handleRemovePhoto}
+                        startIcon={<DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />}
+                        sx={{
+                          borderRadius: "7px",
+                          textTransform: "none",
+                          fontWeight: 600,
+                          fontSize: "0.8rem",
+                          borderColor: "error.main",
+                          color: "error.main",
+                          "&:hover": {
+                            borderColor: "error.dark",
+                            backgroundColor: "rgba(239, 68, 68, 0.08)",
+                          },
+                        }}
+                      >
+                        {t("profile.removePhoto")}
+                      </Button>
+                    )}
+                  </Box>
+                </Box>
+              </Box>
+            </Grid>
+
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
-                name="fullName"
+                name="full_name"
                 control={control}
                 label={t("profile.fullName")}
                 required
@@ -283,9 +434,10 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
-                name="avatarUrl"
+                name="avatar_url"
                 control={control}
-                label={t("profile.avatarUrl")}
+                label="Image URL (Alternative)"
+                placeholder="https://..."
               />
             </Grid>
           </Grid>
@@ -337,7 +489,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
           <Grid container spacing={2.25}>
             <Grid size={{ xs: 12 }}>
               <CustomTextField
-                name="personalSummary"
+                name="personal_summary"
                 control={control}
                 label={t("profile.personalSummary")}
                 multiline
@@ -829,7 +981,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
           <Grid container spacing={2.25}>
             <Grid size={{ xs: 12 }}>
               <CustomTextField
-                name="referencesText"
+                name="references_text"
                 control={control}
                 label={t("profile.references")}
                 multiline
@@ -840,7 +992,7 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave }) =>
         )}
 
         {/* Standard Project Footer Buttons */}
-        <FooterButton onCancel={onClose} saveText={t("save")} />
+        <FooterButton onCancel={onClose} loading={isSaving} saveText={t("save")} />
       </CustomForm>
     </CustomDialog>
   );

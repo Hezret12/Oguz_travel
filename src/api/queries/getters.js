@@ -190,3 +190,7 @@ export const getAllReportsApi = async (params = {}) => {
 export const getAllReportSharesApi = async (params = {}) => {
   return await api.getPrivate('/report-share/get-all-report-shares', params);
 };
+
+export const getUserProfileApi = async () => {
+  return await api.getPrivate('/user/get-user-profile');
+};

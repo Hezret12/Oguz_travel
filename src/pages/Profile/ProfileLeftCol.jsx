@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import {
   Box,
   Paper,
@@ -13,12 +14,35 @@ import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
+import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
 
-const ProfileLeftCol = ({ profile, onEditSection }) => {
+const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
   const { t } = useLocale();
+  const fileInputRef = useRef(null);
+
   const contact = profile.contact || {};
   const skills = profile.skills || [];
+
+  const handleDirectAvatarUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t("profile.photoHint"));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result;
+      if (dataUrl) {
+        onAvatarChange?.(dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -52,24 +76,64 @@ const ProfileLeftCol = ({ profile, onEditSection }) => {
           </IconButton>
         </Tooltip>
 
-        {/* Circular Avatar */}
+        {/* Circular Avatar with Camera Hover Overlay */}
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-          <Avatar
-            src={profile.avatarUrl}
-            alt={profile.fullName}
-            sx={{
-              width: 110,
-              height: 110,
-              boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-              border: "3px solid",
-              borderColor: "background.paper",
-              fontSize: "2.2rem",
-              fontWeight: 700,
-              bgcolor: "#0c8a7b",
-            }}
-          >
-            {profile.fullName?.charAt(0) || "U"}
-          </Avatar>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleDirectAvatarUpload}
+            accept="image/png, image/jpeg, image/webp"
+            style={{ display: "none" }}
+          />
+          <Tooltip title={t("profile.changePhoto")} placement="bottom">
+            <Box
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                position: "relative",
+                cursor: "pointer",
+                borderRadius: "50%",
+                "&:hover .avatar-upload-overlay": {
+                  opacity: 1,
+                },
+              }}
+            >
+              <Avatar
+                src={profile.avatar_url || profile.avatarUrl}
+                alt={profile.full_name || profile.fullName}
+                sx={{
+                  width: 110,
+                  height: 110,
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                  border: "3px solid",
+                  borderColor: "background.paper",
+                  fontSize: "2.2rem",
+                  fontWeight: 700,
+                  bgcolor: "#0c8a7b",
+                }}
+              >
+                {(profile.full_name || profile.fullName)?.charAt(0) || "U"}
+              </Avatar>
+
+              {/* Hover Camera Overlay */}
+              <Box
+                className="avatar-upload-overlay"
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(0, 0, 0, 0.45)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#ffffff",
+                  opacity: 0,
+                  transition: "opacity 0.2s ease",
+                }}
+              >
+                <PhotoCameraRoundedIcon sx={{ fontSize: 26 }} />
+              </Box>
+            </Box>
+          </Tooltip>
         </Box>
 
         <Typography
@@ -82,7 +146,7 @@ const ProfileLeftCol = ({ profile, onEditSection }) => {
             mb: 0.5,
           }}
         >
-          {profile.fullName}
+          {profile.full_name || profile.fullName}
         </Typography>
 
         <Typography
