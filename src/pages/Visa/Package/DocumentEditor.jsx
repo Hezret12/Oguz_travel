@@ -226,16 +226,18 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
             value={docData.title || ""}
             onChange={handleTitleChange}
             placeholder="Täze wiza dokumenti"
-            InputProps={{
-              disableUnderline: true,
-              sx: {
-                fontSize: { xs: "1.4rem", sm: "1.75rem" },
-                fontWeight: 800,
-                color: "text.primary",
-                mb: 1.5,
-                lineHeight: 1.2,
-                "& input": {
-                  p: 0,
+            slotProps={{
+              input: {
+                disableUnderline: true,
+                sx: {
+                  fontSize: { xs: "1.4rem", sm: "1.75rem" },
+                  fontWeight: 800,
+                  color: "text.primary",
+                  mb: 1.5,
+                  lineHeight: 1.2,
+                  "& input": {
+                    p: 0,
+                  },
                 },
               },
             }}
@@ -247,14 +249,16 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
             value={docData.country || ""}
             onChange={handleCountryChange}
             placeholder="Ýurt (meselem: Hytaý, Rossiýa, Dubaý)"
-            InputProps={{
-              disableUnderline: true,
-              sx: {
-                fontSize: "0.95rem",
-                fontWeight: 500,
-                color: "text.secondary",
-                "& input": {
-                  p: 0,
+            slotProps={{
+              input: {
+                disableUnderline: true,
+                sx: {
+                  fontSize: "0.95rem",
+                  fontWeight: 500,
+                  color: "text.secondary",
+                  "& input": {
+                    p: 0,
+                  },
                 },
               },
             }}
@@ -308,12 +312,14 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
             onChange={handleGeneralNoteChange}
             placeholder="Bu ýere bellik ýazyň..."
             variant="standard"
-            InputProps={{
-              disableUnderline: true,
-              sx: {
-                fontSize: "0.92rem",
-                color: "text.primary",
-                p: 0,
+            slotProps={{
+              input: {
+                disableUnderline: true,
+                sx: {
+                  fontSize: "0.92rem",
+                  color: "text.primary",
+                  p: 0,
+                },
               },
             }}
           />

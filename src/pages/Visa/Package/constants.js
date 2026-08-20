@@ -11,27 +11,17 @@ export const createDocumentsTable = () => ({
   title: "TABLISA 1: GEREKLI RESMİNAMALAR",
   rows: [
     [
-      createNewCell("T/b"),
-      createNewCell("Resminamanyň ady"),
-      createNewCell("Düşündiriş / Format"),
+      createNewCell("№"),
+      createNewCell(""),
+      createNewCell(""),
     ],
     [
-      createNewCell("1"),
-      createNewCell("Zagranpasport (Asyl nusgasy)"),
-      createNewCell("Möhleti iň az 6 aý bolmaly"),
-    ],
-    [
-      createNewCell("2"),
-      createNewCell("Surat (3.5 x 4.5)"),
-      createNewCell("Ak fonda, 2 sany täze düşülen"),
-    ],
-    [
-      createNewCell("3"),
-      createNewCell("Wiza anketi"),
-      createNewCell("Doly we dogry doldurylan"),
+      createNewCell(""),
+      createNewCell(""),
+      createNewCell(""),
     ],
   ],
-  note: "Ähli resminamalar doly we talaplara laýyk bolmaly.",
+  note: "",
 });
 
 export const createPricesTable = () => ({
@@ -39,30 +29,22 @@ export const createPricesTable = () => ({
   title: "TABLISA 2: WIZANYŇ BAHALARY WE MÖHLETLERI",
   rows: [
     [
-      createNewCell("Wizanyň görnüşi"),
-      createNewCell("Giriş sany"),
-      createNewCell("Garaşylýan wagt"),
-      createNewCell("Bahasy"),
+      createNewCell("№"),
+      createNewCell(""),
+      createNewCell(""),
     ],
     [
-      createNewCell("Syýahatçylyk (Turist)"),
-      createNewCell("1 gezeklik (Single)"),
-      createNewCell("7 - 10 iş güni"),
-      createNewCell("120 USD"),
-    ],
-    [
-      createNewCell("Işewürlik (Biznes)"),
-      createNewCell("Köp gezeklik (Multi)"),
-      createNewCell("5 - 7 iş güni"),
-      createNewCell("250 USD"),
+      createNewCell(""),
+      createNewCell(""),
+      createNewCell(""),
     ],
   ],
-  note: "Konsullyk tölegleri we goşmaça hyzmatlar hasaba goşulan däldir.",
+  note: "",
 });
 
 export const createNewDocument = () => ({
   id: `doc-${Date.now()}`,
-  title: "Täze wiza resminamasy",
+  title: "",
   country: "",
   tables: [createDocumentsTable(), createPricesTable()],
   generalNote: "",

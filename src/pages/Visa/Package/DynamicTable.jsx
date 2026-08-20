@@ -224,18 +224,20 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
           value={table.title ?? `TABLISA ${tableIndex + 1}`}
           onChange={(e) => onUpdate({ ...table, title: e.target.value })}
           placeholder={`TABLISA ${tableIndex + 1}`}
-          InputProps={{
-            disableUnderline: true,
-            sx: {
-              fontWeight: 800,
-              letterSpacing: "1px",
-              color: "text.secondary",
-              fontSize: "0.85rem",
-              textTransform: "uppercase",
-              width: "100%",
-              p: 0,
-              "& input": {
+          slotProps={{
+            input: {
+              disableUnderline: true,
+              sx: {
+                fontWeight: 800,
+                letterSpacing: "1px",
+                color: "text.secondary",
+                fontSize: "0.85rem",
+                textTransform: "uppercase",
+                width: "100%",
                 p: 0,
+                "& input": {
+                  p: 0,
+                },
               },
             },
           }}
@@ -311,15 +313,17 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
                           value={cell.text || ""}
                           onChange={(e) => handleCellTextChange(rIdx, cIdx, e.target.value)}
                           placeholder="..."
-                          InputProps={{
-                            disableUnderline: true,
-                            sx: {
-                              px: 1.5,
-                              py: 1,
-                              fontSize: "0.9rem",
-                              fontWeight: rIdx === 0 ? 600 : 400,
-                              color: "text.primary",
-                              lineHeight: 1.4,
+                          slotProps={{
+                            input: {
+                              disableUnderline: true,
+                              sx: {
+                                px: 1.5,
+                                py: 1,
+                                fontSize: "0.9rem",
+                                fontWeight: rIdx === 0 ? 600 : 400,
+                                color: "text.primary",
+                                lineHeight: 1.4,
+                              },
                             },
                           }}
                         />
@@ -366,6 +370,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={handleCloseMenu}
+        disablePortal
         transformOrigin={{ horizontal: "left", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "top" }}
         slotProps={{
@@ -391,14 +396,14 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
           <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
             <ArrowForwardRoundedIcon sx={{ fontSize: 18 }} />
           </ListItemIcon>
-          <ListItemText primary="Saga birikdir" primaryTypographyProps={{ fontSize: "0.86rem", fontWeight: 500 }} />
+          <ListItemText primary="Saga birikdir" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 500 } }} />
         </MenuItem>
 
         <MenuItem onClick={handleMergeDown} sx={{ py: 1, fontSize: "0.86rem" }}>
           <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
             <ArrowDownwardRoundedIcon sx={{ fontSize: 18 }} />
           </ListItemIcon>
-          <ListItemText primary="Aşakyna birikdir" primaryTypographyProps={{ fontSize: "0.86rem", fontWeight: 500 }} />
+          <ListItemText primary="Aşakyna birikdir" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 500 } }} />
         </MenuItem>
 
         {canSplit && (
@@ -406,7 +411,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
             <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
               <ContentCutRoundedIcon sx={{ fontSize: 18 }} />
             </ListItemIcon>
-            <ListItemText primary="Böl (split)" primaryTypographyProps={{ fontSize: "0.86rem", fontWeight: 500 }} />
+            <ListItemText primary="Böl (split)" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 500 } }} />
           </MenuItem>
         )}
 
@@ -416,14 +421,14 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
           <ListItemIcon sx={{ minWidth: 30, color: "error.main" }}>
             <TableRowsRoundedIcon sx={{ fontSize: 18 }} />
           </ListItemIcon>
-          <ListItemText primary="Setiri poz" primaryTypographyProps={{ fontSize: "0.86rem", fontWeight: 600 }} />
+          <ListItemText primary="Setiri poz" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 600 } }} />
         </MenuItem>
 
         <MenuItem onClick={handleDeleteColumn} sx={{ py: 1, color: "error.main" }}>
           <ListItemIcon sx={{ minWidth: 30, color: "error.main" }}>
             <ViewColumnRoundedIcon sx={{ fontSize: 18 }} />
           </ListItemIcon>
-          <ListItemText primary="Sütni poz" primaryTypographyProps={{ fontSize: "0.86rem", fontWeight: 600 }} />
+          <ListItemText primary="Sütni poz" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 600 } }} />
         </MenuItem>
       </Menu>
 
@@ -504,12 +509,14 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
           onChange={(e) => onUpdate({ ...table, note: e.target.value })}
           placeholder="Bu tablisanyň bellikleri..."
           variant="standard"
-          InputProps={{
-            disableUnderline: true,
-            sx: {
-              fontSize: "0.88rem",
-              color: "text.primary",
-              p: 0,
+          slotProps={{
+            input: {
+              disableUnderline: true,
+              sx: {
+                fontSize: "0.88rem",
+                color: "text.primary",
+                p: 0,
+              },
             },
           }}
         />
