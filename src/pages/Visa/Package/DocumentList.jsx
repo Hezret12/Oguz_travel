@@ -71,10 +71,9 @@ const DocumentList = ({
         minHeight: 0,
       }}
     >
-      {/* Top Header with Search and Add Button on the same single line */}
       <PageHeader
-        title={t("sidebar.visa.package") || "Wiza Bukjalary"}
-        pageTitle={`${t("sidebar.visa.package") || "Wiza Bukjalary"} | Oguz Travel`}
+        title={t("sidebar.visa.package")}
+        pageTitle={`${t("sidebar.visa.package")} | Oguz Travel`}
         addButtonText="Täze dokument"
         onAddClick={onCreateDocument}
       >
@@ -83,12 +82,11 @@ const DocumentList = ({
           onChange={setSearchQuery}
           onRefetch={onRefetch}
           isFetching={isFetching}
-          placeholder={t("search") || "Gözleg..."}
+          placeholder={t("search")}
           sx={{ minWidth: { xs: 160, sm: 260 } }}
         />
       </PageHeader>
 
-      {/* Cards Grid / Loading / Empty */}
       <Box sx={{ flexGrow: 1, overflowY: "auto", pb: 4, px: 0.5 }}>
         {isLoading ? (
           <Box
@@ -102,9 +100,6 @@ const DocumentList = ({
             }}
           >
             <CircularProgress sx={{ color: "#0c8a7b" }} />
-            <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
-              Wiza dokumentleri ýüklenýär...
-            </Typography>
           </Box>
         ) : filteredDocuments.length === 0 ? (
           <Paper
