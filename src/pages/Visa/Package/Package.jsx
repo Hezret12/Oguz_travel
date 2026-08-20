@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import DocumentList from "./DocumentList";
 import DocumentEditor from "./DocumentEditor";
-import { DEFAULT_SAMPLE_DOCUMENTS, createNewDocument } from "./constants";
+import { createNewDocument } from "./constants";
 
 const STORAGE_KEY = "oguz_travel_visa_documents";
 
@@ -12,14 +12,14 @@ const Package = () => {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
     } catch {
       // Fallback on error
     }
-    return DEFAULT_SAMPLE_DOCUMENTS;
+    return [];
   });
 
   const [activeDocumentId, setActiveDocumentId] = useState(null);

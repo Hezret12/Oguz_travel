@@ -219,6 +219,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
         }}
       >
         <TextField
+          fullWidth
           variant="standard"
           value={table.title ?? `TABLISA ${tableIndex + 1}`}
           onChange={(e) => onUpdate({ ...table, title: e.target.value })}
@@ -229,10 +230,10 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
               fontWeight: 800,
               letterSpacing: "1px",
               color: "text.secondary",
-              fontSize: "0.82rem",
+              fontSize: "0.85rem",
               textTransform: "uppercase",
+              width: "100%",
               p: 0,
-              maxWidth: "500px",
               "& input": {
                 p: 0,
               },
