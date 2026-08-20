@@ -12,7 +12,6 @@ import {
   TextField,
   Paper,
 } from "@mui/material";
-import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
@@ -27,7 +26,7 @@ import TableRowsRoundedIcon from "@mui/icons-material/TableRowsRounded";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import { createNewCell } from "./constants";
 
-const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
+const DynamicTable = ({ table, tableIndex, onUpdate }) => {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [activeCellCoord, setActiveCellCoord] = useState(null); // { r: rowIndex, c: colIndex }
 

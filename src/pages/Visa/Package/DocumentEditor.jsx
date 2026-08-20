@@ -11,7 +11,6 @@ import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
-import toast from "react-hot-toast";
 import DynamicTable from "./DynamicTable";
 import DocumentPreviewModal from "./DocumentPreviewModal";
 import { createDocumentsTable, createPricesTable } from "./constants";

@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,6 +9,7 @@ import {
   IconButton,
   Tooltip,
   Chip,
+  CircularProgress,
 } from "@mui/material";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
@@ -15,53 +17,53 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import FlightTakeoffRoundedIcon from "@mui/icons-material/FlightTakeoffRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { CircularProgress } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
 import { getOneVisaDocApi } from "../../../api/queries/getters";
+import { useDateFormat } from "../../../functions/generalHelpers";
 import { deserializeBackendToDocument } from "./constants";
 
-const DocumentPreviewModal = ({ open, onClose, document }) => {
+const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
   const [copied, setCopied] = useState(false);
-  const [fullDoc, setFullDoc] = useState(document);
-  const [loading, setLoading] = useState(false);
+  const { formatChange } = useDateFormat();
 
-  useEffect(() => {
-    if (open && document) {
-      if (document.tables && document.tables.length > 0) {
-        setFullDoc(document);
-      } else if (document.guid || document.id) {
-        setLoading(true);
-        getOneVisaDocApi(document.guid || document.id)
-          .then((res) => {
-            const dataObj = res?.data?.data || res?.data;
-            if (dataObj) {
-              setFullDoc(deserializeBackendToDocument(dataObj));
-            } else {
-              setFullDoc(document);
-            }
-          })
-          .catch(() => {
-            setFullDoc(document);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      } else {
-        setFullDoc(document);
+  // Determine if we need to fetch full details from backend
+  const docGuid = doc?.guid || doc?.id;
+  const hasTables = doc?.tables?.length > 0;
+  const shouldFetch = open && !!docGuid && !hasTables;
+
+  // TanStack Query — fetch full doc details only when needed
+  const { data: fetchedDoc, isLoading } = useQuery({
+    queryKey: ["visaDocPreview", docGuid],
+    queryFn: async () => {
+      const res = await getOneVisaDocApi(docGuid);
+      const dataObj = res?.data?.data || res?.data;
+      if (dataObj) {
+        return deserializeBackendToDocument(dataObj);
       }
-    }
-  }, [open, document]);
+      return null;
+    },
+    enabled: shouldFetch,
+    staleTime: 30_000, // Cache for 30s to avoid refetching on reopen
+  });
 
-  if (!open || !document) return null;
+  // Derive the current document — no setState needed
+  const currentDoc = useMemo(() => {
+    if (fetchedDoc) return fetchedDoc;
+    if (doc) return doc;
+    return null;
+  }, [fetchedDoc, doc]);
 
-  const currentDoc = fullDoc || document;
+  if (!open || !doc) return null;
+
+  const loading = shouldFetch && isLoading;
 
   const handlePrint = () => {
     window.print();
   };
 
   const handleCopyText = () => {
+    if (!currentDoc) return;
     try {
       let textContent = `${currentDoc.title || "Wiza Dokumenti"}\n`;
       if (currentDoc.country) textContent += `Ýurt: ${currentDoc.country}\n\n`;
@@ -145,7 +147,7 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
           </Box>
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-              {document.title || "Dokument Önizleme"}
+              {doc.title || "Dokument Önizleme"}
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
               Word / A4 Çap Formaty
@@ -318,7 +320,7 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
 
             <Box sx={{ textAlign: "right" }}>
               <Chip
-                label={currentDoc.country || "Wiza Resminamasy"}
+                label={currentDoc?.country || "Wiza Resminamasy"}
                 size="small"
                 sx={{
                   bgcolor: "#f0fdfa",
@@ -331,7 +333,7 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
                 }}
               />
               <Typography sx={{ fontSize: "0.7rem", color: "#94a3b8", fontWeight: 500 }}>
-                Senesi: {new Date(currentDoc.updatedAt || Date.now()).toLocaleDateString("tk-TM")}
+                Senesi: {formatChange(currentDoc?.updatedAt, { dateOnly: true }) || "—"}
               </Typography>
             </Box>
           </Box>
@@ -349,9 +351,9 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
                 mb: 0.5,
               }}
             >
-              {currentDoc.title || "Täze wiza dokumenti"}
+              {currentDoc?.title || "Täze wiza dokumenti"}
             </Typography>
-            {currentDoc.country && (
+            {currentDoc?.country && (
               <Typography sx={{ color: "#64748b", fontWeight: 600, fontSize: "0.95rem" }}>
                 Ýurt: {currentDoc.country}
               </Typography>
@@ -359,7 +361,7 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
           </Box>
 
           {/* Tables */}
-          {(currentDoc.tables || []).map((table, tIdx) => (
+          {(currentDoc?.tables || []).map((table, tIdx) => (
             <Box key={table.id || tIdx} sx={{ mb: 4 }}>
               <Box
                 sx={{
@@ -453,7 +455,7 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
           ))}
 
           {/* Global General Note */}
-          {document.generalNote && (
+          {currentDoc?.generalNote && (
             <Box
               sx={{
                 mt: 4,
