@@ -24,12 +24,11 @@ import ContentCutRoundedIcon from "@mui/icons-material/ContentCutRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ViewColumnRoundedIcon from "@mui/icons-material/ViewColumnRounded";
 import TableRowsRoundedIcon from "@mui/icons-material/TableRowsRounded";
-import NoteAltOutlinedIcon from "@mui/icons-material/NoteAltOutlined";
 import { createNewCell } from "./constants";
 
 const DynamicTable = ({ table, tableIndex, onUpdate }) => {
   const [menuAnchor, setMenuAnchor] = useState(null);
-  const [activeCellCoord, setActiveCellCoord] = useState(null);
+  const [activeCellCoord, setActiveCellCoord] = useState(null); // { r: rowIndex, c: colIndex }
 
   const rows = table.rows || [];
 
@@ -56,6 +55,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
     onUpdate({ ...table, rows: newRows });
   };
 
+  // Row reorder handlers
   const handleMoveRowUp = (rIdx) => {
     if (rIdx <= 1) return;
     const newRows = [...rows];
@@ -70,6 +70,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
     onUpdate({ ...table, rows: newRows });
   };
 
+  // Column reorder handlers
   const handleMoveColumnLeft = () => {
     if (!activeCellCoord) return;
     const { c } = activeCellCoord;
@@ -245,128 +246,107 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
     <Paper
       elevation={0}
       sx={{
-        borderRadius: "20px",
+        borderRadius: "10px",
         border: "1px solid",
         borderColor: "divider",
         backgroundColor: "background.paper",
-        p: { xs: 2, sm: 3 },
-        boxShadow: (theme) =>
-          theme.palette.mode === "dark"
-            ? "0 4px 20px rgba(0, 0, 0, 0.15)"
-            : "0 2px 16px rgba(0, 0, 0, 0.02)",
-        transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-        "&:hover": {
-          boxShadow: (theme) =>
-            theme.palette.mode === "dark"
-              ? "0 6px 24px rgba(0, 0, 0, 0.25)"
-              : "0 4px 20px rgba(0, 0, 0, 0.04)",
-        },
+        p: { xs: 2.5, sm: 3.5 },
       }}
     >
+      {/* Table Title and Actions Bar */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "flex-end",
           flexWrap: "wrap",
-          gap: 1.5,
-          mb: 2,
+          gap: 2,
+          mb: 2.5,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, flex: 1, minWidth: "240px" }}>
-
+        <Box sx={{ flex: 1, minWidth: "260px" }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.88rem", mb: 1 }}>
+            Tablisa {tableIndex + 1} ady *
+          </Typography>
           <TextField
             fullWidth
-            variant="standard"
             value={table.title ?? `TABLISA ${tableIndex + 1}`}
             onChange={(e) => onUpdate({ ...table, title: e.target.value })}
-            placeholder={`TABLISA ${tableIndex + 1}`}
+            placeholder={`Tablisa ${tableIndex + 1} ady`}
             slotProps={{
               input: {
-                disableUnderline: true,
                 sx: {
-                  fontWeight: 800,
-                  letterSpacing: "0.5px",
-                  color: "text.primary",
-                  fontSize: "0.92rem",
-                  textTransform: "uppercase",
-                  "& input": {
-                    p: 0,
-                  },
+                  borderRadius: "8px",
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                  minHeight: "44px",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
                 },
               },
             }}
           />
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        {/* Add Row / Add Column Buttons */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+          <Button
+            variant="outlined"
+            onClick={handleAddRow}
+            startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
+            sx={{
+              textTransform: "none",
+              borderRadius: "8px",
+              borderColor: "divider",
+              color: "text.primary",
+              fontWeight: 600,
+              fontSize: "0.88rem",
+              px: 2,
+              py: 0.75,
+              minHeight: "44px",
+              "&:hover": {
+                borderColor: "text.primary",
+                backgroundColor: "action.hover",
+              },
+            }}
+          >
+            Setir goş
+          </Button>
 
-          <Tooltip title="Aşakyna täze setir goş" placement="top">
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleAddRow}
-              startIcon={<AddRoundedIcon sx={{ fontSize: 16 }} />}
-              sx={{
-                textTransform: "none",
-                borderRadius: "8px",
-                borderColor: "divider",
-                color: "text.secondary",
-                fontWeight: 600,
-                fontSize: "0.8rem",
-                px: 1.5,
-                py: 0.5,
-                bgcolor: "background.paper",
-                "&:hover": {
-                  borderColor: "primary.main",
-                  color: "primary.main",
-                  backgroundColor: "rgba(14, 133, 132, 0.06)",
-                },
-              }}
-            >
-              Setir goş
-            </Button>
-          </Tooltip>
-
-          <Tooltip title="Saga täze sütün goş" placement="top">
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleAddColumn}
-              startIcon={<ViewColumnRoundedIcon sx={{ fontSize: 16 }} />}
-              sx={{
-                textTransform: "none",
-                borderRadius: "8px",
-                borderColor: "divider",
-                color: "text.secondary",
-                fontWeight: 600,
-                fontSize: "0.8rem",
-                px: 1.5,
-                py: 0.5,
-                bgcolor: "background.paper",
-                "&:hover": {
-                  borderColor: "primary.main",
-                  color: "primary.main",
-                  backgroundColor: "rgba(14, 133, 132, 0.06)",
-                },
-              }}
-            >
-              Sütün goş
-            </Button>
-          </Tooltip>
+          <Button
+            variant="outlined"
+            onClick={handleAddColumn}
+            startIcon={<ViewColumnRoundedIcon sx={{ fontSize: 18 }} />}
+            sx={{
+              textTransform: "none",
+              borderRadius: "8px",
+              borderColor: "divider",
+              color: "text.primary",
+              fontWeight: 600,
+              fontSize: "0.88rem",
+              px: 2,
+              py: 0.75,
+              minHeight: "44px",
+              "&:hover": {
+                borderColor: "text.primary",
+                backgroundColor: "action.hover",
+              },
+            }}
+          >
+            Sütün goş
+          </Button>
         </Box>
       </Box>
 
-      {/* Interactive Table Grid */}
+      {/* Table Grid Container */}
       <Box
         sx={{
           overflowX: "auto",
           width: "100%",
-          borderRadius: "12px",
+          borderRadius: "8px",
           border: "1px solid",
           borderColor: "divider",
-          mb: 2,
-          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.02)",
+          mb: 3,
         }}
       >
         <Box
@@ -388,7 +368,6 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                   {row.map((cell, cIdx) => {
                     if (cell.isMerged) return null;
 
-                    // First column (index 0) is the fixed "№" column
                     const isOrderCol = cIdx === 0;
 
                     return (
@@ -402,7 +381,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                           borderColor: "divider",
                           p: 0,
                           position: "relative",
-                          minHeight: "44px",
+                          minHeight: "46px",
                           ...(isOrderCol && {
                             width: "52px",
                             minWidth: "52px",
@@ -417,65 +396,46 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                             }
                             if (isHeaderRow) {
                               return theme.palette.mode === "dark"
-                                ? "rgba(255, 255, 255, 0.04)"
+                                ? "rgba(255, 255, 255, 0.05)"
                                 : "#f1f5f9";
                             }
                             return "transparent";
                           },
-                          "&:focus-within": {
-                            boxShadow: (theme) =>
-                              isOrderCol
-                                ? "none"
-                                : `inset 0 0 0 1.5px ${theme.palette.primary.main}`,
-                            backgroundColor: (theme) =>
-                              isOrderCol
-                                ? "inherit"
-                                : theme.palette.mode === "dark"
-                                ? "rgba(14, 133, 132, 0.08)"
-                                : "rgba(14, 133, 132, 0.03)",
-                          },
                           "&:hover .cell-menu-btn": {
-                            opacity: isOrderCol ? 0 : 1,
-                            visibility: isOrderCol ? "hidden" : "visible",
-                          },
-                          "&:focus-within .cell-menu-btn": {
                             opacity: isOrderCol ? 0 : 1,
                             visibility: isOrderCol ? "hidden" : "visible",
                           },
                         }}
                       >
                         {isOrderCol ? (
-                          /* Fixed auto-increment № column */
                           <Box
                             sx={{
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              minHeight: "44px",
+                              minHeight: "46px",
                               px: 0.5,
-                              py: 1,
+                              py: 0.5,
                             }}
                           >
                             <Typography
                               variant="body2"
                               sx={{
-                                fontWeight: isHeaderRow ? 800 : 600,
-                                fontSize: isHeaderRow ? "0.78rem" : "0.85rem",
+                                fontWeight: isHeaderRow ? 700 : 500,
+                                fontSize: isHeaderRow ? "0.85rem" : "0.9rem",
                                 color: isHeaderRow ? "text.secondary" : "text.primary",
                                 userSelect: "none",
-                                letterSpacing: isHeaderRow ? "0.5px" : 0,
                               }}
                             >
                               {isHeaderRow ? "№" : dataRowNumber}
                             </Typography>
                           </Box>
                         ) : (
-                          /* Normal editable cell */
                           <Box
                             sx={{
                               display: "flex",
                               alignItems: "center",
-                              minHeight: "44px",
+                              minHeight: "46px",
                               position: "relative",
                             }}
                           >
@@ -492,14 +452,10 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                                   sx: {
                                     px: 1.5,
                                     py: 1,
-                                    fontSize: isHeaderRow ? "0.88rem" : "0.88rem",
-                                    fontWeight: isHeaderRow ? 700 : 400,
-                                    color: isHeaderRow ? "text.primary" : "text.primary",
+                                    fontSize: "0.92rem",
+                                    fontWeight: isHeaderRow ? 600 : 400,
+                                    color: "text.primary",
                                     lineHeight: 1.45,
-                                    "& textarea::placeholder": {
-                                      color: "text.secondary",
-                                      opacity: isHeaderRow ? 0.7 : 0.4,
-                                    },
                                   },
                                 },
                               }}
@@ -517,22 +473,16 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                                 transform: "translateY(-50%)",
                                 opacity: 0,
                                 visibility: "hidden",
-                                transition: "all 0.15s ease",
+                                transition: "opacity 0.15s ease",
                                 p: 0.4,
                                 bgcolor: "background.paper",
-                                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                                 border: "1px solid",
                                 borderColor: "divider",
                                 color: "text.secondary",
-                                borderRadius: "6px",
-                                "&:hover": {
-                                  bgcolor: "primary.main",
-                                  color: "#ffffff",
-                                  borderColor: "primary.main",
-                                },
+                                borderRadius: "4px",
                               }}
                             >
-                              <MoreVertRoundedIcon sx={{ fontSize: 15 }} />
+                              <MoreVertRoundedIcon sx={{ fontSize: 16 }} />
                             </IconButton>
                           </Box>
                         )}
@@ -553,7 +503,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                       textAlign: "center",
                       backgroundColor: (theme) =>
                         theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.02)"
+                          ? "rgba(255, 255, 255, 0.01)"
                           : "#fafbfc",
                       "&:hover .reorder-btn": {
                         opacity: 1,
@@ -561,8 +511,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                     }}
                   >
                     {isHeaderRow ? (
-                      /* Empty header for action column */
-                      <Box sx={{ minHeight: "44px" }} />
+                      <Box sx={{ minHeight: "46px" }} />
                     ) : (
                       <Box
                         sx={{
@@ -570,11 +519,10 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                           flexDirection: "column",
                           alignItems: "center",
                           justifyContent: "center",
-                          minHeight: "44px",
-                          gap: 0,
+                          minHeight: "46px",
                         }}
                       >
-                        <Tooltip title="Setiri ýokaryk süýşür" placement="left">
+                        <Tooltip title="Ýokaryk" placement="left">
                           <span>
                             <IconButton
                               className="reorder-btn"
@@ -586,18 +534,14 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                                 opacity: 0,
                                 transition: "opacity 0.15s ease",
                                 color: rIdx <= 1 ? "action.disabled" : "text.secondary",
-                                "&:hover": {
-                                  color: "primary.main",
-                                  bgcolor: "action.hover",
-                                },
                               }}
                             >
-                              <KeyboardArrowUpRoundedIcon sx={{ fontSize: 16 }} />
+                              <KeyboardArrowUpRoundedIcon sx={{ fontSize: 17 }} />
                             </IconButton>
                           </span>
                         </Tooltip>
 
-                        <Tooltip title="Setiri aşak süýşür" placement="left">
+                        <Tooltip title="Aşak" placement="left">
                           <span>
                             <IconButton
                               className="reorder-btn"
@@ -609,13 +553,9 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                                 opacity: 0,
                                 transition: "opacity 0.15s ease",
                                 color: rIdx >= rows.length - 1 ? "action.disabled" : "text.secondary",
-                                "&:hover": {
-                                  color: "primary.main",
-                                  bgcolor: "action.hover",
-                                },
                               }}
                             >
-                              <KeyboardArrowDownRoundedIcon sx={{ fontSize: 16 }} />
+                              <KeyboardArrowDownRoundedIcon sx={{ fontSize: 17 }} />
                             </IconButton>
                           </span>
                         </Tooltip>
@@ -630,54 +570,25 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
       </Box>
 
       {/* Table Note Area */}
-      <Box
-        sx={{
-          p: 1.5,
-          borderRadius: "10px",
-          bgcolor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(255, 255, 255, 0.02)"
-              : "rgba(0, 0, 0, 0.02)",
-          border: "1px dashed",
-          borderColor: "divider",
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 0.5 }}>
-          <NoteAltOutlinedIcon sx={{ fontSize: 15, color: "warning.main" }} />
-          <Typography
-            variant="caption"
-            sx={{
-              fontWeight: 800,
-              fontSize: "0.72rem",
-              letterSpacing: "0.5px",
-              color: "text.secondary",
-              textTransform: "uppercase",
-            }}
-          >
-            Tablisa Bellikleri
-          </Typography>
-        </Box>
-
+      <Box>
+        <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.88rem", mb: 1 }}>
+          Tablisa bellikleri (islege görä)
+        </Typography>
         <TextField
           fullWidth
           multiline
-          rows={2}
+          rows={3}
           value={table.note || ""}
           onChange={(e) => onUpdate({ ...table, note: e.target.value })}
-          placeholder="Bu tablisa degişli aýratyn düşündirişler ýa-da möhletler..."
-          variant="standard"
+          placeholder="Meselem: Resminamalar iňlis ýa-da rus dilinde terjime edilmeli..."
           slotProps={{
             input: {
-              disableUnderline: true,
               sx: {
-                fontSize: "0.85rem",
-                color: "text.primary",
-                p: 0,
-                lineHeight: 1.5,
-                "& textarea::placeholder": {
-                  color: "text.secondary",
-                  opacity: 0.5,
-                },
+                borderRadius: "8px",
+                fontSize: "0.92rem",
+                p: 1.5,
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
               },
             },
           }}
@@ -695,42 +606,42 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
         slotProps={{
           paper: {
             sx: {
-              borderRadius: "14px",
-              boxShadow: "0 12px 36px rgba(0,0,0,0.18)",
+              borderRadius: "8px",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
               border: "1px solid",
               borderColor: "divider",
-              minWidth: "200px",
+              minWidth: "190px",
               py: 0.5,
             },
           },
         }}
       >
-        <Box sx={{ px: 2, py: 0.75 }}>
-          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 800, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+        <Box sx={{ px: 2, py: 0.5 }}>
+          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, fontSize: "0.72rem" }}>
             Öýjük hereketleri
           </Typography>
         </Box>
 
-        <MenuItem onClick={handleMergeRight} sx={{ py: 1, fontSize: "0.85rem" }}>
-          <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
-            <ArrowForwardRoundedIcon sx={{ fontSize: 18 }} />
+        <MenuItem onClick={handleMergeRight} sx={{ py: 0.8, fontSize: "0.85rem" }}>
+          <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
+            <ArrowForwardRoundedIcon sx={{ fontSize: 17 }} />
           </ListItemIcon>
-          <ListItemText primary="Saga birikdir" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
+          <ListItemText primary="Saga birikdir" slotProps={{ primary: { fontSize: "0.85rem" } }} />
         </MenuItem>
 
-        <MenuItem onClick={handleMergeDown} sx={{ py: 1, fontSize: "0.85rem" }}>
-          <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
-            <ArrowDownwardRoundedIcon sx={{ fontSize: 18 }} />
+        <MenuItem onClick={handleMergeDown} sx={{ py: 0.8, fontSize: "0.85rem" }}>
+          <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
+            <ArrowDownwardRoundedIcon sx={{ fontSize: 17 }} />
           </ListItemIcon>
-          <ListItemText primary="Aşakyna birikdir" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
+          <ListItemText primary="Aşakyna birikdir" slotProps={{ primary: { fontSize: "0.85rem" } }} />
         </MenuItem>
 
         {canSplit && (
-          <MenuItem onClick={handleSplitCell} sx={{ py: 1, fontSize: "0.85rem" }}>
-            <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
-              <ContentCutRoundedIcon sx={{ fontSize: 18 }} />
+          <MenuItem onClick={handleSplitCell} sx={{ py: 0.8, fontSize: "0.85rem" }}>
+            <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
+              <ContentCutRoundedIcon sx={{ fontSize: 17 }} />
             </ListItemIcon>
-            <ListItemText primary="Böl (split)" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
+            <ListItemText primary="Böl (split)" slotProps={{ primary: { fontSize: "0.85rem" } }} />
           </MenuItem>
         )}
 
@@ -738,27 +649,27 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
         {activeCellCoord && activeCellCoord.c > 0 && (
           <>
             <Divider sx={{ my: 0.5 }} />
-            <Box sx={{ px: 2, py: 0.75 }}>
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 800, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            <Box sx={{ px: 2, py: 0.5 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, fontSize: "0.72rem" }}>
                 Ýerini çalyş
               </Typography>
             </Box>
 
             {activeCellCoord.c > 1 && (
-              <MenuItem onClick={handleMoveColumnLeft} sx={{ py: 1, fontSize: "0.85rem" }}>
-                <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
-                  <KeyboardArrowLeftRoundedIcon sx={{ fontSize: 18 }} />
+              <MenuItem onClick={handleMoveColumnLeft} sx={{ py: 0.8, fontSize: "0.85rem" }}>
+                <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
+                  <KeyboardArrowLeftRoundedIcon sx={{ fontSize: 17 }} />
                 </ListItemIcon>
-                <ListItemText primary="Sütüni çepe göçür" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
+                <ListItemText primary="Sütüni çepe göçür" slotProps={{ primary: { fontSize: "0.85rem" } }} />
               </MenuItem>
             )}
 
             {activeCellCoord.c < (rows[0]?.length || 1) - 1 && (
-              <MenuItem onClick={handleMoveColumnRight} sx={{ py: 1, fontSize: "0.85rem" }}>
-                <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
-                  <KeyboardArrowRightRoundedIcon sx={{ fontSize: 18 }} />
+              <MenuItem onClick={handleMoveColumnRight} sx={{ py: 0.8, fontSize: "0.85rem" }}>
+                <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
+                  <KeyboardArrowRightRoundedIcon sx={{ fontSize: 17 }} />
                 </ListItemIcon>
-                <ListItemText primary="Sütüni saga göçür" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
+                <ListItemText primary="Sütüni saga göçür" slotProps={{ primary: { fontSize: "0.85rem" } }} />
               </MenuItem>
             )}
 
@@ -769,12 +680,12 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                   handleCloseMenu();
                   handleMoveRowUp(r);
                 }}
-                sx={{ py: 1, fontSize: "0.85rem" }}
+                sx={{ py: 0.8, fontSize: "0.85rem" }}
               >
-                <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
-                  <KeyboardArrowUpRoundedIcon sx={{ fontSize: 18 }} />
+                <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
+                  <KeyboardArrowUpRoundedIcon sx={{ fontSize: 17 }} />
                 </ListItemIcon>
-                <ListItemText primary="Setiri ýokaryk göçür" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
+                <ListItemText primary="Setiri ýokaryk göçür" slotProps={{ primary: { fontSize: "0.85rem" } }} />
               </MenuItem>
             )}
 
@@ -785,12 +696,12 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                   handleCloseMenu();
                   handleMoveRowDown(r);
                 }}
-                sx={{ py: 1, fontSize: "0.85rem" }}
+                sx={{ py: 0.8, fontSize: "0.85rem" }}
               >
-                <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
-                  <KeyboardArrowDownRoundedIcon sx={{ fontSize: 18 }} />
+                <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>
+                  <KeyboardArrowDownRoundedIcon sx={{ fontSize: 17 }} />
                 </ListItemIcon>
-                <ListItemText primary="Setiri aşak göçür" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
+                <ListItemText primary="Setiri aşak göçür" slotProps={{ primary: { fontSize: "0.85rem" } }} />
               </MenuItem>
             )}
           </>
@@ -798,18 +709,18 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
 
         <Divider sx={{ my: 0.5 }} />
 
-        <MenuItem onClick={handleDeleteRow} sx={{ py: 1, color: "error.main" }}>
-          <ListItemIcon sx={{ minWidth: 30, color: "error.main" }}>
-            <TableRowsRoundedIcon sx={{ fontSize: 18 }} />
+        <MenuItem onClick={handleDeleteRow} sx={{ py: 0.8, color: "error.main" }}>
+          <ListItemIcon sx={{ minWidth: 28, color: "error.main" }}>
+            <TableRowsRoundedIcon sx={{ fontSize: 17 }} />
           </ListItemIcon>
-          <ListItemText primary="Setiri poz" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 600 } }} />
+          <ListItemText primary="Setiri poz" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
         </MenuItem>
 
-        <MenuItem onClick={handleDeleteColumn} sx={{ py: 1, color: "error.main" }}>
-          <ListItemIcon sx={{ minWidth: 30, color: "error.main" }}>
-            <ViewColumnRoundedIcon sx={{ fontSize: 18 }} />
+        <MenuItem onClick={handleDeleteColumn} sx={{ py: 0.8, color: "error.main" }}>
+          <ListItemIcon sx={{ minWidth: 28, color: "error.main" }}>
+            <ViewColumnRoundedIcon sx={{ fontSize: 17 }} />
           </ListItemIcon>
-          <ListItemText primary="Sütni poz" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 600 } }} />
+          <ListItemText primary="Sütni poz" slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 500 } }} />
         </MenuItem>
       </Menu>
     </Paper>
