@@ -7,16 +7,17 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Divider,
 } from "@mui/material";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
+import { getFileUrl } from "../../functions/generalHelpers";
 
 const formatText = (val) => {
   if (!val) return "";
@@ -47,7 +48,7 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
     reader.onload = (event) => {
       const dataUrl = event.target?.result;
       if (dataUrl) {
-        onAvatarChange?.(dataUrl);
+        onAvatarChange?.(dataUrl, file);
       }
     };
     reader.readAsDataURL(file);
@@ -60,22 +61,28 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
   const phoneStr = formatText(contact.phone);
   const locationStr = formatText(contact.location);
   const websiteStr = formatText(contact.website);
-  const linkedinStr = formatText(contact.linkedin);
+
+  const hasContactInfo = Boolean(emailStr || phoneStr || locationStr || websiteStr);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-      {/* 1. Main Profile Card */}
-      <Paper
-        elevation={0}
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: "20px",
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: "background.paper",
+        overflow: "hidden",
+        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.03)",
+        transition: "all 0.2s ease-in-out",
+      }}
+    >
+      {/* 1. Header & Identity Section */}
+      <Box
         sx={{
-          borderRadius: "16px",
-          border: "1px solid",
-          borderColor: "divider",
-          backgroundColor: "background.paper",
-          p: 3.5,
+          p: { xs: 2.5, sm: 3.5 },
           textAlign: "center",
           position: "relative",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.02)",
         }}
       >
         <Tooltip title={t("profile.editTitleBasic")} placement="top">
@@ -87,15 +94,19 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
               top: 14,
               right: 14,
               color: "text.secondary",
-              "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
+              borderRadius: "8px",
+              "&:hover": {
+                color: "#0c8a7b",
+                backgroundColor: "rgba(12, 138, 123, 0.08)",
+              },
             }}
           >
             <EditOutlinedIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
 
-        {/* Circular Avatar with Camera Hover Overlay */}
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+        {/* Avatar with Camera Trigger */}
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2, mt: 0.5 }}>
           <input
             type="file"
             ref={fileInputRef}
@@ -116,15 +127,15 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
               }}
             >
               <Avatar
-                src={profile.avatar_url || profile.avatarUrl}
+                src={getFileUrl(profile.avatar_url || profile.avatarUrl)}
                 alt={fullNameStr}
                 sx={{
-                  width: 110,
-                  height: 110,
+                  width: 104,
+                  height: 104,
                   boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
                   border: "3px solid",
                   borderColor: "background.paper",
-                  fontSize: "2.2rem",
+                  fontSize: "2.1rem",
                   fontWeight: 700,
                   bgcolor: "#0c8a7b",
                 }}
@@ -132,7 +143,6 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
                 {fullNameStr.charAt(0) || "U"}
               </Avatar>
 
-              {/* Hover Camera Overlay */}
               <Box
                 className="avatar-upload-overlay"
                 sx={{
@@ -148,23 +158,24 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
                   transition: "opacity 0.2s ease",
                 }}
               >
-                <PhotoCameraRoundedIcon sx={{ fontSize: 26 }} />
+                <PhotoCameraRoundedIcon sx={{ fontSize: 24 }} />
               </Box>
             </Box>
           </Tooltip>
         </Box>
 
+        {/* Name & Role */}
         <Typography
           variant="h6"
           sx={{
             fontWeight: 800,
-            fontSize: "1.2rem",
+            fontSize: "1.18rem",
             color: "text.primary",
-            lineHeight: 1.2,
+            lineHeight: 1.25,
             mb: 0.5,
           }}
         >
-          {fullNameStr}
+          {fullNameStr || "—"}
         </Typography>
 
         <Typography
@@ -172,11 +183,11 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
           sx={{
             color: "text.secondary",
             fontWeight: 500,
-            fontSize: "0.9rem",
-            mb: 2,
+            fontSize: "0.88rem",
+            mb: statusStr ? 1.5 : 0,
           }}
         >
-          {roleStr}
+          {roleStr || "—"}
         </Typography>
 
         {statusStr && (
@@ -197,28 +208,28 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
             }}
           />
         )}
-      </Paper>
+      </Box>
 
-      {/* 2. Contact Information Card */}
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: "16px",
-          border: "1px solid",
-          borderColor: "divider",
-          backgroundColor: "background.paper",
-          p: 3,
-          position: "relative",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.02)",
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+      {/* Divider */}
+      <Divider sx={{ borderColor: "divider", opacity: 0.6 }} />
+
+      {/* 2. Contact Section */}
+      <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
           <Typography
             variant="subtitle2"
             sx={{
               fontWeight: 800,
               color: "text.primary",
-              fontSize: "0.95rem",
+              fontSize: "0.92rem",
+              letterSpacing: "-0.2px",
             }}
           >
             {t("profile.contact")}
@@ -229,7 +240,11 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
               onClick={() => onEditSection("contact")}
               sx={{
                 color: "text.secondary",
-                "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
+                borderRadius: "8px",
+                "&:hover": {
+                  color: "#0c8a7b",
+                  backgroundColor: "rgba(12, 138, 123, 0.08)",
+                },
               }}
             >
               <EditOutlinedIcon sx={{ fontSize: 17 }} />
@@ -237,74 +252,176 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
           </Tooltip>
         </Box>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
-          {emailStr && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <MailOutlineRoundedIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
-              <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {emailStr}
-              </Typography>
-            </Box>
-          )}
+        {hasContactInfo ? (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
+            {emailStr && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(13, 148, 136, 0.15)"
+                        : "rgba(14, 133, 132, 0.08)",
+                    color: "#0c8a7b",
+                    flexShrink: 0,
+                  }}
+                >
+                  <MailOutlineRoundedIcon sx={{ fontSize: 17 }} />
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.primary",
+                    fontSize: "0.86rem",
+                    wordBreak: "break-all",
+                    fontWeight: 500,
+                  }}
+                >
+                  {emailStr}
+                </Typography>
+              </Box>
+            )}
 
-          {phoneStr && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <PhoneOutlinedIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
-              <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {phoneStr}
-              </Typography>
-            </Box>
-          )}
+            {phoneStr && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(13, 148, 136, 0.15)"
+                        : "rgba(14, 133, 132, 0.08)",
+                    color: "#0c8a7b",
+                    flexShrink: 0,
+                  }}
+                >
+                  <PhoneOutlinedIcon sx={{ fontSize: 17 }} />
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.primary",
+                    fontSize: "0.86rem",
+                    fontWeight: 500,
+                  }}
+                >
+                  {phoneStr}
+                </Typography>
+              </Box>
+            )}
 
-          {locationStr && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <LocationOnOutlinedIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
-              <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {locationStr}
-              </Typography>
-            </Box>
-          )}
+            {locationStr && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(13, 148, 136, 0.15)"
+                        : "rgba(14, 133, 132, 0.08)",
+                    color: "#0c8a7b",
+                    flexShrink: 0,
+                  }}
+                >
+                  <LocationOnOutlinedIcon sx={{ fontSize: 17 }} />
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.primary",
+                    fontSize: "0.86rem",
+                    fontWeight: 500,
+                  }}
+                >
+                  {locationStr}
+                </Typography>
+              </Box>
+            )}
 
-          {websiteStr && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <LanguageOutlinedIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
-              <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {websiteStr}
-              </Typography>
-            </Box>
-          )}
+            {websiteStr && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(13, 148, 136, 0.15)"
+                        : "rgba(14, 133, 132, 0.08)",
+                    color: "#0c8a7b",
+                    flexShrink: 0,
+                  }}
+                >
+                  <LanguageRoundedIcon sx={{ fontSize: 17 }} />
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.primary",
+                    fontSize: "0.86rem",
+                    fontWeight: 500,
+                    wordBreak: "break-all",
+                  }}
+                >
+                  {websiteStr}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        ) : (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              fontSize: "0.86rem",
+              fontStyle: "italic",
+            }}
+          >
+            {t("profile.noContact")}
+          </Typography>
+        )}
+      </Box>
 
-          {linkedinStr && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <LinkedInIcon sx={{ fontSize: 18, color: "#0c8a7b" }} />
-              <Typography variant="body2" sx={{ color: "text.primary", fontSize: "0.86rem" }}>
-                {linkedinStr}
-              </Typography>
-            </Box>
-          )}
-        </Box>
-      </Paper>
+      {/* Divider */}
+      <Divider sx={{ borderColor: "divider", opacity: 0.6 }} />
 
-      {/* 3. Skills Card */}
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: "16px",
-          border: "1px solid",
-          borderColor: "divider",
-          backgroundColor: "background.paper",
-          p: 3,
-          position: "relative",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.02)",
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+      {/* 3. Skills Section */}
+      <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
           <Typography
             variant="subtitle2"
             sx={{
               fontWeight: 800,
               color: "text.primary",
-              fontSize: "0.95rem",
+              fontSize: "0.92rem",
+              letterSpacing: "-0.2px",
             }}
           >
             {t("profile.skills")}
@@ -315,7 +432,11 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
               onClick={() => onEditSection("skills")}
               sx={{
                 color: "text.secondary",
-                "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
+                borderRadius: "8px",
+                "&:hover": {
+                  color: "#0c8a7b",
+                  backgroundColor: "rgba(12, 138, 123, 0.08)",
+                },
               }}
             >
               <EditOutlinedIcon sx={{ fontSize: 17 }} />
@@ -323,28 +444,53 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
           </Tooltip>
         </Box>
 
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {skills.map((skill, idx) => (
-            <Chip
-              key={idx}
-              label={skill}
-              size="small"
-              sx={{
-                bgcolor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.06)"
-                    : "#f1f5f9",
-                color: "text.primary",
-                fontWeight: 600,
-                fontSize: "0.78rem",
-                borderRadius: "8px",
-                px: 0.5,
-              }}
-            />
-          ))}
-        </Box>
-      </Paper>
-    </Box>
+        {skills.length > 0 ? (
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {skills.map((skill, idx) => (
+              <Chip
+                key={idx}
+                label={skill}
+                size="small"
+                sx={{
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.06)"
+                      : "#f1f5f9",
+                  color: "text.primary",
+                  fontWeight: 600,
+                  fontSize: "0.78rem",
+                  borderRadius: "8px",
+                  border: "1px solid",
+                  borderColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.08)"
+                      : "transparent",
+                  px: 0.5,
+                  transition: "all 0.15s ease",
+                  "&:hover": {
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "rgba(255, 255, 255, 0.12)"
+                        : "#e2e8f0",
+                  },
+                }}
+              />
+            ))}
+          </Box>
+        ) : (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              fontSize: "0.86rem",
+              fontStyle: "italic",
+            }}
+          >
+            {t("profile.noSkills")}
+          </Typography>
+        )}
+      </Box>
+    </Paper>
   );
 };
 

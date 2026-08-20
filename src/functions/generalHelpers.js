@@ -2,6 +2,27 @@ import dayjs from "dayjs";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/useAuth";
 import { useCallback } from "react";
+import { BASE_URL } from "../api/axiosIntance";
+
+/**
+ * Resolves a file/image URL from backend uploads folder or external absolute link.
+ * Handles 'uploads/uuid.webp', '/uploads/uuid.webp', or full 'http://...' URLs safely.
+ */
+export const getFileUrl = (pathOrUrl) => {
+  if (!pathOrUrl || typeof pathOrUrl !== "string") return "";
+  const trimmed = pathOrUrl.trim();
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("data:") ||
+    trimmed.startsWith("blob:")
+  ) {
+    return trimmed;
+  }
+  const serverRoot = (BASE_URL || "").replace(/\/api(\/v\d+)?\/?$/i, "");
+  const cleanPath = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return `${serverRoot}${cleanPath}`;
+};
 
 // Handle error
 export function handleError(msg, error) {

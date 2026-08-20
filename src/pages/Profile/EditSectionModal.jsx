@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -11,7 +11,7 @@ import {
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, useFieldArray } from "react-hook-form";
 import toast from "react-hot-toast";
 import CustomTextField from "../../components/CustomTextField";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
@@ -19,95 +19,137 @@ import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../components/Dialog/CustomForm";
 import { FooterButton } from "../../components/Dialog/FooterButton";
 import { useLocale } from "../../hooks/useLocale";
+import { getFileUrl } from "../../functions/generalHelpers";
+
+const formatPlainString = (val) => {
+  if (!val) return "";
+  if (typeof val === "string") return val;
+  if (typeof val === "object") {
+    return val.tk || val.en || val.ru || val.fullName || val.name || val.title || "";
+  }
+  return String(val);
+};
 
 const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSaving = false }) => {
   const { t } = useLocale();
   const fileInputRef = useRef(null);
 
-  const { control, handleSubmit, reset, setValue } = useForm({
-    defaultValues: {
-      full_name: "",
-      role: "",
-      status: "",
-      avatar_url: "",
-      email: "",
-      phone: "",
-      location: "",
-      website: "",
-      linkedin: "",
-      personal_summary: "",
-      references_text: "",
+  const contact = profileData?.contact || {};
+
+  const { control, handleSubmit, setValue } = useForm({
+    values: {
+      full_name: formatPlainString(profileData?.full_name || profileData?.fullName),
+      role: formatPlainString(profileData?.role),
+      status: formatPlainString(profileData?.status),
+      avatar_url: formatPlainString(profileData?.avatar_url || profileData?.avatarUrl),
+      email: formatPlainString(contact.email),
+      phone: formatPlainString(contact.phone),
+      location: formatPlainString(contact.location),
+      website: formatPlainString(contact.website),
+      linkedin: formatPlainString(contact.linkedin),
+      personal_summary: formatPlainString(profileData?.personal_summary || profileData?.personalSummary),
+      new_skill: "",
+      work_experience: (Array.isArray(profileData?.work_experience)
+        ? profileData.work_experience
+        : Array.isArray(profileData?.workExperience)
+        ? profileData.workExperience
+        : []
+      ).map((exp, idx) => ({
+        id: exp?.id || `exp-${idx}`,
+        role: formatPlainString(exp?.role),
+        company: formatPlainString(exp?.company),
+        location: formatPlainString(exp?.location),
+        period: formatPlainString(exp?.period),
+        bullets: Array.isArray(exp?.bullets)
+          ? exp.bullets.join("\n")
+          : formatPlainString(exp?.bullets),
+      })),
+      education: (Array.isArray(profileData?.education)
+        ? profileData.education
+        : []
+      ).map((edu, idx) => ({
+        id: edu?.id || `edu-${idx}`,
+        degree: formatPlainString(edu?.degree),
+        school: formatPlainString(edu?.school),
+        period: formatPlainString(edu?.period),
+      })),
+      languages: (Array.isArray(profileData?.languages)
+        ? profileData.languages
+        : []
+      ).map((lang, idx) => ({
+        id: lang?.id || `lang-${idx}`,
+        name: formatPlainString(lang?.name),
+        level: formatPlainString(lang?.level),
+      })),
     },
   });
 
+  const {
+    fields: experienceFields,
+    append: appendExperience,
+    remove: removeExperience,
+  } = useFieldArray({ control, name: "work_experience" });
+
+  const {
+    fields: educationFields,
+    append: appendEducation,
+    remove: removeEducation,
+  } = useFieldArray({ control, name: "education" });
+
+  const {
+    fields: languageFields,
+    append: appendLanguage,
+    remove: removeLanguage,
+  } = useFieldArray({ control, name: "languages" });
+
   const watchedAvatarUrl = useWatch({ control, name: "avatar_url" });
   const watchedFullName = useWatch({ control, name: "full_name" });
+  const watchedNewSkill = useWatch({ control, name: "new_skill" });
 
-  // Dynamic Array States for Skills, Experience, Education, Certifications, Languages
   const [skillsList, setSkillsList] = useState([]);
-  const [newSkillInput, setNewSkillInput] = useState("");
-  const [experienceList, setExperienceList] = useState([]);
-  const [educationList, setEducationList] = useState([]);
-  const [certificationsList, setCertificationsList] = useState([]);
-  const [languagesList, setLanguagesList] = useState([]);
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
 
-  useEffect(() => {
-    if (open && profileData) {
-      const contact = profileData.contact || {};
-      const refText =
-        profileData.references_text ||
-        (profileData.references || []).map((r) => r.text || "").join("\n");
-
-      reset({
-        full_name: profileData.full_name || profileData.fullName || "",
-        role: profileData.role || "",
-        status: profileData.status || "",
-        avatar_url: profileData.avatar_url || profileData.avatarUrl || "",
-        email: contact.email || "",
-        phone: contact.phone || "",
-        location: contact.location || "",
-        website: contact.website || "",
-        linkedin: contact.linkedin || "",
-        personal_summary: profileData.personal_summary || profileData.personalSummary || "",
-        references_text: refText || "",
-      });
-
-      setSkillsList([...(profileData.skills || [])]);
-      setExperienceList(
-        JSON.parse(
-          JSON.stringify(profileData.work_experience || profileData.workExperience || [])
-        )
-      );
-      setEducationList(JSON.parse(JSON.stringify(profileData.education || [])));
-      setCertificationsList(JSON.parse(JSON.stringify(profileData.certifications || [])));
-      setLanguagesList(JSON.parse(JSON.stringify(profileData.languages || [])));
-      setNewSkillInput("");
-    }
-  }, [open, profileData, reset]);
+  const [prevModalKey, setPrevModalKey] = useState(null);
+  const currentModalKey = open ? `${sectionKey}_${profileData?.updatedAt || profileData?.guid || "open"}` : null;
+  if (currentModalKey !== prevModalKey) {
+    setPrevModalKey(currentModalKey);
+    setSkillsList([...(profileData?.skills || [])]);
+    setSelectedImageFile(null);
+  }
 
   if (!open) return null;
 
-  const handleImageFileChange = (e) => {
-    const file = e.target.files?.[0];
+  const processImageFile = (file) => {
     if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Diňe surat faýllary (PNG, JPG, WEBP) kabul edilýär");
+      return;
+    }
 
     if (file.size > 5 * 1024 * 1024) {
       toast.error(t("profile.photoHint"));
       return;
     }
 
+    setSelectedImageFile(file);
     const reader = new FileReader();
     reader.onload = (event) => {
       const dataUrl = event.target?.result;
       if (dataUrl) {
         setValue("avatar_url", dataUrl, { shouldDirty: true });
-        toast.success(t("profile.saveSuccess"));
       }
     };
     reader.readAsDataURL(file);
   };
 
+  const handleImageFileChange = (e) => {
+    const file = e.target.files?.[0];
+    processImageFile(file);
+  };
+
   const handleRemovePhoto = () => {
+    setSelectedImageFile(null);
     setValue("avatar_url", "", { shouldDirty: true });
   };
 
@@ -125,12 +167,8 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
         return t("profile.editTitleExperience");
       case "education":
         return t("profile.editTitleEducation");
-      case "certifications":
-        return t("profile.editTitleCertifications");
       case "languages":
         return t("profile.editTitleLanguages");
-      case "references":
-        return t("profile.editTitleReferences");
       default:
         return t("edit");
     }
@@ -139,55 +177,60 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
   const handleFormSubmit = (data) => {
     let updated = {
       ...profileData,
-      full_name: profileData.full_name || profileData.fullName,
-      role: profileData.role,
-      status: profileData.status,
-      avatar_url: profileData.avatar_url || profileData.avatarUrl,
+      full_name: formatPlainString(profileData.full_name || profileData.fullName),
+      role: formatPlainString(profileData.role),
+      status: formatPlainString(profileData.status),
+      avatar_url: formatPlainString(profileData.avatar_url || profileData.avatarUrl),
       contact: { ...(profileData.contact || {}) },
       skills: [...skillsList],
-      personal_summary: profileData.personal_summary || profileData.personalSummary,
-      work_experience: [...experienceList],
-      education: [...educationList],
-      certifications: [...certificationsList],
-      languages: [...languagesList],
-      references: (data.references_text || "")
-        .split("\n")
-        .filter(Boolean)
-        .map((text) => ({ id: `ref-${Math.random()}`, text })),
-      references_text: data.references_text || "",
+      personal_summary: formatPlainString(profileData.personal_summary || profileData.personalSummary),
+      work_experience: Array.isArray(profileData.work_experience || profileData.workExperience)
+        ? [...(profileData.work_experience || profileData.workExperience)]
+        : [],
+      education: Array.isArray(profileData.education) ? [...profileData.education] : [],
+      languages: Array.isArray(profileData.languages) ? [...profileData.languages] : [],
     };
 
     if (sectionKey === "basic") {
-      updated.full_name = data.full_name;
-      updated.role = data.role;
-      updated.status = data.status;
+      updated.full_name = formatPlainString(data.full_name);
       updated.avatar_url = data.avatar_url;
+      if (selectedImageFile) {
+        updated.avatar_file = selectedImageFile;
+      }
     } else if (sectionKey === "contact") {
       updated.contact = {
-        email: data.email,
-        phone: data.phone,
-        location: data.location,
-        website: data.website,
-        linkedin: data.linkedin,
+        email: formatPlainString(data.email),
+        phone: formatPlainString(data.phone),
+        location: formatPlainString(data.location),
+        website: formatPlainString(data.website),
+        linkedin: formatPlainString(data.linkedin),
       };
     } else if (sectionKey === "summary") {
-      updated.personal_summary = data.personal_summary;
+      updated.personal_summary = formatPlainString(data.personal_summary);
     } else if (sectionKey === "skills") {
       updated.skills = skillsList;
     } else if (sectionKey === "experience") {
-      updated.work_experience = experienceList;
+      updated.work_experience = (data.work_experience || []).map((exp) => ({
+        id: exp.id || `exp-${Date.now()}`,
+        role: formatPlainString(exp.role),
+        company: formatPlainString(exp.company),
+        location: formatPlainString(exp.location),
+        period: formatPlainString(exp.period),
+        bullets: typeof exp.bullets === "string" ? exp.bullets.split("\n").filter(Boolean) : (exp.bullets || []),
+      }));
     } else if (sectionKey === "education") {
-      updated.education = educationList;
-    } else if (sectionKey === "certifications") {
-      updated.certifications = certificationsList;
+      updated.education = (data.education || []).map((edu) => ({
+        id: edu.id || `edu-${Date.now()}`,
+        degree: formatPlainString(edu.degree),
+        school: formatPlainString(edu.school),
+        period: formatPlainString(edu.period),
+      }));
     } else if (sectionKey === "languages") {
-      updated.languages = languagesList;
-    } else if (sectionKey === "references") {
-      updated.references_text = data.references_text;
-      updated.references = (data.references_text || "")
-        .split("\n")
-        .filter(Boolean)
-        .map((text) => ({ id: `ref-${Math.random()}`, text }));
+      updated.languages = (data.languages || []).map((lang) => ({
+        id: lang.id || `lang-${Date.now()}`,
+        name: formatPlainString(lang.name),
+        level: formatPlainString(lang.level),
+      }));
     }
 
     onSave(updated);
@@ -196,251 +239,192 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
 
   // Skill Add / Remove
   const handleAddSkill = () => {
-    const trimmed = newSkillInput.trim();
+    const trimmed = (watchedNewSkill || "").trim();
     if (!trimmed) return;
     if (skillsList.includes(trimmed)) return;
     setSkillsList((prev) => [...prev, trimmed]);
-    setNewSkillInput("");
+    setValue("new_skill", "");
   };
 
   const handleRemoveSkill = (skillToRemove) => {
     setSkillsList((prev) => prev.filter((s) => s !== skillToRemove));
   };
 
-  // Experience Helpers
-  const handleAddExperience = () => {
-    setExperienceList((prev) => [
-      ...prev,
-      {
-        id: `exp-${Date.now()}`,
-        role: "",
-        company: "",
-        location: "",
-        period: "",
-        bullets: [""],
-      },
-    ]);
-  };
-
-  const handleUpdateExperience = (idx, field, val) => {
-    setExperienceList((prev) => {
-      const list = [...prev];
-      list[idx] = { ...list[idx], [field]: val };
-      return list;
-    });
-  };
-
-  const handleRemoveExperience = (idx) => {
-    setExperienceList((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  // Education Helpers
-  const handleAddEducation = () => {
-    setEducationList((prev) => [
-      ...prev,
-      {
-        id: `edu-${Date.now()}`,
-        degree: "",
-        school: "",
-        period: "",
-      },
-    ]);
-  };
-
-  const handleUpdateEducation = (idx, field, val) => {
-    setEducationList((prev) => {
-      const list = [...prev];
-      list[idx] = { ...list[idx], [field]: val };
-      return list;
-    });
-  };
-
-  const handleRemoveEducation = (idx) => {
-    setEducationList((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  // Certification Helpers
-  const handleAddCertification = () => {
-    setCertificationsList((prev) => [
-      ...prev,
-      {
-        id: `cert-${Date.now()}`,
-        title: "",
-        year: new Date().getFullYear().toString(),
-      },
-    ]);
-  };
-
-  const handleUpdateCertification = (idx, field, val) => {
-    setCertificationsList((prev) => {
-      const list = [...prev];
-      list[idx] = { ...list[idx], [field]: val };
-      return list;
-    });
-  };
-
-  const handleRemoveCertification = (idx) => {
-    setCertificationsList((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  // Language Helpers
-  const handleAddLanguage = () => {
-    setLanguagesList((prev) => [
-      ...prev,
-      {
-        id: `lang-${Date.now()}`,
-        name: "",
-        level: "Fluent",
-      },
-    ]);
-  };
-
-  const handleUpdateLanguage = (idx, field, val) => {
-    setLanguagesList((prev) => {
-      const list = [...prev];
-      list[idx] = { ...list[idx], [field]: val };
-      return list;
-    });
-  };
-
-  const handleRemoveLanguage = (idx) => {
-    setLanguagesList((prev) => prev.filter((_, i) => i !== idx));
-  };
-
   return (
-    <CustomDialog open={open} close={onClose} widthX={660}>
-      <CustomDialogHeader variant="h5" title={getSectionTitle()} />
-      <CustomForm handleSubmit={handleSubmit(handleFormSubmit)}>
-        {/* 1. Basic Info & Photo Upload */}
-        {sectionKey === "basic" && (
-          <Grid container spacing={2.25}>
-            {/* Interactive Avatar Upload Box */}
-            <Grid size={{ xs: 12 }}>
+    <CustomDialog
+      open={open}
+      close={onClose}
+      widthX={sectionKey === "experience" || sectionKey === "education" ? 640 : 520}
+    >
+      <CustomDialogHeader variant="h6" title={getSectionTitle()} />
+
+      <CustomForm
+        onSubmit={handleSubmit(handleFormSubmit)}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          maxHeight: "calc(85vh - 70px)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Scrollable Body */}
+        <Box
+          sx={{
+            p: 3,
+            overflowY: "auto",
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2.5,
+            "&::-webkit-scrollbar": { width: "6px" },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "divider",
+              borderRadius: "3px",
+            },
+          }}
+        >
+          {/* 1. Basic Info (Avatar & Full Name) */}
+          {sectionKey === "basic" && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {/* Instagram-Style Minimal Avatar Container */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1.5,
+                pt: 1,
+              }}
+            >
+              {/* Hidden File Input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageFileChange}
+                style={{ display: "none" }}
+              />
+
+              {/* Clickable Avatar with Smooth Overlay */}
               <Box
+                onClick={() => fileInputRef.current?.click()}
                 sx={{
-                  p: 2.5,
-                  borderRadius: "12px",
-                  border: "1px dashed",
-                  borderColor: (theme) =>
-                    theme.palette.mode === "dark" ? "rgba(255,255,255,0.18)" : "#cbd5e1",
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark" ? "rgba(255,255,255,0.02)" : "#f8fafc",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 3,
-                  flexWrap: "wrap",
+                  position: "relative",
+                  width: 96,
+                  height: 96,
+                  borderRadius: "50%",
+                  cursor: "pointer",
+                  overflow: "hidden",
+                  "&:hover .instagram-avatar-overlay": {
+                    opacity: 1,
+                  },
                 }}
               >
                 <Avatar
-                  src={watchedAvatarUrl}
+                  src={getFileUrl(watchedAvatarUrl)}
                   alt={watchedFullName}
                   sx={{
-                    width: 76,
-                    height: 76,
-                    boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
-                    border: "2px solid #0E8584",
-                    fontSize: "1.75rem",
-                    fontWeight: 700,
+                    width: 96,
+                    height: 96,
+                    border: "3px solid",
+                    borderColor: (theme) =>
+                      theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "#e2e8f0",
                     bgcolor: "#0E8584",
+                    color: "#ffffff",
+                    fontSize: "2.2rem",
+                    fontWeight: 800,
+                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
                   }}
                 >
                   {watchedFullName?.charAt(0) || "U"}
                 </Avatar>
 
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary" }}>
-                    {t("profile.avatarUrl")}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1.5 }}>
-                    {t("profile.photoHint")}
-                  </Typography>
-
-                  <Box sx={{ display: "flex", gap: 1.25, alignItems: "center" }}>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleImageFileChange}
-                      accept="image/png, image/jpeg, image/webp"
-                      style={{ display: "none" }}
-                    />
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => fileInputRef.current?.click()}
-                      startIcon={<PhotoCameraRoundedIcon sx={{ fontSize: 17 }} />}
-                      sx={{
-                        borderRadius: "7px",
-                        textTransform: "none",
-                        fontWeight: 600,
-                        fontSize: "0.8rem",
-                        bgcolor: "#0E8584",
-                        border: "0.5px solid #2CA7A6",
-                        color: "#ffffff",
-                        "&:hover": { bgcolor: "#0C7776" },
-                      }}
-                    >
-                      {watchedAvatarUrl ? t("profile.changePhoto") : t("profile.uploadPhoto")}
-                    </Button>
-
-                    {watchedAvatarUrl && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={handleRemovePhoto}
-                        startIcon={<DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />}
-                        sx={{
-                          borderRadius: "7px",
-                          textTransform: "none",
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          borderColor: "error.main",
-                          color: "error.main",
-                          "&:hover": {
-                            borderColor: "error.dark",
-                            backgroundColor: "rgba(239, 68, 68, 0.08)",
-                          },
-                        }}
-                      >
-                        {t("profile.removePhoto")}
-                      </Button>
-                    )}
-                  </Box>
+                {/* Dark Glassmorphic Hover Camera Icon */}
+                <Box
+                  className="instagram-avatar-overlay"
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(0, 0, 0, 0.45)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#ffffff",
+                    opacity: 0,
+                    transition: "opacity 0.2s ease",
+                  }}
+                >
+                  <PhotoCameraRoundedIcon sx={{ fontSize: 28 }} />
                 </Box>
               </Box>
-            </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
+              {/* Instagram-Style Action Links */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Button
+                  size="small"
+                  variant="text"
+                  onClick={() => fileInputRef.current?.click()}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 700,
+                    fontSize: "0.88rem",
+                    color: "#0E8584",
+                    p: 0,
+                    minWidth: "auto",
+                    "&:hover": {
+                      color: "#0C7776",
+                      backgroundColor: "transparent",
+                      textDecoration: "underline",
+                    },
+                  }}
+                >
+                  {watchedAvatarUrl
+                    ? t("profile.changePhoto") || "Suraty çalyş"
+                    : t("profile.uploadPhoto") || "Surat ýükle"}
+                </Button>
+
+                {watchedAvatarUrl && (
+                  <>
+                    <Typography sx={{ color: "text.disabled", fontSize: "0.8rem", userSelect: "none" }}>
+                      •
+                    </Typography>
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={handleRemovePhoto}
+                      sx={{
+                        textTransform: "none",
+                        fontWeight: 600,
+                        fontSize: "0.85rem",
+                        color: "error.main",
+                        p: 0,
+                        minWidth: "auto",
+                        "&:hover": {
+                          color: "error.dark",
+                          backgroundColor: "transparent",
+                          textDecoration: "underline",
+                        },
+                      }}
+                    >
+                      {t("profile.removePhoto") || "Suraty aýyr"}
+                    </Button>
+                  </>
+                )}
+              </Box>
+            </Box>
+
+            {/* Name Input */}
+            <Box sx={{ width: "100%", mt: 1 }}>
               <CustomTextField
                 name="full_name"
                 control={control}
                 label={t("profile.fullName")}
                 required
               />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                name="role"
-                control={control}
-                label={t("profile.role")}
-                required
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                name="status"
-                control={control}
-                label={t("profile.status")}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                name="avatar_url"
-                control={control}
-                label="Image URL (Alternative)"
-                placeholder="https://..."
-              />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         )}
 
         {/* 2. Contact Info */}
@@ -467,20 +451,6 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
                 label={t("profile.location")}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                name="website"
-                control={control}
-                label={t("profile.website")}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                name="linkedin"
-                control={control}
-                label={t("profile.linkedin")}
-              />
-            </Grid>
           </Grid>
         )}
 
@@ -504,30 +474,15 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
             <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-end" }}>
               <Box sx={{ flexGrow: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", mb: 0.75 }}>
-                  {t("profile.addSkill")}
-                </Typography>
-                <input
-                  type="text"
-                  value={newSkillInput}
-                  onChange={(e) => setNewSkillInput(e.target.value)}
+                <CustomTextField
+                  name="new_skill"
+                  control={control}
+                  label={t("profile.addSkill")}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
                       handleAddSkill();
                     }
-                  }}
-                  style={{
-                    width: "100%",
-                    height: "44px",
-                    padding: "0 14px",
-                    borderRadius: "7px",
-                    border: "1px solid rgba(0, 0, 0, 0.23)",
-                    fontSize: "0.875rem",
-                    outline: "none",
-                    boxSizing: "border-box",
-                    backgroundColor: "transparent",
-                    color: "inherit",
                   }}
                 />
               </Box>
@@ -541,8 +496,9 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
                   textTransform: "none",
                   fontWeight: 600,
                   bgcolor: "#0E8584",
-                  border: "0.5px solid #2CA7A6",
                   color: "#ffffff",
+                  whiteSpace: "nowrap",
+                  mb: "2px",
                   "&:hover": { bgcolor: "#0C7776" },
                 }}
               >
@@ -563,10 +519,14 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
                     sx={{
                       borderRadius: "7px",
                       fontWeight: 600,
-                      backgroundColor: "rgba(14, 133, 132, 0.12)",
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark" ? "rgba(14, 133, 132, 0.2)" : "rgba(14, 133, 132, 0.1)",
                       color: "#0E8584",
+                      border: "1px solid",
+                      borderColor: "rgba(14, 133, 132, 0.3)",
                       "& .MuiChip-deleteIcon": {
                         color: "#0E8584",
+                        "&:hover": { color: "error.main" },
                       },
                     }}
                   />
@@ -578,139 +538,70 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
 
         {/* 5. Work Experience */}
         {sectionKey === "experience" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {experienceList.map((exp, idx) => (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {experienceFields.map((fieldItem, idx) => (
               <Box
-                key={exp.id || idx}
+                key={fieldItem.id}
                 sx={{
-                  p: 2.5,
+                  p: 1.75,
                   border: "1px solid",
                   borderColor: "divider",
-                  borderRadius: "10px",
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.02)" : "#fafafa",
+                  borderRadius: "8px",
+                  backgroundColor: "background.paper",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 2,
+                  gap: 1.5,
                 }}
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0E8584" }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0c8a7b", fontSize: "0.82rem" }}>
                     #{idx + 1}
                   </Typography>
-                  <IconButton size="small" color="error" onClick={() => handleRemoveExperience(idx)}>
-                    <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+                  <IconButton size="small" color="error" onClick={() => removeExperience(idx)} sx={{ p: 0.5 }}>
+                    <DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />
                   </IconButton>
                 </Box>
 
-                <Grid container spacing={2}>
+                <Grid container spacing={1.5}>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      {t("profile.roleLabel")}
-                    </Typography>
-                    <input
-                      type="text"
-                      value={exp.role || ""}
-                      onChange={(e) => handleUpdateExperience(idx, "role", e.target.value)}
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(0, 0, 0, 0.2)",
-                        fontSize: "0.875rem",
-                        boxSizing: "border-box",
-                        backgroundColor: "transparent",
-                        color: "inherit",
-                      }}
+                    <CustomTextField
+                      name={`work_experience.${idx}.role`}
+                      control={control}
+                      label={t("profile.roleLabel")}
                     />
                   </Grid>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      {t("profile.company")}
-                    </Typography>
-                    <input
-                      type="text"
-                      value={exp.company || ""}
-                      onChange={(e) => handleUpdateExperience(idx, "company", e.target.value)}
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(0, 0, 0, 0.2)",
-                        fontSize: "0.875rem",
-                        boxSizing: "border-box",
-                        backgroundColor: "transparent",
-                        color: "inherit",
-                      }}
+                    <CustomTextField
+                      name={`work_experience.${idx}.company`}
+                      control={control}
+                      label={t("profile.company")}
                     />
                   </Grid>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      {t("profile.location")}
-                    </Typography>
-                    <input
-                      type="text"
-                      value={exp.location || ""}
-                      onChange={(e) => handleUpdateExperience(idx, "location", e.target.value)}
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(0, 0, 0, 0.2)",
-                        fontSize: "0.875rem",
-                        boxSizing: "border-box",
-                        backgroundColor: "transparent",
-                        color: "inherit",
-                      }}
+                    <CustomTextField
+                      name={`work_experience.${idx}.location`}
+                      control={control}
+                      label={t("profile.location")}
                     />
                   </Grid>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      {t("profile.period")}
-                    </Typography>
-                    <input
-                      type="text"
-                      value={exp.period || ""}
-                      onChange={(e) => handleUpdateExperience(idx, "period", e.target.value)}
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(0, 0, 0, 0.2)",
-                        fontSize: "0.875rem",
-                        boxSizing: "border-box",
-                        backgroundColor: "transparent",
-                        color: "inherit",
-                      }}
+                    <CustomTextField
+                      name={`work_experience.${idx}.period`}
+                      control={control}
+                      label={t("profile.period")}
                     />
                   </Grid>
 
                   <Grid size={{ xs: 12 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      {t("profile.bullets")}
-                    </Typography>
-                    <textarea
-                      rows={3}
-                      value={(exp.bullets || []).join("\n")}
-                      onChange={(e) => handleUpdateExperience(idx, "bullets", e.target.value.split("\n"))}
-                      style={{
-                        width: "100%",
-                        padding: "8px 12px",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(0, 0, 0, 0.2)",
-                        fontSize: "0.875rem",
-                        boxSizing: "border-box",
-                        backgroundColor: "transparent",
-                        color: "inherit",
-                        fontFamily: "inherit",
-                      }}
+                    <CustomTextField
+                      name={`work_experience.${idx}.bullets`}
+                      control={control}
+                      label={t("profile.bullets")}
+                      multiline
+                      rows={2.5}
                     />
                   </Grid>
                 </Grid>
@@ -719,15 +610,17 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
 
             <Button
               variant="outlined"
+              size="small"
               startIcon={<AddRoundedIcon />}
-              onClick={handleAddExperience}
+              onClick={() => appendExperience({ role: "", company: "", location: "", period: "", bullets: "" })}
               sx={{
                 borderRadius: "7px",
                 textTransform: "none",
                 fontWeight: 600,
-                borderColor: "#0E8584",
-                color: "#0E8584",
-                "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
+                borderColor: "#0c8a7b",
+                color: "#0c8a7b",
+                py: 0.75,
+                "&:hover": { borderColor: "#096e62", backgroundColor: "rgba(12, 138, 123, 0.04)" },
               }}
             >
               {t("profile.addExperience")}
@@ -737,95 +630,52 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
 
         {/* 6. Education */}
         {sectionKey === "education" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-            {educationList.map((edu, idx) => (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {educationFields.map((fieldItem, idx) => (
               <Box
-                key={edu.id || idx}
+                key={fieldItem.id}
                 sx={{
-                  p: 2.5,
+                  p: 1.75,
                   border: "1px solid",
                   borderColor: "divider",
-                  borderRadius: "10px",
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.02)" : "#fafafa",
+                  borderRadius: "8px",
+                  backgroundColor: "background.paper",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 2,
+                  gap: 1.5,
                 }}
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0E8584" }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0c8a7b", fontSize: "0.82rem" }}>
                     #{idx + 1}
                   </Typography>
-                  <IconButton size="small" color="error" onClick={() => handleRemoveEducation(idx)}>
-                    <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+                  <IconButton size="small" color="error" onClick={() => removeEducation(idx)} sx={{ p: 0.5 }}>
+                    <DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />
                   </IconButton>
                 </Box>
 
-                <Grid container spacing={2}>
+                <Grid container spacing={1.5}>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      {t("profile.degree")}
-                    </Typography>
-                    <input
-                      type="text"
-                      value={edu.degree || ""}
-                      onChange={(e) => handleUpdateEducation(idx, "degree", e.target.value)}
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(0, 0, 0, 0.2)",
-                        fontSize: "0.875rem",
-                        boxSizing: "border-box",
-                        backgroundColor: "transparent",
-                        color: "inherit",
-                      }}
+                    <CustomTextField
+                      name={`education.${idx}.degree`}
+                      control={control}
+                      label={t("profile.degree")}
                     />
                   </Grid>
 
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      {t("profile.school")}
-                    </Typography>
-                    <input
-                      type="text"
-                      value={edu.school || ""}
-                      onChange={(e) => handleUpdateEducation(idx, "school", e.target.value)}
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(0, 0, 0, 0.2)",
-                        fontSize: "0.875rem",
-                        boxSizing: "border-box",
-                        backgroundColor: "transparent",
-                        color: "inherit",
-                      }}
+                    <CustomTextField
+                      name={`education.${idx}.school`}
+                      control={control}
+                      label={t("profile.school")}
                     />
                   </Grid>
 
                   <Grid size={{ xs: 12 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary", mb: 0.5, display: "block" }}>
-                      {t("profile.period")}
-                    </Typography>
-                    <input
-                      type="text"
-                      value={edu.period || ""}
-                      onChange={(e) => handleUpdateEducation(idx, "period", e.target.value)}
-                      style={{
-                        width: "100%",
-                        height: "40px",
-                        padding: "0 12px",
-                        borderRadius: "7px",
-                        border: "1px solid rgba(0, 0, 0, 0.2)",
-                        fontSize: "0.875rem",
-                        boxSizing: "border-box",
-                        backgroundColor: "transparent",
-                        color: "inherit",
-                      }}
+                    <CustomTextField
+                      name={`education.${idx}.period`}
+                      control={control}
+                      label={t("profile.period")}
                     />
                   </Grid>
                 </Grid>
@@ -834,15 +684,17 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
 
             <Button
               variant="outlined"
+              size="small"
               startIcon={<AddRoundedIcon />}
-              onClick={handleAddEducation}
+              onClick={() => appendEducation({ degree: "", school: "", period: "" })}
               sx={{
                 borderRadius: "7px",
                 textTransform: "none",
                 fontWeight: 600,
-                borderColor: "#0E8584",
-                color: "#0E8584",
-                "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
+                borderColor: "#0c8a7b",
+                color: "#0c8a7b",
+                py: 0.75,
+                "&:hover": { borderColor: "#096e62", backgroundColor: "rgba(12, 138, 123, 0.04)" },
               }}
             >
               {t("profile.addEducation")}
@@ -850,149 +702,86 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
           </Box>
         )}
 
-        {/* 7. Certifications */}
-        {sectionKey === "certifications" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {certificationsList.map((cert, idx) => (
-              <Box key={cert.id || idx} sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-                <input
-                  type="text"
-                  value={cert.title || ""}
-                  onChange={(e) => handleUpdateCertification(idx, "title", e.target.value)}
-                  placeholder={t("profile.certTitle")}
-                  style={{
-                    flex: 1,
-                    height: "40px",
-                    padding: "0 12px",
-                    borderRadius: "7px",
-                    border: "1px solid rgba(0, 0, 0, 0.2)",
-                    fontSize: "0.875rem",
-                    boxSizing: "border-box",
-                    backgroundColor: "transparent",
-                    color: "inherit",
-                  }}
-                />
-                <input
-                  type="text"
-                  value={cert.year || ""}
-                  onChange={(e) => handleUpdateCertification(idx, "year", e.target.value)}
-                  placeholder={t("profile.year")}
-                  style={{
-                    width: "110px",
-                    height: "40px",
-                    padding: "0 12px",
-                    borderRadius: "7px",
-                    border: "1px solid rgba(0, 0, 0, 0.2)",
-                    fontSize: "0.875rem",
-                    boxSizing: "border-box",
-                    backgroundColor: "transparent",
-                    color: "inherit",
-                  }}
-                />
-                <IconButton size="small" color="error" onClick={() => handleRemoveCertification(idx)}>
-                  <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Box>
-            ))}
-
-            <Button
-              variant="outlined"
-              startIcon={<AddRoundedIcon />}
-              onClick={handleAddCertification}
-              sx={{
-                borderRadius: "7px",
-                textTransform: "none",
-                fontWeight: 600,
-                borderColor: "#0E8584",
-                color: "#0E8584",
-                "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
-              }}
-            >
-              {t("profile.addCertification")}
-            </Button>
-          </Box>
-        )}
-
-        {/* 8. Languages */}
+        {/* 7. Languages */}
         {sectionKey === "languages" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {languagesList.map((lang, idx) => (
-              <Box key={lang.id || idx} sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
-                <input
-                  type="text"
-                  value={lang.name || ""}
-                  onChange={(e) => handleUpdateLanguage(idx, "name", e.target.value)}
-                  placeholder={t("profile.languageName")}
-                  style={{
-                    flex: 1,
-                    height: "40px",
-                    padding: "0 12px",
-                    borderRadius: "7px",
-                    border: "1px solid rgba(0, 0, 0, 0.2)",
-                    fontSize: "0.875rem",
-                    boxSizing: "border-box",
-                    backgroundColor: "transparent",
-                    color: "inherit",
-                  }}
-                />
-                <input
-                  type="text"
-                  value={lang.level || ""}
-                  onChange={(e) => handleUpdateLanguage(idx, "level", e.target.value)}
-                  placeholder={t("profile.languageLevel")}
-                  style={{
-                    width: "140px",
-                    height: "40px",
-                    padding: "0 12px",
-                    borderRadius: "7px",
-                    border: "1px solid rgba(0, 0, 0, 0.2)",
-                    fontSize: "0.875rem",
-                    boxSizing: "border-box",
-                    backgroundColor: "transparent",
-                    color: "inherit",
-                  }}
-                />
-                <IconButton size="small" color="error" onClick={() => handleRemoveLanguage(idx)}>
-                  <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            {languageFields.map((fieldItem, idx) => (
+              <Box
+                key={fieldItem.id}
+                sx={{
+                  display: "flex",
+                  gap: 1.25,
+                  alignItems: "flex-start",
+                  p: 1.25,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: "8px",
+                  backgroundColor: "background.paper",
+                }}
+              >
+                <Box sx={{ flexGrow: 1 }}>
+                  <CustomTextField
+                    name={`languages.${idx}.name`}
+                    control={control}
+                    label={t("profile.languageName")}
+                  />
+                </Box>
+                <Box sx={{ width: 160 }}>
+                  <CustomTextField
+                    name={`languages.${idx}.level`}
+                    control={control}
+                    label={t("profile.languageLevel")}
+                  />
+                </Box>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => removeLanguage(idx)}
+                  sx={{ mt: 3, p: 0.5 }}
+                >
+                  <DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />
                 </IconButton>
               </Box>
             ))}
 
             <Button
               variant="outlined"
+              size="small"
               startIcon={<AddRoundedIcon />}
-              onClick={handleAddLanguage}
+              onClick={() => appendLanguage({ name: "", level: "" })}
               sx={{
                 borderRadius: "7px",
                 textTransform: "none",
                 fontWeight: 600,
-                borderColor: "#0E8584",
-                color: "#0E8584",
-                "&:hover": { borderColor: "#0C7776", backgroundColor: "rgba(14, 133, 132, 0.04)" },
+                borderColor: "#0c8a7b",
+                color: "#0c8a7b",
+                py: 0.75,
+                "&:hover": { borderColor: "#096e62", backgroundColor: "rgba(12, 138, 123, 0.04)" },
               }}
             >
               {t("profile.addLanguage")}
             </Button>
           </Box>
         )}
+        </Box>
 
-        {/* 9. References */}
-        {sectionKey === "references" && (
-          <Grid container spacing={2.25}>
-            <Grid size={{ xs: 12 }}>
-              <CustomTextField
-                name="references_text"
-                control={control}
-                label={t("profile.references")}
-                multiline
-                rows={4}
-              />
-            </Grid>
-          </Grid>
-        )}
-
-        {/* Standard Project Footer Buttons */}
-        <FooterButton onCancel={onClose} loading={isSaving} saveText={t("save")} />
+        {/* Fixed Pinned Footer */}
+        <Box
+          sx={{
+            p: 1.5,
+            px: 2.5,
+            borderTop: "1px solid",
+            borderColor: "divider",
+            backgroundColor: "background.paper",
+          }}
+        >
+          <FooterButton
+            onCancel={onClose}
+            loading={isSaving}
+            saveText={t("save")}
+            sx={{ mt: 0 }}
+          />
+        </Box>
       </CustomForm>
     </CustomDialog>
   );

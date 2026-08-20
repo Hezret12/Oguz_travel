@@ -181,6 +181,29 @@ export const updateCustomFieldApi = async (data) => {
 };
 
 export const updateUserProfileApi = async (data) => {
+  if (data instanceof FormData) {
+    return await api.patchFormDataPrivate('/user/update-user-profile', data);
+  }
+
+  const rawFile = data?.avatar_file || (data?.avatar_url instanceof File ? data.avatar_url : null);
+  if (rawFile instanceof File) {
+    const formData = new FormData();
+    formData.append('avatar_url', rawFile);
+
+    Object.keys(data).forEach((key) => {
+      if (key === 'avatar_file' || key === 'avatar_url') return;
+      const val = data[key];
+      if (val !== undefined && val !== null) {
+        if (typeof val === 'object') {
+          formData.append(key, JSON.stringify(val));
+        } else {
+          formData.append(key, String(val));
+        }
+      }
+    });
+    return await api.patchFormDataPrivate('/user/update-user-profile', formData);
+  }
+
   return await api.patchPrivate('/user/update-user-profile', data);
 };
 

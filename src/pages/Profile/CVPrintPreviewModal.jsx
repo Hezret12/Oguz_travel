@@ -17,6 +17,7 @@ import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { useLocale } from "../../hooks/useLocale";
+import { getFileUrl } from "../../functions/generalHelpers";
 
 const formatText = (val) => {
   if (!val) return "";
@@ -40,9 +41,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
   const skills = profile.skills || [];
   const experiences = profile.work_experience || profile.workExperience || [];
   const educations = profile.education || [];
-  const certifications = profile.certifications || [];
   const languages = profile.languages || [];
-  const references = profile.references || [];
   const summary = formatText(profile.personal_summary || profile.personalSummary);
   const fullName = formatText(profile.full_name || profile.fullName);
   const role = formatText(profile.role);
@@ -204,7 +203,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
             }}
           >
             <Avatar
-              src={avatarUrl}
+              src={getFileUrl(avatarUrl)}
               alt={fullName}
               sx={{
                 width: 90,
@@ -243,7 +242,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                   mb: 1.5,
                 }}
               >
-                {profile.role}
+                {role}
               </Typography>
 
               {/* Contact Icons Ribbon */}
@@ -257,34 +256,34 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                   color: "#475569",
                 }}
               >
-                {contact.email && (
+                {emailStr && (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                     <MailOutlineRoundedIcon sx={{ fontSize: 16, color: "#0f766e" }} />
-                    <span>{contact.email}</span>
+                    <span>{emailStr}</span>
                   </Box>
                 )}
-                {contact.phone && (
+                {phoneStr && (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                     <PhoneOutlinedIcon sx={{ fontSize: 16, color: "#0f766e" }} />
-                    <span>{contact.phone}</span>
+                    <span>{phoneStr}</span>
                   </Box>
                 )}
-                {contact.location && (
+                {locationStr && (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                     <LocationOnOutlinedIcon sx={{ fontSize: 16, color: "#0f766e" }} />
-                    <span>{contact.location}</span>
+                    <span>{locationStr}</span>
                   </Box>
                 )}
-                {contact.website && (
+                {websiteStr && (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                     <LanguageOutlinedIcon sx={{ fontSize: 16, color: "#0f766e" }} />
-                    <span>{contact.website}</span>
+                    <span>{websiteStr}</span>
                   </Box>
                 )}
-                {contact.linkedin && (
+                {linkedinStr && (
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                     <LinkedInIcon sx={{ fontSize: 16, color: "#0f766e" }} />
-                    <span>{contact.linkedin}</span>
+                    <span>{linkedinStr}</span>
                   </Box>
                 )}
               </Box>
@@ -469,37 +468,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                 </Box>
               )}
 
-              {/* Certifications & Awards */}
-              {certifications.length > 0 && (
-                <Box>
-                  <Typography
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: "0.92rem",
-                      letterSpacing: "0.5px",
-                      color: "#0f766e",
-                      textTransform: "uppercase",
-                      mb: 1.25,
-                      borderBottom: "1px solid #e2e8f0",
-                      pb: 0.5,
-                    }}
-                  >
-                    {t("profile.certifications")}
-                  </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                    {certifications.map((cert, idx) => (
-                      <Box key={cert.id || idx} sx={{ display: "flex", justifyContent: "space-between" }}>
-                        <Typography sx={{ fontWeight: 700, fontSize: "0.82rem", color: "#1e293b" }}>
-                          {cert.title}
-                        </Typography>
-                        <Typography sx={{ color: "#64748b", fontSize: "0.78rem", fontWeight: 600 }}>
-                          {cert.year}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              )}
+
 
               {/* Languages */}
               {languages.length > 0 && (
@@ -533,32 +502,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                 </Box>
               )}
 
-              {/* References */}
-              {references.length > 0 && (
-                <Box>
-                  <Typography
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: "0.92rem",
-                      letterSpacing: "0.5px",
-                      color: "#0f766e",
-                      textTransform: "uppercase",
-                      mb: 1.25,
-                      borderBottom: "1px solid #e2e8f0",
-                      pb: 0.5,
-                    }}
-                  >
-                    {t("profile.references")}
-                  </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
-                    {references.map((ref, idx) => (
-                      <Typography key={ref.id || idx} sx={{ color: "#475569", fontSize: "0.8rem", fontStyle: "italic" }}>
-                        {ref.text}
-                      </Typography>
-                    ))}
-                  </Box>
-                </Box>
-              )}
+
             </Box>
           </Box>
         </Box>

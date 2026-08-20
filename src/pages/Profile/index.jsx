@@ -1,15 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Box,
   Typography,
   Button,
   Grid,
-  CircularProgress,
 } from "@mui/material";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
-import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
-import toast from "react-hot-toast";
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../hooks/useLocale";
 import { useGet } from "../../hooks/CRUD/useGet";
@@ -20,151 +16,138 @@ import ProfileLeftCol from "./ProfileLeftCol";
 import ProfileRightCol from "./ProfileRightCol";
 import EditSectionModal from "./EditSectionModal";
 import CVPrintPreviewModal from "./CVPrintPreviewModal";
-import { DEFAULT_PROFILE, STORAGE_KEY_PROFILE } from "./constants";
+import { EMPTY_PROFILE } from "./constants";
+
+const extractPlainString = (val) => {
+  if (!val) return "";
+  if (typeof val === "string") return val;
+  if (typeof val === "object") {
+    return val.tk || val.en || val.ru || val.fullName || val.name || val.title || "";
+  }
+  return String(val);
+};
 
 const ProfilePage = () => {
   const { user } = useAuth();
   const { t } = useLocale();
 
-  const userKey = user?.guid || user?.id || user?.phone_number || "me";
-  const userStorageKey = `${STORAGE_KEY_PROFILE}_${userKey}`;
-
-  // Local state initialized with user-specific fallback
-  const [profile, setProfile] = useState(() => {
-    try {
-      const saved = localStorage.getItem(userStorageKey);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch {
-      // Fallback
-    }
-
-    return {
-      ...DEFAULT_PROFILE,
-      full_name: user?.name || user?.fullName || DEFAULT_PROFILE.full_name,
-      role: user?.position || user?.position_name || DEFAULT_PROFILE.role,
-      contact: {
-        ...DEFAULT_PROFILE.contact,
-        email: user?.email || DEFAULT_PROFILE.contact.email,
-        phone: user?.phone_number || DEFAULT_PROFILE.contact.phone,
-      },
-    };
-  });
-
   const [activeModalSection, setActiveModalSection] = useState(null);
   const [cvPrintOpen, setCvPrintOpen] = useState(false);
 
-  // 1. Fetch Profile from Backend via useGet scoped to current user
-  const { data: serverProfileData, isLoading: isProfileLoading } = useGet({
+  const { data: serverProfileData, refetch: refetchProfile } = useGet({
     apiFn: getUserProfileApi,
-    key: ["userProfile", userKey],
-    options: {
-      retry: false,
-    },
+    key: "userProfile",
   });
 
-  // Sync user & connected employee details when auth loads
-  useEffect(() => {
-    if (user) {
-      setProfile((prev) => {
-        const isDefaultName = !prev.full_name || prev.full_name === DEFAULT_PROFILE.full_name;
-        const isDefaultRole = !prev.role || prev.role === DEFAULT_PROFILE.role;
-        const isDefaultEmail = !prev.contact?.email || prev.contact?.email === DEFAULT_PROFILE.contact.email;
-        const isDefaultPhone = !prev.contact?.phone || prev.contact?.phone === DEFAULT_PROFILE.contact.phone;
-        const isDefaultLocation = !prev.contact?.location || prev.contact?.location === DEFAULT_PROFILE.contact.location;
+  const profile = useMemo(() => {
+    const serverData =
+      serverProfileData && typeof serverProfileData === "object"
+        ? serverProfileData
+        : {};
+    const contact = serverData.contact || {};
 
-        return {
-          ...prev,
-          full_name: isDefaultName ? (user.name || user.fullName || DEFAULT_PROFILE.full_name) : prev.full_name,
-          role: isDefaultRole ? (user.position || user.position_name || DEFAULT_PROFILE.role) : prev.role,
-          avatar_url: prev.avatar_url || user.avatar_url || "",
-          contact: {
-            ...prev.contact,
-            email: isDefaultEmail ? (user.email || DEFAULT_PROFILE.contact.email) : prev.contact?.email,
-            phone: isDefaultPhone ? (user.phone_number || DEFAULT_PROFILE.contact.phone) : prev.contact?.phone,
-            location: isDefaultLocation ? (user.office || user.department || DEFAULT_PROFILE.contact.location) : prev.contact?.location,
-          },
-        };
-      });
-    }
-  }, [user]);
+    return {
+      ...EMPTY_PROFILE,
+      ...serverData,
+      guid: serverData.guid || user?.guid || "",
+      full_name: extractPlainString(
+        serverData.full_name ||
+        serverData.fullName ||
+        user?.name ||
+        user?.fullName
+      ),
+      role: extractPlainString(
+        serverData.role ||
+        user?.position ||
+        user?.position_name
+      ),
+      avatar_url: extractPlainString(
+        serverData.avatar_url || serverData.avatarUrl || user?.avatar_url
+      ),
+      contact: {
+        email: extractPlainString(contact.email || user?.email),
+        phone: extractPlainString(contact.phone || user?.phone_number),
+        location: extractPlainString(contact.location),
+        website: extractPlainString(contact.website),
+        linkedin: extractPlainString(contact.linkedin),
+      },
+      skills: Array.isArray(serverData.skills) ? serverData.skills : [],
+      personal_summary: extractPlainString(
+        serverData.personal_summary ||
+        serverData.personalSummary
+      ),
+      work_experience: Array.isArray(
+        serverData.work_experience || serverData.workExperience
+      )
+        ? serverData.work_experience || serverData.workExperience
+        : [],
+      education: Array.isArray(serverData.education)
+        ? serverData.education
+        : [],
+      languages: Array.isArray(serverData.languages)
+        ? serverData.languages
+        : [],
+    };
+  }, [serverProfileData, user]);
 
-  // When server data arrives, merge into local state
-  useEffect(() => {
-    if (serverProfileData && typeof serverProfileData === "object" && Object.keys(serverProfileData).length > 0) {
-      setProfile((prev) => ({
-        ...prev,
-        ...serverProfileData,
-        full_name: serverProfileData.full_name || serverProfileData.fullName || prev.full_name,
-        avatar_url: serverProfileData.avatar_url || serverProfileData.avatarUrl || prev.avatar_url,
-        personal_summary:
-          serverProfileData.personal_summary ||
-          serverProfileData.personalSummary ||
-          prev.personal_summary,
-        work_experience:
-          serverProfileData.work_experience ||
-          serverProfileData.workExperience ||
-          prev.work_experience,
-        references_text:
-          serverProfileData.references_text ||
-          (serverProfileData.references || []).map((r) => r.text || "").join("\n") ||
-          prev.references_text,
-      }));
-    }
-  }, [serverProfileData]);
-
-  // 2. Update Profile to Backend via useUpdate
   const { mutate: mutateUpdateProfile, isPending: isUpdating } = useUpdate({
     apiFn: updateUserProfileApi,
-    key: ["userProfile", userKey],
+    key: "userProfile",
     idKey: "guid",
+    invalidateQueries: ["userProfile"],
     onSuccessUpdate: () => {
-      toast.success(t("profile.saveSuccess"));
+      refetchProfile();
     },
   });
 
-  // Sync to user-scoped localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(userStorageKey, JSON.stringify(profile));
-    } catch {
-      // Ignore write errors
-    }
-  }, [profile, userStorageKey]);
+  const sanitizeProfilePayload = (profileData) => ({
+    guid: profileData.guid || user?.guid || "",
+    full_name: extractPlainString(profileData.full_name || profileData.fullName),
+    role: extractPlainString(profileData.role),
+    status: extractPlainString(profileData.status),
+    avatar_url: extractPlainString(profileData.avatar_url || profileData.avatarUrl),
+    avatar_file: profileData.avatar_file instanceof File ? profileData.avatar_file : undefined,
+    contact: {
+      email: extractPlainString(profileData.contact?.email),
+      phone: extractPlainString(profileData.contact?.phone),
+      location: extractPlainString(profileData.contact?.location),
+      website: extractPlainString(profileData.contact?.website),
+      linkedin: extractPlainString(profileData.contact?.linkedin),
+    },
+    skills: Array.isArray(profileData.skills) ? profileData.skills : [],
+    personal_summary: extractPlainString(profileData.personal_summary || profileData.personalSummary),
+    work_experience: Array.isArray(profileData.work_experience || profileData.workExperience)
+      ? (profileData.work_experience || profileData.workExperience).map((exp) => ({
+          id: exp.id || `exp-${Date.now()}`,
+          role: extractPlainString(exp.role),
+          company: extractPlainString(exp.company),
+          location: extractPlainString(exp.location),
+          period: extractPlainString(exp.period),
+          bullets: Array.isArray(exp.bullets) ? exp.bullets : [],
+        }))
+      : [],
+    education: Array.isArray(profileData.education)
+      ? profileData.education.map((edu) => ({
+          id: edu.id || `edu-${Date.now()}`,
+          degree: extractPlainString(edu.degree),
+          school: extractPlainString(edu.school),
+          period: extractPlainString(edu.period),
+        }))
+      : [],
+    languages: Array.isArray(profileData.languages)
+      ? profileData.languages.map((lang) => ({
+          id: lang.id || `lang-${Date.now()}`,
+          name: extractPlainString(lang.name),
+          level: extractPlainString(lang.level),
+        }))
+      : [],
+  });
 
   const handleUpdateProfile = (updatedProfile) => {
-    setProfile(updatedProfile);
-    try {
-      mutateUpdateProfile(updatedProfile);
-    } catch {
-      // Local fallback
-    }
+    const payload = sanitizeProfilePayload(updatedProfile);
+    mutateUpdateProfile(payload);
   };
 
-  const handleManualSave = () => {
-    localStorage.setItem(userStorageKey, JSON.stringify(profile));
-    try {
-      mutateUpdateProfile(profile);
-    } catch {
-      // Local fallback
-    }
-    toast.success(t("profile.saveSuccess"));
-  };
-
-  const handleDownloadJson = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(profile, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute(
-      "download",
-      `${(profile.full_name || profile.fullName || "CV").replace(/\s+/g, "_")}_CV.json`
-    );
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-    toast.success(t("profile.downloadSuccess"));
-  };
 
   return (
     <Box
@@ -176,7 +159,6 @@ const ProfilePage = () => {
         pb: 6,
       }}
     >
-      {/* Top Header Toolbar */}
       <Box
         className="no-print"
         sx={{
@@ -216,31 +198,7 @@ const ProfilePage = () => {
           </Typography>
         </Box>
 
-        {/* Action Buttons */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Button
-            variant="outlined"
-            onClick={handleDownloadJson}
-            startIcon={<DownloadRoundedIcon sx={{ fontSize: 18 }} />}
-            sx={{
-              borderRadius: "10px",
-              textTransform: "none",
-              fontWeight: 600,
-              fontSize: "0.88rem",
-              px: 2,
-              py: 0.75,
-              borderColor: "divider",
-              color: "text.primary",
-              backgroundColor: "background.paper",
-              "&:hover": {
-                borderColor: "text.primary",
-                backgroundColor: "action.hover",
-              },
-            }}
-          >
-            {t("profile.downloadData")}
-          </Button>
-
           <Button
             variant="contained"
             onClick={() => setCvPrintOpen(true)}
@@ -272,49 +230,20 @@ const ProfilePage = () => {
           >
             {t("profile.printCv")}
           </Button>
-
-          <Button
-            variant="contained"
-            onClick={handleManualSave}
-            disabled={isUpdating}
-            startIcon={
-              isUpdating ? (
-                <CircularProgress size={18} color="inherit" />
-              ) : (
-                <SaveRoundedIcon sx={{ fontSize: 18 }} />
-              )
-            }
-            sx={{
-              borderRadius: "10px",
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.88rem",
-              px: 2.25,
-              py: 0.75,
-              bgcolor: "#0f172a",
-              color: "#ffffff",
-              "&:hover": { bgcolor: "#1e293b" },
-            }}
-          >
-            {t("save")}
-          </Button>
         </Box>
       </Box>
 
-      {/* Main Two-Column Profile & CV Layout */}
       <Grid container spacing={3} sx={{ px: { xs: 0.5, sm: 1 } }}>
-        {/* Left Column (Avatar, Contact, Skills) */}
         <Grid size={{ xs: 12, md: 4.2, lg: 3.8 }}>
           <ProfileLeftCol
             profile={profile}
             onEditSection={(section) => setActiveModalSection(section)}
-            onAvatarChange={(newAvatarUrl) => {
-              handleUpdateProfile({ ...profile, avatar_url: newAvatarUrl });
+            onAvatarChange={(newAvatarUrl, file) => {
+              handleUpdateProfile({ ...profile, avatar_url: newAvatarUrl, avatar_file: file });
             }}
           />
         </Grid>
 
-        {/* Right Column (Summary, Experience, Education, Certifications, Languages, References) */}
         <Grid size={{ xs: 12, md: 7.8, lg: 8.2 }}>
           <ProfileRightCol
             profile={profile}
@@ -323,7 +252,6 @@ const ProfilePage = () => {
         </Grid>
       </Grid>
 
-      {/* Dynamic Section Edit Modal */}
       <EditSectionModal
         open={Boolean(activeModalSection)}
         sectionKey={activeModalSection}
@@ -333,7 +261,6 @@ const ProfilePage = () => {
         onSave={handleUpdateProfile}
       />
 
-      {/* Professional A4 CV Print & PDF Preview Modal */}
       <CVPrintPreviewModal
         open={cvPrintOpen}
         onClose={() => setCvPrintOpen(false)}
