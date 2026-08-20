@@ -8,15 +8,23 @@ const ProtectedRoute = () => {
   if (loading) return null;
   if (!user)   return <Navigate to="/login" replace />;
 
-  if (Array.isArray(user.permissions) && user.permissions.length > 0 && location.pathname !== '/unauthorized') {
+  const ALWAYS_ALLOWED_PATHS = ['/profile', '/notifications', '/unauthorized'];
+
+  if (Array.isArray(user.permissions) && user.permissions.length > 0) {
     const currentPath = location.pathname;
-    const isAllowed = user.permissions.some(
-      (permission) =>
-        currentPath === permission || currentPath.startsWith(permission + '/')
+    const isAlwaysAllowed = ALWAYS_ALLOWED_PATHS.some(
+      (path) => currentPath === path || currentPath.startsWith(path + '/')
     );
 
-    if (!isAllowed) {
-      return <Navigate to="/unauthorized" replace />;
+    if (!isAlwaysAllowed) {
+      const isAllowed = user.permissions.some(
+        (permission) =>
+          currentPath === permission || currentPath.startsWith(permission + '/')
+      );
+
+      if (!isAllowed) {
+        return <Navigate to="/unauthorized" replace />;
+      }
     }
   }
 

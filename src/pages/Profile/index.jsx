@@ -26,10 +26,13 @@ const ProfilePage = () => {
   const { user } = useAuth();
   const { t } = useLocale();
 
-  // Local state initialized with fallback
+  const userKey = user?.guid || user?.id || user?.phone_number || "me";
+  const userStorageKey = `${STORAGE_KEY_PROFILE}_${userKey}`;
+
+  // Local state initialized with user-specific fallback
   const [profile, setProfile] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
+      const saved = localStorage.getItem(userStorageKey);
       if (saved) {
         return JSON.parse(saved);
       }
@@ -52,12 +55,12 @@ const ProfilePage = () => {
   const [activeModalSection, setActiveModalSection] = useState(null);
   const [cvPrintOpen, setCvPrintOpen] = useState(false);
 
-  // 1. Fetch Profile from Backend via useGet
+  // 1. Fetch Profile from Backend via useGet scoped to current user
   const { data: serverProfileData, isLoading: isProfileLoading } = useGet({
     apiFn: getUserProfileApi,
-    key: "userProfile",
+    key: ["userProfile", userKey],
     options: {
-      retry: false, // fallback to localStorage/defaults smoothly if backend not yet created
+      retry: false,
     },
   });
 
@@ -88,25 +91,24 @@ const ProfilePage = () => {
   // 2. Update Profile to Backend via useUpdate
   const { mutate: mutateUpdateProfile, isPending: isUpdating } = useUpdate({
     apiFn: updateUserProfileApi,
-    key: "userProfile",
+    key: ["userProfile", userKey],
     idKey: "guid",
     onSuccessUpdate: () => {
       toast.success(t("profile.saveSuccess"));
     },
   });
 
-  // Sync to localStorage
+  // Sync to user-scoped localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(profile));
+      localStorage.setItem(userStorageKey, JSON.stringify(profile));
     } catch {
       // Ignore write errors
     }
-  }, [profile]);
+  }, [profile, userStorageKey]);
 
   const handleUpdateProfile = (updatedProfile) => {
     setProfile(updatedProfile);
-    // Send to API
     try {
       mutateUpdateProfile(updatedProfile);
     } catch {
@@ -115,7 +117,7 @@ const ProfilePage = () => {
   };
 
   const handleManualSave = () => {
-    localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(profile));
+    localStorage.setItem(userStorageKey, JSON.stringify(profile));
     try {
       mutateUpdateProfile(profile);
     } catch {
