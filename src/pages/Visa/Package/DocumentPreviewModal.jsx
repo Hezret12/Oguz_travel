@@ -70,10 +70,15 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
 
       (currentDoc.tables || []).forEach((tbl, idx) => {
         textContent += `--- ${tbl.title || `TABLISA ${idx + 1}`} ---\n`;
-        (tbl.rows || []).forEach((row) => {
+        (tbl.rows || []).forEach((row, rIdx) => {
           const rowText = row
             .filter((c) => !c.isMerged)
-            .map((c) => c.text || "-")
+            .map((c, cIdx) => {
+              if (cIdx === 0) {
+                return rIdx === 0 ? "№" : String(rIdx);
+              }
+              return c.text || "-";
+            })
             .join(" | ");
           textContent += `${rowText}\n`;
         });
@@ -410,28 +415,43 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                   }}
                 >
                   <tbody>
-                    {(table.rows || []).map((row, rIdx) => (
-                      <tr key={rIdx}>
-                        {row.map((cell, cIdx) => {
-                          if (cell.isMerged) return null;
-                          const isHeaderRow = rIdx === 0;
-                          return (
-                            <td
-                              key={cell.id || `${rIdx}-${cIdx}`}
-                              colSpan={cell.colSpan || 1}
-                              rowSpan={cell.rowSpan || 1}
-                              style={{
-                                fontWeight: isHeaderRow ? 700 : 400,
-                                backgroundColor: isHeaderRow ? "#f1f5f9" : "#ffffff",
-                                color: isHeaderRow ? "#0f172a" : "#334155",
-                              }}
-                            >
-                              {cell.text || "—"}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
+                    {(table.rows || []).map((row, rIdx) => {
+                      const isHeaderRow = rIdx === 0;
+                      return (
+                        <tr key={rIdx}>
+                          {row.map((cell, cIdx) => {
+                            if (cell.isMerged) return null;
+                            const isOrderCol = cIdx === 0;
+                            const displayValue = isOrderCol
+                              ? isHeaderRow
+                                ? "№"
+                                : rIdx
+                              : cell.text || "—";
+
+                            return (
+                              <td
+                                key={cell.id || `${rIdx}-${cIdx}`}
+                                colSpan={cell.colSpan || 1}
+                                rowSpan={cell.rowSpan || 1}
+                                style={{
+                                  fontWeight: isHeaderRow ? 700 : isOrderCol ? 600 : 400,
+                                  backgroundColor: isHeaderRow
+                                    ? "#f1f5f9"
+                                    : isOrderCol
+                                    ? "#fafbfc"
+                                    : "#ffffff",
+                                  color: isHeaderRow ? "#0f172a" : "#334155",
+                                  textAlign: isOrderCol ? "center" : "left",
+                                  width: isOrderCol ? "48px" : undefined,
+                                }}
+                              >
+                                {displayValue}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </Box>
               </Box>
