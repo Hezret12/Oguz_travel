@@ -139,8 +139,8 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
               width: 36,
               height: 36,
               borderRadius: "10px",
-              bgcolor: "rgba(12, 138, 123, 0.12)",
-              color: "#0c8a7b",
+              bgcolor: "rgba(24, 90, 189, 0.12)",
+              color: "#185abd",
             }}
           >
             <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />

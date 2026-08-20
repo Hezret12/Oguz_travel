@@ -206,9 +206,9 @@ const DocumentList = ({
                         borderRadius: "10px",
                         bgcolor: (theme) =>
                           theme.palette.mode === "dark"
-                            ? "rgba(12, 138, 123, 0.15)"
-                            : "rgba(14, 133, 132, 0.10)",
-                        color: "#0c8a7b",
+                            ? "rgba(24, 90, 189, 0.18)"
+                            : "rgba(24, 90, 189, 0.10)",
+                        color: "#185abd",
                         transition: "transform 0.2s ease",
                       }}
                     >
