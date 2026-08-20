@@ -183,3 +183,7 @@ export const updateCustomFieldApi = async (data) => {
 export const updateUserProfileApi = async (data) => {
   return await api.patchPrivate('/user/update-user-profile', data);
 };
+
+export const updateVisaDocApi = async (data) => {
+  return await api.patchPrivate('/visa-docs/update-visa-doc', data);
+};

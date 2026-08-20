@@ -237,3 +237,7 @@ export const addCustomFieldApi = async (data) => {
   return await api.postPrivate("/custom_fields/add-custom-field", data);
 };
 
+export const addVisaDocApi = async (data) => {
+  return await api.postPrivate("/visa-docs/add-visa-doc", data);
+};
+

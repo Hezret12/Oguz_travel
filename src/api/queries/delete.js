@@ -133,3 +133,8 @@ export const deleteCustomFieldApi = async (guid) => {
   const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
   return await api.deletePrivate('/custom_fields/delete-custom-field', { guid: actualGuid });
 };
+
+export const deleteVisaDocApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/visa-docs/delete-visa-doc', { guid: actualGuid });
+};

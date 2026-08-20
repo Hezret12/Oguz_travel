@@ -15,13 +15,47 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import FlightTakeoffRoundedIcon from "@mui/icons-material/FlightTakeoffRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { CircularProgress } from "@mui/material";
+import { getOneVisaDocApi } from "../../../api/queries/getters";
+import { deserializeBackendToDocument } from "./constants";
 
 const DocumentPreviewModal = ({ open, onClose, document }) => {
   const [copied, setCopied] = useState(false);
+  const [fullDoc, setFullDoc] = useState(document);
+  const [loading, setLoading] = useState(false);
 
-  if (!document) return null;
+  useEffect(() => {
+    if (open && document) {
+      if (document.tables && document.tables.length > 0) {
+        setFullDoc(document);
+      } else if (document.guid || document.id) {
+        setLoading(true);
+        getOneVisaDocApi(document.guid || document.id)
+          .then((res) => {
+            const dataObj = res?.data?.data || res?.data;
+            if (dataObj) {
+              setFullDoc(deserializeBackendToDocument(dataObj));
+            } else {
+              setFullDoc(document);
+            }
+          })
+          .catch(() => {
+            setFullDoc(document);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      } else {
+        setFullDoc(document);
+      }
+    }
+  }, [open, document]);
+
+  if (!open || !document) return null;
+
+  const currentDoc = fullDoc || document;
 
   const handlePrint = () => {
     window.print();
@@ -29,10 +63,10 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
 
   const handleCopyText = () => {
     try {
-      let textContent = `${document.title || "Wiza Dokumenti"}\n`;
-      if (document.country) textContent += `Ýurt: ${document.country}\n\n`;
+      let textContent = `${currentDoc.title || "Wiza Dokumenti"}\n`;
+      if (currentDoc.country) textContent += `Ýurt: ${currentDoc.country}\n\n`;
 
-      (document.tables || []).forEach((tbl, idx) => {
+      (currentDoc.tables || []).forEach((tbl, idx) => {
         textContent += `--- ${tbl.title || `TABLISA ${idx + 1}`} ---\n`;
         (tbl.rows || []).forEach((row) => {
           const rowText = row
@@ -45,8 +79,8 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
         textContent += `\n`;
       });
 
-      if (document.generalNote) {
-        textContent += `Umumy Bellik: ${document.generalNote}\n`;
+      if (currentDoc.generalNote) {
+        textContent += `Umumy Bellik: ${currentDoc.generalNote}\n`;
       }
 
       navigator.clipboard.writeText(textContent);
@@ -210,35 +244,45 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
           overflowY: "auto",
           display: "flex",
           justifyContent: "center",
+          alignItems: loading ? "center" : "flex-start",
+          minHeight: "400px",
         }}
       >
-        {/* Printable Sheet */}
-        <Box
-          id="printable-word-document"
-          sx={{
-            width: "100%",
-            maxWidth: "760px",
-            minHeight: "960px",
-            backgroundColor: "#ffffff",
-            color: "#1e293b",
-            p: { xs: 3, sm: 5 },
-            borderRadius: "4px",
-            boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.06)",
-            fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif)",
-            position: "relative",
-          }}
-        >
-          {/* Document Header Letterhead */}
+        {loading ? (
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 8 }}>
+            <CircularProgress sx={{ color: "#0c8a7b" }} />
+            <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+              Dokument maglumatlary ýüklenýär...
+            </Typography>
+          </Box>
+        ) : (
+          /* Printable Sheet */
           <Box
+            id="printable-word-document"
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              pb: 2.5,
-              mb: 3.5,
-              borderBottom: "2px solid #0f766e",
+              width: "100%",
+              maxWidth: "760px",
+              minHeight: "960px",
+              backgroundColor: "#ffffff",
+              color: "#1e293b",
+              p: { xs: 3, sm: 5 },
+              borderRadius: "4px",
+              boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.06)",
+              fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif)",
+              position: "relative",
             }}
           >
+            {/* Document Header Letterhead */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                pb: 2.5,
+                mb: 3.5,
+                borderBottom: "2px solid #0f766e",
+              }}
+            >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <Box
                 sx={{
@@ -274,7 +318,7 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
 
             <Box sx={{ textAlign: "right" }}>
               <Chip
-                label={document.country || "Wiza Resminamasy"}
+                label={currentDoc.country || "Wiza Resminamasy"}
                 size="small"
                 sx={{
                   bgcolor: "#f0fdfa",
@@ -287,7 +331,7 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
                 }}
               />
               <Typography sx={{ fontSize: "0.7rem", color: "#94a3b8", fontWeight: 500 }}>
-                Senesi: {new Date(document.updatedAt || Date.now()).toLocaleDateString("tk-TM")}
+                Senesi: {new Date(currentDoc.updatedAt || Date.now()).toLocaleDateString("tk-TM")}
               </Typography>
             </Box>
           </Box>
@@ -305,17 +349,17 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
                 mb: 0.5,
               }}
             >
-              {document.title || "Täze wiza dokumenti"}
+              {currentDoc.title || "Täze wiza dokumenti"}
             </Typography>
-            {document.country && (
+            {currentDoc.country && (
               <Typography sx={{ color: "#64748b", fontWeight: 600, fontSize: "0.95rem" }}>
-                Ýurt: {document.country}
+                Ýurt: {currentDoc.country}
               </Typography>
             )}
           </Box>
 
           {/* Tables */}
-          {(document.tables || []).map((table, tIdx) => (
+          {(currentDoc.tables || []).map((table, tIdx) => (
             <Box key={table.id || tIdx} sx={{ mb: 4 }}>
               <Box
                 sx={{
@@ -421,7 +465,7 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
                 UMUMY BELLIK
               </Typography>
               <Typography sx={{ fontSize: "0.88rem", color: "#334155", whiteSpace: "pre-wrap" }}>
-                {document.generalNote}
+                {currentDoc.generalNote}
               </Typography>
             </Box>
           )}
@@ -448,6 +492,7 @@ const DocumentPreviewModal = ({ open, onClose, document }) => {
             </Box>
           </Box>
         </Box>
+        )}
       </DialogContent>
 
       {/* Global CSS for Clean Printing */}

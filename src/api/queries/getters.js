@@ -194,3 +194,11 @@ export const getAllReportSharesApi = async (params = {}) => {
 export const getUserProfileApi = async () => {
   return await api.getPrivate('/user/get-user-profile');
 };
+
+export const getAllVisaDocsApi = async (params = {}) => {
+  return await api.getPrivate('/visa-docs/get-visa-docs', params);
+};
+
+export const getOneVisaDocApi = async (guid) => {
+  return await api.getPrivate(`/visa-docs/get-visa-doc/${guid}`);
+};

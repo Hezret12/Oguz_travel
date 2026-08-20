@@ -5,6 +5,7 @@ import {
   Button,
   TextField,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
@@ -15,7 +16,7 @@ import DynamicTable from "./DynamicTable";
 import DocumentPreviewModal from "./DocumentPreviewModal";
 import { createDocumentsTable, createPricesTable } from "./constants";
 
-const DocumentEditor = ({ initialDocument, onBack, onSave }) => {
+const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) => {
   const [docData, setDocData] = useState(() => {
     let tables = initialDocument.tables || [];
     if (tables.length === 0) {
@@ -58,7 +59,6 @@ const DocumentEditor = ({ initialDocument, onBack, onSave }) => {
       updatedAt: new Date().toISOString(),
     };
     onSave(updated);
-    toast.success("Dokument üstünlikli ýatda saklandy!");
   };
 
   return (
@@ -139,7 +139,14 @@ const DocumentEditor = ({ initialDocument, onBack, onSave }) => {
           <Button
             variant="contained"
             onClick={handleSaveClick}
-            startIcon={<SaveRoundedIcon sx={{ fontSize: 18 }} />}
+            disabled={isSaving}
+            startIcon={
+              isSaving ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : (
+                <SaveRoundedIcon sx={{ fontSize: 18 }} />
+              )
+            }
             sx={{
               textTransform: "none",
               borderRadius: "10px",

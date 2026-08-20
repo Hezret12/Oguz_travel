@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  CircularProgress,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
@@ -18,16 +19,32 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import PageHeader from "../../../components/PageHeader";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
+import Pagination from "../../../components/Pagination";
 import DocumentPreviewModal from "./DocumentPreviewModal";
 import { useLocale } from "../../../hooks/useLocale";
 
-const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteDocument }) => {
+const DocumentList = ({
+  documents = [],
+  isLoading = false,
+  isFetching = false,
+  onRefetch,
+  searchQuery = "",
+  setSearchQuery,
+  page = 1,
+  limit = 20,
+  setPage,
+  setPageSize,
+  totalItems = 0,
+  onSelectDocument,
+  onCreateDocument,
+  onDeleteDocument,
+}) => {
   const { t } = useLocale();
-  const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [previewTarget, setPreviewTarget] = useState(null);
 
   const filteredDocuments = useMemo(() => {
+    if (!documents || !Array.isArray(documents)) return [];
     if (!searchQuery.trim()) return documents;
     const query = searchQuery.toLowerCase();
     return documents.filter(
@@ -40,7 +57,7 @@ const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteD
 
   const confirmDelete = () => {
     if (deleteTarget) {
-      onDeleteDocument(deleteTarget.id);
+      onDeleteDocument(deleteTarget.guid || deleteTarget.id, deleteTarget.guid);
       setDeleteTarget(null);
     }
   };
@@ -64,14 +81,32 @@ const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteD
         <GlobalSearchInput
           value={searchQuery}
           onChange={setSearchQuery}
+          onRefetch={onRefetch}
+          isFetching={isFetching}
           placeholder={t("search") || "Gözleg..."}
           sx={{ minWidth: { xs: 160, sm: 260 } }}
         />
       </PageHeader>
 
-      {/* Cards Grid */}
+      {/* Cards Grid / Loading / Empty */}
       <Box sx={{ flexGrow: 1, overflowY: "auto", pb: 4, px: 0.5 }}>
-        {filteredDocuments.length === 0 ? (
+        {isLoading ? (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "260px",
+              gap: 2,
+            }}
+          >
+            <CircularProgress sx={{ color: "#0c8a7b" }} />
+            <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600 }}>
+              Wiza dokumentleri ýüklenýär...
+            </Typography>
+          </Box>
+        ) : filteredDocuments.length === 0 ? (
           <Paper
             elevation={0}
             sx={{
@@ -116,14 +151,16 @@ const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteD
             }}
           >
             {filteredDocuments.map((doc) => {
-              const tableCount = doc.tables?.length || 0;
-              const hasNote = Boolean(
-                doc.generalNote?.trim() || doc.tables?.some((t) => t.note?.trim())
-              );
+              const docKey = doc.guid || doc.id;
+              const tableCount = doc.tableCount !== undefined ? doc.tableCount : (doc.tables?.length || 0);
+              const hasNote =
+                doc.hasNote !== undefined
+                  ? doc.hasNote
+                  : Boolean(doc.generalNote?.trim() || doc.tables?.some((t) => t.note?.trim()));
 
               return (
                 <Paper
-                  key={doc.id}
+                  key={docKey}
                   elevation={0}
                   onClick={() => onSelectDocument(doc)}
                   sx={{
@@ -296,6 +333,19 @@ const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteD
         )}
       </Box>
 
+      {/* Pagination if multiple pages */}
+      {totalItems > limit && setPage && (
+        <Box sx={{ mt: 2 }}>
+          <Pagination
+            totalItems={totalItems}
+            page={page}
+            limit={limit}
+            setPage={setPage}
+            setPageSize={setPageSize}
+          />
+        </Box>
+      )}
+
       {/* Word / A4 Document Full Preview Modal */}
       <DocumentPreviewModal
         open={Boolean(previewTarget)}
@@ -318,33 +368,59 @@ const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteD
         }}
       >
         <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
-          <WarningAmberRoundedIcon sx={{ color: "error.main", fontSize: 28 }} />
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Dokumenti pozmak
-          </Typography>
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: "10px",
+              bgcolor: "error.lighter",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "error.main",
+            }}
+          >
+            <WarningAmberRoundedIcon sx={{ fontSize: 24 }} />
+          </Box>
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Dokumenti pozmak
+            </Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              Bu amaly yzyna gaýtaryp bolmaýar
+            </Typography>
+          </Box>
         </DialogTitle>
-
-        <DialogContent sx={{ py: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            <strong>"{deleteTarget?.title}"</strong> atly dokumenti pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaýar.
+        <DialogContent sx={{ py: 1.5 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            Hakykatdan hem <strong>"{deleteTarget?.title}"</strong> atly wiza dokumentini pozmak isleýärsiňizmi?
           </Typography>
         </DialogContent>
-
-        <DialogActions sx={{ p: 2, gap: 1 }}>
+        <DialogActions sx={{ px: 2, pb: 1.5, gap: 1 }}>
           <Button
             variant="outlined"
             onClick={() => setDeleteTarget(null)}
-            sx={{ borderRadius: "8px", textTransform: "none", color: "text.secondary" }}
+            sx={{
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 600,
+              color: "text.secondary",
+              borderColor: "divider",
+            }}
           >
-            Ýatyrmak
+            Ýatyr
           </Button>
           <Button
             variant="contained"
             color="error"
             onClick={confirmDelete}
-            sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 700 }}
+            sx={{
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 600,
+            }}
           >
-            Pozmak
+            Poz
           </Button>
         </DialogActions>
       </Dialog>
