@@ -311,7 +311,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                       textTransform: "uppercase",
                     }}
                   >
-                    {table.title || `TABLISA ${tIdx + 1}`}
+                    {table.title || (tIdx === 0 ? "Gerekli resminamalar" : "Wizaň bahalary we möhletleri")}
                   </Typography>
                 </Box>
 

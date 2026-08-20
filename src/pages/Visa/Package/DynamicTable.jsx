@@ -287,7 +287,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
           </Box>
           <TextField
             fullWidth
-            value={table.title ?? `TABLISA ${tableIndex + 1}`}
+            value={table.title ?? (tableIndex === 0 ? "Gerekli resminamalar" : "Wizaň bahalary we möhletleri")}
             onChange={(e) => onUpdate({ ...table, title: e.target.value })}
             placeholder={t("visaDocument.tableTitlePlaceholder", { number: tableIndex + 1 })}
             slotProps={{

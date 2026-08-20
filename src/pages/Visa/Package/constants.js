@@ -8,7 +8,7 @@ export const createNewCell = (text = "", colSpan = 1, rowSpan = 1) => ({
 
 export const createDocumentsTable = () => ({
   id: `tbl-docs-${Date.now()}`,
-  title: "TABLISA 1: GEREKLI RESMİNAMALAR",
+  title: "Gerekli resminamalar",
   rows: [
     [
       createNewCell("№"),
@@ -26,7 +26,7 @@ export const createDocumentsTable = () => ({
 
 export const createPricesTable = () => ({
   id: `tbl-prices-${Date.now() + 1}`,
-  title: "TABLISA 2: WIZANYŇ BAHALARY WE MÖHLETLERI",
+  title: "Wizaň bahalary we möhletleri",
   rows: [
     [
       createNewCell("№"),
