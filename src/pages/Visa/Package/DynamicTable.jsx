@@ -11,7 +11,6 @@ import {
   Divider,
   TextField,
   Paper,
-  Tooltip,
 } from "@mui/material";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
@@ -489,79 +488,6 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                       </Box>
                     );
                   })}
-
-                  {/* Right-side reorder action column */}
-                  <Box
-                    component="td"
-                    sx={{
-                      border: "1px solid",
-                      borderColor: "divider",
-                      p: 0,
-                      width: "36px",
-                      minWidth: "36px",
-                      maxWidth: "36px",
-                      textAlign: "center",
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.01)"
-                          : "#fafbfc",
-                      "&:hover .reorder-btn": {
-                        opacity: 1,
-                      },
-                    }}
-                  >
-                    {isHeaderRow ? (
-                      <Box sx={{ minHeight: "46px" }} />
-                    ) : (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          minHeight: "46px",
-                        }}
-                      >
-                        <Tooltip title="Ýokaryk" placement="left">
-                          <span>
-                            <IconButton
-                              className="reorder-btn"
-                              size="small"
-                              disabled={rIdx <= 1}
-                              onClick={() => handleMoveRowUp(rIdx)}
-                              sx={{
-                                p: 0.15,
-                                opacity: 0,
-                                transition: "opacity 0.15s ease",
-                                color: rIdx <= 1 ? "action.disabled" : "text.secondary",
-                              }}
-                            >
-                              <KeyboardArrowUpRoundedIcon sx={{ fontSize: 17 }} />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-
-                        <Tooltip title="Aşak" placement="left">
-                          <span>
-                            <IconButton
-                              className="reorder-btn"
-                              size="small"
-                              disabled={rIdx >= rows.length - 1}
-                              onClick={() => handleMoveRowDown(rIdx)}
-                              sx={{
-                                p: 0.15,
-                                opacity: 0,
-                                transition: "opacity 0.15s ease",
-                                color: rIdx >= rows.length - 1 ? "action.disabled" : "text.secondary",
-                              }}
-                            >
-                              <KeyboardArrowDownRoundedIcon sx={{ fontSize: 17 }} />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-                      </Box>
-                    )}
-                  </Box>
                 </tr>
               );
             })}
