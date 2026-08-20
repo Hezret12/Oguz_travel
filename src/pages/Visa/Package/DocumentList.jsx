@@ -5,6 +5,7 @@ import {
   Button,
   Paper,
   IconButton,
+  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -13,15 +14,18 @@ import {
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import PageHeader from "../../../components/PageHeader";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
+import DocumentPreviewModal from "./DocumentPreviewModal";
 import { useLocale } from "../../../hooks/useLocale";
 
 const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteDocument }) => {
   const { t } = useLocale();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [previewTarget, setPreviewTarget] = useState(null);
 
   const filteredDocuments = useMemo(() => {
     if (!searchQuery.trim()) return documents;
@@ -145,7 +149,7 @@ const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteD
                     },
                   }}
                 >
-                  {/* Top Bar: Icon + Trash action */}
+                  {/* Top Bar: Icon + Action Buttons (Eye + Trash) */}
                   <Box
                     sx={{
                       display: "flex",
@@ -174,24 +178,54 @@ const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteD
                       <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />
                     </Box>
 
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget(doc);
-                      }}
-                      sx={{
-                        color: "text.secondary",
-                        opacity: 0.6,
-                        "&:hover": {
-                          color: "error.main",
-                          opacity: 1,
-                          backgroundColor: "rgba(239, 68, 68, 0.08)",
-                        },
-                      }}
-                    >
-                      <DeleteOutlineRoundedIcon sx={{ fontSize: 19 }} />
-                    </IconButton>
+                    {/* Quick Card Action Buttons */}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                      <Tooltip title="Word görnüşinde görmek (Önizleme)" placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewTarget(doc);
+                          }}
+                          sx={{
+                            color: "text.secondary",
+                            opacity: 0.7,
+                            p: 0.6,
+                            borderRadius: "8px",
+                            "&:hover": {
+                              color: "primary.main",
+                              opacity: 1,
+                              backgroundColor: "rgba(12, 138, 123, 0.08)",
+                            },
+                          }}
+                        >
+                          <VisibilityOutlinedIcon sx={{ fontSize: 19 }} />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Pozmak" placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget(doc);
+                          }}
+                          sx={{
+                            color: "text.secondary",
+                            opacity: 0.7,
+                            p: 0.6,
+                            borderRadius: "8px",
+                            "&:hover": {
+                              color: "error.main",
+                              opacity: 1,
+                              backgroundColor: "rgba(239, 68, 68, 0.08)",
+                            },
+                          }}
+                        >
+                          <DeleteOutlineRoundedIcon sx={{ fontSize: 19 }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
                   </Box>
 
                   {/* Title & Details */}
@@ -261,6 +295,13 @@ const DocumentList = ({ documents, onSelectDocument, onCreateDocument, onDeleteD
           </Box>
         )}
       </Box>
+
+      {/* Word / A4 Document Full Preview Modal */}
+      <DocumentPreviewModal
+        open={Boolean(previewTarget)}
+        onClose={() => setPreviewTarget(null)}
+        document={previewTarget}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog
