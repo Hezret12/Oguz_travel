@@ -16,6 +16,10 @@ import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
+import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
+import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import ContentCutRoundedIcon from "@mui/icons-material/ContentCutRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ViewColumnRoundedIcon from "@mui/icons-material/ViewColumnRounded";
@@ -52,6 +56,50 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
     onUpdate({ ...table, rows: newRows });
   };
 
+  // Row reorder handlers
+  const handleMoveRowUp = (rIdx) => {
+    if (rIdx <= 1) return; // Can't move header (0) or first data row (1) up
+    const newRows = [...rows];
+    [newRows[rIdx - 1], newRows[rIdx]] = [newRows[rIdx], newRows[rIdx - 1]];
+    onUpdate({ ...table, rows: newRows });
+  };
+
+  const handleMoveRowDown = (rIdx) => {
+    if (rIdx === 0 || rIdx >= rows.length - 1) return;
+    const newRows = [...rows];
+    [newRows[rIdx], newRows[rIdx + 1]] = [newRows[rIdx + 1], newRows[rIdx]];
+    onUpdate({ ...table, rows: newRows });
+  };
+
+  // Column reorder handlers
+  const handleMoveColumnLeft = () => {
+    if (!activeCellCoord) return;
+    const { c } = activeCellCoord;
+    handleCloseMenu();
+    // Can't move № col (0) or first data col (1) left
+    if (c <= 1) return;
+    const newRows = rows.map((row) => {
+      const newRow = [...row];
+      [newRow[c - 1], newRow[c]] = [newRow[c], newRow[c - 1]];
+      return newRow;
+    });
+    onUpdate({ ...table, rows: newRows });
+  };
+
+  const handleMoveColumnRight = () => {
+    if (!activeCellCoord) return;
+    const { c } = activeCellCoord;
+    handleCloseMenu();
+    // Can't move № col (0) or last col right
+    if (c === 0 || c >= (rows[0]?.length || 1) - 1) return;
+    const newRows = rows.map((row) => {
+      const newRow = [...row];
+      [newRow[c], newRow[c + 1]] = [newRow[c + 1], newRow[c]];
+      return newRow;
+    });
+    onUpdate({ ...table, rows: newRows });
+  };
+
   const handleAddRow = () => {
     const colCount = rows[0]?.length || 3;
     const newRow = Array.from({ length: colCount }, () => createNewCell());
@@ -76,7 +124,9 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
     if (!activeCellCoord) return;
     const { c } = activeCellCoord;
     handleCloseMenu();
-    if ((rows[0]?.length || 0) <= 1) return;
+    // Protect the fixed № column (index 0)
+    if (c === 0) return;
+    if ((rows[0]?.length || 0) <= 2) return; // Keep at least № + 1 data column
     const newRows = rows.map((row) => row.filter((_, idx) => idx !== c));
     onUpdate({ ...table, rows: newRows });
   };
@@ -85,6 +135,8 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
     if (!activeCellCoord) return;
     const { r, c } = activeCellCoord;
     handleCloseMenu();
+    // Protect the fixed № column
+    if (c === 0) return;
 
     const currentCell = rows[r]?.[c];
     if (!currentCell) return;
@@ -123,6 +175,8 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
     if (!activeCellCoord) return;
     const { r, c } = activeCellCoord;
     handleCloseMenu();
+    // Protect the fixed № column
+    if (c === 0) return;
 
     const currentCell = rows[r]?.[c];
     if (!currentCell) return;
@@ -161,6 +215,8 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
     if (!activeCellCoord) return;
     const { r, c } = activeCellCoord;
     handleCloseMenu();
+    // Protect the fixed № column
+    if (c === 0) return;
 
     const cell = rows[r]?.[c];
     if (!cell) return;
@@ -265,102 +321,230 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
           }}
         >
           <tbody>
-            {rows.map((row, rIdx) => (
-              <tr key={rIdx}>
-                {row.map((cell, cIdx) => {
-                  if (cell.isMerged) return null;
+            {rows.map((row, rIdx) => {
+              // Track visible data row index for auto-increment (skip header row 0)
+              let dataRowNumber = 0;
+              if (rIdx > 0) {
+                // Count visible (non-header) rows up to this index
+                dataRowNumber = rIdx;
+              }
 
-                  return (
-                    <Box
-                      component="td"
-                      key={cell.id || `${rIdx}-${cIdx}`}
-                      colSpan={cell.colSpan || 1}
-                      rowSpan={cell.rowSpan || 1}
-                      sx={{
-                        border: "1px solid",
-                        borderColor: "divider",
-                        p: 0,
-                        position: "relative",
-                        minHeight: "44px",
-                        backgroundColor: (theme) =>
-                          rIdx === 0 && rows.length > 1
-                            ? theme.palette.mode === "dark"
-                              ? "rgba(255, 255, 255, 0.03)"
-                              : "#f8fafc"
-                            : "transparent",
-                        "&:hover .cell-menu-btn": {
-                          opacity: 1,
-                          visibility: "visible",
-                        },
-                        "&:focus-within .cell-menu-btn": {
-                          opacity: 1,
-                          visibility: "visible",
-                        },
-                      }}
-                    >
+              return (
+                <tr key={rIdx}>
+                  {row.map((cell, cIdx) => {
+                    if (cell.isMerged) return null;
+
+                    // First column (index 0) is the fixed "№" column
+                    const isOrderCol = cIdx === 0;
+
+                    return (
+                      <Box
+                        component="td"
+                        key={cell.id || `${rIdx}-${cIdx}`}
+                        colSpan={isOrderCol ? 1 : cell.colSpan || 1}
+                        rowSpan={isOrderCol ? 1 : cell.rowSpan || 1}
+                        sx={{
+                          border: "1px solid",
+                          borderColor: "divider",
+                          p: 0,
+                          position: "relative",
+                          minHeight: "44px",
+                          // Fixed narrow width for № column
+                          ...(isOrderCol && {
+                            width: "56px",
+                            minWidth: "56px",
+                            maxWidth: "56px",
+                            textAlign: "center",
+                          }),
+                          backgroundColor: (theme) => {
+                            if (isOrderCol) {
+                              return theme.palette.mode === "dark"
+                                ? "rgba(255, 255, 255, 0.04)"
+                                : "#f1f5f9";
+                            }
+                            if (rIdx === 0 && rows.length > 1) {
+                              return theme.palette.mode === "dark"
+                                ? "rgba(255, 255, 255, 0.03)"
+                                : "#f8fafc";
+                            }
+                            return "transparent";
+                          },
+                          "&:hover .cell-menu-btn": {
+                            opacity: isOrderCol ? 0 : 1,
+                            visibility: isOrderCol ? "hidden" : "visible",
+                          },
+                          "&:focus-within .cell-menu-btn": {
+                            opacity: isOrderCol ? 0 : 1,
+                            visibility: isOrderCol ? "hidden" : "visible",
+                          },
+                        }}
+                      >
+                        {isOrderCol ? (
+                          /* Fixed auto-increment № column */
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              minHeight: "44px",
+                              px: 0.5,
+                              py: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: rIdx === 0 ? 700 : 500,
+                                fontSize: rIdx === 0 ? "0.78rem" : "0.88rem",
+                                color: rIdx === 0 ? "text.secondary" : "text.primary",
+                                userSelect: "none",
+                                letterSpacing: rIdx === 0 ? "0.5px" : 0,
+                              }}
+                            >
+                              {rIdx === 0 ? "№" : dataRowNumber}
+                            </Typography>
+                          </Box>
+                        ) : (
+                          /* Normal editable cell */
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              minHeight: "44px",
+                              position: "relative",
+                            }}
+                          >
+                            <TextField
+                              fullWidth
+                              variant="standard"
+                              multiline
+                              value={cell.text || ""}
+                              onChange={(e) => handleCellTextChange(rIdx, cIdx, e.target.value)}
+                              placeholder="..."
+                              slotProps={{
+                                input: {
+                                  disableUnderline: true,
+                                  sx: {
+                                    px: 1.5,
+                                    py: 1,
+                                    fontSize: "0.9rem",
+                                    fontWeight: rIdx === 0 ? 600 : 400,
+                                    color: "text.primary",
+                                    lineHeight: 1.4,
+                                  },
+                                },
+                              }}
+                            />
+
+                            {/* Cell 3-dots actions button */}
+                            <IconButton
+                              className="cell-menu-btn"
+                              size="small"
+                              onClick={(e) => handleOpenMenu(e, rIdx, cIdx)}
+                              sx={{
+                                position: "absolute",
+                                right: 4,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                opacity: 0,
+                                visibility: "hidden",
+                                transition: "all 0.15s ease",
+                                p: 0.5,
+                                bgcolor: "background.paper",
+                                boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                                border: "1px solid",
+                                borderColor: "divider",
+                                color: "text.secondary",
+                                "&:hover": {
+                                  bgcolor: "action.hover",
+                                  color: "text.primary",
+                                },
+                              }}
+                            >
+                              <MoreVertRoundedIcon sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          </Box>
+                        )}
+                      </Box>
+                    );
+                  })}
+
+                  {/* Right-side reorder action column */}
+                  <Box
+                    component="td"
+                    sx={{
+                      border: "1px solid",
+                      borderColor: "divider",
+                      p: 0,
+                      width: "40px",
+                      minWidth: "40px",
+                      maxWidth: "40px",
+                      textAlign: "center",
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.02)"
+                          : "#fafbfc",
+                      "&:hover .reorder-btn": {
+                        opacity: 1,
+                      },
+                    }}
+                  >
+                    {rIdx === 0 ? (
+                      /* Empty header for action column */
+                      <Box sx={{ minHeight: "44px" }} />
+                    ) : (
                       <Box
                         sx={{
                           display: "flex",
+                          flexDirection: "column",
                           alignItems: "center",
+                          justifyContent: "center",
                           minHeight: "44px",
-                          position: "relative",
+                          gap: 0,
                         }}
                       >
-                        <TextField
-                          fullWidth
-                          variant="standard"
-                          multiline
-                          value={cell.text || ""}
-                          onChange={(e) => handleCellTextChange(rIdx, cIdx, e.target.value)}
-                          placeholder="..."
-                          slotProps={{
-                            input: {
-                              disableUnderline: true,
-                              sx: {
-                                px: 1.5,
-                                py: 1,
-                                fontSize: "0.9rem",
-                                fontWeight: rIdx === 0 ? 600 : 400,
-                                color: "text.primary",
-                                lineHeight: 1.4,
-                              },
-                            },
-                          }}
-                        />
-
-                        {/* Cell 3-dots actions button */}
                         <IconButton
-                          className="cell-menu-btn"
+                          className="reorder-btn"
                           size="small"
-                          onClick={(e) => handleOpenMenu(e, rIdx, cIdx)}
+                          disabled={rIdx <= 1}
+                          onClick={() => handleMoveRowUp(rIdx)}
                           sx={{
-                            position: "absolute",
-                            right: 4,
-                            top: "50%",
-                            transform: "translateY(-50%)",
+                            p: 0.25,
                             opacity: 0,
-                            visibility: "hidden",
-                            transition: "all 0.15s ease",
-                            p: 0.5,
-                            bgcolor: "background.paper",
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
-                            border: "1px solid",
-                            borderColor: "divider",
-                            color: "text.secondary",
+                            transition: "opacity 0.15s ease",
+                            color: rIdx <= 1 ? "action.disabled" : "text.secondary",
                             "&:hover": {
+                              color: "primary.main",
                               bgcolor: "action.hover",
-                              color: "text.primary",
                             },
                           }}
                         >
-                          <MoreVertRoundedIcon sx={{ fontSize: 16 }} />
+                          <KeyboardArrowUpRoundedIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                        <IconButton
+                          className="reorder-btn"
+                          size="small"
+                          disabled={rIdx >= rows.length - 1}
+                          onClick={() => handleMoveRowDown(rIdx)}
+                          sx={{
+                            p: 0.25,
+                            opacity: 0,
+                            transition: "opacity 0.15s ease",
+                            color: rIdx >= rows.length - 1 ? "action.disabled" : "text.secondary",
+                            "&:hover": {
+                              color: "primary.main",
+                              bgcolor: "action.hover",
+                            },
+                          }}
+                        >
+                          <KeyboardArrowDownRoundedIcon sx={{ fontSize: 18 }} />
                         </IconButton>
                       </Box>
-                    </Box>
-                  );
-                })}
-              </tr>
-            ))}
+                    )}
+                  </Box>
+                </tr>
+              );
+            })}
           </tbody>
         </Box>
       </Box>
@@ -413,6 +597,68 @@ const DynamicTable = ({ table, tableIndex, onUpdate, onDelete }) => {
             </ListItemIcon>
             <ListItemText primary="Böl (split)" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 500 } }} />
           </MenuItem>
+        )}
+
+        {/* Column & Row Reorder Actions */}
+        {activeCellCoord && activeCellCoord.c > 0 && (
+          <>
+            <Divider sx={{ my: 0.5 }} />
+            <Box sx={{ px: 2, py: 0.75 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, fontSize: "0.72rem" }}>
+                Ýerini çalyş
+              </Typography>
+            </Box>
+
+            {activeCellCoord.c > 1 && (
+              <MenuItem onClick={handleMoveColumnLeft} sx={{ py: 1, fontSize: "0.86rem" }}>
+                <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
+                  <KeyboardArrowLeftRoundedIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Sütüni çepe göçür" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 500 } }} />
+              </MenuItem>
+            )}
+
+            {activeCellCoord.c < (rows[0]?.length || 1) - 1 && (
+              <MenuItem onClick={handleMoveColumnRight} sx={{ py: 1, fontSize: "0.86rem" }}>
+                <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
+                  <KeyboardArrowRightRoundedIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Sütüni saga göçür" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 500 } }} />
+              </MenuItem>
+            )}
+
+            {activeCellCoord.r > 0 && activeCellCoord.r > 1 && (
+              <MenuItem
+                onClick={() => {
+                  const r = activeCellCoord.r;
+                  handleCloseMenu();
+                  handleMoveRowUp(r);
+                }}
+                sx={{ py: 1, fontSize: "0.86rem" }}
+              >
+                <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
+                  <KeyboardArrowUpRoundedIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Setiri ýokaryk göçür" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 500 } }} />
+              </MenuItem>
+            )}
+
+            {activeCellCoord.r > 0 && activeCellCoord.r < rows.length - 1 && (
+              <MenuItem
+                onClick={() => {
+                  const r = activeCellCoord.r;
+                  handleCloseMenu();
+                  handleMoveRowDown(r);
+                }}
+                sx={{ py: 1, fontSize: "0.86rem" }}
+              >
+                <ListItemIcon sx={{ minWidth: 30, color: "text.secondary" }}>
+                  <KeyboardArrowDownRoundedIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Setiri aşak göçür" slotProps={{ primary: { fontSize: "0.86rem", fontWeight: 500 } }} />
+              </MenuItem>
+            )}
+          </>
         )}
 
         <Divider sx={{ my: 0.5 }} />
