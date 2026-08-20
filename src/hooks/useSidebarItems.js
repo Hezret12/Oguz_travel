@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   CheckSquare,
   Bell,
+  UserCircle,
   UserCog,
   UserCheck,
   Users,
@@ -43,6 +44,12 @@ export const useSidebarItems = () => {
         text: t("sidebar.notifications"),
         path: PATHS.NOTIFICATIONS,
         icon: createElement(Bell, { size: 20, strokeWidth: 2.2 }),
+      },
+      {
+        id: "profile",
+        text: t("sidebar.profile") || "Profil",
+        path: PATHS.PROFILE,
+        icon: createElement(UserCircle, { size: 20, strokeWidth: 2.2 }),
       },
       {
         id: "employee",

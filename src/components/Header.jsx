@@ -15,7 +15,7 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import { ChevronDown, Home } from 'lucide-react';
+import { ChevronDown, Home, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
@@ -468,6 +468,33 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                 </Box>
 
                 <Divider sx={{ my: 0.75 }} />
+
+                <MenuItem
+                  onClick={() => {
+                    handleCloseUserMenu();
+                    navigate('/profile');
+                  }}
+                  sx={{
+                    borderRadius: '8px',
+                    py: 1,
+                    px: 1.5,
+                    color: 'text.primary',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    '&:hover': {
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? 'rgba(20, 184, 166, 0.12)'
+                          : 'rgba(14, 133, 132, 0.08)',
+                      color: (theme) =>
+                        theme.palette.mode === 'dark' ? '#2DD4BF' : '#0E8584',
+                    },
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <User size={18} style={{ marginRight: 12 }} />
+                  {t('header.profile') || 'Profil & CV'}
+                </MenuItem>
 
                 <MenuItem
                   onClick={handleLogout}

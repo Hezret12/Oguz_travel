@@ -48,6 +48,7 @@ const VisaIntakePage = lazyRetry(() => import('../pages/VisaIntake'));
 const TurkishAirlinesReportPage = lazyRetry(() => import('../pages/Reports/TurkishAirlinesReport'));
 const TaskFlowPage = lazyRetry(() => import('../pages/TaskFlow'));
 const NotificationPage = lazyRetry(() => import('../pages/Notification'));
+const ProfilePage = lazyRetry(() => import('../pages/Profile/index'));
 
 function PageLoader() {
   const [visible, setVisible] = useState(false);
@@ -111,6 +112,7 @@ const Intake = Loadable(VisaIntakePage);
 const TurkishReport = Loadable(TurkishAirlinesReportPage);
 const TaskFlow = Loadable(TaskFlowPage);
 const Notification = Loadable(NotificationPage);
+const Profile = Loadable(ProfilePage);
 const Unauthorized = Loadable(UnauthorizedPage);
 const NotFound = Loadable(NotFoundPage);
 const Login = Loadable(LoginPage);
@@ -141,6 +143,7 @@ const router = createBrowserRouter([
             children: [
               { index: true, element: <Dashboard /> },
               { path: 'tasks', element: <TaskFlow /> },
+              { path: 'profile', element: <Profile /> },
               { path: 'employee', element: <Employee /> },
               { path: 'employee/users', element: <Users /> },
               { path: 'clients', element: <Clients /> },
