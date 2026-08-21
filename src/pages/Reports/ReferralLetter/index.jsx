@@ -6,7 +6,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { FileBox, FileSpreadsheet } from "lucide-react";
+import { FileBox, FileSpreadsheet, Package } from "lucide-react";
 import CustomTabs from "../../../components/CustomTabs";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
@@ -592,53 +592,41 @@ const ReferralLetterPage = () => {
 
           {totalStockCount !== null && (
             <Box
-              sx={(theme) => ({
+              sx={(tTheme) => ({
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 1.2,
-                px: 1.75,
-                py: 0.75,
-                borderRadius: "10px",
+                gap: 1,
+                px: 1.5,
+                py: 0.6,
+                borderRadius: "8px",
                 backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(20, 184, 166, 0.12)"
-                    : "rgba(14, 133, 132, 0.08)",
+                  tTheme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.04)"
+                    : "rgba(0, 0, 0, 0.03)",
                 border: "1px solid",
-                borderColor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(20, 184, 166, 0.35)"
-                    : "rgba(14, 133, 132, 0.22)",
+                borderColor: tTheme.palette.divider,
+                transition: "all 0.15s ease",
               })}
             >
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
-                  boxShadow: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "0 0 6px #14B8A6"
-                      : "0 0 6px #0E8584",
-                }}
-              />
+              <Package size={15} style={{ opacity: 0.75 }} />
               <Typography
                 variant="body2"
-                sx={(theme) => ({
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
-                  color:
-                    theme.palette.mode === "dark" ? "#2DD4BF" : "#0E8584",
-                })}
+                sx={{
+                  fontSize: "0.8125rem",
+                  color: "text.secondary",
+                  fontWeight: 500,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                }}
               >
-                {t("referralLetter.totalStock")}:{" "}
+                {t("referralLetter.totalStock")}:
                 <Box
                   component="span"
                   sx={{
-                    fontWeight: 800,
-                    fontSize: "0.95rem",
-                    ml: 0.5,
+                    color: "text.primary",
+                    fontWeight: 700,
+                    fontVariantNumeric: "tabular-nums",
                   }}
                 >
                   {totalStockCount} {t("referralLetter.letterUnit")}
