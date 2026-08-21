@@ -159,7 +159,7 @@ const ReferalLetter = () => {
       {
         id: "operator",
         header: t("columns.operator"),
-        size: 190,
+        size: 220,
         accessorFn: (row) => row.refferaloperator?.fullName ?? "",
         Cell: ({ row }) => (
           <StackedCell
@@ -184,7 +184,7 @@ const ReferalLetter = () => {
         accessorFn: (row) => row.client?.gender ?? "",
         id: "gender",
         header: t("columns.gender"),
-        size: 90,
+        size: 80,
         Cell: ({ cell }) => {
           const val = cell.getValue();
           return val === "Male"
@@ -193,6 +193,8 @@ const ReferalLetter = () => {
               ? t("clients.genderWomen")
               : val;
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => row.client?.dateOfBirth ?? "",
@@ -200,24 +202,32 @@ const ReferalLetter = () => {
         header: t("columns.dateOfBirth"),
         size: 110,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorFn: (row) => row.client?.passport_number ?? "",
         id: "passport_number",
         header: t("columns.passportNumber"),
         size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "destination_country",
         id: "destination_country",
         header: t("columns.destinationCountry"),
         size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "tranzit",
         id: "tranzit",
         header: t("columns.transit"),
         size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "travel_document_number",
@@ -277,6 +287,8 @@ const ReferalLetter = () => {
           const symbol = CURRENCY_SYMBOLS[currency] || currency;
           return `${Number(amount ?? 0).toFixed(2)} ${symbol}`;
         },
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
       },
       {
         accessorKey: "contract_number",
@@ -527,7 +539,7 @@ const ReferalLetter = () => {
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
-        description={t("deleteConfirm")}
+        description={t("deleteDialog.description")}
       />
 
       <MaterialReactTable table={table} />

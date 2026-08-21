@@ -30,6 +30,12 @@ const CustomDatePicker = ({
       render={({ field, fieldState: { error } }) => {
         const hasError = Boolean(error);
 
+        const parsedValue = field.value
+          ? dayjs(field.value).isValid()
+            ? dayjs(field.value)
+            : null
+          : null;
+
         return (
           <Box
             sx={{
@@ -61,12 +67,11 @@ const CustomDatePicker = ({
                 padding: "0 12px !important",
                 fontSize: "0.875rem !important",
                 boxSizing: "border-box !important",
-                lineHeight: "44px !important",
                 textAlign: "left !important",
               },
               "& .MuiPickersSectionList-root": {
                 padding: "0 12px !important",
-                height: "44px !important",
+                height: "100% !important",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "flex-start !important",
@@ -89,17 +94,17 @@ const CustomDatePicker = ({
               <OverflowTooltipLabel label={label} required={required} />
             )}
             <PickerComponent
-              value={field.value ? dayjs(field.value) : null}
+              value={parsedValue}
               onChange={(newValue) => {
-                field.onChange(
-                  newValue && newValue.isValid()
-                    ? newValue.toISOString()
-                    : null,
-                );
+                if (!newValue) {
+                  field.onChange(null);
+                } else if (dayjs.isDayjs(newValue) && newValue.isValid()) {
+                  field.onChange(newValue.toISOString());
+                }
               }}
               format={format}
               disabled={disabled}
-              views={showTime ? undefined : ["year", "month", "day"]}
+              enableAccessibleFieldDOMStructure={false}
               slotProps={{
                 textField: {
                   fullWidth: true,

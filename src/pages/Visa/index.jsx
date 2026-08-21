@@ -425,7 +425,7 @@ const Visa = () => {
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
         isLoading={isDeleting}
-        description={t("deleteConfirm")}
+        description={t("deleteDialog.description")}
       />
 
       <MaterialReactTable table={table} />

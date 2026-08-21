@@ -34,8 +34,19 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore callback functions and ReactNode children in serializability checks
-        ignoredActions: ['modal/openModal'],
+        ignoredActions: [
+          'modal/openModal',
+          'modal/openAddClientModal',
+        ],
+        ignoredActionPaths: [
+          'payload.onCreated',
+          'payload.modalProps.onConfirm',
+          'payload.modalProps.onCancel',
+          'payload.modalProps.onClose',
+          'payload.modalProps.children',
+          'payload.modalProps.tabs',
+          'payload.modalProps.footerButtons',
+        ],
         ignoredPaths: [
           'modal.modalProps.onConfirm',
           'modal.modalProps.onCancel',

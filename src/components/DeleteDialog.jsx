@@ -25,7 +25,10 @@ const DeleteDialog = ({
 }) => {
   const { t } = useLocale();
 
-  const resolvedDescription = description ?? t("deleteDialog.description") ?? "Are you sure you want to delete this record? This action cannot be undone.";
+  const resolvedDescription =
+    (typeof description === "string" ? description : null) ??
+    t("deleteDialog.description") ??
+    "Are you sure you want to delete this record? This action cannot be undone.";
   const resolvedConfirm = confirmText ?? t("delete") ?? "Delete";
   const resolvedCancel = cancelText ?? t("cancel") ?? "Cancel";
 
