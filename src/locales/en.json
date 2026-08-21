@@ -374,6 +374,7 @@
     "quantity": "Quantity",
     "totalCount": "Quantity",
     "totalQuantity": "Total Quantity",
+    "totalStock": "Total Stock",
     "letterUnit": "letters",
     "statusSold": "Sold",
     "statusDamaged": "Damaged",

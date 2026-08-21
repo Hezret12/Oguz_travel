@@ -54,5 +54,7 @@ export function usePagginationGet({ apiFn, key, params, options = {} }) {
     isError,
     error,
     refetch,
+    responseBody,
+    rawResponse: data,
   };
 }

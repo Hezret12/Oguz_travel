@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { Box, Paper, Button, useTheme, Badge } from "@mui/material";
+import { Box, Paper, Button, useTheme, Badge, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { Funnel } from "lucide-react";
 import {
@@ -80,6 +80,7 @@ const ReferralLetterPage = () => {
     isLoading: isReportLoading,
     isFetching: isReportFetching,
     refetch: refetchReports,
+    responseBody: reportResponseBody,
   } = usePagginationGet({
     apiFn: getAllReportSharesApi,
     key: "reportShares",
@@ -93,11 +94,17 @@ const ReferralLetterPage = () => {
     isLoading: isStockLoading,
     isFetching: isStockFetching,
     refetch: refetchStock,
+    responseBody: stockResponseBody,
   } = usePagginationGet({
     apiFn: getAllReportsApi,
     key: "reports",
     params: queryParams,
   });
+
+  const totalStockCount =
+    reportResponseBody?.total_report_count ??
+    stockResponseBody?.total_report_count ??
+    null;
 
   // Delete hooks
   const { mutate: deleteStock, isPending: isDeletingStock } = useDelete({
@@ -522,10 +529,10 @@ const ReferralLetterPage = () => {
         value: "stock",
         label: t("referralLetter.stockTab"),
         icon: <FileBox size={18} />,
-        badge: stockTotal || stockList.length,
+        badge: totalStockCount ?? (stockTotal || stockList.length),
       },
     ],
-    [t, reportTotal, reportList.length, stockTotal, stockList.length],
+    [t, reportTotal, reportList.length, totalStockCount, stockTotal, stockList.length],
   );
 
   const activeFiltersCount = useMemo(() => {
@@ -570,17 +577,76 @@ const ReferralLetterPage = () => {
           flexWrap: "wrap",
         }}
       >
-        <CustomTabs
-          value={activeTab}
-          onChange={handleTabChange}
-          tabs={tabsConfig}
-          variant="pills"
-          color="blue"
-          tabSx={{
-            minWidth: { xs: 130, sm: 160, md: 180 },
-            textAlign: "center",
-          }}
-        />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+          <CustomTabs
+            value={activeTab}
+            onChange={handleTabChange}
+            tabs={tabsConfig}
+            variant="pills"
+            color="blue"
+            tabSx={{
+              minWidth: { xs: 130, sm: 160, md: 180 },
+              textAlign: "center",
+            }}
+          />
+
+          {totalStockCount !== null && (
+            <Box
+              sx={(theme) => ({
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 1.2,
+                px: 1.75,
+                py: 0.75,
+                borderRadius: "10px",
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(20, 184, 166, 0.12)"
+                    : "rgba(14, 133, 132, 0.08)",
+                border: "1px solid",
+                borderColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(20, 184, 166, 0.35)"
+                    : "rgba(14, 133, 132, 0.22)",
+              })}
+            >
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "0 0 6px #14B8A6"
+                      : "0 0 6px #0E8584",
+                }}
+              />
+              <Typography
+                variant="body2"
+                sx={(theme) => ({
+                  fontWeight: 600,
+                  fontSize: "0.85rem",
+                  color:
+                    theme.palette.mode === "dark" ? "#2DD4BF" : "#0E8584",
+                })}
+              >
+                {t("referralLetter.totalStock")}:{" "}
+                <Box
+                  component="span"
+                  sx={{
+                    fontWeight: 800,
+                    fontSize: "0.95rem",
+                    ml: 0.5,
+                  }}
+                >
+                  {totalStockCount} {t("referralLetter.letterUnit")}
+                </Box>
+              </Typography>
+            </Box>
+          )}
+        </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           {activeTab === "reports" && (
