@@ -23,6 +23,7 @@ import { useSidebarItems } from '../hooks/useSidebarItems';
 import LanguageSwitcher from './LanguageSwitcher';
 import ThemeToggle from './ThemeToggle';
 import NotificationPopover from './NotificationPopover';
+import { getFileUrl } from '../functions/generalHelpers';
 
 function getRouteBreadcrumb(pathname, sidebarItems, defaultTitle) {
   for (const item of sidebarItems) {
@@ -291,6 +292,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                     {/* Modern Avatar with Online Status Indicator */}
                     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                       <Avatar
+                        src={getFileUrl(user.avatar_url || user.avatar)}
                         alt={user.name}
                         sx={{
                           width: 34,
@@ -411,6 +413,9 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                 {/* User Info Header in Dropdown */}
                 <Box
                   sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
                     px: 1.5,
                     py: 1.2,
                     mb: 0.5,
@@ -421,49 +426,70 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                         : 'rgba(0,0,0,0.02)',
                   }}
                 >
-                  <Typography
-                    variant="subtitle2"
-                    noWrap
+                  <Avatar
+                    src={getFileUrl(user.avatar_url || user.avatar)}
+                    alt={user.name}
                     sx={{
-                      fontWeight: 700,
-                      fontSize: '0.875rem',
-                      color: 'text.primary',
-                    }}
-                  >
-                    {user.name || user.fullName || user.phone_number}
-                  </Typography>
-                  {user.email ? (
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      noWrap
-                      sx={{ display: 'block', mt: 0.25 }}
-                    >
-                      {user.email}
-                    </Typography>
-                  ) : null}
-
-                  <Box
-                    sx={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      mt: 0.75,
-                      px: 1,
-                      py: 0.3,
-                      borderRadius: '6px',
-                      fontSize: '0.68rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.02em',
-                      backgroundColor: (theme) =>
+                      width: 40,
+                      height: 40,
+                      background: (theme) =>
                         theme.palette.mode === 'dark'
-                          ? 'rgba(20, 184, 166, 0.15)'
-                          : 'rgba(14, 133, 132, 0.10)',
-                      color: (theme) =>
-                        theme.palette.mode === 'dark' ? '#2DD4BF' : '#0E8584',
-                      textTransform: 'uppercase',
+                          ? 'linear-gradient(135deg, #0D9488 0%, #14B8A6 100%)'
+                          : 'linear-gradient(135deg, #0E8584 0%, #14B8A6 100%)',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: '0.95rem',
+                      boxShadow: '0 2px 8px rgba(14, 133, 132, 0.25)',
                     }}
                   >
-                    {user.position || user.position_name || user.role || 'User'}
+                    {(user.name || user.fullName || user.phone_number || '?').charAt(0).toUpperCase()}
+                  </Avatar>
+
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography
+                      variant="subtitle2"
+                      noWrap
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '0.875rem',
+                        color: 'text.primary',
+                      }}
+                    >
+                      {user.name || user.fullName || user.phone_number}
+                    </Typography>
+                    {user.email ? (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        noWrap
+                        sx={{ display: 'block', mt: 0.25 }}
+                      >
+                        {user.email}
+                      </Typography>
+                    ) : null}
+
+                    <Box
+                      sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        mt: 0.5,
+                        px: 1,
+                        py: 0.2,
+                        borderRadius: '6px',
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.02em',
+                        backgroundColor: (theme) =>
+                          theme.palette.mode === 'dark'
+                            ? 'rgba(20, 184, 166, 0.15)'
+                            : 'rgba(14, 133, 132, 0.10)',
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' ? '#2DD4BF' : '#0E8584',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {user.position || user.position_name || user.role || 'User'}
+                    </Box>
                   </Box>
                 </Box>
 

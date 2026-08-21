@@ -29,7 +29,7 @@ const extractPlainString = (val) => {
 };
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, refetchUser } = useAuth();
   const { t } = useLocale();
 
   const [activeModalSection, setActiveModalSection] = useState(null);
@@ -95,9 +95,10 @@ const ProfilePage = () => {
     apiFn: updateUserProfileApi,
     key: "userProfile",
     idKey: "guid",
-    invalidateQueries: ["userProfile"],
+    invalidateQueries: ["userProfile", "authUser"],
     onSuccessUpdate: () => {
       refetchProfile();
+      refetchUser?.();
     },
   });
 

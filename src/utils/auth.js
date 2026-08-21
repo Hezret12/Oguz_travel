@@ -27,25 +27,30 @@ export function normalizeUser(rawUser) {
 
   const role = resolveUserRole(rawUser);
   const emp = rawUser.employee || {};
+  const userDetail = rawUser.userDetail || {};
+  const contact = userDetail.contact || {};
 
   const name =
+    extractText(userDetail.full_name) ||
+    extractText(userDetail.fullName) ||
+    extractText(rawUser.employee_name) ||
     extractText(emp.fullName) ||
     extractText(emp.name) ||
     extractText(rawUser.name) ||
     extractText(rawUser.fullName) ||
-    extractText(rawUser.employee_name) ||
-    extractText(rawUser.user_name) ||
     extractText(rawUser.phone_number) ||
     extractText(rawUser.phone) ||
     '';
 
   const email =
+    extractText(contact.email) ||
     extractText(emp.email) ||
     extractText(rawUser.email) ||
     extractText(rawUser.user_email) ||
     '';
 
   const phone_number =
+    extractText(contact.phone) ||
     extractText(emp.phone_number) ||
     extractText(emp.phone) ||
     extractText(rawUser.phone_number) ||
@@ -53,6 +58,8 @@ export function normalizeUser(rawUser) {
     '';
 
   const position =
+    extractText(userDetail.role) ||
+    extractText(rawUser.positions?.[0]?.name) ||
     extractText(emp.position) ||
     extractText(rawUser.position) ||
     extractText(rawUser.position_name) ||
@@ -71,6 +78,8 @@ export function normalizeUser(rawUser) {
     '';
 
   const avatar_url =
+    extractText(userDetail.avatar_url) ||
+    extractText(userDetail.avatarUrl) ||
     extractText(emp.avatar_url) ||
     extractText(emp.avatar) ||
     extractText(rawUser.avatar_url) ||
