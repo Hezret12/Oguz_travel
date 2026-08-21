@@ -199,6 +199,11 @@ export const getUserProfileApi = async () => {
   return await api.getPrivate('/user/get-user-profile');
 };
 
+export const getOneUserProfileApi = async (guid) => {
+  if (!guid) return null;
+  return await api.getPrivate(`/user/getOne-profile/${guid}`);
+};
+
 export const getAllVisaDocsApi = async (params = {}) => {
   return await api.getPrivate('/visa-docs/get-visa-docs', params);
 };

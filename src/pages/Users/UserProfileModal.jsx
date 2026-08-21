@@ -14,6 +14,8 @@ import ProfileRightCol from "../Profile/ProfileRightCol";
 import CVPrintPreviewModal from "../Profile/CVPrintPreviewModal";
 import { EMPTY_PROFILE } from "../Profile/constants";
 import { useLocale } from "../../hooks/useLocale";
+import { useGet } from "../../hooks/CRUD/useGet";
+import { getOneUserProfileApi } from "../../api/queries/getters";
 
 const extractPlainString = (val) => {
   if (!val) return "";
@@ -38,8 +40,6 @@ const UserProfileModal = ({
   close,
   onClose,
   user,
-  isLoading = false,
-  isError = false,
 }) => {
   const { t, selectedLang } = useLocale();
   const [cvPrintOpen, setCvPrintOpen] = useState(false);
@@ -49,11 +49,29 @@ const UserProfileModal = ({
     else if (onClose) onClose();
   };
 
-  const profile = useMemo(() => {
-    if (!user) return EMPTY_PROFILE;
+  const userGuid = user?.guid;
 
-    const emp = user.employee || {};
-    const contact = user.contact || emp.contact || {};
+  const { data: serverProfileData, isLoading, isError } = useGet({
+    apiFn: () => getOneUserProfileApi(userGuid),
+    key: ["userProfile", userGuid],
+    options: {
+      enabled: Boolean(open && userGuid),
+      staleTime: 1000 * 60 * 5,
+    },
+  });
+
+  const profile = useMemo(() => {
+    let raw = {};
+    if (serverProfileData && typeof serverProfileData === "object") {
+      raw = serverProfileData.data && typeof serverProfileData.data === "object" && !Array.isArray(serverProfileData.data)
+        ? serverProfileData.data
+        : serverProfileData;
+    } else if (user && typeof user === "object") {
+      raw = user;
+    }
+
+    const emp = raw.employee || user?.employee || {};
+    const contact = raw.contact || emp.contact || user?.contact || {};
 
     let roleStr = "";
     if (Array.isArray(emp.positions) && emp.positions.length > 0) {
@@ -70,7 +88,9 @@ const UserProfileModal = ({
       roleStr =
         selectedLang(emp.position?.name) ||
         extractPlainString(emp.position?.name || emp.position);
-    } else if (user.isAdmin != null) {
+    } else if (raw.role || user?.role) {
+      roleStr = extractPlainString(raw.role || user?.role);
+    } else if (user?.isAdmin != null) {
       roleStr = user.isAdmin ? "Admin" : "User";
     }
 
@@ -79,34 +99,36 @@ const UserProfileModal = ({
       extractPlainString(emp.office?.fullName || emp.office?.name || emp.office);
 
     const nameStr =
+      extractPlainString(raw.full_name || raw.fullName) ||
       extractPlainString(emp.fullName || emp.name) ||
-      extractPlainString(user.fullName || user.name || user.phone_number);
+      extractPlainString(user?.fullName || user?.name || user?.phone_number);
 
     return {
       ...EMPTY_PROFILE,
-      guid: user.guid || emp.guid || "",
+      ...raw,
+      guid: raw.guid || user?.guid || emp.guid || "",
       full_name: nameStr,
       role: roleStr,
-      status: user.isActive !== undefined ? (user.isActive ? "Active" : "Inactive") : extractPlainString(user.status || emp.status),
-      avatar_url: extractPlainString(emp.avatar_url || emp.avatarUrl || user.avatar_url || user.avatarUrl),
+      status: user?.isActive !== undefined ? (user.isActive ? "Active" : "Inactive") : extractPlainString(raw.status || user?.status || emp.status),
+      avatar_url: extractPlainString(raw.avatar_url || raw.avatarUrl || emp.avatar_url || emp.avatarUrl || user?.avatar_url || user?.avatarUrl),
       contact: {
-        email: extractPlainString(contact.email || emp.gmail || emp.email || user.email || user.gmail),
-        phone: extractPlainString(contact.phone || user.phone_number || emp.phone_number || user.phone || emp.phone),
-        location: extractPlainString(contact.location || emp.address || user.address || officeStr),
+        email: extractPlainString(contact.email || emp.gmail || emp.email || user?.email || user?.gmail),
+        phone: extractPlainString(contact.phone || user?.phone_number || emp.phone_number || user?.phone || emp.phone),
+        location: extractPlainString(contact.location || emp.address || user?.address || officeStr),
         website: extractPlainString(contact.website),
         linkedin: extractPlainString(contact.linkedin),
       },
-      skills: Array.isArray(emp.skills) ? emp.skills : (Array.isArray(user.skills) ? user.skills : []),
+      skills: Array.isArray(raw.skills) ? raw.skills : (Array.isArray(emp.skills) ? emp.skills : (Array.isArray(user?.skills) ? user.skills : [])),
       personal_summary: extractPlainString(
-        emp.personal_summary || emp.personalSummary || user.personal_summary || user.personalSummary
+        raw.personal_summary || raw.personalSummary || emp.personal_summary || emp.personalSummary || user?.personal_summary || user?.personalSummary
       ),
-      work_experience: Array.isArray(emp.work_experience || emp.workExperience)
-        ? emp.work_experience || emp.workExperience
-        : (Array.isArray(user.work_experience) ? user.work_experience : []),
-      education: Array.isArray(emp.education) ? emp.education : (Array.isArray(user.education) ? user.education : []),
-      languages: Array.isArray(emp.languages) ? emp.languages : (Array.isArray(user.languages) ? user.languages : []),
+      work_experience: Array.isArray(raw.work_experience || raw.workExperience)
+        ? raw.work_experience || raw.workExperience
+        : (Array.isArray(emp.work_experience || emp.workExperience) ? emp.work_experience || emp.workExperience : (Array.isArray(user?.work_experience) ? user.work_experience : [])),
+      education: Array.isArray(raw.education) ? raw.education : (Array.isArray(emp.education) ? emp.education : (Array.isArray(user?.education) ? user.education : [])),
+      languages: Array.isArray(raw.languages) ? raw.languages : (Array.isArray(emp.languages) ? emp.languages : (Array.isArray(user?.languages) ? user.languages : [])),
     };
-  }, [user, selectedLang]);
+  }, [serverProfileData, user, selectedLang]);
 
   if (!open) return null;
 
