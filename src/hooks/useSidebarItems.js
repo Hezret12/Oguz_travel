@@ -165,7 +165,7 @@ export const useSidebarItems = () => {
       },
       {
         id: "profile",
-        text: t("sidebar.profile") || "Profil",
+        text: t("sidebar.profile"),
         path: PATHS.PROFILE,
         icon: createElement(UserCircle, { size: 20, strokeWidth: 2.2 }),
       },

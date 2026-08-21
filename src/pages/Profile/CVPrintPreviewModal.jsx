@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -18,6 +19,7 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { useLocale } from "../../hooks/useLocale";
 import { getFileUrl } from "../../functions/generalHelpers";
+import { printElement } from "../../functions/printHelper";
 
 const formatText = (val) => {
   if (!val) return "";
@@ -30,12 +32,9 @@ const formatText = (val) => {
 
 const CVPrintPreviewModal = ({ open, onClose, profile }) => {
   const { t } = useLocale();
+  const sheetRef = useRef(null);
 
   if (!profile) return null;
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   const contact = profile.contact || {};
   const skills = profile.skills || [];
@@ -51,6 +50,12 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
   const locationStr = formatText(contact.location);
   const websiteStr = formatText(contact.website);
   const linkedinStr = formatText(contact.linkedin);
+
+  const handlePrint = () => {
+    if (sheetRef.current) {
+      printElement(sheetRef.current, "");
+    }
+  };
 
   return (
     <Dialog
@@ -104,7 +109,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           </Box>
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-              {profile.fullName} — {t("profile.previewTitle")}
+              {fullName} — {t("profile.previewTitle")}
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
               {t("profile.previewSubtitle")}
@@ -174,6 +179,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
         }}
       >
         <Box
+          ref={sheetRef}
           id="printable-cv-sheet"
           sx={{
             width: "100%",
@@ -494,32 +500,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           </Box>
         </Box>
       </DialogContent>
-
-      <style>
-        {`
-          @media print {
-            body * {
-              visibility: hidden !important;
-            }
-            #printable-cv-sheet, #printable-cv-sheet * {
-              visibility: visible !important;
-            }
-            #printable-cv-sheet {
-              position: absolute !important;
-              left: 0 !important;
-              top: 0 !important;
-              width: 100% !important;
-              max-width: 100% !important;
-              padding: 24px !important;
-              box-shadow: none !important;
-              border: none !important;
-            }
-            .no-print {
-              display: none !important;
-            }
-          }
-        `}
-      </style>
     </Dialog>
   );
 };

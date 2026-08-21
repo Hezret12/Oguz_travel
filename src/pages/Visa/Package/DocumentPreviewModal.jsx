@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -20,10 +20,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getOneVisaDocApi } from "../../../api/queries/getters";
 import { deserializeBackendToDocument } from "./constants";
 import { useLocale } from "../../../hooks/useLocale";
+import { printElement } from "../../../functions/printHelper";
 
 const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
   const { t } = useLocale();
   const [copied, setCopied] = useState(false);
+  const docSheetRef = useRef(null);
 
   const docGuid = doc?.guid || doc?.id;
   const hasTables = doc?.tables?.length > 0;
@@ -44,17 +46,19 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
   });
 
   const currentDoc = useMemo(() => {
+    if (hasTables) return doc;
     if (fetchedDoc) return fetchedDoc;
-    if (doc) return doc;
-    return null;
-  }, [fetchedDoc, doc]);
+    return doc;
+  }, [fetchedDoc, doc, hasTables]);
 
   if (!open || !doc) return null;
 
   const loading = shouldFetch && isLoading;
 
   const handlePrint = () => {
-    window.print();
+    if (docSheetRef.current) {
+      printElement(docSheetRef.current, "");
+    }
   };
 
   const handleCopyText = () => {
@@ -259,6 +263,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
         ) : (
           /* Printable Sheet */
           <Box
+            ref={docSheetRef}
             id="printable-word-document"
             sx={{
               width: "100%",
@@ -420,71 +425,6 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
           </Box>
         )}
       </DialogContent>
-
-      {/* Global CSS for Clean Printing (Suppresses Browser Header/Footer & Fixes Multi-Table Clipping) */}
-      <style>
-        {`
-          @page {
-            size: A4 portrait;
-            margin: 0 !important;
-          }
-          @media print {
-            @page {
-              size: A4 portrait;
-              margin: 0 !important;
-            }
-            html, body {
-              margin: 0 !important;
-              padding: 0 !important;
-              background: #ffffff !important;
-              overflow: visible !important;
-              height: auto !important;
-            }
-            body * {
-              visibility: hidden !important;
-            }
-            .MuiDialog-root,
-            .MuiDialog-container,
-            .MuiDialog-paper,
-            .MuiDialogContent-root {
-              position: static !important;
-              overflow: visible !important;
-              height: auto !important;
-              max-height: none !important;
-              max-width: 100% !important;
-              box-shadow: none !important;
-              background: transparent !important;
-              border: none !important;
-              margin: 0 !important;
-              padding: 0 !important;
-              display: block !important;
-            }
-            #printable-word-document,
-            #printable-word-document * {
-              visibility: visible !important;
-            }
-            #printable-word-document {
-              position: relative !important;
-              left: auto !important;
-              top: auto !important;
-              width: 100% !important;
-              max-width: 100% !important;
-              min-height: auto !important;
-              padding: 16mm 20mm !important;
-              margin: 0 !important;
-              box-shadow: none !important;
-              border: none !important;
-              box-sizing: border-box !important;
-            }
-            table, tr, td, th {
-              page-break-inside: avoid !important;
-            }
-            .no-print {
-              display: none !important;
-            }
-          }
-        `}
-      </style>
     </Dialog>
   );
 };

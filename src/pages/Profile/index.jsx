@@ -6,6 +6,7 @@ import {
   Grid,
 } from "@mui/material";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../hooks/useLocale";
 import { useGet } from "../../hooks/CRUD/useGet";
@@ -159,6 +160,14 @@ const ProfilePage = () => {
         pb: 6,
       }}
     >
+      <Helmet>
+        <title>{`${profile.full_name || t("profile.title")} | Oguz Travel`}</title>
+        <meta
+          name="description"
+          content={profile.personal_summary || `${profile.full_name || "User"} Profile & CV Builder - Oguz Travel`}
+        />
+      </Helmet>
+
       <Box
         className="no-print"
         sx={{
