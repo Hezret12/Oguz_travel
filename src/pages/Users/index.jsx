@@ -10,7 +10,8 @@ import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 import AddUserModal from "./AddUser/AddUserModal";
 import EditUserModal from "./EditUser/EditUserModal";
-import { Box, Chip } from "@mui/material";
+import { Box, Chip, IconButton } from "@mui/material";
+import { User } from "lucide-react";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import { usePageFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
@@ -23,8 +24,13 @@ import DeleteDialog from "../../components/DeleteDialog";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { deleteUser } from "../../api/queries/delete";
+import { useAuth } from "../../context/useAuth";
+import UserProfileModal from "./UserProfileModal";
 
 const Users = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin" || Boolean(user?.user_is_admin);
+  const [selectedProfileUser, setSelectedProfileUser] = useState(null);
   const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
 
@@ -162,20 +168,62 @@ const Users = () => {
       {
         id: "actions",
         header: t("columns.actions"),
-        size: 100,
+        size: isAdmin ? 135 : 100,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row, table }) => (
-          <ColumnActionButtons
-            row={row}
-            table={table}
-            onDelete={handleDeleteClick}
-          />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+            }}
+          >
+            {isAdmin && (
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.currentTarget.blur();
+                  setSelectedProfileUser(row.original);
+                }}
+                size="small"
+                title={t("profile.profileView")}
+                sx={(theme) => ({
+                  borderRadius: "7px",
+                  border: `1px solid ${theme.palette.divider}`,
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? "rgba(20, 184, 166, 0.12)"
+                      : "rgba(14, 133, 132, 0.08)",
+                  color: theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
+                  transition: "all 0.15s ease",
+                  "&:hover": {
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(20, 184, 166, 0.22)"
+                        : "rgba(14, 133, 132, 0.18)",
+                    borderColor: theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
+                    transform: "translateY(-1px)",
+                  },
+                  "&:active": { transform: "scale(0.95)" },
+                })}
+              >
+                <User size={15} />
+              </IconButton>
+            )}
+
+            <ColumnActionButtons
+              row={row}
+              table={table}
+              onDelete={handleDeleteClick}
+            />
+          </Box>
         ),
       },
     ],
-    [t, handleDeleteClick],
+    [t, handleDeleteClick, isAdmin],
   );
 
   const table = useMaterialReactTable({
@@ -290,6 +338,14 @@ const Users = () => {
         isLoading={isDeleting}
         description={t("users.deleteConfirm")}
       />
+
+      {isAdmin && (
+        <UserProfileModal
+          open={Boolean(selectedProfileUser)}
+          close={() => setSelectedProfileUser(null)}
+          user={selectedProfileUser}
+        />
+      )}
 
       <MaterialReactTable table={table} />
     </>

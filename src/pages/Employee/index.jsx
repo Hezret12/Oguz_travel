@@ -6,8 +6,7 @@ import { useLocale } from "../../hooks/useLocale";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
-import { Box, Chip, Tooltip, IconButton } from "@mui/material";
-import { User } from "lucide-react";
+import { Box, Chip, Tooltip } from "@mui/material";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import AddEmployee from "./Contents/AddEmployee";
 import EditEmployee from "./Contents/EditEmployee";
@@ -31,13 +30,8 @@ import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { deleteEmployee } from "../../api/queries/delete";
 import { actions } from "../../utils/helperConstant";
-import { useAuth } from "../../context/useAuth";
-import EmployeeProfileModal from "./Contents/EmployeeProfileModal";
 
 const Employee = () => {
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin" || Boolean(user?.user_is_admin);
-  const [selectedProfileEmployee, setSelectedProfileEmployee] = useState(null);
   const [rowSelection, setRowSelection] = useState({});
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -261,62 +255,20 @@ const Employee = () => {
       {
         id: "actions",
         header: t("columns.actions"),
-        size: isAdmin ? 135 : actions,
+        size: actions,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         Cell: ({ row, table }) => (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 1,
-            }}
-          >
-            {isAdmin && (
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.currentTarget.blur();
-                  setSelectedProfileEmployee(row.original);
-                }}
-                size="small"
-                title={t("profile.profileView")}
-                sx={(theme) => ({
-                  borderRadius: "7px",
-                  border: `1px solid ${theme.palette.divider}`,
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? "rgba(20, 184, 166, 0.12)"
-                      : "rgba(14, 133, 132, 0.08)",
-                  color: theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
-                  transition: "all 0.15s ease",
-                  "&:hover": {
-                    backgroundColor:
-                      theme.palette.mode === "dark"
-                        ? "rgba(20, 184, 166, 0.22)"
-                        : "rgba(14, 133, 132, 0.18)",
-                    borderColor: theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
-                    transform: "translateY(-1px)",
-                  },
-                  "&:active": { transform: "scale(0.95)" },
-                })}
-              >
-                <User size={15} />
-              </IconButton>
-            )}
-
-            <ColumnActionButtons
-              row={row}
-              table={table}
-              onDelete={handleDeleteClick}
-            />
-          </Box>
+          <ColumnActionButtons
+            row={row}
+            table={table}
+            onDelete={handleDeleteClick}
+          />
         ),
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLang, t, isAdmin, handleDeleteClick],
+    [selectedLang, t],
   );
 
   const activeFilters = useMemo(
@@ -487,14 +439,6 @@ const Employee = () => {
         isLoading={isDeleting}
         description={t("employee.deleteConfirm")}
       />
-
-      {isAdmin && (
-        <EmployeeProfileModal
-          open={Boolean(selectedProfileEmployee)}
-          close={() => setSelectedProfileEmployee(null)}
-          employee={selectedProfileEmployee}
-        />
-      )}
 
       <MaterialReactTable table={table} />
     </>
