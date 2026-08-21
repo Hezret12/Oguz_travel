@@ -8,7 +8,7 @@ import {
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useLocale } from "../../hooks/useLocale";
 
-const ProfileRightCol = ({ profile, onEditSection }) => {
+const ProfileRightCol = ({ profile, onEditSection, readOnly = false }) => {
   const { t } = useLocale();
   const experiences = profile.work_experience || profile.workExperience || [];
   const educations = profile.education || [];
@@ -41,18 +41,20 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
           >
             {t("profile.personalSummary")}
           </Typography>
-          <Tooltip title={t("profile.editTitleSummary")} placement="top">
-            <IconButton
-              size="small"
-              onClick={() => onEditSection("summary")}
-              sx={{
-                color: "text.secondary",
-                "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
-              }}
-            >
-              <EditOutlinedIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Tooltip>
+          {!readOnly && Boolean(onEditSection) && (
+            <Tooltip title={t("profile.editTitleSummary")} placement="top">
+              <IconButton
+                size="small"
+                onClick={() => onEditSection("summary")}
+                sx={{
+                  color: "text.secondary",
+                  "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
+                }}
+              >
+                <EditOutlinedIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         <Typography
@@ -92,18 +94,20 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
           >
             {t("profile.workExperience")}
           </Typography>
-          <Tooltip title={t("profile.editTitleExperience")} placement="top">
-            <IconButton
-              size="small"
-              onClick={() => onEditSection("experience")}
-              sx={{
-                color: "text.secondary",
-                "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
-              }}
-            >
-              <EditOutlinedIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Tooltip>
+          {!readOnly && Boolean(onEditSection) && (
+            <Tooltip title={t("profile.editTitleExperience")} placement="top">
+              <IconButton
+                size="small"
+                onClick={() => onEditSection("experience")}
+                sx={{
+                  color: "text.secondary",
+                  "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
+                }}
+              >
+                <EditOutlinedIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         {experiences.length > 0 ? (
@@ -188,18 +192,20 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
           >
             {t("profile.education")}
           </Typography>
-          <Tooltip title={t("profile.editTitleEducation")} placement="top">
-            <IconButton
-              size="small"
-              onClick={() => onEditSection("education")}
-              sx={{
-                color: "text.secondary",
-                "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
-              }}
-            >
-              <EditOutlinedIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Tooltip>
+          {!readOnly && Boolean(onEditSection) && (
+            <Tooltip title={t("profile.editTitleEducation")} placement="top">
+              <IconButton
+                size="small"
+                onClick={() => onEditSection("education")}
+                sx={{
+                  color: "text.secondary",
+                  "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
+                }}
+              >
+                <EditOutlinedIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         {educations.length > 0 ? (
@@ -260,18 +266,20 @@ const ProfileRightCol = ({ profile, onEditSection }) => {
           >
             {t("profile.languages")}
           </Typography>
-          <Tooltip title={t("profile.editTitleLanguages")} placement="top">
-            <IconButton
-              size="small"
-              onClick={() => onEditSection("languages")}
-              sx={{
-                color: "text.secondary",
-                "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
-              }}
-            >
-              <EditOutlinedIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Tooltip>
+          {!readOnly && Boolean(onEditSection) && (
+            <Tooltip title={t("profile.editTitleLanguages")} placement="top">
+              <IconButton
+                size="small"
+                onClick={() => onEditSection("languages")}
+                sx={{
+                  color: "text.secondary",
+                  "&:hover": { color: "#0c8a7b", backgroundColor: "rgba(12, 138, 123, 0.08)" },
+                }}
+              >
+                <EditOutlinedIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         {languages.length > 0 ? (

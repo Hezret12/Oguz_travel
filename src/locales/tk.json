@@ -228,6 +228,9 @@
     }
   },
   "profile": {
+    "title": "Profil",
+    "profileView": "Profili gör",
+    "fetchFailed": "Maglumatlary ýükläp bolmady",
     "cvBuilder": "Profil we terjimehal",
     "cvBuilderSubtitle": "Terjimehalyňyzy we profiliňizi dolandyryň",
     "downloadData": "Maglumatlary ýükle",

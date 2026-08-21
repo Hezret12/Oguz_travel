@@ -225,6 +225,9 @@
     }
   },
   "profile": {
+    "title": "Профиль",
+    "profileView": "Посмотреть профиль",
+    "fetchFailed": "Не удалось загрузить данные",
     "cvBuilder": "Профиль и резюме",
     "cvBuilderSubtitle": "Управление профилем и резюме",
     "downloadData": "Скачать данные",

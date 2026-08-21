@@ -225,6 +225,9 @@
     }
   },
   "profile": {
+    "title": "Profile",
+    "profileView": "View Profile",
+    "fetchFailed": "Failed to load data",
     "cvBuilder": "Profile & Resume",
     "cvBuilderSubtitle": "Manage your profile and resume",
     "downloadData": "Download Data",

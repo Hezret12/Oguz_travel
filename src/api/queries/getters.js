@@ -37,6 +37,10 @@ export const getAllEmployeeApi = async (params = {}) => {
   return await api.getPrivate('/employee/get-all-employees', params);
 };
 
+export const getEmployeesForPositionApi = async (params = {}) => {
+  return await api.getPrivate('/employee/get-employees-for-position', params);
+};
+
 export const getAllStatusApi = async (params = {}) => {
   return await api.getPrivate('/tstatus/get-all-tstatus', params);
 };

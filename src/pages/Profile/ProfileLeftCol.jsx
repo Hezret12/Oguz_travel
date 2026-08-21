@@ -28,7 +28,7 @@ const formatText = (val) => {
   return String(val);
 };
 
-const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
+const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange, readOnly = false }) => {
   const { t } = useLocale();
   const fileInputRef = useRef(null);
 
@@ -85,83 +85,106 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
           position: "relative",
         }}
       >
-        <Tooltip title={t("profile.editTitleBasic")} placement="top">
-          <IconButton
-            size="small"
-            onClick={() => onEditSection("basic")}
-            sx={{
-              position: "absolute",
-              top: 14,
-              right: 14,
-              color: "text.secondary",
-              borderRadius: "8px",
-              "&:hover": {
-                color: "#0c8a7b",
-                backgroundColor: "rgba(12, 138, 123, 0.08)",
-              },
-            }}
-          >
-            <EditOutlinedIcon sx={{ fontSize: 18 }} />
-          </IconButton>
-        </Tooltip>
-
-        {/* Avatar with Camera Trigger */}
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 2, mt: 0.5 }}>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleDirectAvatarUpload}
-            accept="image/png, image/jpeg, image/webp"
-            style={{ display: "none" }}
-          />
-          <Tooltip title={t("profile.changePhoto")} placement="bottom">
-            <Box
-              onClick={() => fileInputRef.current?.click()}
+        {!readOnly && Boolean(onEditSection) && (
+          <Tooltip title={t("profile.editTitleBasic")} placement="top">
+            <IconButton
+              size="small"
+              onClick={() => onEditSection("basic")}
               sx={{
-                position: "relative",
-                cursor: "pointer",
-                borderRadius: "50%",
-                "&:hover .avatar-upload-overlay": {
-                  opacity: 1,
+                position: "absolute",
+                top: 14,
+                right: 14,
+                color: "text.secondary",
+                borderRadius: "8px",
+                "&:hover": {
+                  color: "#0c8a7b",
+                  backgroundColor: "rgba(12, 138, 123, 0.08)",
                 },
               }}
             >
-              <Avatar
-                src={getFileUrl(profile.avatar_url || profile.avatarUrl)}
-                alt={fullNameStr}
-                sx={{
-                  width: 104,
-                  height: 104,
-                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-                  border: "3px solid",
-                  borderColor: "background.paper",
-                  fontSize: "2.1rem",
-                  fontWeight: 700,
-                  bgcolor: "#0c8a7b",
-                }}
-              >
-                {fullNameStr.charAt(0) || "U"}
-              </Avatar>
-
-              <Box
-                className="avatar-upload-overlay"
-                sx={{
-                  position: "absolute",
-                  inset: 0,
-                  borderRadius: "50%",
-                  backgroundColor: "rgba(0, 0, 0, 0.45)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#ffffff",
-                  opacity: 0,
-                  transition: "opacity 0.2s ease",
-                }}
-              >
-                <PhotoCameraRoundedIcon sx={{ fontSize: 24 }} />
-              </Box>
-            </Box>
+              <EditOutlinedIcon sx={{ fontSize: 18 }} />
+            </IconButton>
           </Tooltip>
+        )}
+
+        {/* Avatar with optional Camera Trigger */}
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2, mt: 0.5 }}>
+          {!readOnly && Boolean(onAvatarChange) ? (
+            <>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleDirectAvatarUpload}
+                accept="image/png, image/jpeg, image/webp"
+                style={{ display: "none" }}
+              />
+              <Tooltip title={t("profile.changePhoto")} placement="bottom">
+                <Box
+                  onClick={() => fileInputRef.current?.click()}
+                  sx={{
+                    position: "relative",
+                    cursor: "pointer",
+                    borderRadius: "50%",
+                    "&:hover .avatar-upload-overlay": {
+                      opacity: 1,
+                    },
+                  }}
+                >
+                  <Avatar
+                    src={getFileUrl(profile.avatar_url || profile.avatarUrl)}
+                    alt={fullNameStr}
+                    sx={{
+                      width: 104,
+                      height: 104,
+                      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                      border: "3px solid",
+                      borderColor: "background.paper",
+                      fontSize: "2.1rem",
+                      fontWeight: 700,
+                      bgcolor: "#0c8a7b",
+                    }}
+                  >
+                    {fullNameStr.charAt(0) || "U"}
+                  </Avatar>
+
+                  <Box
+                    className="avatar-upload-overlay"
+                    sx={{
+                      position: "absolute",
+                      inset: 0,
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(0, 0, 0, 0.45)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#ffffff",
+                      opacity: 0,
+                      transition: "opacity 0.2s ease",
+                    }}
+                  >
+                    <PhotoCameraRoundedIcon sx={{ fontSize: 24 }} />
+                  </Box>
+                </Box>
+              </Tooltip>
+            </>
+          ) : (
+            <Avatar
+              src={getFileUrl(profile.avatar_url || profile.avatarUrl)}
+              alt={fullNameStr}
+              sx={{
+                width: 104,
+                height: 104,
+                boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                border: "3px solid",
+                borderColor: "background.paper",
+                fontSize: "2.1rem",
+                fontWeight: 700,
+                bgcolor: "#0c8a7b",
+              }}
+            >
+              {fullNameStr.charAt(0) || "U"}
+            </Avatar>
+          )}
         </Box>
 
         {/* Name & Role */}
@@ -234,22 +257,24 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
           >
             {t("profile.contact")}
           </Typography>
-          <Tooltip title={t("profile.editTitleContact")} placement="top">
-            <IconButton
-              size="small"
-              onClick={() => onEditSection("contact")}
-              sx={{
-                color: "text.secondary",
-                borderRadius: "8px",
-                "&:hover": {
-                  color: "#0c8a7b",
-                  backgroundColor: "rgba(12, 138, 123, 0.08)",
-                },
-              }}
-            >
-              <EditOutlinedIcon sx={{ fontSize: 17 }} />
-            </IconButton>
-          </Tooltip>
+          {!readOnly && Boolean(onEditSection) && (
+            <Tooltip title={t("profile.editTitleContact")} placement="top">
+              <IconButton
+                size="small"
+                onClick={() => onEditSection("contact")}
+                sx={{
+                  color: "text.secondary",
+                  borderRadius: "8px",
+                  "&:hover": {
+                    color: "#0c8a7b",
+                    backgroundColor: "rgba(12, 138, 123, 0.08)",
+                  },
+                }}
+              >
+                <EditOutlinedIcon sx={{ fontSize: 17 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         {hasContactInfo ? (
@@ -426,22 +451,24 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange }) => {
           >
             {t("profile.skills")}
           </Typography>
-          <Tooltip title={t("profile.editTitleSkills")} placement="top">
-            <IconButton
-              size="small"
-              onClick={() => onEditSection("skills")}
-              sx={{
-                color: "text.secondary",
-                borderRadius: "8px",
-                "&:hover": {
-                  color: "#0c8a7b",
-                  backgroundColor: "rgba(12, 138, 123, 0.08)",
-                },
-              }}
-            >
-              <EditOutlinedIcon sx={{ fontSize: 17 }} />
-            </IconButton>
-          </Tooltip>
+          {!readOnly && Boolean(onEditSection) && (
+            <Tooltip title={t("profile.editTitleSkills")} placement="top">
+              <IconButton
+                size="small"
+                onClick={() => onEditSection("skills")}
+                sx={{
+                  color: "text.secondary",
+                  borderRadius: "8px",
+                  "&:hover": {
+                    color: "#0c8a7b",
+                    backgroundColor: "rgba(12, 138, 123, 0.08)",
+                  },
+                }}
+              >
+                <EditOutlinedIcon sx={{ fontSize: 17 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         {skills.length > 0 ? (
