@@ -138,7 +138,11 @@
     "translator": "Переводчик",
     "direction": "Направление (Напр.: TK -> RU)",
     "pageCount": "Количество страниц",
-    "correctionStatus": "Статус исправления"
+    "correctionStatus": "Статус исправления",
+    "role": "Роль",
+    "isAdmin": "Администратор",
+    "startDate": "Дата начала",
+    "endDate": "Дата окончания"
   },
   "addTranslation": "Добавить перевод",
   "addTranslator": "Добавить переводчика",
@@ -198,6 +202,7 @@
   "users": {
     "title": "Ulanyjylar",
     "add": "Ulanyjy goş",
+    "isAdmin": "Администратор",
     "deleteConfirm": "Hakykatdan hem bu ulanyjyny öçürmek isleýärsiňizmi?",
     "statusActiveLabel": "Aktiw",
     "statusInactiveLabel": "Passiw",
@@ -315,7 +320,8 @@
       "title": "Виза",
       "package": "Пакеты",
       "packages": "Пакеты"
-    }
+    },
+    "taskFlow": "Задачи"
   },
   "turkish": {
     "addTicket": "Добавить билет Turkish Airlines",
@@ -342,7 +348,8 @@
   "b2b": {
     "title": "B2B",
     "addTicket": "B2B bilet goşmak",
-    "editTicket": "B2B bileti üýtgetmek"
+    "editTicket": "B2B bileti üýtgetmek",
+    "agentPhoneNumber": "Телефон агента"
   },
   "referralLetter": {
     "title": "Письма и договоры",
@@ -418,7 +425,8 @@
     "transferType": "Тип трансфера",
     "carType": "Класс авто",
     "note": "Примечание",
-    "deleteConfirm": "Вы действительно хотите удалить эту продажу? Это действие нельзя отменить."
+    "deleteConfirm": "Вы действительно хотите удалить эту продажу? Это действие нельзя отменить.",
+    "system": "Система"
   },
   "visaIntake": {
     "title": "Прием документов",
@@ -525,7 +533,13 @@
     "maxFilesLimitExceeded": "Некоторые файлы не были добавлены из-за ограничения.",
     "unsupportedFileType": "Неподдерживаемый тип файла. Допускаются только Изображения, PDF, Excel и Word.",
     "fileTooLarge": "Размер файла не должен превышать 10MB.",
-    "duplicateFile": "Этот файл уже добавлен."
+    "duplicateFile": "Этот файл уже добавлен.",
+    "priorityLow": "Низкий",
+    "status": "Статус",
+    "overdue": "Просрочено",
+    "noTasksFound": "Задачи не найдены",
+    "noTasksDesc": "В данный момент нет задач.",
+    "changeStatus": "Изменить статус"
   },
   "notifications": {
     "title": "Уведомления",
@@ -548,7 +562,9 @@
     "noUnread": "Нет новых непрочитанных уведомлений",
     "emptyDesc": "Новые уведомления появятся здесь по мере их поступления.",
     "endDate": "Дата окончания",
-    "viewAll": "Посмотреть все"
+    "viewAll": "Посмотреть все",
+    "message": "Сообщение",
+    "task": "Задача"
   },
   "customFields": {
     "title": "Пользовательские поля",
@@ -645,5 +661,68 @@
     "copyError": "Не удалось скопировать.",
     "loadingDetails": "Загрузка данных документа...",
     "dateLabel": "Дата"
-  }
+  },
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "apply": "Применить",
+    "reset": "Сбросить",
+    "all": "Все",
+    "search": "Поиск",
+    "download": "Скачать",
+    "filter": "Фильтр",
+    "clearFilter": "Очистить фильтр",
+    "clearAll": "Очистить все",
+    "loading": "Загрузка...",
+    "errorOccurred": "Произошла ошибка при загрузке данных.",
+    "noData": "Данные не найдены",
+    "noDataDesc": "По вашему запросу ничего не найдено.",
+    "noClientFound": "Клиент не найден",
+    "noEmployeeFound": "Сотрудник не найден",
+    "addClient": "Добавить клиента",
+    "addPackage": "Добавить пакет",
+    "confirm": "Подтвердить",
+    "ok": "ОК",
+    "confirmTitle": "Подтверждение",
+    "infoTitle": "Информация",
+    "preview": "Предпросмотр",
+    "remove": "Удалить",
+    "openInNewTab": "Открыть в новой вкладке",
+    "prev": "Назад",
+    "next": "Вперед",
+    "status": "Статус",
+    "date": "Дата",
+    "price": "Цена",
+    "actions": "Действия",
+    "onlyAdmin": "Только для администратора"
+  },
+  "autocomplete": {
+    "addClient": "Добавить клиента",
+    "noEmployeeFound": "Сотрудник не найден",
+    "noClientFound": "Клиент не найден"
+  },
+  "fields": {
+    "fullName": "Полное имя",
+    "firstName": "Имя",
+    "lastName": "Фамилия",
+    "subject": "Тема",
+    "message": "Сообщение",
+    "departure": "Пункт отправления",
+    "destination": "Пункт назначения",
+    "departureDate": "Дата вылета"
+  },
+  "addVisa": "Добавить визу",
+  "clearAll": "Очистить все",
+  "openInNewTab": "Открыть в новой вкладке",
+  "remove": "Удалить",
+  "preview": "Предпросмотр",
+  "onlyAdmin": "Только для администратора",
+  "dateOfBirth": "Дата рождения",
+  "noEmployeeFound": "Сотрудник не найден",
+  "prev": "Назад",
+  "next": "Вперед",
+  "editTranslation": "Редактировать перевод",
+  "translationKey": "Ключ перевода"
 }

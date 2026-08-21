@@ -126,7 +126,7 @@ const UserProfileModal = ({
         >
           <CustomDialogHeader
             variant="h5"
-            title={`${profile.full_name || t("columns.fullName")} — ${t("profile.title")}`}
+            title={`${profile.full_name} - ${t("profile.title")}`}
           />
 
           <Button
@@ -198,7 +198,6 @@ const UserProfileModal = ({
         )}
       </CustomDialog>
 
-      {/* CV Print Preview Modal */}
       <CVPrintPreviewModal
         open={cvPrintOpen}
         onClose={() => setCvPrintOpen(false)}

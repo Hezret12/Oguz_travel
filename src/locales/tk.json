@@ -140,7 +140,9 @@
     "pageCount": "Sahypa sany",
     "correctionStatus": "Düzeliş ýagdaýy",
     "role": "Rol",
-    "isAdmin": "Admin"
+    "isAdmin": "Admin",
+    "startDate": "Başlangyç senesi",
+    "endDate": "Gutarýan senesi"
   },
   "addTranslation": "Terjime goşmak",
   "addTranslator": "Täze terjimeçi goşmak",
@@ -318,7 +320,8 @@
       "title": "Wiza",
       "package": "Bukjalar",
       "packages": "Bukjalar"
-    }
+    },
+    "taskFlow": "Ýumuşlar"
   },
   "turkish": {
     "addTicket": "Türk howa ýollary bilet goşmak",
@@ -345,7 +348,8 @@
   "b2b": {
     "title": "B2B",
     "addTicket": "B2B bilet goşmak",
-    "editTicket": "B2B bileti üýtgetmek"
+    "editTicket": "B2B bileti üýtgetmek",
+    "agentPhoneNumber": "Agent telefony"
   },
   "referralLetter": {
     "title": "Ýollanma hatlary",
@@ -421,7 +425,8 @@
     "transferType": "Transfer görnüşi",
     "carType": "Maşyn görnüşi",
     "note": "Bellik",
-    "deleteConfirm": "Siz hakykatdan hem bu satyşy pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaz."
+    "deleteConfirm": "Siz hakykatdan hem bu satyşy pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaz.",
+    "system": "Ulgam"
   },
   "visaIntake": {
     "title": "Kabul ediji bölümi",
@@ -528,7 +533,13 @@
     "maxFilesLimitExceeded": "Çäklendirme sebäpli käbir faýllar birikdirilmedi.",
     "unsupportedFileType": "Goldanylmaýan faýl görnüşi. Diňe Surat, PDF, Excel we Word kabul edilýär.",
     "fileTooLarge": "Faýl ölçegi 10MB-dan uly bolmaly däl.",
-    "duplicateFile": "Bu faýl eýýäm goşuldy."
+    "duplicateFile": "Bu faýl eýýäm goşuldy.",
+    "priorityLow": "Pes",
+    "status": "Ýagdaýy",
+    "overdue": "Möhleti geçen",
+    "noTasksFound": "Ýumuş tapylmady",
+    "noTasksDesc": "Häzirki wagtda hiç hili ýumuş ýok.",
+    "changeStatus": "Ýagdaýy üýtgetmek"
   },
   "notifications": {
     "title": "Bildirişler",
@@ -551,7 +562,9 @@
     "noUnread": "Täze okalmadyk bildiriş ýok",
     "emptyDesc": "Täze bildirişler geleninde bärik çykar.",
     "endDate": "Gutarýan senesi",
-    "viewAll": "Ählisini Gör"
+    "viewAll": "Ählisini Gör",
+    "message": "Habar",
+    "task": "Ýumuş"
   },
   "customFields": {
     "title": "Meýdançalar",
@@ -648,5 +661,68 @@
     "copyError": "Göçürip bolmady.",
     "loadingDetails": "Dokument maglumatlary ýüklenýär...",
     "dateLabel": "Senesi"
-  }
+  },
+  "common": {
+    "save": "Ýatda sakla",
+    "cancel": "Ýatyrmak",
+    "edit": "Üýtgetmek",
+    "delete": "Pozmak",
+    "apply": "Ulanmak",
+    "reset": "Arassala",
+    "all": "Hemmesi",
+    "search": "Gözleg",
+    "download": "Ýükläp al",
+    "filter": "Filter",
+    "clearFilter": "Filtri arassala",
+    "clearAll": "Hemmesini arassala",
+    "loading": "Ýüklenýär...",
+    "errorOccurred": "Maglumatlary ýüklemekde ýalňyşlyk ýüze çykdy.",
+    "noData": "Maglumat tapylmady",
+    "noDataDesc": "Gözleg ýa-da filter boýunça hiç hili maglumat tapylmady.",
+    "noClientFound": "Müşderi tapylmady",
+    "noEmployeeFound": "Işgär tapylmady",
+    "addClient": "Täze müşderi goşmak",
+    "addPackage": "Täze bukja goşmak",
+    "confirm": "Tassykla",
+    "ok": "Bolýar",
+    "confirmTitle": "Tassyklama",
+    "infoTitle": "Maglumat",
+    "preview": "Öňünden görmek",
+    "remove": "Aýyrmak",
+    "openInNewTab": "Täze sahypada aç",
+    "prev": "Öňki",
+    "next": "Indiki",
+    "status": "Ýagdaýy",
+    "date": "Senesi",
+    "price": "Bahasy",
+    "actions": "Amallar",
+    "onlyAdmin": "Diňe administrator üçin"
+  },
+  "autocomplete": {
+    "addClient": "Täze müşderi goşmak",
+    "noEmployeeFound": "Işgär tapylmady",
+    "noClientFound": "Müşderi tapylmady"
+  },
+  "fields": {
+    "fullName": "Doly ady",
+    "firstName": "Ady",
+    "lastName": "Familýasy",
+    "subject": "Mowzuk",
+    "message": "Haty",
+    "departure": "Uçuş ýeri",
+    "destination": "Gidilýän ýer",
+    "departureDate": "Uçuş senesi"
+  },
+  "addVisa": "Wiza goşmak",
+  "clearAll": "Hemmesini arassala",
+  "openInNewTab": "Täze sahypada aç",
+  "remove": "Aýyrmak",
+  "preview": "Öňünden görmek",
+  "onlyAdmin": "Diňe administrator üçin",
+  "dateOfBirth": "Doglan senesi",
+  "noEmployeeFound": "Işgär tapylmady",
+  "prev": "Öňki",
+  "next": "Indiki",
+  "editTranslation": "Terjimäni üýtgetmek",
+  "translationKey": "Terjime açary"
 }

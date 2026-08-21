@@ -73,7 +73,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
         },
       }}
     >
-      {/* Top Toolbar (Hidden on print) */}
       <DialogTitle
         className="no-print"
         sx={{
@@ -174,7 +173,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           justifyContent: "center",
         }}
       >
-        {/* The Printable A4 Resume Sheet */}
         <Box
           id="printable-cv-sheet"
           sx={{
@@ -192,7 +190,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
             gap: 3.5,
           }}
         >
-          {/* 1. Header: Avatar, Name, Role, and Contact Strip */}
           <Box
             sx={{
               display: "flex",
@@ -245,7 +242,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                 {role}
               </Typography>
 
-              {/* Contact Icons Ribbon */}
               <Box
                 sx={{
                   display: "flex",
@@ -290,7 +286,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
             </Box>
           </Box>
 
-          {/* 2. Personal Summary Section */}
           {summary && (
             <Box>
               <Typography
@@ -320,7 +315,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
             </Box>
           )}
 
-          {/* 3. Two-Column CV Body Grid */}
           <Box
             sx={{
               display: "grid",
@@ -329,9 +323,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               alignItems: "start",
             }}
           >
-            {/* Left Column (Work Experience & Education) */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
-              {/* Work Experience */}
               {experiences.length > 0 && (
                 <Box>
                   <Typography
@@ -386,7 +378,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                 </Box>
               )}
 
-              {/* Education */}
               {educations.length > 0 && (
                 <Box>
                   <Typography
@@ -427,9 +418,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               )}
             </Box>
 
-            {/* Right Column (Skills, Certifications, Languages, References) */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
-              {/* Skills */}
               {skills.length > 0 && (
                 <Box>
                   <Typography
@@ -469,8 +458,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               )}
 
 
-
-              {/* Languages */}
               {languages.length > 0 && (
                 <Box>
                   <Typography
@@ -508,7 +495,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
         </Box>
       </DialogContent>
 
-      {/* Global CSS for Clean Printing of the CV */}
       <style>
         {`
           @media print {
