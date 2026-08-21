@@ -32,7 +32,7 @@ import { AuthProvider } from './context/AuthProvider';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <HelmetProvider>
-      <ThemeProvider theme={themeConfig}>
+      <ThemeProvider theme={themeConfig} defaultMode="light" modeStorageKey="theme">
         <QueryClientProvider client={queryClient}>
           <I18nextProvider i18n={i18n}>
             <AuthProvider>

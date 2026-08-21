@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
 import DocumentList from "./DocumentList";
 import DocumentEditor from "./DocumentEditor";
@@ -16,8 +16,6 @@ import { addVisaDocApi } from "../../../api/queries/post";
 import { updateVisaDocApi } from "../../../api/queries/patch";
 import { deleteVisaDocApi } from "../../../api/queries/delete";
 
-const STORAGE_KEY = "oguz_travel_visa_documents";
-
 const Package = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -25,8 +23,8 @@ const Package = () => {
 
   // 1. Fetch all Visa Docs from Backend via usePagginationGet
   const {
-    data: serverDocs,
-    totalItems,
+    data: serverDocs = [],
+    totalItems = 0,
     isLoading,
     isFetching,
     refetch,
@@ -34,23 +32,6 @@ const Package = () => {
     apiFn: getAllVisaDocsApi,
     key: "visaDocs",
     params: { page, limit, search: searchQuery },
-    options: {
-      retry: false,
-    },
-  });
-
-  // Local storage fallback state
-  const [localDocs, setLocalDocs] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      }
-    } catch {
-      // Fallback
-    }
-    return [];
   });
 
   const [activeDocument, setActiveDocument] = useState(null);
@@ -93,18 +74,6 @@ const Package = () => {
     isPaginated: true,
   });
 
-  // Decide active documents list (server data with fallback to local)
-  const displayDocuments = Array.isArray(serverDocs) && serverDocs.length > 0 ? serverDocs : localDocs;
-
-  // Sync to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(localDocs));
-    } catch {
-      // Ignore
-    }
-  }, [localDocs]);
-
   // Open Document: Fetch full details if needed
   const handleSelectDocument = async (doc) => {
     const docGuid = doc.guid || doc.id;
@@ -139,17 +108,6 @@ const Package = () => {
     const isNew = !updatedDoc.guid && (!updatedDoc.id || String(updatedDoc.id).startsWith("doc-"));
     const payload = serializeDocumentToBackend(updatedDoc);
 
-    // Also update local list for offline capability
-    setLocalDocs((prev) => {
-      const exists = prev.some((d) => (d.guid || d.id) === (updatedDoc.guid || updatedDoc.id));
-      if (exists) {
-        return prev.map((d) =>
-          (d.guid || d.id) === (updatedDoc.guid || updatedDoc.id) ? updatedDoc : d
-        );
-      }
-      return [updatedDoc, ...prev];
-    });
-
     if (isNew) {
       createVisaDoc(payload);
     } else {
@@ -159,7 +117,6 @@ const Package = () => {
 
   const handleDeleteDocument = (docId, docGuid) => {
     const targetGuid = docGuid || docId;
-    setLocalDocs((prev) => prev.filter((d) => (d.guid || d.id) !== targetGuid));
     if (activeDocument && (activeDocument.guid === targetGuid || activeDocument.id === targetGuid)) {
       setActiveDocument(null);
     }
@@ -194,7 +151,7 @@ const Package = () => {
         />
       ) : (
         <DocumentList
-          documents={displayDocuments}
+          documents={serverDocs}
           isLoading={isLoading || isLoadingDetail}
           isFetching={isFetching}
           onRefetch={refetch}
@@ -204,7 +161,7 @@ const Package = () => {
           limit={limit}
           setPage={setPage}
           setPageSize={setLimit}
-          totalItems={totalItems || displayDocuments.length}
+          totalItems={totalItems || serverDocs.length}
           onSelectDocument={handleSelectDocument}
           onCreateDocument={handleCreateDocument}
           onDeleteDocument={handleDeleteDocument}
