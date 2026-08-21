@@ -161,11 +161,7 @@ const ProfilePage = () => {
       }}
     >
       <Helmet>
-        <title>{`${profile.full_name || t("profile.title")} | Oguz Travel`}</title>
-        <meta
-          name="description"
-          content={profile.personal_summary || `${profile.full_name || "User"} Profile & CV Builder - Oguz Travel`}
-        />
+        <title>{`${t("profile.title")} | Oguz Travel`}</title>
       </Helmet>
 
       <Box
