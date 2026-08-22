@@ -22,6 +22,8 @@
   "paymentPaid": "Paid",
   "paymentCredit": "Credit",
   "paymentRefunded": "Refunded",
+  "tripTypeOneWay": "One Way",
+  "tripTypeRoundTrip": "Round Trip",
   "kassa": "Kassa",
   "price": "Bahasy",
   "validation": {

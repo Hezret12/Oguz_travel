@@ -126,7 +126,7 @@ const B2B = () => {
         return `${t("columns.operatorTwo")}: ${employeeById[value]?.fullName || value}`;
       }
       if (key === "travel_type") {
-        return `${t("columns.tripType")}: ${value === "1" ? "ROUND TRIP" : "ONE WAY"}`;
+        return `${t("columns.tripType")}: ${String(value) === "1" ? t("tripTypeRoundTrip") : t("tripTypeOneWay")}`;
       }
       if (key === "is_paid") {
         return `${t("columns.paymentStatus")}: ${value === "true" ? t("paymentPaid") : t("paymentCredit")}`;
@@ -225,9 +225,7 @@ const B2B = () => {
           return (
             <StackedCell
               primary={row?.original?.assignment_operator?.fullName}
-              secondary={selectedLang(
-                row?.original?.assignment_operator?.office?.fullName,
-              )}
+              secondary={selectedLang(row?.original?.assignment_operator?.office?.shortName)}
             />
           );
         },
@@ -241,9 +239,7 @@ const B2B = () => {
           return (
             <StackedCell
               primary={row?.original?.receiver_operator?.fullName}
-              secondary={selectedLang(
-                row?.original?.receiver_operator?.office?.fullName,
-              )}
+              secondary={selectedLang(row?.original?.receiver_operator?.office?.shortName)}
             />
           );
         },
@@ -285,11 +281,7 @@ const B2B = () => {
         header: t("columns.paymentStatus"),
         size: 110,
         Cell: ({ row }) => (
-          <PaymentStatusCell
-            percent={
-              row.original.paidPercentage ?? row.original.payment_percent
-            }
-          />
+          <PaymentStatusCell percent={row.original.paidPercentage} />
         ),
       },
       {
@@ -384,12 +376,14 @@ const B2B = () => {
       {
         accessorFn: (row) => {
           if (row.travel_type !== undefined) {
-            return row.travel_type === 1 ? "ROUND TRIP" : "ONE WAY";
+            return String(row.travel_type) === "1"
+              ? t("tripTypeRoundTrip")
+              : t("tripTypeOneWay");
           }
           return row.tripType;
         },
         id: "tripType",
-        header: t("columns.tripType", "Trip Type"),
+        header: t("columns.tripType"),
         size: colSize,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },

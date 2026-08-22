@@ -22,6 +22,8 @@
   "paymentPaid": "Tölendi",
   "paymentCredit": "Kredit",
   "paymentRefunded": "Gaýtaryldy",
+  "tripTypeOneWay": "Bir taraplaýyn",
+  "tripTypeRoundTrip": "Iki taraplaýyn",
   "kassa": "Kassa",
   "price": "Bahasy",
   "validation": {

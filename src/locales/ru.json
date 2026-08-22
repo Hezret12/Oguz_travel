@@ -22,6 +22,8 @@
   "paymentPaid": "Оплачено",
   "paymentCredit": "Кредит",
   "paymentRefunded": "Возвращено",
+  "tripTypeOneWay": "В одну сторону",
+  "tripTypeRoundTrip": "В обе стороны",
   "kassa": "Касса",
   "price": "Bahasy",
   "validation": {

@@ -7,7 +7,10 @@ import { useLocale } from "../../../../hooks/useLocale";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { getAllStatusApi } from "../../../../api/queries/getters";
 import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
-import { getBooleanPaymentFilterOptions } from "../../../../functions/generalHelpers";
+import {
+  getBooleanPaymentFilterOptions,
+  getTripTypeOptions,
+} from "../../../../functions/generalHelpers";
 
 const selectSx = {
   borderRadius: "8px",
@@ -158,11 +161,8 @@ const B2BFilter = ({
   );
 
   const travelTypeOptions = useMemo(
-    () => [
-      { label: "ONE WAY", value: "0" },
-      { label: "ROUND TRIP", value: "1" },
-    ],
-    []
+    () => getTripTypeOptions(t, true),
+    [t]
   );
 
   const isPaidOptions = useMemo(

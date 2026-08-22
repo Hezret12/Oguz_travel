@@ -19,12 +19,10 @@ import { useGet } from "../../../hooks/CRUD/useGet";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 import { useMemo } from "react";
 import CurrencyAmount from "../../../components/inputs/CurrencyAmount";
-import { getBooleanPaymentOptions } from "../../../functions/generalHelpers";
-
-const TRIP_TYPE_OPTIONS = [
-  { label: "One Way", value: 0 },
-  { label: "Round Trip", value: 1 },
-];
+import {
+  getBooleanPaymentOptions,
+  getTripTypeOptions,
+} from "../../../functions/generalHelpers";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -50,6 +48,7 @@ const EditB2BDialog = ({ table, row, open, close }) => {
   };
 
   const paymentOptions = useMemo(() => getBooleanPaymentOptions(t), [t]);
+  const tripTypeOptions = useMemo(() => getTripTypeOptions(t), [t]);
 
   const {
     data: status,
@@ -256,7 +255,7 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   name="travel_type"
                   control={control}
                   label={t("columns.tripType")}
-                  options={TRIP_TYPE_OPTIONS}
+                  options={tripTypeOptions}
                 />
               </Grid>
 

@@ -125,3 +125,14 @@ export const getBooleanPaymentFilterOptions = (t) => [
   { label: t("paymentCredit"), value: "false" },
 ];
 
+/**
+ * Standard translated trip type options.
+ * @param {Function} t - translation function
+ * @param {boolean} [isFilter=false] - when true, returns string values ("0", "1") for filters; otherwise numbers (0, 1) for forms
+ */
+export const getTripTypeOptions = (t, isFilter = false) => [
+  { label: t("tripTypeOneWay"), value: isFilter ? "0" : 0 },
+  { label: t("tripTypeRoundTrip"), value: isFilter ? "1" : 1 },
+];
+
+
