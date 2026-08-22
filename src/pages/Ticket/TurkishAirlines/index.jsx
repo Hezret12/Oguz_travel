@@ -15,7 +15,10 @@ import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import StackedCell from "../../../components/inputs/StackCell";
 import StatusChip from "../../../components/StatusChip";
-import { SALE_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
+import {
+  SALE_STATUS_CONFIG,
+  PAYMENT_STATUS_CONFIG,
+} from "../../../functions/statusChipConfigs";
 import { usePageFilters } from "../../../hooks/usePageFilters";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -320,8 +323,23 @@ const TurkishAirlines = () => {
         ),
       },
       {
-        id: "payment_status",
+        accessorFn: (row) => row.is_paid,
+        id: "is_paid",
         header: t("columns.paymentStatus"),
+        size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ cell }) => (
+          <StatusChip
+            status={cell.getValue()}
+            config={PAYMENT_STATUS_CONFIG}
+            size="small"
+          />
+        ),
+      },
+      {
+        id: "payment_status",
+        header: t("columns.paymentPercentage"),
         size: 110,
         Cell: ({ row }) => (
           <PaymentStatusCell percent={row.original.paidPercentage} />
