@@ -592,32 +592,35 @@ const ReferralLetterPage = () => {
 
           {totalStockCount !== null && (
             <Box
-              sx={(tTheme) => ({
+              sx={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 1,
-                px: 1.5,
-                py: 0.6,
-                borderRadius: "8px",
-                backgroundColor:
-                  tTheme.palette.mode === "dark"
+                px: 2,
+                height: 48,
+                borderRadius: "12px",
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
                     ? "rgba(255, 255, 255, 0.04)"
-                    : "rgba(0, 0, 0, 0.03)",
+                    : "#F1F5F9",
                 border: "1px solid",
-                borderColor: tTheme.palette.divider,
+                borderColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.08)"
+                    : "#E2E8F0",
                 transition: "all 0.15s ease",
-              })}
+              }}
             >
-              <Package size={15} style={{ opacity: 0.75 }} />
+              <Package size={17} style={{ opacity: 0.75 }} />
               <Typography
                 variant="body2"
                 sx={{
-                  fontSize: "0.8125rem",
+                  fontSize: "0.825rem",
                   color: "text.secondary",
-                  fontWeight: 500,
+                  fontWeight: 600,
                   display: "flex",
                   alignItems: "center",
-                  gap: 0.5,
+                  gap: 0.6,
                 }}
               >
                 {t("referralLetter.totalStock")}:

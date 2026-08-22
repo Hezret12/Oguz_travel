@@ -5,9 +5,9 @@ import {
   Paper,
   alpha,
   Skeleton,
-  useTheme,
+  Chip,
 } from "@mui/material";
-import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
+import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
@@ -17,19 +17,8 @@ import { useQuery } from "@tanstack/react-query";
 import { getTurkishQuarterApi } from "../../../../api/queries/getters";
 import { formatNumber } from "../../../../functions/generalHelpers";
 
-import { Chip } from "@mui/material";
-
-const QUARTER_LABELS = {
-  1: "Q1 · Jan – Mar",
-  2: "Q2 · Apr – Jun",
-  3: "Q3 · Jul – Sep",
-  4: "Q4 · Oct – Dec",
-};
-
-export default function QuarterReportCard({ selectedQuarter, onQuarterChange, paperSx, teal }) {
+export default function QuarterReportCard({ selectedQuarter, onQuarterChange, paperSx, teal = "#0D9488" }) {
   const { t } = useLocale();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
 
   const quarter = selectedQuarter || Math.floor(new Date().getMonth() / 3) + 1;
 
@@ -68,10 +57,6 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
     };
   }, [quarterRes]);
 
-  const subText = isDark ? "rgba(255,255,255,0.5)" : "#64748B";
-  const labelColor = isDark ? "rgba(255,255,255,0.7)" : "#475569";
-  const valueColor = isDark ? "#FFF" : "#0F172A";
-  const trackColor = isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0";
   const trendColor = qi?.isUp ? "#10B981" : "#EF4444";
 
   return (
@@ -100,7 +85,7 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
               border: `1px solid ${alpha(teal, 0.18)}`,
             }}
           >
-            <EmojiEventsRoundedIcon sx={{ fontSize: 22 }} />
+            <PieChartRoundedIcon sx={{ fontSize: 22 }} />
           </Box>
           <Box>
             <Typography
@@ -108,18 +93,17 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
                 fontWeight: 700,
                 fontSize: "0.9rem",
                 lineHeight: 1.2,
-                color: valueColor,
+                color: "text.primary",
               }}
             >
-              {t("report.turkishAirlines.quarterReport") || "Quarter Comparison"}
+              {t("report.turkishAirlines.quarterReport")}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: subText, fontWeight: 600, mt: 0.2 }}>
-              {QUARTER_LABELS[quarter]}
+            <Typography sx={{ fontSize: 12, color: "text.secondary", fontWeight: 600, mt: 0.2 }}>
+              {t(`report.turkishAirlines.q${quarter}`)}
             </Typography>
           </Box>
         </Box>
 
-        {/* Quick Quarter Switcher Buttons */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           {[1, 2, 3, 4].map((q) => {
             const isActive = quarter === q;
@@ -133,9 +117,21 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
                   fontWeight: 800,
                   fontSize: 11.5,
                   cursor: "pointer",
-                  backgroundColor: isActive ? teal : isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
-                  color: isActive ? "#FFF" : isDark ? "rgba(255,255,255,0.7)" : "#475569",
-                  border: `1px solid ${isActive ? teal : isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0"}`,
+                  backgroundColor: isActive
+                    ? teal
+                    : (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255,255,255,0.06)"
+                          : "#F1F5F9",
+                  color: isActive ? "#FFF" : "text.secondary",
+                  border: (theme) =>
+                    `1px solid ${
+                      isActive
+                        ? teal
+                        : theme.palette.mode === "dark"
+                        ? "rgba(255,255,255,0.08)"
+                        : "#E2E8F0"
+                    }`,
                   "&:hover": {
                     backgroundColor: isActive ? teal : alpha(teal, 0.12),
                     color: isActive ? "#FFF" : teal,
@@ -164,8 +160,8 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
                 mb: 1,
               }}
             >
-              <Typography sx={{ fontSize: 12, fontWeight: 600, color: labelColor }}>
-                {t("report.turkishAirlines.achievementRate") || "Achievement"}
+              <Typography sx={{ fontSize: 12, fontWeight: 600, color: "text.secondary" }}>
+                {t("report.turkishAirlines.achievementRate")}
               </Typography>
               <Typography
                 sx={{
@@ -182,7 +178,10 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
               sx={{
                 height: 8,
                 borderRadius: 4,
-                backgroundColor: trackColor,
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255,255,255,0.08)"
+                    : "#E2E8F0",
                 overflow: "hidden",
               }}
             >
@@ -207,20 +206,28 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
               gap: 1,
               p: 2,
               borderRadius: 2,
-              backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "#F8FAFC",
-              border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "#E2E8F0"}`,
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255,255,255,0.03)"
+                  : "#F8FAFC",
+              border: (theme) =>
+                `1px solid ${
+                  theme.palette.mode === "dark"
+                    ? "rgba(255,255,255,0.06)"
+                    : "#E2E8F0"
+                }`,
             }}
           >
             {/* Previous Year */}
             <Box sx={{ textAlign: "center", flex: 1 }}>
-              <Typography sx={{ fontSize: 11, color: subText, fontWeight: 600, mb: 0.5 }}>
+              <Typography sx={{ fontSize: 11, color: "text.secondary", fontWeight: 600, mb: 0.5 }}>
                 {qi?.prevYear || "—"}
               </Typography>
               <Typography
                 sx={{
                   fontSize: 18,
                   fontWeight: 700,
-                  color: labelColor,
+                  color: "text.primary",
                   letterSpacing: "-0.02em",
                 }}
               >
@@ -239,7 +246,7 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
               }}
             >
               <ArrowForwardRoundedIcon
-                sx={{ fontSize: 18, color: subText, transform: "rotate(-30deg)" }}
+                sx={{ fontSize: 18, color: "text.secondary", transform: "rotate(-30deg)" }}
               />
               <Box
                 sx={{
@@ -272,7 +279,7 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
 
             {/* Current Year */}
             <Box sx={{ textAlign: "center", flex: 1 }}>
-              <Typography sx={{ fontSize: 11, color: subText, fontWeight: 600, mb: 0.5 }}>
+              <Typography sx={{ fontSize: 11, color: "text.secondary", fontWeight: 600, mb: 0.5 }}>
                 {qi?.currYear || "—"}
               </Typography>
               <Typography

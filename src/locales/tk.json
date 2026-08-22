@@ -498,10 +498,10 @@
       "sublabelQuoted": "Satylan baha jemi",
       "sublabelProfit": "Aýlyk peýda",
       "sublabelCredit": "Garaşylýan borç jemi",
-      "q1": "1-nji Çäryek (Q1: Ýan - Mar)",
-      "q2": "2-nji Çäryek (Q2: Apr - Iýun)",
-      "q3": "3-nji Çäryek (Q3: Iýul - Sen)",
-      "q4": "4-nji Çäryek (Q4: Okt - Dek)",
+      "q1": "1-nji Çäryek (Ýan – Mar)",
+      "q2": "2-nji Çäryek (Apr – Iýun)",
+      "q3": "3-nji Çäryek (Iýul – Sen)",
+      "q4": "4-nji Çäryek (Okt – Dek)",
       "quarterReport": "Çäryeklik Deňeşdirme we Maksat Hasabaty",
       "achievementRate": "Çäryek Maksady",
       "achievementSublabel": "Geçen çäryek temasy"
@@ -697,7 +697,14 @@
     "date": "Senesi",
     "price": "Bahasy",
     "actions": "Amallar",
-    "onlyAdmin": "Diňe administrator üçin"
+    "onlyAdmin": "Diňe administrator üçin",
+    "exportExcel": "Excel",
+    "excelExportSuccess": "Excel faýly üstünlikli ýüklenildi",
+    "noDataToExport": "Eksport etmek üçin maglumat ýok",
+    "exportError": "Excel faýly ýüklenende ýalňyşlyk ýüze çykdy",
+    "exportExcelModalTitle": "Excel-e Eksport Etmek (Süzgüç)",
+    "exportExcelModalDesc": "Eksport ediljek maglumatlar üçin aşakdaky süzgüçleri saýlap bilersiňiz:",
+    "includeCurrentPageFilters": "Sahapadaky bar bolan gözleg we filterleri hem goşmak"
   },
   "autocomplete": {
     "addClient": "Täze müşderi goşmak",

@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import {
   Box,
   Typography,
@@ -8,38 +8,21 @@ import {
   IconButton,
   Tooltip,
   alpha,
-  useTheme,
 } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
-import DateRangeRoundedIcon from "@mui/icons-material/DateRangeRounded";
+import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
+import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 
-const MONTHS = [
-  { value: 0, tk: "Ýanwar", ru: "Январь", en: "January" },
-  { value: 1, tk: "Fewral", ru: "Февраль", en: "February" },
-  { value: 2, tk: "Mart", ru: "Март", en: "March" },
-  { value: 3, tk: "Aprel", ru: "Апрель", en: "April" },
-  { value: 4, tk: "Maý", ru: "Май", en: "May" },
-  { value: 5, tk: "Iýun", ru: "Июнь", en: "June" },
-  { value: 6, tk: "Iýul", ru: "Июль", en: "July" },
-  { value: 7, tk: "Awgust", ru: "Август", en: "August" },
-  { value: 8, tk: "Sentýabr", ru: "Сентябрь", en: "September" },
-  { value: 9, tk: "Oktýabr", ru: "Октябрь", en: "October" },
-  { value: 10, tk: "Noýabr", ru: "Ноябрь", en: "November" },
-  { value: 11, tk: "Dekabr", ru: "Декабрь", en: "December" },
-];
-
-const YEARS = [2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030];
-
-const QUARTER_OPTIONS = [
-  { value: 1, key: "q1", defaultLabel: "Q1 · Ýan – Mar" },
-  { value: 2, key: "q2", defaultLabel: "Q2 · Apr – Iýun" },
-  { value: 3, key: "q3", defaultLabel: "Q3 · Iýul – Sen" },
-  { value: 4, key: "q4", defaultLabel: "Q4 · Okt – Dek" },
+const QUARTERS = [
+  { value: 1, key: "report.turkishAirlines.q1" },
+  { value: 2, key: "report.turkishAirlines.q2" },
+  { value: 3, key: "report.turkishAirlines.q3" },
+  { value: 4, key: "report.turkishAirlines.q4" },
 ];
 
 const ReportHeader = ({
@@ -47,62 +30,56 @@ const ReportHeader = ({
   onDateChange,
   selectedQuarter,
   onQuarterChange,
-  teal,
+  teal = "#0D9488",
 }) => {
-  const { t, currentLanguage } = useLocale();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+  const { t } = useLocale();
 
   const d = dayjs.isDayjs(selectedDate) ? selectedDate : dayjs(selectedDate);
-  const currentMonthIdx = d.isValid() ? d.month() : dayjs().month();
-  const currentYear = d.isValid() ? d.year() : dayjs().year();
+  const validDate = d.isValid() ? d : dayjs();
 
   const handlePrevMonth = useCallback(() => {
-    const prev = (d.isValid() ? d : dayjs()).subtract(1, "month");
+    const prev = validDate.subtract(1, "month");
     onDateChange(prev);
     if (onQuarterChange) {
       const q = Math.floor(prev.month() / 3) + 1;
       onQuarterChange(q);
     }
-  }, [d, onDateChange, onQuarterChange]);
+  }, [validDate, onDateChange, onQuarterChange]);
 
   const handleNextMonth = useCallback(() => {
-    const next = (d.isValid() ? d : dayjs()).add(1, "month");
+    const next = validDate.add(1, "month");
     onDateChange(next);
     if (onQuarterChange) {
       const q = Math.floor(next.month() / 3) + 1;
       onQuarterChange(q);
     }
-  }, [d, onDateChange, onQuarterChange]);
+  }, [validDate, onDateChange, onQuarterChange]);
 
-  const handleMonthChange = useCallback(
-    (monthVal) => {
-      const newDate = (d.isValid() ? d : dayjs()).month(Number(monthVal));
-      onDateChange(newDate);
-      if (onQuarterChange) {
-        const q = Math.floor(Number(monthVal) / 3) + 1;
-        onQuarterChange(q);
+  const handleDateSelect = useCallback(
+    (newDate) => {
+      if (newDate && dayjs.isDayjs(newDate) && newDate.isValid()) {
+        onDateChange(newDate);
+        if (onQuarterChange) {
+          const q = Math.floor(newDate.month() / 3) + 1;
+          onQuarterChange(q);
+        }
       }
     },
-    [d, onDateChange, onQuarterChange]
+    [onDateChange, onQuarterChange]
   );
 
-  const handleYearChange = useCallback(
-    (yearVal) => {
-      const newDate = (d.isValid() ? d : dayjs()).year(Number(yearVal));
-      onDateChange(newDate);
-    },
-    [d, onDateChange]
+  const quarterOptions = useMemo(
+    () =>
+      QUARTERS.map((q) => ({
+        value: q.value,
+        label: t(q.key),
+      })),
+    [t]
   );
 
-  const getMonthLabel = (m) => {
-    if (currentLanguage === "ru") return m.ru;
-    if (currentLanguage === "en") return m.en;
-    return m.tk;
-  };
+  const monthDisplayStr = validDate.format("MMMM YYYY");
 
-  const selectedMonthObj = MONTHS.find((m) => m.value === currentMonthIdx) || MONTHS[currentMonthIdx] || MONTHS[0];
-  const monthDisplayStr = `${getMonthLabel(selectedMonthObj)} ${currentYear}`;
+  const [isQuarterOpen, setIsQuarterOpen] = useState(false);
 
   return (
     <Box
@@ -129,7 +106,7 @@ const ReportHeader = ({
             color: "text.primary",
           }}
         >
-          {t("sidebar.reportTurkishAirlines") || t("report.turkishAirlines.title") || "Türk howa ýollary"}
+          {t("sidebar.reportTurkishAirlines")}
         </Typography>
 
         <Box
@@ -145,6 +122,7 @@ const ReportHeader = ({
             color: teal,
             fontSize: 13,
             fontWeight: 700,
+            textTransform: "capitalize",
           }}
         >
           <CalendarMonthRoundedIcon sx={{ fontSize: 16 }} />
@@ -161,21 +139,25 @@ const ReportHeader = ({
           flexWrap: "wrap",
         }}
       >
-        {/* Month & Year Box: < Prev | Month | Year | Next > */}
+        {/* Day.js Month & Year DatePicker: < Prev | Month Year Picker | Next > */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             gap: 0.5,
-            backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#FFFFFF",
+            backgroundColor: "background.paper",
             borderRadius: "10px",
             border: (theme) => `1px solid ${theme.palette.divider}`,
-            boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.06)",
+            boxShadow: (theme) =>
+              theme.palette.mode === "dark"
+                ? "0 2px 8px rgba(0,0,0,0.3)"
+                : "0 1px 4px rgba(0,0,0,0.06)",
             p: "3px 6px",
+            height: 42,
           }}
         >
           {/* Prev Month Button */}
-          <Tooltip title={t("prev") || "Öňki aý"}>
+          <Tooltip title={t("prev")}>
             <IconButton
               size="small"
               onClick={handlePrevMonth}
@@ -191,71 +173,51 @@ const ReportHeader = ({
             </IconButton>
           </Tooltip>
 
-          {/* Month Select */}
-          <FormControl size="small" sx={{ minWidth: 130 }}>
-            <Select
-              value={currentMonthIdx}
-              onChange={(e) => handleMonthChange(e.target.value)}
-              displayEmpty
-              renderValue={(val) => {
-                const m = MONTHS.find((item) => item.value === val) || MONTHS[val] || MONTHS[0];
-                return (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                    <CalendarMonthRoundedIcon sx={{ fontSize: 16, color: teal }} />
-                    <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: "text.primary" }}>
-                      {getMonthLabel(m)}
-                    </Typography>
-                  </Box>
-                );
-              }}
-              sx={{
-                height: 34,
-                "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-                "& .MuiSelect-select": { py: 0.5, px: 1 },
-              }}
-            >
-              {MONTHS.map((m) => (
-                <MenuItem key={m.value} value={m.value}>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 600 }}>
-                    {String(m.value + 1).padStart(2, "0")} · {getMonthLabel(m)}
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Year Select */}
-          <FormControl size="small" sx={{ minWidth: 85 }}>
-            <Select
-              value={currentYear}
-              onChange={(e) => handleYearChange(e.target.value)}
-              displayEmpty
-              renderValue={(val) => (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <DateRangeRoundedIcon sx={{ fontSize: 15, color: "text.secondary" }} />
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: "text.primary" }}>
-                    {val}
-                  </Typography>
-                </Box>
-              )}
-              sx={{
-                height: 34,
-                "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-                "& .MuiSelect-select": { py: 0.5, px: 0.8 },
-              }}
-            >
-              {YEARS.map((y) => (
-                <MenuItem key={y} value={y}>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 600 }}>
-                    {y}
-                  </Typography>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {/* Month & Year Day.js DatePicker */}
+          <DatePicker
+            views={["year", "month"]}
+            openTo="month"
+            value={validDate}
+            onChange={handleDateSelect}
+            format="MMMM YYYY"
+            slotProps={{
+              textField: {
+                size: "small",
+                variant: "standard",
+                slotProps: {
+                  input: {
+                    disableUnderline: true,
+                  },
+                },
+                sx: {
+                  width: { xs: 130, sm: 160 },
+                  "& .MuiInputBase-root": {
+                    fontSize: { xs: "13px", sm: "14px" },
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    color: "text.primary",
+                  },
+                  "& .MuiInputBase-input": {
+                    textAlign: "center",
+                    cursor: "pointer",
+                    py: 0.5,
+                    px: { xs: 0.5, sm: 1 },
+                    textTransform: "capitalize",
+                  },
+                  "& .MuiIconButton-root": {
+                    p: 0.5,
+                    color: teal,
+                  },
+                  "& .MuiInput-underline:before, & .MuiInput-underline:after": {
+                    display: "none",
+                  },
+                },
+              },
+            }}
+          />
 
           {/* Next Month Button */}
-          <Tooltip title={t("next") || "Indiki aý"}>
+          <Tooltip title={t("next")}>
             <IconButton
               size="small"
               onClick={handleNextMonth}
@@ -277,28 +239,54 @@ const ReportHeader = ({
           <Select
             value={selectedQuarter ?? 1}
             onChange={(e) => onQuarterChange?.(Number(e.target.value))}
+            open={isQuarterOpen}
+            onOpen={() => setIsQuarterOpen(true)}
+            onClose={() => setIsQuarterOpen(false)}
             displayEmpty
             renderValue={(val) => {
-              const opt = QUARTER_OPTIONS.find((o) => o.value === val);
+              const opt = quarterOptions.find((o) => o.value === val);
               return (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <EmojiEventsRoundedIcon sx={{ fontSize: 18, color: teal }} />
+                  <PieChartRoundedIcon sx={{ fontSize: 18, color: teal }} />
                   <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: "text.primary" }}>
-                    {t(`report.turkishAirlines.${opt?.key}`) || opt?.defaultLabel || `Q${val}`}
+                    {opt?.label ?? `Q${val}`}
                   </Typography>
                 </Box>
               );
             }}
+            IconComponent={() => (
+              <Box
+                component="span"
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "absolute",
+                  right: 12,
+                  top: "calc(50% - 9px)",
+                  color: "text.secondary",
+                  pointerEvents: "none",
+                  transform: isQuarterOpen ? "rotate(180deg)" : "none",
+                  transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease",
+                }}
+              >
+                <ChevronDown size={18} />
+              </Box>
+            )}
             sx={{
               height: 42,
               borderRadius: "10px",
-              backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#FFFFFF",
+              backgroundColor: "background.paper",
               border: (theme) => `1px solid ${theme.palette.divider}`,
-              boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.3)" : "0 1px 4px rgba(0,0,0,0.06)",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 2px 8px rgba(0,0,0,0.3)"
+                  : "0 1px 4px rgba(0,0,0,0.06)",
               "& .MuiOutlinedInput-notchedOutline": { border: "none" },
               "& .MuiSelect-select": {
                 py: 1,
-                px: 1.5,
+                pl: 1.5,
+                pr: 4,
                 display: "flex",
                 alignItems: "center",
               },
@@ -313,7 +301,7 @@ const ReportHeader = ({
               },
             }}
           >
-            {QUARTER_OPTIONS.map((opt) => (
+            {quarterOptions.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, py: 0.3 }}>
                   <Box
@@ -330,10 +318,10 @@ const ReportHeader = ({
                       fontWeight: 800,
                     }}
                   >
-                    Q{opt.value}
+                    {opt.value}
                   </Box>
                   <Typography sx={{ fontSize: 13.5, fontWeight: 600 }}>
-                    {t(`report.turkishAirlines.${opt.key}`) || opt.defaultLabel}
+                    {opt.label}
                   </Typography>
                 </Box>
               </MenuItem>

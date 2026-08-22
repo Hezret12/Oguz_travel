@@ -1,20 +1,21 @@
 import { memo } from "react";
-import { Box, Typography, Paper, Chip, alpha, useTheme } from "@mui/material";
+import { Box, Typography, Paper, Chip, alpha, Grid } from "@mui/material";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import PendingActionsRoundedIcon from "@mui/icons-material/PendingActionsRounded";
 import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
 import { useLocale } from "../../../../hooks/useLocale";
 
 const SummaryCard = memo(
-  ({ icon, value, label, sublabel, color, paperSx, isDark }) => (
+  ({ icon, value, label, sublabel, color, paperSx }) => (
     <Paper
       sx={{
         ...paperSx,
         p: 2.2,
+        height: "100%",
         display: "flex",
         flexDirection: "column",
+        justifyContent: "space-between",
         gap: 1.2,
         position: "relative",
         overflow: "hidden",
@@ -74,7 +75,7 @@ const SummaryCard = memo(
           sx={{
             fontWeight: 800,
             fontFamily: "'Inter', sans-serif",
-            color: isDark ? "#FFF" : "#0F172A",
+            color: "text.primary",
             letterSpacing: "-0.02em",
             lineHeight: 1.1,
           }}
@@ -85,9 +86,9 @@ const SummaryCard = memo(
           variant="body2"
           sx={{
             fontWeight: 600,
-            color: isDark ? "rgba(255,255,255,0.7)" : "#475569",
+            color: "text.secondary",
             fontSize: 13,
-            mt: 0.3,
+            mt: 0.5,
           }}
         >
           {label}
@@ -96,7 +97,8 @@ const SummaryCard = memo(
           <Typography
             variant="caption"
             sx={{
-              color: isDark ? "rgba(255,255,255,0.4)" : "#94A3B8",
+              color: "text.secondary",
+              opacity: 0.75,
               fontSize: 11.5,
               display: "block",
               mt: 0.3,
@@ -117,74 +119,55 @@ const ReportSummaryCards = ({
   achievementPercentage = "0%",
   formatCompact,
   paperSx,
-  teal,
-  accent,
-  green,
-  orange,
+  teal = "#0D9488",
+  green = "#10B981",
+  orange = "#F59E0B",
 }) => {
   const { t } = useLocale();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
 
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "1fr 1fr",
-          md: "repeat(3, 1fr)",
-          lg: "repeat(5, 1fr)",
-        },
-        gap: 2,
-      }}
-    >
-      <SummaryCard
-        icon={<ReceiptLongRoundedIcon sx={{ fontSize: 24 }} />}
-        value={formatCompact(stats.monthBase)}
-        label={t("columns.baseFare")}
-        sublabel={t("report.turkishAirlines.sublabelBase")}
-        color={accent}
-        paperSx={paperSx}
-        isDark={isDark}
-      />
-      <SummaryCard
-        icon={<AttachMoneyIcon sx={{ fontSize: 24 }} />}
-        value={formatCompact(stats.monthQuoted)}
-        label={t("columns.quotedFare")}
-        sublabel={t("report.turkishAirlines.sublabelQuoted")}
-        color={teal}
-        paperSx={paperSx}
-        isDark={isDark}
-      />
-      <SummaryCard
-        icon={<TrendingUpIcon sx={{ fontSize: 24 }} />}
-        value={formatCompact(stats.monthProfit)}
-        label={t("report.turkishAirlines.profit") || t("columns.profit") || "Peýda"}
-        sublabel={t("report.turkishAirlines.sublabelProfit") || "Aýlyk net peýda"}
-        color={green}
-        paperSx={paperSx}
-        isDark={isDark}
-      />
-      <SummaryCard
-        icon={<EmojiEventsRoundedIcon sx={{ fontSize: 24 }} />}
-        value={achievementPercentage}
-        label={t("report.turkishAirlines.achievementRate") || "Çäryek Maksady"}
-        sublabel={t("report.turkishAirlines.achievementSublabel") || "Geçen çäryek temasy"}
-        color="#059669"
-        paperSx={paperSx}
-        isDark={isDark}
-      />
-      <SummaryCard
-        icon={<PendingActionsRoundedIcon sx={{ fontSize: 24 }} />}
-        value={formatCompact(stats.monthCredit)}
-        label={t("paymentCredit") || "Kredit (Ödenmedi)"}
-        sublabel={t("report.turkishAirlines.sublabelCredit") || "Garaşylýan borç jemi"}
-        color={orange}
-        paperSx={paperSx}
-        isDark={isDark}
-      />
-    </Box>
+    <Grid container spacing={2}>
+      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <SummaryCard
+          icon={<AttachMoneyIcon sx={{ fontSize: 24 }} />}
+          value={formatCompact(stats?.monthQuoted ?? 0)}
+          label={t("columns.quotedFare")}
+          sublabel={t("report.turkishAirlines.sublabelQuoted")}
+          color={teal}
+          paperSx={paperSx}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <SummaryCard
+          icon={<TrendingUpIcon sx={{ fontSize: 24 }} />}
+          value={formatCompact(stats?.monthProfit ?? 0)}
+          label={t("columns.profit")}
+          sublabel={t("report.turkishAirlines.sublabelProfit")}
+          color={green}
+          paperSx={paperSx}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <SummaryCard
+          icon={<EmojiEventsRoundedIcon sx={{ fontSize: 24 }} />}
+          value={achievementPercentage}
+          label={t("report.turkishAirlines.achievementRate")}
+          sublabel={t("report.turkishAirlines.achievementSublabel")}
+          color="#059669"
+          paperSx={paperSx}
+        />
+      </Grid>
+      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <SummaryCard
+          icon={<PendingActionsRoundedIcon sx={{ fontSize: 24 }} />}
+          value={formatCompact(stats?.monthCredit ?? 0)}
+          label={t("paymentCredit")}
+          sublabel={t("report.turkishAirlines.sublabelCredit")}
+          color={orange}
+          paperSx={paperSx}
+        />
+      </Grid>
+    </Grid>
   );
 };
 

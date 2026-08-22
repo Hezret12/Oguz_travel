@@ -697,7 +697,14 @@
     "date": "Дата",
     "price": "Цена",
     "actions": "Действия",
-    "onlyAdmin": "Только для администратора"
+    "onlyAdmin": "Только для администратора",
+    "exportExcel": "Excel",
+    "excelExportSuccess": "Excel файл успешно скачан",
+    "noDataToExport": "Нет данных для экспорта",
+    "exportError": "Ошибка при экспорте Excel файла",
+    "exportExcelModalTitle": "Экспорт в Excel (Фильтр)",
+    "exportExcelModalDesc": "Вы можете выбрать фильтры для экспортируемых данных:",
+    "includeCurrentPageFilters": "Включить текущие фильтры и поиск со страницы"
   },
   "autocomplete": {
     "addClient": "Добавить клиента",

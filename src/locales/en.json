@@ -697,7 +697,14 @@
     "date": "Date",
     "price": "Price",
     "actions": "Actions",
-    "onlyAdmin": "Admin only"
+    "onlyAdmin": "Admin only",
+    "exportExcel": "Excel",
+    "excelExportSuccess": "Excel file downloaded successfully",
+    "noDataToExport": "No data to export",
+    "exportError": "Error exporting Excel file",
+    "exportExcelModalTitle": "Export to Excel (Filter)",
+    "exportExcelModalDesc": "You can configure filters for the exported data:",
+    "includeCurrentPageFilters": "Include current page filters and search"
   },
   "autocomplete": {
     "addClient": "Add Client",
