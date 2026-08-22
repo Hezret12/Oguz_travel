@@ -26,7 +26,6 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
 
   const isLogin = variant === 'login';
 
-  // Normalize language code (e.g. 'tk-TM' -> 'tk')
   const normalizedLang = (currentLanguage || 'tk').slice(0, 2).toLowerCase();
   const activeLangObj = LANGUAGES.find((l) => l.code === normalizedLang) || LANGUAGES[0];
 
@@ -95,29 +94,29 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
             borderColor: isLogin
               ? 'rgba(255,255,255,0.18)'
               : (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.15)'
-                    : 'rgba(0,0,0,0.12)',
+                theme.palette.mode === 'dark'
+                  ? 'rgba(255,255,255,0.15)'
+                  : 'rgba(0,0,0,0.12)',
             backgroundColor: isLogin
               ? 'rgba(255,255,255,0.10)'
               : (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.06)'
-                    : 'rgba(0,0,0,0.03)',
+                theme.palette.mode === 'dark'
+                  ? 'rgba(255,255,255,0.06)'
+                  : 'rgba(0,0,0,0.03)',
             color: isLogin
               ? '#ffffff'
               : (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.85)'
-                    : 'text.primary',
+                theme.palette.mode === 'dark'
+                  ? 'rgba(255,255,255,0.85)'
+                  : 'text.primary',
             backdropFilter: 'blur(8px)',
             '&:hover': {
               backgroundColor: isLogin
                 ? 'rgba(255,255,255,0.18)'
                 : (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(255,255,255,0.12)'
-                      : 'rgba(0,0,0,0.07)',
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.12)'
+                    : 'rgba(0,0,0,0.07)',
             },
             transition: 'all 0.2s ease',
           }}
@@ -157,9 +156,9 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
               backdropFilter: isLogin ? 'blur(12px)' : undefined,
               backgroundColor: isLogin
                 ? (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(20,40,60,0.95)'
-                      : 'rgba(255,255,255,0.97)'
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(20,40,60,0.95)'
+                    : 'rgba(255,255,255,0.97)'
                 : undefined,
               boxShadow: (theme) =>
                 theme.palette.mode === 'dark'
