@@ -144,10 +144,10 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
-        MenuListProps={{
-          'aria-labelledby': 'language-switcher-button',
-        }}
         slotProps={{
+          list: {
+            'aria-labelledby': 'language-switcher-button',
+          },
           paper: {
             sx: {
               mt: 1,

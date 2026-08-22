@@ -216,34 +216,33 @@ const Clients = () => {
                   size="small"
                   aria-label={t("clients.documents")}
                   sx={(theme) => ({
-                    borderRadius: "7px",
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "6px",
                     border:
                       theme.palette.mode === "dark"
-                        ? "1px solid rgba(99, 102, 241, 0.35)"
-                        : "1px solid rgba(79, 70, 229, 0.30)",
-                    background:
+                        ? "1px solid rgba(20, 184, 166, 0.3)"
+                        : "1px solid rgba(14, 133, 132, 0.25)",
+                    backgroundColor:
                       theme.palette.mode === "dark"
-                        ? "linear-gradient(135deg, rgba(99, 102, 241, 0.16) 0%, rgba(79, 70, 229, 0.08) 100%)"
-                        : "linear-gradient(135deg, rgba(99, 102, 241, 0.14) 0%, rgba(79, 70, 229, 0.06) 100%)",
-                    color: theme.palette.mode === "dark" ? "#818cf8" : "#4f46e5",
-                    transition: "all 0.18s cubic-bezier(0.4, 0, 0.2, 1)",
+                        ? "rgba(20, 184, 166, 0.1)"
+                        : "rgba(14, 133, 132, 0.07)",
+                    color:
+                      theme.palette.mode === "dark" ? "#2DD4BF" : "#0E8584",
+                    transition: "all 0.15s ease",
                     "&:hover": {
-                      background:
+                      backgroundColor:
                         theme.palette.mode === "dark"
-                          ? "linear-gradient(135deg, rgba(99, 102, 241, 0.28) 0%, rgba(79, 70, 229, 0.18) 100%)"
-                          : "linear-gradient(135deg, rgba(99, 102, 241, 0.24) 0%, rgba(79, 70, 229, 0.14) 100%)",
+                          ? "rgba(20, 184, 166, 0.2)"
+                          : "rgba(14, 133, 132, 0.15)",
                       borderColor:
-                        theme.palette.mode === "dark" ? "#818cf8" : "#6366f1",
-                      transform: "translateY(-1.5px)",
-                      boxShadow:
-                        theme.palette.mode === "dark"
-                          ? "0 3px 12px rgba(99, 102, 241, 0.35)"
-                          : "0 3px 10px rgba(79, 70, 229, 0.25)",
+                        theme.palette.mode === "dark" ? "#2DD4BF" : "#0E8584",
+                      transform: "translateY(-1px)",
                     },
-                    "&:active": { transform: "scale(0.94)" },
+                    "&:active": { transform: "scale(0.95)" },
                   })}
                 >
-                  <FileUp size={15} strokeWidth={2.2} />
+                  <FileUp size={15} strokeWidth={2} />
                 </IconButton>
               </Tooltip>
 
