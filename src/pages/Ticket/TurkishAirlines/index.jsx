@@ -15,6 +15,8 @@ import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import StackedCell from "../../../components/inputs/StackCell";
 import StatusChip from "../../../components/StatusChip";
+import OperatorsCell from "../../../components/OperatorsCell";
+import ClientCell from "../../../components/ClientCell";
 import {
   SALE_STATUS_CONFIG,
   PAYMENT_STATUS_CONFIG,
@@ -233,30 +235,15 @@ const TurkishAirlines = () => {
         muiTableBodyCellProps: { align: "right" },
       },
       {
-        id: "operator",
-        header: t("columns.operator"),
-        size: 220,
-        accessorFn: (row) => row.ta_assignment_operator?.fullName ?? "",
+        id: "operators",
+        header: t("columns.operators"),
+        size: 200,
+        accessorFn: (row) =>
+          `${row.ta_assignment_operator?.fullName ?? ""} ${row.ta_receiver_operator?.fullName ?? ""}`.trim(),
         Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.ta_assignment_operator?.fullName}
-            secondary={selectedLang(
-              row.original.ta_assignment_operator?.office?.fullName,
-            )}
-          />
-        ),
-      },
-      {
-        id: "op2",
-        header: t("columns.operatorTwo"),
-        size: 220,
-        accessorFn: (row) => row.ta_receiver_operator?.fullName ?? "",
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.ta_receiver_operator?.fullName}
-            secondary={selectedLang(
-              row.original.ta_receiver_operator?.office?.fullName,
-            )}
+          <OperatorsCell
+            assignmentOperator={row.original.ta_assignment_operator}
+            receiverOperator={row.original.ta_receiver_operator}
           />
         ),
       },
@@ -265,12 +252,7 @@ const TurkishAirlines = () => {
         header: t("columns.client"),
         size: 220,
         accessorFn: (row) => row.client?.fullName ?? "",
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.client?.fullName}
-            secondary={row.original.client?.phone_number}
-          />
-        ),
+        Cell: ({ row }) => <ClientCell client={row.original.client} />,
       },
       {
         accessorFn: (row) => row.client?.dateOfBirth ?? "",

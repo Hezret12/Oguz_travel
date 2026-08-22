@@ -20,6 +20,8 @@ import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import AddB2BTicketDialog from "./AddB2BTicketDialog";
 import EditB2BDialog from "./EditB2BDialog";
 import StatusChip from "../../../components/StatusChip";
+import OperatorsCell from "../../../components/OperatorsCell";
+import ClientCell from "../../../components/ClientCell";
 
 import {
   SALE_STATUS_CONFIG,
@@ -220,46 +222,24 @@ const B2B = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorFn: (row) => row.assignment_operator?.fullName,
-        id: "assignment_operator",
-        header: t("columns.operator"),
-        size: 220,
-        Cell: ({ row }) => {
-          return (
-            <StackedCell
-              primary={row?.original?.assignment_operator?.fullName}
-              secondary={selectedLang(row?.original?.assignment_operator?.office?.shortName)}
-            />
-          );
-        },
-      },
-      {
-        accessorFn: (row) => row.receiver_operator?.fullName,
-        id: "receiver_operator",
-        header: t("columns.operatorTwo"),
-        size: 220,
-        Cell: ({ row }) => {
-          return (
-            <StackedCell
-              primary={row?.original?.receiver_operator?.fullName}
-              secondary={selectedLang(row?.original?.receiver_operator?.office?.shortName)}
-            />
-          );
-        },
+        accessorFn: (row) =>
+          `${row.assignment_operator?.fullName ?? ""} ${row.receiver_operator?.fullName ?? ""}`.trim(),
+        id: "operators",
+        header: t("columns.operators"),
+        size: 200,
+        Cell: ({ row }) => (
+          <OperatorsCell
+            assignmentOperator={row.original?.assignment_operator}
+            receiverOperator={row.original?.receiver_operator}
+          />
+        ),
       },
       {
         accessorFn: (row) => row.client?.fullName,
         id: "client",
         header: t("columns.client"),
         size: 220,
-        Cell: ({ row }) => {
-          return (
-            <StackedCell
-              primary={row?.original?.client?.fullName}
-              secondary={row?.original?.client?.passport_number}
-            />
-          );
-        },
+        Cell: ({ row }) => <ClientCell client={row.original?.client} />,
       },
       {
         accessorFn: (row) => getStatusKey(row),
