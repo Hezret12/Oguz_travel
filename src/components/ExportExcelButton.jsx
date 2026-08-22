@@ -4,11 +4,7 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { useLocale } from "../hooks/useLocale";
 import GlobalExcelExportModal from "./Dialog/GlobalExcelExportModal";
 
-/**
- * Universal Excel Export Button for all modules
- * Opens filter modal first, allows fine-tuning date ranges / criteria,
- * then generates a styled Excel file matching official table styling.
- */
+
 const ExportExcelButton = ({
   apiFn,
   queryParams = {},
