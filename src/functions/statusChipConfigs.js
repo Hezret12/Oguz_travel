@@ -23,6 +23,8 @@ export const SALE_STATUS_CONFIG = {
 export const PAYMENT_STATUS_CONFIG = {
   TOLENDI: { label: "Tolendi", color: "#16a34a", icon: PaymentsRoundedIcon },
   KREDIT: { label: "Kredit", color: "#d97706", icon: CreditCardRoundedIcon },
+  TRUE: { label: "Tölendi", color: "#16a34a", icon: PaymentsRoundedIcon },
+  FALSE: { label: "Kredit", color: "#d97706", icon: CreditCardRoundedIcon },
 };
 
 export const OUTBOUND_PAYMENT_STATUS_CONFIG = {

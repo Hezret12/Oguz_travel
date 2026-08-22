@@ -21,7 +21,10 @@ import AddB2BTicketDialog from "./AddB2BTicketDialog";
 import EditB2BDialog from "./EditB2BDialog";
 import StatusChip from "../../../components/StatusChip";
 
-import { SALE_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
+import {
+  SALE_STATUS_CONFIG,
+  PAYMENT_STATUS_CONFIG,
+} from "../../../functions/statusChipConfigs";
 import { usePageFilters } from "../../../hooks/usePageFilters";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -273,12 +276,27 @@ const B2B = () => {
         size: 90,
       },
       {
+        accessorFn: (row) => row.is_paid,
+        id: "is_paid",
+        header: t("columns.paymentStatus"),
+        size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ cell }) => (
+          <StatusChip
+            status={cell.getValue()}
+            config={PAYMENT_STATUS_CONFIG}
+            size="small"
+          />
+        ),
+      },
+      {
         accessorFn: (row) => {
           const pct = row.paidPercentage ?? row.payment_percent;
           return typeof pct === "string" ? parseFloat(pct) : pct;
         },
         id: "paidPercentage",
-        header: t("columns.paymentStatus"),
+        header: t("columns.paymentPercentage"),
         size: 110,
         Cell: ({ row }) => (
           <PaymentStatusCell percent={row.original.paidPercentage} />
