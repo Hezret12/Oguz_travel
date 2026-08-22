@@ -5,9 +5,7 @@ export const REFERRAL_LETTER_EXCEL_BANNER =
 
 export const REFERRAL_LETTER_EXCEL_RIGHT_HEADER = "";
 
-/**
- * 17 exact styled columns matching Oguz Travel Referral Letters official table
- */
+
 export const REFERRAL_LETTER_EXCEL_COLUMNS = [
   {
     header: "T/b",
