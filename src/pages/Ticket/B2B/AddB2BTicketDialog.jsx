@@ -33,9 +33,21 @@ const CURRENCY_SYMBOLS = {
   RUB: "₽",
 };
 
-const AddB2BTicketDialog = ({ table }) => {
+const AddB2BTicketDialog = ({ table, open, close }) => {
   const { t, selectedLang } = useLocale();
   const { addB2BTicket } = useValidShema();
+
+  const isModalOpen =
+    open !== undefined
+      ? Boolean(open)
+      : Boolean(table && table.getState().creatingRow);
+
+  const closeDialog = () => {
+    if (table) {
+      table.setCreatingRow(null);
+    }
+    close?.();
+  };
 
   const paymentOptions = useMemo(() => getBooleanPaymentOptions(t), [t]);
 
@@ -48,11 +60,11 @@ const AddB2BTicketDialog = ({ table }) => {
     key: "status",
   });
 
-  const { mutate: createB2B, isLoading: isSubmit } = useCreate({
+  const { mutate: createB2B, isPending: isSubmit } = useCreate({
     apiFn: addB2BApi,
     key: "b2b",
     onSuccess: () => {
-      table.setCreatingRow(null);
+      closeDialog();
     },
   });
 
@@ -91,12 +103,6 @@ const AddB2BTicketDialog = ({ table }) => {
 
   const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || "$";
 
-  const closeDialog = () => {
-    if (table) {
-      table.setCreatingRow(null);
-    }
-  };
-
   const submitHandler = async (data) => {
     try {
       const payload = {
@@ -119,7 +125,7 @@ const AddB2BTicketDialog = ({ table }) => {
   };
 
   return (
-    <CustomDialog widthX={800} open={true} close={closeDialog}>
+    <CustomDialog widthX={800} open={isModalOpen} close={closeDialog}>
       <Box
         sx={{
           display: "flex",

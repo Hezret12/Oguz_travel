@@ -466,8 +466,6 @@ const B2B = () => {
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
     enableColumnPinning: true,
-    createDisplayMode: "custom",
-    editDisplayMode: "custom",
     initialState: {
       columnPinning: {
         left: ["index_number"],
@@ -476,6 +474,12 @@ const B2B = () => {
     },
     columns,
     data: b2bData,
+    renderCreateRowDialogContent: ({ table }) => (
+      <AddB2BTicketDialog table={table} />
+    ),
+    renderEditRowDialogContent: ({ table, row }) => (
+      <EditB2BDialog table={table} row={row} />
+    ),
     state: {
       rowSelection,
       isLoading: isLoading || isFetching,
@@ -633,11 +637,6 @@ const B2B = () => {
       )}
 
       <MaterialReactTable table={table} />
-
-      {table.getState().creatingRow && <AddB2BTicketDialog table={table} />}
-      {table.getState().editingRow && (
-        <EditB2BDialog table={table} row={table.getState().editingRow} />
-      )}
     </Box>
   );
 };

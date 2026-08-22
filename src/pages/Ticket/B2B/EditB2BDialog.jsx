@@ -33,9 +33,21 @@ const CURRENCY_SYMBOLS = {
   RUB: "₽",
 };
 
-const EditB2BDialog = ({ table, row }) => {
+const EditB2BDialog = ({ table, row, open, close }) => {
   const { t, selectedLang } = useLocale();
   const { addB2BTicket } = useValidShema();
+
+  const isModalOpen =
+    open !== undefined
+      ? Boolean(open)
+      : Boolean(table && (table.getState().editingRow?.id === row?.id || table.getState().editingRow));
+
+  const closeDialog = () => {
+    if (table) {
+      table.setEditingRow(null);
+    }
+    close?.();
+  };
 
   const paymentOptions = useMemo(() => getBooleanPaymentOptions(t), [t]);
 
@@ -53,7 +65,7 @@ const EditB2BDialog = ({ table, row }) => {
     key: "b2b",
     idKey: "guid",
     onSuccessUpdate: () => {
-      table.setEditingRow(null);
+      closeDialog();
     },
   });
 
@@ -93,12 +105,6 @@ const EditB2BDialog = ({ table, row }) => {
 
   const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || "$";
 
-  const closeDialog = () => {
-    if (table) {
-      table.setEditingRow(null);
-    }
-  };
-
   const submitHandler = async (data) => {
     try {
       const payload = {
@@ -121,7 +127,7 @@ const EditB2BDialog = ({ table, row }) => {
   };
 
   return (
-    <CustomDialog widthX={800} open={true} close={closeDialog}>
+    <CustomDialog widthX={800} open={isModalOpen} close={closeDialog}>
       <Box
         sx={{
           display: "flex",
