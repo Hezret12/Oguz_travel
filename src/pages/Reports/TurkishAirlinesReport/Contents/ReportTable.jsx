@@ -325,7 +325,6 @@ const ReportTable = ({
                 })
               )}
 
-              {/* Summary Footer Rows */}
               {footer.length > 0 && (
                 <>
                   <TableRow>
