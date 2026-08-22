@@ -56,34 +56,32 @@ const ColumnActionButtons = ({
             size="small"
             title="Tölegler"
             sx={(theme) => ({
-              borderRadius: "7px",
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
               border:
                 theme.palette.mode === "dark"
-                  ? "1px solid rgba(251, 191, 36, 0.35)"
-                  : "1px solid rgba(217, 119, 6, 0.32)",
-              background:
+                  ? "1px solid rgba(16, 185, 129, 0.3)"
+                  : "1px solid rgba(16, 185, 129, 0.25)",
+              backgroundColor:
                 theme.palette.mode === "dark"
-                  ? "linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0.09) 100%)"
-                  : "linear-gradient(135deg, rgba(251, 191, 36, 0.16) 0%, rgba(217, 119, 6, 0.08) 100%)",
-              color: theme.palette.mode === "dark" ? "#fbbf24" : "#b45309",
+                  ? "rgba(16, 185, 129, 0.1)"
+                  : "rgba(16, 185, 129, 0.07)",
+              color: theme.palette.mode === "dark" ? "#34d399" : "#059669",
               transition: "all 0.15s ease",
               "&:hover": {
-                background:
+                backgroundColor:
                   theme.palette.mode === "dark"
-                    ? "linear-gradient(135deg, rgba(245, 158, 11, 0.28) 0%, rgba(217, 119, 6, 0.18) 100%)"
-                    : "linear-gradient(135deg, rgba(251, 191, 36, 0.28) 0%, rgba(217, 119, 6, 0.18) 100%)",
+                    ? "rgba(16, 185, 129, 0.2)"
+                    : "rgba(16, 185, 129, 0.15)",
                 borderColor:
-                  theme.palette.mode === "dark" ? "#fbbf24" : "#d97706",
+                  theme.palette.mode === "dark" ? "#34d399" : "#059669",
                 transform: "translateY(-1px)",
-                boxShadow:
-                  theme.palette.mode === "dark"
-                    ? "0 2px 10px rgba(245, 158, 11, 0.32)"
-                    : "0 2px 8px rgba(217, 119, 6, 0.25)",
               },
               "&:active": { transform: "scale(0.95)" },
             })}
           >
-            <CircleDollarSign size={16} strokeWidth={2.2} />
+            <CircleDollarSign size={15} strokeWidth={2} />
           </IconButton>
         )}
 
@@ -99,26 +97,32 @@ const ColumnActionButtons = ({
             size="small"
             title="Kommentariýa Ýaz / Gör"
             sx={(theme) => ({
-              borderRadius: "7px",
-              border: `1px solid ${theme.palette.divider}`,
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              border:
+                theme.palette.mode === "dark"
+                  ? "1px solid rgba(99, 102, 241, 0.3)"
+                  : "1px solid rgba(99, 102, 241, 0.25)",
               backgroundColor:
                 theme.palette.mode === "dark"
-                  ? "rgba(20,184,166,0.12)"
-                  : "rgba(14,133,132,0.08)",
-              color: theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
+                  ? "rgba(99, 102, 241, 0.1)"
+                  : "rgba(99, 102, 241, 0.07)",
+              color: theme.palette.mode === "dark" ? "#818cf8" : "#4f46e5",
               transition: "all 0.15s ease",
               "&:hover": {
                 backgroundColor:
                   theme.palette.mode === "dark"
-                    ? "rgba(20,184,166,0.22)"
-                    : "rgba(14,133,132,0.18)",
-                borderColor: theme.palette.mode === "dark" ? "#14B8A6" : "#0E8584",
+                    ? "rgba(99, 102, 241, 0.2)"
+                    : "rgba(99, 102, 241, 0.15)",
+                borderColor:
+                  theme.palette.mode === "dark" ? "#818cf8" : "#4f46e5",
                 transform: "translateY(-1px)",
               },
               "&:active": { transform: "scale(0.95)" },
             })}
           >
-            <ChatBubbleOutlinedIcon sx={{ fontSize: 16 }} />
+            <ChatBubbleOutlinedIcon sx={{ fontSize: 15 }} />
           </IconButton>
         )}
 
@@ -128,20 +132,22 @@ const ColumnActionButtons = ({
           size="small"
           title="Üýtgetmek"
           sx={(theme) => ({
-            borderRadius: "7px",
+            width: "28px",
+            height: "28px",
+            borderRadius: "6px",
             border: `1px solid ${theme.palette.divider}`,
             backgroundColor:
               theme.palette.mode === "dark"
-                ? "rgba(255,255,255,0.05)"
-                : "rgba(0,0,0,0.04)",
+                ? "rgba(255, 255, 255, 0.04)"
+                : "rgba(0, 0, 0, 0.03)",
             color: theme.palette.text.secondary,
             transition: "all 0.15s ease",
             "&:hover": {
               backgroundColor:
                 theme.palette.mode === "dark"
-                  ? "rgba(255,255,255,0.10)"
-                  : "rgba(0,0,0,0.09)",
-              borderColor: theme.palette.text.secondary,
+                  ? "rgba(255, 255, 255, 0.08)"
+                  : "rgba(0, 0, 0, 0.07)",
+              borderColor: theme.palette.text.primary,
               color: theme.palette.text.primary,
               transform: "translateY(-1px)",
             },
@@ -156,20 +162,31 @@ const ColumnActionButtons = ({
           onClick={handleDelete}
           size="small"
           title="Pozmak"
-          sx={{
-            borderRadius: "7px",
-            border: "1px solid rgba(239,68,68,0.35)",
-            backgroundColor: "rgba(239,68,68,0.07)",
-            color: "#ef4444",
+          sx={(theme) => ({
+            width: "28px",
+            height: "28px",
+            borderRadius: "6px",
+            border:
+              theme.palette.mode === "dark"
+                ? "1px solid rgba(239, 68, 68, 0.3)"
+                : "1px solid rgba(239, 68, 68, 0.25)",
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "rgba(239, 68, 68, 0.1)"
+                : "rgba(239, 68, 68, 0.06)",
+            color: theme.palette.mode === "dark" ? "#f87171" : "#dc2626",
             transition: "all 0.15s ease",
             "&:hover": {
-              backgroundColor: "rgba(239,68,68,0.15)",
-              borderColor: "#ef4444",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(239, 68, 68, 0.2)"
+                  : "rgba(239, 68, 68, 0.14)",
+              borderColor:
+                theme.palette.mode === "dark" ? "#f87171" : "#dc2626",
               transform: "translateY(-1px)",
-              boxShadow: "0 2px 8px rgba(239,68,68,0.25)",
             },
             "&:active": { transform: "scale(0.95)" },
-          }}
+          })}
         >
           <Trash2 size={15} />
         </IconButton>

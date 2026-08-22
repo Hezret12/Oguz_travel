@@ -12,6 +12,8 @@ import Pagination from "../../components/Pagination";
 import TableEmptyState from "../../components/TableEmptyState";
 import StackedCell from "../../components/inputs/StackCell";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
+import OperatorsCell from "../../components/OperatorsCell";
+import ClientCell from "../../components/ClientCell";
 import FilterDrawer from "../../components/FilterDrawer";
 import DeleteDialog from "../../components/DeleteDialog";
 import { usePageFilters } from "../../hooks/usePageFilters";
@@ -36,9 +38,10 @@ import {
   REFERRAL_LETTER_EXCEL_COLUMNS,
   REFERRAL_LETTER_EXCEL_BANNER,
   REFERRAL_LETTER_EXCEL_RIGHT_HEADER,
-} from "./referralLetterExcel";
+  REFERRAL_LETTER_EXCEL_DEFAULT_VALUES,
+  renderReferralLetterFilterFields,
+} from "./referralLetterExcel.jsx";
 import { useDateFormat } from "../../functions/generalHelpers";
-import { nameColSize } from "../../utils/helperConstant";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -48,7 +51,7 @@ const CURRENCY_SYMBOLS = {
 };
 
 const ReferalLetter = () => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
@@ -165,23 +168,25 @@ const ReferalLetter = () => {
       {
         id: "operator",
         header: t("columns.operator"),
-        size: 220,
-        accessorFn: (row) => row.refferaloperator?.fullName ?? "",
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={row?.original?.refferaloperator?.fullName}
-            secondary={selectedLang(row?.original?.refferaloperator?.shortName)}
-          />
-        ),
+        size: 200,
+        accessorFn: (row) =>
+          row.refferaloperator?.fullName || row.operator?.fullName || "",
+        Cell: ({ row }) => {
+          const opr =
+            row.original.refferaloperator ||
+            row.original.operator ||
+            row.original.received_opr;
+          return <OperatorsCell assignmentOperator={opr} />;
+        },
       },
       {
         header: t("columns.client"),
         id: "fullName",
-        size: nameColSize,
+        size: 220,
         accessorFn: (row) => row.client?.fullName ?? "",
         Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original?.client?.fullName}
+          <ClientCell
+            client={row.original?.client}
             secondary={row.original?.yolagcyTel}
           />
         ),
@@ -527,6 +532,8 @@ const ReferalLetter = () => {
           titleBanner={REFERRAL_LETTER_EXCEL_BANNER}
           rightHeader={REFERRAL_LETTER_EXCEL_RIGHT_HEADER}
           fileName="OGUZTRAVEL_Yollanma_Hatlary"
+          defaultValues={REFERRAL_LETTER_EXCEL_DEFAULT_VALUES}
+          customFilterFields={renderReferralLetterFilterFields}
         />
       </PageHeader>
 
