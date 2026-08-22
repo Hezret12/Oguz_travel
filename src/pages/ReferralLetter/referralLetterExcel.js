@@ -3,7 +3,7 @@ import { formatExcelDate } from "../../functions/excelExportHelper";
 export const REFERRAL_LETTER_EXCEL_BANNER =
   'OGUZABAT Hojalyk Jemgyýetiniň "OGUZTRAVEL" syýahatçylyk bölümi tarapyndan daşary ýurtlara ugradylan syýahatçylar baradaky hasabat';
 
-export const REFERRAL_LETTER_EXCEL_RIGHT_HEADER = "GIDÝÄN syýahatçylar";
+export const REFERRAL_LETTER_EXCEL_RIGHT_HEADER = "";
 
 /**
  * 17 exact styled columns matching Oguz Travel Referral Letters official table

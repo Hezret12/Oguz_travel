@@ -2,18 +2,13 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 
-/**
- * Safe date formatter (DD.MM.YYYY)
- */
+
 export const formatExcelDate = (val) => {
   if (!val) return "";
   const d = dayjs(val);
   return d.isValid() ? d.format("DD.MM.YYYY") : String(val);
 };
 
-/**
- * Safe string extractor
- */
 export const extractExcelText = (val, lang = "tk") => {
   if (!val) return "";
   if (typeof val === "string") return val;
@@ -24,13 +19,7 @@ export const extractExcelText = (val, lang = "tk") => {
   return String(val);
 };
 
-/**
- * Automatically fetch all pages from a paginated API endpoint
- * @param {Function} apiFn - API query function
- * @param {Object} filterParams - Filter parameters
- * @param {Function} onProgress - Progress callback (loadedCount, totalCount)
- * @param {number} pageSize - Limit per request (default: 100)
- */
+
 export const fetchAllPaginatedData = async (
   apiFn,
   filterParams = {},
@@ -109,9 +98,7 @@ export const fetchAllPaginatedData = async (
   return allItems;
 };
 
-/**
- * Generate a pixel-perfect styled Excel file with full borders, header banner, and custom column alignments
- */
+
 export const exportStyledExcelFile = async ({
   titleBanner = null,
   rightHeader = null,
