@@ -54,7 +54,7 @@ const FilterSelect = ({
       onClose={() => onClose?.(name)}
       displayEmpty
       sx={selectSx}
-      slotProps={menuPaperProps}
+      MenuProps={{ slotProps: menuPaperProps }}
       IconComponent={() => (
         <Box
           component="span"

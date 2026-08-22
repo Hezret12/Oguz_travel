@@ -58,7 +58,7 @@ const FilterSelect = ({
       displayEmpty
       disabled={isLoading}
       sx={selectSx}
-      slotProps={menuPaperProps}
+      MenuProps={{ slotProps: menuPaperProps }}
       IconComponent={() => (
         <Box
           component="span"
