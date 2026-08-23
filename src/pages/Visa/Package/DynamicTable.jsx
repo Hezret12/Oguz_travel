@@ -283,7 +283,6 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
         }
       }
 
-      // 3. Data Rows (r >= 1):
       const newDataRows = [];
       for (let rowIdx = 1; rowIdx < rows.length; rowIdx++) {
         const oldRow = rows[rowIdx];
