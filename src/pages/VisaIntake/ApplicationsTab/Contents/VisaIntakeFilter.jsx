@@ -6,7 +6,6 @@ import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { getAllEmployeeApi } from "../../../../api/queries/getters";
-import { VISA_SELECT_OPTIONS } from "../../../../functions/visaCountryFieldConfigs";
 
 const selectSx = {
   borderRadius: "8px",
@@ -188,18 +187,6 @@ const VisaIntakeFilter = ({
         value={filters.operator_guid}
         options={employeeOptions}
         isOpen={selectsOpen?.operator_guid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
-      />
-
-      <FilterSelect
-        label={t("visaIntake.fields.visaCategory")}
-        name="visa_category"
-        value={filters.visa_category}
-        options={VISA_SELECT_OPTIONS.visaCategories}
-        isOpen={selectsOpen?.visa_category ?? false}
         allText={allText}
         onChange={onFilterChange}
         onOpen={onSelectOpen}

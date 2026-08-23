@@ -166,16 +166,38 @@ export const VisaIntakeModal = ({
   const initialValues = useMemo(() => {
     const defaults = {};
 
+    const customValues =
+      typeof itemData?.custom_field_values === "string"
+        ? (() => {
+            try {
+              return JSON.parse(itemData.custom_field_values);
+            } catch {
+              return {};
+            }
+          })()
+        : itemData?.custom_field_values || {};
+
     sortedFields.forEach((field) => {
       const key = field.fieldKey;
 
       if (itemData) {
-        const val = itemData[key] ?? itemData.custom_field_values?.[key];
+        let val;
+        if (key === "client_guid") {
+          val = itemData.client_guid || "";
+        } else if (key === "accepted_opr_guid") {
+          val = itemData.accepted_opr_guid || itemData.operator_guid || "";
+        } else if (key === "application_date") {
+          val = itemData.application_date;
+        } else if (key === "note" || key === "notes") {
+          val = itemData.note ?? itemData.notes ?? customValues?.note ?? "";
+        } else {
+          val = customValues?.[key];
+        }
 
         if (key === "client_guid") {
-          defaults[key] = itemData.client_guid || "";
+          defaults[key] = val || "";
         } else if (key === "accepted_opr_guid") {
-          defaults[key] = itemData.accepted_opr_guid || itemData.operator_guid || "";
+          defaults[key] = val || "";
         } else if (val !== undefined && val !== null) {
           defaults[key] = field.fieldType === "date" ? (val ? dayjs(val) : null) : val;
         } else {
@@ -274,14 +296,10 @@ export const VisaIntakeModal = ({
         payload.operator_guid = formattedVal || null;
       } else if (key === "office_guid") {
         payload.office_guid = formattedVal || null;
-      } else if (key === "visa_type" || key === "visa_category") {
-        payload.visa_type = formattedVal || null;
       } else if (key === "note") {
         payload.note = formattedVal || null;
       } else {
-        if (formattedVal !== null && formattedVal !== "") {
-          custom_field_values[key] = formattedVal;
-        }
+        custom_field_values[key] = formattedVal !== undefined ? formattedVal : "";
       }
     });
 

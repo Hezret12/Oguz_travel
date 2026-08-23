@@ -158,29 +158,3 @@ export const getVisaFieldLabel = (field, currentLanguage = "tk") => {
   }
   return String(field);
 };
-
-export const VISA_SELECT_OPTIONS = {
-  visaCategories: [
-    { value: "TOURISM", label: "Tourism" },
-    { value: "BUSINESS", label: "Business" },
-    { value: "STUDENT", label: "Student" },
-    { value: "TRANSIT", label: "Transit" },
-    { value: "FAMILY", label: "Family" },
-    { value: "WORK", label: "Work" },
-    { value: "MEDICAL", label: "Medical" },
-    { value: "PV-1", label: "PV-1" },
-  ],
-  visaKinds: [
-    { value: "EXPRESS", label: "Express" },
-    { value: "REGULAR", label: "Regular" },
-  ],
-  multiplicities: [
-    { value: "SINGLE", label: "Single" },
-    { value: "DOUBLE", label: "Double" },
-    { value: "MULTI", label: "Multi" },
-  ],
-  processedStatuses: [
-    { value: "TRUE", label: "Işlenen" },
-    { value: "FALSE", label: "Işlenmedik" },
-  ],
-};

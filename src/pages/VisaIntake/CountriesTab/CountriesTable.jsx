@@ -28,14 +28,20 @@ export const CountriesTable = forwardRef((props, ref) => {
   const [searchQuery, setSearch] = useState("");
   const debouncedSearch = useDebounce(searchQuery, 400);
 
-  const params = useMemo(
-    () => ({
-      page,
-      limit,
-      search: debouncedSearch || undefined,
-    }),
-    [page, limit, debouncedSearch]
-  );
+  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
+  if (debouncedSearch !== prevSearch) {
+    setPrevSearch(debouncedSearch);
+    setPage(1);
+  }
+
+  const params = useMemo(() => {
+    const p = { page, limit };
+    const query = debouncedSearch?.trim();
+    if (query) {
+      p.search = query;
+    }
+    return p;
+  }, [page, limit, debouncedSearch]);
 
   const {
     data: countriesData = [],
@@ -49,12 +55,6 @@ export const CountriesTable = forwardRef((props, ref) => {
     key: "countries",
     params,
   });
-
-  const [prevSearch, setPrevSearch] = useState(debouncedSearch);
-  if (debouncedSearch !== prevSearch) {
-    setPrevSearch(debouncedSearch);
-    setPage(1);
-  }
 
   const { mutate: deleteCountry, isPending: isDeleting } = useDelete({
     deleteFn: deleteCountryApi,

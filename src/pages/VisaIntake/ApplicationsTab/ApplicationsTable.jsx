@@ -347,13 +347,25 @@ export const ApplicationsTable = forwardRef(
           if (!standardKeys.has(fieldKey) && !isNotesField(field)) {
             const headerLabel = selectedLang(field.label) || fieldKey;
 
+            const getCustomFieldValue = (row) => {
+              if (!row) return undefined;
+              let cfv = row.custom_field_values;
+              if (typeof cfv === "string") {
+                try {
+                  cfv = JSON.parse(cfv);
+                } catch {
+                  cfv = {};
+                }
+              }
+              return cfv?.[fieldKey];
+            };
+
             if (field.fieldType === "date") {
               cols.push({
                 id: fieldKey,
                 header: headerLabel,
                 size: 130,
-                accessorFn: (row) =>
-                  row[fieldKey] ?? row.custom_field_values?.[fieldKey],
+                accessorFn: (row) => getCustomFieldValue(row),
                 Cell: ({ cell }) =>
                   formatChange(cell.getValue(), { dateOnly: true }),
               });
@@ -362,8 +374,7 @@ export const ApplicationsTable = forwardRef(
                 id: fieldKey,
                 header: headerLabel,
                 size: 140,
-                accessorFn: (row) =>
-                  row[fieldKey] ?? row.custom_field_values?.[fieldKey] ?? "-",
+                accessorFn: (row) => getCustomFieldValue(row) ?? "-",
                 Cell: ({ cell }) => {
                   const val = cell.getValue();
                   if (!val || val === "-") return "-";
@@ -383,8 +394,7 @@ export const ApplicationsTable = forwardRef(
                 id: fieldKey,
                 header: headerLabel,
                 size: 150,
-                accessorFn: (row) =>
-                  row[fieldKey] ?? row.custom_field_values?.[fieldKey] ?? "-",
+                accessorFn: (row) => getCustomFieldValue(row) ?? "-",
               });
             }
           }
