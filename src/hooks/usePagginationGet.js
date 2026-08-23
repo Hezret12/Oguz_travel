@@ -44,11 +44,25 @@ export function usePagginationGet({ apiFn, key, params, options = {} }) {
     responseBody?.data?.meta?.currentPage ??
     1;
 
+  const totalPrice =
+    responseBody?.data?.meta?.totalPrice ??
+    responseBody?.meta?.totalPrice ??
+    responseBody?.data?.totalPrice ??
+    responseBody?.totalPrice ??
+    0;
+
+  const meta =
+    responseBody?.data?.meta ??
+    responseBody?.meta ??
+    null;
+
   return {
     data: items,
     totalItems,
     pageCount,
     currentPage,
+    totalPrice,
+    meta,
     isLoading,
     isFetching,
     isError,

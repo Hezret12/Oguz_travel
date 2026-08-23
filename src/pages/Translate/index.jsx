@@ -8,7 +8,7 @@ import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 import TableEmptyState from "../../components/TableEmptyState";
-import { Box, Chip } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
 import AddTranslateModal from "./AddTranslateModal";
@@ -89,6 +89,7 @@ const TranslatePage = () => {
     refetch,
     pageCount,
     totalItems,
+    totalPrice = 0,
   } = usePagginationGet({
     apiFn: getAllTranslationsApi,
     key: "translations",
@@ -176,7 +177,7 @@ const TranslatePage = () => {
       {
         accessorKey: "received_day",
         id: "received_day",
-        header: t("columns.receivedDay") || "Alnan güni",
+        header: t("columns.receivedDay"),
         size: 100,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
         muiTableHeadCellProps: { align: "center" },
@@ -185,7 +186,7 @@ const TranslatePage = () => {
       {
         accessorKey: "received_time",
         id: "received_time",
-        header: t("columns.receivedTime") || "Alnan wagty",
+        header: t("columns.receivedTime"),
         size: 90,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -227,7 +228,7 @@ const TranslatePage = () => {
       {
         accessorFn: (row) => row.page_count,
         id: "page_count",
-        header: t("columns.pageCount") || "Sahypa",
+        header: t("columns.pageCount"),
         size: 80,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -235,7 +236,7 @@ const TranslatePage = () => {
       {
         accessorFn: (row) => row.completed_page_count,
         id: "completed_page_count",
-        header: t("columns.completedPageCount") || "Tabşyrylan sahypa sany",
+        header: t("columns.completedPageCount"),
         size: 130,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -243,7 +244,7 @@ const TranslatePage = () => {
       {
         accessorFn: (row) => row.price,
         id: "price",
-        header: t("columns.price") || "Baha",
+        header: t("columns.price"),
         size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
@@ -291,7 +292,7 @@ const TranslatePage = () => {
       {
         accessorKey: "completed_day",
         id: "completed_day",
-        header: t("columns.completedDay") || "Tabşyrylan güni",
+        header: t("columns.completedDay"),
         size: 100,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
         muiTableHeadCellProps: { align: "center" },
@@ -300,7 +301,7 @@ const TranslatePage = () => {
       {
         accessorKey: "completed_time",
         id: "completed_time",
-        header: t("columns.completedTime") || "Tabşyrylan wagty",
+        header: t("columns.completedTime"),
         size: 90,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -321,7 +322,7 @@ const TranslatePage = () => {
       },
       {
         id: "actions",
-        header: t("columns.actions") ?? "Actions",
+        header: t("columns.actions"),
         size: 110,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
@@ -466,9 +467,54 @@ const TranslatePage = () => {
             minHeight: "52px",
             borderTop: `1px solid ${theme.palette.divider}`,
             backgroundColor: theme.palette.background.paper,
+            gap: 2,
+            flexWrap: "wrap",
           })}
         >
-          <Box />
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 1,
+              px: 1.5,
+              py: 0.5,
+              borderRadius: "8px",
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.04)"
+                  : "rgba(0, 0, 0, 0.03)",
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                fontSize: "0.825rem",
+                color: "text.secondary",
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: 0.6,
+              }}
+            >
+              {t("columns.totalPrice")}:
+              <Box
+                component="span"
+                sx={{
+                  color: "text.primary",
+                  fontWeight: 700,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {new Intl.NumberFormat("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }).format(Number(totalPrice || 0))}{" "}
+                TMT
+              </Box>
+            </Typography>
+          </Box>
           <Pagination
             pageIndex={pageIndex}
             pageCount={pageCount}
