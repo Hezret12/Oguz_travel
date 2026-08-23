@@ -249,7 +249,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
     onUpdate({ ...table, rows: newRows });
   };
 
-  const handleSplitToSubColumns = () => {
+  const handleSplitToSubColumns = (count = 2) => {
     if (!activeCellCoord) return;
     const { r, c } = activeCellCoord;
     handleCloseMenu();
@@ -258,14 +258,15 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
     const currentCell = rows[0]?.[c];
     if (!currentCell) return;
 
-    // Check if table currently has 1-row header
     if (headerRowCount === 1) {
       // 1. Row 0:
       const newRow0 = [];
       for (let colIdx = 0; colIdx < rows[0].length; colIdx++) {
         if (colIdx === c) {
-          newRow0.push({ ...rows[0][colIdx], colSpan: 2, rowSpan: 1 });
-          newRow0.push({ ...createNewCell(""), isMerged: true });
+          newRow0.push({ ...rows[0][colIdx], colSpan: count, rowSpan: 1 });
+          for (let k = 1; k < count; k++) {
+            newRow0.push({ ...createNewCell(""), isMerged: true });
+          }
         } else {
           newRow0.push({ ...rows[0][colIdx], rowSpan: 2, colSpan: rows[0][colIdx].colSpan || 1 });
         }
@@ -275,14 +276,15 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
       const newRow1 = [];
       for (let colIdx = 0; colIdx < rows[0].length; colIdx++) {
         if (colIdx === c) {
-          newRow1.push(createNewCell(""));
-          newRow1.push(createNewCell(""));
+          for (let k = 0; k < count; k++) {
+            newRow1.push(createNewCell(""));
+          }
         } else {
           newRow1.push({ ...createNewCell(""), isMerged: true });
         }
       }
 
-      // 3. Data Rows (r >= 1): insert 1 empty cell at index c + 1
+      // 3. Data Rows (r >= 1):
       const newDataRows = [];
       for (let rowIdx = 1; rowIdx < rows.length; rowIdx++) {
         const oldRow = rows[rowIdx];
@@ -290,7 +292,9 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
         for (let colIdx = 0; colIdx < oldRow.length; colIdx++) {
           newRow.push(oldRow[colIdx]);
           if (colIdx === c) {
-            newRow.push(createNewCell(""));
+            for (let k = 1; k < count; k++) {
+              newRow.push(createNewCell(""));
+            }
           }
         }
         newDataRows.push(newRow);
@@ -298,20 +302,36 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
 
       onUpdate({ ...table, rows: [newRow0, newRow1, ...newDataRows] });
     } else {
-      // Table already has 2-row header:
+      // Header is already 2 rows
+      const currentColSpan = currentCell.colSpan || 1;
+      const additionalCount = count - currentColSpan;
+      if (additionalCount <= 0) return;
+
       const newRows = rows.map((row, rowIdx) => {
         const newRow = [];
         for (let colIdx = 0; colIdx < row.length; colIdx++) {
           if (rowIdx === 0 && colIdx === c) {
-            newRow.push({ ...row[colIdx], colSpan: 2, rowSpan: 1 });
-            newRow.push({ ...createNewCell(""), isMerged: true });
+            newRow.push({ ...row[colIdx], colSpan: count, rowSpan: 1 });
+            for (let k = 0; k < additionalCount; k++) {
+              newRow.push({ ...createNewCell(""), isMerged: true });
+            }
           } else if (rowIdx === 1 && colIdx === c) {
-            newRow.push(createNewCell(""));
-            newRow.push(createNewCell(""));
+            if (currentColSpan === 1) {
+              for (let k = 0; k < count; k++) {
+                newRow.push(createNewCell(""));
+              }
+            } else {
+              newRow.push(row[colIdx]);
+              for (let k = 0; k < additionalCount; k++) {
+                newRow.push(createNewCell(""));
+              }
+            }
           } else {
             newRow.push(row[colIdx]);
             if (rowIdx >= 2 && colIdx === c) {
-              newRow.push(createNewCell(""));
+              for (let k = 0; k < additionalCount; k++) {
+                newRow.push(createNewCell(""));
+              }
             }
           }
         }
@@ -675,25 +695,45 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
           </Typography>
         </Box>
 
-        {/* Split into 2 Sub-columns action for header cells */}
+        {/* Split into 2 or 3 Sub-columns action for header cells */}
         {activeCellCoord && activeCellCoord.r === 0 && activeCellCoord.c > 0 && (
-          <MenuItem
-            onClick={handleSplitToSubColumns}
-            sx={{
-              py: 0.8,
-              fontSize: "0.85rem",
-              color: "primary.main",
-              fontWeight: 600,
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 28, color: "primary.main" }}>
-              <CallSplitRoundedIcon sx={{ fontSize: 17 }} />
-            </ListItemIcon>
-            <ListItemText
-              primary={t("visaDocument.splitTo2SubColumns")}
-              slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 600 } }}
-            />
-          </MenuItem>
+          <>
+            <MenuItem
+              onClick={() => handleSplitToSubColumns(2)}
+              sx={{
+                py: 0.8,
+                fontSize: "0.85rem",
+                color: "primary.main",
+                fontWeight: 600,
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 28, color: "primary.main" }}>
+                <CallSplitRoundedIcon sx={{ fontSize: 17 }} />
+              </ListItemIcon>
+              <ListItemText
+                primary={t("visaDocument.splitTo2SubColumns")}
+                slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 600 } }}
+              />
+            </MenuItem>
+
+            <MenuItem
+              onClick={() => handleSplitToSubColumns(3)}
+              sx={{
+                py: 0.8,
+                fontSize: "0.85rem",
+                color: "primary.main",
+                fontWeight: 600,
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 28, color: "primary.main" }}>
+                <CallSplitRoundedIcon sx={{ fontSize: 17 }} />
+              </ListItemIcon>
+              <ListItemText
+                primary={t("visaDocument.splitTo3SubColumns")}
+                slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 600 } }}
+              />
+            </MenuItem>
+          </>
         )}
 
         <MenuItem onClick={handleMergeRight} sx={{ py: 0.8, fontSize: "0.85rem" }}>

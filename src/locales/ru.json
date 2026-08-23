@@ -648,6 +648,7 @@
     "tableNoteHelper": "Напишите отдельное пояснение или требование, относящееся только к этой таблице",
     "cellActions": "Действия с ячейкой",
     "splitTo2SubColumns": "Разделить на 2 колонки",
+    "splitTo3SubColumns": "Разделить на 3 колонки",
     "subColumnPlaceholder": "Подколонка...",
     "mergeRight": "Объединить вправо",
     "mergeDown": "Объединить вниз",

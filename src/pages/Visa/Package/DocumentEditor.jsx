@@ -167,7 +167,7 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
       {/* Main Content Form */}
       <Box
         sx={{
-          maxWidth: "960px",
+          maxWidth: "90%",
           width: "100%",
           mx: "auto",
           px: { xs: 2, sm: 3 },

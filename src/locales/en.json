@@ -648,6 +648,7 @@
     "tableNoteHelper": "Write specific requirements or remarks relevant only to this table",
     "cellActions": "Cell Actions",
     "splitTo2SubColumns": "Split into 2 columns",
+    "splitTo3SubColumns": "Split into 3 columns",
     "subColumnPlaceholder": "Sub-column...",
     "mergeRight": "Merge Right",
     "mergeDown": "Merge Down",
