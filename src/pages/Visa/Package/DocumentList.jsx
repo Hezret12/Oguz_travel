@@ -87,7 +87,7 @@ const DocumentList = ({
         />
       </PageHeader>
 
-      <Box sx={{ flexGrow: 1, overflowY: "auto", pb: 4, px: 0.5 }}>
+      <Box sx={{ flexGrow: 1, overflowY: "auto", pb: 4, px: 0.5, pt: 1 }}>
         {isLoading ? (
           <Box
             sx={{

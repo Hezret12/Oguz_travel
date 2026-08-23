@@ -647,6 +647,8 @@
     "tableNotePlaceholder": "e.g.: Documents must be translated into English or Russian...",
     "tableNoteHelper": "Write specific requirements or remarks relevant only to this table",
     "cellActions": "Cell Actions",
+    "splitTo2SubColumns": "Split into 2 columns",
+    "subColumnPlaceholder": "Sub-column...",
     "mergeRight": "Merge Right",
     "mergeDown": "Merge Down",
     "splitCell": "Split Cell",

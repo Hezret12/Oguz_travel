@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -21,10 +21,10 @@ import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownR
 import KeyboardArrowLeftRoundedIcon from "@mui/icons-material/KeyboardArrowLeftRounded";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import ContentCutRoundedIcon from "@mui/icons-material/ContentCutRounded";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ViewColumnRoundedIcon from "@mui/icons-material/ViewColumnRounded";
 import TableRowsRoundedIcon from "@mui/icons-material/TableRowsRounded";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+import CallSplitRoundedIcon from "@mui/icons-material/CallSplitRounded";
 import { createNewCell } from "./constants";
 import { useLocale } from "../../../hooks/useLocale";
 
@@ -35,6 +35,17 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
   const [activeCellCoord, setActiveCellCoord] = useState(null); // { r: rowIndex, c: colIndex }
 
   const rows = table.rows || [];
+
+  const headerRowCount = useMemo(() => {
+    if (!rows || rows.length === 0) return 1;
+    let maxSpan = 1;
+    (rows[0] || []).forEach((c) => {
+      if (c && c.rowSpan && c.rowSpan > maxSpan) {
+        maxSpan = c.rowSpan;
+      }
+    });
+    return maxSpan;
+  }, [rows]);
 
   const handleOpenMenu = (event, r, c) => {
     event.stopPropagation();
@@ -238,6 +249,79 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
     onUpdate({ ...table, rows: newRows });
   };
 
+  const handleSplitToSubColumns = () => {
+    if (!activeCellCoord) return;
+    const { r, c } = activeCellCoord;
+    handleCloseMenu();
+    if (c === 0 || r !== 0) return;
+
+    const currentCell = rows[0]?.[c];
+    if (!currentCell) return;
+
+    // Check if table currently has 1-row header
+    if (headerRowCount === 1) {
+      // 1. Row 0:
+      const newRow0 = [];
+      for (let colIdx = 0; colIdx < rows[0].length; colIdx++) {
+        if (colIdx === c) {
+          newRow0.push({ ...rows[0][colIdx], colSpan: 2, rowSpan: 1 });
+          newRow0.push({ ...createNewCell(""), isMerged: true });
+        } else {
+          newRow0.push({ ...rows[0][colIdx], rowSpan: 2, colSpan: rows[0][colIdx].colSpan || 1 });
+        }
+      }
+
+      // 2. Row 1 (Sub-headers):
+      const newRow1 = [];
+      for (let colIdx = 0; colIdx < rows[0].length; colIdx++) {
+        if (colIdx === c) {
+          newRow1.push(createNewCell(""));
+          newRow1.push(createNewCell(""));
+        } else {
+          newRow1.push({ ...createNewCell(""), isMerged: true });
+        }
+      }
+
+      // 3. Data Rows (r >= 1): insert 1 empty cell at index c + 1
+      const newDataRows = [];
+      for (let rowIdx = 1; rowIdx < rows.length; rowIdx++) {
+        const oldRow = rows[rowIdx];
+        const newRow = [];
+        for (let colIdx = 0; colIdx < oldRow.length; colIdx++) {
+          newRow.push(oldRow[colIdx]);
+          if (colIdx === c) {
+            newRow.push(createNewCell(""));
+          }
+        }
+        newDataRows.push(newRow);
+      }
+
+      onUpdate({ ...table, rows: [newRow0, newRow1, ...newDataRows] });
+    } else {
+      // Table already has 2-row header:
+      const newRows = rows.map((row, rowIdx) => {
+        const newRow = [];
+        for (let colIdx = 0; colIdx < row.length; colIdx++) {
+          if (rowIdx === 0 && colIdx === c) {
+            newRow.push({ ...row[colIdx], colSpan: 2, rowSpan: 1 });
+            newRow.push({ ...createNewCell(""), isMerged: true });
+          } else if (rowIdx === 1 && colIdx === c) {
+            newRow.push(createNewCell(""));
+            newRow.push(createNewCell(""));
+          } else {
+            newRow.push(row[colIdx]);
+            if (rowIdx >= 2 && colIdx === c) {
+              newRow.push(createNewCell(""));
+            }
+          }
+        }
+        return newRow;
+      });
+
+      onUpdate({ ...table, rows: newRows });
+    }
+  };
+
   const currentActiveCell = activeCellCoord
     ? rows[activeCellCoord.r]?.[activeCellCoord.c]
     : null;
@@ -310,7 +394,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
           <Button
             variant="outlined"
             onClick={handleAddRow}
-            startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
+            startIcon={<TableRowsRoundedIcon sx={{ fontSize: 18 }} />}
             sx={{
               textTransform: "none",
               borderRadius: "8px",
@@ -377,22 +461,29 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
         >
           <tbody>
             {rows.map((row, rIdx) => {
-              const dataRowNumber = rIdx > 0 ? rIdx : 0;
-              const isHeaderRow = rIdx === 0;
+              const isHeaderRow = rIdx < headerRowCount;
+              const dataRowNumber = rIdx >= headerRowCount ? rIdx - headerRowCount + 1 : 0;
 
               return (
                 <tr key={rIdx}>
                   {row.map((cell, cIdx) => {
-                    if (cell.isMerged) return null;
-
                     const isOrderCol = cIdx === 0;
+
+                    if (isOrderCol) {
+                      if (rIdx > 0 && rIdx < headerRowCount) return null;
+                    } else if (cell.isMerged) {
+                      return null;
+                    }
+
+                    const cellRowSpan = isOrderCol && isHeaderRow ? headerRowCount : cell.rowSpan || 1;
+                    const cellColSpan = isOrderCol ? 1 : cell.colSpan || 1;
 
                     return (
                       <Box
                         component="td"
                         key={cell.id || `${rIdx}-${cIdx}`}
-                        colSpan={isOrderCol ? 1 : cell.colSpan || 1}
-                        rowSpan={isOrderCol ? 1 : cell.rowSpan || 1}
+                        colSpan={cellColSpan}
+                        rowSpan={cellRowSpan}
                         sx={{
                           border: "1px solid",
                           borderColor: "divider",
@@ -462,7 +553,13 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                               multiline
                               value={cell.text || ""}
                               onChange={(e) => handleCellTextChange(rIdx, cIdx, e.target.value)}
-                              placeholder={isHeaderRow ? t("visaDocument.columnNamePlaceholder") : t("visaDocument.cellPlaceholder")}
+                              placeholder={
+                                isHeaderRow
+                                  ? rIdx === 0
+                                    ? t("visaDocument.columnNamePlaceholder")
+                                    : t("visaDocument.subColumnPlaceholder")
+                                  : t("visaDocument.cellPlaceholder")
+                              }
                               slotProps={{
                                 input: {
                                   disableUnderline: true,
@@ -557,7 +654,6 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
         anchorEl={menuAnchor}
         open={Boolean(menuAnchor)}
         onClose={handleCloseMenu}
-        disablePortal
         transformOrigin={{ horizontal: "left", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "top" }}
         slotProps={{
@@ -578,6 +674,27 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
             {t("visaDocument.cellActions")}
           </Typography>
         </Box>
+
+        {/* Split into 2 Sub-columns action for header cells */}
+        {activeCellCoord && activeCellCoord.r === 0 && activeCellCoord.c > 0 && (
+          <MenuItem
+            onClick={handleSplitToSubColumns}
+            sx={{
+              py: 0.8,
+              fontSize: "0.85rem",
+              color: "primary.main",
+              fontWeight: 600,
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 28, color: "primary.main" }}>
+              <CallSplitRoundedIcon sx={{ fontSize: 17 }} />
+            </ListItemIcon>
+            <ListItemText
+              primary={t("visaDocument.splitTo2SubColumns")}
+              slotProps={{ primary: { fontSize: "0.85rem", fontWeight: 600 } }}
+            />
+          </MenuItem>
+        )}
 
         <MenuItem onClick={handleMergeRight} sx={{ py: 0.8, fontSize: "0.85rem" }}>
           <ListItemIcon sx={{ minWidth: 28, color: "text.secondary" }}>

@@ -32,8 +32,10 @@ export const createPricesTable = () => ({
       createNewCell("№"),
       createNewCell(""),
       createNewCell(""),
+      createNewCell(""),
     ],
     [
+      createNewCell(""),
       createNewCell(""),
       createNewCell(""),
       createNewCell(""),
@@ -157,6 +159,29 @@ export const deserializeBackendToDocument = (serverDoc) => {
 
     if (matrixRows.length === 0) {
       matrixRows = dIdx === 0 ? createDocumentsTable().rows : createPricesTable().rows;
+    } else {
+      // Automatically flag cells that are spanned/merged by other cells
+      for (let r = 0; r < matrixRows.length; r++) {
+        for (let c = 0; c < (matrixRows[r] || []).length; c++) {
+          const cell = matrixRows[r][c];
+          if (!cell || cell.isMerged) continue;
+          const rowSpan = cell.rowSpan || 1;
+          const colSpan = cell.colSpan || 1;
+
+          if (rowSpan > 1 || colSpan > 1) {
+            for (let dr = 0; dr < rowSpan; dr++) {
+              for (let dc = 0; dc < colSpan; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const targetR = r + dr;
+                const targetC = c + dc;
+                if (matrixRows[targetR] && matrixRows[targetR][targetC]) {
+                  matrixRows[targetR][targetC].isMerged = true;
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
     return {

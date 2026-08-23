@@ -306,7 +306,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                     mb: 1.5,
                   }}
                 >
-                  <Box sx={{ width: 4, height: 18, bgcolor: "#017C7D", borderRadius: "2px" }} />
+                  <Box sx={{ width: 3.5, height: 16, bgcolor: "#1e293b", borderRadius: "2px" }} />
                   <Typography
                     sx={{
                       fontWeight: 800,
@@ -345,59 +345,89 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                     }}
                   >
                     <tbody>
-                      {(table.rows || []).map((row, rIdx) => {
-                        const isHeaderRow = rIdx === 0;
-                        return (
-                          <tr key={rIdx}>
-                            {row.map((cell, cIdx) => {
-                              if (cell.isMerged) return null;
-                              const isOrderCol = cIdx === 0;
-                              const displayValue = isOrderCol
-                                ? isHeaderRow
-                                  ? "№"
-                                  : rIdx
-                                : cell.text || "—";
+                      {(() => {
+                        let headerRowCount = 1;
+                        (table.rows?.[0] || []).forEach((c) => {
+                          if (c && c.rowSpan && c.rowSpan > headerRowCount) {
+                            headerRowCount = c.rowSpan;
+                          }
+                        });
 
-                              return (
-                                <td
-                                  key={cell.id || `${rIdx}-${cIdx}`}
-                                  colSpan={cell.colSpan || 1}
-                                  rowSpan={cell.rowSpan || 1}
-                                  style={{
-                                    fontWeight: isHeaderRow ? 700 : isOrderCol ? 600 : 400,
-                                    backgroundColor: isHeaderRow
-                                      ? "#f1f5f9"
-                                      : isOrderCol
-                                        ? "#fafbfc"
-                                        : "#ffffff",
-                                    color: isHeaderRow ? "#0f172a" : "#334155",
-                                    textAlign: isOrderCol ? "center" : "left",
-                                    width: isOrderCol ? "48px" : undefined,
-                                  }}
-                                >
-                                  {displayValue}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      })}
+                        return (table.rows || []).map((row, rIdx) => {
+                          const isHeaderRow = rIdx < headerRowCount;
+                          const dataRowNumber = rIdx >= headerRowCount ? rIdx - headerRowCount + 1 : 0;
+
+                          return (
+                            <tr key={rIdx}>
+                              {row.map((cell, cIdx) => {
+                                const isOrderCol = cIdx === 0;
+
+                                if (isOrderCol) {
+                                  if (rIdx > 0 && rIdx < headerRowCount) return null;
+                                } else if (cell.isMerged) {
+                                  return null;
+                                }
+
+                                const displayValue = isOrderCol
+                                  ? isHeaderRow
+                                    ? "№"
+                                    : dataRowNumber
+                                  : cell.text || "—";
+
+                                const cellRowSpan = isOrderCol && isHeaderRow ? headerRowCount : cell.rowSpan || 1;
+                                const cellColSpan = isOrderCol ? 1 : cell.colSpan || 1;
+
+                                return (
+                                  <td
+                                    key={cell.id || `${rIdx}-${cIdx}`}
+                                    colSpan={cellColSpan}
+                                    rowSpan={cellRowSpan}
+                                    style={{
+                                      fontWeight: isHeaderRow ? 700 : isOrderCol ? 600 : 400,
+                                      backgroundColor: isHeaderRow
+                                        ? "#f1f5f9"
+                                        : isOrderCol
+                                          ? "#fafbfc"
+                                          : "#ffffff",
+                                      color: isHeaderRow ? "#0f172a" : "#334155",
+                                      textAlign: isOrderCol ? "center" : "left",
+                                      width: isOrderCol ? "48px" : undefined,
+                                    }}
+                                  >
+                                    {displayValue}
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          );
+                        });
+                      })()}
                     </tbody>
                   </Box>
                 </Box>
 
                 {/* Table Note */}
                 {table.note && (
-                  <Box
-                    sx={{
-                      bgcolor: "#f8fafc",
-                      p: 1.75,
-                      borderRadius: "4px",
-                      borderLeft: "3px solid #017C7D",
-                    }}
-                  >
-                    <Typography sx={{ fontSize: "0.84rem", color: "#475569", lineHeight: 1.5 }}>
-                      <strong style={{ color: "#0f172a" }}>{t("visaDocument.generalNote")}:</strong> {table.note}
+                  <Box sx={{ mt: 1.5, px: 0.5 }}>
+                    <Typography
+                      sx={{
+                        fontSize: "0.875rem",
+                        color: "#0f172a",
+                        lineHeight: 1.6,
+                        whiteSpace: "pre-wrap",
+                      }}
+                    >
+                      <Box
+                        component="span"
+                        sx={{
+                          fontWeight: 700,
+                          color: "#0f172a",
+                          mr: 0.75,
+                        }}
+                      >
+                        Bellik:
+                      </Box>
+                      {table.note}
                     </Typography>
                   </Box>
                 )}
@@ -409,14 +439,30 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
               <Box
                 sx={{
                   mt: 4,
-                  pt: 3,
-                  borderTop: "1px dashed #cbd5e1",
+                  pt: 2.5,
+                  borderTop: "1px solid #cbd5e1",
                 }}
               >
-                <Typography sx={{ fontWeight: 800, fontSize: "0.88rem", color: "#0f172a", mb: 1, letterSpacing: "0.5px" }}>
-                  {t("visaDocument.generalNote").toUpperCase()}
+                <Typography
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: "0.9rem",
+                    color: "#0f172a",
+                    mb: 1,
+                    letterSpacing: "0.3px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {t("visaDocument.generalNote")}:
                 </Typography>
-                <Typography sx={{ fontSize: "0.88rem", color: "#334155", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+                <Typography
+                  sx={{
+                    fontSize: "0.875rem",
+                    color: "#0f172a",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.65,
+                  }}
+                >
                   {currentDoc.generalNote}
                 </Typography>
               </Box>
