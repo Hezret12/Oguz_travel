@@ -272,7 +272,6 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
         }
       }
 
-      // 2. Row 1 (Sub-headers):
       const newRow1 = [];
       for (let colIdx = 0; colIdx < rows[0].length; colIdx++) {
         if (colIdx === c) {
