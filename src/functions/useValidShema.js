@@ -154,6 +154,20 @@ export const useValidShema = () => {
       }),
   });
 
+  const addCafeteriaTransaction = yup.object({
+    type: yup
+      .boolean()
+      .typeError(t("cafeteria.validation.typeRequired"))
+      .required(t("cafeteria.validation.typeRequired")),
+    amount: yup
+      .number()
+      .typeError(t("cafeteria.validation.amountRequired"))
+      .positive(t("cafeteria.validation.amountPositive"))
+      .required(t("cafeteria.validation.amountRequired")),
+    date: stringRequiredValidSchema(t("cafeteria.validation.dateRequired")),
+    description: stringOptionalValidSchema(),
+  });
+
   return {
     addB2BTicket,
     addTurkishAirlinesTicket,
@@ -169,6 +183,7 @@ export const useValidShema = () => {
     addTranslator,
     addOutbound,
     addNotification,
+    addCafeteriaTransaction,
   };
 };
 

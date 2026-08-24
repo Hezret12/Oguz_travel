@@ -138,3 +138,8 @@ export const deleteVisaDocApi = async (guid) => {
   const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
   return await api.deletePrivate('/visa-docs/delete-visa-doc', { guid: actualGuid });
 };
+
+export const deleteCafeteriaTransactionApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate(`/cafeteria/delete/${actualGuid}`, { guid: actualGuid });
+};

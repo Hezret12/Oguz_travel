@@ -30,6 +30,7 @@ export const PATHS = {
     TURKISH_AIRLINES: '/reports/turkish-airlines',
     REFERRAL_LETTER: '/reports/referral-letter',
   },
+  CAFETERIA: '/cafeteria',
   PROFILE: '/profile',
 };
 

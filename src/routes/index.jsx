@@ -49,6 +49,7 @@ const TurkishAirlinesReportPage = lazyRetry(() => import('../pages/Reports/Turki
 const TaskFlowPage = lazyRetry(() => import('../pages/TaskFlow'));
 const NotificationPage = lazyRetry(() => import('../pages/Notification'));
 const ProfilePage = lazyRetry(() => import('../pages/Profile/index'));
+const CafeteriaPage = lazyRetry(() => import('../pages/Cafeteria'));
 
 function PageLoader() {
   const [visible, setVisible] = useState(false);
@@ -113,6 +114,7 @@ const TurkishReport = Loadable(TurkishAirlinesReportPage);
 const TaskFlow = Loadable(TaskFlowPage);
 const Notification = Loadable(NotificationPage);
 const Profile = Loadable(ProfilePage);
+const Cafeteria = Loadable(CafeteriaPage);
 const Unauthorized = Loadable(UnauthorizedPage);
 const NotFound = Loadable(NotFoundPage);
 const Login = Loadable(LoginPage);
@@ -165,6 +167,7 @@ const router = createBrowserRouter([
               { path: 'intake', element: <Intake /> },
               { path: 'reports/turkish-airlines', element: <TurkishReport /> },
               { path: 'reports/referral-letter', element: <ReferralLetterReport /> },
+              { path: 'cafeteria', element: <Cafeteria /> },
               { path: 'notifications', element: <Notification /> },
               { path: 'unauthorized', element: <Unauthorized /> },
             ],

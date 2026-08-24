@@ -337,6 +337,7 @@
       "package": "Packages",
       "packages": "Packages"
     },
+    "cafeteria": "Cafeteria",
     "taskFlow": "Tasks"
   },
   "turkish": {
@@ -751,5 +752,48 @@
   "prev": "Prev",
   "next": "Next",
   "editTranslation": "Edit Translation",
-  "translationKey": "Translation Key"
+  "translationKey": "Translation Key",
+  "cafeteria": {
+    "title": "Cafeteria",
+    "income": "Income",
+    "expense": "Expense",
+    "balance": "Balance",
+    "totalIncome": "Total Income",
+    "totalExpense": "Total Expense",
+    "netBalance": "Net Balance",
+    "addTransaction": "Add Transaction",
+    "editTransaction": "Edit Transaction",
+    "transactionDetails": "Transaction Details",
+    "type": "Type",
+    "category": "Category",
+    "amount": "Amount",
+    "date": "Date",
+    "description": "Description",
+    "allTypes": "All Types",
+    "allCategories": "All Categories",
+    "categories": {
+      "foodPurchase": "Food Purchase",
+      "sales": "Sales Revenue",
+      "utilities": "Utilities",
+      "beverages": "Beverages",
+      "equipment": "Equipment",
+      "other": "Other"
+    },
+    "types": {
+      "income": "Income",
+      "expense": "Expense"
+    },
+    "excel": {
+      "titleBanner": "CAFETERIA REPORT",
+      "sheetName": "Cafeteria",
+      "totalSummary": "TOTAL"
+    },
+    "validation": {
+      "typeRequired": "Select transaction type",
+      "amountRequired": "Enter amount",
+      "amountPositive": "Amount must be greater than 0",
+      "categoryRequired": "Select category",
+      "dateRequired": "Select date"
+    }
+  }
 }

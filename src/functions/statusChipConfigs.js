@@ -15,6 +15,8 @@ import LocalHospitalRoundedIcon from "@mui/icons-material/LocalHospitalRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
 import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
+import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
+import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 
 export const SALE_STATUS_CONFIG = {
   SALE: { label: "Sale", color: "#16a34a", icon: CheckCircleRoundedIcon },
@@ -92,3 +94,12 @@ export const VISA_STATUS_CONFIG = {
   CANCELLED: { label: "Ýatyryldy", color: "#64748b", icon: BlockRoundedIcon },
   COMPLETED: { label: "Tamamlandy", color: "#0d9488", icon: VerifiedRoundedIcon },
 };
+
+export const CAFETERIA_TYPE_CONFIG = {
+  INCOME: { label: "Girdeji", color: "#16a34a", icon: TrendingUpRoundedIcon },
+  EXPENSE: { label: "Çykdajy", color: "#dc2626", icon: TrendingDownRoundedIcon },
+  TRUE: { label: "Girdeji", color: "#16a34a", icon: TrendingUpRoundedIcon },
+  FALSE: { label: "Çykdajy", color: "#dc2626", icon: TrendingDownRoundedIcon },
+  "1": { label: "Girdeji", color: "#16a34a", icon: TrendingUpRoundedIcon },
+  "0": { label: "Çykdajy", color: "#dc2626", icon: TrendingDownRoundedIcon },
+};

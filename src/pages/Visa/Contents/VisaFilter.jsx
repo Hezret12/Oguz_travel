@@ -2,8 +2,6 @@ import { useMemo } from "react";
 import { Box, FormControl, MenuItem, Select, Stack, Typography, TextField } from "@mui/material";
 import { ChevronDown } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
-import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllPackageByIndexApi } from "../../../api/queries/getters";
 import { getBooleanPaymentFilterOptions } from "../../../functions/generalHelpers";
 
 const selectSx = {
@@ -124,27 +122,7 @@ const VisaFilter = ({
 }) => {
   const { t } = useLocale();
 
-  const { data: mainPackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 4 },
-  });
 
-  const { data: servicePackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 5 },
-  });
-
-  const packageOptions = useMemo(
-    () => (mainPackages || []).map((p) => ({ value: p.guid, label: p.name })),
-    [mainPackages]
-  );
-
-  const serviceOptions = useMemo(
-    () => (servicePackages || []).map((p) => ({ value: p.guid, label: p.name })),
-    [servicePackages]
-  );
 
   const statusOptions = useMemo(
     () => [
@@ -199,30 +177,6 @@ const VisaFilter = ({
         value={filters?.is_paid}
         options={paymentFilterOptions}
         isOpen={selectsOpen?.is_paid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
-      />
-
-      <FilterSelect
-        label={t("sidebar.visa.packages")}
-        name="package_guid"
-        value={filters.package_guid}
-        options={packageOptions}
-        isOpen={selectsOpen?.package_guid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
-      />
-
-      <FilterSelect
-        label={t("columns.service")}
-        name="service_guid"
-        value={filters.service_guid}
-        options={serviceOptions}
-        isOpen={selectsOpen?.service_guid ?? false}
         allText={allText}
         onChange={onFilterChange}
         onOpen={onSelectOpen}

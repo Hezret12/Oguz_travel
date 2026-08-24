@@ -210,3 +210,7 @@ export const updateUserProfileApi = async (data) => {
 export const updateVisaDocApi = async (data) => {
   return await api.patchPrivate('/visa-docs/update-visa-doc', data);
 };
+
+export const updateCafeteriaTransactionApi = async (data) => {
+  return await api.patchPrivate(`/cafeteria/update/${data.guid || data.id}`, data);
+};

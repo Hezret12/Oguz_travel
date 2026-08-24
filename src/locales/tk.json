@@ -337,6 +337,7 @@
       "package": "Bukjalar",
       "packages": "Bukjalar"
     },
+    "cafeteria": "Kafeteriýa",
     "taskFlow": "Ýumuşlar"
   },
   "turkish": {
@@ -751,5 +752,48 @@
   "prev": "Öňki",
   "next": "Indiki",
   "editTranslation": "Terjimäni üýtgetmek",
-  "translationKey": "Terjime açary"
+  "translationKey": "Terjime açary",
+  "cafeteria": {
+    "title": "Kafeteriýa",
+    "income": "Girdeji",
+    "expense": "Çykdajy",
+    "balance": "Balans",
+    "totalIncome": "Jemi girdeji",
+    "totalExpense": "Jemi çykdajy",
+    "netBalance": "Arassa balans",
+    "addTransaction": "Täze amal goşmak",
+    "editTransaction": "Amaly üýtgetmek",
+    "transactionDetails": "Amal maglumatlary",
+    "type": "Görnüşi",
+    "category": "Kategoriýa",
+    "amount": "Mukdary",
+    "date": "Senesi",
+    "description": "Düşündiriş",
+    "allTypes": "Ähli görnüşler",
+    "allCategories": "Ähli kategoriýalar",
+    "categories": {
+      "foodPurchase": "Azyk satyn almak",
+      "sales": "Söwda girdejisi",
+      "utilities": "Kommunal hyzmatlar",
+      "beverages": "Içgiler",
+      "equipment": "Enjamlar",
+      "other": "Başga"
+    },
+    "types": {
+      "income": "Girdeji",
+      "expense": "Çykdajy"
+    },
+    "excel": {
+      "titleBanner": "KAFETERIÝA HASABATY",
+      "sheetName": "Kafeteriýa",
+      "totalSummary": "JEMI"
+    },
+    "validation": {
+      "typeRequired": "Amalyň görnüşini saýlaň",
+      "amountRequired": "Mukdary giriziň",
+      "amountPositive": "Mukdar 0-dan uly bolmaly",
+      "categoryRequired": "Kategoriýany saýlaň",
+      "dateRequired": "Senäni giriziň"
+    }
+  }
 }

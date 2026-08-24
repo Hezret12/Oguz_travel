@@ -241,3 +241,7 @@ export const addVisaDocApi = async (data) => {
   return await api.postPrivate("/visa-docs/add-visa-doc", data);
 };
 
+export const addCafeteriaTransactionApi = async (data) => {
+  return await api.postPrivate("/cafeteria/add", data);
+};
+

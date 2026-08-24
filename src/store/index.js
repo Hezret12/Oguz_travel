@@ -11,6 +11,7 @@ import translateFiltersReducer from './slices/filters/translateFilterSlice';
 import outboundFiltersReducer from './slices/filters/outboundFilterSlice';
 import visaIntakeFiltersReducer from './slices/filters/visaIntakeFilterSlice';
 import taskFiltersReducer from './slices/filters/taskFilterSlice';
+import cafeteriaFiltersReducer from './slices/filters/cafeteriaFilterSlice';
 import notificationsReducer from './slices/notificationSlice';
 
 const store = configureStore({
@@ -29,6 +30,7 @@ const store = configureStore({
     outboundFilters: outboundFiltersReducer,
     visaIntakeFilters: visaIntakeFiltersReducer,
     taskFilters:     taskFiltersReducer,
+    cafeteriaFilters: cafeteriaFiltersReducer,
     // paymentFilters: paymentFiltersReducer,
   },
   middleware: (getDefaultMiddleware) =>

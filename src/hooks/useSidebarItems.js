@@ -18,6 +18,7 @@ import {
   PlaneTakeoff,
   BarChart3,
   ClipboardCheck,
+  UtensilsCrossed,
 } from "lucide-react";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 import { PATHS } from "../routes/paths";
@@ -136,6 +137,12 @@ export const useSidebarItems = () => {
             icon: createElement(FileText, { size: 18, strokeWidth: 2.2 }),
           },
         ],
+      },
+      {
+        id: "cafeteria",
+        text: t("sidebar.cafeteria"),
+        path: PATHS.CAFETERIA,
+        icon: createElement(UtensilsCrossed, { size: 20, strokeWidth: 2.2 }),
       },
       {
         id: "employee",

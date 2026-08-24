@@ -3,5 +3,6 @@ export * from './b2bFilterSlice';
 export * from './turkishAirlinesFilterSlice';
 export * from './referralLetterFilterSlice';
 export * from './taskFilterSlice';
+export * from './cafeteriaFilterSlice';
 export { createFilterSlice } from './createFilterSlice';
 

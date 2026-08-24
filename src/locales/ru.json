@@ -337,6 +337,7 @@
       "package": "Пакеты",
       "packages": "Пакеты"
     },
+    "cafeteria": "Кафетерий",
     "taskFlow": "Задачи"
   },
   "turkish": {
@@ -751,5 +752,48 @@
   "prev": "Назад",
   "next": "Вперед",
   "editTranslation": "Редактировать перевод",
-  "translationKey": "Ключ перевода"
+  "translationKey": "Ключ перевода",
+  "cafeteria": {
+    "title": "Кафетерий",
+    "income": "Доход",
+    "expense": "Расход",
+    "balance": "Баланс",
+    "totalIncome": "Общий доход",
+    "totalExpense": "Общий расход",
+    "netBalance": "Чистый баланс",
+    "addTransaction": "Добавить операцию",
+    "editTransaction": "Редактировать операцию",
+    "transactionDetails": "Детали операции",
+    "type": "Тип",
+    "category": "Категория",
+    "amount": "Сумма",
+    "date": "Дата",
+    "description": "Описание",
+    "allTypes": "Все типы",
+    "allCategories": "Все категории",
+    "categories": {
+      "foodPurchase": "Закупка продуктов",
+      "sales": "Выручка от продаж",
+      "utilities": "Коммунальные услуги",
+      "beverages": "Напитки",
+      "equipment": "Оборудование",
+      "other": "Другое"
+    },
+    "types": {
+      "income": "Доход",
+      "expense": "Расход"
+    },
+    "excel": {
+      "titleBanner": "ОТЧЕТ КАФЕТЕРИЯ",
+      "sheetName": "Кафетерий",
+      "totalSummary": "ИТОГО"
+    },
+    "validation": {
+      "typeRequired": "Выберите тип операции",
+      "amountRequired": "Введите сумму",
+      "amountPositive": "Сумма должна быть больше 0",
+      "categoryRequired": "Выберите категорию",
+      "dateRequired": "Укажите дату"
+    }
+  }
 }

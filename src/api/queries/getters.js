@@ -211,3 +211,12 @@ export const getAllVisaDocsApi = async (params = {}) => {
 export const getOneVisaDocApi = async (guid) => {
   return await api.getPrivate(`/visa-docs/get-visa-doc/${guid}`);
 };
+
+export const getAllCafeteriaTransactionsApi = async (params = {}) => {
+  return await api.getPrivate('/cafeteria/get-all', params);
+};
+
+export const getCafeteriaSummaryApi = async (params = {}) => {
+  return await api.getPrivate('/cafeteria/summary', params);
+};
+
