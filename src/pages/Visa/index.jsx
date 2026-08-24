@@ -11,6 +11,8 @@ import TableEmptyState from "../../components/TableEmptyState";
 import { Box, Chip } from "@mui/material";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
+import StatusChip from "../../components/StatusChip";
+import { VISA_STATUS_CONFIG } from "../../functions/statusChipConfigs";
 import AddVisaModal from "./AddVisaModal";
 import EditVisaModal from "./EditVisaModal";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
@@ -160,6 +162,17 @@ const Visa = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
+        accessorKey: "status",
+        id: "status",
+        header: t("columns.visaStatus") || "Wiza ýagdaýy",
+        size: 140,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ cell }) => (
+          <StatusChip status={cell.getValue()} config={VISA_STATUS_CONFIG} />
+        ),
+      },
+      {
         accessorFn: (row) => row.price_tmt,
         id: "price_tmt",
         header: t("columns.total_tmt"),
@@ -218,7 +231,7 @@ const Visa = () => {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t],
+    [t, selectedLang, formatChange],
   );
 
   const table = useMaterialReactTable({

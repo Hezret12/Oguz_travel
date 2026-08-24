@@ -46,6 +46,18 @@ const EditVisaModal = ({ table, row }) => {
     [employees, selectedLang],
   );
 
+  const statusOptions = useMemo(
+    () => [
+      { label: t("visa.statusPending"), value: "PENDING", color: "#d97706" },
+      { label: t("visa.statusInProgress"), value: "IN_PROGRESS", color: "#2563eb" },
+      { label: t("visa.statusApproved"), value: "APPROVED", color: "#16a34a" },
+      { label: t("visa.statusRejected"), value: "REJECTED", color: "#dc2626" },
+      { label: t("visa.statusCancelled"), value: "CANCELLED", color: "#64748b" },
+      { label: t("visa.statusCompleted"), value: "COMPLETED", color: "#7c3aed" },
+    ],
+    [t],
+  );
+
   // Mutation to update Visa
   const { mutate: updateVisa, isPending: isSubmit } = useUpdate({
     apiFn: updateVisaApi,
@@ -57,7 +69,7 @@ const EditVisaModal = ({ table, row }) => {
   });
 
   // Form setup
-  const { control, handleSubmit, setValue } = useForm({
+  const { control, handleSubmit } = useForm({
     defaultValues: {
       guid: row?.original?.guid || null,
       index_number: row?.original?.index_number || "",
@@ -65,6 +77,7 @@ const EditVisaModal = ({ table, row }) => {
       client_guid:
         row?.original?.client_guid || row?.original?.client?.guid || null,
       received_opr_guid: row?.original?.received_opr_guid || null,
+      status: row?.original?.status || "PENDING",
       agent: {
         name: row?.original?.agent?.name || "",
         phone_number: row?.original?.agent?.phone_number || "",
@@ -84,6 +97,7 @@ const EditVisaModal = ({ table, row }) => {
   const submitHandler = (values) => {
     const payload = {
       ...values,
+      status: values.status || "PENDING",
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),
       agent:
@@ -147,6 +161,14 @@ const EditVisaModal = ({ table, row }) => {
             required
           />
 
+          <CustomSelect
+            name="status"
+            control={control}
+            label={t("columns.visaStatus") || "Wiza ýagdaýy"}
+            options={statusOptions}
+            required
+          />
+
           <CustomTextField
             name="price_tmt"
             control={control}
@@ -163,12 +185,14 @@ const EditVisaModal = ({ table, row }) => {
             endIcon="USD"
           />
 
-          <Box sx={{ gridColumn: "span 2" }}>
+          <Box sx={{ gridColumn: "1 / -1" }}>
             <AgentAccordion
               control={control}
               fullNameName="agent.name"
               phoneNumberName="agent.phone_number"
-              inline
+              title={t("columns.agent")}
+              fullNameLabel={t("columns.agentFullName")}
+              phoneNumberLabel={t("b2b.agentPhoneNumber")}
             />
           </Box>
 
