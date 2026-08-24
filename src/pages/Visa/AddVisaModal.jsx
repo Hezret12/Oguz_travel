@@ -73,7 +73,7 @@ const AddVisaModal = ({ table }) => {
       index_number: "",
       datetime: dayjs().toISOString(),
       client_guid: null,
-      receiver_opr_guid: null,
+      received_opr_guid: null,
       status: "PENDING",
       agent: {
         name: "",
@@ -104,19 +104,8 @@ const AddVisaModal = ({ table }) => {
   };
 
   const autocompleteColumns = useMemo(
-    () => [
-      "fullName",
-      "phone_number",
-      {
-        key: "passport_number",
-        label: t("columns.passportNumber"),
-      },
-      {
-        key: "dateOfBirth",
-        label: t("columns.dateOfBirth"),
-      },
-    ],
-    [t],
+    () => ["fullName", "passport_number", "phone_number", "dateOfBirth"],
+    [],
   );
 
   return (
@@ -137,6 +126,7 @@ const AddVisaModal = ({ table }) => {
               name="client_guid"
               label={t("columns.client")}
               columns={autocompleteColumns}
+              required
             />
           </Box>
 
@@ -150,13 +140,12 @@ const AddVisaModal = ({ table }) => {
           <CustomDatePicker
             name="datetime"
             control={control}
-            label={t("columns.dateTime")}
-            showTime={true}
+            label={t("columns.issueDate")}
             required
           />
 
           <CustomSelect
-            name="receiver_opr_guid "
+            name="received_opr_guid"
             control={control}
             label={t("columns.operatorTwo")}
             options={employeeOptions}

@@ -112,13 +112,8 @@ const EditVisaModal = ({ table, row }) => {
   };
 
   const autocompleteColumns = useMemo(
-    () => [
-      "fullName",
-      "phone_number",
-      { key: "passport_number", label: t("columns.passportNumber") },
-      { key: "dateOfBirth", label: t("columns.dateOfBirth") },
-    ],
-    [t],
+    () => ["fullName", "passport_number", "phone_number", "dateOfBirth"],
+    [],
   );
 
   return (
@@ -140,6 +135,7 @@ const EditVisaModal = ({ table, row }) => {
               label={t("columns.client")}
               columns={autocompleteColumns}
               initialClient={row?.original?.client}
+              required
             />
           </Box>
 
@@ -153,8 +149,7 @@ const EditVisaModal = ({ table, row }) => {
           <CustomDatePicker
             name="datetime"
             control={control}
-            label={t("columns.dateTime")}
-            showTime={true}
+            label={t("columns.issueDate")}
             required
           />
 
