@@ -163,13 +163,12 @@ const AddVisaModal = ({ table }) => {
             required
           />
 
-          <AgentAccordion
+          <CustomSelect
+            name="status"
             control={control}
-            fullNameName="agent.name"
-            phoneNumberName="agent.phone_number"
-            title={t("columns.agent")}
-            fullNameLabel={t("columns.agentFullName")}
-            phoneNumberLabel={t("b2b.agentPhoneNumber")}
+            label={t("columns.visaStatus") || "Wiza ýagdaýy"}
+            options={statusOptions}
+            required
           />
 
           <CustomTextField
@@ -187,6 +186,17 @@ const AddVisaModal = ({ table }) => {
             label={`${t("price")} (USD)`}
             endIcon="USD"
           />
+
+          <Box sx={{ gridColumn: "1 / -1" }}>
+            <AgentAccordion
+              control={control}
+              fullNameName="agent.name"
+              phoneNumberName="agent.phone_number"
+              title={t("columns.agent")}
+              fullNameLabel={t("columns.agentFullName")}
+              phoneNumberLabel={t("b2b.agentPhoneNumber")}
+            />
+          </Box>
 
           <Box sx={{ gridColumn: "1 / -1" }}>
             <CustomTextField
