@@ -155,7 +155,7 @@ const AddVisaModal = ({ table }) => {
           <CustomSelect
             name="status"
             control={control}
-            label={t("columns.visaStatus") || "Wiza ýagdaýy"}
+            label={t("columns.visaStatus")}
             options={statusOptions}
             required
           />
@@ -164,7 +164,7 @@ const AddVisaModal = ({ table }) => {
             name="price_tmt"
             control={control}
             type="number"
-            label={`${t("price")} (TMT)`}
+            label={`${t("price")}, TMT`}
             endIcon="TMT"
           />
 
@@ -172,7 +172,7 @@ const AddVisaModal = ({ table }) => {
             name="price_usd"
             control={control}
             type="number"
-            label={`${t("price")} (USD)`}
+            label={`${t("price")}, USD`}
             endIcon="USD"
           />
 
