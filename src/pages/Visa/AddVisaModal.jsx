@@ -46,6 +46,18 @@ const AddVisaModal = ({ table }) => {
     [employees, selectedLang],
   );
 
+  const statusOptions = useMemo(
+    () => [
+      { label: t("visa.statusPending"), value: "PENDING", color: "#d97706" },
+      { label: t("visa.statusInProgress"), value: "IN_PROGRESS", color: "#2563eb" },
+      { label: t("visa.statusApproved"), value: "APPROVED", color: "#16a34a" },
+      { label: t("visa.statusRejected"), value: "REJECTED", color: "#dc2626" },
+      { label: t("visa.statusCancelled"), value: "CANCELLED", color: "#64748b" },
+      { label: t("visa.statusCompleted"), value: "COMPLETED", color: "#7c3aed" },
+    ],
+    [t],
+  );
+
   // Mutation to create Visa
   const { mutate: createVisa, isPending: isSubmit } = useCreate({
     apiFn: addVisaApi,
@@ -56,12 +68,13 @@ const AddVisaModal = ({ table }) => {
   });
 
   // Form setup
-  const { control, handleSubmit, setValue } = useForm({
+  const { control, handleSubmit } = useForm({
     defaultValues: {
       index_number: "",
       datetime: dayjs().toISOString(),
       client_guid: null,
       received_opr_guid: null,
+      status: "PENDING",
       agent: {
         name: "",
         phone_number: "",
@@ -81,6 +94,7 @@ const AddVisaModal = ({ table }) => {
   const submitHandler = (values) => {
     const payload = {
       ...values,
+      status: values.status || "PENDING",
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),
       agent:

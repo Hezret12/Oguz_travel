@@ -83,3 +83,12 @@ export const REFERRAL_REPORT_STATUS_CONFIG = {
   "GARAŞYLÝAR": { label: "Zyýan ýeten", color: "#ea580c", icon: ScheduleRoundedIcon },
   "ÝATYRYLDY": { label: "Ýitirilen", color: "#dc2626", icon: CancelRoundedIcon },
 };
+
+export const VISA_STATUS_CONFIG = {
+  PENDING: { label: "Garaşylýar", color: "#d97706", icon: ScheduleRoundedIcon },
+  IN_PROGRESS: { label: "Işlenýär", color: "#2563eb", icon: AutorenewRoundedIcon },
+  APPROVED: { label: "Kabul edildi", color: "#16a34a", icon: CheckCircleRoundedIcon },
+  REJECTED: { label: "Ret edildi", color: "#dc2626", icon: CancelRoundedIcon },
+  CANCELLED: { label: "Ýatyryldy", color: "#64748b", icon: BlockRoundedIcon },
+  COMPLETED: { label: "Tamamlandy", color: "#7c3aed", icon: VerifiedRoundedIcon },
+};

@@ -146,7 +146,18 @@
     "role": "Роль",
     "isAdmin": "Администратор",
     "startDate": "Дата начала",
-    "endDate": "Дата окончания"
+    "endDate": "Дата окончания",
+    "visaStatus": "Статус визы"
+  },
+  "visa": {
+    "title": "Виза",
+    "status": "Статус визы",
+    "statusPending": "Ожидается",
+    "statusInProgress": "В процессе",
+    "statusApproved": "Одобрено",
+    "statusRejected": "Отклонено",
+    "statusCancelled": "Отменено",
+    "statusCompleted": "Завершено"
   },
   "addTranslation": "Добавить перевод",
   "addTranslator": "Добавить переводчика",

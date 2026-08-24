@@ -146,7 +146,18 @@
     "role": "Role",
     "isAdmin": "Admin",
     "startDate": "Start Date",
-    "endDate": "End Date"
+    "endDate": "End Date",
+    "visaStatus": "Visa Status"
+  },
+  "visa": {
+    "title": "Visa",
+    "status": "Visa Status",
+    "statusPending": "Pending",
+    "statusInProgress": "In Progress",
+    "statusApproved": "Approved",
+    "statusRejected": "Rejected",
+    "statusCancelled": "Cancelled",
+    "statusCompleted": "Completed"
   },
   "addTranslation": "Add Translation",
   "addTranslator": "Add New Translator",

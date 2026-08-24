@@ -145,6 +145,18 @@ const VisaFilter = ({
     [servicePackages]
   );
 
+  const statusOptions = useMemo(
+    () => [
+      { value: "PENDING", label: t("visa.statusPending") },
+      { value: "IN_PROGRESS", label: t("visa.statusInProgress") },
+      { value: "APPROVED", label: t("visa.statusApproved") },
+      { value: "REJECTED", label: t("visa.statusRejected") },
+      { value: "CANCELLED", label: t("visa.statusCancelled") },
+      { value: "COMPLETED", label: t("visa.statusCompleted") },
+    ],
+    [t]
+  );
+
   const allText = t("all") ?? "All";
 
   return (
@@ -161,6 +173,18 @@ const VisaFilter = ({
         name="end_date"
         value={filters.end_date}
         onChange={onFilterChange}
+      />
+
+      <FilterSelect
+        label={t("columns.visaStatus") || "Wiza ýagdaýy"}
+        name="status"
+        value={filters.status}
+        options={statusOptions}
+        isOpen={selectsOpen?.status ?? false}
+        allText={allText}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
       />
 
       <FilterSelect

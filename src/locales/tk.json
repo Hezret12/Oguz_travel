@@ -146,7 +146,18 @@
     "role": "Rol",
     "isAdmin": "Admin",
     "startDate": "Başlangyç senesi",
-    "endDate": "Gutarýan senesi"
+    "endDate": "Gutarýan senesi",
+    "visaStatus": "Wiza ýagdaýy"
+  },
+  "visa": {
+    "title": "Wiza",
+    "status": "Wiza ýagdaýy",
+    "statusPending": "Garaşylýar",
+    "statusInProgress": "Işlenýär",
+    "statusApproved": "Kabul edildi",
+    "statusRejected": "Ret edildi",
+    "statusCancelled": "Ýatyryldy",
+    "statusCompleted": "Tamamlandy"
   },
   "addTranslation": "Terjime goşmak",
   "addTranslator": "Täze terjimeçi goşmak",

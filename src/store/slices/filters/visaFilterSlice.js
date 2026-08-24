@@ -9,6 +9,7 @@ export const visaFilterSlice = createFilterSlice({
     package_guid: '',
     service_guid: '',
     received_opr_guid: '',
+    status: '',
   },
   defaultPageSize: 20,
 });
