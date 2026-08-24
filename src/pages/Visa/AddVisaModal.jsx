@@ -5,40 +5,6 @@ import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 
-const checkIsOnSale = (item) => {
-  if (!item || !item.sale_price || Number(item.sale_price) <= 0) return false;
-  if (!item.sale_start_date || !item.sale_end_date) return false;
-
-  const parseLocalDate = (dateStr) => {
-    if (typeof dateStr === "string") {
-      if (dateStr.includes("T")) {
-        const d = new Date(dateStr);
-        return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-      }
-      const parts = dateStr.split("-");
-      if (parts.length === 3) {
-        return new Date(
-          Number(parts[0]),
-          Number(parts[1]) - 1,
-          Number(parts[2]),
-        );
-      }
-    }
-    const d = new Date(dateStr);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  };
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  const start = parseLocalDate(item.sale_start_date);
-  start.setHours(0, 0, 0, 0);
-
-  const end = parseLocalDate(item.sale_end_date);
-  end.setHours(23, 59, 59, 999);
-
-  return now >= start && now <= end;
-};
 
 const formatPrice = (price, currency = "TMT") => {
   const num = Number(price || 0);
@@ -77,36 +43,6 @@ const AddVisaModal = ({ table }) => {
   const { t, selectedLang } = useLocale();
   const { addVisa } = useValidShema();
 
-  // Fetch package categories by their respective indices (1 to 5)
-  const { data: mainPackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 1 },
-  });
-
-  const { data: servicePackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 2 },
-  });
-
-  const { data: hotelPackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 3 },
-  });
-
-  const { data: translationPackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 4 },
-  });
-
-  const { data: courierPackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 5 },
-  });
 
   // Fetch employees list
   const { data: employees = [] } = useGet({
@@ -152,11 +88,6 @@ const AddVisaModal = ({ table }) => {
         name: "",
         phone_number: "",
       },
-      package_guid: null,
-      service_guid: null,
-      hotel_booking_guid: null,
-      translation_guid: null,
-      courier_guid: null,
       price_tmt: 0,
       price_usd: 0,
       note: "",
@@ -165,53 +96,7 @@ const AddVisaModal = ({ table }) => {
     mode: "onSubmit",
   });
 
-  // Watch selected package values to automatically compute totals
-  const selectedPackageGuid = useWatch({ control, name: "package_guid" });
-  const selectedServiceGuid = useWatch({ control, name: "service_guid" });
-  const selectedHotelGuid = useWatch({ control, name: "hotel_booking_guid" });
-  const selectedTranslationGuid = useWatch({
-    control,
-    name: "translation_guid",
-  });
-  const selectedCourierGuid = useWatch({ control, name: "courier_guid" });
 
-  useEffect(() => {
-    let tmtSum = 0;
-
-    const selectedItems = [
-      (mainPackages || []).find((p) => p.guid === selectedPackageGuid),
-      (servicePackages || []).find((p) => p.guid === selectedServiceGuid),
-      (hotelPackages || []).find((p) => p.guid === selectedHotelGuid),
-      (translationPackages || []).find(
-        (p) => p.guid === selectedTranslationGuid,
-      ),
-      (courierPackages || []).find((p) => p.guid === selectedCourierGuid),
-    ].filter(Boolean);
-
-    selectedItems.forEach((item) => {
-      const isSale = checkIsOnSale(item);
-      const effectivePrice = isSale
-        ? Number(item.sale_price)
-        : Number(item.price);
-      const priceVal = effectivePrice || 0;
-
-      tmtSum += priceVal;
-    });
-
-    setValue("price_tmt", tmtSum);
-  }, [
-    selectedPackageGuid,
-    selectedServiceGuid,
-    selectedHotelGuid,
-    selectedTranslationGuid,
-    selectedCourierGuid,
-    mainPackages,
-    servicePackages,
-    hotelPackages,
-    translationPackages,
-    courierPackages,
-    setValue,
-  ]);
 
   const closeDialog = () => {
     table.setCreatingRow(null);
@@ -222,7 +107,6 @@ const AddVisaModal = ({ table }) => {
       ...values,
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),
-      // Set empty strings/nulls cleanly for optional objects if agent is empty
       agent:
         values.agent?.name || values.agent?.phone_number ? values.agent : null,
     };
@@ -235,11 +119,11 @@ const AddVisaModal = ({ table }) => {
       "phone_number",
       {
         key: "passport_number",
-        label: t("columns.passportNumber") || "Passport №",
+        label: t("columns.passportNumber"),
       },
       {
         key: "dateOfBirth",
-        label: t("columns.dateOfBirth") || "Doglan senesi",
+        label: t("columns.dateOfBirth"),
       },
     ],
     [t],
@@ -365,7 +249,7 @@ const AddVisaModal = ({ table }) => {
     <CustomDialog widthX={860} open={true} close={closeDialog}>
       <CustomDialogHeader
         variant="h5"
-        title={t("sidebar.visaApplications") || "Wiza arza goşmak"}
+        title={t("sidebar.visaApplications")}
       />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box

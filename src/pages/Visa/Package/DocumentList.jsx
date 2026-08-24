@@ -31,7 +31,7 @@ const DocumentList = ({
   searchQuery = "",
   setSearchQuery,
   page = 1,
-  limit = 20,
+  limit = 40,
   setPage,
   setPageSize,
   totalItems = 0,
