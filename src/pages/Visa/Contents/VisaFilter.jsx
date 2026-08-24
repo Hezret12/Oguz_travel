@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { getAllPackageByIndexApi } from "../../../api/queries/getters";
+import { getBooleanPaymentFilterOptions } from "../../../functions/generalHelpers";
 
 const selectSx = {
   borderRadius: "8px",
@@ -157,26 +158,31 @@ const VisaFilter = ({
     [t]
   );
 
-  const allText = t("all") ?? "All";
+  const paymentFilterOptions = useMemo(
+    () => getBooleanPaymentFilterOptions(t),
+    [t]
+  );
+
+  const allText = t("all");
 
   return (
     <Stack spacing={2.5}>
       <FilterDate
-        label={t("columns.startDate") || "Başlangyç sene"}
+        label={t("columns.startDate")}
         name="start_date"
         value={filters.start_date}
         onChange={onFilterChange}
       />
 
       <FilterDate
-        label={t("columns.endDate") || "Gutarýan sene"}
+        label={t("columns.endDate")}
         name="end_date"
         value={filters.end_date}
         onChange={onFilterChange}
       />
 
       <FilterSelect
-        label={t("columns.visaStatus") || "Wiza ýagdaýy"}
+        label={t("columns.visaStatus")}
         name="status"
         value={filters.status}
         options={statusOptions}
@@ -188,7 +194,19 @@ const VisaFilter = ({
       />
 
       <FilterSelect
-        label={t("sidebar.visa.packages") || "Bukja"}
+        label={t("columns.paymentStatus")}
+        name="is_paid"
+        value={filters?.is_paid}
+        options={paymentFilterOptions}
+        isOpen={selectsOpen?.is_paid ?? false}
+        allText={allText}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
+      />
+
+      <FilterSelect
+        label={t("sidebar.visa.packages")}
         name="package_guid"
         value={filters.package_guid}
         options={packageOptions}
@@ -200,7 +218,7 @@ const VisaFilter = ({
       />
 
       <FilterSelect
-        label={t("columns.service") || "Hyzmat"}
+        label={t("columns.service")}
         name="service_guid"
         value={filters.service_guid}
         options={serviceOptions}

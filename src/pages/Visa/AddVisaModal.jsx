@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 
 import { useLocale } from "../../hooks/useLocale";
 import { useValidShema } from "../../functions/useValidShema";
+import { getBooleanPaymentOptions } from "../../functions/generalHelpers";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../components/Dialog/CustomForm";
@@ -15,7 +16,6 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllEmployeeApi } from "../../api/queries/getters";
-import AgentAccordion from "../../components/global/AgentAccordion";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addVisaApi } from "../../api/queries/post";
@@ -58,6 +58,8 @@ const AddVisaModal = ({ table }) => {
     [t],
   );
 
+  const paymentOptions = useMemo(() => getBooleanPaymentOptions(t), [t]);
+
   // Mutation to create Visa
   const { mutate: createVisa, isPending: isSubmit } = useCreate({
     apiFn: addVisaApi,
@@ -75,12 +77,13 @@ const AddVisaModal = ({ table }) => {
       client_guid: null,
       received_opr_guid: null,
       status: "PENDING",
+      is_paid: true,
       agent: {
         name: "",
         phone_number: "",
       },
-      price_tmt: 0,
-      price_usd: 0,
+      price_tmt: null,
+      price_usd: null,
       note: "",
     },
     resolver: yupResolver(addVisa),
@@ -95,6 +98,7 @@ const AddVisaModal = ({ table }) => {
     const payload = {
       ...values,
       status: values.status || "PENDING",
+      is_paid: Boolean(values.is_paid),
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),
       agent:
@@ -176,16 +180,25 @@ const AddVisaModal = ({ table }) => {
             endIcon="USD"
           />
 
-          <Box sx={{ gridColumn: "1 / -1" }}>
-            <AgentAccordion
-              control={control}
-              fullNameName="agent.name"
-              phoneNumberName="agent.phone_number"
-              title={t("columns.agent")}
-              fullNameLabel={t("columns.agentFullName")}
-              phoneNumberLabel={t("b2b.agentPhoneNumber")}
-            />
-          </Box>
+          <CustomSelect
+            name="is_paid"
+            control={control}
+            label={t("columns.paymentStatus")}
+            options={paymentOptions}
+            required
+          />
+
+          <CustomTextField
+            name="agent.name"
+            control={control}
+            label={t("columns.agentFullName")}
+          />
+
+          <CustomTextField
+            name="agent.phone_number"
+            control={control}
+            label={t("columns.agentPhoneNumber")}
+          />
 
           <Box sx={{ gridColumn: "1 / -1" }}>
             <CustomTextField

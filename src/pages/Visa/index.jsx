@@ -12,7 +12,11 @@ import { Box, Chip } from "@mui/material";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
 import StatusChip from "../../components/StatusChip";
-import { VISA_STATUS_CONFIG } from "../../functions/statusChipConfigs";
+import {
+  PAYMENT_STATUS_CONFIG,
+  VISA_STATUS_CONFIG,
+} from "../../functions/statusChipConfigs";
+import PaymentStatusCell from "../../components/PaymentStatusCell";
 import AddVisaModal from "./AddVisaModal";
 import EditVisaModal from "./EditVisaModal";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
@@ -117,24 +121,16 @@ const Visa = () => {
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
-        accessorFn: (row) =>
-          row.received_opr?.fullName ||
-          row.received_operator?.fullName ||
-          row.receiver_operator?.fullName,
+        accessorFn: (row) => row.receiver_operator?.fullName,
         id: "received_opr",
         header: t("columns.operatorTwo"),
         size: 200,
         Cell: ({ row }) => {
-          const opr =
-            row?.original?.received_opr ||
-            row?.original?.received_operator ||
-            row?.original?.receiver_operator;
+          const opr = row?.original?.receiver_operator;
           return (
             <StackedCell
               primary={opr?.fullName}
-              secondary={selectedLang(
-                opr?.office?.fullName || opr?.office?.shortName,
-              )}
+              secondary={selectedLang(opr?.office?.shortName)}
             />
           );
         },
@@ -171,13 +167,35 @@ const Visa = () => {
       {
         accessorKey: "status",
         id: "status",
-        header: t("columns.visaStatus") || "Wiza ýagdaýy",
+        header: t("columns.visaStatus"),
         size: 140,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ cell }) => (
           <StatusChip status={cell.getValue()} config={VISA_STATUS_CONFIG} />
         ),
+      },
+      {
+        accessorFn: (row) => row.is_paid,
+        id: "is_paid",
+        header: t("columns.paymentStatus"),
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ cell, row }) => {
+          if (
+            (cell.getValue() === false || cell.getValue() === "false") &&
+            row.original.paidPercentage !== undefined
+          ) {
+            return <PaymentStatusCell percent={row.original.paidPercentage} />;
+          }
+          return (
+            <StatusChip
+              status={cell.getValue()}
+              config={PAYMENT_STATUS_CONFIG}
+            />
+          );
+        },
       },
       {
         accessorFn: (row) => row.price_tmt,
@@ -331,25 +349,34 @@ const Visa = () => {
           isFetching={isFetching}
         />
 
-        {activeFilters.map(([key, value]) => (
-          <Chip
-            key={key}
-            label={`${t(`columns.${key}`, key)}: ${value}`}
-            onDelete={() => setFilter(key, "")}
-            color="primary"
-            variant="outlined"
-            size="small"
-            sx={{
-              borderRadius: "8px",
-              height: "32px",
-              fontWeight: 500,
-              "& .MuiChip-deleteIcon": {
-                color: "primary.main",
-                transition: "all 0.15s ease",
-              },
-            }}
-          />
-        ))}
+        {activeFilters.map(([key, value]) => {
+          let displayVal = value;
+          if (key === "is_paid") {
+            displayVal =
+              value === "true" || value === true
+                ? t("paymentPaid")
+                : t("paymentCredit");
+          }
+          return (
+            <Chip
+              key={key}
+              label={`${t(`columns.${key}`, key)}: ${displayVal}`}
+              onDelete={() => setFilter(key, "")}
+              color="primary"
+              variant="outlined"
+              size="small"
+              sx={{
+                borderRadius: "8px",
+                height: "32px",
+                fontWeight: 500,
+                "& .MuiChip-deleteIcon": {
+                  color: "primary.main",
+                  transition: "all 0.15s ease",
+                },
+              }}
+            />
+          );
+        })}
       </Box>
     ),
 

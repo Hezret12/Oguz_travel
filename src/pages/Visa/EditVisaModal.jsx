@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 
 import { useLocale } from "../../hooks/useLocale";
 import { useValidShema } from "../../functions/useValidShema";
+import { getBooleanPaymentOptions } from "../../functions/generalHelpers";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../components/Dialog/CustomForm";
@@ -15,7 +16,6 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllEmployeeApi } from "../../api/queries/getters";
-import AgentAccordion from "../../components/global/AgentAccordion";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { updateVisaApi } from "../../api/queries/patch";
@@ -35,8 +35,8 @@ const EditVisaModal = ({ table, row }) => {
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
           ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
+          selectedLang(emp.office.fullName) ||
+          ""
           : "";
         const label = officeShort
           ? `${emp.fullName} (${officeShort})`
@@ -58,6 +58,8 @@ const EditVisaModal = ({ table, row }) => {
     [t],
   );
 
+  const paymentOptions = useMemo(() => getBooleanPaymentOptions(t), [t]);
+
   // Mutation to update Visa
   const { mutate: updateVisa, isPending: isSubmit } = useUpdate({
     apiFn: updateVisaApi,
@@ -74,21 +76,16 @@ const EditVisaModal = ({ table, row }) => {
       guid: row?.original?.guid || null,
       index_number: row?.original?.index_number || "",
       datetime: row?.original?.datetime || dayjs().toISOString(),
-      client_guid:
-        row?.original?.client_guid || row?.original?.client?.guid || null,
-      received_opr_guid:
-        row?.original?.received_opr_guid ||
-        row?.original?.received_opr?.guid ||
-        row?.original?.receiver_operator?.guid ||
-        row?.original?.receiver_opr_guid ||
-        null,
+      client_guid: row?.original?.client?.guid || null,
+      received_opr_guid: row?.original?.receiver_operator?.guid || null,
       status: row?.original?.status || "PENDING",
-      agent: {
-        name: row?.original?.agent?.name || "",
-        phone_number: row?.original?.agent?.phone_number || "",
-      },
-      price_tmt: row?.original?.price_tmt || 0,
-      price_usd: row?.original?.price_usd || 0,
+      is_paid:
+        row?.original?.is_paid !== undefined
+          ? Boolean(row.original.is_paid)
+          : true,
+      agent: row?.original?.agent ? row?.original?.agent : { name: "", phone_number: "" },
+      price_tmt: row?.original?.price_tmt || null,
+      price_usd: row?.original?.price_usd || null,
       note: row?.original?.note || "",
     },
     resolver: yupResolver(addVisa),
@@ -103,6 +100,7 @@ const EditVisaModal = ({ table, row }) => {
     const payload = {
       ...values,
       status: values.status || "PENDING",
+      is_paid: Boolean(values.is_paid),
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),
       agent:
@@ -164,7 +162,7 @@ const EditVisaModal = ({ table, row }) => {
           <CustomSelect
             name="status"
             control={control}
-            label={t("columns.visaStatus") || "Wiza ýagdaýy"}
+            label={t("columns.visaStatus")}
             options={statusOptions}
             required
           />
@@ -173,7 +171,7 @@ const EditVisaModal = ({ table, row }) => {
             name="price_tmt"
             control={control}
             type="number"
-            label={`${t("price")} (TMT)`}
+            label={`${t("price")}, TMT`}
             endIcon="TMT"
           />
 
@@ -181,20 +179,29 @@ const EditVisaModal = ({ table, row }) => {
             name="price_usd"
             control={control}
             type="number"
-            label={`${t("price")} (USD)`}
+            label={`${t("price")}, USD`}
             endIcon="USD"
           />
 
-          <Box sx={{ gridColumn: "1 / -1" }}>
-            <AgentAccordion
-              control={control}
-              fullNameName="agent.name"
-              phoneNumberName="agent.phone_number"
-              title={t("columns.agent")}
-              fullNameLabel={t("columns.agentFullName")}
-              phoneNumberLabel={t("b2b.agentPhoneNumber")}
-            />
-          </Box>
+          <CustomSelect
+            name="is_paid"
+            control={control}
+            label={t("columns.paymentStatus")}
+            options={paymentOptions}
+            required
+          />
+
+          <CustomTextField
+            name="agent.name"
+            control={control}
+            label={t("columns.agentFullName")}
+          />
+
+          <CustomTextField
+            name="agent.phone_number"
+            control={control}
+            label={t("columns.agentPhoneNumber")}
+          />
 
           <Box sx={{ gridColumn: "1 / -1" }}>
             <CustomTextField

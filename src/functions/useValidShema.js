@@ -59,7 +59,7 @@ export const useValidShema = () => {
   });
 
   const addVisa = yup.object({
-  
+    is_paid: yup.boolean().optional(),
   });
 
   const addB2BTicket = yup.object({

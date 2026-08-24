@@ -10,6 +10,7 @@ export const visaFilterSlice = createFilterSlice({
     service_guid: '',
     received_opr_guid: '',
     status: '',
+    is_paid: '',
   },
   defaultPageSize: 20,
 });
