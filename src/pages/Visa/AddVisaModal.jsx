@@ -35,8 +35,8 @@ const AddVisaModal = ({ table }) => {
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
           ? selectedLang(emp.office.shortName) ||
-            selectedLang(emp.office.fullName) ||
-            ""
+          selectedLang(emp.office.fullName) ||
+          ""
           : "";
         const label = officeShort
           ? `${emp.fullName} (${officeShort})`
@@ -58,6 +58,7 @@ const AddVisaModal = ({ table }) => {
     [t],
   );
 
+  // Mutation to create Visa
   const { mutate: createVisa, isPending: isSubmit } = useCreate({
     apiFn: addVisaApi,
     key: "visaApplications",
@@ -155,7 +156,7 @@ const AddVisaModal = ({ table }) => {
           />
 
           <CustomSelect
-            name="receiver_opr_guid"
+            name="receiver_opr_guid "
             control={control}
             label={t("columns.operatorTwo")}
             options={employeeOptions}
