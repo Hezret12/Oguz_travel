@@ -1,24 +1,8 @@
-import { useMemo, useEffect } from "react";
-import { Box, MenuItem, Tooltip, Typography } from "@mui/material";
-import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
-import { useForm, useWatch } from "react-hook-form";
+import { useMemo } from "react";
+import { Box } from "@mui/material";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
-
-
-const formatPrice = (price, currency = "TMT") => {
-  const num = Number(price || 0);
-  const parts = num.toFixed(2).split(".");
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  const symbols = {
-    USD: "$",
-    EUR: "€",
-    TMT: "m",
-    RUB: "₽",
-  };
-  const symbol = symbols[currency] || currency;
-  return `${parts[0]},${parts[1]} ${symbol}`;
-};
 
 import { useLocale } from "../../hooks/useLocale";
 import { useValidShema } from "../../functions/useValidShema";
@@ -30,10 +14,7 @@ import CustomSelect from "../../components/CustomSelect";
 import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import { useGet } from "../../hooks/CRUD/useGet";
-import {
-  getAllPackageByIndexApi,
-  getAllEmployeeApi,
-} from "../../api/queries/getters";
+import { getAllEmployeeApi } from "../../api/queries/getters";
 import AgentAccordion from "../../components/global/AgentAccordion";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import { useCreate } from "../../hooks/CRUD/useCreate";
@@ -42,7 +23,6 @@ import { addVisaApi } from "../../api/queries/post";
 const AddVisaModal = ({ table }) => {
   const { t, selectedLang } = useLocale();
   const { addVisa } = useValidShema();
-
 
   // Fetch employees list
   const { data: employees = [] } = useGet({
@@ -55,8 +35,8 @@ const AddVisaModal = ({ table }) => {
       (employees || []).map((emp) => {
         const officeShort = emp.office?.shortName
           ? selectedLang(emp.office.shortName) ||
-          selectedLang(emp.office.fullName) ||
-          ""
+            selectedLang(emp.office.fullName) ||
+            ""
           : "";
         const label = officeShort
           ? `${emp.fullName} (${officeShort})`
@@ -65,8 +45,6 @@ const AddVisaModal = ({ table }) => {
       }),
     [employees, selectedLang],
   );
-
-  // Raw arrays are passed directly to CustomSelect to allow displaying price and description details.
 
   // Mutation to create Visa
   const { mutate: createVisa, isPending: isSubmit } = useCreate({
@@ -95,8 +73,6 @@ const AddVisaModal = ({ table }) => {
     resolver: yupResolver(addVisa),
     mode: "onSubmit",
   });
-
-
 
   const closeDialog = () => {
     table.setCreatingRow(null);
@@ -129,128 +105,9 @@ const AddVisaModal = ({ table }) => {
     [t],
   );
 
-  const renderPackageOption = (item, option) => {
-    const hasPrice = item?.price !== undefined && item?.price !== null;
-    const hasDescription = Boolean(item?.description);
-    const isOnSale = checkIsOnSale(item);
-
-    return (
-      <MenuItem
-        key={option.id}
-        value={option.id}
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          minWidth: "240px",
-          gap: 2,
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            minWidth: 0,
-            flexGrow: 1,
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: "0.875rem",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {option.label}
-          </Typography>
-          {hasDescription && (
-            <Tooltip
-              title={item.description}
-              arrow
-              placement="top"
-              slotProps={{
-                tooltip: {
-                  sx: {
-                    fontSize: "0.8rem",
-                    whiteSpace: "pre-line",
-                    py: 0.75,
-                    px: 1.25,
-                    borderRadius: "6px",
-                    maxWidth: 280,
-                  },
-                },
-              }}
-            >
-              <HelpOutlineRoundedIcon
-                sx={{
-                  fontSize: "15px",
-                  color: "text.secondary",
-                  cursor: "help",
-                  flexShrink: 0,
-                  "&:hover": { color: "primary.main" },
-                }}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </Tooltip>
-          )}
-        </Box>
-
-        {hasPrice && (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: 1,
-              ml: 2,
-              flexShrink: 0,
-            }}
-          >
-            {isOnSale ? (
-              <>
-                <Typography
-                  sx={{
-                    fontSize: "0.75rem",
-                    textDecoration: "line-through",
-                    color: "text.secondary",
-                  }}
-                >
-                  {formatPrice(item.price, item.currency)}
-                </Typography>
-                <Typography
-                  sx={{
-                    fontSize: "0.85rem",
-                    fontWeight: 700,
-                    color: "error.main",
-                  }}
-                >
-                  {formatPrice(item.sale_price, item.currency)}
-                </Typography>
-              </>
-            ) : (
-              <Typography
-                sx={{
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  color: "text.primary",
-                }}
-              >
-                {formatPrice(item.price, item.currency)}
-              </Typography>
-            )}
-          </Box>
-        )}
-      </MenuItem>
-    );
-  };
-
   return (
     <CustomDialog widthX={860} open={true} close={closeDialog}>
-      <CustomDialogHeader
-        variant="h5"
-        title={t("sidebar.visaApplications")}
-      />
+      <CustomDialogHeader variant="h5" title={t("sidebar.visaApplications")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box
           sx={{
@@ -290,56 +147,6 @@ const AddVisaModal = ({ table }) => {
             label={t("columns.operatorTwo")}
             options={employeeOptions}
             required
-          />
-
-          <CustomSelect
-            name="package_guid"
-            control={control}
-            label={t("sidebar.visa.packages")}
-            options={mainPackages}
-            getRowId={(item) => item.guid}
-            getRowLabel={(item) => item.name}
-            renderOption={renderPackageOption}
-          />
-
-          <CustomSelect
-            name="service_guid"
-            control={control}
-            label={t("columns.service")}
-            options={servicePackages}
-            getRowId={(item) => item.guid}
-            getRowLabel={(item) => item.name}
-            renderOption={renderPackageOption}
-          />
-
-          <CustomSelect
-            name="hotel_booking_guid"
-            control={control}
-            label={t("columns.hotelBron")}
-            options={hotelPackages}
-            getRowId={(item) => item.guid}
-            getRowLabel={(item) => item.name}
-            renderOption={renderPackageOption}
-          />
-
-          <CustomSelect
-            name="translation_guid"
-            control={control}
-            label={t("columns.translation")}
-            options={translationPackages}
-            getRowId={(item) => item.guid}
-            getRowLabel={(item) => item.name}
-            renderOption={renderPackageOption}
-          />
-
-          <CustomSelect
-            name="courier_guid"
-            control={control}
-            label={t("columns.courier")}
-            options={courierPackages}
-            getRowId={(item) => item.guid}
-            getRowLabel={(item) => item.name}
-            renderOption={renderPackageOption}
           />
 
           <AgentAccordion

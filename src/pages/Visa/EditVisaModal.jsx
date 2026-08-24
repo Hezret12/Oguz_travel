@@ -5,54 +5,6 @@ import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 
-const checkIsOnSale = (item) => {
-  if (!item || !item.sale_price || Number(item.sale_price) <= 0) return false;
-  if (!item.sale_start_date || !item.sale_end_date) return false;
-
-  const parseLocalDate = (dateStr) => {
-    if (typeof dateStr === "string") {
-      if (dateStr.includes("T")) {
-        const d = new Date(dateStr);
-        return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-      }
-      const parts = dateStr.split("-");
-      if (parts.length === 3) {
-        return new Date(
-          Number(parts[0]),
-          Number(parts[1]) - 1,
-          Number(parts[2])
-        );
-      }
-    }
-    const d = new Date(dateStr);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  };
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  const start = parseLocalDate(item.sale_start_date);
-  start.setHours(0, 0, 0, 0);
-
-  const end = parseLocalDate(item.sale_end_date);
-  end.setHours(23, 59, 59, 999);
-
-  return now >= start && now <= end;
-};
-
-const formatPrice = (price, currency = "TMT") => {
-  const num = Number(price || 0);
-  const parts = num.toFixed(2).split(".");
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  const symbols = {
-    USD: "$",
-    EUR: "€",
-    TMT: "m",
-    RUB: "₽",
-  };
-  const symbol = symbols[currency] || currency;
-  return `${parts[0]},${parts[1]} ${symbol}`;
-};
 
 import { useLocale } from "../../hooks/useLocale";
 import { useValidShema } from "../../functions/useValidShema";
@@ -73,37 +25,6 @@ import { updateVisaApi } from "../../api/queries/patch";
 const EditVisaModal = ({ table, row }) => {
   const { t, selectedLang } = useLocale();
   const { addVisa } = useValidShema();
-
-  // Fetch package categories by their respective indices (1 to 5)
-  const { data: courierPackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 1 },
-  });
-
-  const { data: translationPackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 2 },
-  });
-
-  const { data: hotelPackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 3 },
-  });
-
-  const { data: mainPackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 4 },
-  });
-
-  const { data: servicePackages = [] } = useGet({
-    apiFn: getAllPackageByIndexApi,
-    key: "visa-packages-byindex",
-    params: { index: 5 },
-  });
 
   // Fetch employees list
   const { data: employees = [] } = useGet({
