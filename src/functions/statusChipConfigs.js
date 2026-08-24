@@ -13,6 +13,8 @@ import FamilyRestroomRoundedIcon from "@mui/icons-material/FamilyRestroomRounded
 import WorkRoundedIcon from "@mui/icons-material/WorkRounded";
 import LocalHospitalRoundedIcon from "@mui/icons-material/LocalHospitalRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
+import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
+import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
 
 export const SALE_STATUS_CONFIG = {
   SALE: { label: "Sale", color: "#16a34a", icon: CheckCircleRoundedIcon },
