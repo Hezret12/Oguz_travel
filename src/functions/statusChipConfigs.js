@@ -90,5 +90,5 @@ export const VISA_STATUS_CONFIG = {
   APPROVED: { label: "Kabul edildi", color: "#16a34a", icon: CheckCircleRoundedIcon },
   REJECTED: { label: "Ret edildi", color: "#dc2626", icon: CancelRoundedIcon },
   CANCELLED: { label: "Ýatyryldy", color: "#64748b", icon: BlockRoundedIcon },
-  COMPLETED: { label: "Tamamlandy", color: "#7c3aed", icon: VerifiedRoundedIcon },
+  COMPLETED: { label: "Tamamlandy", color: "#0d9488", icon: VerifiedRoundedIcon },
 };

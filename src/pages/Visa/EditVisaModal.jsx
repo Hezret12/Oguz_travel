@@ -53,7 +53,7 @@ const EditVisaModal = ({ table, row }) => {
       { label: t("visa.statusApproved"), value: "APPROVED", color: "#16a34a" },
       { label: t("visa.statusRejected"), value: "REJECTED", color: "#dc2626" },
       { label: t("visa.statusCancelled"), value: "CANCELLED", color: "#64748b" },
-      { label: t("visa.statusCompleted"), value: "COMPLETED", color: "#7c3aed" },
+      { label: t("visa.statusCompleted"), value: "COMPLETED", color: "#0d9488" },
     ],
     [t],
   );
