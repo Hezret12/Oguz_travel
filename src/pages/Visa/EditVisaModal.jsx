@@ -76,7 +76,12 @@ const EditVisaModal = ({ table, row }) => {
       datetime: row?.original?.datetime || dayjs().toISOString(),
       client_guid:
         row?.original?.client_guid || row?.original?.client?.guid || null,
-      received_opr_guid: row?.original?.received_opr_guid || null,
+      received_opr_guid:
+        row?.original?.received_opr_guid ||
+        row?.original?.received_opr?.guid ||
+        row?.original?.receiver_operator?.guid ||
+        row?.original?.receiver_opr_guid ||
+        null,
       status: row?.original?.status || "PENDING",
       agent: {
         name: row?.original?.agent?.name || "",

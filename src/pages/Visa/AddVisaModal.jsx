@@ -58,7 +58,6 @@ const AddVisaModal = ({ table }) => {
     [t],
   );
 
-  // Mutation to create Visa
   const { mutate: createVisa, isPending: isSubmit } = useCreate({
     apiFn: addVisaApi,
     key: "visaApplications",
@@ -73,7 +72,7 @@ const AddVisaModal = ({ table }) => {
       index_number: "",
       datetime: dayjs().toISOString(),
       client_guid: null,
-      received_opr_guid: null,
+      receiver_opr_guid: null,
       status: "PENDING",
       agent: {
         name: "",
@@ -156,7 +155,7 @@ const AddVisaModal = ({ table }) => {
           />
 
           <CustomSelect
-            name="received_opr_guid"
+            name="receiver_opr_guid"
             control={control}
             label={t("columns.operatorTwo")}
             options={employeeOptions}

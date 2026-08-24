@@ -117,16 +117,23 @@ const Visa = () => {
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
-        accessorFn: (row) => row.receiver_operator?.fullName,
-        id: "receiver_operator",
+        accessorFn: (row) =>
+          row.received_opr?.fullName ||
+          row.received_operator?.fullName ||
+          row.receiver_operator?.fullName,
+        id: "received_opr",
         header: t("columns.operatorTwo"),
         size: 200,
         Cell: ({ row }) => {
+          const opr =
+            row?.original?.received_opr ||
+            row?.original?.received_operator ||
+            row?.original?.receiver_operator;
           return (
             <StackedCell
-              primary={row?.original?.receiver_operator?.fullName}
+              primary={opr?.fullName}
               secondary={selectedLang(
-                row?.original?.receiver_operator?.office?.fullName,
+                opr?.office?.fullName || opr?.office?.shortName,
               )}
             />
           );
