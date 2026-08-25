@@ -330,7 +330,6 @@ const PackagesPage = () => {
                     </Stack>
                   </Box>
 
-                  {/* Bottom Bar: Update Date + View Button */}
                   <Box
                     sx={{
                       display: "flex",
