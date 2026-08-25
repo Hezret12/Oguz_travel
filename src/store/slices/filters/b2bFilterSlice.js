@@ -12,7 +12,7 @@ export const b2bFilterSlice = createFilterSlice({
     flight_date: '',
     is_paid: '',
   },
-  defaultPageSize: 10,
+  defaultPageSize: 40,
 });
 
 export const b2bFilterActions = b2bFilterSlice.actions;

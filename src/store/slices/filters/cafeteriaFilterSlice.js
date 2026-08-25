@@ -8,7 +8,7 @@ export const cafeteriaFilterSlice = createFilterSlice({
     end_date: '',
     type: '',
   },
-  defaultPageSize: 20,
+  defaultPageSize: 40,
 });
 
 export const cafeteriaFilterActions = cafeteriaFilterSlice.actions;
