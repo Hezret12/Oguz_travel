@@ -155,8 +155,8 @@ const PackagesPage = () => {
             />
             <Typography variant="body1" sx={{ fontWeight: 600, color: "text.secondary" }}>
               {searchQuery
-                ? t("common.noSearchResults", "Gözlegiňize gabat gelýän bukja tapylmady.")
-                : t("common.noData", "Heniz hiç hili bukja ýok.")}
+                ? t("common.noSearchResults")
+                : t("common.noData")}
             </Typography>
           </Paper>
         ) : (
