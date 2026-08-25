@@ -29,11 +29,17 @@ body {
 
 
 [data-mui-color-scheme="dark"] #nprogress .bar {
-  background: #38BDF8 !important;
+  background: #2DD4BF !important;
 }
 
 [data-mui-color-scheme="dark"] #nprogress .peg {
-  box-shadow: 0 0 10px #38BDF8, 0 0 5px #38BDF8 !important;
+  box-shadow: 0 0 10px #2DD4BF, 0 0 5px #2DD4BF !important;
+}
+
+[data-mui-color-scheme="dark"] {
+  --scrollbar-track: rgba(2, 44, 69, 0.15);
+  --scrollbar-thumb: rgba(45, 212, 191, 0.25);
+  --scrollbar-thumb-hover: rgba(45, 212, 191, 0.45);
 }
 
 /* Material UI Autocomplete/Autofill background color transparent override */

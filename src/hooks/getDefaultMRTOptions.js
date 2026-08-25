@@ -126,7 +126,7 @@ export const getDefaultMRTOptions = () => ({
         const base = {
           fontSize: "14px",
           fontWeight: 650,
-          backgroundColor: isDark ? "#11192A" : "#FFFFFF",
+          backgroundColor: theme.palette.background.paper,
           color: isDark ? "#F8FAFC" : "#334155",
           borderBottom: `1px solid ${theme.palette.divider}`,
         };
@@ -151,7 +151,7 @@ export const getDefaultMRTOptions = () => ({
       sx: (theme) => {
         const isDark = theme.palette.mode === "dark";
         const base = {
-          backgroundColor: isDark ? "#11192A" : "#FFFFFF",
+          backgroundColor: theme.palette.background.paper,
           color: isDark ? "#E2E8F0" : "#1E293B",
           borderBottom: `1px solid ${theme.palette.divider}`,
         };

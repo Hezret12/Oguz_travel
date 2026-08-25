@@ -722,7 +722,7 @@
     "excelExportSuccess": "Excel faýly üstünlikli ýüklenildi",
     "noDataToExport": "Eksport etmek üçin maglumat ýok",
     "exportError": "Excel faýly ýüklenende ýalňyşlyk ýüze çykdy",
-    "exportExcelModalTitle": "Excel-e Eksport Etmek (Süzgüç)",
+    "exportExcelModalTitle": "Excele geçirmek",
     "exportExcelModalDesc": "Eksport ediljek maglumatlar üçin aşakdaky süzgüçleri saýlap bilersiňiz:",
     "includeCurrentPageFilters": "Sahapadaky bar bolan gözleg we filterleri hem goşmak"
   },
@@ -735,7 +735,7 @@
     "fullName": "Doly ady",
     "firstName": "Ady",
     "lastName": "Familýasy",
-    "subject": "Mowzuk",
+    "subject": "Düşündiriş",
     "message": "Haty",
     "departure": "Uçuş ýeri",
     "destination": "Gidilýän ýer",
@@ -758,41 +758,20 @@
     "income": "Girdeji",
     "expense": "Çykdajy",
     "balance": "Balans",
-    "totalIncome": "Jemi girdeji",
-    "totalExpense": "Jemi çykdajy",
-    "netBalance": "Arassa balans",
     "addTransaction": "Täze amal goşmak",
     "editTransaction": "Amaly üýtgetmek",
-    "transactionDetails": "Amal maglumatlary",
     "type": "Görnüşi",
-    "category": "Kategoriýa",
     "amount": "Mukdary",
     "date": "Senesi",
     "description": "Düşündiriş",
-    "allTypes": "Ähli görnüşler",
-    "allCategories": "Ähli kategoriýalar",
-    "categories": {
-      "foodPurchase": "Azyk satyn almak",
-      "sales": "Söwda girdejisi",
-      "utilities": "Kommunal hyzmatlar",
-      "beverages": "Içgiler",
-      "equipment": "Enjamlar",
-      "other": "Başga"
-    },
     "types": {
       "income": "Girdeji",
       "expense": "Çykdajy"
-    },
-    "excel": {
-      "titleBanner": "KAFETERIÝA HASABATY",
-      "sheetName": "Kafeteriýa",
-      "totalSummary": "JEMI"
     },
     "validation": {
       "typeRequired": "Amalyň görnüşini saýlaň",
       "amountRequired": "Mukdary giriziň",
       "amountPositive": "Mukdar 0-dan uly bolmaly",
-      "categoryRequired": "Kategoriýany saýlaň",
       "dateRequired": "Senäni giriziň"
     }
   }

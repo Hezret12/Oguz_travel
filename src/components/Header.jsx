@@ -93,19 +93,19 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
       position="fixed"
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
-        backdropFilter: 'blur(10px)',
+        backdropFilter: 'blur(12px)',
         borderBottom: '1px solid',
         borderColor: (theme) =>
           theme.palette.mode === 'dark'
-            ? 'rgba(255, 255, 255, 0.08)'
+            ? 'rgba(45, 212, 191, 0.10)'
             : '#e2e8f0',
         backgroundColor: (theme) =>
           theme.palette.mode === 'dark'
-            ? 'rgba(17, 25, 42, 0.88)'
+            ? 'rgba(4, 17, 24, 0.85)'
             : 'rgba(255, 255, 255, 0.88)',
         boxShadow: (theme) =>
           theme.palette.mode === 'dark'
-            ? '0 4px 20px rgba(0,0,0,0.25)'
+            ? '0 4px 24px rgba(0,0,0,0.35)'
             : '0 1px 3px rgba(0,0,0,0.04)',
         left: { xs: 0, md: sidebarWidth },
         width: { xs: '100%', md: `calc(100% - ${sidebarWidth}px)` },
@@ -319,8 +319,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                           bgcolor: '#10B981',
                           borderRadius: '50%',
                           border: (theme) =>
-                            `2px solid ${theme.palette.mode === 'dark' ? '#11192A' : '#ffffff'
-                            }`,
+                            `2px solid ${theme.palette.background.paper}`,
                         }}
                       />
                     </Box>
@@ -398,13 +397,10 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                       p: 1,
                       border: '1px solid',
                       borderColor: 'divider',
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? '#11192A'
-                          : '#ffffff',
+                      backgroundColor: 'background.paper',
                       boxShadow: (theme) =>
                         theme.palette.mode === 'dark'
-                          ? '0 12px 36px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06)'
+                          ? '0 12px 36px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)'
                           : '0 12px 36px rgba(15,23,42,0.12)',
                     },
                   },

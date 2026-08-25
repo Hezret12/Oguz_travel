@@ -9,15 +9,15 @@ const isPathActive = (targetPath, currentPath) => {
 };
 
 const getTokens = (isDark) => ({
-  text: isDark ? '#94A3B8' : '#475569',
-  textActive: isDark ? '#F8FAFC' : '#0F172A',
-  icon: isDark ? '#64748B' : '#64748B',
+  text: isDark ? '#A1B5C4' : '#475569',
+  textActive: isDark ? '#FFFFFF' : '#0F172A',
+  icon: isDark ? '#6B96A8' : '#64748B',
   iconActive: isDark ? '#2DD4BF' : '#0E8584',
-  activeBg: isDark ? 'rgba(20, 184, 166, 0.12)' : 'rgba(14, 133, 132, 0.08)',
-  activeHoverBg: isDark ? 'rgba(20, 184, 166, 0.18)' : 'rgba(14, 133, 132, 0.12)',
-  hoverBg: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.04)',
-  treeRail: isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.07)',
-  expandIcon: isDark ? '#64748B' : '#94A3B8',
+  activeBg: isDark ? 'linear-gradient(90deg, rgba(20, 184, 166, 0.22) 0%, rgba(45, 212, 191, 0.08) 100%)' : 'rgba(14, 133, 132, 0.08)',
+  activeHoverBg: isDark ? 'linear-gradient(90deg, rgba(20, 184, 166, 0.28) 0%, rgba(45, 212, 191, 0.14) 100%)' : 'rgba(14, 133, 132, 0.12)',
+  hoverBg: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
+  treeRail: isDark ? 'rgba(45, 212, 191, 0.18)' : 'rgba(0, 0, 0, 0.07)',
+  expandIcon: isDark ? '#6B96A8' : '#94A3B8',
 });
 
 const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {

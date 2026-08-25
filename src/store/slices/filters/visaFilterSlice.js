@@ -12,7 +12,7 @@ export const visaFilterSlice = createFilterSlice({
     status: '',
     is_paid: '',
   },
-  defaultPageSize: 20,
+  defaultPageSize: 40,
 });
 
 export const visaFilterActions = visaFilterSlice.actions;

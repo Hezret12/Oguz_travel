@@ -3,7 +3,7 @@ import { LogOut, MapPin } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../hooks/useLocale";
 
-const SidebarFooter = ({ collapsed, onLogout }) => {
+const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
   const { user } = useAuth();
   const { selectedLang } = useLocale();
 
@@ -21,7 +21,7 @@ const SidebarFooter = ({ collapsed, onLogout }) => {
           flexDirection: "column",
           alignItems: "center",
           borderTop: "1px solid",
-          borderColor: "divider",
+          borderColor: isDark ? "rgba(45, 212, 191, 0.10)" : "divider",
         }}
       >
         <Tooltip title="Logout" placement="right">
@@ -50,7 +50,7 @@ const SidebarFooter = ({ collapsed, onLogout }) => {
       sx={{
         p: "12px 14px",
         borderTop: "1px solid",
-        borderColor: "divider",
+        borderColor: isDark ? "rgba(45, 212, 191, 0.10)" : "divider",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -59,7 +59,7 @@ const SidebarFooter = ({ collapsed, onLogout }) => {
     >
       {officeName && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, minWidth: 0 }}>
-          <MapPin size={15} style={{ color: "#0E8584", flexShrink: 0 }} />
+          <MapPin size={15} style={{ color: isDark ? "#2DD4BF" : "#0E8584", flexShrink: 0 }} />
           <Typography
             variant="caption"
             noWrap

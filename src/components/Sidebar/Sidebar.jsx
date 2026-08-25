@@ -17,16 +17,16 @@ const sidebarSurfaceStyles = (isDark, width) => ({
   height: "100vh",
   width,
   background: isDark
-    ? "#11192A"
+    ? "linear-gradient(180deg, #021819 0%, #022C45 100%)"
     : "#ffffff",
-  borderRight: isDark ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
+  borderRight: isDark ? "1px solid rgba(45, 212, 191, 0.12)" : "1px solid #e2e8f0",
   display: "flex",
   flexDirection: "column",
   zIndex: 1200,
   transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   overflow: "hidden",
   boxShadow: isDark
-    ? "4px 0 24px rgba(0,0,0,0.30)"
+    ? "4px 0 30px rgba(0,0,0,0.45)"
     : "1px 0 12px rgba(0,0,0,0.06)",
   fontFamily: "'Inter', sans-serif",
 });
@@ -54,7 +54,7 @@ const SidebarPanel = ({
         height: 94,
         px: collapsed ? 1 : 2.5,
         borderBottom: "1px solid",
-        borderColor: isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.06)",
+        borderColor: isDark ? "rgba(45, 212, 191, 0.10)" : "rgba(0, 0, 0, 0.06)",
         overflow: "hidden",
         flexShrink: 0,
         transition: "padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -91,11 +91,11 @@ const SidebarPanel = ({
           width: "4px",
         },
         "&::-webkit-scrollbar-thumb": {
-          backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)",
+          backgroundColor: isDark ? "rgba(45, 212, 191, 0.16)" : "rgba(0, 0, 0, 0.08)",
           borderRadius: "4px",
         },
         "&:hover::-webkit-scrollbar-thumb": {
-          backgroundColor: isDark ? "rgba(255, 255, 255, 0.16)" : "rgba(0, 0, 0, 0.16)",
+          backgroundColor: isDark ? "rgba(45, 212, 191, 0.30)" : "rgba(0, 0, 0, 0.16)",
         },
       }}
     >
