@@ -32,6 +32,7 @@ export const PATHS = {
   },
   CAFETERIA: '/cafeteria',
   PROFILE: '/profile',
+  PACKAGES: '/packages',
 };
 
 export function joinPath(...segments) {

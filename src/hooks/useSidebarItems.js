@@ -115,6 +115,13 @@ export const useSidebarItems = () => {
         icon: createElement(PlaneTakeoff, { size: 20, strokeWidth: 2.2 }),
       },
       {
+        id: "packages",
+        text: t("sidebar.packages", "Bukjalar"),
+        path: PATHS.PACKAGES,
+        icon: createElement(Package, { size: 20, strokeWidth: 2.2 }),
+        alwaysVisible: true,
+      },
+      {
         id: "reports",
         isGroup: true,
         text: t("sidebar.reports"),

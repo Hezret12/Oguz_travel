@@ -138,7 +138,19 @@ const UserAccessTab = ({ control }) => {
   const { t } = useLocale();
   const sidebarItems = useSidebarItems();
 
-  const allAccessIds = sidebarItems.flatMap((item) =>
+  const permissionSidebarItems = sidebarItems
+    .map((item) => {
+      if (item.alwaysVisible) return null;
+      if (item.isGroup && item.children) {
+        const filteredChildren = item.children.filter((c) => !c.alwaysVisible);
+        if (filteredChildren.length === 0) return null;
+        return { ...item, children: filteredChildren };
+      }
+      return item;
+    })
+    .filter(Boolean);
+
+  const allAccessIds = permissionSidebarItems.flatMap((item) =>
     item.isGroup ? item.children.map(getAccessId) : [getAccessId(item)],
   );
 
@@ -176,7 +188,7 @@ const UserAccessTab = ({ control }) => {
             </Box>
 
             <Stack spacing={1.5}>
-              {sidebarItems.map((item) => (
+              {permissionSidebarItems.map((item) => (
                 <AccessGroup
                   key={item.isGroup ? item.text : getAccessId(item)}
                   group={item}

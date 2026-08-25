@@ -42,6 +42,7 @@ const VisaPage = lazyRetry(() => import('../pages/Visa'));
 const ReferralLetterPage = lazyRetry(() => import('../pages/ReferralLetter'));
 const ReferralLetterReportPage = lazyRetry(() => import('../pages/Reports/ReferralLetter/index'));
 const PackagePage = lazyRetry(() => import('../pages/Visa/Package/Package'));
+const PackagesViewPage = lazyRetry(() => import('../pages/Packages'));
 const TranslatePage = lazyRetry(() => import('../pages/Translate'));
 const OutboundPage = lazyRetry(() => import('../pages/Outbound/Outbound'));
 const VisaIntakePage = lazyRetry(() => import('../pages/VisaIntake'));
@@ -104,6 +105,7 @@ const Visa = Loadable(VisaPage);
 const ReferralLetter = Loadable(ReferralLetterPage);
 const ReferralLetterReport = Loadable(ReferralLetterReportPage);
 const Package = Loadable(PackagePage);
+const PackagesView = Loadable(PackagesViewPage);
 const Translate = Loadable(TranslatePage);
 const Outbound = Loadable(OutboundPage);
 const Ticket = Loadable(TicketPage);
@@ -155,6 +157,7 @@ const router = createBrowserRouter([
               { path: 'visa/package', element: <Package /> },
               { path: 'translation', element: <Translate /> },
               { path: 'outbound', element: <Outbound /> },
+              { path: 'packages', element: <PackagesView /> },
               {
                 path: 'ticket',
                 element: <Ticket />,

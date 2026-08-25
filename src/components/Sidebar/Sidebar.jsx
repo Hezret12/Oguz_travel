@@ -157,9 +157,12 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
 
       return navItems
         .map((item) => {
+          if (item.alwaysVisible) {
+            return item;
+          }
           if (item.isGroup && item.children) {
             const allowedChildren = item.children.filter((child) =>
-              isPathAllowed(child.path),
+              child.alwaysVisible || isPathAllowed(child.path),
             );
             if (allowedChildren.length === 0) return null;
             return { ...item, children: allowedChildren };
