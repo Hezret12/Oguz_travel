@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
@@ -241,18 +242,24 @@ const PackagesPage = () => {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        width: 40,
-                        height: 40,
+                        width: 42,
+                        height: 42,
                         borderRadius: "10px",
-                        bgcolor: (theme) =>
+                        background: (theme) =>
                           theme.palette.mode === "dark"
-                            ? "rgba(45, 212, 191, 0.16)"
-                            : "rgba(14, 133, 132, 0.10)",
-                        color: "primary.main",
-                        transition: "transform 0.2s ease",
+                            ? "linear-gradient(135deg, rgba(24, 90, 189, 0.26) 0%, rgba(13, 71, 161, 0.16) 100%)"
+                            : "linear-gradient(135deg, rgba(24, 90, 189, 0.12) 0%, rgba(27, 102, 201, 0.06) 100%)",
+                        border: "1px solid",
+                        borderColor: (theme) =>
+                          theme.palette.mode === "dark"
+                            ? "rgba(59, 130, 246, 0.28)"
+                            : "rgba(24, 90, 189, 0.18)",
+                        color: (theme) =>
+                          theme.palette.mode === "dark" ? "#60a5fa" : "#185abd",
+                        transition: "all 0.2s ease",
                       }}
                     >
-                      <DescriptionOutlinedIcon sx={{ fontSize: 22 }} />
+                      <ArticleRoundedIcon sx={{ fontSize: 23 }} />
                     </Box>
 
                     {doc.country && (
