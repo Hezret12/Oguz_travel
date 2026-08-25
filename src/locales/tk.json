@@ -2,7 +2,7 @@
   "edit": "Üýtgetmek",
   "delete": "Pozmak",
   "apply": "Ulanmak",
-  "cancel": "Ýatyrmak",
+  "cancel": "Ýapmak",
   "reset": "Arassala",
   "all": "Hemmesi",
   "search": "Gözleg",
@@ -44,26 +44,26 @@
     "onlyLetters": "Diňe harplar",
     "confirmPasswordRequired": "Parol tassykla zerurdyr",
     "passwordsDoNotMatch": "Passwords do not match",
-    "genderRequired": "Gender is required",
-    "tcNoRequired": "TC number is required",
-    "tcNoInvalid": "Invalid TC number",
-    "passportRequired": "Passport number is required",
-    "passportInvalid": "Invalid passport number",
-    "messageMin": "Message must be at least 10 characters",
-    "minPassengers": "At least 1 passenger must be selected",
-    "invalidReturnDate": "Return date cannot be before departure date"
+    "genderRequired": "Saýlanmaly",
+    "tcNoRequired": "Dogry girizilmedi",
+    "tcNoInvalid": "Dogry girizilmedi",
+    "passportRequired": "Pasport girizilmedi",
+    "passportInvalid": "Dogry girizilmedi",
+    "messageMin": "Düşündiriş 10 harpdan az bolmaly",
+    "minPassengers": "1 myhman saýlanmaly",
+    "invalidReturnDate": "Gidiş senesinden öň bolup bilmez"
   },
   "deleteConfirm": {
-    "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza yrap bolmaz."
+    "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi?"
   },
   "deleteDialog": {
-    "description": "Siz hakykatdan hem bu ýazgyny pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaz."
+    "description": "Siz hakykatdan hem bu ýazgyny pozmak isleýärsiňizmi?"
   },
   "columns": {
     "code": "Kody",
-    "countryNameTm": "Ýurt ady (TM)",
-    "countryNameRu": "Ýurt ady (RU)",
-    "countryNameEn": "Ýurt ady (EN)",
+    "countryNameTm": "Ýurt ady, Tm",
+    "countryNameRu": "Ýurt ady, Ru",
+    "countryNameEn": "Ýurt ady, En",
     "fullName": "Add Familýa",
     "phoneNumber": "Telefon belgisi",
     "gmail": "El. poçta",
@@ -89,8 +89,8 @@
     "country": "Ýurt",
     "client": "Müşderi",
     "issueDate": "Senesi",
-    "operator": "Tabşyryjy (Operator)",
-    "operatorTwo": "Kabul ediji (Operator)",
+    "operator": "Tabşyryjy, Operator",
+    "operatorTwo": "Kabul ediji, Operator",
     "operators": "Operatorlar",
     "agent": "Agent",
     "agentFullName": "Agent Ady Familýasy",
