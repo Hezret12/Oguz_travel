@@ -5,7 +5,7 @@ export const usersFilterSlice = createFilterSlice({
   defaultFilters: {
     search: '',
   },
-  defaultPageSize: 10,
+  defaultPageSize: 30,
 });
 
 export const usersFilterActions = usersFilterSlice.actions;

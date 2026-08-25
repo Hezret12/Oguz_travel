@@ -12,7 +12,7 @@ export const turkishAirlinesFilterSlice = createFilterSlice({
     is_paid: '',
     office_guid: '',
   },
-  defaultPageSize: 10,
+  defaultPageSize: 40,
 });
 
 export const turkishAirlinesFilterActions = turkishAirlinesFilterSlice.actions;
