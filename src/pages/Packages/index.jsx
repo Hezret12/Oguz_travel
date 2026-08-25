@@ -384,7 +384,6 @@ const PackagesPage = () => {
         )}
       </Box>
 
-      {/* Pagination Footer */}
       <Pagination
         totalItems={totalItems || serverDocs.length}
         page={page}
@@ -393,7 +392,6 @@ const PackagesPage = () => {
         setPageSize={setLimit}
       />
 
-      {/* Read-Only Word Document Preview Modal (Includes Print & Copy) */}
       <DocumentPreviewModal
         open={Boolean(previewDocument)}
         onClose={() => setPreviewDocument(null)}
