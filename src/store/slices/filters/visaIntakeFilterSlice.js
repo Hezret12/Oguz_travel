@@ -9,7 +9,7 @@ export const visaIntakeFilterSlice = createFilterSlice({
     operator_guid: '',
     visa_category: '',
   },
-  defaultPageSize: 20,
+  defaultPageSize: 40,
 });
 
 export const visaIntakeFilterActions = visaIntakeFilterSlice.actions;
