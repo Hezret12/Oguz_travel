@@ -33,7 +33,6 @@ const PackagesPage = () => {
   const [limit, setLimit] = useState(24);
   const [previewDocument, setPreviewDocument] = useState(null);
 
-  // Fetch Visa Document Packages from backend (Read-Only)
   const {
     data: serverDocs = [],
     totalItems = 0,
@@ -60,13 +59,11 @@ const PackagesPage = () => {
         minHeight: 0,
       }}
     >
-      {/* Page Header */}
       <PageHeader
         title={t("sidebar.packages")}
         pageTitle={`${t("sidebar.packages")} | Oguz Travel`}
       />
 
-      {/* Top Search & Toolbar */}
       <Paper
         elevation={0}
         sx={{
