@@ -115,7 +115,6 @@ const PackagesPage = () => {
         )}
       </Paper>
 
-      {/* Main Content Area */}
       <Box sx={{ flexGrow: 1, overflowY: "auto", pb: 4, px: 0.5, pt: 1 }}>
         {isLoading ? (
           <Box
@@ -224,7 +223,6 @@ const PackagesPage = () => {
                     },
                   }}
                 >
-                  {/* Top Bar: Icon + Country Badge */}
                   <Box
                     sx={{
                       display: "flex",
