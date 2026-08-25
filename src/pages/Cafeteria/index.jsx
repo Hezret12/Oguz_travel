@@ -163,20 +163,13 @@ const Cafeteria = () => {
         id: "createdBy",
         header: t("columns.employee"),
         size: 180,
-        accessorFn: (row) =>
-          row.createdBy?.fullName ||
-          row.created_by?.fullName ||
-          row.user?.fullName ||
-          "",
+        accessorFn: (row) => row.createdBy?.fullName,
         Cell: ({ row }) => {
-          const creator =
-            row.original.createdBy ||
-            row.original.created_by ||
-            row.original.user;
+          const creator = row.original.createdBy
           return (
             <StackedCell
               primary={creator?.fullName}
-              secondary={creator?.phone_number || creator?.email}
+              secondary={creator?.phone_number}
             />
           );
         },
@@ -297,9 +290,9 @@ const Cafeteria = () => {
           if (key === "type") {
             displayVal =
               value === true ||
-              value === "true" ||
-              value === 1 ||
-              value === "INCOME"
+                value === "true" ||
+                value === 1 ||
+                value === "INCOME"
                 ? t("cafeteria.types.income")
                 : t("cafeteria.types.expense");
           }
