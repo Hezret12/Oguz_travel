@@ -67,7 +67,6 @@ const EditCafeteriaModal = ({ table, row }) => {
       />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
-          {/* Type Selector (Segmented Radio Buttons) */}
           <Grid size={{ xs: 12 }}>
             <Controller
               name="type"
