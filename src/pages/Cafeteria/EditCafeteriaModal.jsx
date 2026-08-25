@@ -90,7 +90,6 @@ const EditCafeteriaModal = ({ table, row }) => {
                         gap: 1.5,
                       }}
                     >
-                      {/* INCOME Button (true) */}
                       <ButtonBase
                         type="button"
                         onClick={() => field.onChange(true)}
