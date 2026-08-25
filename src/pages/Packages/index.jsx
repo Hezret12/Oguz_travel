@@ -98,7 +98,7 @@ const PackagesPage = () => {
         {totalItems > 0 && (
           <Chip
             size="small"
-            label={`${totalItems} ${t("sidebar.packages", "Bukja")}`}
+            label={`${totalItems} ${t("sidebar.packages")}`}
             sx={{
               alignSelf: { xs: "flex-start", sm: "center" },
               fontWeight: 600,
