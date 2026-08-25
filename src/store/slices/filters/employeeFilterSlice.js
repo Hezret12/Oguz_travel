@@ -9,7 +9,7 @@ export const employeeFilterSlice = createFilterSlice({
     position_guid:   '',
     office_guid:     '',
   },
-  defaultPageSize: 35,
+  defaultPageSize: 40,
 });
 
 export const employeeFilterActions   = employeeFilterSlice.actions;

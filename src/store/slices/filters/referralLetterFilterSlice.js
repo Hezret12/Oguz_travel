@@ -9,7 +9,7 @@ export const referralLetterFilterSlice = createFilterSlice({
     status: '',
     datetime: '',
   },
-  defaultPageSize: 10,
+  defaultPageSize: 40,
 });
 
 export const referralLetterFilterActions = referralLetterFilterSlice.actions;
