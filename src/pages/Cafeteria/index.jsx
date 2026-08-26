@@ -106,12 +106,11 @@ const Cafeteria = () => {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "index",
+        accessorFn: "index",
         id: "index",
         header: "#",
         size: 50,
         enableSorting: false,
-        Cell: ({ row }) => (page - 1) * limit + row.index + 1,
       },
       {
         accessorKey: "date",
