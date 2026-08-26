@@ -12,12 +12,6 @@ import { useLocale } from "../../../hooks/useLocale";
 
 const LEGACY_ACCESS_IDS = {
   "/": "dashboard_view",
-  "/employee": "employees_view",
-  "/employee/users": "users_view",
-  "/ticket/b2b": "tickets_view",
-  "/ticket/turkish-airlines": "tickets_view",
-  "/clients": "clients_view",
-  "/settings": "settings_view",
 };
 
 const getAccessId = (item) => item.path;
@@ -107,7 +101,7 @@ const AccessGroup = ({ group, selectedAccessIds, onToggle }) => {
           <Box sx={{ display: "flex", color: "text.secondary", flexShrink: 0 }}>
             {group.icon}
           </Box>
-          <Typography sx={{ flex: 1, fontSize: 13, fontWeight: 700,textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          <Typography sx={{ flex: 1, fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
             {group.text}
           </Typography>
           <Typography variant="caption" sx={{ color: selectedCount ? "primary.main" : "text.disabled", fontWeight: 700 }}>
