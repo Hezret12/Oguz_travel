@@ -45,6 +45,36 @@ export const useSidebarItems = () => {
         icon: createElement(CheckSquare, { size: 20, strokeWidth: 2.2 }),
       },
       {
+        id: "finance",
+        isGroup: true,
+        text: t("sidebar.finance", "Maliýe"),
+        icon: createElement(Wallet, { size: 20, strokeWidth: 2.2 }),
+        alwaysVisible: true,
+        children: [
+          {
+            id: "finance-lots",
+            text: t("sidebar.financeLots", "Partiýalar we Ammar"),
+            path: PATHS.FINANCE.LOTS,
+            icon: createElement(Boxes, { size: 18, strokeWidth: 2.2 }),
+            alwaysVisible: true,
+          },
+          {
+            id: "finance-cash-flow",
+            text: t("sidebar.cashFlow", "Pul Akymy"),
+            path: PATHS.FINANCE.CASH_FLOW,
+            icon: createElement(ArrowLeftRight, { size: 18, strokeWidth: 2.2 }),
+            alwaysVisible: true,
+          },
+          {
+            id: "finance-overview",
+            text: t("sidebar.financeOverview", "Maliýe Hasabaty"),
+            path: PATHS.FINANCE.OVERVIEW,
+            icon: createElement(PieChart, { size: 18, strokeWidth: 2.2 }),
+            alwaysVisible: true,
+          },
+        ],
+      },
+      {
         id: "clients",
         text: t("sidebar.clients"),
         icon: createElement(Contact2, { size: 20, strokeWidth: 2.2 }),
@@ -154,36 +184,6 @@ export const useSidebarItems = () => {
         text: t("sidebar.cafeteria"),
         path: PATHS.CAFETERIA,
         icon: createElement(UtensilsCrossed, { size: 20, strokeWidth: 2.2 }),
-      },
-      {
-        id: "finance",
-        isGroup: true,
-        text: t("sidebar.finance", "Maliýe we Ammar"),
-        icon: createElement(Wallet, { size: 20, strokeWidth: 2.2 }),
-        alwaysVisible: true,
-        children: [
-          {
-            id: "finance-lots",
-            text: t("sidebar.financeLots", "Partiýalar we Ammar"),
-            path: PATHS.FINANCE.LOTS,
-            icon: createElement(Boxes, { size: 18, strokeWidth: 2.2 }),
-            alwaysVisible: true,
-          },
-          {
-            id: "finance-cash-flow",
-            text: t("sidebar.cashFlow", "Pul Akymy"),
-            path: PATHS.FINANCE.CASH_FLOW,
-            icon: createElement(ArrowLeftRight, { size: 18, strokeWidth: 2.2 }),
-            alwaysVisible: true,
-          },
-          {
-            id: "finance-overview",
-            text: t("sidebar.financeOverview", "Maliýe Hasabaty"),
-            path: PATHS.FINANCE.OVERVIEW,
-            icon: createElement(PieChart, { size: 18, strokeWidth: 2.2 }),
-            alwaysVisible: true,
-          },
-        ],
       },
       {
         id: "employee",
