@@ -6,7 +6,6 @@ import ScrollToTop from '../components/ScrollToTop';
 import ProtectedRoute from '../components/ProtectedRoute';
 import GuestRoute from '../components/GuestRoute';
 import DashboardLayout from '../layouts/DashboardLayout';
-import FinanceLayout from '../pages/Finance';
 
 
 function lazyRetry(componentImport) {
@@ -178,16 +177,10 @@ const router = createBrowserRouter([
               { path: 'reports/turkish-airlines', element: <TurkishReport /> },
               { path: 'reports/referral-letter', element: <ReferralLetterReport /> },
               { path: 'cafeteria', element: <Cafeteria /> },
-              {
-                path: 'finance',
-                element: <FinanceLayout />,
-                children: [
-                  { index: true, element: <Navigate to="lots" replace /> },
-                  { path: 'lots', element: <FinanceLots /> },
-                  { path: 'cash-flow', element: <FinanceCashFlow /> },
-                  { path: 'overview', element: <FinanceOverview /> },
-                ],
-              },
+              { path: 'finance', element: <Navigate to="/finance/lots" replace /> },
+              { path: 'finance/lots', element: <FinanceLots /> },
+              { path: 'finance/cash-flow', element: <FinanceCashFlow /> },
+              { path: 'finance/overview', element: <FinanceOverview /> },
               { path: 'notifications', element: <Notification /> },
               { path: 'unauthorized', element: <Unauthorized /> },
             ],
