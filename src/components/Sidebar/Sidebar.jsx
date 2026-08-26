@@ -80,7 +80,6 @@ const SidebarPanel = ({
       </Box> */}
     </Box>
 
-    {/* Scrollable Navigation List */}
     <List
       sx={{
         flex: 1,
