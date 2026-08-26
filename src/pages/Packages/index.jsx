@@ -291,13 +291,13 @@ const PackagesPage = () => {
                         overflow: "hidden",
                       }}
                     >
-                      {doc.title || t("visaDocument.title", "Wiza bukjasy")}
+                      {doc.title || t("visaDocument.title")}
                     </Typography>
 
                     <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 0.75 }}>
                       <Chip
                         icon={<TableChartOutlinedIcon sx={{ fontSize: "14px !important" }} />}
-                        label={`${tableCount} ${t("visaDocument.tables", "tablisa")}`}
+                        label={`${tableCount} ${t("visaDocument.tables")}`}
                         size="small"
                         variant="outlined"
                         sx={{
