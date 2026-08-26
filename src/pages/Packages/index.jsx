@@ -276,7 +276,6 @@ const PackagesPage = () => {
                     )}
                   </Box>
 
-                  {/* Document Title & Meta Description */}
                   <Box sx={{ mb: 2.5, flexGrow: 1 }}>
                     <Typography
                       variant="h6"
