@@ -273,7 +273,7 @@ export const getFinanceSummaryApi = async (params = {}) => {
   } catch {
     // Graceful fallback
   }
-  const { mockPurchaseLots, mockFinanceTransactions, mockCashBoxes } = await import('../mock/financeMockData');
+  const { mockPurchaseLots, mockCashBoxes } = await import('../mock/financeMockData');
 
   const unconsumedAssetTotal = mockPurchaseLots.reduce(
     (acc, lot) => acc + (lot.total_quantity - lot.consumed_quantity) * lot.unit_cost,
