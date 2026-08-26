@@ -373,7 +373,7 @@ const PackagesPage = () => {
                         transition: "all 0.2s ease",
                       }}
                     >
-                      {t("visaDocument.preview", "Görmek")}
+                      {t("visaDocument.preview")}
                     </Button>
                   </Box>
                 </Paper>
