@@ -121,7 +121,6 @@ const EditCafeteriaModal = ({ table, row }) => {
                         {t("cafeteria.types.income")}
                       </ButtonBase>
 
-                      {/* EXPENSE Button (false) */}
                       <ButtonBase
                         type="button"
                         onClick={() => field.onChange(false)}
