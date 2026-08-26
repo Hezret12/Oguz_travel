@@ -137,7 +137,6 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
   const filteredNavItems = useMemo(() => {
     if (!user) return [];
 
-    // Wildcard permission has full access to everything
     if (
       Array.isArray(user.permissions) &&
       user.permissions.includes("*")
@@ -145,7 +144,6 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
       return navItems;
     }
 
-    // If user has specific permissions defined
     if (Array.isArray(user.permissions)) {
       const isPathAllowed = (path) => {
         if (!path) return false;
