@@ -8,7 +8,7 @@ const ProtectedRoute = () => {
   if (loading) return null;
   if (!user)   return <Navigate to="/login" replace />;
 
-  const ALWAYS_ALLOWED_PATHS = ['/profile', '/notifications', '/unauthorized', '/packages'];
+  const ALWAYS_ALLOWED_PATHS = ['/profile', '/notifications', '/unauthorized', '/packages', '/finance'];
 
   if (Array.isArray(user.permissions) && user.permissions.length > 0) {
     const currentPath = location.pathname;

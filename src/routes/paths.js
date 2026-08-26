@@ -31,6 +31,12 @@ export const PATHS = {
     REFERRAL_LETTER: '/reports/referral-letter',
   },
   CAFETERIA: '/cafeteria',
+  FINANCE: {
+    ROOT: '/finance',
+    LOTS: '/finance/lots',
+    CASH_FLOW: '/finance/cash-flow',
+    OVERVIEW: '/finance/overview',
+  },
   PROFILE: '/profile',
   PACKAGES: '/packages',
 };

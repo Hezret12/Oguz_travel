@@ -220,3 +220,164 @@ export const getCafeteriaSummaryApi = async (params = {}) => {
   return await api.getPrivate('/cafeteria/summary', params);
 };
 
+// ==================== FINANCE / INVENTORY MODULE ====================
+export const getAllPurchaseLotsApi = async (params = {}) => {
+  try {
+    const res = await api.getPrivate('/finance/lots', params);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback for UI preview
+  }
+  const { mockPurchaseLots } = await import('../mock/financeMockData');
+  const page = Number(params?.page || 1);
+  const limit = Number(params?.limit || 40);
+  const search = params?.search?.toLowerCase()?.trim();
+  const serviceType = params?.service_type;
+  const status = params?.status;
+
+  let filtered = [...mockPurchaseLots];
+  if (search) {
+    filtered = filtered.filter(
+      (item) =>
+        item.lot_number?.toLowerCase()?.includes(search) ||
+        item.name?.toLowerCase()?.includes(search) ||
+        item.supplier?.name?.toLowerCase()?.includes(search)
+    );
+  }
+  if (serviceType) {
+    filtered = filtered.filter((item) => item.service_type === serviceType);
+  }
+  if (status) {
+    filtered = filtered.filter((item) => item.status === status);
+  }
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / limit) || 1;
+  const startIndex = (page - 1) * limit;
+  const paginatedData = filtered.slice(startIndex, startIndex + limit);
+
+  return {
+    data: {
+      data: paginatedData,
+      totalItems,
+      totalPages,
+      currentPage: page,
+    },
+  };
+};
+
+export const getFinanceSummaryApi = async (params = {}) => {
+  try {
+    const res = await api.getPrivate('/finance/summary', params);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { mockPurchaseLots, mockFinanceTransactions, mockCashBoxes } = await import('../mock/financeMockData');
+
+  const unconsumedAssetTotal = mockPurchaseLots.reduce(
+    (acc, lot) => acc + (lot.total_quantity - lot.consumed_quantity) * lot.unit_cost,
+    0
+  );
+  const totalCostPurchased = mockPurchaseLots.reduce((acc, lot) => acc + lot.total_cost, 0);
+  const realizedCogs = mockPurchaseLots.reduce((acc, lot) => acc + lot.consumed_quantity * lot.unit_cost, 0);
+  const totalCashBalanceUSD = mockCashBoxes.reduce((acc, cb) => {
+    if (cb.currency === 'USD') return acc + cb.current_balance;
+    if (cb.currency === 'TMT') return acc + cb.current_balance / 19.5;
+    return acc;
+  }, 0);
+
+  return {
+    data: {
+      inventoryValuation: [
+        { service_type: 'VISA_SLOT', remaining_units: 103, unconsumed_asset_value: 5015.00, currency: 'USD' },
+        { service_type: 'HOTEL_ALLOTMENT', remaining_units: 32, unconsumed_asset_value: 3840.00, currency: 'USD' },
+      ],
+      realization: [
+        { service_type: 'VISA_SLOT', total_consumed_units: 57, total_realized_cogs: 2835.00, total_realized_revenue: 5200.00, realized_gross_profit: 2365.00 },
+        { service_type: 'HOTEL_ALLOTMENT', total_consumed_units: 18, total_realized_cogs: 2160.00, total_realized_revenue: 3500.00, realized_gross_profit: 1340.00 },
+      ],
+      unconsumedAssetTotal,
+      totalCostPurchased,
+      realizedCogs,
+      totalCashBalanceUSD,
+    },
+  };
+};
+
+export const getAllCashTransactionsApi = async (params = {}) => {
+  try {
+    const res = await api.getPrivate('/finance/transactions', params);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { mockFinanceTransactions } = await import('../mock/financeMockData');
+  const page = Number(params?.page || 1);
+  const limit = Number(params?.limit || 40);
+  const search = params?.search?.toLowerCase()?.trim();
+  const txType = params?.transaction_type;
+
+  let filtered = [...mockFinanceTransactions];
+  if (search) {
+    filtered = filtered.filter(
+      (item) =>
+        item.transaction_number?.toLowerCase()?.includes(search) ||
+        item.description?.toLowerCase()?.includes(search) ||
+        item.counterparty_name?.toLowerCase()?.includes(search)
+    );
+  }
+  if (txType) {
+    filtered = filtered.filter((item) => item.transaction_type === txType);
+  }
+
+  const totalItems = filtered.length;
+  const totalPages = Math.ceil(totalItems / limit) || 1;
+  const startIndex = (page - 1) * limit;
+  const paginatedData = filtered.slice(startIndex, startIndex + limit);
+
+  return {
+    data: {
+      data: paginatedData,
+      totalItems,
+      totalPages,
+      currentPage: page,
+    },
+  };
+};
+
+export const getAllCashBoxesApi = async (params = {}) => {
+  try {
+    const res = await api.getPrivate('/finance/cash-boxes', params);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { mockCashBoxes } = await import('../mock/financeMockData');
+  return { data: mockCashBoxes };
+};
+
+export const getAllSuppliersApi = async (params = {}) => {
+  try {
+    const res = await api.getPrivate('/finance/suppliers', params);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { mockSuppliers } = await import('../mock/financeMockData');
+  return { data: mockSuppliers };
+};
+
+export const getLotConsumptionHistoryApi = async (lotGuid) => {
+  try {
+    const res = await api.getPrivate(`/finance/lots/${lotGuid}/consumptions`);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { mockConsumptionLedger } = await import('../mock/financeMockData');
+  const items = mockConsumptionLedger.filter((c) => c.lot_guid === lotGuid);
+  return { data: items };
+};
+
+

@@ -12,6 +12,8 @@ import outboundFiltersReducer from './slices/filters/outboundFilterSlice';
 import visaIntakeFiltersReducer from './slices/filters/visaIntakeFilterSlice';
 import taskFiltersReducer from './slices/filters/taskFilterSlice';
 import cafeteriaFiltersReducer from './slices/filters/cafeteriaFilterSlice';
+import financeLotFiltersReducer from './slices/filters/financeLotFilterSlice';
+import cashFlowFiltersReducer from './slices/filters/cashFlowFilterSlice';
 import notificationsReducer from './slices/notificationSlice';
 
 const store = configureStore({
@@ -31,6 +33,8 @@ const store = configureStore({
     visaIntakeFilters: visaIntakeFiltersReducer,
     taskFilters:     taskFiltersReducer,
     cafeteriaFilters: cafeteriaFiltersReducer,
+    financeLotFilters: financeLotFiltersReducer,
+    cashFlowFilters:   cashFlowFiltersReducer,
     // paymentFilters: paymentFiltersReducer,
   },
   middleware: (getDefaultMiddleware) =>

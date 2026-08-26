@@ -17,6 +17,12 @@ import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
 import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
+import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
+import DoneAllRoundedIcon from "@mui/icons-material/DoneAllRounded";
+import AlarmOffRoundedIcon from "@mui/icons-material/AlarmOffRounded";
+import AccountBalanceWalletRoundedIcon from "@mui/icons-material/AccountBalanceWalletRounded";
+import HotelRoundedIcon from "@mui/icons-material/HotelRounded";
+import AltRouteRoundedIcon from "@mui/icons-material/AltRouteRounded";
 
 export const SALE_STATUS_CONFIG = {
   SALE: { label: "Sale", color: "#16a34a", icon: CheckCircleRoundedIcon },
@@ -102,4 +108,28 @@ export const CAFETERIA_TYPE_CONFIG = {
   FALSE: { label: "Çykdajy", color: "#dc2626", icon: TrendingDownRoundedIcon },
   "1": { label: "Girdeji", color: "#16a34a", icon: TrendingUpRoundedIcon },
   "0": { label: "Çykdajy", color: "#dc2626", icon: TrendingDownRoundedIcon },
-};
+};
+
+export const PURCHASE_LOT_STATUS_CONFIG = {
+  ACTIVE: { label: "Işjeň", color: "#16a34a", icon: Inventory2RoundedIcon },
+  EXHAUSTED: { label: "Gutarýan / Gutardy", color: "#64748b", icon: DoneAllRoundedIcon },
+  EXPIRED: { label: "Möhleti geçen", color: "#dc2626", icon: AlarmOffRoundedIcon },
+  CANCELLED: { label: "Ýatyryldy", color: "#94a3b8", icon: CancelRoundedIcon },
+};
+
+export const FINANCE_TRANSACTION_TYPE_CONFIG = {
+  INCOME: { label: "Girdeji", color: "#16a34a", icon: TrendingUpRoundedIcon },
+  EXPENSE: { label: "Çykdajy", color: "#dc2626", icon: TrendingDownRoundedIcon },
+  SUPPLIER_PAYMENT: { label: "Üpjün edijä töleg", color: "#2563eb", icon: CreditCardRoundedIcon },
+  CLIENT_PAYMENT: { label: "Müşderi tölegi", color: "#0891b2", icon: PaymentsRoundedIcon },
+  TRANSFER: { label: "Geçirim", color: "#7c3aed", icon: AltRouteRoundedIcon },
+};
+
+export const FINANCE_SERVICE_TYPE_CONFIG = {
+  VISA_SLOT: { label: "Wiza Kwotasy", color: "#0891b2", icon: FlightRoundedIcon },
+  HOTEL_ALLOTMENT: { label: "Otel Basyşy", color: "#db2777", icon: HotelRoundedIcon },
+  FLIGHT_QUOTA: { label: "Uçuş Bloki", color: "#2563eb", icon: ConnectingAirportsRoundedIcon },
+  TOUR_PACKAGE: { label: "Tur Bukjasy", color: "#7c3aed", icon: BusinessCenterRoundedIcon },
+  TRANSFER: { label: "Transfer", color: "#ea580c", icon: WorkRoundedIcon },
+};
+

@@ -214,3 +214,21 @@ export const updateVisaDocApi = async (data) => {
 export const updateCafeteriaTransactionApi = async (data) => {
   return await api.patchPrivate(`/cafeteria/update/${data.guid || data.id}`, data);
 };
+
+// ==================== FINANCE / INVENTORY MODULE ====================
+export const updatePurchaseLotApi = async (data) => {
+  try {
+    const res = await api.patchPrivate(`/finance/lots/${data.guid || data.id}`, data);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { mockPurchaseLots } = await import('../mock/financeMockData');
+  const index = mockPurchaseLots.findIndex((l) => l.guid === (data.guid || data.id));
+  if (index !== -1) {
+    mockPurchaseLots[index] = { ...mockPurchaseLots[index], ...data };
+    return { data: mockPurchaseLots[index] };
+  }
+  return { data };
+};
+

@@ -6,6 +6,7 @@ import ScrollToTop from '../components/ScrollToTop';
 import ProtectedRoute from '../components/ProtectedRoute';
 import GuestRoute from '../components/GuestRoute';
 import DashboardLayout from '../layouts/DashboardLayout';
+import FinanceLayout from '../pages/Finance';
 
 
 function lazyRetry(componentImport) {
@@ -51,6 +52,9 @@ const TaskFlowPage = lazyRetry(() => import('../pages/TaskFlow'));
 const NotificationPage = lazyRetry(() => import('../pages/Notification'));
 const ProfilePage = lazyRetry(() => import('../pages/Profile/index'));
 const CafeteriaPage = lazyRetry(() => import('../pages/Cafeteria'));
+const FinanceLotsPage = lazyRetry(() => import('../pages/Finance/Lots'));
+const FinanceCashFlowPage = lazyRetry(() => import('../pages/Finance/CashFlow'));
+const FinanceOverviewPage = lazyRetry(() => import('../pages/Finance/Overview'));
 
 function PageLoader() {
   const [visible, setVisible] = useState(false);
@@ -117,6 +121,9 @@ const TaskFlow = Loadable(TaskFlowPage);
 const Notification = Loadable(NotificationPage);
 const Profile = Loadable(ProfilePage);
 const Cafeteria = Loadable(CafeteriaPage);
+const FinanceLots = Loadable(FinanceLotsPage);
+const FinanceCashFlow = Loadable(FinanceCashFlowPage);
+const FinanceOverview = Loadable(FinanceOverviewPage);
 const Unauthorized = Loadable(UnauthorizedPage);
 const NotFound = Loadable(NotFoundPage);
 const Login = Loadable(LoginPage);
@@ -171,6 +178,16 @@ const router = createBrowserRouter([
               { path: 'reports/turkish-airlines', element: <TurkishReport /> },
               { path: 'reports/referral-letter', element: <ReferralLetterReport /> },
               { path: 'cafeteria', element: <Cafeteria /> },
+              {
+                path: 'finance',
+                element: <FinanceLayout />,
+                children: [
+                  { index: true, element: <Navigate to="lots" replace /> },
+                  { path: 'lots', element: <FinanceLots /> },
+                  { path: 'cash-flow', element: <FinanceCashFlow /> },
+                  { path: 'overview', element: <FinanceOverview /> },
+                ],
+              },
               { path: 'notifications', element: <Notification /> },
               { path: 'unauthorized', element: <Unauthorized /> },
             ],
