@@ -21,7 +21,6 @@ import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { getFinanceSummaryApi, getAllCashBoxesApi } from "../../../api/queries/getters";
 import PageHeader from "../../../components/PageHeader";
-import AddPurchaseLotModal from "../AddPurchaseLotModal";
 import AddCashTransactionModal from "../AddCashTransactionModal";
 import { PATHS } from "../../../routes/paths";
 
@@ -95,7 +94,6 @@ const StatCard = ({ title, value, subtitle, color = "text.primary", onClick }) =
 const FinanceOverview = () => {
   const { t } = useLocale();
   const navigate = useNavigate();
-  const [isAddLotOpen, setIsAddLotOpen] = useState(false);
   const [isAddTxOpen, setIsAddTxOpen] = useState(false);
 
   const { data: summary } = useGet({
@@ -109,12 +107,7 @@ const FinanceOverview = () => {
   });
   const cashBoxes = (cashBoxesData || []).filter((cb) => cb.is_active !== false);
 
-  const inventoryValuation = summary?.inventoryValuation || [];
   const realization = summary?.realization || [];
-
-  const totalUnconsumedAsset =
-    summary?.unconsumedAssetTotal ??
-    inventoryValuation.reduce((acc, curr) => acc + Number(curr.unconsumed_asset_value || 0), 0) ?? 8855;
 
   const totalRealizedCogs =
     summary?.realizedCogs ??
@@ -156,10 +149,11 @@ const FinanceOverview = () => {
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <StatCard
-              title={t("finance.unconsumedStockAsset", "Ammar Aktiwleri")}
-              value={formatMoney(totalUnconsumedAsset, "$")}
-              subtitle="Galyndy hyzmat aktiwleri"
-              onClick={() => navigate(PATHS.FINANCE.LOTS)}
+              title={t("finance.realizedRevenue", "Jemi Girdeji (Revenue)")}
+              value={formatMoney(totalRealizedRevenue, "$")}
+              subtitle="Hyzmat satyş girdejisi"
+              color="#2563EB"
+              onClick={() => navigate(PATHS.FINANCE.CASH_FLOW)}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
@@ -168,7 +162,7 @@ const FinanceOverview = () => {
               value={formatMoney(totalRealizedCogs, "$")}
               subtitle="Satylan hyzmat harajatlary"
               color="#DC2626"
-              onClick={() => navigate(PATHS.FINANCE.LOTS)}
+              onClick={() => navigate(PATHS.FINANCE.CASH_FLOW)}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
@@ -455,10 +449,6 @@ const FinanceOverview = () => {
       </Box>
 
       {/* Dialogs */}
-      <AddPurchaseLotModal
-        open={isAddLotOpen}
-        close={() => setIsAddLotOpen(false)}
-      />
       <AddCashTransactionModal
         open={isAddTxOpen}
         close={() => setIsAddTxOpen(false)}

@@ -33,7 +33,6 @@ export const PATHS = {
   CAFETERIA: '/cafeteria',
   FINANCE: {
     ROOT: '/finance',
-    LOTS: '/finance/lots',
     CASH_FLOW: '/finance/cash-flow',
     OVERVIEW: '/finance/overview',
   },

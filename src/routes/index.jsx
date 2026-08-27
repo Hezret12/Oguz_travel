@@ -51,7 +51,6 @@ const TaskFlowPage = lazyRetry(() => import('../pages/TaskFlow'));
 const NotificationPage = lazyRetry(() => import('../pages/Notification'));
 const ProfilePage = lazyRetry(() => import('../pages/Profile/index'));
 const CafeteriaPage = lazyRetry(() => import('../pages/Cafeteria'));
-const FinanceLotsPage = lazyRetry(() => import('../pages/Finance/Lots'));
 const FinanceCashFlowPage = lazyRetry(() => import('../pages/Finance/CashFlow'));
 const FinanceOverviewPage = lazyRetry(() => import('../pages/Finance/Overview'));
 
@@ -120,7 +119,6 @@ const TaskFlow = Loadable(TaskFlowPage);
 const Notification = Loadable(NotificationPage);
 const Profile = Loadable(ProfilePage);
 const Cafeteria = Loadable(CafeteriaPage);
-const FinanceLots = Loadable(FinanceLotsPage);
 const FinanceCashFlow = Loadable(FinanceCashFlowPage);
 const FinanceOverview = Loadable(FinanceOverviewPage);
 const Unauthorized = Loadable(UnauthorizedPage);
@@ -177,8 +175,7 @@ const router = createBrowserRouter([
               { path: 'reports/turkish-airlines', element: <TurkishReport /> },
               { path: 'reports/referral-letter', element: <ReferralLetterReport /> },
               { path: 'cafeteria', element: <Cafeteria /> },
-              { path: 'finance', element: <Navigate to="/finance/lots" replace /> },
-              { path: 'finance/lots', element: <FinanceLots /> },
+              { path: 'finance', element: <Navigate to="/finance/cash-flow" replace /> },
               { path: 'finance/cash-flow', element: <FinanceCashFlow /> },
               { path: 'finance/overview', element: <FinanceOverview /> },
               { path: 'notifications', element: <Notification /> },

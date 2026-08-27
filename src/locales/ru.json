@@ -340,9 +340,8 @@
     },
     "cafeteria": "Кафетерий",
     "finance": "Финансы",
-    "financeLots": "Партии и Склад",
-    "cashFlow": "Движение Денег",
-    "financeOverview": "Финансовый Отчет",
+    "cashFlow": "Движение денег",
+    "financeOverview": "Финансовый отчет",
     "taskFlow": "Задачи"
   },
   "turkish": {

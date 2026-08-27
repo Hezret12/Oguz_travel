@@ -340,9 +340,8 @@
     },
     "cafeteria": "Cafeteria",
     "finance": "Finance",
-    "financeLots": "Purchase Lots & Stock",
     "cashFlow": "Cash Flow",
-    "financeOverview": "Financial Overview",
+    "financeOverview": "Financial Report",
     "taskFlow": "Tasks"
   },
   "turkish": {

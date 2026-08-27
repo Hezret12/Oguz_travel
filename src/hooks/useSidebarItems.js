@@ -20,7 +20,6 @@ import {
   ClipboardCheck,
   UtensilsCrossed,
   Wallet,
-  Boxes,
   ArrowLeftRight,
   PieChart,
 } from "lucide-react";
@@ -51,13 +50,6 @@ export const useSidebarItems = () => {
         icon: createElement(Wallet, { size: 20, strokeWidth: 2.2 }),
         alwaysVisible: true,
         children: [
-          {
-            id: "finance-lots",
-            text: t("sidebar.financeLots", "Partiýalar we Ammar"),
-            path: PATHS.FINANCE.LOTS,
-            icon: createElement(Boxes, { size: 18, strokeWidth: 2.2 }),
-            alwaysVisible: true,
-          },
           {
             id: "finance-cash-flow",
             text: t("sidebar.cashFlow", "Pul Akymy"),
