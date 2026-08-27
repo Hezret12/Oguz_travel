@@ -3,17 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import {
-  Box,
-  Typography,
-  Chip,
-  Button,
-  alpha,
-} from "@mui/material";
-import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
-import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
+import { Box, Typography, Chip, alpha } from "@mui/material";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
@@ -141,13 +131,10 @@ const CashFlow = () => {
     params: queryParams,
   });
 
-  const transactions = useMemo(
-    () => {
-      const raw = transactionsData?.data ?? transactionsData ?? [];
-      return Array.isArray(raw) ? raw : [];
-    },
-    [transactionsData]
-  );
+  const transactions = useMemo(() => {
+    const raw = transactionsData?.data ?? transactionsData ?? [];
+    return Array.isArray(raw) ? raw : [];
+  }, [transactionsData]);
 
   /* ──────── Compute summary totals ──────── */
   const { totalIncome, totalExpense, netAmount } = useMemo(() => {
@@ -351,63 +338,24 @@ const CashFlow = () => {
       isLoading,
       showProgressBars: isFetching,
     },
-    muiTablePaperProps: {
-      sx: (theme) => ({
-        display: "flex",
-        flexDirection: "column",
-        height: "calc(100vh - 310px)",
-        width: "100%",
-        border: "1px solid",
-        borderColor: "divider",
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: "none",
-        borderRadius: "12px",
-        overflow: "hidden",
-      }),
-    },
-    renderEmptyRowsFallback: () => (
-      <Paper
-        variant="outlined"
+    renderTopToolbarCustomActions: () => (
+      <Box
         sx={{
-          p: 6,
-          my: 3,
-          textAlign: "center",
-          borderRadius: 3,
-          bgcolor: "background.paper",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          gap: 2,
+          gap: 1.5,
+          py: 0.5,
         }}
       >
-        <Box
-          sx={{
-            p: 2,
-            borderRadius: "50%",
-            bgcolor: "action.hover",
-            color: "text.secondary",
-          }}
-        >
-          <AccountBalanceWalletOutlinedIcon sx={{ fontSize: 48 }} />
-        </Box>
-        <Typography variant="h6" sx={{ fontWeight: 700, color: "text.primary" }}>
-          {t("finance.noTransactionsTitle", "Heniz pul amaly ýazylmady")}
-        </Typography>
-        <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 450 }}>
-          {t(
-            "finance.noTransactionsDesc",
-            "Kassalara gelen girdejileri, müşderi töleglerini, partiýa çykdajylaryny we ofis operasion harajatlaryny hasaba alyň."
-          )}
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddRoundedIcon />}
-          onClick={() => table.setCreatingRow(true)}
-          sx={{ mt: 1, borderRadius: 2, textTransform: "none", fontWeight: 700, px: 3 }}
-        >
-          {t("finance.addTransaction")}
-        </Button>
-      </Paper>
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={setSearch}
+          placeholder={t("finance.searchTransactions", "Search transactions...")}
+          onRefetch={refetch}
+          isFetching={isFetching}
+          disabled={isLoading}
+        />
+      </Box>
     ),
     renderCreateRowDialogContent: ({ table }) => (
       <AddCashTransactionModal table={table} />
@@ -435,15 +383,6 @@ const CashFlow = () => {
           />
         </Box>
       </PageHeader>
-
-      {/* ── Search ── */}
-      <GlobalSearchInput
-        value={searchQuery}
-        onChange={setSearch}
-        placeholder={t("finance.searchTransactions", "Search transactions...")}
-        onRefetch={refetch}
-        isFetching={isFetching}
-      />
 
       {/* ── Table ── */}
       <MaterialReactTable table={table} />
