@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
 import dayjs from "dayjs";
 
@@ -8,12 +8,12 @@ import { useDocumentTitle } from "../../../hooks/useDocumentTitle";
 import { formatNumber, formatCompact } from "../../../functions/generalHelpers";
 import { useQuery } from "@tanstack/react-query";
 import { getTurkishQuarterApi } from "../../../api/queries/getters";
-import { exportTurkishAirlinesExcel } from "./functions/exportTurkishAirlinesExcel";
 
 import ReportHeader from "./Contents/ReportHeader";
 import ReportSummaryCards from "./Contents/ReportSummaryCards";
 import ReportCharts from "./Contents/ReportCharts";
 import ReportTable from "./Contents/ReportTable";
+import TurkishAirlinesExportModal from "./Contents/TurkishAirlinesExportModal";
 
 const getCurrentQuarter = () => Math.floor(new Date().getMonth() / 3) + 1;
 
@@ -21,6 +21,7 @@ const TurkishAirlinesReport = () => {
   useDocumentTitle("Turkish Airlines - Oguz Travel");
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [selectedQuarter, setSelectedQuarter] = useState(getCurrentQuarter());
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const { data: quarterRes } = useQuery({
     queryKey: ["turkish-quarter", selectedQuarter],
@@ -54,22 +55,6 @@ const TurkishAirlinesReport = () => {
     footerCellSx,
   } = useReportTheme();
 
-  const handleExportExcel = useCallback(async () => {
-    try {
-      await exportTurkishAirlinesExcel({
-        selectedDate,
-        daysInMonth,
-        offices,
-        rows,
-        footer,
-        grandTotal,
-        findFooter,
-      });
-    } catch (err) {
-      console.error("Turkish Airlines Excel export error:", err);
-    }
-  }, [selectedDate, daysInMonth, offices, rows, footer, grandTotal, findFooter]);
-
   return (
     <Box
       sx={{
@@ -85,7 +70,7 @@ const TurkishAirlinesReport = () => {
         onDateChange={setSelectedDate}
         selectedQuarter={selectedQuarter}
         onQuarterChange={setSelectedQuarter}
-        onExportExcel={handleExportExcel}
+        onExportExcel={() => setIsExportModalOpen(true)}
         teal={colors.teal}
         borderCol={colors.border}
         paperSx={paperSx}
@@ -128,11 +113,10 @@ const TurkishAirlinesReport = () => {
         findFooter={findFooter}
         formatNumber={formatNumber}
         daysInMonth={daysInMonth}
-        onExportExcel={handleExportExcel}
+        onExportExcel={() => setIsExportModalOpen(true)}
         teal={colors.teal}
         accent={colors.accent}
         green={colors.green}
-        orange={colors.orange}
         borderCol={colors.border}
         paperSx={paperSx}
         headerCellSx={headerCellSx}
@@ -140,6 +124,18 @@ const TurkishAirlinesReport = () => {
         footerCellSx={footerCellSx}
         bgHeader={colors.bgHeader}
         bgSticky={colors.bgSticky}
+      />
+
+      {/* Excel Export Confirmation Modal */}
+      <TurkishAirlinesExportModal
+        open={isExportModalOpen}
+        close={() => setIsExportModalOpen(false)}
+        selectedDate={selectedDate}
+        daysInMonth={daysInMonth}
+        offices={offices}
+        rows={rows}
+        grandTotal={grandTotal}
+        findFooter={findFooter}
       />
     </Box>
   );

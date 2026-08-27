@@ -18,7 +18,7 @@ const TK_MONTHS = [
 ];
 
 const formatMoneyDisplay = (val) => {
-  if (val === undefined || val === null || val === "" || Number(val) === 0) { 
+  if (val === undefined || val === null || val === "" || Number.isNaN(Number(val)) || Number(val) === 0) {
     return "$  -";
   }
   const num = Number(val);
@@ -38,7 +38,7 @@ export const exportTurkishAirlinesExcel = async ({
 }) => {
   const d = dayjs.isDayjs(selectedDate) ? selectedDate : dayjs(selectedDate);
   const validDate = d.isValid() ? d : dayjs();
-  const monthNameTk = TK_MONTHS[validDate.month()] || validDate.format("MMMM");
+  const monthNameTk = TK_MONTHS[validDate.month()] || "Awgust";
   const yearStr = validDate.format("YYYY");
 
   const workbook = new ExcelJS.Workbook();
@@ -120,7 +120,7 @@ export const exportTurkishAirlinesExcel = async ({
     worksheet.getColumn(startCol + idx).width = col.width || 15;
   });
 
-  // 1. Top Title Banner (Rows 2 - 3, from startCol to endCol)
+  // 1. Top Title Banner (Rows 2 - 3, from startCol to endCol) - Fixed Turkmen Title
   const titleText = `Türk howa ýollary ${monthNameTk} ${yearStr} Hasabaty`;
   worksheet.mergeCells(2, startCol, 3, endCol);
   const titleCell = worksheet.getCell(2, startCol);

@@ -523,10 +523,18 @@
       "q1": "1-й Квартал (Q1: Янв - Мар)",
       "q2": "2-й Квартал (Q2: Апр - Июн)",
       "q3": "3-й Квартал (Q3: Июл - Сен)",
-      "q4": "4-й Квартал (Q4: Окт - Дек)",
-      "quarterReport": "Квартальное сравнение и отчет по целям",
-      "achievementRate": "Цель квартала",
-      "achievementSublabel": "Тема прошлого квартала"
+      "q4": "4-й Квартал (Окт – Дек)",
+      "quarterReport": "Квартальный сравнительный отчет и цели",
+      "achievementRate": "Квартальная цель",
+      "achievementSublabel": "Тема прошлого квартала",
+      "exportModalTitle": "Экспорт отчета Turkish Airlines",
+      "exportModalDesc": "Скачать Excel отчет Turkish Airlines за выбранный период.",
+      "exportPeriod": "Период отчета",
+      "exportOffices": "Участвующие офисы",
+      "exportFileFormat": "Формат файла",
+      "exportFileName": "Имя файла",
+      "exportButton": "Скачать Excel",
+      "exportSuccess": "Отчет успешно скачан"
     }
   },
   "task": {

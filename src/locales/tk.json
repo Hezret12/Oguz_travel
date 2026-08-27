@@ -526,7 +526,15 @@
       "q4": "4-nji Çäryek (Okt – Dek)",
       "quarterReport": "Çäryeklik Deňeşdirme we Maksat Hasabaty",
       "achievementRate": "Çäryek Maksady",
-      "achievementSublabel": "Geçen çäryek temasy"
+      "achievementSublabel": "Geçen çäryek temasy",
+      "exportModalTitle": "Turkish Airlines Hasabatyny Eksport Etmek",
+      "exportModalDesc": "Seçilen döwür üçin Turkish Airlines Excel hasabatyny ýükläň.",
+      "exportPeriod": "Hasabat Döwri",
+      "exportOffices": "Gatnaşýan Ofisler",
+      "exportFileFormat": "Faýl Formatı",
+      "exportFileName": "Faýl Ady",
+      "exportButton": "Excel Ýüklemek",
+      "exportSuccess": "Hasabat üstünlikli ýüklendi"
     }
   },
   "task": {

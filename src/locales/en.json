@@ -526,7 +526,15 @@
       "q4": "4th Quarter (Q4: Oct - Dec)",
       "quarterReport": "Quarterly Comparison & Target Report",
       "achievementRate": "Quarter Goal",
-      "achievementSublabel": "Last quarter theme"
+      "achievementSublabel": "Last quarter theme",
+      "exportModalTitle": "Export Turkish Airlines Report",
+      "exportModalDesc": "Download Turkish Airlines Excel report for the selected period.",
+      "exportPeriod": "Report Period",
+      "exportOffices": "Included Offices",
+      "exportFileFormat": "File Format",
+      "exportFileName": "File Name",
+      "exportButton": "Download Excel",
+      "exportSuccess": "Report downloaded successfully"
     }
   },
   "task": {
