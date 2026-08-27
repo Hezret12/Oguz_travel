@@ -829,6 +829,8 @@
     "realizedRevenue": "Satyş bahasy",
     "realizedCost": "Özüne düşýän baha (COGS)",
     "grossMargin": "Peýda",
-    "totalCashBalance": "Jemi kassa galyndysy"
+    "totalCashBalance": "Jemi kassa galyndysy",
+    "searchTransactions": "Amal gözle...",
+    "recordedBy": "Ýazga alan"
   }
 }

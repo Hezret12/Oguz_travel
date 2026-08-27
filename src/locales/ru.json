@@ -829,6 +829,8 @@
     "realizedRevenue": "Цена продажи",
     "realizedCost": "Себестоимость (COGS)",
     "grossMargin": "Маржа",
-    "totalCashBalance": "Общий остаток в кассах"
+    "totalCashBalance": "Общий остаток в кассах",
+    "searchTransactions": "Поиск транзакций...",
+    "recordedBy": "Записал"
   }
 }

@@ -829,6 +829,8 @@
     "realizedRevenue": "Sale Price",
     "realizedCost": "Cost of Goods (COGS)",
     "grossMargin": "Profit Margin",
-    "totalCashBalance": "Total Cash Balance"
+    "totalCashBalance": "Total Cash Balance",
+    "searchTransactions": "Search transactions...",
+    "recordedBy": "Recorded by"
   }
 }

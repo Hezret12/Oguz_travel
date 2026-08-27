@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -9,18 +9,17 @@ import {
   Chip,
   Paper,
   Button,
+  alpha,
 } from "@mui/material";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
-import SwapHorizRoundedIcon from "@mui/icons-material/SwapHorizRounded";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 import PageHeader from "../../../components/PageHeader";
 import Pagination from "../../../components/Pagination";
-import StackedCell from "../../../components/inputs/StackCell";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import DeleteDialog from "../../../components/DeleteDialog";
@@ -36,17 +35,81 @@ import {
 } from "../../../store/slices/filters/cashFlowFilterSlice";
 import FilterDrawer from "../../../components/FilterDrawer";
 import CashFlowFilter from "../Contents/CashFlowFilter";
-import FinanceHeaderStats from "../Contents/FinanceHeaderStats";
 import AddCashTransactionModal from "../AddCashTransactionModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
-import StatusChip from "../../../components/StatusChip";
-import { FINANCE_TRANSACTION_TYPE_CONFIG } from "../../../functions/statusChipConfigs";
 
+/* ──────────────── Category chip color map ──────────────── */
+const CATEGORY_COLORS = {
+  LOT_PURCHASE: { bg: "#EDE9FE", color: "#7C3AED", label: "Supplier Payment" },
+  CLIENT_SALE: { bg: "#DBEAFE", color: "#2563EB", label: "Tour Sale" },
+  OFFICE_RENT: { bg: "#FEE2E2", color: "#DC2626", label: "Office Rent" },
+  SALARY: { bg: "#FEF3C7", color: "#D97706", label: "Salary" },
+  CAFETERIA: { bg: "#FFEDD5", color: "#EA580C", label: "Cafeteria" },
+  MARKETING: { bg: "#FCE7F3", color: "#DB2777", label: "Marketing" },
+  OVERHEAD: { bg: "#F1F5F9", color: "#475569", label: "Utilities" },
+  SUPPLIER_PAYMENT: { bg: "#EDE9FE", color: "#7C3AED", label: "Supplier Payment" },
+  FLIGHT_SALE: { bg: "#CCFBF1", color: "#0D9488", label: "Flight Sale" },
+  TRANSFER_SALE: { bg: "#E0E7FF", color: "#4F46E5", label: "Transfer Sale" },
+};
+
+const getCategoryChip = (category) => {
+  const cfg = CATEGORY_COLORS[category];
+  if (!cfg) return { bg: "#F1F5F9", color: "#475569", label: category || "—" };
+  return cfg;
+};
+
+/* ──────────────── Summary Card ──────────────── */
+const SummaryCard = ({ label, value, color }) => (
+  <Paper
+    variant="outlined"
+    sx={{
+      flex: 1,
+      px: 2.5,
+      py: 2,
+      borderRadius: "12px",
+      borderColor: "divider",
+      bgcolor: "background.paper",
+      minWidth: 180,
+    }}
+  >
+    <Typography
+      variant="body2"
+      sx={{
+        fontWeight: 500,
+        color: "text.secondary",
+        fontSize: "13px",
+        mb: 0.5,
+      }}
+    >
+      {label}
+    </Typography>
+    <Typography
+      variant="h5"
+      sx={{
+        fontWeight: 700,
+        color,
+        fontSize: { xs: "20px", sm: "24px" },
+        fontFamily: "'Inter', sans-serif",
+        letterSpacing: "-0.5px",
+      }}
+    >
+      {value}
+    </Typography>
+  </Paper>
+);
+
+/* ──────────────── Format money helper ──────────────── */
+const fmtMoney = (val) =>
+  `$${Math.abs(Number(val || 0)).toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
+
+/* ──────────────── Main Component ──────────────── */
 const CashFlow = () => {
   const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
-  const [quickFilter, setQuickFilter] = useState("ALL"); // ALL, INCOME, EXPENSE, SUPPLIER, CLIENT
 
   const {
     draft,
@@ -83,32 +146,28 @@ const CashFlow = () => {
     params: queryParams,
   });
 
-  const rawTransactions = useMemo(
-    () => transactionsData?.data ?? transactionsData ?? [],
+  const transactions = useMemo(
+    () => {
+      const raw = transactionsData?.data ?? transactionsData ?? [];
+      return Array.isArray(raw) ? raw : [];
+    },
     [transactionsData]
   );
 
-  const transactions = useMemo(() => {
-    if (!Array.isArray(rawTransactions)) return [];
-    if (quickFilter === "ALL") return rawTransactions;
-    if (quickFilter === "INCOME") {
-      return rawTransactions.filter(
-        (t) => t.transaction_type === "INCOME" || t.transaction_type === "CLIENT_PAYMENT"
-      );
-    }
-    if (quickFilter === "EXPENSE") {
-      return rawTransactions.filter(
-        (t) => t.transaction_type === "EXPENSE" || t.transaction_type === "SUPPLIER_PAYMENT"
-      );
-    }
-    if (quickFilter === "SUPPLIER") {
-      return rawTransactions.filter((t) => t.transaction_type === "SUPPLIER_PAYMENT");
-    }
-    if (quickFilter === "CLIENT") {
-      return rawTransactions.filter((t) => t.transaction_type === "CLIENT_PAYMENT");
-    }
-    return rawTransactions;
-  }, [rawTransactions, quickFilter]);
+  /* ──────── Compute summary totals ──────── */
+  const { totalIncome, totalExpense, netAmount } = useMemo(() => {
+    let inc = 0;
+    let exp = 0;
+    transactions.forEach((tx) => {
+      const amt = Number(tx.amount || 0);
+      if (tx.transaction_type === "INCOME" || tx.transaction_type === "CLIENT_PAYMENT") {
+        inc += amt;
+      } else {
+        exp += amt;
+      }
+    });
+    return { totalIncome: inc, totalExpense: exp, netAmount: inc - exp };
+  }, [transactions]);
 
   const { mutate: deleteTransaction, isPending: isDeleting } = useDelete({
     deleteFn: deleteCashTransactionApi,
@@ -122,132 +181,155 @@ const CashFlow = () => {
     onConfirm: (item) => deleteTransaction(item.guid || item.id),
   });
 
+  /* ──────────────── Table Columns ──────────────── */
   const columns = useMemo(
     () => [
       {
-        accessorKey: "transaction_number",
-        header: t("finance.transactionNumber"),
-        size: 190,
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.transaction_number}
-            secondary={row.original.description || "—"}
-          />
+        accessorKey: "transaction_date",
+        header: t("date", "Senesi"),
+        size: 120,
+        Cell: ({ cell }) => (
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 500, color: "text.primary", fontSize: "13.5px" }}
+          >
+            {formatChange(cell.getValue(), { dateOnly: true })}
+          </Typography>
         ),
       },
       {
         accessorKey: "transaction_type",
         header: t("finance.transactionType"),
+        size: 100,
+        Cell: ({ row }) => {
+          const type = row.original.transaction_type;
+          const isIncome = type === "INCOME" || type === "CLIENT_PAYMENT";
+          return (
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                fontSize: "13px",
+                color: isIncome ? "success.main" : "error.main",
+              }}
+            >
+              {isIncome ? "Income" : "Expense"}
+            </Typography>
+          );
+        },
+      },
+      {
+        accessorKey: "category",
+        header: t("category", "Kategoriýa"),
         size: 160,
-        Cell: ({ cell }) => (
-          <StatusChip
-            status={cell.getValue()}
-            config={FINANCE_TRANSACTION_TYPE_CONFIG}
-            size="small"
-          />
-        ),
+        Cell: ({ cell, row }) => {
+          const cat = cell.getValue() || row.original.transaction_type;
+          const cfg = getCategoryChip(cat);
+          return (
+            <Chip
+              label={cfg.label}
+              size="small"
+              sx={{
+                fontWeight: 600,
+                fontSize: "12px",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? alpha(cfg.color, 0.15)
+                    : cfg.bg,
+                color: cfg.color,
+                borderRadius: "6px",
+                height: 26,
+                "& .MuiChip-label": { px: 1.2 },
+              }}
+            />
+          );
+        },
       },
       {
         accessorKey: "cash_box.name",
         header: t("finance.cashBox"),
-        size: 160,
+        size: 170,
         Cell: ({ cell, row }) => (
-          <Chip
-            label={cell.getValue() || row.original.cash_box_name || "Kassa"}
-            size="small"
-            variant="outlined"
-            sx={{ fontWeight: 650, borderRadius: 1.5 }}
-          />
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 500, color: "text.primary", fontSize: "13.5px" }}
+          >
+            {cell.getValue() || row.original.cash_box_name || "—"}
+          </Typography>
         ),
       },
       {
         accessorKey: "counterparty_name",
         header: t("finance.counterparty"),
-        size: 190,
-        Cell: ({ cell, row }) => (
-          <StackedCell
-            primary={cell.getValue() || "—"}
-            secondary={
-              row.original.related_lot_number
-                ? `Lot: ${row.original.related_lot_number}`
-                : row.original.category || ""
-            }
-          />
+        size: 170,
+        Cell: ({ cell }) => (
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 500, color: "text.primary", fontSize: "13.5px" }}
+          >
+            {cell.getValue() || "Internal"}
+          </Typography>
         ),
       },
       {
         accessorKey: "amount",
         header: t("finance.amount"),
-        size: 160,
+        size: 140,
         Cell: ({ row }) => {
-          const isIncome =
-            row.original.transaction_type === "INCOME" ||
-            row.original.transaction_type === "CLIENT_PAYMENT";
+          const type = row.original.transaction_type;
+          const isIncome = type === "INCOME" || type === "CLIENT_PAYMENT";
+          const amt = Number(row.original.amount || 0);
+          const formatted = amt.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+          });
           return (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Box
-                sx={{
-                  p: 0.5,
-                  borderRadius: "50%",
-                  bgcolor: isIncome ? "success.50" : "error.50",
-                  color: isIncome ? "success.main" : "error.main",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {isIncome ? (
-                  <TrendingUpRoundedIcon sx={{ fontSize: 16 }} />
-                ) : (
-                  <TrendingDownRoundedIcon sx={{ fontSize: 16 }} />
-                )}
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 800,
-                  fontSize: "13.5px",
-                  color: isIncome ? "success.main" : "error.main",
-                }}
-              >
-                {isIncome ? "+" : "-"}
-                {Number(row.original.amount || 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                })}{" "}
-                {row.original.currency}
-              </Typography>
-            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 700,
+                fontSize: "13.5px",
+                color: isIncome ? "#16a34a" : "#DC2626",
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
+              {isIncome ? "+" : "-"}${formatted}
+            </Typography>
           );
         },
       },
       {
-        accessorKey: "converted_amount_tmt",
-        header: t("finance.convertedAmount"),
-        size: 150,
-        Cell: ({ row }) => (
-          <Typography variant="body2" sx={{ fontWeight: 650, color: "text.secondary" }}>
-            {Number(row.original.converted_amount_tmt || 0).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-            })}{" "}
-            TMT
-          </Typography>
-        ),
-      },
-      {
-        accessorKey: "payment_method",
-        header: t("finance.paymentMethod"),
-        size: 120,
+        accessorKey: "description",
+        header: t("description", "Düşündiriş"),
+        size: 220,
         Cell: ({ cell }) => (
-          <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
-            {cell.getValue() || "CASH"}
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 400,
+              color: "text.secondary",
+              fontSize: "13px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: 200,
+            }}
+          >
+            {cell.getValue() || "—"}
           </Typography>
         ),
       },
       {
-        accessorKey: "transaction_date",
-        header: t("date", "Senesi"),
-        size: 130,
-        Cell: ({ cell }) => formatChange(cell.getValue()),
+        id: "recorded_by",
+        header: t("finance.recordedBy", "Recorded by"),
+        size: 110,
+        Cell: () => (
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 500, color: "text.secondary", fontSize: "13px" }}
+          >
+            Finance
+          </Typography>
+        ),
       },
       {
         id: "actions",
@@ -273,6 +355,20 @@ const CashFlow = () => {
     state: {
       isLoading,
       showProgressBars: isFetching,
+    },
+    muiTablePaperProps: {
+      sx: (theme) => ({
+        display: "flex",
+        flexDirection: "column",
+        height: "calc(100vh - 310px)",
+        width: "100%",
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: "none",
+        borderRadius: "12px",
+        overflow: "hidden",
+      }),
     },
     renderEmptyRowsFallback: () => (
       <Paper
@@ -325,75 +421,53 @@ const CashFlow = () => {
 
   return (
     <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2.5 }}>
+      {/* ── Page Header ── */}
       <PageHeader
         title={t("finance.cashFlowTitle")}
-        subtitle={t("finance.cashFlowSubtitle")}
-        buttonText={t("finance.addTransaction")}
-        onButtonClick={() => table.setCreatingRow(true)}
-      >
-        <FinanceHeaderStats queryParams={queryParams} />
-      </PageHeader>
+        onFilterClick={openDrawer}
+        filterButtonText={t("filters", "Filters")}
+        onAddClick={() => table.setCreatingRow(true)}
+        addButtonText={t("finance.addTransaction", "+ Record Transaction")}
+      />
 
-      {/* Search & Quick Filters */}
+      {/* ── Search ── */}
+      <GlobalSearchInput
+        value={searchQuery}
+        onChange={setSearch}
+        placeholder={t("finance.searchTransactions", "Search transactions...")}
+        onRefetch={refetch}
+        isFetching={isFetching}
+      />
+
+      {/* ── Summary Cards ── */}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
           gap: 2,
-          flexWrap: "wrap",
+          flexWrap: { xs: "wrap", sm: "nowrap" },
         }}
       >
-        <GlobalSearchInput
-          value={searchQuery}
-          onChange={setSearch}
-          placeholder={t("search")}
-          onRefetch={refetch}
-          isFetching={isFetching}
-          onFilterClick={openDrawer}
+        <SummaryCard
+          label="Income"
+          value={fmtMoney(totalIncome)}
+          color="#16a34a"
         />
-
-        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-          <Chip
-            label="Ählisi"
-            clickable
-            color={quickFilter === "ALL" ? "primary" : "default"}
-            variant={quickFilter === "ALL" ? "filled" : "outlined"}
-            onClick={() => setQuickFilter("ALL")}
-            sx={{ fontWeight: 600 }}
-          />
-          <Chip
-            icon={<TrendingUpRoundedIcon fontSize="small" />}
-            label="Girdeji (Money In)"
-            clickable
-            color={quickFilter === "INCOME" ? "success" : "default"}
-            variant={quickFilter === "INCOME" ? "filled" : "outlined"}
-            onClick={() => setQuickFilter("INCOME")}
-            sx={{ fontWeight: 600 }}
-          />
-          <Chip
-            icon={<TrendingDownRoundedIcon fontSize="small" />}
-            label="Çykdajy (Money Out)"
-            clickable
-            color={quickFilter === "EXPENSE" ? "error" : "default"}
-            variant={quickFilter === "EXPENSE" ? "filled" : "outlined"}
-            onClick={() => setQuickFilter("EXPENSE")}
-            sx={{ fontWeight: 600 }}
-          />
-          <Chip
-            icon={<SwapHorizRoundedIcon fontSize="small" />}
-            label="Üpjün ediji tölegleri"
-            clickable
-            color={quickFilter === "SUPPLIER" ? "warning" : "default"}
-            variant={quickFilter === "SUPPLIER" ? "filled" : "outlined"}
-            onClick={() => setQuickFilter("SUPPLIER")}
-            sx={{ fontWeight: 600 }}
-          />
-        </Box>
+        <SummaryCard
+          label="Expense"
+          value={fmtMoney(totalExpense)}
+          color="#DC2626"
+        />
+        <SummaryCard
+          label="Net"
+          value={`${netAmount < 0 ? "-" : ""}${fmtMoney(Math.abs(netAmount))}`}
+          color={netAmount >= 0 ? "#16a34a" : "#DC2626"}
+        />
       </Box>
 
+      {/* ── Table ── */}
       <MaterialReactTable table={table} />
 
+      {/* ── Pagination ── */}
       <Pagination
         totalItems={totalItems}
         page={page}
@@ -402,6 +476,7 @@ const CashFlow = () => {
         setPageSize={setPageSize}
       />
 
+      {/* ── Filter Drawer ── */}
       <FilterDrawer
         open={isDrawerOpen}
         onClose={closeDrawer}
@@ -417,6 +492,7 @@ const CashFlow = () => {
         />
       </FilterDrawer>
 
+      {/* ── Delete Confirmation ── */}
       <DeleteDialog
         open={deleteDialog.isOpen}
         onClose={deleteDialog.close}
