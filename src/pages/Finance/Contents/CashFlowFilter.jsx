@@ -11,7 +11,10 @@ import {
 import { ChevronDown } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllCashBoxesApi } from "../../../api/queries/getters";
+import {
+  getAllEmployeeApi,
+  getAllOfficeApi,
+} from "../../../api/queries/getters";
 
 const selectSx = {
   borderRadius: "8px",
@@ -126,70 +129,81 @@ const CashFlowFilter = ({
   openSelect,
   closeSelect,
 }) => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
 
-  const { data: cashBoxesData } = useGet({
-    apiFn: getAllCashBoxesApi,
-    key: "all-cash-boxes",
+  const { data: employeesData } = useGet({
+    apiFn: getAllEmployeeApi,
+    key: "all-employees-filter",
+    params: { limit: 100 },
   });
 
-  const cashBoxOptions = useMemo(
-    () =>
-      (cashBoxesData || []).map((cb) => ({
-        label: `${cb.name} (${cb.currency})`,
-        value: cb.guid,
-      })),
-    [cashBoxesData]
-  );
+  const { data: officesData } = useGet({
+    apiFn: getAllOfficeApi,
+    key: "all-offices-filter",
+    params: { limit: 100 },
+  });
 
-  const transactionTypeOptions = useMemo(
+  const employeeOptions = useMemo(() => {
+    const raw = employeesData?.data ?? employeesData ?? [];
+    const list = Array.isArray(raw) ? raw : [];
+    return list.map((emp) => ({
+      label: emp.fullName || emp.name || "—",
+      value: emp.guid,
+    }));
+  }, [employeesData]);
+
+  const officeOptions = useMemo(() => {
+    const raw = officesData?.data ?? officesData ?? [];
+    const list = Array.isArray(raw) ? raw : [];
+    return list.map((off) => ({
+      label: selectedLang(off.shortName) || selectedLang(off.fullName) || off.name || "—",
+      value: off.guid,
+    }));
+  }, [officesData, selectedLang]);
+
+  const categoryOptions = useMemo(
     () => [
-      { label: "Girdeji (INCOME)", value: "INCOME" },
-      { label: "Çykdajy (EXPENSE)", value: "EXPENSE" },
-      { label: "Üpjün edijä töleg (SUPPLIER_PAYMENT)", value: "SUPPLIER_PAYMENT" },
-      { label: "Müşderi tölegi (CLIENT_PAYMENT)", value: "CLIENT_PAYMENT" },
-      { label: "Geçirim (TRANSFER)", value: "TRANSFER" },
+      { label: "B2B Biletler", value: "B2B" },
+      { label: "Türk Howa Ýollary", value: "TURKISH_AIRLINES" },
+      { label: "Awia Hyzmatlar (Airway)", value: "AIRWAY" },
+      { label: "Demir ýol (Railway)", value: "RAILWAY" },
+      { label: "Myhmanhana (Hotel)", value: "HOTEL" },
+      { label: "Syýahat (Tour)", value: "TOUR" },
+      { label: "Ulag / Geçirim (Transfer)", value: "TRANSFER" },
+      { label: "Bukjalar (Package)", value: "PACKAGE" },
+      { label: "Wiza Hyzmatlary", value: "VISA" },
+      { label: "Terjime Hyzmatlary", value: "TRANSLATION" },
+      { label: "Kafeteriýa", value: "CAFETERIA" },
+      { label: "Ofis Kireýi (Rent)", value: "OFFICE_RENT" },
+      { label: "Aýlyk Haky (Salary)", value: "SALARY" },
+      { label: "Marketing / Mahabat", value: "MARKETING" },
+      { label: "Beýleki Harajatlar (Overhead)", value: "OVERHEAD" },
     ],
     []
   );
 
-  const categoryOptions = useMemo(
+  const currencyOptions = useMemo(
     () => [
-      { label: "Partiýa satyn alnyşy (LOT_PURCHASE)", value: "LOT_PURCHASE" },
-      { label: "Müşderi hyzmaty (CLIENT_SALE)", value: "CLIENT_SALE" },
-      { label: "Ofis kireýi (OFFICE_RENT)", value: "OFFICE_RENT" },
-      { label: "Aýlyk haky (SALARY)", value: "SALARY" },
-      { label: "Beýleki çykdajylar (OVERHEAD)", value: "OVERHEAD" },
+      { label: "USD ($)", value: "USD" },
+      { label: "TMT (TMT)", value: "TMT" },
+      { label: "EUR (€)", value: "EUR" },
+      { label: "TRY (₺)", value: "TRY" },
+      { label: "AED (AED)", value: "AED" },
+      { label: "RUB (₽)", value: "RUB" },
+    ],
+    []
+  );
+
+  const isManualOptions = useMemo(
+    () => [
+      { label: "El bilen goşulan (Manual)", value: "true" },
+      { label: "Awto-sinkronlaşan (Auto-Sync)", value: "false" },
     ],
     []
   );
 
   return (
     <Stack spacing={2.5}>
-      <FilterSelect
-        label={t("finance.transactionType")}
-        name="transaction_type"
-        value={draft.transaction_type}
-        options={transactionTypeOptions}
-        isOpen={selectsOpen.transaction_type}
-        allText={t("all")}
-        onChange={setDraftFilter}
-        onOpen={openSelect}
-        onClose={closeSelect}
-      />
-
-      <FilterSelect
-        label={t("finance.cashBox")}
-        name="cash_box_guid"
-        value={draft.cash_box_guid}
-        options={cashBoxOptions}
-        isOpen={selectsOpen.cash_box_guid}
-        allText={t("all")}
-        onChange={setDraftFilter}
-        onOpen={openSelect}
-        onClose={closeSelect}
-      />
-
       <FilterSelect
         label={t("category", "Kategoriýa")}
         name="category"
@@ -202,17 +216,58 @@ const CashFlowFilter = ({
         onClose={closeSelect}
       />
 
-      <FilterDate
-        label={t("startDate", "Başlangyç sene")}
-        name="start_date"
-        value={draft.start_date}
+      <FilterSelect
+        label={t("operator", "Jogapkär / Operator")}
+        name="receiver_opr_guid"
+        value={draft.receiver_opr_guid}
+        options={employeeOptions}
+        isOpen={selectsOpen.receiver_opr_guid}
+        allText={t("all")}
         onChange={setDraftFilter}
+        onOpen={openSelect}
+        onClose={closeSelect}
+      />
+
+      <FilterSelect
+        label={t("office", "Ofis")}
+        name="office_guid"
+        value={draft.office_guid}
+        options={officeOptions}
+        isOpen={selectsOpen.office_guid}
+        allText={t("all")}
+        onChange={setDraftFilter}
+        onOpen={openSelect}
+        onClose={closeSelect}
+      />
+
+      <FilterSelect
+        label={t("currency", "Walýuta")}
+        name="currency"
+        value={draft.currency}
+        options={currencyOptions}
+        isOpen={selectsOpen.currency}
+        allText={t("all")}
+        onChange={setDraftFilter}
+        onOpen={openSelect}
+        onClose={closeSelect}
+      />
+
+      <FilterSelect
+        label={t("finance.type", "Goşulyş görnüşi")}
+        name="is_manual"
+        value={draft.is_manual}
+        options={isManualOptions}
+        isOpen={selectsOpen.is_manual}
+        allText={t("all")}
+        onChange={setDraftFilter}
+        onOpen={openSelect}
+        onClose={closeSelect}
       />
 
       <FilterDate
-        label={t("endDate", "Gutarýan sene")}
-        name="end_date"
-        value={draft.end_date}
+        label={t("date", "Sene")}
+        name="datetime"
+        value={draft.datetime}
         onChange={setDraftFilter}
       />
     </Stack>

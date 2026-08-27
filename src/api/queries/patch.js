@@ -215,6 +215,10 @@ export const updateCafeteriaTransactionApi = async (data) => {
   return await api.patchPrivate(`/cafeteria/update/${data.guid || data.id}`, data);
 };
 
+export const updateTotalCalculationApi = async (data) => {
+  return await api.patchPrivate('/total-calculations/update-total-calculation', data);
+};
+
 // ==================== FINANCE / INVENTORY MODULE ====================
 export const updatePurchaseLotApi = async (data) => {
   try {
@@ -231,4 +235,3 @@ export const updatePurchaseLotApi = async (data) => {
   }
   return { data };
 };
-

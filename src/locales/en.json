@@ -837,9 +837,19 @@
     "noConsumptions": "No services consumed from this lot yet",
     "realizedRevenue": "Sale Price",
     "realizedCost": "Cost of Goods (COGS)",
-    "grossMargin": "Profit Margin",
-    "totalCashBalance": "Total Cash Balance",
     "searchTransactions": "Search transactions...",
-    "recordedBy": "Recorded by"
+    "recordedBy": "Recorded by",
+    "totalSale": "Total Sales",
+    "totalCost": "Total Costs",
+    "netProfit": "Net Profit",
+    "totalCredit": "Credit / Payments",
+    "salePrice": "Sale Price",
+    "netPrice": "Net Cost / Expense",
+    "profit": "Profit",
+    "creditPrice": "Credit / Paid",
+    "type": "Record Type",
+    "editTransaction": "Edit Transaction",
+    "deleteTransaction": "Delete Transaction",
+    "deleteConfirm": "Are you sure you want to delete this transaction? This action cannot be undone."
   }
 }

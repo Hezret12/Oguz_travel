@@ -837,9 +837,19 @@
     "noConsumptions": "Bu partiýadan heniz hyzmat ulanylmady",
     "realizedRevenue": "Satyş bahasy",
     "realizedCost": "Özüne düşýän baha (COGS)",
-    "grossMargin": "Peýda",
-    "totalCashBalance": "Jemi kassa galyndysy",
     "searchTransactions": "Amal gözle...",
-    "recordedBy": "Ýazga alan"
+    "recordedBy": "Ýazga alan",
+    "totalSale": "Jemi Satyş",
+    "totalCost": "Jemi Harajat",
+    "netProfit": "Arassa Peýda",
+    "totalCredit": "Algy / Bergi",
+    "salePrice": "Satyş bahasy",
+    "netPrice": "Özüne düşýän baha",
+    "profit": "Peýda",
+    "creditPrice": "Algy / Bergi",
+    "type": "Görnüşi",
+    "editTransaction": "Amaly üýtgetmek",
+    "deleteTransaction": "Pul amalyny pozmak",
+    "deleteConfirm": "Bu pul amalyny pozmak isleýändigiňize ynanýarsyňyzmy? Bu amaly yzyna gaýtaryp bolmaýar."
   }
 }

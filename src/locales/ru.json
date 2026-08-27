@@ -837,9 +837,19 @@
     "noConsumptions": "Из этой партии еще не было списаний",
     "realizedRevenue": "Цена продажи",
     "realizedCost": "Себестоимость (COGS)",
-    "grossMargin": "Маржа",
-    "totalCashBalance": "Общий остаток в кассах",
     "searchTransactions": "Поиск транзакций...",
-    "recordedBy": "Записал"
+    "recordedBy": "Записал",
+    "totalSale": "Всего продажи",
+    "totalCost": "Всего расходы",
+    "netProfit": "Чистая прибыль",
+    "totalCredit": "Кредит / Оплаты",
+    "salePrice": "Цена продажи",
+    "netPrice": "Себестоимость / Расход",
+    "profit": "Прибыль",
+    "creditPrice": "Кредит / Оплата",
+    "type": "Тип записи",
+    "editTransaction": "Редактировать операцию",
+    "deleteTransaction": "Удалить операцию",
+    "deleteConfirm": "Вы уверены, что хотите удалить эту операцию? Это действие необратимо."
   }
 }

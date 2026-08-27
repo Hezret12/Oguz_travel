@@ -85,10 +85,9 @@ const NotFound = () => {
             letterSpacing: "-0.3px",
           }}
         >
-          {t("notFound.title", "Sahypa Tapylmady")}
+          {t("notFound.title")}
         </Typography>
 
-        {/* Description */}
         <Typography
           variant="body1"
           sx={{
@@ -99,13 +98,9 @@ const NotFound = () => {
             mb: 4,
           }}
         >
-          {t(
-            "notFound.desc",
-            "Gözleýän sahypaňyz aýrylan, ady üýtgedilen ýa-da wagtlaýyn elýeterli däl bolup biler."
-          )}
+          {t("notFound.desc")}
         </Typography>
 
-        {/* Action Buttons */}
         <Box
           sx={{
             display: "flex",

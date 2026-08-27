@@ -380,4 +380,6 @@ export const getLotConsumptionHistoryApi = async (lotGuid) => {
   return { data: items };
 };
 
-
+export const getAllTotalCalculationsApi = async (params = {}) => {
+  return await api.getPrivate('/total-calculations/get-all-total-calculations', params);
+};

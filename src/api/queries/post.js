@@ -357,4 +357,6 @@ export const consumeLotApi = async (data) => {
   return { data: { success: true } };
 };
 
-
+export const addTotalCalculationApi = async (data) => {
+  return await api.postPrivate('/total-calculations/add-total-calculation', data);
+};

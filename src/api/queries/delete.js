@@ -173,3 +173,7 @@ export const deleteCashTransactionApi = async (guid) => {
   return { data: { success: true } };
 };
 
+export const deleteTotalCalculationApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/total-calculations/delete-total-calculation', { guid: actualGuid });
+};
