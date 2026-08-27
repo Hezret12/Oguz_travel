@@ -406,15 +406,13 @@ const CashFlow = () => {
 
   return (
     <>
-      {/* ── Page Header ── */}
       <PageHeader
         title={t("finance.cashFlowTitle")}
         onFilterClick={openDrawer}
         filterButtonText={t("filters", "Filters")}
         onAddClick={() => table.setCreatingRow(true)}
-        addButtonText={t("finance.addTransaction", "+ Record Transaction")}
+        addButtonText={t("finance.addTransaction")}
       >
-        {/* Inline summary stats */}
         <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
           <StatPill label="Income" value={fmtMoney(totalIncome)} color="#16a34a" />
           <StatPill label="Expense" value={fmtMoney(totalExpense)} color="#DC2626" />
@@ -426,10 +424,8 @@ const CashFlow = () => {
         </Box>
       </PageHeader>
 
-      {/* ── Table ── */}
       <MaterialReactTable table={table} />
 
-      {/* ── Filter Drawer ── */}
       <FilterDrawer
         open={isDrawerOpen}
         onClose={closeDrawer}
@@ -445,7 +441,6 @@ const CashFlow = () => {
         />
       </FilterDrawer>
 
-      {/* ── Delete Confirmation ── */}
       <DeleteDialog
         open={deleteDialog.isOpen}
         onClose={deleteDialog.close}
