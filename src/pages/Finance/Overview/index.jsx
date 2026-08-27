@@ -14,6 +14,8 @@ import {
   Button,
 } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import { BarChart } from "@mui/x-charts/BarChart";
+import { PieChart } from "@mui/x-charts/PieChart";
 
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -125,6 +127,22 @@ const FinanceOverview = () => {
   const marginPercent =
     totalRealizedRevenue > 0 ? ((totalRealizedProfit / totalRealizedRevenue) * 100).toFixed(1) : 0;
 
+  /* ── Charts Data ── */
+  const barCategories = realization.map((r) => r.service_type || "Service");
+  const revenueData = realization.map((r) => Number(r.total_realized_revenue || 0));
+  const cogsData = realization.map((r) => Number(r.total_realized_cogs || 0));
+  const profitData = realization.map(
+    (r) => Number(r.total_realized_revenue || 0) - Number(r.total_realized_cogs || 0)
+  );
+
+  const pieColors = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899"];
+  const pieData = cashBoxes.map((cb, idx) => ({
+    id: cb.guid || idx,
+    value: Number(cb.current_balance || 0),
+    label: `${cb.name}`,
+    color: pieColors[idx % pieColors.length],
+  }));
+
   return (
     <>
       <PageHeader
@@ -170,6 +188,102 @@ const FinanceOverview = () => {
               color="#2563EB"
               onClick={() => navigate(PATHS.FINANCE.CASH_FLOW)}
             />
+          </Grid>
+        </Grid>
+
+        {/* ── Visual Analytics / Charts Section ── */}
+        <Grid container spacing={2.5}>
+          {/* Revenue vs COGS vs Profit Bar Chart */}
+          <Grid size={{ xs: 12, lg: 7 }}>
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2.5,
+                borderRadius: "12px",
+                borderColor: "divider",
+                bgcolor: "background.paper",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary" }}>
+                  Hyzmatlar boýunça Maliýe Deňeşdirmesi
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "13px" }}>
+                  Satyş, özüne düşýän baha (COGS) we gazanylan peýda grafiki
+                </Typography>
+              </Box>
+
+              {barCategories.length > 0 ? (
+                <Box sx={{ width: "100%", height: 280 }}>
+                  <BarChart
+                    xAxis={[{ scaleType: "band", data: barCategories }]}
+                    series={[
+                      { data: revenueData, label: "Satyş (Revenue)", color: "#2563EB" },
+                      { data: cogsData, label: "COGS (Cost)", color: "#DC2626" },
+                      { data: profitData, label: "Peýda (Profit)", color: "#16A34A" },
+                    ]}
+                    height={270}
+                    margin={{ top: 30, bottom: 30, left: 50, right: 20 }}
+                    borderRadius={6}
+                  />
+                </Box>
+              ) : (
+                <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
+                  Maglumat ýok
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+
+          {/* Cash Boxes Balance Distribution Donut Chart */}
+          <Grid size={{ xs: 12, lg: 5 }}>
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 2.5,
+                borderRadius: "12px",
+                borderColor: "divider",
+                bgcolor: "background.paper",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary" }}>
+                  Kassa Paýlanyşygy (Donut)
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "13px" }}>
+                  Kassalar boýunça balans paýy
+                </Typography>
+              </Box>
+
+              {pieData.length > 0 ? (
+                <Box sx={{ width: "100%", height: 280, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <PieChart
+                    series={[
+                      {
+                        data: pieData,
+                        innerRadius: 55,
+                        outerRadius: 90,
+                        paddingAngle: 3,
+                        cornerRadius: 6,
+                        highlightScope: { fade: "global", highlight: "item" },
+                      },
+                    ]}
+                    height={260}
+                    margin={{ top: 20, bottom: 20, left: 20, right: 120 }}
+                  />
+                </Box>
+              ) : (
+                <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>
+                  Maglumat ýok
+                </Box>
+              )}
+            </Paper>
           </Grid>
         </Grid>
 
