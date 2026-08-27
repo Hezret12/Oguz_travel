@@ -7,6 +7,7 @@ import {
   MenuItem,
   IconButton,
   Tooltip,
+  Button,
   alpha,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -14,7 +15,7 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 
@@ -30,6 +31,7 @@ const ReportHeader = ({
   onDateChange,
   selectedQuarter,
   onQuarterChange,
+  onExportExcel,
   teal = "#0D9488",
 }) => {
   const { t } = useLocale();
@@ -328,6 +330,36 @@ const ReportHeader = ({
             ))}
           </Select>
         </FormControl>
+
+        {onExportExcel && (
+          <Button
+            variant="outlined"
+            onClick={onExportExcel}
+            startIcon={<Download size={16} />}
+            sx={{
+              height: 42,
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: 13,
+              px: 2,
+              borderColor: (theme) => `1px solid ${theme.palette.divider}`,
+              color: "text.primary",
+              backgroundColor: "background.paper",
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 2px 8px rgba(0,0,0,0.3)"
+                  : "0 1px 4px rgba(0,0,0,0.06)",
+              "&:hover": {
+                borderColor: teal,
+                backgroundColor: alpha(teal, 0.08),
+                color: teal,
+              },
+            }}
+          >
+            Excel Export
+          </Button>
+        )}
       </Box>
     </Box>
   );

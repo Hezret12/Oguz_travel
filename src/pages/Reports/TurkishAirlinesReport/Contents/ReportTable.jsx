@@ -10,10 +10,12 @@ import {
   TableHead,
   TableRow,
   Skeleton,
+  Button,
   alpha,
   useTheme,
 } from "@mui/material";
 import AccountBalanceWalletRoundedIcon from "@mui/icons-material/AccountBalanceWalletRounded";
+import { Download } from "lucide-react";
 import { useLocale } from "../../../../hooks/useLocale";
 
 const ReportTable = ({
@@ -25,6 +27,7 @@ const ReportTable = ({
   findFooter,
   formatNumber,
   daysInMonth,
+  onExportExcel,
   teal,
   accent,
   green,
@@ -85,19 +88,46 @@ const ReportTable = ({
             {t("report.turkishAirlines.dailyReportTable")}
           </Typography>
         </Box>
-        <Typography
-          variant="caption"
-          sx={{
-            color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
-            fontWeight: 600,
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 1.5,
-            backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9",
-          }}
-        >
-          {daysInMonth} {t("report.turkishAirlines.daysData")}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
+              fontWeight: 600,
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 1.5,
+              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9",
+            }}
+          >
+            {daysInMonth} {t("report.turkishAirlines.daysData")}
+          </Typography>
+
+          {onExportExcel && (
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={onExportExcel}
+              startIcon={<Download size={14} />}
+              sx={{
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 700,
+                fontSize: "12px",
+                height: 28,
+                px: 1.5,
+                borderColor: alpha(green, 0.4),
+                color: green,
+                "&:hover": {
+                  borderColor: green,
+                  backgroundColor: alpha(green, 0.08),
+                },
+              }}
+            >
+              Excel Export
+            </Button>
+          )}
+        </Box>
       </Box>
 
       <TableContainer sx={{ overflowX: "auto" }}>
