@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Typography, Chip, alpha } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
@@ -27,23 +27,22 @@ import CashFlowFilter from "../Contents/CashFlowFilter";
 import AddCashTransactionModal from "../AddCashTransactionModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 
-const CATEGORY_COLORS = {
-  LOT_PURCHASE: { bg: "#EDE9FE", color: "#7C3AED", label: "Supplier Payment" },
-  CLIENT_SALE: { bg: "#DBEAFE", color: "#2563EB", label: "Tour Sale" },
-  OFFICE_RENT: { bg: "#FEE2E2", color: "#DC2626", label: "Office Rent" },
-  SALARY: { bg: "#FEF3C7", color: "#D97706", label: "Salary" },
-  CAFETERIA: { bg: "#FFEDD5", color: "#EA580C", label: "Cafeteria" },
-  MARKETING: { bg: "#FCE7F3", color: "#DB2777", label: "Marketing" },
-  OVERHEAD: { bg: "#F1F5F9", color: "#475569", label: "Utilities" },
-  SUPPLIER_PAYMENT: { bg: "#EDE9FE", color: "#7C3AED", label: "Supplier Payment" },
-  FLIGHT_SALE: { bg: "#CCFBF1", color: "#0D9488", label: "Flight Sale" },
-  TRANSFER_SALE: { bg: "#E0E7FF", color: "#4F46E5", label: "Transfer Sale" },
+const CATEGORY_LABELS = {
+  LOT_PURCHASE: "Supplier Payment",
+  CLIENT_SALE: "Tour Sale",
+  OFFICE_RENT: "Office Rent",
+  SALARY: "Salary",
+  CAFETERIA: "Cafeteria",
+  MARKETING: "Marketing",
+  OVERHEAD: "Utilities",
+  SUPPLIER_PAYMENT: "Supplier Payment",
+  FLIGHT_SALE: "Flight Sale",
+  TRANSFER_SALE: "Transfer Sale",
+  VISA_SALE: "Visa Sale",
 };
 
-const getCategoryChip = (category) => {
-  const cfg = CATEGORY_COLORS[category];
-  if (!cfg) return { bg: "#F1F5F9", color: "#475569", label: category || "—" };
-  return cfg;
+const getCategoryLabel = (category) => {
+  return CATEGORY_LABELS[category] || category || "—";
 };
 
 const StatPill = ({ label, value, color }) => (
@@ -199,24 +198,13 @@ const CashFlow = () => {
         size: 160,
         Cell: ({ cell, row }) => {
           const cat = cell.getValue() || row.original.transaction_type;
-          const cfg = getCategoryChip(cat);
           return (
-            <Chip
-              label={cfg.label}
-              size="small"
-              sx={{
-                fontWeight: 600,
-                fontSize: "12px",
-                bgcolor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? alpha(cfg.color, 0.15)
-                    : cfg.bg,
-                color: cfg.color,
-                borderRadius: "6px",
-                height: 26,
-                "& .MuiChip-label": { px: 1.2 },
-              }}
-            />
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 500, color: "text.primary", fontSize: "13.5px" }}
+            >
+              {getCategoryLabel(cat)}
+            </Typography>
           );
         },
       },
