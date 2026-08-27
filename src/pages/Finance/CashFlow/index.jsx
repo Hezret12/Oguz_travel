@@ -27,7 +27,6 @@ import CashFlowFilter from "../Contents/CashFlowFilter";
 import AddCashTransactionModal from "../AddCashTransactionModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 
-/* ──────────────── Category chip color map ──────────────── */
 const CATEGORY_COLORS = {
   LOT_PURCHASE: { bg: "#EDE9FE", color: "#7C3AED", label: "Supplier Payment" },
   CLIENT_SALE: { bg: "#DBEAFE", color: "#2563EB", label: "Tour Sale" },
@@ -47,7 +46,6 @@ const getCategoryChip = (category) => {
   return cfg;
 };
 
-/* ──────────────── Stat Pill (inline, compact) ──────────────── */
 const StatPill = ({ label, value, color }) => (
   <Box
     sx={{
@@ -83,14 +81,12 @@ const StatPill = ({ label, value, color }) => (
   </Box>
 );
 
-/* ──────────────── Format money helper ──────────────── */
 const fmtMoney = (val) =>
   `$${Math.abs(Number(val || 0)).toLocaleString("en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   })}`;
 
-/* ──────────────── Main Component ──────────────── */
 const CashFlow = () => {
   const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -135,7 +131,6 @@ const CashFlow = () => {
     return Array.isArray(raw) ? raw : [];
   }, [transactionsData]);
 
-  /* ──────── Compute summary totals ──────── */
   const { totalIncome, totalExpense, netAmount } = useMemo(() => {
     let inc = 0;
     let exp = 0;
@@ -162,7 +157,6 @@ const CashFlow = () => {
     onConfirm: (item) => deleteTransaction(item.guid || item.id),
   });
 
-  /* ──────────────── Table Columns ──────────────── */
   const columns = useMemo(
     () => [
       {
@@ -280,7 +274,7 @@ const CashFlow = () => {
       },
       {
         accessorKey: "description",
-        header: t("description", "Düşündiriş"),
+        header: t("description"),
         size: 220,
         Cell: ({ cell }) => (
           <Typography
@@ -301,7 +295,7 @@ const CashFlow = () => {
       },
       {
         id: "recorded_by",
-        header: t("finance.recordedBy", "Recorded by"),
+        header: t("finance.recordedBy"),
         size: 110,
         Cell: () => (
           <Typography
@@ -368,7 +362,7 @@ const CashFlow = () => {
         <GlobalSearchInput
           value={searchQuery}
           onChange={setSearch}
-          placeholder={t("finance.searchTransactions", "Search transactions...")}
+          placeholder={t("finance.searchTransactions")}
           onRefetch={refetch}
           isFetching={isFetching}
           disabled={isLoading}
