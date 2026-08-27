@@ -7,9 +7,7 @@ import {
   Box,
   Typography,
   Chip,
-  Paper,
   Button,
-  alpha,
 } from "@mui/material";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
@@ -58,44 +56,40 @@ const getCategoryChip = (category) => {
   return cfg;
 };
 
-/* ──────────────── Summary Card ──────────────── */
-const SummaryCard = ({ label, value, color }) => (
-  <Paper
-    variant="outlined"
+/* ──────────────── Stat Pill (inline, compact) ──────────────── */
+const StatPill = ({ label, value, color }) => (
+  <Box
     sx={{
-      flex: 1,
-      px: 2.5,
-      py: 2,
-      borderRadius: "12px",
+      display: "flex",
+      alignItems: "baseline",
+      gap: 0.8,
+      px: 1.8,
+      py: 0.8,
+      borderRadius: "10px",
+      border: "1px solid",
       borderColor: "divider",
       bgcolor: "background.paper",
-      minWidth: 180,
+      whiteSpace: "nowrap",
     }}
   >
     <Typography
-      variant="body2"
-      sx={{
-        fontWeight: 500,
-        color: "text.secondary",
-        fontSize: "13px",
-        mb: 0.5,
-      }}
+      component="span"
+      sx={{ fontSize: "12px", fontWeight: 600, color: "text.secondary" }}
     >
       {label}
     </Typography>
     <Typography
-      variant="h5"
+      component="span"
       sx={{
-        fontWeight: 700,
+        fontSize: "15px",
+        fontWeight: 750,
         color,
-        fontSize: { xs: "20px", sm: "24px" },
         fontFamily: "'Inter', sans-serif",
-        letterSpacing: "-0.5px",
       }}
     >
       {value}
     </Typography>
-  </Paper>
+  </Box>
 );
 
 /* ──────────────── Format money helper ──────────────── */
@@ -428,7 +422,18 @@ const CashFlow = () => {
         filterButtonText={t("filters", "Filters")}
         onAddClick={() => table.setCreatingRow(true)}
         addButtonText={t("finance.addTransaction", "+ Record Transaction")}
-      />
+      >
+        {/* Inline summary stats */}
+        <Box sx={{ display: "flex", gap: 1.5, alignItems: "center" }}>
+          <StatPill label="Income" value={fmtMoney(totalIncome)} color="#16a34a" />
+          <StatPill label="Expense" value={fmtMoney(totalExpense)} color="#DC2626" />
+          <StatPill
+            label="Net"
+            value={`${netAmount < 0 ? "-" : ""}${fmtMoney(Math.abs(netAmount))}`}
+            color={netAmount >= 0 ? "#16a34a" : "#DC2626"}
+          />
+        </Box>
+      </PageHeader>
 
       {/* ── Search ── */}
       <GlobalSearchInput
@@ -438,31 +443,6 @@ const CashFlow = () => {
         onRefetch={refetch}
         isFetching={isFetching}
       />
-
-      {/* ── Summary Cards ── */}
-      <Box
-        sx={{
-          display: "flex",
-          gap: 2,
-          flexWrap: { xs: "wrap", sm: "nowrap" },
-        }}
-      >
-        <SummaryCard
-          label="Income"
-          value={fmtMoney(totalIncome)}
-          color="#16a34a"
-        />
-        <SummaryCard
-          label="Expense"
-          value={fmtMoney(totalExpense)}
-          color="#DC2626"
-        />
-        <SummaryCard
-          label="Net"
-          value={`${netAmount < 0 ? "-" : ""}${fmtMoney(Math.abs(netAmount))}`}
-          color={netAmount >= 0 ? "#16a34a" : "#DC2626"}
-        />
-      </Box>
 
       {/* ── Table ── */}
       <MaterialReactTable table={table} />
