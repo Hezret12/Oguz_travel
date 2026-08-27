@@ -107,9 +107,7 @@ const CashFlow = () => {
     searchQuery,
     setSearch,
     page,
-    limit,
     setPage,
-    setPageSize,
     selectsOpen,
     openSelect,
     closeSelect,
@@ -125,6 +123,7 @@ const CashFlow = () => {
     isFetching,
     refetch,
     totalItems,
+    pageCount,
   } = usePagginationGet({
     apiFn: getAllCashTransactionsApi,
     key: "cashTransactions",
@@ -338,6 +337,25 @@ const CashFlow = () => {
       isLoading,
       showProgressBars: isFetching,
     },
+    muiTableBodyRowProps: ({ row }) => {
+      const type = row.original?.transaction_type;
+      const isIncome = type === "INCOME" || type === "CLIENT_PAYMENT";
+      const indicatorColor = isIncome ? "#16a34a" : "#dc2626";
+
+      return {
+        sx: (theme) => ({
+          cursor: "pointer",
+          borderLeft: `3.5px solid ${indicatorColor}`,
+          transition: "background-color 0.15s ease",
+          "&:hover": {
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "rgba(255, 255, 255, 0.05)"
+                : "rgba(0, 0, 0, 0.03) !important",
+          },
+        }),
+      };
+    },
     renderTopToolbarCustomActions: () => (
       <Box
         sx={{
@@ -357,13 +375,37 @@ const CashFlow = () => {
         />
       </Box>
     ),
+    renderBottomToolbar: () => (
+      <Box
+        sx={(theme) => ({
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 2,
+          py: 0.75,
+          minHeight: "52px",
+          borderTop: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+        })}
+      >
+        <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "13px" }}>
+          Jemi: <strong>{totalItems || 0}</strong>
+        </Typography>
+        <Pagination
+          pageIndex={page - 1}
+          pageCount={pageCount || 1}
+          totalRows={totalItems}
+          onPageChange={(newIndex) => setPage(newIndex + 1)}
+        />
+      </Box>
+    ),
     renderCreateRowDialogContent: ({ table }) => (
       <AddCashTransactionModal table={table} />
     ),
   });
 
   return (
-    <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2.5 }}>
+    <>
       {/* ── Page Header ── */}
       <PageHeader
         title={t("finance.cashFlowTitle")}
@@ -386,15 +428,6 @@ const CashFlow = () => {
 
       {/* ── Table ── */}
       <MaterialReactTable table={table} />
-
-      {/* ── Pagination ── */}
-      <Pagination
-        totalItems={totalItems}
-        page={page}
-        limit={limit}
-        setPage={setPage}
-        setPageSize={setPageSize}
-      />
 
       {/* ── Filter Drawer ── */}
       <FilterDrawer
@@ -419,7 +452,7 @@ const CashFlow = () => {
         onConfirm={deleteDialog.confirm}
         loading={isDeleting}
       />
-    </Box>
+    </>
   );
 };
 
