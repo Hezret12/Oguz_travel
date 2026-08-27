@@ -112,7 +112,6 @@ export const exportTurkishAirlinesExcel = async ({
   const numCols = columns.length;
   const endCol = startCol + numCols - 1;
 
-  // Set column widths
   for (let c = 1; c < startCol; c++) {
     worksheet.getColumn(c).width = 4;
   }
@@ -120,7 +119,6 @@ export const exportTurkishAirlinesExcel = async ({
     worksheet.getColumn(startCol + idx).width = col.width || 15;
   });
 
-  // 1. Top Title Banner (Rows 2 - 3, from startCol to endCol) - Fixed Turkmen Title
   const titleText = `Türk howa ýollary ${monthNameTk} ${yearStr} Hasabaty`;
   worksheet.mergeCells(2, startCol, 3, endCol);
   const titleCell = worksheet.getCell(2, startCol);
@@ -175,12 +173,11 @@ export const exportTurkishAirlinesExcel = async ({
     cell.border = getTableBorder(true, false, isFirstCol, isLastCol);
   });
 
-  // 3. Data Rows (Days 1 .. daysInMonth) starting at Row 6
   const numDays = daysInMonth || validDate.daysInMonth();
 
   for (let i = 0; i < numDays; i++) {
     const dayNum = i + 1;
-    const isEvenDay = dayNum % 2 === 0; // Day 2, 4, 6... are grey; Day 1, 3, 5... are white
+    const isEvenDay = dayNum % 2 === 0;
     const rowBgColor = isEvenDay ? "FFD9D9D9" : "FFFFFFFF";
     const dayDate = validDate.date(dayNum).format("DD.MM.YYYY");
     const rowData = rows[i] || { day: dayNum, total: 0, totalBase: 0 };
