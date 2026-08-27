@@ -629,7 +629,9 @@
   "notFound": {
     "title": "404 - Page Not Found",
     "desc": "The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.",
-    "goHome": "Go to Home"
+    "goHome": "Go to Home",
+    "goBack": "Go Back",
+    "quickLinks": "Quick Links"
   },
   "login": {
     "title": "Login",

@@ -629,7 +629,9 @@
   "notFound": {
     "title": "404 - Sahypa Tapylmady",
     "desc": "Gözleýän sahypaňyz aýrylan, ady üýtgedilen ýa-da wagtlaýyn elýeterli däl bolup biler.",
-    "goHome": "Baş Sahypa"
+    "goHome": "Baş Sahypa",
+    "goBack": "Yza gaýt",
+    "quickLinks": "Esasy bölümler"
   },
   "login": {
     "title": "Giriş",
