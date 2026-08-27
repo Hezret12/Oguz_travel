@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
   Grid,
-  Typography,
   Box,
   Button,
   ButtonBase,
@@ -78,9 +77,9 @@ const AddCashTransactionModal = ({ open, close, table }) => {
     },
   });
 
-  const [transactionType, currency, amount, cashBoxGuid] = useWatch({
+  const transactionType = useWatch({
     control,
-    name: ["transaction_type", "currency", "amount", "cash_box_guid"],
+    name: "transaction_type",
   });
 
   const isIncome = transactionType === "INCOME";
