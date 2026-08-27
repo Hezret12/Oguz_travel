@@ -4,56 +4,48 @@ import {
   Grid,
   Typography,
   Box,
+  Button,
+  ButtonBase,
   Alert,
-  Divider,
 } from "@mui/material";
-import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
-import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
-import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
+import ArrowCircleUpOutlinedIcon from "@mui/icons-material/ArrowCircleUpOutlined";
+import ArrowCircleDownOutlinedIcon from "@mui/icons-material/ArrowCircleDownOutlined";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../components/Dialog/CustomForm";
-import { FooterButton } from "../../components/Dialog/FooterButton";
 import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
 import CustomDatePicker from "../../components/CustomDatePicker";
-import AppAutocomplete from "../../components/AppAutocomplete";
 import { useLocale } from "../../hooks/useLocale";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addCashTransactionApi } from "../../api/queries/post";
 import { getAllCashBoxesApi } from "../../api/queries/getters";
 import { useGet } from "../../hooks/CRUD/useGet";
 
-const TRANSACTION_TYPES = [
-  { label: "Girdeji / Money In (INCOME)", value: "INCOME" },
-  { label: "Çykdajy / Money Out (EXPENSE)", value: "EXPENSE" },
-  { label: "Üpjün edijä töleg (SUPPLIER_PAYMENT)", value: "SUPPLIER_PAYMENT" },
-  { label: "Müşderi tölegi (CLIENT_PAYMENT)", value: "CLIENT_PAYMENT" },
-  { label: "Kassa arasynda geçirim (TRANSFER)", value: "TRANSFER" },
+const INCOME_CATEGORIES = [
+  { label: "Tour Sale", value: "CLIENT_SALE" },
+  { label: "Flight Sale", value: "FLIGHT_SALE" },
+  { label: "Transfer Sale", value: "TRANSFER_SALE" },
+  { label: "Visa Sale", value: "VISA_SALE" },
+  { label: "Other Income", value: "OTHER_INCOME" },
 ];
 
-const CATEGORY_OPTIONS = [
-  { label: "Partiýa satyn alnyşy (LOT_PURCHASE)", value: "LOT_PURCHASE" },
-  { label: "Müşderi satyşy (CLIENT_SALE)", value: "CLIENT_SALE" },
-  { label: "Ofis kireýi (OFFICE_RENT)", value: "OFFICE_RENT" },
-  { label: "Aýlyk haky (SALARY)", value: "SALARY" },
-  { label: "Kafeteriýa (CAFETERIA)", value: "CAFETERIA" },
-  { label: "Mahabat / Marketing (MARKETING)", value: "MARKETING" },
-  { label: "Beýleki çykdajylar (OVERHEAD)", value: "OVERHEAD" },
-];
-
-const PAYMENT_METHODS = [
-  { label: "Nagt (CASH)", value: "CASH" },
-  { label: "Karta (CARD)", value: "CARD" },
-  { label: "Bank hasaby / Hasaplaşyk (BANK_TRANSFER)", value: "BANK_TRANSFER" },
+const EXPENSE_CATEGORIES = [
+  { label: "Supplier Payment", value: "LOT_PURCHASE" },
+  { label: "Office Rent", value: "OFFICE_RENT" },
+  { label: "Utilities", value: "OVERHEAD" },
+  { label: "Salary", value: "SALARY" },
+  { label: "Marketing", value: "MARKETING" },
+  { label: "Cafeteria", value: "CAFETERIA" },
+  { label: "Other Expense", value: "OTHER_EXPENSE" },
 ];
 
 const CURRENCY_OPTIONS = [
-  { label: "USD ($)", value: "USD" },
-  { label: "TMT (m)", value: "TMT" },
-  { label: "EUR (€)", value: "EUR" },
-  { label: "TRY (₺)", value: "TRY" },
-  { label: "AED (AED)", value: "AED" },
+  { label: "USD", value: "USD" },
+  { label: "TMT", value: "TMT" },
+  { label: "EUR", value: "EUR" },
+  { label: "TRY", value: "TRY" },
+  { label: "AED", value: "AED" },
 ];
 
 const AddCashTransactionModal = ({ open, close, table }) => {
@@ -71,53 +63,37 @@ const AddCashTransactionModal = ({ open, close, table }) => {
     close?.();
   };
 
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset, setValue } = useForm({
     defaultValues: {
-      transaction_type: "EXPENSE",
-      category: "OVERHEAD",
+      transaction_type: "INCOME",
+      category: "",
       cash_box_guid: "",
       counterparty_name: "",
       amount: "",
       currency: "USD",
       exchange_rate: "19.5",
       payment_method: "CASH",
-      transaction_date: new Date(),
+      transaction_date: new Date().toISOString(),
       description: "",
     },
   });
 
-  const [amount, currency, exchangeRate, transactionType, cashBoxGuid] = useWatch({
+  const [transactionType, currency, amount, cashBoxGuid] = useWatch({
     control,
-    name: ["amount", "currency", "exchange_rate", "transaction_type", "cash_box_guid"],
+    name: ["transaction_type", "currency", "amount", "cash_box_guid"],
   });
+
+  const isIncome = transactionType === "INCOME";
 
   const { data: cashBoxesData } = useGet({
     apiFn: getAllCashBoxesApi,
     key: "all-cash-boxes",
   });
 
-  const selectedCashBox = (cashBoxesData || []).find((cb) => cb.guid === cashBoxGuid);
-
   const cashBoxOptions = (cashBoxesData || []).map((cb) => ({
-    label: `${cb.name} — Balance: ${Number(cb.current_balance || 0).toLocaleString()} ${cb.currency}`,
+    label: `${cb.name} (${cb.currency})`,
     value: cb.guid,
   }));
-
-  const numAmount = Number(amount || 0);
-  const numRate = Number(exchangeRate || 1.0);
-  const calculatedTmt = currency === "TMT" ? numAmount : numAmount * numRate;
-
-  const isIncome = transactionType === "INCOME" || transactionType === "CLIENT_PAYMENT";
-  const isExpense = transactionType === "EXPENSE" || transactionType === "SUPPLIER_PAYMENT";
-
-  // Balance warning
-  const isBalanceExceeded =
-    isExpense &&
-    selectedCashBox &&
-    selectedCashBox.currency === currency &&
-    numAmount > Number(selectedCashBox.current_balance || 0);
-
-  const isHighValue = numAmount >= 2000;
 
   const { mutate: createTransaction, isPending } = useCreate({
     apiFn: addCashTransactionApi,
@@ -129,21 +105,22 @@ const AddCashTransactionModal = ({ open, close, table }) => {
     },
   });
 
+  const handleTypeChange = (type) => {
+    setValue("transaction_type", type);
+    setValue("category", "");
+  };
+
   const onSubmit = (formData) => {
     setFormError("");
     const parsedAmount = Number(formData.amount);
-    const parsedRate = Number(formData.exchange_rate || 1.0);
+    const parsedRate = Number(formData.exchange_rate || (formData.currency === "USD" ? 19.5 : 1.0));
 
-    if (parsedAmount <= 0) {
-      setFormError("Mukdar 0-dan uly bolmaly!");
-      return;
-    }
-    if (parsedRate <= 0) {
-      setFormError("Walýuta kursy 0-dan uly bolmaly!");
+    if (!parsedAmount || parsedAmount <= 0) {
+      setFormError("Please enter a valid amount greater than 0");
       return;
     }
     if (!formData.cash_box_guid) {
-      setFormError("Kassa hökmany saýlanmaly!");
+      setFormError("Please select a cash box");
       return;
     }
 
@@ -151,194 +128,237 @@ const AddCashTransactionModal = ({ open, close, table }) => {
       ...formData,
       amount: parsedAmount,
       exchange_rate: parsedRate,
-      converted_amount_tmt: currency === "TMT" ? parsedAmount : parsedAmount * parsedRate,
+      converted_amount_tmt: formData.currency === "TMT" ? parsedAmount : parsedAmount * parsedRate,
     });
   };
 
+  const currentCategoryOptions = isIncome ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+
   return (
-    <CustomDialog open={isModalOpen} close={handleClose} widthX={720}>
+    <CustomDialog open={isModalOpen} close={handleClose} widthX={480}>
       <CustomDialogHeader
-        variant="h5"
-        title={t("finance.addTransaction")}
+        variant="h6"
+        title={t("finance.recordTransaction", "Record Transaction")}
         onClose={handleClose}
       />
       <CustomForm handleSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={2} sx={{ p: 2.5 }}>
+        <Box sx={{ p: 2.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
           {formError && (
-            <Grid size={{ xs: 12 }}>
-              <Alert severity="error" onClose={() => setFormError("")}>
-                {formError}
-              </Alert>
-            </Grid>
+            <Alert severity="error" onClose={() => setFormError("")} sx={{ borderRadius: "8px" }}>
+              {formError}
+            </Alert>
           )}
 
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomSelect
-              name="transaction_type"
-              control={control}
-              label={t("finance.transactionType")}
-              options={TRANSACTION_TYPES}
-              required
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomSelect
-              name="category"
-              control={control}
-              label={t("category", "Kategoriýa")}
-              options={CATEGORY_OPTIONS}
-              required
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <AppAutocomplete
-              name="cash_box_guid"
-              control={control}
-              label={t("finance.cashBox")}
-              options={cashBoxOptions}
-              required
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomTextField
-              name="counterparty_name"
-              control={control}
-              label={t("finance.counterparty")}
-              placeholder="e.g. Pegasus Airlines / Ahmet Yılmaz"
-              required
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <CustomTextField
-              name="amount"
-              control={control}
-              label={t("finance.amount")}
-              type="number"
-              slotProps={{ htmlInput: { min: 0.01, step: 0.01 } }}
-              required
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <CustomSelect
-              name="currency"
-              control={control}
-              label={t("currency", "Walýuta")}
-              options={CURRENCY_OPTIONS}
-              required
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <CustomTextField
-              name="exchange_rate"
-              control={control}
-              label="Kurs (1 Unit = ? TMT)"
-              type="number"
-              slotProps={{ htmlInput: { min: 0.01, step: 0.01 } }}
-              required
-            />
-          </Grid>
-
-          {/* Real-time TMT conversion pill */}
-          <Grid size={{ xs: 12 }}>
-            <Box
+          {/* ── Segmented Type Toggle ── */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 0.75,
+              p: "4px",
+              borderRadius: "10px",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.05)"
+                  : "#F1F5F9",
+            }}
+          >
+            <ButtonBase
+              type="button"
+              onClick={() => handleTypeChange("INCOME")}
               sx={{
-                p: 2,
-                borderRadius: 2,
-                bgcolor: isIncome ? "success.50" : "error.50",
-                border: "1px solid",
-                borderColor: isIncome ? "success.200" : "error.200",
+                py: 1,
+                px: 2,
+                borderRadius: "8px",
                 display: "flex",
-                justifyContent: "space-between",
                 alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+                fontSize: "14px",
+                fontWeight: isIncome ? 700 : 500,
+                color: isIncome
+                  ? "#059669"
+                  : "text.secondary",
+                bgcolor: isIncome
+                  ? "background.paper"
+                  : "transparent",
+                boxShadow: isIncome
+                  ? (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "0 1px 3px rgba(0,0,0,0.4)"
+                        : "0 1px 3px rgba(0,0,0,0.08)"
+                  : "none",
+                transition: "all 0.15s ease",
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                {isIncome ? (
-                  <TrendingUpRoundedIcon sx={{ color: "success.main" }} />
-                ) : (
-                  <TrendingDownRoundedIcon sx={{ color: "error.main" }} />
-                )}
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700, color: "text.primary" }}>
-                    {isIncome ? "Kassa girdejisi (Money In)" : "Kassadan çykdajy (Money Out)"}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                    Konwertirlenen TMT mukdary:
-                  </Typography>
-                </Box>
-              </Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 800,
-                  color: isIncome ? "success.main" : "error.main",
-                }}
-              >
-                {isIncome ? "+" : "-"}
-                {calculatedTmt.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
-                TMT
-              </Typography>
-            </Box>
-          </Grid>
+              <ArrowCircleUpOutlinedIcon sx={{ fontSize: 18, color: isIncome ? "#059669" : "inherit" }} />
+              Income
+            </ButtonBase>
 
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomSelect
-              name="payment_method"
-              control={control}
-              label={t("finance.paymentMethod")}
-              options={PAYMENT_METHODS}
-              required
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomDatePicker
-              name="transaction_date"
-              control={control}
-              label={t("date", "Senesi")}
-              required
-            />
-          </Grid>
+            <ButtonBase
+              type="button"
+              onClick={() => handleTypeChange("EXPENSE")}
+              sx={{
+                py: 1,
+                px: 2,
+                borderRadius: "8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1,
+                fontSize: "14px",
+                fontWeight: !isIncome ? 700 : 500,
+                color: !isIncome
+                  ? (theme) => theme.palette.mode === "dark" ? "#F87171" : "#475569"
+                  : "text.secondary",
+                bgcolor: !isIncome
+                  ? "background.paper"
+                  : "transparent",
+                boxShadow: !isIncome
+                  ? (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "0 1px 3px rgba(0,0,0,0.4)"
+                        : "0 1px 3px rgba(0,0,0,0.08)"
+                  : "none",
+                transition: "all 0.15s ease",
+              }}
+            >
+              <ArrowCircleDownOutlinedIcon sx={{ fontSize: 18, color: !isIncome ? "inherit" : "inherit" }} />
+              Expense
+            </ButtonBase>
+          </Box>
 
-          <Grid size={{ xs: 12 }}>
-            <CustomTextField
-              name="description"
-              control={control}
-              label={t("description", "Düşündiriş")}
-              placeholder="e.g. Dubai bilet bron tölegi ýa-da ofis kireýi..."
-              multiline
-              rows={2}
-            />
-          </Grid>
+          {/* ── Category ── */}
+          <CustomSelect
+            name="category"
+            control={control}
+            label={t("category", "Category")}
+            placeholder="Select category"
+            options={currentCategoryOptions}
+            required
+          />
 
-          {/* Insufficient Cash Box Balance Alert */}
-          {isBalanceExceeded && (
-            <Grid size={{ xs: 12 }}>
-              <Alert severity="error" sx={{ borderRadius: 2 }}>
-                <strong>Duýduryş:</strong> Saýlanan kassadaky bakiýe ({selectedCashBox?.current_balance} {currency}) çykarylýan mukdardan ({numAmount} {currency}) az! Kassa balansy minusa geçip biler.
-              </Alert>
+          {/* ── Amount & Currency ── */}
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="amount"
+                control={control}
+                label={t("finance.amount", "Amount")}
+                type="number"
+                placeholder="0"
+                slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+                required
+              />
             </Grid>
-          )}
-
-          {/* High value safety banner */}
-          {isHighValue && (
-            <Grid size={{ xs: 12 }}>
-              <Alert
-                severity="warning"
-                icon={<WarningAmberRoundedIcon fontSize="inherit" />}
-                sx={{ borderRadius: 2 }}
-              >
-                <strong>Tassyklaň:</strong> Siz {numAmount.toLocaleString()} {currency} ({calculatedTmt.toLocaleString()} TMT) möçberinde uly pul amaly goşýarsyňyz.
-              </Alert>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomSelect
+                name="currency"
+                control={control}
+                label={t("currency", "Currency")}
+                placeholder="USD"
+                options={CURRENCY_OPTIONS}
+                required
+              />
             </Grid>
-          )}
-        </Grid>
+          </Grid>
 
-        <FooterButton loading={isPending} onCancel={handleClose} />
+          {/* ── Cash Box ── */}
+          <CustomSelect
+            name="cash_box_guid"
+            control={control}
+            label={t("finance.cashBox", "Cash Box")}
+            placeholder="Select cash box"
+            options={cashBoxOptions}
+            required
+          />
+
+          {/* ── Counterparty & Date ── */}
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomTextField
+                name="counterparty_name"
+                control={control}
+                label={t("finance.counterparty", "Counterparty")}
+                placeholder="Client / supplier"
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <CustomDatePicker
+                name="transaction_date"
+                control={control}
+                label={t("date", "Date")}
+                required
+              />
+            </Grid>
+          </Grid>
+
+          {/* ── Description ── */}
+          <CustomTextField
+            name="description"
+            control={control}
+            label={t("description", "Description")}
+            placeholder="Optional note"
+          />
+
+          {/* ── Footer Buttons ── */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: 1.5,
+              pt: 1,
+            }}
+          >
+            <Button
+              type="button"
+              onClick={handleClose}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "14px",
+                color: "text.secondary",
+                px: 2,
+                py: 0.8,
+                borderRadius: "8px",
+                "&:hover": {
+                  bgcolor: "action.hover",
+                },
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isPending}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "14px",
+                px: 3,
+                py: 0.9,
+                borderRadius: "8px",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "#334155"
+                    : "#64748b",
+                color: "#ffffff",
+                boxShadow: "none",
+                "&:hover": {
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "#475569"
+                      : "#475569",
+                  boxShadow: "none",
+                },
+              }}
+            >
+              {isPending ? "Saving..." : "Review"}
+            </Button>
+          </Box>
+        </Box>
       </CustomForm>
     </CustomDialog>
   );
