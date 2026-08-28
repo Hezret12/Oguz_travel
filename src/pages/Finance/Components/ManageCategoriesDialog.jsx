@@ -186,7 +186,7 @@ const ManageCategoriesDialog = ({ open, onClose, onSelectCategory }) => {
             sx={{ mb: 1.2, fontWeight: 600, color: "text.primary", display: "flex", alignItems: "center", gap: 0.8 }}
           >
             <FolderPlus size={16} />
-            {t("finance.addNewCategory", "Täze kategoriýa goşmak")}
+            {t("finance.addNewCategory")}
           </Typography>
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
