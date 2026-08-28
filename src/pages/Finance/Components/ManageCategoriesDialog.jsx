@@ -51,7 +51,7 @@ const ManageCategoriesDialog = ({ open, onClose, onSelectCategory }) => {
   const handleAdd = (e) => {
     e?.preventDefault();
     if (!newCatName.trim()) {
-      setErrorMsg(t("finance.enterCategoryName", "Kategoriýanyň adyny ýazyň"));
+      setErrorMsg(t("finance.enterCategoryName"));
       return;
     }
 
