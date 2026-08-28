@@ -258,7 +258,7 @@ const CategorySelectWithManagement = ({
 
               {error && (
                 <FormHelperText error sx={{ mx: 0.5, mt: 0.5 }}>
-                  {error.message || t("requiredField", "Bu meýdan hökmany")}
+                  {error.message || t("requiredField")}
                 </FormHelperText>
               )}
             </FormControl>
