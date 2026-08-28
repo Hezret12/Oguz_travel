@@ -219,13 +219,11 @@ export const updateTotalCalculationApi = async (data) => {
   return await api.patchPrivate('/total-calculations/update-total-calculation', data);
 };
 
-// ==================== FINANCE / INVENTORY MODULE ====================
 export const updatePurchaseLotApi = async (data) => {
   try {
     const res = await api.patchPrivate(`/finance/lots/${data.guid || data.id}`, data);
     if (res?.data) return res;
   } catch {
-    // Graceful fallback
   }
   const { mockPurchaseLots } = await import('../mock/financeMockData');
   const index = mockPurchaseLots.findIndex((l) => l.guid === (data.guid || data.id));
