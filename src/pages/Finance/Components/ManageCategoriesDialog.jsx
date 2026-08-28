@@ -326,7 +326,7 @@ const ManageCategoriesDialog = ({ open, onClose, onSelectCategory }) => {
                             {cat.label}
                           </Typography>
                           <Chip
-                            label={isBuiltIn ? t("finance.builtIn", "Esasy") : t("finance.custom", "Ýörite")}
+                            label={isBuiltIn ? t("finance.builtIn") : t("finance.custom")}
                             size="small"
                             sx={{
                               height: 20,
