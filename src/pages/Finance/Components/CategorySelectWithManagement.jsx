@@ -63,7 +63,6 @@ const CategorySelectWithManagement = ({
         render={({ field, fieldState: { error } }) => {
           const currentValue = field.value || defaultValue || "";
 
-          // Ensure currentValue is present in options even if it's legacy/custom
           const allOptions = [...categories];
           if (
             currentValue &&
