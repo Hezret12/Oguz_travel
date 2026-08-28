@@ -231,7 +231,7 @@ const CategorySelectWithManagement = ({
                   </MenuItem>
                 </Select>
 
-                <Tooltip title={t("finance.manageCategories", "Kategoriýalary dolandyrmak")}>
+                <Tooltip title={t("finance.manageCategories")}>
                   <IconButton
                     type="button"
                     onClick={() => setIsManageOpen(true)}
