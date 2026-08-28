@@ -197,7 +197,7 @@ const ManageCategoriesDialog = ({ open, onClose, onSelectCategory }) => {
                 setNewCatName(e.target.value);
                 if (errorMsg) setErrorMsg("");
               }}
-              placeholder={t("finance.categoryPlaceholder", "Mysall: Ýangyç, Kese aragatnaşyk, Internet...")}
+              placeholder={t("finance.categoryPlaceholder")}
               error={Boolean(errorMsg)}
               helperText={errorMsg}
               sx={{
