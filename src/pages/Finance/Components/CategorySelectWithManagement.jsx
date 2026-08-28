@@ -226,7 +226,7 @@ const CategorySelectWithManagement = ({
                   >
                     <Plus size={16} />
                     <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, color: "primary.main" }}>
-                      + {t("finance.addNewCategory", "Täze kategoriýa goşmak...")}
+                      + {t("finance.addNewCategory")}
                     </Typography>
                   </MenuItem>
                 </Select>
