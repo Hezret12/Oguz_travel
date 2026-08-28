@@ -235,3 +235,15 @@ export const updatePurchaseLotApi = async (data) => {
   }
   return { data };
 };
+
+export const updateFinanceCategoryApi = async (data) => {
+  try {
+    const res = await api.patchPrivate('/finance-category/update-category', data);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { updateCustomCategory } = await import('../../functions/financeCategories');
+  updateCustomCategory(data.guid || data.id || data.value, data.name || data.label || data.title || data.category);
+  return { data };
+};

@@ -850,6 +850,17 @@
     "type": "Record Type",
     "editTransaction": "Edit Transaction",
     "deleteTransaction": "Delete Transaction",
-    "deleteConfirm": "Are you sure you want to delete this transaction? This action cannot be undone."
+    "deleteConfirm": "Are you sure you want to delete this transaction? This action cannot be undone.",
+    "manageCategories": "Manage Categories",
+    "categoryDesc": "Add new categories or manage existing ones",
+    "addNewCategory": "Add New Category",
+    "enterCategoryName": "Enter category name",
+    "categoryPlaceholder": "Example: Fuel, Telecom, Internet...",
+    "allCategories": "All Categories",
+    "builtIn": "Built-in",
+    "custom": "Custom",
+    "manageCategoriesTooltip": "Add / manage categories",
+    "addEditCategory": "Add / edit category",
+    "selectCategory": "Select category..."
   }
 }

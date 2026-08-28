@@ -850,6 +850,17 @@
     "type": "Görnüşi",
     "editTransaction": "Amaly üýtgetmek",
     "deleteTransaction": "Pul amalyny pozmak",
-    "deleteConfirm": "Bu pul amalyny pozmak isleýändigiňize ynanýarsyňyzmy? Bu amaly yzyna gaýtaryp bolmaýar."
+    "deleteConfirm": "Bu pul amalyny pozmak isleýändigiňize ynanýarsyňyzmy? Bu amaly yzyna gaýtaryp bolmaýar.",
+    "manageCategories": "Kategoriýalary dolandyrmak",
+    "categoryDesc": "Täze kategoriýa goşuň ýa-da bar bolanlary sazlaň",
+    "addNewCategory": "Täze kategoriýa goşmak",
+    "enterCategoryName": "Kategoriýanyň adyny ýazyň",
+    "categoryPlaceholder": "Mysall: Ýangyç, Kese aragatnaşyk, Internet...",
+    "allCategories": "Ähli kategoriýalar",
+    "builtIn": "Esasy",
+    "custom": "Ýörite",
+    "manageCategoriesTooltip": "Kategoriýa goşmak / sazlamak",
+    "addEditCategory": "Kategoriýa goş / sazla",
+    "selectCategory": "Kategoriýa saýlaň..."
   }
 }

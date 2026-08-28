@@ -15,6 +15,7 @@ import {
   getAllEmployeeApi,
   getAllOfficeApi,
 } from "../../../api/queries/getters";
+import { useFinanceCategories } from "../../../functions/financeCategories";
 
 const selectSx = {
   borderRadius: "8px",
@@ -161,25 +162,15 @@ const CashFlowFilter = ({
     }));
   }, [officesData, selectedLang]);
 
+  const { categories } = useFinanceCategories();
+
   const categoryOptions = useMemo(
-    () => [
-      { label: "B2B Biletler", value: "B2B" },
-      { label: "Türk Howa Ýollary", value: "TURKISH_AIRLINES" },
-      { label: "Awia Hyzmatlar (Airway)", value: "AIRWAY" },
-      { label: "Demir ýol (Railway)", value: "RAILWAY" },
-      { label: "Myhmanhana (Hotel)", value: "HOTEL" },
-      { label: "Syýahat (Tour)", value: "TOUR" },
-      { label: "Ulag / Geçirim (Transfer)", value: "TRANSFER" },
-      { label: "Bukjalar (Package)", value: "PACKAGE" },
-      { label: "Wiza Hyzmatlary", value: "VISA" },
-      { label: "Terjime Hyzmatlary", value: "TRANSLATION" },
-      { label: "Kafeteriýa", value: "CAFETERIA" },
-      { label: "Ofis Kireýi (Rent)", value: "OFFICE_RENT" },
-      { label: "Aýlyk Haky (Salary)", value: "SALARY" },
-      { label: "Marketing / Mahabat", value: "MARKETING" },
-      { label: "Beýleki Harajatlar (Overhead)", value: "OVERHEAD" },
-    ],
-    []
+    () =>
+      categories.map((cat) => ({
+        label: cat.label,
+        value: cat.value,
+      })),
+    [categories]
   );
 
   const currencyOptions = useMemo(

@@ -27,29 +27,7 @@ import CashFlowFilter from "../Contents/CashFlowFilter";
 import AddCashTransactionModal from "../AddCashTransactionModal";
 import EditCashTransactionModal from "../EditCashTransactionModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
-
-const CATEGORY_LABELS = {
-  B2B: "B2B Bilet",
-  TURKISH_AIRLINES: "Türk Howa Ýollary",
-  AIRWAY: "Awia Hyzmat",
-  RAILWAY: "Demir Ýol",
-  HOTEL: "Myhmanhana",
-  TOUR: "Syýahat",
-  TRANSFER: "Ulag / Geçirim",
-  PACKAGE: "Bukja",
-  VISA: "Wiza",
-  TRANSLATION: "Terjime",
-  CAFETERIA: "Kafeteriýa",
-  OFFICE_RENT: "Ofis Kireýi",
-  SALARY: "Aýlyk Haky",
-  MARKETING: "Mahabat",
-  OVERHEAD: "Beýleki Harajat",
-};
-
-const getCategoryDisplay = (cat) => {
-  if (!cat) return "—";
-  return CATEGORY_LABELS[cat] || cat;
-};
+import { useFinanceCategories } from "../../../functions/financeCategories";
 
 const StatPill = ({ label, value, color, subtitle }) => (
   <Box
@@ -107,6 +85,20 @@ const CashFlow = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const { categories } = useFinanceCategories();
+
+  const categoryMap = useMemo(() => {
+    const map = {};
+    categories.forEach((cat) => {
+      map[cat.value] = cat.label;
+    });
+    return map;
+  }, [categories]);
+
+  const getCategoryDisplay = (cat) => {
+    if (!cat) return "—";
+    return categoryMap[cat] || cat;
+  };
 
   const {
     draft,
@@ -433,7 +425,7 @@ const CashFlow = () => {
         ),
       },
     ],
-    [t, selectedLang, formatChange, deleteDialog]
+    [t, selectedLang, formatChange, deleteDialog, categoryMap]
   );
 
   const table = useMaterialReactTable({

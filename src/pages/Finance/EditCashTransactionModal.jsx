@@ -14,6 +14,7 @@ import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { updateTotalCalculationApi } from "../../api/queries/patch";
 import { getAllEmployeeApi } from "../../api/queries/getters";
 import { useGet } from "../../hooks/CRUD/useGet";
+import CategorySelectWithManagement from "./Components/CategorySelectWithManagement";
 
 const CURRENCY_OPTIONS = [
   { label: "USD ($)", value: "USD" },
@@ -39,7 +40,7 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
     close?.();
   };
 
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset, setValue } = useForm({
     defaultValues: {
       category: currentRow.category || "",
       net_price: currentRow.net_price !== undefined ? String(currentRow.net_price) : "",
@@ -106,9 +107,10 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2.5}>
           <Grid size={{ xs: 12 }}>
-            <CustomTextField
+            <CategorySelectWithManagement
               name="category"
               control={control}
+              setValue={setValue}
               label={t("category", "Kategoriýa / Düşündiriş")}
               required
             />

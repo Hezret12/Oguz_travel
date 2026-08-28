@@ -360,3 +360,15 @@ export const consumeLotApi = async (data) => {
 export const addTotalCalculationApi = async (data) => {
   return await api.postPrivate('/total-calculations/add-total-calculation', data);
 };
+
+export const addFinanceCategoryApi = async (data) => {
+  try {
+    const res = await api.postPrivate('/finance-category/add-category', data);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { addCustomCategory } = await import('../../functions/financeCategories');
+  const created = addCustomCategory(data?.name || data?.label || data?.title || data?.category);
+  return { data: created };
+};
