@@ -16,14 +16,7 @@ export const DEFAULT_FINANCE_CATEGORIES = [
   { value: "HOTEL", label: "Myhmanhana", isBuiltIn: true },
   { value: "TOUR", label: "Syýahat", isBuiltIn: true },
   { value: "TRANSFER", label: "Ulag / Geçirim", isBuiltIn: true },
-  { value: "PACKAGE", label: "Bukja", isBuiltIn: true },
-  { value: "VISA", label: "Wiza", isBuiltIn: true },
-  { value: "TRANSLATION", label: "Terjime", isBuiltIn: true },
-  { value: "CAFETERIA", label: "Kafeteriýa", isBuiltIn: true },
-  { value: "OFFICE_RENT", label: "Ofis Kireýi", isBuiltIn: true },
-  { value: "SALARY", label: "Aýlyk Haky", isBuiltIn: true },
-  { value: "MARKETING", label: "Mahabat", isBuiltIn: true },
-  { value: "OVERHEAD", label: "Beýleki Harajat", isBuiltIn: true },
+
 ];
 
 const STORAGE_KEY = "finance_custom_categories";
