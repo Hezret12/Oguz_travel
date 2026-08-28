@@ -234,7 +234,6 @@ const ManageCategoriesDialog = ({ open, onClose, onSelectCategory }) => {
 
         <Divider sx={{ my: 2 }} />
 
-        {/* Existing Categories List */}
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
           <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
             {t("finance.allCategories")} ({categories.length})
