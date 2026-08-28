@@ -151,10 +151,10 @@ const ManageCategoriesDialog = ({ open, onClose, onSelectCategory }) => {
           </Box>
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary" }}>
-              {t("finance.manageCategories", "Kategoriýalary dolandyrmak")}
+              {t("finance.manageCategories")}
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              {t("finance.categoryDesc", "Täze kategoriýa goşuň ýa-da bar bolanlary sazlaň")}
+              {t("finance.categoryDesc")}
             </Typography>
           </Box>
         </Box>
