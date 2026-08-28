@@ -227,7 +227,7 @@ const ManageCategoriesDialog = ({ open, onClose, onSelectCategory }) => {
                 whiteSpace: "nowrap",
               }}
             >
-              {isCreating ? t("saving", "Ýüklenýär...") : t("add", "Goş")}
+              {isCreating ? t("saving") : t("add")}
             </Button>
           </Box>
         </Paper>
