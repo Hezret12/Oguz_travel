@@ -220,7 +220,7 @@ export const updateTotalCalculationApi = async (data) => {
 };
 
 export const updatePurchaseLotApi = async (data) => {
- 
+
 };
 
 export const updateFinanceCategoryApi = async (data) => {
