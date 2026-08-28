@@ -130,7 +130,7 @@ const CategorySelectWithManagement = ({
                     }}
                   >
                     <Plus size={14} />
-                    <span>{t("finance.addEditCategory", "Kategoriýa goş / sazla")}</span>
+                    <span>{t("finance.addEditCategory")}</span>
                   </Box>
                 </Tooltip>
               </Box>
