@@ -15,7 +15,6 @@ import {
   getAllEmployeeApi,
   getAllOfficeApi,
 } from "../../../api/queries/getters";
-import { useFinanceCategories } from "../../../functions/financeCategories";
 
 const selectSx = {
   borderRadius: "8px",
@@ -162,17 +161,6 @@ const CashFlowFilter = ({
     }));
   }, [officesData, selectedLang]);
 
-  const { categories } = useFinanceCategories();
-
-  const categoryOptions = useMemo(
-    () =>
-      categories.map((cat) => ({
-        label: cat.label,
-        value: cat.value,
-      })),
-    [categories]
-  );
-
   const currencyOptions = useMemo(
     () => [
       { label: "TMT", value: "TMT" },
@@ -191,17 +179,27 @@ const CashFlowFilter = ({
 
   return (
     <Stack spacing={2.5}>
-      <FilterSelect
-        label={t("category", "Kategoriýa")}
-        name="category"
-        value={draft.category}
-        options={categoryOptions}
-        isOpen={selectsOpen.category}
-        allText={t("all")}
-        onChange={setDraftFilter}
-        onOpen={openSelect}
-        onClose={closeSelect}
-      />
+      <Box>
+        <Typography
+          variant="body2"
+          sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
+        >
+          {t("category", "Kategoriýa")}
+        </Typography>
+        <TextField
+          size="small"
+          fullWidth
+          value={draft.category || ""}
+          onChange={(e) => setDraftFilter("category", e.target.value)}
+          placeholder={t("category", "Kategoriýa")}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "8px",
+              bgcolor: "background.paper",
+            },
+          }}
+        />
+      </Box>
 
       <FilterSelect
         label={t("operator", "Jogapkär / Operator")}

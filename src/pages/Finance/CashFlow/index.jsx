@@ -27,7 +27,6 @@ import CashFlowFilter from "../Contents/CashFlowFilter";
 import AddCashTransactionModal from "../AddCashTransactionModal";
 import EditCashTransactionModal from "../EditCashTransactionModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
-import { useFinanceCategories } from "../../../functions/financeCategories";
 
 const StatPill = ({ label, value, color, subtitle }) => (
   <Box
@@ -85,20 +84,6 @@ const CashFlow = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const { categories } = useFinanceCategories();
-
-  const categoryMap = useMemo(() => {
-    const map = {};
-    categories.forEach((cat) => {
-      map[cat.value] = cat.label;
-    });
-    return map;
-  }, [categories]);
-
-  const getCategoryDisplay = (cat) => {
-    if (!cat) return "—";
-    return categoryMap[cat] || cat;
-  };
 
   const {
     draft,
@@ -220,9 +205,10 @@ const CashFlow = () => {
         size: 170,
         Cell: ({ cell }) => {
           const val = cell.getValue();
+          if (!val) return "—";
           return (
             <Chip
-              label={getCategoryDisplay(val)}
+              label={val}
               size="small"
               variant="outlined"
               sx={{
@@ -425,7 +411,7 @@ const CashFlow = () => {
         ),
       },
     ],
-    [t, selectedLang, formatChange, deleteDialog, categoryMap]
+    [t, selectedLang, formatChange, deleteDialog]
   );
 
   const table = useMaterialReactTable({

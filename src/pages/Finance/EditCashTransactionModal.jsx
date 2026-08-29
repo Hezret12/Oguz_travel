@@ -14,7 +14,6 @@ import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { updateTotalCalculationApi } from "../../api/queries/patch";
 import { getAllEmployeeApi } from "../../api/queries/getters";
 import { useGet } from "../../hooks/CRUD/useGet";
-import CategorySelectWithManagement from "./Components/CategorySelectWithManagement";
 
 const CURRENCY_OPTIONS = [
   { label: "TMT", value: "TMT" },
@@ -36,7 +35,7 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
     close?.();
   };
 
-  const { control, handleSubmit, reset, setValue } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       category: currentRow.category || "",
       net_price: currentRow.net_price !== undefined ? String(currentRow.net_price) : "",
@@ -85,7 +84,7 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
   const onSubmit = (formData) => {
     const payload = {
       guid: currentRow.guid || currentRow.id,
-      category: formData.category?.trim() || "OTHER_EXPENSE",
+      category: formData.category?.trim() || "",
       net_price: Number(formData.net_price || 0),
       currency: formData.currency || "USD",
       receiver_opr_guid: formData.receiver_opr_guid || undefined,
@@ -103,10 +102,9 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2.5}>
           <Grid size={{ xs: 12 }}>
-            <CategorySelectWithManagement
+            <CustomTextField
               name="category"
               control={control}
-              setValue={setValue}
               label={t("category", "Kategoriýa / Düşündiriş")}
               required
             />

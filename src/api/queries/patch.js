@@ -220,16 +220,3 @@ export const updateTotalCalculationApi = async (data) => {
 };
 
 
-export const updateFinanceCategoryApi = async (data) => {
-  try {
-    const res = await api.patchPrivate('/finance-category/update-category', data);
-    if (res?.data) return res;
-  } catch {
-    // Graceful fallback
-  }
-  const { updateCustomCategory } = await import('../../functions/financeCategories');
-  const idOrValue = data?.id || data?.value || data?.guid;
-  const newLabel = data?.name || data?.label || data?.title;
-  updateCustomCategory(idOrValue, newLabel);
-  return { data: { ...data, label: newLabel, value: idOrValue } };
-};

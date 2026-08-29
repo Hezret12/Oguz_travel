@@ -150,15 +150,3 @@ export const deleteTotalCalculationApi = async (guid) => {
   return await api.deletePrivate('/total-calculations/delete-total-calculation', { guid: actualGuid });
 };
 
-export const deleteFinanceCategoryApi = async (guid) => {
-  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id || guid?.value) : guid;
-  try {
-    const res = await api.deletePrivate('/finance-category/delete-category', { guid: actualGuid, value: actualGuid });
-    if (res?.data) return res;
-  } catch {
-    // Graceful fallback
-  }
-  const { deleteCustomCategory } = await import('../../functions/financeCategories');
-  deleteCustomCategory(actualGuid);
-  return { data: { success: true } };
-};

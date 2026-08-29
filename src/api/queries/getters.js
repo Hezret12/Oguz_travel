@@ -224,13 +224,3 @@ export const getAllTotalCalculationsApi = async (params = {}) => {
   return await api.getPrivate('/total-calculations/get-all-total-calculations', params);
 };
 
-export const getAllFinanceCategoriesApi = async (params = {}) => {
-  try {
-    const res = await api.getPrivate('/finance-category/get-all-categories', params);
-    if (res?.data) return res;
-  } catch {
-    // Graceful fallback
-  }
-  const { getAllFinanceCategories } = await import('../../functions/financeCategories');
-  return { data: getAllFinanceCategories() };
-};
