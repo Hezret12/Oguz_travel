@@ -175,12 +175,8 @@ const CashFlowFilter = ({
 
   const currencyOptions = useMemo(
     () => [
-      { label: "USD ($)", value: "USD" },
-      { label: "TMT (TMT)", value: "TMT" },
-      { label: "EUR (€)", value: "EUR" },
-      { label: "TRY (₺)", value: "TRY" },
-      { label: "AED (AED)", value: "AED" },
-      { label: "RUB (₽)", value: "RUB" },
+      { label: "TMT", value: "TMT" },
+      { label: "USD", value: "USD" },
     ],
     []
   );

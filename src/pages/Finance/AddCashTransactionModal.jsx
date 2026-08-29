@@ -17,12 +17,8 @@ import { useGet } from "../../hooks/CRUD/useGet";
 import CategorySelectWithManagement from "./Components/CategorySelectWithManagement";
 
 const CURRENCY_OPTIONS = [
-  { label: "USD ($)", value: "USD" },
-  { label: "TMT (TMT)", value: "TMT" },
-  { label: "EUR (€)", value: "EUR" },
-  { label: "TRY (₺)", value: "TRY" },
-  { label: "AED (AED)", value: "AED" },
-  { label: "RUB (₽)", value: "RUB" },
+  { label: "TMT", value: "TMT" },
+  { label: "USD", value: "USD" },
 ];
 
 const AddCashTransactionModal = ({ open, close, table }) => {

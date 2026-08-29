@@ -144,34 +144,6 @@ export const deleteCafeteriaTransactionApi = async (guid) => {
   return await api.deletePrivate(`/cafeteria/delete/${actualGuid}`, { guid: actualGuid });
 };
 
-// ==================== FINANCE / INVENTORY MODULE ====================
-export const deletePurchaseLotApi = async (guid) => {
-  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
-  try {
-    const res = await api.deletePrivate(`/finance/lots/${actualGuid}`, { guid: actualGuid });
-    if (res?.data) return res;
-  } catch {
-    // Graceful fallback
-  }
-  const { mockPurchaseLots } = await import('../mock/financeMockData');
-  const index = mockPurchaseLots.findIndex((l) => l.guid === actualGuid);
-  if (index !== -1) mockPurchaseLots.splice(index, 1);
-  return { data: { success: true } };
-};
-
-export const deleteCashTransactionApi = async (guid) => {
-  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
-  try {
-    const res = await api.deletePrivate(`/finance/transactions/${actualGuid}`, { guid: actualGuid });
-    if (res?.data) return res;
-  } catch {
-    // Graceful fallback
-  }
-  const { mockFinanceTransactions } = await import('../mock/financeMockData');
-  const index = mockFinanceTransactions.findIndex((t) => t.guid === actualGuid);
-  if (index !== -1) mockFinanceTransactions.splice(index, 1);
-  return { data: { success: true } };
-};
 
 export const deleteTotalCalculationApi = async (guid) => {
   const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;

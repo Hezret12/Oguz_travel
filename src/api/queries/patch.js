@@ -219,22 +219,6 @@ export const updateTotalCalculationApi = async (data) => {
   return await api.patchPrivate('/total-calculations/update-total-calculation', data);
 };
 
-export const updatePurchaseLotApi = async (data) => {
-  const actualGuid = data?.guid || data?.id;
-  try {
-    const res = await api.patchPrivate(`/finance/lots/${actualGuid}`, data);
-    if (res?.data) return res;
-  } catch {
-    // Graceful fallback
-  }
-  const { mockPurchaseLots } = await import('../mock/financeMockData');
-  const index = mockPurchaseLots.findIndex((l) => l.guid === actualGuid);
-  if (index !== -1) {
-    mockPurchaseLots[index] = { ...mockPurchaseLots[index], ...data };
-    return { data: mockPurchaseLots[index] };
-  }
-  return { data };
-};
 
 export const updateFinanceCategoryApi = async (data) => {
   try {

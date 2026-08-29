@@ -18,11 +18,10 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 
 import { useLocale } from "../../../hooks/useLocale";
-import { useGet } from "../../../hooks/CRUD/useGet";
-import { getFinanceSummaryApi, getAllCashBoxesApi } from "../../../api/queries/getters";
 import PageHeader from "../../../components/PageHeader";
 import AddCashTransactionModal from "../AddCashTransactionModal";
 import { PATHS } from "../../../routes/paths";
+import { DEFAULT_FINANCE_SUMMARY, DEFAULT_CASH_BOXES } from "./mockData";
 
 const formatMoney = (val, currency = "$") => {
   const num = Number(val || 0);
@@ -96,16 +95,8 @@ const FinanceOverview = () => {
   const navigate = useNavigate();
   const [isAddTxOpen, setIsAddTxOpen] = useState(false);
 
-  const { data: summary } = useGet({
-    apiFn: getFinanceSummaryApi,
-    key: "finance-summary",
-  });
-
-  const { data: cashBoxesData } = useGet({
-    apiFn: getAllCashBoxesApi,
-    key: "all-cash-boxes",
-  });
-  const cashBoxes = (cashBoxesData || []).filter((cb) => cb.is_active !== false);
+  const summary = DEFAULT_FINANCE_SUMMARY;
+  const cashBoxes = DEFAULT_CASH_BOXES;
 
   const realization = summary?.realization || [];
 
