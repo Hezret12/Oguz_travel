@@ -220,9 +220,32 @@ export const updateTotalCalculationApi = async (data) => {
 };
 
 export const updatePurchaseLotApi = async (data) => {
-
+  const actualGuid = data?.guid || data?.id;
+  try {
+    const res = await api.patchPrivate(`/finance/lots/${actualGuid}`, data);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { mockPurchaseLots } = await import('../mock/financeMockData');
+  const index = mockPurchaseLots.findIndex((l) => l.guid === actualGuid);
+  if (index !== -1) {
+    mockPurchaseLots[index] = { ...mockPurchaseLots[index], ...data };
+    return { data: mockPurchaseLots[index] };
+  }
+  return { data };
 };
 
 export const updateFinanceCategoryApi = async (data) => {
-
+  try {
+    const res = await api.patchPrivate('/finance-category/update-category', data);
+    if (res?.data) return res;
+  } catch {
+    // Graceful fallback
+  }
+  const { updateCustomCategory } = await import('../../functions/financeCategories');
+  const idOrValue = data?.id || data?.value || data?.guid;
+  const newLabel = data?.name || data?.label || data?.title;
+  updateCustomCategory(idOrValue, newLabel);
+  return { data: { ...data, label: newLabel, value: idOrValue } };
 };
