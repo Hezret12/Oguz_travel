@@ -35,9 +35,9 @@ export const themeConfig = createTheme({
           contrastText: '#011718',
         },
         background: {
-          default: '#030F16',
-          paper: '#081A24',
-          secondary: '#0C2331',
+          default: '#090A0F',
+          paper: '#12131A',
+          secondary: '#181A24',
         },
         text: {
           primary: '#F8FAFC',
@@ -46,9 +46,9 @@ export const themeConfig = createTheme({
         divider: 'rgba(255, 255, 255, 0.08)',
         action: {
           hover: 'rgba(255, 255, 255, 0.045)',
-          selected: 'rgba(20, 184, 166, 0.14)',
+          selected: 'rgba(20, 184, 166, 0.16)',
         },
-        subtable: { header: '#0B202D' },
+        subtable: { header: '#151621' },
       },
     },
   },
@@ -60,29 +60,29 @@ export const themeConfig = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           backgroundImage: 'none',
-          boxShadow: theme.palette.mode === 'dark' ? '0 4px 20px rgba(0, 0, 0, 0.35)' : 'none',
+          boxShadow: theme.palette.mode === 'dark' ? '0 4px 24px rgba(0, 0, 0, 0.50)' : 'none',
         }),
       },
     },
     MuiTooltip: {
       styleOverrides: {
         tooltip: ({ theme }) => ({
-          backgroundColor: theme.palette.mode === 'dark' ? '#0C2331' : '#ffffff',
+          backgroundColor: theme.palette.mode === 'dark' ? '#181A24' : '#ffffff',
           color: theme.palette.text.primary,
-          border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(45, 212, 191, 0.20)' : theme.palette.divider}`,
+          border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : theme.palette.divider}`,
           borderRadius: 8,
           fontSize: '0.78rem',
           fontWeight: 500,
           padding: '6px 10px',
           boxShadow:
             theme.palette.mode === 'dark'
-              ? '0 8px 24px rgba(0, 0, 0, 0.55)'
+              ? '0 8px 24px rgba(0, 0, 0, 0.65)'
               : '0 8px 24px rgba(0, 0, 0, 0.08)',
         }),
         arrow: ({ theme }) => ({
-          color: theme.palette.mode === 'dark' ? '#0C2331' : '#ffffff',
+          color: theme.palette.mode === 'dark' ? '#181A24' : '#ffffff',
           '&::before': {
-            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(45, 212, 191, 0.20)' : theme.palette.divider}`,
+            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : theme.palette.divider}`,
           },
         }),
       },

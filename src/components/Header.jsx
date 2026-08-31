@@ -97,15 +97,15 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
         borderBottom: '1px solid',
         borderColor: (theme) =>
           theme.palette.mode === 'dark'
-            ? 'rgba(45, 212, 191, 0.10)'
+            ? 'rgba(255, 255, 255, 0.08)'
             : '#e2e8f0',
         backgroundColor: (theme) =>
           theme.palette.mode === 'dark'
-            ? 'rgba(4, 17, 24, 0.85)'
+            ? 'rgba(12, 13, 18, 0.85)'
             : 'rgba(255, 255, 255, 0.88)',
         boxShadow: (theme) =>
           theme.palette.mode === 'dark'
-            ? '0 4px 24px rgba(0,0,0,0.35)'
+            ? '0 4px 24px rgba(0, 0, 0, 0.50)'
             : '0 1px 3px rgba(0,0,0,0.04)',
         left: { xs: 0, md: sidebarWidth },
         width: { xs: '100%', md: `calc(100% - ${sidebarWidth}px)` },
