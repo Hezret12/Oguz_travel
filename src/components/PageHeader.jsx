@@ -97,7 +97,7 @@ const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonT
                   },
                 }}
               >
-                {filterButtonText ?? "Filtrele"}
+                {filterButtonText}
               </Button>
             )}
 
