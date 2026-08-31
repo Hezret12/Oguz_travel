@@ -36,14 +36,21 @@ const ExportExcelButton = ({
   size = "medium",
   disabled = false,
   tooltip = null,
+  label = null,
+  children,
+  onClick,
   sx = {},
   ...props
 }) => {
   const { t } = useLocale();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleOpenModal = (e) => {
+  const handleButtonClick = (e) => {
     e?.currentTarget?.blur();
+    if (onClick) {
+      onClick(e);
+      return;
+    }
     setIsModalOpen(true);
   };
 
@@ -51,20 +58,22 @@ const ExportExcelButton = ({
     setIsModalOpen(false);
   };
 
+  const isSmall = size === "small";
+
   const buttonContent = (
     <Button
       variant={variant}
       size={size}
-      onClick={handleOpenModal}
+      onClick={handleButtonClick}
       disabled={disabled}
-      startIcon={<ExcelIcon size={18} />}
+      startIcon={<ExcelIcon size={isSmall ? 15 : 18} />}
       sx={{
-        height: "40px",
-        px: 2,
-        borderRadius: "10px",
+        height: isSmall ? "32px" : "40px",
+        px: isSmall ? 1.5 : 2,
+        borderRadius: isSmall ? "8px" : "10px",
         textTransform: "none",
-        fontWeight: 550,
-        fontSize: "14px",
+        fontWeight: 600,
+        fontSize: isSmall ? "12.5px" : "14px",
         letterSpacing: "0.1px",
         borderColor: "divider",
         color: "text.primary",
@@ -75,13 +84,13 @@ const ExportExcelButton = ({
         boxShadow: (theme) =>
           theme.palette.mode === "dark"
             ? "0 2px 8px rgba(0, 0, 0, 0.32)"
-            : "0 2px 8px rgba(16, 124, 65, 0.16)",
+            : "0 2px 8px rgba(16, 124, 65, 0.12)",
         transition: "all 0.2s ease",
         "&:hover": {
           backgroundColor: (theme) =>
             theme.palette.mode === "dark"
               ? "rgba(16, 185, 129, 0.1)"
-              : "rgba(16, 185, 129, 0.05)",
+              : "rgba(16, 185, 129, 0.06)",
           borderColor: (theme) =>
             theme.palette.mode === "dark"
               ? "rgba(16, 185, 129, 0.45)"
@@ -92,7 +101,7 @@ const ExportExcelButton = ({
           boxShadow: (theme) =>
             theme.palette.mode === "dark"
               ? "0 4px 14px rgba(16, 185, 129, 0.28)"
-              : "0 4px 14px rgba(16, 124, 65, 0.24)",
+              : "0 4px 14px rgba(16, 124, 65, 0.22)",
         },
         "&:active": {
           transform: "scale(0.98)",
@@ -105,7 +114,7 @@ const ExportExcelButton = ({
       }}
       {...props}
     >
-      {t("common.exportExcel", "Excel")}
+      {children || label || t("common.exportExcel", "Excel")}
     </Button>
   );
 
@@ -113,7 +122,7 @@ const ExportExcelButton = ({
     <>
       {tooltip ? <Tooltip title={tooltip}>{buttonContent}</Tooltip> : buttonContent}
 
-      {isModalOpen && (
+      {isModalOpen && !onClick && (
         <GlobalExcelExportModal
           open={isModalOpen}
           close={handleCloseModal}

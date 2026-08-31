@@ -15,8 +15,8 @@ import {
   useTheme,
 } from "@mui/material";
 import AccountBalanceWalletRoundedIcon from "@mui/icons-material/AccountBalanceWalletRounded";
-import { Download } from "lucide-react";
 import { useLocale } from "../../../../hooks/useLocale";
+import ExportExcelButton from "../../../../components/ExportExcelButton";
 
 const ReportTable = ({
   isLoading,
@@ -104,28 +104,10 @@ const ReportTable = ({
           </Typography>
 
           {onExportExcel && (
-            <Button
+            <ExportExcelButton
               size="small"
-              variant="outlined"
               onClick={onExportExcel}
-              startIcon={<Download size={14} />}
-              sx={{
-                borderRadius: "8px",
-                textTransform: "none",
-                fontWeight: 700,
-                fontSize: "12px",
-                height: 28,
-                px: 1.5,
-                borderColor: alpha(green, 0.4),
-                color: green,
-                "&:hover": {
-                  borderColor: green,
-                  backgroundColor: alpha(green, 0.08),
-                },
-              }}
-            >
-              Excel Export
-            </Button>
+            />
           )}
         </Box>
       </Box>

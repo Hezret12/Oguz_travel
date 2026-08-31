@@ -9,7 +9,6 @@ import {
   useTheme,
 } from "@mui/material";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import toast from "react-hot-toast";
 import dayjs from "dayjs";
 
@@ -18,6 +17,7 @@ import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../../../components/Dialog/CustomForm";
 import FooterButton from "../../../../components/Dialog/FooterButton";
+import { ExcelIcon } from "../../../../components/ExportExcelButton";
 import { exportTurkishAirlinesExcel } from "../functions/exportTurkishAirlinesExcel";
 
 const TK_MONTHS = [
@@ -134,7 +134,7 @@ const TurkishAirlinesExportModal = ({
                   {t("report.turkishAirlines.exportFileFormat", "Faýl Formatı")}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mt: 0.5 }}>
-                  <DescriptionRoundedIcon sx={{ fontSize: 18, color: "#16A34A" }} />
+                  <ExcelIcon size={18} />
                   <Typography variant="body2" sx={{ fontWeight: 700, color: "text.primary" }}>
                     Microsoft Excel (.xlsx)
                   </Typography>

@@ -15,9 +15,10 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
-import { ChevronDown, Download } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
+import ExportExcelButton from "../../../../components/ExportExcelButton";
 
 const QUARTERS = [
   { value: 1, key: "report.turkishAirlines.q1" },
@@ -332,33 +333,7 @@ const ReportHeader = ({
         </FormControl>
 
         {onExportExcel && (
-          <Button
-            variant="outlined"
-            onClick={onExportExcel}
-            startIcon={<Download size={16} />}
-            sx={{
-              height: 42,
-              borderRadius: "10px",
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: 13,
-              px: 2,
-              borderColor: (theme) => `1px solid ${theme.palette.divider}`,
-              color: "text.primary",
-              backgroundColor: "background.paper",
-              boxShadow: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "0 2px 8px rgba(0,0,0,0.3)"
-                  : "0 1px 4px rgba(0,0,0,0.06)",
-              "&:hover": {
-                borderColor: teal,
-                backgroundColor: alpha(teal, 0.08),
-                color: teal,
-              },
-            }}
-          >
-            Excel Export
-          </Button>
+          <ExportExcelButton onClick={onExportExcel} />
         )}
       </Box>
     </Box>
