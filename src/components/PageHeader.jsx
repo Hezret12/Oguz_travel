@@ -155,7 +155,7 @@ const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonT
                   },
                 }}
               >
-                {addButtonText ?? "Ekle"}
+                {addButtonText}
               </Button>
             )}
           </Box>
