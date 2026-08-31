@@ -6,6 +6,7 @@ import {
   alpha,
   Skeleton,
   Chip,
+  useTheme,
 } from "@mui/material";
 import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
@@ -17,8 +18,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getTurkishQuarterApi } from "../../../../api/queries/getters";
 import { formatNumber } from "../../../../functions/generalHelpers";
 
-export default function QuarterReportCard({ selectedQuarter, onQuarterChange, paperSx, teal = "#0D9488" }) {
+export default function QuarterReportCard({ selectedQuarter, onQuarterChange, paperSx }) {
   const { t } = useLocale();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
 
   const quarter = selectedQuarter || Math.floor(new Date().getMonth() / 3) + 1;
 
@@ -57,7 +60,7 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
     };
   }, [quarterRes]);
 
-  const trendColor = qi?.isUp ? "#10B981" : "#EF4444";
+  const trendColor = qi?.isUp ? (isDark ? "#34D399" : "#10B981") : (isDark ? "#F87171" : "#EF4444");
 
   return (
     <Paper
@@ -77,12 +80,12 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
               width: 40,
               height: 40,
               borderRadius: 2,
-              bgcolor: alpha(teal, 0.12),
-              color: teal,
+              bgcolor: (th) => alpha(th.palette.primary.main, 0.12),
+              color: "primary.main",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              border: `1px solid ${alpha(teal, 0.18)}`,
+              border: (th) => `1px solid ${alpha(th.palette.primary.main, 0.18)}`,
             }}
           >
             <PieChartRoundedIcon sx={{ fontSize: 22 }} />
@@ -118,23 +121,25 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
                   fontSize: 11.5,
                   cursor: "pointer",
                   backgroundColor: isActive
-                    ? teal
-                    : (theme) =>
-                        theme.palette.mode === "dark"
+                    ? "primary.main"
+                    : (th) =>
+                        th.palette.mode === "dark"
                           ? "rgba(255,255,255,0.06)"
                           : "#F1F5F9",
                   color: isActive ? "#FFF" : "text.secondary",
-                  border: (theme) =>
+                  border: (th) =>
                     `1px solid ${
                       isActive
-                        ? teal
-                        : theme.palette.mode === "dark"
+                        ? th.palette.primary.main
+                        : th.palette.mode === "dark"
                         ? "rgba(255,255,255,0.08)"
                         : "#E2E8F0"
                     }`,
                   "&:hover": {
-                    backgroundColor: isActive ? teal : alpha(teal, 0.12),
-                    color: isActive ? "#FFF" : teal,
+                    backgroundColor: isActive
+                      ? "primary.main"
+                      : (th) => alpha(th.palette.primary.main, 0.12),
+                    color: isActive ? "#FFF" : "primary.main",
                   },
                 }}
               />
@@ -167,7 +172,7 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
                 sx={{
                   fontSize: 20,
                   fontWeight: 800,
-                  color: qi?.isDone ? "#10B981" : teal,
+                  color: qi?.isDone ? (isDark ? "#34D399" : "#10B981") : "primary.main",
                   letterSpacing: "-0.02em",
                 }}
               >
@@ -178,8 +183,8 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
               sx={{
                 height: 8,
                 borderRadius: 4,
-                backgroundColor: (theme) =>
-                  theme.palette.mode === "dark"
+                backgroundColor: (th) =>
+                  th.palette.mode === "dark"
                     ? "rgba(255,255,255,0.08)"
                     : "#E2E8F0",
                 overflow: "hidden",
@@ -190,7 +195,7 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
                   height: "100%",
                   width: `${Math.min(100, qi?.achNum || 0)}%`,
                   borderRadius: 4,
-                  backgroundColor: qi?.isDone ? "#10B981" : teal,
+                  backgroundColor: qi?.isDone ? (isDark ? "#34D399" : "#10B981") : theme.palette.primary.main,
                   transition: "width 0.5s ease",
                 }}
               />
@@ -206,13 +211,13 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
               gap: 1,
               p: 2,
               borderRadius: 2,
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
+              backgroundColor: (th) =>
+                th.palette.mode === "dark"
                   ? "rgba(255,255,255,0.03)"
                   : "#F8FAFC",
-              border: (theme) =>
+              border: (th) =>
                 `1px solid ${
-                  theme.palette.mode === "dark"
+                  th.palette.mode === "dark"
                     ? "rgba(255,255,255,0.06)"
                     : "#E2E8F0"
                 }`,
@@ -286,7 +291,7 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
                 sx={{
                   fontSize: 18,
                   fontWeight: 800,
-                  color: teal,
+                  color: "primary.main",
                   letterSpacing: "-0.02em",
                 }}
               >

@@ -7,58 +7,58 @@ const useReportTheme = () => {
 
   const colors = useMemo(
     () => ({
-      teal: isDark ? "#2DD4BF" : "#0E8584",
-      tealSoft: isDark ? "#14B8A6" : "#0D9488",
-      accent: isDark ? "#22D3EE" : "#0284C7",
+      teal: theme.palette.primary.main,
+      tealSoft: theme.palette.primary.light,
+      accent: isDark ? "#38BDF8" : "#0284C7",
       green: isDark ? "#34D399" : "#10B981",
       orange: isDark ? "#FBBF24" : "#D97706",
-      red: "#EF4444",
-      bgCard: isDark ? "#031E2A" : "#FFFFFF",
-      bgSticky: isDark ? "#021721" : "#FFFFFF",
-      bgHeader: isDark ? "#052938" : "#F8FAFC",
-      border: isDark ? "rgba(20, 184, 166, 0.15)" : "#E2E8F0",
-      hoverTeal: isDark ? "rgba(20,184,166,0.08)" : "rgba(14,133,132,0.05)",
+      red: isDark ? "#F87171" : "#EF4444",
+      bgCard: isDark ? "#12131A" : "#FFFFFF",
+      bgSticky: isDark ? "#12131A" : "#FFFFFF",
+      bgHeader: isDark ? (theme.palette.subtable?.header || "#151621") : "#F8FAFC",
+      border: theme.palette.divider,
+      hoverTeal: isDark ? "rgba(255, 255, 255, 0.045)" : "rgba(14, 133, 132, 0.05)",
       gradientTeal: isDark
-        ? "linear-gradient(135deg, rgba(20,184,166,0.12) 0%, rgba(34,211,238,0.06) 100%)"
-        : "linear-gradient(135deg, rgba(14,133,132,0.06) 0%, rgba(2,132,199,0.04) 100%)",
+        ? "linear-gradient(135deg, rgba(20, 184, 166, 0.08) 0%, rgba(56, 189, 248, 0.04) 100%)"
+        : "linear-gradient(135deg, rgba(14, 133, 132, 0.06) 0%, rgba(2, 132, 199, 0.04) 100%)",
       shadowCard: isDark
-        ? "0 8px 32px rgba(0,0,0,0.36), 0 2px 8px rgba(20,184,166,0.08)"
-        : "0 2px 12px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03)",
+        ? "0 4px 24px rgba(0, 0, 0, 0.50)"
+        : "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
       shadowHover: isDark
-        ? "0 12px 40px rgba(0,0,0,0.4), 0 4px 12px rgba(20,184,166,0.12)"
-        : "0 8px 28px rgba(0,0,0,0.08), 0 2px 8px rgba(14,133,132,0.06)",
+        ? "0 8px 32px rgba(0, 0, 0, 0.65)"
+        : "0 4px 16px rgba(0,0,0,0.08)",
     }),
-    [isDark]
+    [theme, isDark]
   );
 
   const paperSx = useMemo(
     () => ({
-      borderRadius: 3,
-      border: `1px solid ${colors.border}`,
-      backgroundColor: colors.bgCard,
+      borderRadius: "12px",
+      border: `1px solid ${theme.palette.divider}`,
+      backgroundColor: "background.paper",
       boxShadow: colors.shadowCard,
       transition: "box-shadow 0.25s ease, transform 0.25s ease",
       "&:hover": {
         boxShadow: colors.shadowHover,
       },
     }),
-    [colors]
+    [theme.palette.divider, colors.shadowCard, colors.shadowHover]
   );
 
   const selectSx = useMemo(
     () => ({
-      backgroundColor: isDark ? "rgba(20,184,166,0.06)" : "#FFFFFF",
-      borderRadius: 2,
-      "& .MuiOutlinedInput-notchedOutline": { borderColor: colors.border },
+      backgroundColor: "background.paper",
+      borderRadius: "10px",
+      "& .MuiOutlinedInput-notchedOutline": { borderColor: theme.palette.divider },
       "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: colors.teal,
+        borderColor: theme.palette.primary.main,
       },
       "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: colors.teal,
+        borderColor: theme.palette.primary.main,
         borderWidth: 1.5,
       },
     }),
-    [isDark, colors]
+    [theme.palette.divider, theme.palette.primary.main]
   );
 
   const headerCellSx = useMemo(
@@ -67,30 +67,28 @@ const useReportTheme = () => {
       fontSize: 11.5,
       letterSpacing: "0.06em",
       textTransform: "uppercase",
-      color: isDark ? "rgba(255,255,255,0.6)" : "#475569",
-      borderBottom: `2px solid ${isDark ? "rgba(20,184,166,0.2)" : "#E2E8F0"}`,
+      color: "text.secondary",
+      borderBottom: `1px solid ${theme.palette.divider}`,
       py: 1.5,
       px: 1.5,
       whiteSpace: "nowrap",
       backgroundColor: colors.bgHeader,
     }),
-    [isDark, colors]
+    [colors.bgHeader, theme.palette.divider]
   );
 
   const bodyCellSx = useMemo(
     () => ({
       fontSize: 13,
       fontWeight: 500,
-      color: isDark ? "rgba(255,255,255,0.85)" : "#334155",
-      borderBottom: isDark
-        ? "1px solid rgba(255,255,255,0.05)"
-        : "1px solid #F1F5F9",
+      color: "text.primary",
+      borderBottom: `1px solid ${theme.palette.divider}`,
       py: 1.2,
       px: 1.5,
       whiteSpace: "nowrap",
       fontFamily: "'Inter', sans-serif",
     }),
-    [isDark]
+    [theme.palette.divider]
   );
 
   const footerCellSx = useMemo(
@@ -98,13 +96,11 @@ const useReportTheme = () => {
       ...bodyCellSx,
       fontWeight: 700,
       fontSize: 13,
-      backgroundColor: isDark ? "rgba(20,184,166,0.08)" : "#F0FDF4",
+      backgroundColor: colors.bgHeader,
       borderBottom: "none",
-      borderTop: isDark
-        ? "2px solid rgba(20,184,166,0.3)"
-        : "2px solid #CBD5E1",
+      borderTop: `1px solid ${theme.palette.divider}`,
     }),
-    [bodyCellSx, isDark]
+    [bodyCellSx, colors.bgHeader, theme.palette.divider]
   );
 
   return {
@@ -119,3 +115,4 @@ const useReportTheme = () => {
 };
 
 export default useReportTheme;
+

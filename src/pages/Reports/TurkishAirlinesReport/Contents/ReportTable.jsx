@@ -10,13 +10,11 @@ import {
   TableHead,
   TableRow,
   Skeleton,
-  Button,
   alpha,
   useTheme,
 } from "@mui/material";
 import AccountBalanceWalletRoundedIcon from "@mui/icons-material/AccountBalanceWalletRounded";
 import { useLocale } from "../../../../hooks/useLocale";
-import ExportExcelButton from "../../../../components/ExportExcelButton";
 
 const ReportTable = ({
   isLoading,
@@ -27,17 +25,13 @@ const ReportTable = ({
   findFooter,
   formatNumber,
   daysInMonth,
-  onExportExcel,
-  teal,
   accent,
-  green,
   borderCol,
   paperSx,
   headerCellSx,
   bodyCellSx,
   footerCellSx,
   bgHeader,
-  bgSticky,
 }) => {
   const { t } = useLocale();
   const theme = useTheme();
@@ -45,10 +39,10 @@ const ReportTable = ({
 
   const stickyShadow = isDark
     ? "inset 4px 0 6px -4px rgba(0,0,0,0.5)"
-    : "inset 4px 0 6px -4px rgba(0,0,0,0.1)";
+    : "inset 4px 0 6px -4px rgba(0,0,0,0.06)";
   const stickyShadowRight = isDark
     ? "inset -4px 0 6px -4px rgba(0,0,0,0.5)"
-    : "inset -4px 0 6px -4px rgba(0,0,0,0.1)";
+    : "inset -4px 0 6px -4px rgba(0,0,0,0.06)";
 
   return (
     <Paper sx={{ ...paperSx, p: 0, overflow: "hidden" }}>
@@ -61,8 +55,8 @@ const ReportTable = ({
           py: 2,
           borderBottom: `1px solid ${borderCol}`,
           background: isDark
-            ? "linear-gradient(135deg, rgba(16,185,129,0.06) 0%, transparent 100%)"
-            : "linear-gradient(135deg, rgba(16,185,129,0.04) 0%, transparent 100%)",
+            ? "transparent"
+            : "linear-gradient(135deg, rgba(14,133,132,0.04) 0%, transparent 100%)",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
@@ -71,19 +65,19 @@ const ReportTable = ({
               width: 36,
               height: 36,
               borderRadius: 2,
-              backgroundColor: alpha(green, 0.12),
-              color: green,
+              backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12),
+              color: "primary.main",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              border: `1px solid ${alpha(green, 0.15)}`,
+              border: (theme) => `1px solid ${alpha(theme.palette.primary.main, 0.18)}`,
             }}
           >
             <AccountBalanceWalletRoundedIcon sx={{ fontSize: 20 }} />
           </Box>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 700, color: isDark ? "#FFF" : "#0F172A" }}
+            sx={{ fontWeight: 700, color: "text.primary" }}
           >
             {t("report.turkishAirlines.dailyReportTable")}
           </Typography>
@@ -92,23 +86,16 @@ const ReportTable = ({
           <Typography
             variant="caption"
             sx={{
-              color: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
+              color: "text.secondary",
               fontWeight: 600,
               px: 1.5,
               py: 0.5,
               borderRadius: 1.5,
-              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9",
+              backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#F1F5F9",
             }}
           >
             {daysInMonth} {t("report.turkishAirlines.daysData")}
           </Typography>
-
-          {onExportExcel && (
-            <ExportExcelButton
-              size="small"
-              onClick={onExportExcel}
-            />
-          )}
         </Box>
       </Box>
 
@@ -157,7 +144,7 @@ const ReportTable = ({
                   align="right"
                   sx={{
                     ...headerCellSx,
-                    color: green,
+                    color: "text.primary",
                     position: "sticky",
                     right: 0,
                     zIndex: 3,
@@ -178,7 +165,7 @@ const ReportTable = ({
                     <Typography
                       variant="body2"
                       sx={{
-                        color: isDark ? "rgba(255,255,255,0.5)" : "#64748B",
+                        color: "text.secondary",
                         fontWeight: 600,
                       }}
                     >
@@ -196,9 +183,9 @@ const ReportTable = ({
                     : "transparent";
                   const stickyBg = isEven
                     ? isDark
-                      ? "#021721"
+                      ? (theme.palette.subtable?.header || "#151621")
                       : "#F8FAFC"
-                    : bgSticky;
+                    : (isDark ? "background.paper" : "#FFFFFF");
 
                   return (
                     <TableRow
@@ -206,9 +193,7 @@ const ReportTable = ({
                       sx={{
                         backgroundColor: rowBg,
                         "&:hover": {
-                          backgroundColor: isDark
-                            ? "rgba(20,184,166,0.08)"
-                            : "rgba(14,133,132,0.05)",
+                          backgroundColor: (theme) => theme.palette.action.hover,
                         },
                         transition: "background-color 0.15s ease",
                       }}
@@ -218,7 +203,7 @@ const ReportTable = ({
                         sx={{
                           ...bodyCellSx,
                           fontWeight: 700,
-                          color: teal,
+                          color: "text.primary",
                           fontSize: 13.5,
                           position: "sticky",
                           left: 0,
@@ -240,9 +225,8 @@ const ReportTable = ({
                               <Typography
                                 component="span"
                                 sx={{
-                                  color: isDark
-                                    ? "rgba(255,255,255,0.15)"
-                                    : "#CBD5E1",
+                                  color: "text.secondary",
+                                  opacity: 0.4,
                                 }}
                               >
                                 —
@@ -274,7 +258,7 @@ const ReportTable = ({
                                   fontWeight: 600,
                                   fontSize: 13,
                                   lineHeight: 1.2,
-                                  color: isDark ? "rgba(255,255,255,0.9)" : "#1E293B",
+                                  color: "text.primary",
                                 }}
                               >
                                 {quoted > 0 ? formatNumber(quoted) : "0"}
@@ -285,9 +269,7 @@ const ReportTable = ({
                                     component="span"
                                     sx={{
                                       fontSize: 11,
-                                      color: isDark
-                                        ? "rgba(255,255,255,0.2)"
-                                        : "#CBD5E1",
+                                      color: "divider",
                                       fontWeight: 400,
                                       lineHeight: 1.2,
                                     }}
@@ -298,7 +280,7 @@ const ReportTable = ({
                                     component="span"
                                     sx={{
                                       fontSize: 12,
-                                      color: "#EF4444",
+                                      color: isDark ? "#F87171" : "#DC2626",
                                       fontWeight: 600,
                                       lineHeight: 1.2,
                                     }}
@@ -318,10 +300,8 @@ const ReportTable = ({
                           fontWeight: 700,
                           color:
                             row.total > 0
-                              ? green
-                              : isDark
-                                ? "rgba(255,255,255,0.2)"
-                                : "#CBD5E1",
+                              ? "text.primary"
+                              : "text.secondary",
                           fontSize: 13.5,
                           position: "sticky",
                           right: 0,
@@ -346,7 +326,7 @@ const ReportTable = ({
                         py: 1.2,
                         borderBottom: "none",
                         backgroundColor: isDark
-                          ? "rgba(20,184,166,0.06)"
+                          ? "rgba(255,255,255,0.03)"
                           : "#F1F5F9",
                       }}
                     >
@@ -354,7 +334,7 @@ const ReportTable = ({
                         variant="overline"
                         sx={{
                           fontWeight: 800,
-                          color: teal,
+                          color: "primary.main",
                           letterSpacing: "0.08em",
                           px: 1,
                         }}
@@ -372,7 +352,7 @@ const ReportTable = ({
                         position: "sticky",
                         left: 0,
                         zIndex: 1,
-                        backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        backgroundColor: bgHeader,
                         boxShadow: stickyShadow,
                       }}
                     >
@@ -384,7 +364,7 @@ const ReportTable = ({
                         <TableCell
                           key={short}
                           align="center"
-                          sx={{ ...footerCellSx, color: "#EF4444" }}
+                          sx={{ ...footerCellSx, color: isDark ? "#F87171" : "#DC2626" }}
                         >
                           {f ? formatNumber(f.total_base) : "—"}
                         </TableCell>
@@ -394,11 +374,11 @@ const ReportTable = ({
                       align="right"
                       sx={{
                         ...footerCellSx,
-                        color: "#EF4444",
+                        color: isDark ? "#F87171" : "#DC2626",
                         position: "sticky",
                         right: 0,
                         zIndex: 1,
-                        backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        backgroundColor: bgHeader,
                         boxShadow: stickyShadowRight,
                       }}
                     >
@@ -415,7 +395,7 @@ const ReportTable = ({
                         position: "sticky",
                         left: 0,
                         zIndex: 1,
-                        backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        backgroundColor: bgHeader,
                         boxShadow: stickyShadow,
                       }}
                     >
@@ -438,11 +418,11 @@ const ReportTable = ({
                       sx={{
                         ...footerCellSx,
                         borderTop: "none",
-                        color: green,
+                        color: isDark ? "#34D399" : "#10B981",
                         position: "sticky",
                         right: 0,
                         zIndex: 1,
-                        backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        backgroundColor: bgHeader,
                         boxShadow: stickyShadowRight,
                       }}
                     >
@@ -459,7 +439,7 @@ const ReportTable = ({
                         position: "sticky",
                         left: 0,
                         zIndex: 1,
-                        backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        backgroundColor: bgHeader,
                         boxShadow: stickyShadow,
                       }}
                     >
@@ -487,13 +467,13 @@ const ReportTable = ({
                       sx={{
                         ...footerCellSx,
                         borderTop: "none",
-                        color: green,
+                        color: isDark ? "#34D399" : "#10B981",
                         fontWeight: 700,
                         fontSize: 13.5,
                         position: "sticky",
                         right: 0,
                         zIndex: 1,
-                        backgroundColor: isDark ? "#042533" : "#F0FDF4",
+                        backgroundColor: bgHeader,
                         boxShadow: stickyShadowRight,
                       }}
                     >

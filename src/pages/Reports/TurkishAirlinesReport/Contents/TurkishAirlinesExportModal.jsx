@@ -122,7 +122,7 @@ const TurkishAirlinesExportModal = ({
                   {t("report.turkishAirlines.exportPeriod", "Hasabat Döwri")}
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mt: 0.5 }}>
-                  <CalendarMonthRoundedIcon sx={{ fontSize: 18, color: "#0D9488" }} />
+                  <CalendarMonthRoundedIcon sx={{ fontSize: 18, color: "primary.main" }} />
                   <Typography variant="body2" sx={{ fontWeight: 700, color: "text.primary" }}>
                     {monthNameTk} {yearStr} ({numDays} {t("report.turkishAirlines.day", "gün")})
                   </Typography>
@@ -164,7 +164,7 @@ const TurkishAirlinesExportModal = ({
                 <Typography variant="caption" sx={{ color: "text.secondary", display: "block" }}>
                   {t("report.turkishAirlines.baseFare", "Jemi Esasy Baha (BF)")}
                 </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 800, color: "#DC2626" }}>
+                <Typography variant="body1" sx={{ fontWeight: 800, color: isDark ? "#F87171" : "#DC2626" }}>
                   ${totalBase.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                 </Typography>
               </Box>

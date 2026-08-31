@@ -18,7 +18,7 @@ import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
 import { useLocale } from "../../../../hooks/useLocale";
 import QuarterReportCard from "./QuarterReportCard";
 
-const SectionTitle = ({ icon, title, subtitle, color, isDark, action }) => (
+const SectionTitle = ({ icon, title, subtitle, color, action }) => (
   <Box
     sx={{
       display: "flex",
@@ -48,7 +48,7 @@ const SectionTitle = ({ icon, title, subtitle, color, isDark, action }) => (
           variant="subtitle1"
           sx={{
             fontWeight: 700,
-            color: isDark ? "#FFF" : "#0F172A",
+            color: "text.primary",
             lineHeight: 1.2,
           }}
         >
@@ -56,7 +56,7 @@ const SectionTitle = ({ icon, title, subtitle, color, isDark, action }) => (
         </Typography>
         <Typography
           variant="caption"
-          sx={{ color: isDark ? "rgba(255,255,255,0.45)" : "#64748B" }}
+          sx={{ color: "text.secondary" }}
         >
           {subtitle}
         </Typography>
@@ -66,7 +66,7 @@ const SectionTitle = ({ icon, title, subtitle, color, isDark, action }) => (
   </Box>
 );
 
-const EmptyState = ({ icon, text, borderCol, isDark }) => (
+const EmptyState = ({ icon, text, borderCol }) => (
   <Box
     sx={{
       height: 260,
@@ -83,7 +83,7 @@ const EmptyState = ({ icon, text, borderCol, isDark }) => (
     {icon}
     <Typography
       variant="body2"
-      sx={{ color: isDark ? "rgba(255,255,255,0.5)" : "#64748B", fontWeight: 600 }}
+      sx={{ color: "text.secondary", fontWeight: 600 }}
     >
       {text}
     </Typography>
@@ -135,7 +135,6 @@ const ReportCharts = ({
               title={t("report.turkishAirlines.dailyTurnoverChart")}
               subtitle={t("report.turkishAirlines.dailyTurnoverSubtitle")}
               color={teal}
-              isDark={isDark}
               action={
                 <Chip
                   label={`${t("report.turkishAirlines.total")}: ${formatNumber(monthQuoted)}`}
@@ -162,7 +161,7 @@ const ReportCharts = ({
                       scaleType: "band",
                       dataKey: "day",
                       tickLabelStyle: {
-                        fill: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
+                        fill: theme.palette.text.secondary,
                         fontSize: 11,
                       },
                     },
@@ -170,7 +169,7 @@ const ReportCharts = ({
                   yAxis={[
                     {
                       tickLabelStyle: {
-                        fill: isDark ? "rgba(255,255,255,0.4)" : "#64748B",
+                        fill: theme.palette.text.secondary,
                         fontSize: 11,
                       },
                     },
@@ -194,10 +193,9 @@ const ReportCharts = ({
               </Box>
             ) : (
               <EmptyState
-                icon={<ShowChartRoundedIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />}
+                icon={<ShowChartRoundedIcon sx={{ fontSize: 40, color: "text.secondary", opacity: 0.3, mb: 1 }} />}
                 text={noDataText}
                 borderCol={borderCol}
-                isDark={isDark}
               />
             )}
           </Paper>
@@ -219,7 +217,6 @@ const ReportCharts = ({
               title={t("report.turkishAirlines.statusChart") || "Status grafikleri"}
               subtitle={t("report.turkishAirlines.statusChartSubtitle") || "Aylyk status paylashygy"}
               color={accent}
-              isDark={isDark}
             />
 
             {isStatusLoading ? (
@@ -293,7 +290,7 @@ const ReportCharts = ({
                         variant="h5"
                         sx={{
                           fontWeight: 800,
-                          color: isDark ? "#FFF" : "#0F172A",
+                          color: "text.primary",
                           lineHeight: 1.1,
                           fontSize: "1.45rem",
                         }}
@@ -303,7 +300,7 @@ const ReportCharts = ({
                       <Typography
                         variant="caption"
                         sx={{
-                          color: isDark ? "rgba(255,255,255,0.5)" : "#64748B",
+                          color: "text.secondary",
                           fontSize: 11,
                           fontWeight: 600,
                           textTransform: "uppercase",
@@ -349,11 +346,11 @@ const ReportCharts = ({
                             gap: 0.6,
                             p: 1.2,
                             borderRadius: "10px",
-                            backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "#F8FAFC",
-                            border: (theme) => `1px solid ${theme.palette.divider}`,
+                            backgroundColor: isDark ? "rgba(255,255,255,0.02)" : "#F8FAFC",
+                            border: (th) => `1px solid ${th.palette.divider}`,
                             transition: "all 0.15s ease",
                             "&:hover": {
-                              backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
+                              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9",
                               transform: "translateX(2px)",
                             },
                           }}
@@ -435,10 +432,9 @@ const ReportCharts = ({
               </Grid>
             ) : (
               <EmptyState
-                icon={<PieChartRoundedIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />}
+                icon={<PieChartRoundedIcon sx={{ fontSize: 40, color: "text.secondary", opacity: 0.3, mb: 1 }} />}
                 text={noDataText}
                 borderCol={borderCol}
-                isDark={isDark}
               />
             )}
           </Paper>
@@ -463,7 +459,6 @@ const ReportCharts = ({
               title={t("report.turkishAirlines.officeBreakdown") || "Ofisler boýunça paýy"}
               subtitle={t("report.turkishAirlines.officeBreakdownSubtitle") || "Toplam ciroya katkı oranları"}
               color={accent}
-              isDark={isDark}
             />
 
             {isLoading ? (
@@ -498,7 +493,7 @@ const ReportCharts = ({
                           variant="body2"
                           sx={{
                             fontWeight: 700,
-                            color: isDark ? "#FFF" : "#0F172A",
+                            color: "text.primary",
                             fontSize: 13,
                           }}
                         >
@@ -509,7 +504,7 @@ const ReportCharts = ({
                         variant="body2"
                         sx={{
                           fontWeight: 600,
-                          color: isDark ? "rgba(255,255,255,0.75)" : "#334155",
+                          color: "text.secondary",
                           fontSize: 13,
                         }}
                       >
@@ -546,10 +541,9 @@ const ReportCharts = ({
               </Box>
             ) : (
               <EmptyState
-                icon={<ApartmentIcon sx={{ fontSize: 40, color: isDark ? "rgba(255,255,255,0.2)" : "#CBD5E1", mb: 1 }} />}
+                icon={<ApartmentIcon sx={{ fontSize: 40, color: "text.secondary", opacity: 0.3, mb: 1 }} />}
                 text={noDataText}
                 borderCol={borderCol}
-                isDark={isDark}
               />
             )}
           </Paper>
@@ -561,7 +555,6 @@ const ReportCharts = ({
             selectedQuarter={selectedQuarter}
             onQuarterChange={onQuarterChange}
             paperSx={paperSx}
-            teal={teal}
           />
         </Grid>
       </Grid>
@@ -570,3 +563,4 @@ const ReportCharts = ({
 };
 
 export default memo(ReportCharts);
+

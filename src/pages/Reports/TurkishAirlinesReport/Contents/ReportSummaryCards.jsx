@@ -120,6 +120,7 @@ const ReportSummaryCards = ({
   formatCompact,
   paperSx,
   teal = "#0D9488",
+  accent = "#0284C7",
   green = "#10B981",
   orange = "#F59E0B",
 }) => {
@@ -153,7 +154,7 @@ const ReportSummaryCards = ({
           value={achievementPercentage}
           label={t("report.turkishAirlines.achievementRate")}
           sublabel={t("report.turkishAirlines.achievementSublabel")}
-          color="#059669"
+          color={accent}
           paperSx={paperSx}
         />
       </Grid>
@@ -172,3 +173,4 @@ const ReportSummaryCards = ({
 };
 
 export default memo(ReportSummaryCards);
+

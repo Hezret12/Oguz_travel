@@ -7,11 +7,9 @@ import {
   MenuItem,
   IconButton,
   Tooltip,
-  Button,
   alpha,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
@@ -80,7 +78,6 @@ const ReportHeader = ({
     [t]
   );
 
-  const monthDisplayStr = validDate.format("MMMM YYYY");
 
   const [isQuarterOpen, setIsQuarterOpen] = useState(false);
 
@@ -112,25 +109,6 @@ const ReportHeader = ({
           {t("sidebar.reportTurkishAirlines")}
         </Typography>
 
-        <Box
-          sx={{
-            display: { xs: "none", sm: "inline-flex" },
-            alignItems: "center",
-            gap: 0.8,
-            px: 1.5,
-            py: 0.5,
-            borderRadius: "20px",
-            backgroundColor: alpha(teal, 0.1),
-            border: `1px solid ${alpha(teal, 0.25)}`,
-            color: teal,
-            fontSize: 13,
-            fontWeight: 700,
-            textTransform: "capitalize",
-          }}
-        >
-          <CalendarMonthRoundedIcon sx={{ fontSize: 16 }} />
-          {monthDisplayStr}
-        </Box>
       </Box>
 
       {/* Date & Quarter Controls */}
