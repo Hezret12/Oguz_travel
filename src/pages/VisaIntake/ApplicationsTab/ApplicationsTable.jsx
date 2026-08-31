@@ -531,10 +531,46 @@ export const ApplicationsTable = forwardRef(
           />
           <Badge color="primary" variant="dot" invisible={!isFilterActive}>
             <Button
-              variant={isFilterActive ? "contained" : "outlined"}
-              startIcon={<Funnel size={16} />}
+              variant="outlined"
+              startIcon={<Funnel size={16} style={{ opacity: 0.8 }} />}
               onClick={openDrawer}
-              sx={{ borderRadius: "8px", fontWeight: 600, height: "40px" }}
+              sx={{
+                height: "40px",
+                px: 2.5,
+                borderRadius: "10px",
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "14px",
+                letterSpacing: "0.1px",
+                borderColor: isFilterActive ? "primary.main" : "divider",
+                color: isFilterActive ? "primary.main" : "text.primary",
+                backgroundColor: (theme) =>
+                  isFilterActive
+                    ? theme.palette.mode === "dark"
+                      ? "rgba(20, 184, 166, 0.12)"
+                      : "rgba(14, 133, 132, 0.08)"
+                    : theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.04)"
+                    : "rgba(0, 0, 0, 0.02)",
+                boxShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0 2px 8px rgba(0, 0, 0, 0.32)"
+                    : "0 1px 4px rgba(0, 0, 0, 0.04)",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.08)"
+                      : "rgba(0, 0, 0, 0.05)",
+                  borderColor: isFilterActive
+                    ? "primary.light"
+                    : (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.20)"
+                          : "rgba(0, 0, 0, 0.18)",
+                  transform: "translateY(-1px)",
+                },
+              }}
             >
               {t("filter")}
             </Button>

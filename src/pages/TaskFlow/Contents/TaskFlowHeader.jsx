@@ -65,7 +65,7 @@ function TaskFlowHeader({
                   variant="dot"
                   invisible={!hasActiveFilters}
                 >
-                  <Funnel size={16} />
+                  <Funnel size={16} style={{ opacity: 0.8 }} />
                 </Badge>
               }
               onClick={onFilterClick}
@@ -76,7 +76,35 @@ function TaskFlowHeader({
                 borderRadius: "10px",
                 textTransform: "none",
                 fontWeight: 600,
-                fontSize: "0.875rem",
+                fontSize: "14px",
+                letterSpacing: "0.1px",
+                borderColor: "divider",
+                color: "text.primary",
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.04)"
+                    : "rgba(0, 0, 0, 0.02)",
+                boxShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0 2px 8px rgba(0, 0, 0, 0.32)"
+                    : "0 1px 4px rgba(0, 0, 0, 0.04)",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.08)"
+                      : "rgba(0, 0, 0, 0.05)",
+                  borderColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.20)"
+                      : "rgba(0, 0, 0, 0.18)",
+                  color: "text.primary",
+                  transform: "translateY(-1px)",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "0 4px 14px rgba(0, 0, 0, 0.45)"
+                      : "0 4px 12px rgba(0, 0, 0, 0.08)",
+                },
               }}
             >
               {t("filter")}
