@@ -352,7 +352,7 @@ const FinanceOverview = () => {
             </Box>
             <Box>
               <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, fontSize: "12px" }}>
-                {t("finance.netCashFlow", "Arassa akym (girdeji − çykdajy)")}
+                {t("finance.netCashFlow")}
               </Typography>
               <Typography
                 variant="h5"
@@ -373,7 +373,7 @@ const FinanceOverview = () => {
           <Box sx={{ display: "flex", gap: 3 }}>
             <Box sx={{ textAlign: "right" }}>
               <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500 }}>
-                {t("finance.totalIncomeShort", "Jemi girdeji")}
+                {t("finance.totalIncomeShort")}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 700, color: "#16a34a", fontFamily: "'Inter', sans-serif" }}>
                 {formatMoney(totalIncome, "$")}
@@ -381,7 +381,7 @@ const FinanceOverview = () => {
             </Box>
             <Box sx={{ textAlign: "right" }}>
               <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500 }}>
-                {t("finance.totalExpenseShort", "Jemi çykdajy")}
+                {t("finance.totalExpenseShort")}
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 700, color: "#DC2626", fontFamily: "'Inter', sans-serif" }}>
                 {formatMoney(totalExpense, "$")}
@@ -390,9 +390,7 @@ const FinanceOverview = () => {
           </Box>
         </Paper>
 
-        {/* ── Visual Analytics / Charts Section ── */}
         <Grid container spacing={2.5}>
-          {/* Revenue vs COGS vs Profit Bar Chart */}
           <Grid size={{ xs: 12, lg: 7 }}>
             <Paper
               variant="outlined"
