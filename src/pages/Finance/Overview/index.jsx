@@ -304,8 +304,8 @@ const FinanceOverview = () => {
           </Grid>
           <Grid size={{ xs: 12, lg: 6 }}>
             <CashFlowPanel
-              title={t("finance.expense", "Para çykyşy")}
-              chipLabel={t("finance.expenseLabel", "Çykdajy")}
+              title={t("finance.expense")}
+              chipLabel={t("finance.expenseLabel")}
               chipColor="#DC2626"
               items={expenseItems}
               total={totalExpense}
@@ -314,7 +314,6 @@ const FinanceOverview = () => {
           </Grid>
         </Grid>
 
-        {/* ── Net Cash Flow Summary ── */}
         <Paper
           variant="outlined"
           sx={{
