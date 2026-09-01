@@ -273,7 +273,7 @@ const FinanceOverview = () => {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <StatCard
-              title={t("finance.realizedGrossProfit", "Arassa Peýda")}
+              title={t("finance.realizedGrossProfit")}
               value={formatMoney(totalRealizedProfit, "$")}
               subtitle={`Peýda maržasy: ${marginPercent}%`}
               color="#16a34a"
