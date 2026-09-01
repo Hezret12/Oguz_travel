@@ -435,7 +435,6 @@ const FinanceOverview = () => {
             </Paper>
           </Grid>
 
-          {/* Cash Boxes Balance Distribution Donut Chart */}
           <Grid size={{ xs: 12, lg: 5 }}>
             <Paper
               variant="outlined"
@@ -484,9 +483,7 @@ const FinanceOverview = () => {
           </Grid>
         </Grid>
 
-        {/* ── Tables & Breakdowns ── */}
         <Grid container spacing={2.5}>
-          {/* Service realization P&L table */}
           <Grid size={{ xs: 12, lg: 7 }}>
             <Paper
               variant="outlined"
@@ -570,7 +567,6 @@ const FinanceOverview = () => {
             </Paper>
           </Grid>
 
-          {/* Cash Boxes & Accounts */}
           <Grid size={{ xs: 12, lg: 5 }}>
             <Paper
               variant="outlined"
