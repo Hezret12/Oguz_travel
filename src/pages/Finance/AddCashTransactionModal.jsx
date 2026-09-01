@@ -119,7 +119,7 @@ const AddCashTransactionModal = ({ open, close, table }) => {
             <AppAutocomplete
               name="receiver_opr_guid"
               control={control}
-              label={t("operator", "Jogapkär / Operator")}
+              label={t("operator")}
               options={employeeOptions}
             />
           </Grid>
