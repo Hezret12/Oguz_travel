@@ -137,8 +137,6 @@ const AddCashTransactionModal = ({ open, close, table }) => {
         <FooterButton
           loading={isPending}
           onCancel={handleClose}
-          saveText={t("save", "Ýatda sakla")}
-          cancelText={t("cancel", "Ýatyr")}
         />
       </CustomForm>
     </CustomDialog>
