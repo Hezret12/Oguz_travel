@@ -99,7 +99,7 @@ const AddCashTransactionModal = ({ open, close, table }) => {
             <CustomTextField
               name="net_price"
               control={control}
-              label={t("finance.amount", "Möçberi / Bahasy")}
+              label={t("finance.amount")}
               type="number"
               required
             />
