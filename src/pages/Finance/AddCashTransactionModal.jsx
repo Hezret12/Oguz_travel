@@ -90,7 +90,7 @@ const AddCashTransactionModal = ({ open, close, table }) => {
             <CustomTextField
               name="category"
               control={control}
-              label={t("category", "Kategoriýa / Düşündiriş")}
+              label={t("category")}
               required
             />
           </Grid>
