@@ -246,8 +246,8 @@ const FinanceOverview = () => {
   return (
     <>
       <PageHeader
-        title={t("finance.overviewTitle", "Maliýe Hasabaty (P&L)")}
-        addButtonText={t("finance.addTransaction", "+ Pul amaly goşmak")}
+        title={t("finance.overviewTitle")}
+        addButtonText={t("finance.addTransaction")}
         onAddClick={() => setIsAddTxOpen(true)}
       />
 
