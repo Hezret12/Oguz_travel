@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -12,8 +12,12 @@ import {
   TableHead,
   TableRow,
   Button,
+  LinearProgress,
+  alpha,
 } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
+import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 
@@ -90,6 +94,106 @@ const StatCard = ({ title, value, subtitle, color = "text.primary", onClick }) =
   </Paper>
 );
 
+/* ── Cash Flow Breakdown Panel ── */
+const CashFlowPanel = ({ title, chipLabel, chipColor, items, total, accentColor }) => (
+  <Paper
+    variant="outlined"
+    sx={{
+      p: 2.5,
+      borderRadius: "12px",
+      borderColor: "divider",
+      bgcolor: "background.paper",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+    }}
+  >
+    {/* Header */}
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary" }}>
+          {title}
+        </Typography>
+        <Box
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            px: 1,
+            py: 0.3,
+            borderRadius: "6px",
+            bgcolor: (theme) => alpha(chipColor, theme.palette.mode === "dark" ? 0.15 : 0.1),
+          }}
+        >
+          <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: chipColor }} />
+          <Typography sx={{ fontSize: "11px", fontWeight: 600, color: chipColor }}>
+            {chipLabel}
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+
+    {/* Total */}
+    <Typography
+      variant="h5"
+      sx={{
+        fontWeight: 800,
+        color: accentColor,
+        fontSize: { xs: "22px", sm: "26px" },
+        fontFamily: "'Inter', sans-serif",
+        letterSpacing: "-0.5px",
+        mb: 2.5,
+        mt: 0.5,
+      }}
+    >
+      {formatMoney(total, "$")}
+    </Typography>
+
+    {/* Items */}
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      {items.map((item) => {
+        const pct = total > 0 ? (item.amount / total) * 100 : 0;
+        return (
+          <Box key={item.type}>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.5 }}>
+              <Typography variant="body2" sx={{ fontWeight: 500, color: "text.primary", fontSize: "13px" }}>
+                {item.label}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  color: "text.primary",
+                  fontSize: "13px",
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                {formatMoney(item.amount, "$")}
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={pct}
+              sx={{
+                height: 6,
+                borderRadius: 3,
+                bgcolor: (theme) => alpha(accentColor, theme.palette.mode === "dark" ? 0.12 : 0.08),
+                "& .MuiLinearProgress-bar": {
+                  borderRadius: 3,
+                  bgcolor: accentColor,
+                },
+              }}
+            />
+            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", mt: 0.3, display: "block" }}>
+              {pct.toFixed(1)}%
+            </Typography>
+          </Box>
+        );
+      })}
+    </Box>
+  </Paper>
+);
+
 const FinanceOverview = () => {
   const { t } = useLocale();
   const navigate = useNavigate();
@@ -110,6 +214,20 @@ const FinanceOverview = () => {
   const totalRealizedProfit = totalRealizedRevenue - totalRealizedCogs;
   const marginPercent =
     totalRealizedRevenue > 0 ? ((totalRealizedProfit / totalRealizedRevenue) * 100).toFixed(1) : 0;
+
+  /* ── Income / Expense Totals ── */
+  const incomeItems = summary?.incomeByType || [];
+  const expenseItems = summary?.expenseByType || [];
+
+  const totalIncome = useMemo(
+    () => incomeItems.reduce((acc, item) => acc + Number(item.amount || 0), 0),
+    [incomeItems]
+  );
+  const totalExpense = useMemo(
+    () => expenseItems.reduce((acc, item) => acc + Number(item.amount || 0), 0),
+    [expenseItems]
+  );
+  const netCashFlow = totalIncome - totalExpense;
 
   /* ── Charts Data ── */
   const barCategories = realization.map((r) => r.service_type || "Service");
@@ -175,6 +293,107 @@ const FinanceOverview = () => {
             />
           </Grid>
         </Grid>
+
+        {/* ── Income / Expense Breakdown ── */}
+        <Grid container spacing={2.5}>
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <CashFlowPanel
+              title={t("finance.income", "Para girişi")}
+              chipLabel={t("finance.incomeLabel", "Girdeji")}
+              chipColor="#16a34a"
+              items={incomeItems}
+              total={totalIncome}
+              accentColor="#16a34a"
+            />
+          </Grid>
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <CashFlowPanel
+              title={t("finance.expense", "Para çykyşy")}
+              chipLabel={t("finance.expenseLabel", "Çykdajy")}
+              chipColor="#DC2626"
+              items={expenseItems}
+              total={totalExpense}
+              accentColor="#DC2626"
+            />
+          </Grid>
+        </Grid>
+
+        {/* ── Net Cash Flow Summary ── */}
+        <Paper
+          variant="outlined"
+          sx={{
+            p: 2.5,
+            borderRadius: "12px",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            display: "flex",
+            alignItems: { xs: "flex-start", sm: "center" },
+            justifyContent: "space-between",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 1.5,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "10px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: (theme) =>
+                  alpha(
+                    netCashFlow >= 0 ? "#16a34a" : "#DC2626",
+                    theme.palette.mode === "dark" ? 0.15 : 0.1
+                  ),
+              }}
+            >
+              {netCashFlow >= 0 ? (
+                <TrendingUpRoundedIcon sx={{ fontSize: 22, color: "#16a34a" }} />
+              ) : (
+                <TrendingDownRoundedIcon sx={{ fontSize: 22, color: "#DC2626" }} />
+              )}
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, fontSize: "12px" }}>
+                {t("finance.netCashFlow", "Arassa akym (girdeji − çykdajy)")}
+              </Typography>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 800,
+                  color: netCashFlow >= 0 ? "#16a34a" : "#DC2626",
+                  fontSize: { xs: "22px", sm: "26px" },
+                  fontFamily: "'Inter', sans-serif",
+                  letterSpacing: "-0.5px",
+                }}
+              >
+                {netCashFlow >= 0 ? "+" : ""}
+                {formatMoney(netCashFlow, "$")}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 3 }}>
+            <Box sx={{ textAlign: "right" }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500 }}>
+                {t("finance.totalIncomeShort", "Jemi girdeji")}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: "#16a34a", fontFamily: "'Inter', sans-serif" }}>
+                {formatMoney(totalIncome, "$")}
+              </Typography>
+            </Box>
+            <Box sx={{ textAlign: "right" }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500 }}>
+                {t("finance.totalExpenseShort", "Jemi çykdajy")}
+              </Typography>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: "#DC2626", fontFamily: "'Inter', sans-serif" }}>
+                {formatMoney(totalExpense, "$")}
+              </Typography>
+            </Box>
+          </Box>
+        </Paper>
 
         {/* ── Visual Analytics / Charts Section ── */}
         <Grid container spacing={2.5}>
@@ -449,3 +668,4 @@ const FinanceOverview = () => {
 };
 
 export default FinanceOverview;
+
