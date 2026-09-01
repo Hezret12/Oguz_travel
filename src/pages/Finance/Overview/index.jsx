@@ -252,11 +252,10 @@ const FinanceOverview = () => {
       />
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pb: 4 }}>
-        {/* ── 4 Main Metric Cards ── */}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <StatCard
-              title={t("finance.realizedRevenue", "Jemi Girdeji (Revenue)")}
+              title={t("finance.realizedRevenue")}
               value={formatMoney(totalRealizedRevenue, "$")}
               subtitle="Hyzmat satyş girdejisi"
               color="#2563EB"
