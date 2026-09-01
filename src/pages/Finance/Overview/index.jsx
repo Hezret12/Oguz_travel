@@ -216,8 +216,8 @@ const FinanceOverview = () => {
     totalRealizedRevenue > 0 ? ((totalRealizedProfit / totalRealizedRevenue) * 100).toFixed(1) : 0;
 
   /* ── Income / Expense Totals ── */
-  const incomeItems = summary?.incomeByType || [];
-  const expenseItems = summary?.expenseByType || [];
+  const incomeItems = useMemo(() => summary?.incomeByType || [], [summary?.incomeByType]);
+  const expenseItems = useMemo(() => summary?.expenseByType || [], [summary?.expenseByType]);
 
   const totalIncome = useMemo(
     () => incomeItems.reduce((acc, item) => acc + Number(item.amount || 0), 0),
