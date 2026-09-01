@@ -82,7 +82,7 @@ const AddCashTransactionModal = ({ open, close, table }) => {
     <CustomDialog open={isModalOpen} close={handleClose} widthX={560}>
       <CustomDialogHeader
         variant="h6"
-        title={t("finance.addTransaction", "+ Pul amaly / Harajat goşmak")}
+        title={t("finance.addTransaction")}
       />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2.5}>
