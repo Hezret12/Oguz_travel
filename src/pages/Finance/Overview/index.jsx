@@ -264,7 +264,7 @@ const FinanceOverview = () => {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <StatCard
-              title={t("finance.realizedCogs", "Özüne düşýän baha (COGS)")}
+              title={t("finance.realizedCogs")}
               value={formatMoney(totalRealizedCogs, "$")}
               subtitle="Satylan hyzmat harajatlary"
               color="#DC2626"
