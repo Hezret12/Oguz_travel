@@ -282,7 +282,7 @@ const FinanceOverview = () => {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <StatCard
-              title={t("finance.totalCashBalance", "Jemi Kassa Galyndysy")}
+              title={t("finance.totalCashBalance")}
               value={formatMoney(18615, "$")}
               subtitle={`${cashBoxes.length} işjeň kassa`}
               color="#2563EB"
@@ -291,12 +291,11 @@ const FinanceOverview = () => {
           </Grid>
         </Grid>
 
-        {/* ── Income / Expense Breakdown ── */}
         <Grid container spacing={2.5}>
           <Grid size={{ xs: 12, lg: 6 }}>
             <CashFlowPanel
-              title={t("finance.income", "Para girişi")}
-              chipLabel={t("finance.incomeLabel", "Girdeji")}
+              title={t("finance.income")}
+              chipLabel={t("finance.incomeLabel")}
               chipColor="#16a34a"
               items={incomeItems}
               total={totalIncome}
