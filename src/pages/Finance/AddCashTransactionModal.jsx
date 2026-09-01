@@ -109,7 +109,7 @@ const AddCashTransactionModal = ({ open, close, table }) => {
             <CustomSelect
               name="currency"
               control={control}
-              label={t("currency", "Walýuta")}
+              label={t("currency")}
               options={CURRENCY_OPTIONS}
               required
             />
