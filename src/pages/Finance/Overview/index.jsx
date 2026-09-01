@@ -647,7 +647,6 @@ const FinanceOverview = () => {
         </Grid>
       </Box>
 
-      {/* Dialogs */}
       <AddCashTransactionModal
         open={isAddTxOpen}
         close={() => setIsAddTxOpen(false)}
