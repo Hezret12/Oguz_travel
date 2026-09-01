@@ -49,12 +49,12 @@ const StatCard = ({ title, value, subtitle, color = "text.primary", onClick }) =
       transition: "all 0.15s ease",
       "&:hover": onClick
         ? {
-            borderColor: "primary.main",
-            boxShadow: (theme) =>
-              theme.palette.mode === "dark"
-                ? "0 4px 16px rgba(0,0,0,0.4)"
-                : "0 4px 16px rgba(0,0,0,0.06)",
-          }
+          borderColor: "primary.main",
+          boxShadow: (theme) =>
+            theme.palette.mode === "dark"
+              ? "0 4px 16px rgba(0,0,0,0.4)"
+              : "0 4px 16px rgba(0,0,0,0.06)",
+        }
         : {},
     }}
   >
@@ -215,7 +215,6 @@ const FinanceOverview = () => {
   const marginPercent =
     totalRealizedRevenue > 0 ? ((totalRealizedProfit / totalRealizedRevenue) * 100).toFixed(1) : 0;
 
-  /* ── Income / Expense Totals ── */
   const incomeItems = useMemo(() => summary?.incomeByType || [], [summary?.incomeByType]);
   const expenseItems = useMemo(() => summary?.expenseByType || [], [summary?.expenseByType]);
 
@@ -229,7 +228,6 @@ const FinanceOverview = () => {
   );
   const netCashFlow = totalIncome - totalExpense;
 
-  /* ── Charts Data ── */
   const barCategories = realization.map((r) => r.service_type || "Service");
   const revenueData = realization.map((r) => Number(r.total_realized_revenue || 0));
   const cogsData = realization.map((r) => Number(r.total_realized_cogs || 0));
