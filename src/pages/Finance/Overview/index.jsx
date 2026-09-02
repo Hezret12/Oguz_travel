@@ -189,20 +189,37 @@ const FinanceOverview = () => {
   const getServiceInfo = (type) => {
     if (type === "VISA_SLOT") {
       return {
-        title: "Wiza kwotasy",
+        title: t("finance.visaQuota"),
         subtitle: "Visa Slot Allotment",
       };
     }
     if (type === "HOTEL_ALLOTMENT") {
       return {
-        title: "Otel ýerleşişi",
+        title: t("finance.hotelAllotment"),
         subtitle: "Hotel Room Allotment",
       };
     }
     return { title: type, subtitle: "" };
   };
 
-  const sortedExpenseItems = [...expenseItems].sort(
+  const getCategoryLabel = (item) => {
+    if (!item) return "";
+    const key = `finance.categories.${item.type}`;
+    const localized = t(key);
+    return localized !== key ? localized : item.label;
+  };
+
+  const localizedIncomeItems = incomeItems.map((item) => ({
+    ...item,
+    label: getCategoryLabel(item),
+  }));
+
+  const localizedExpenseItems = expenseItems.map((item) => ({
+    ...item,
+    label: getCategoryLabel(item),
+  }));
+
+  const sortedExpenseItems = [...localizedExpenseItems].sort(
     (a, b) => Number(b.amount || 0) - Number(a.amount || 0)
   );
 
@@ -213,7 +230,7 @@ const FinanceOverview = () => {
     color: EXPENSE_COLORS[idx % EXPENSE_COLORS.length],
   }));
 
-  const incomePieData = incomeItems.map((item, idx) => ({
+  const incomePieData = localizedIncomeItems.map((item, idx) => ({
     id: item.type,
     value: Number(item.amount || 0),
     label: item.label,
@@ -233,21 +250,21 @@ const FinanceOverview = () => {
             <KpiCard
               label={t("finance.realizedRevenue")}
               value={formatMoney(totalRealizedRevenue, "$")}
-              change="Hyzmat satyşyndan"
+              change={t("finance.fromServiceSales")}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <KpiCard
               label={t("finance.realizedCogs")}
               value={formatMoney(totalRealizedCogs, "$")}
-              change="Hyzmat özüne düşýän baha"
+              change={t("finance.serviceCostPrice")}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <KpiCard
               label={t("finance.realizedGrossProfit")}
               value={formatMoney(totalRealizedProfit, "$")}
-              change={`Marža: ${marginPercent}%`}
+              change={`${t("finance.margin")}: ${marginPercent}%`}
               changeType="up"
             />
           </Grid>
@@ -255,7 +272,7 @@ const FinanceOverview = () => {
             <KpiCard
               label={t("finance.netCashFlow")}
               value={`${netCashFlow >= 0 ? "+" : ""}${formatMoney(netCashFlow, "$")}`}
-              change={`Girdeji: ${formatMoney(totalIncome, "")} — Çykdajy: ${formatMoney(totalExpense, "")}`}
+              change={`${t("finance.income")}: ${formatMoney(totalIncome, "")} — ${t("finance.expense")}: ${formatMoney(totalExpense, "")}`}
               changeType={netCashFlow >= 0 ? "up" : "down"}
             />
           </Grid>
@@ -267,10 +284,10 @@ const FinanceOverview = () => {
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2.5 }}>
                 <Box>
                   <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
-                    Kassalar we hasaplar
+                    {t("finance.cashAndAccounts")}
                   </Typography>
                   <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-                    Elýeterli kassa balanslary
+                    {t("finance.availableBalances")}
                   </Typography>
                 </Box>
                 <Button
@@ -287,7 +304,7 @@ const FinanceOverview = () => {
                     "&:hover": { color: "primary.main", bgcolor: "transparent" },
                   }}
                 >
-                  Ählisi
+                  {t("all")}
                 </Button>
               </Box>
 
@@ -332,7 +349,7 @@ const FinanceOverview = () => {
                           }}
                         />
                         <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", mt: 0.3, display: "block" }}>
-                          {pct.toFixed(0)}% jemiden
+                          {pct.toFixed(0)}% {t("finance.ofTotal")}
                         </Typography>
                       </Box>
                       {idx < cashBoxes.length - 1 && <Divider />}
@@ -344,7 +361,7 @@ const FinanceOverview = () => {
               <Divider sx={{ my: 1.5 }} />
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", px: 0.5 }}>
                 <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500, fontSize: "12.5px" }}>
-                  Jemi balans
+                  {t("finance.totalBalance")}
                 </Typography>
                 <Typography
                   sx={{
@@ -366,10 +383,10 @@ const FinanceOverview = () => {
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
                 <Box>
                   <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
-                    P&L hasabaty (FIFO)
+                    {t("finance.pnlReportFifo")}
                   </Typography>
                   <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-                    Partiýa boýunça özüne düşýän baha we gazanylan peýda
+                    {t("finance.pnlReportSubtitle")}
                   </Typography>
                 </Box>
                 <Box
@@ -381,7 +398,7 @@ const FinanceOverview = () => {
                   }}
                 >
                   <Typography sx={{ fontSize: "11px", fontWeight: 700, color: "#10B981" }}>
-                    Marža: {marginPercent}%
+                    {t("finance.margin")}: {marginPercent}%
                   </Typography>
                 </Box>
               </Box>
@@ -402,12 +419,12 @@ const FinanceOverview = () => {
                         },
                       }}
                     >
-                      <TableCell>Hyzmat</TableCell>
-                      <TableCell align="right">Sany</TableCell>
-                      <TableCell align="right">COGS</TableCell>
-                      <TableCell align="right">Satyş</TableCell>
-                      <TableCell align="right">Peýda</TableCell>
-                      <TableCell align="right">Marža</TableCell>
+                      <TableCell>{t("finance.service")}</TableCell>
+                      <TableCell align="right">{t("finance.quantity")}</TableCell>
+                      <TableCell align="right">{t("finance.cogs")}</TableCell>
+                      <TableCell align="right">{t("finance.sales")}</TableCell>
+                      <TableCell align="right">{t("finance.profit")}</TableCell>
+                      <TableCell align="right">{t("finance.margin")}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -486,12 +503,12 @@ const FinanceOverview = () => {
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.8 }}>
                   <Typography variant="body2" sx={{ fontWeight: 700, color: "text.primary", fontSize: "13px" }}>
-                    Jemi realizasiýa
+                    {t("finance.totalRealization")}
                   </Typography>
                   <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                     <Box sx={{ textAlign: "right" }}>
                       <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "10px", display: "block" }}>
-                        COGS
+                        {t("finance.cogs")}
                       </Typography>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: "#EF4444", fontSize: "12.5px" }}>
                         {formatMoney(totalRealizedCogs, "$")}
@@ -499,7 +516,7 @@ const FinanceOverview = () => {
                     </Box>
                     <Box sx={{ textAlign: "right" }}>
                       <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "10px", display: "block" }}>
-                        Satyş
+                        {t("finance.sales")}
                       </Typography>
                       <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", fontSize: "12.5px" }}>
                         {formatMoney(totalRealizedRevenue, "$")}
@@ -507,7 +524,7 @@ const FinanceOverview = () => {
                     </Box>
                     <Box sx={{ textAlign: "right" }}>
                       <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "10px", display: "block" }}>
-                        Arassa peýda
+                        {t("finance.netProfit")}
                       </Typography>
                       <Typography variant="body2" sx={{ fontWeight: 800, color: "#10B981", fontSize: "13px" }}>
                         +{formatMoney(totalRealizedProfit, "$")}
@@ -525,10 +542,10 @@ const FinanceOverview = () => {
             <Paper sx={cardSx}>
               <Box sx={{ mb: 2.5 }}>
                 <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
-                  Girdeji düzümi
+                  {t("finance.incomeMix")}
                 </Typography>
                 <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-                  Hyzmatlar boýunça girdeji paýy
+                  {t("finance.incomeMixSubtitle")}
                 </Typography>
               </Box>
 
@@ -609,7 +626,7 @@ const FinanceOverview = () => {
                             mt: 0.3,
                           }}
                         >
-                          jemi girdeji
+                          {t("finance.totalIncome")}
                         </Typography>
                       </Box>
                     </Box>
@@ -632,7 +649,7 @@ const FinanceOverview = () => {
                     </Box>
                   </>
                 ) : (
-                  <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>Maglumat ýok</Box>
+                  <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>{t("noData")}</Box>
                 )}
               </Box>
             </Paper>
@@ -643,10 +660,10 @@ const FinanceOverview = () => {
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                 <Box>
                   <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
-                    Para çykyşy paýlanyşygy
+                    {t("finance.cashOutflowBreakdown")}
                   </Typography>
                   <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-                    Kategoriýalar boýunça çykdajylaryň paýy
+                    {t("finance.outflowSubtitle")}
                   </Typography>
                 </Box>
 
@@ -682,7 +699,7 @@ const FinanceOverview = () => {
                       },
                     }}
                   >
-                    Tegelek (Donut)
+                    {t("finance.donutView")}
                   </Button>
                   <Button
                     size="small"
@@ -703,7 +720,7 @@ const FinanceOverview = () => {
                       },
                     }}
                   >
-                    Sütünli paý
+                    {t("finance.barsView")}
                   </Button>
                 </Box>
               </Box>
@@ -784,7 +801,7 @@ const FinanceOverview = () => {
                           mt: 0.3,
                         }}
                       >
-                        jemi çykdajy
+                        {t("finance.totalExpense")}
                       </Typography>
                     </Box>
                   </Box>
@@ -875,7 +892,7 @@ const FinanceOverview = () => {
           <Grid size={{ xs: 12, lg: 6 }}>
             <CashFlowPanel
               title={t("finance.income")}
-              items={incomeItems}
+              items={localizedIncomeItems}
               total={totalIncome}
               accentColor="#22C55E"
             />
@@ -883,7 +900,7 @@ const FinanceOverview = () => {
           <Grid size={{ xs: 12, lg: 6 }}>
             <CashFlowPanel
               title={t("finance.expense")}
-              items={expenseItems}
+              items={localizedExpenseItems}
               total={totalExpense}
               accentColor="#EF4444"
             />
