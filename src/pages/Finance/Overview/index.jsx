@@ -95,9 +95,7 @@ const KpiCard = ({ label, value, change, changeType = "neutral" }) => {
   );
 };
 
-/* ═══════════════════════════════════════════════
-   CASH FLOW BREAKDOWN — minimal list
-═══════════════════════════════════════════════ */
+
 const CashFlowPanel = ({ title, items, total, accentColor }) => (
   <Paper sx={cardSx}>
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: 2 }}>
