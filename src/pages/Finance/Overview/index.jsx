@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -15,7 +15,7 @@ import {
   LinearProgress,
   alpha,
 } from "@mui/material";
-import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import { BarChart } from "@mui/x-charts/BarChart";
@@ -23,7 +23,7 @@ import { PieChart } from "@mui/x-charts/PieChart";
 
 import { useLocale } from "../../../hooks/useLocale";
 import PageHeader from "../../../components/PageHeader";
-import AddCashTransactionModal from "../AddCashTransactionModal";
+
 import { PATHS } from "../../../routes/paths";
 import { DEFAULT_FINANCE_SUMMARY, DEFAULT_CASH_BOXES } from "./mockData";
 
@@ -32,10 +32,9 @@ const formatMoney = (val, currency = "$") => {
   return `${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 };
 
-const StatCard = ({ title, value, subtitle, color = "text.primary", onClick }) => (
+const StatCard = ({ title, value, subtitle, color = "text.primary" }) => (
   <Paper
     variant="outlined"
-    onClick={onClick}
     sx={{
       p: 2.5,
       borderRadius: "12px",
@@ -45,17 +44,6 @@ const StatCard = ({ title, value, subtitle, color = "text.primary", onClick }) =
       display: "flex",
       flexDirection: "column",
       justifyContent: "space-between",
-      cursor: onClick ? "pointer" : "default",
-      transition: "all 0.15s ease",
-      "&:hover": onClick
-        ? {
-          borderColor: "primary.main",
-          boxShadow: (theme) =>
-            theme.palette.mode === "dark"
-              ? "0 4px 16px rgba(0,0,0,0.4)"
-              : "0 4px 16px rgba(0,0,0,0.06)",
-        }
-        : {},
     }}
   >
     <Typography
@@ -83,14 +71,9 @@ const StatCard = ({ title, value, subtitle, color = "text.primary", onClick }) =
     >
       {value}
     </Typography>
-    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-        {subtitle}
-      </Typography>
-      {onClick && (
-        <ArrowForwardRoundedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-      )}
-    </Box>
+    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
+      {subtitle}
+    </Typography>
   </Paper>
 );
 
@@ -197,7 +180,7 @@ const CashFlowPanel = ({ title, chipLabel, chipColor, items, total, accentColor 
 const FinanceOverview = () => {
   const { t } = useLocale();
   const navigate = useNavigate();
-  const [isAddTxOpen, setIsAddTxOpen] = useState(false);
+
 
   const summary = DEFAULT_FINANCE_SUMMARY;
   const cashBoxes = DEFAULT_CASH_BOXES;
@@ -245,11 +228,7 @@ const FinanceOverview = () => {
 
   return (
     <>
-      <PageHeader
-        title={t("finance.overviewTitle")}
-        addButtonText={t("finance.addTransaction")}
-        onAddClick={() => setIsAddTxOpen(true)}
-      />
+      <PageHeader title={t("finance.overviewTitle")} />
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3, pb: 4 }}>
         <Grid container spacing={2}>
@@ -259,7 +238,6 @@ const FinanceOverview = () => {
               value={formatMoney(totalRealizedRevenue, "$")}
               subtitle="Hyzmat satyş girdejisi"
               color="#2563EB"
-              onClick={() => navigate(PATHS.FINANCE.CASH_FLOW)}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
@@ -268,7 +246,6 @@ const FinanceOverview = () => {
               value={formatMoney(totalRealizedCogs, "$")}
               subtitle="Satylan hyzmat harajatlary"
               color="#DC2626"
-              onClick={() => navigate(PATHS.FINANCE.CASH_FLOW)}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
@@ -277,7 +254,6 @@ const FinanceOverview = () => {
               value={formatMoney(totalRealizedProfit, "$")}
               subtitle={`Peýda maržasy: ${marginPercent}%`}
               color="#16a34a"
-              onClick={() => navigate(PATHS.FINANCE.CASH_FLOW)}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
@@ -286,7 +262,6 @@ const FinanceOverview = () => {
               value={formatMoney(18615, "$")}
               subtitle={`${cashBoxes.length} işjeň kassa`}
               color="#2563EB"
-              onClick={() => navigate(PATHS.FINANCE.CASH_FLOW)}
             />
           </Grid>
         </Grid>
@@ -647,10 +622,7 @@ const FinanceOverview = () => {
         </Grid>
       </Box>
 
-      <AddCashTransactionModal
-        open={isAddTxOpen}
-        close={() => setIsAddTxOpen(false)}
-      />
+
     </>
   );
 };
