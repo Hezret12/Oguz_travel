@@ -228,7 +228,6 @@ const FinanceOverview = () => {
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pb: 4 }}>
 
-        {/* ═══ ROW 1 — KPI METRICS ═══ */}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <KpiCard
@@ -362,7 +361,6 @@ const FinanceOverview = () => {
             </Paper>
           </Grid>
 
-          {/* P&L FIFO Table */}
           <Grid size={{ xs: 12, lg: 6 }}>
             <Paper sx={cardSx}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
@@ -473,7 +471,6 @@ const FinanceOverview = () => {
                 </Table>
               </TableContainer>
 
-              {/* Total Footer Box */}
               <Box
                 sx={{
                   mt: 1.5,
@@ -523,9 +520,7 @@ const FinanceOverview = () => {
           </Grid>
         </Grid>
 
-        {/* ═══ ROW 3 — INCOME MIX DONUT + EXPENSE OUTFLOW DONUT ═══ */}
         <Grid container spacing={2}>
-          {/* Income Mix Donut */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={cardSx}>
               <Box sx={{ mb: 2.5 }}>
@@ -619,7 +614,6 @@ const FinanceOverview = () => {
                       </Box>
                     </Box>
 
-                    {/* Legend */}
                     <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 20px", mt: 2, width: "100%", px: 0.5 }}>
                       {incomePieData.map((item) => {
                         const pct = totalIncome > 0 ? ((item.value / totalIncome) * 100).toFixed(0) : 0;
@@ -644,10 +638,8 @@ const FinanceOverview = () => {
             </Paper>
           </Grid>
 
-          {/* Expense Outflow Donut */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={cardSx}>
-              {/* Header with Title & Outflow View Switcher */}
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                 <Box>
                   <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
@@ -658,7 +650,6 @@ const FinanceOverview = () => {
                   </Typography>
                 </Box>
 
-                {/* View Switcher */}
                 <Box
                   sx={{
                     display: "inline-flex",
@@ -717,9 +708,7 @@ const FinanceOverview = () => {
                 </Box>
               </Box>
 
-              {/* Content View */}
               {outflowMode === "donut" ? (
-                /* Donut Chart View (Default) */
                 <Box
                   sx={{
                     flex: 1,
@@ -800,7 +789,6 @@ const FinanceOverview = () => {
                     </Box>
                   </Box>
 
-                  {/* 2-column Legend */}
                   <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 20px", mt: 2, width: "100%", px: 0.5 }}>
                     {expensePieData.map((item) => {
                       const pct = totalExpense > 0 ? ((item.value / totalExpense) * 100).toFixed(0) : 0;
@@ -819,7 +807,6 @@ const FinanceOverview = () => {
                   </Box>
                 </Box>
               ) : (
-                /* Ranked Horizontal Progress Breakdown */
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, flex: 1, justifyContent: "center" }}>
                   {sortedExpenseItems.map((item, idx) => {
                     const pct = totalExpense > 0 ? (item.amount / totalExpense) * 100 : 0;
@@ -884,7 +871,6 @@ const FinanceOverview = () => {
           </Grid>
         </Grid>
 
-        {/* ═══ ROW 4 — DETAILED CASH FLOW PANELS ═══ */}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, lg: 6 }}>
             <CashFlowPanel
