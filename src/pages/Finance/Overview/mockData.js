@@ -35,3 +35,12 @@ export const DEFAULT_CASH_BOXES = [
   { guid: "cb-3", name: "Bank Hasaby (TMT)", currency: "TMT", current_balance: 320000.00, is_active: true },
 ];
 
+export const MONTHLY_TREND = [
+  { month: "Ýan", income: 68500, expense: 46200, profit: 22300 },
+  { month: "Few", income: 72000, expense: 49500, profit: 22500 },
+  { month: "Mart", income: 81200, expense: 52000, profit: 29200 },
+  { month: "Apr", income: 77800, expense: 51000, profit: 26800 },
+  { month: "Maý", income: 84400, expense: 53500, profit: 30900 },
+  { month: "Iýun", income: 86600, expense: 53050, profit: 33550 },
+];
+

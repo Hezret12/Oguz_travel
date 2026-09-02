@@ -20,13 +20,13 @@ import {
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
-import { BarChart } from "@mui/x-charts/BarChart";
+import { LineChart } from "@mui/x-charts/LineChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 
 import { useLocale } from "../../../hooks/useLocale";
 import PageHeader from "../../../components/PageHeader";
 import { PATHS } from "../../../routes/paths";
-import { DEFAULT_FINANCE_SUMMARY, DEFAULT_CASH_BOXES } from "./mockData";
+import { DEFAULT_FINANCE_SUMMARY, DEFAULT_CASH_BOXES, MONTHLY_TREND } from "./mockData";
 
 /* ── Helpers ── */
 const formatMoney = (val, currency = "$") => {
@@ -199,12 +199,34 @@ const FinanceOverview = () => {
   );
   const netCashFlow = totalIncome - totalExpense;
 
-  const barCategories = realization.map((r) => r.service_type || "Service");
-  const revenueData = realization.map((r) => Number(r.total_realized_revenue || 0));
-  const cogsData = realization.map((r) => Number(r.total_realized_cogs || 0));
-  const profitData = realization.map(
-    (r) => Number(r.total_realized_revenue || 0) - Number(r.total_realized_cogs || 0)
-  );
+  const monthlyCategories = MONTHLY_TREND.map((d) => d.month);
+  const monthlyIncome = MONTHLY_TREND.map((d) => d.income);
+  const monthlyExpense = MONTHLY_TREND.map((d) => d.expense);
+  const monthlyProfit = MONTHLY_TREND.map((d) => d.profit);
+
+  const inventoryMap = useMemo(() => {
+    const map = {};
+    (summary?.inventoryValuation || []).forEach((inv) => {
+      map[inv.service_type] = inv;
+    });
+    return map;
+  }, [summary?.inventoryValuation]);
+
+  const getServiceInfo = (type) => {
+    if (type === "VISA_SLOT") {
+      return {
+        title: "Wiza kwotasy",
+        subtitle: "Visa Slot Allotment",
+      };
+    }
+    if (type === "HOTEL_ALLOTMENT") {
+      return {
+        title: "Otel ýerleşişi",
+        subtitle: "Hotel Room Allotment",
+      };
+    }
+    return { title: type, subtitle: "" };
+  };
 
   const incomeColors = ["#3B82F6", "#0EA5E9", "#6366F1", "#8B5CF6", "#A855F7", "#94A3B8"];
   const incomePieData = incomeItems.map((item, idx) => ({
@@ -499,48 +521,114 @@ const FinanceOverview = () => {
           </Grid>
         </Grid>
 
-        {/* ═══ ROW 4 — CHART + P&L TABLE ═══ */}
+        {/* ═══ ROW 4 — MONTHLY TREND CHART + P&L FIFO TABLE ═══ */}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, lg: 7 }}>
             <Paper sx={cardSx}>
-              <Box sx={{ mb: 1.5 }}>
-                <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
-                  Hyzmatlar boýunça deňeşdirme
-                </Typography>
-                <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-                  Satyş, COGS we peýda
-                </Typography>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+                <Box>
+                  <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
+                    Aýlyk maliýe dinamikasy
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
+                    Girdeji, çykdajy we arassa peýdanyň aýlar boýunça meýli
+                  </Typography>
+                </Box>
+                {/* Modern Pill Legend */}
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#3B82F6" }} />
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11.5px", fontWeight: 500 }}>
+                      Girdeji
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#EF4444" }} />
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11.5px", fontWeight: 500 }}>
+                      Çykdajy
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#10B981" }} />
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11.5px", fontWeight: 500 }}>
+                      Peýda
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
 
-              {barCategories.length > 0 ? (
-                <Box sx={{ width: "100%", height: 280, flex: 1 }}>
-                  <BarChart
-                    xAxis={[{ scaleType: "band", data: barCategories }]}
-                    series={[
-                      { data: revenueData, label: "Satyş", color: "#3B82F6" },
-                      { data: cogsData, label: "COGS", color: "#EF4444" },
-                      { data: profitData, label: "Peýda", color: "#22C55E" },
-                    ]}
-                    height={270}
-                    margin={{ top: 30, bottom: 30, left: 50, right: 20 }}
-                    borderRadius={4}
-                  />
-                </Box>
-              ) : (
-                <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>Maglumat ýok</Box>
-              )}
+              <Box sx={{ width: "100%", height: 300, flex: 1 }}>
+                <LineChart
+                  xAxis={[{
+                    scaleType: "point",
+                    data: monthlyCategories,
+                    tickLabelStyle: { fontSize: 11 },
+                  }]}
+                  yAxis={[{
+                    valueFormatter: (v) => `${(v / 1000).toFixed(0)}k$`,
+                    tickLabelStyle: { fontSize: 11 },
+                  }]}
+                  series={[
+                    {
+                      data: monthlyIncome,
+                      label: "Girdeji",
+                      color: "#3B82F6",
+                      curve: "natural",
+                      area: true,
+                      showMark: true,
+                    },
+                    {
+                      data: monthlyExpense,
+                      label: "Çykdajy",
+                      color: "#EF4444",
+                      curve: "natural",
+                      showMark: true,
+                    },
+                    {
+                      data: monthlyProfit,
+                      label: "Arassa peýda",
+                      color: "#10B981",
+                      curve: "natural",
+                      showMark: true,
+                    },
+                  ]}
+                  height={290}
+                  margin={{ top: 15, bottom: 25, left: 55, right: 15 }}
+                  grid={{ horizontal: true }}
+                  slotProps={{ legend: { hidden: true } }}
+                  sx={{
+                    "& .MuiChartsAxis-line": { stroke: "transparent" },
+                    "& .MuiChartsAxis-tick": { stroke: "transparent" },
+                    "& .MuiChartsGrid-line": { stroke: (theme) => alpha(theme.palette.divider, 0.5), strokeDasharray: "4 4" },
+                  }}
+                />
+              </Box>
             </Paper>
           </Grid>
 
           <Grid size={{ xs: 12, lg: 5 }}>
             <Paper sx={cardSx}>
-              <Box sx={{ mb: 1.5 }}>
-                <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
-                  P&L hasabaty (FIFO)
-                </Typography>
-                <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-                  Partiýa bahasy we peýda
-                </Typography>
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+                <Box>
+                  <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
+                    P&L hasabaty (FIFO)
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
+                    Partiýa boýunça özüne düşýän baha we gazanylan peýda
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    px: 1,
+                    py: 0.3,
+                    borderRadius: "6px",
+                    bgcolor: (theme) => alpha("#10B981", theme.palette.mode === "dark" ? 0.12 : 0.08),
+                  }}
+                >
+                  <Typography sx={{ fontSize: "11px", fontWeight: 700, color: "#10B981" }}>
+                    Marža: {marginPercent}%
+                  </Typography>
+                </Box>
               </Box>
 
               <TableContainer sx={{ flex: 1 }}>
@@ -559,12 +647,12 @@ const FinanceOverview = () => {
                         },
                       }}
                     >
-                      <TableCell>{t("finance.serviceType", "Hyzmat")}</TableCell>
+                      <TableCell>Hyzmat</TableCell>
                       <TableCell align="right">Sany</TableCell>
                       <TableCell align="right">COGS</TableCell>
                       <TableCell align="right">Satyş</TableCell>
                       <TableCell align="right">Peýda</TableCell>
-                      <TableCell align="right">%</TableCell>
+                      <TableCell align="right">Marža</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -573,6 +661,8 @@ const FinanceOverview = () => {
                       const cogs = Number(row.total_realized_cogs || 0);
                       const profit = rev - cogs;
                       const itemMargin = rev > 0 ? ((profit / rev) * 100).toFixed(0) : 0;
+                      const info = getServiceInfo(row.service_type);
+                      const inv = inventoryMap[row.service_type];
 
                       return (
                         <TableRow
@@ -587,23 +677,43 @@ const FinanceOverview = () => {
                             "&:last-child td": { borderBottom: "none" },
                           }}
                         >
-                          <TableCell sx={{ fontWeight: 600, color: "text.primary" }}>
-                            {row.service_type}
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", fontSize: "13px" }}>
+                              {info.title}
+                            </Typography>
+                            {inv && (
+                              <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", display: "block" }}>
+                                Ätiýaçlykda: {inv.remaining_units} sany ({formatMoney(inv.unconsumed_asset_value, "$")})
+                              </Typography>
+                            )}
                           </TableCell>
-                          <TableCell align="right" sx={{ color: "text.secondary" }}>
+                          <TableCell align="right" sx={{ color: "text.secondary", fontWeight: 500 }}>
                             {row.total_consumed_units}
                           </TableCell>
-                          <TableCell align="right" sx={{ color: "error.main", fontWeight: 600 }}>
-                            {formatMoney(cogs, "")}
+                          <TableCell align="right" sx={{ color: "#EF4444", fontWeight: 600 }}>
+                            {formatMoney(cogs, "$")}
                           </TableCell>
                           <TableCell align="right" sx={{ color: "text.primary", fontWeight: 600 }}>
-                            {formatMoney(rev, "")}
+                            {formatMoney(rev, "$")}
                           </TableCell>
-                          <TableCell align="right" sx={{ color: "success.main", fontWeight: 600 }}>
-                            +{formatMoney(profit, "")}
+                          <TableCell align="right" sx={{ color: "#10B981", fontWeight: 700 }}>
+                            +{formatMoney(profit, "$")}
                           </TableCell>
-                          <TableCell align="right" sx={{ color: "text.secondary", fontWeight: 600, fontSize: "11.5px" }}>
-                            {itemMargin}%
+                          <TableCell align="right">
+                            <Box
+                              component="span"
+                              sx={{
+                                fontWeight: 700,
+                                fontSize: "11px",
+                                color: "#10B981",
+                                bgcolor: (theme) => alpha("#10B981", theme.palette.mode === "dark" ? 0.12 : 0.08),
+                                px: 0.8,
+                                py: 0.25,
+                                borderRadius: "4px",
+                              }}
+                            >
+                              {itemMargin}%
+                            </Box>
                           </TableCell>
                         </TableRow>
                       );
@@ -612,23 +722,58 @@ const FinanceOverview = () => {
                 </Table>
               </TableContainer>
 
-              <Divider sx={{ mt: 0.5 }} />
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1.5, px: 0.5 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", fontSize: "12.5px" }}>
-                  Jemi
-                </Typography>
-                <Box sx={{ display: "flex", gap: 2.5, alignItems: "baseline" }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "error.main", fontSize: "12.5px", fontFamily: "'Inter', sans-serif" }}>
-                    {formatMoney(totalRealizedCogs, "")}
+              {/* Total Footer Box */}
+              <Box
+                sx={{
+                  mt: 1.5,
+                  p: 1.5,
+                  borderRadius: "10px",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? alpha(theme.palette.background.default, 0.6)
+                      : alpha("#F8FAFC", 0.9),
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.8 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: "text.primary", fontSize: "13px" }}>
+                    Jemi realizasiýa
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", fontSize: "12.5px", fontFamily: "'Inter', sans-serif" }}>
-                    {formatMoney(totalRealizedRevenue, "")}
+                  <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                    <Box sx={{ textAlign: "right" }}>
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "10px", display: "block" }}>
+                        COGS
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: "#EF4444", fontSize: "12.5px" }}>
+                        {formatMoney(totalRealizedCogs, "$")}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: "right" }}>
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "10px", display: "block" }}>
+                        Satyş
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", fontSize: "12.5px" }}>
+                        {formatMoney(totalRealizedRevenue, "$")}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ textAlign: "right" }}>
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "10px", display: "block" }}>
+                        Arassa peýda
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 800, color: "#10B981", fontSize: "13px" }}>
+                        +{formatMoney(totalRealizedProfit, "$")}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+                <Divider sx={{ my: 0.8 }} />
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px" }}>
+                    Ätiýaçlykdaky baha (Unconsumed stock)
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700, color: "success.main", fontSize: "12.5px", fontFamily: "'Inter', sans-serif" }}>
-                    +{formatMoney(totalRealizedProfit, "")}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary", fontSize: "11.5px" }}>
-                    {marginPercent}%
+                  <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 700, fontSize: "11.5px" }}>
+                    {formatMoney(summary?.unconsumedAssetTotal || 8855, "$")}
                   </Typography>
                 </Box>
               </Box>
