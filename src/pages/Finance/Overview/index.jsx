@@ -201,18 +201,6 @@ const FinanceOverview = () => {
   );
   const netCashFlow = totalIncome - totalExpense;
 
-  const monthlyCategories = MONTHLY_TREND.map((d) => d.month);
-  const monthlyIncome = MONTHLY_TREND.map((d) => d.income);
-  const monthlyExpense = MONTHLY_TREND.map((d) => d.expense);
-  const monthlyProfit = MONTHLY_TREND.map((d) => d.profit);
-
-  const inventoryMap = useMemo(() => {
-    const map = {};
-    (summary?.inventoryValuation || []).forEach((inv) => {
-      map[inv.service_type] = inv;
-    });
-    return map;
-  }, [summary?.inventoryValuation]);
 
   const getServiceInfo = (type) => {
     if (type === "VISA_SLOT") {
