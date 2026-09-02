@@ -161,9 +161,6 @@ const CashFlowPanel = ({ title, items, total, accentColor }) => (
   </Paper>
 );
 
-/* ═══════════════════════════════════════════════
-   MAIN COMPONENT
-═══════════════════════════════════════════════ */
 const FinanceOverview = () => {
   const { t } = useLocale();
   const navigate = useNavigate();
