@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -30,7 +30,6 @@ import { DEFAULT_FINANCE_SUMMARY, DEFAULT_CASH_BOXES } from "./mockData";
 const EXPENSE_COLORS = ["#EF4444", "#F59E0B", "#8B5CF6", "#64748B", "#0EA5E9", "#10B981"];
 const INCOME_COLORS = ["#3B82F6", "#0EA5E9", "#6366F1", "#8B5CF6", "#A855F7", "#94A3B8"];
 
-/* ── Helpers ── */
 const formatMoney = (val, currency = "$") => {
   const num = Number(val || 0);
   return `${num.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
@@ -42,7 +41,6 @@ const formatCompact = (val) => {
   return `$${num.toFixed(0)}`;
 };
 
-/* ── Shared card style ── */
 const cardSx = {
   p: 2.5,
   borderRadius: "12px",
@@ -54,9 +52,6 @@ const cardSx = {
   flexDirection: "column",
 };
 
-/* ═══════════════════════════════════════════════
-   KPI CARD — clean, minimal stat card
-═══════════════════════════════════════════════ */
 const KpiCard = ({ label, value, change, changeType = "neutral" }) => {
   const changeColor =
     changeType === "up" ? "success.main" : changeType === "down" ? "error.main" : "text.secondary";
