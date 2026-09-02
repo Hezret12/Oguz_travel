@@ -147,7 +147,10 @@ const CashFlowPanel = ({ title, items, total, accentColor }) => (
               sx={{
                 height: 3,
                 borderRadius: 2,
-                bgcolor: (theme) => alpha(accentColor, theme.palette.mode === "dark" ? 0.08 : 0.06),
+                bgcolor: (theme) => {
+                  const resolved = accentColor.startsWith("#") ? accentColor : theme.palette.success.main;
+                  return alpha(resolved, theme.palette.mode === "dark" ? 0.08 : 0.06);
+                },
                 "& .MuiLinearProgress-bar": {
                   borderRadius: 2,
                   bgcolor: accentColor,
@@ -379,22 +382,39 @@ const FinanceOverview = () => {
               >
                 {incomePieData.length > 0 ? (
                   <>
-                    <Box sx={{ position: "relative", width: "100%", height: 210, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Box
+                      sx={{
+                        position: "relative",
+                        width: 200,
+                        height: 200,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        mx: "auto",
+                      }}
+                    >
                       <PieChart
+                        hideLegend
+                        slots={{ legend: () => null }}
+                        slotProps={{ legend: { hidden: true } }}
                         series={[
                           {
-                            data: incomePieData,
+                            data: incomePieData.map((item) => ({
+                              id: item.id,
+                              value: item.value,
+                              color: item.color,
+                              label: "", // Empty to strictly prevent canvas legend rendering
+                            })),
                             innerRadius: 58,
                             outerRadius: 88,
                             paddingAngle: 2,
-                            cornerRadius: 3,
+                            cornerRadius: 4,
                             highlightScope: { fade: "global", highlight: "item" },
                           },
                         ]}
-                        height={210}
-                        width={240}
-                        margin={{ top: 5, bottom: 5, left: 20, right: 20 }}
-                        slotProps={{ legend: { hidden: true } }}
+                        height={200}
+                        width={200}
+                        margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
                       />
                       <Box
                         sx={{
@@ -403,21 +423,31 @@ const FinanceOverview = () => {
                           left: "50%",
                           transform: "translate(-50%, -50%)",
                           textAlign: "center",
+                          pointerEvents: "none",
                         }}
                       >
                         <Typography
                           sx={{
-                            fontWeight: 700,
+                            fontWeight: 800,
                             color: "text.primary",
                             fontSize: "20px",
                             fontFamily: "'Inter', sans-serif",
-                            letterSpacing: "-0.4px",
-                            lineHeight: 1,
+                            letterSpacing: "-0.5px",
+                            lineHeight: 1.1,
                           }}
                         >
                           {formatCompact(totalIncome)}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "10px", fontWeight: 500 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                            fontSize: "11px",
+                            fontWeight: 500,
+                            display: "block",
+                            mt: 0.3,
+                          }}
+                        >
                           jemi girdeji
                         </Typography>
                       </Box>
@@ -456,7 +486,7 @@ const FinanceOverview = () => {
               title={t("finance.income")}
               items={incomeItems}
               total={totalIncome}
-              accentColor="success.main"
+              accentColor="#22C55E"
             />
           </Grid>
           <Grid size={{ xs: 12, lg: 6 }}>
@@ -464,7 +494,7 @@ const FinanceOverview = () => {
               title={t("finance.expense")}
               items={expenseItems}
               total={totalExpense}
-              accentColor="error.main"
+              accentColor="#EF4444"
             />
           </Grid>
         </Grid>
