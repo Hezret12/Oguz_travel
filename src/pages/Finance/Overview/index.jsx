@@ -20,14 +20,15 @@ import {
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
-import { BarChart } from "@mui/x-charts/BarChart";
-import { LineChart } from "@mui/x-charts/LineChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 
 import { useLocale } from "../../../hooks/useLocale";
 import PageHeader from "../../../components/PageHeader";
 import { PATHS } from "../../../routes/paths";
-import { DEFAULT_FINANCE_SUMMARY, DEFAULT_CASH_BOXES, MONTHLY_TREND } from "./mockData";
+import { DEFAULT_FINANCE_SUMMARY, DEFAULT_CASH_BOXES } from "./mockData";
+
+const EXPENSE_COLORS = ["#EF4444", "#F59E0B", "#8B5CF6", "#64748B", "#0EA5E9", "#10B981"];
+const INCOME_COLORS = ["#3B82F6", "#0EA5E9", "#6366F1", "#8B5CF6", "#A855F7", "#94A3B8"];
 
 /* ── Helpers ── */
 const formatMoney = (val, currency = "$") => {
@@ -188,19 +189,12 @@ const FinanceOverview = () => {
   const marginPercent =
     totalRealizedRevenue > 0 ? ((totalRealizedProfit / totalRealizedRevenue) * 100).toFixed(1) : 0;
 
-  const incomeItems = useMemo(() => summary?.incomeByType || [], [summary?.incomeByType]);
-  const expenseItems = useMemo(() => summary?.expenseByType || [], [summary?.expenseByType]);
+  const incomeItems = summary?.incomeByType || [];
+  const expenseItems = summary?.expenseByType || [];
 
-  const totalIncome = useMemo(
-    () => incomeItems.reduce((acc, item) => acc + Number(item.amount || 0), 0),
-    [incomeItems]
-  );
-  const totalExpense = useMemo(
-    () => expenseItems.reduce((acc, item) => acc + Number(item.amount || 0), 0),
-    [expenseItems]
-  );
+  const totalIncome = incomeItems.reduce((acc, item) => acc + Number(item.amount || 0), 0);
+  const totalExpense = expenseItems.reduce((acc, item) => acc + Number(item.amount || 0), 0);
   const netCashFlow = totalIncome - totalExpense;
-
 
   const getServiceInfo = (type) => {
     if (type === "VISA_SLOT") {
@@ -218,27 +212,22 @@ const FinanceOverview = () => {
     return { title: type, subtitle: "" };
   };
 
-  const expenseColors = ["#EF4444", "#F59E0B", "#8B5CF6", "#64748B", "#0EA5E9", "#10B981"];
+  const sortedExpenseItems = [...expenseItems].sort(
+    (a, b) => Number(b.amount || 0) - Number(a.amount || 0)
+  );
 
-  const sortedExpenseItems = useMemo(() => {
-    return [...expenseItems].sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0));
-  }, [expenseItems]);
+  const expensePieData = sortedExpenseItems.map((item, idx) => ({
+    id: item.type,
+    value: Number(item.amount || 0),
+    label: item.label,
+    color: EXPENSE_COLORS[idx % EXPENSE_COLORS.length],
+  }));
 
-  const expensePieData = useMemo(() => {
-    return sortedExpenseItems.map((item, idx) => ({
-      id: item.type,
-      value: Number(item.amount || 0),
-      label: item.label,
-      color: expenseColors[idx % expenseColors.length],
-    }));
-  }, [sortedExpenseItems]);
-
-  const incomeColors = ["#3B82F6", "#0EA5E9", "#6366F1", "#8B5CF6", "#A855F7", "#94A3B8"];
   const incomePieData = incomeItems.map((item, idx) => ({
     id: item.type,
     value: Number(item.amount || 0),
     label: item.label,
-    color: incomeColors[idx % incomeColors.length],
+    color: INCOME_COLORS[idx % INCOME_COLORS.length],
   }));
 
   const totalCashBalance = cashBoxes.reduce((acc, cb) => acc + Number(cb.current_balance || 0), 0);
@@ -844,7 +833,7 @@ const FinanceOverview = () => {
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, flex: 1, justifyContent: "center" }}>
                   {sortedExpenseItems.map((item, idx) => {
                     const pct = totalExpense > 0 ? (item.amount / totalExpense) * 100 : 0;
-                    const color = expenseColors[idx % expenseColors.length];
+                    const color = EXPENSE_COLORS[idx % EXPENSE_COLORS.length];
                     return (
                       <Box key={item.type}>
                         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.4 }}>
