@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -20,6 +20,7 @@ import {
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import ArrowOutwardRoundedIcon from "@mui/icons-material/ArrowOutwardRounded";
+import { BarChart } from "@mui/x-charts/BarChart";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 
@@ -170,6 +171,7 @@ const CashFlowPanel = ({ title, items, total, accentColor }) => (
 const FinanceOverview = () => {
   const { t } = useLocale();
   const navigate = useNavigate();
+  const [chartType, setChartType] = useState("bar");
 
   const summary = DEFAULT_FINANCE_SUMMARY;
   const cashBoxes = DEFAULT_CASH_BOXES;
@@ -525,83 +527,229 @@ const FinanceOverview = () => {
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, lg: 7 }}>
             <Paper sx={cardSx}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+              {/* Header with Title & Chart Type Switcher */}
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                 <Box>
                   <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
                     Aýlyk maliýe dinamikasy
                   </Typography>
                   <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-                    Girdeji, çykdajy we arassa peýdanyň aýlar boýunça meýli
+                    Girdeji, çykdajy we arassa peýdanyň aýlar boýunça deňeşdirmesi
                   </Typography>
                 </Box>
-                {/* Modern Pill Legend */}
-                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#3B82F6" }} />
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11.5px", fontWeight: 500 }}>
-                      Girdeji
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#EF4444" }} />
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11.5px", fontWeight: 500 }}>
-                      Çykdajy
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "#10B981" }} />
-                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11.5px", fontWeight: 500 }}>
-                      Peýda
-                    </Typography>
-                  </Box>
+
+                {/* Segmented Control */}
+                <Box
+                  sx={{
+                    display: "inline-flex",
+                    p: "2.5px",
+                    borderRadius: "8px",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? alpha(theme.palette.background.default, 0.8)
+                        : alpha(theme.palette.divider, 0.25),
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Button
+                    size="small"
+                    onClick={() => setChartType("bar")}
+                    sx={{
+                      py: 0.3,
+                      px: 1.2,
+                      fontSize: "11px",
+                      fontWeight: chartType === "bar" ? 700 : 500,
+                      textTransform: "none",
+                      minWidth: "auto",
+                      borderRadius: "6px",
+                      bgcolor: chartType === "bar" ? "background.paper" : "transparent",
+                      color: chartType === "bar" ? "text.primary" : "text.secondary",
+                      boxShadow: chartType === "bar" ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+                      "&:hover": {
+                        bgcolor: chartType === "bar" ? "background.paper" : "transparent",
+                      },
+                    }}
+                  >
+                    Sütünli (Bar)
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={() => setChartType("line")}
+                    sx={{
+                      py: 0.3,
+                      px: 1.2,
+                      fontSize: "11px",
+                      fontWeight: chartType === "line" ? 700 : 500,
+                      textTransform: "none",
+                      minWidth: "auto",
+                      borderRadius: "6px",
+                      bgcolor: chartType === "line" ? "background.paper" : "transparent",
+                      color: chartType === "line" ? "text.primary" : "text.secondary",
+                      boxShadow: chartType === "line" ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+                      "&:hover": {
+                        bgcolor: chartType === "line" ? "background.paper" : "transparent",
+                      },
+                    }}
+                  >
+                    Dinamika (Trend)
+                  </Button>
                 </Box>
               </Box>
 
-              <Box sx={{ width: "100%", height: 300, flex: 1 }}>
-                <LineChart
-                  xAxis={[{
-                    scaleType: "point",
-                    data: monthlyCategories,
-                    tickLabelStyle: { fontSize: 11 },
-                  }]}
-                  yAxis={[{
-                    valueFormatter: (v) => `${(v / 1000).toFixed(0)}k$`,
-                    tickLabelStyle: { fontSize: 11 },
-                  }]}
-                  series={[
-                    {
-                      data: monthlyIncome,
-                      label: "Girdeji",
-                      color: "#3B82F6",
-                      curve: "natural",
-                      area: true,
-                      showMark: true,
-                    },
-                    {
-                      data: monthlyExpense,
-                      label: "Çykdajy",
-                      color: "#EF4444",
-                      curve: "natural",
-                      showMark: true,
-                    },
-                    {
-                      data: monthlyProfit,
-                      label: "Arassa peýda",
+              {/* Sub-header Legend & Monthly KPI */}
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1, px: 0.5 }}>
+                <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5 }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: "18px",
+                      fontFamily: "'Inter', sans-serif",
+                      color: "text.primary",
+                      letterSpacing: "-0.3px",
+                    }}
+                  >
+                    $86,600.00
+                  </Typography>
+                  <Box
+                    component="span"
+                    sx={{
+                      fontSize: "11px",
+                      fontWeight: 700,
                       color: "#10B981",
-                      curve: "natural",
-                      showMark: true,
-                    },
-                  ]}
-                  height={290}
-                  margin={{ top: 15, bottom: 25, left: 55, right: 15 }}
-                  grid={{ horizontal: true }}
-                  slotProps={{ legend: { hidden: true } }}
-                  sx={{
-                    "& .MuiChartsAxis-line": { stroke: "transparent" },
-                    "& .MuiChartsAxis-tick": { stroke: "transparent" },
-                    "& .MuiChartsGrid-line": { stroke: (theme) => alpha(theme.palette.divider, 0.5), strokeDasharray: "4 4" },
-                  }}
-                />
+                      bgcolor: (theme) => alpha("#10B981", theme.palette.mode === "dark" ? 0.12 : 0.08),
+                      px: 0.8,
+                      py: 0.2,
+                      borderRadius: "4px",
+                    }}
+                  >
+                    +14.2% bu aý
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: "2px", bgcolor: "#3B82F6" }} />
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500 }}>
+                      Girdeji
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: "2px", bgcolor: "#64748B" }} />
+                    <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500 }}>
+                      Çykdajy
+                    </Typography>
+                  </Box>
+                  {chartType === "line" && (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.6 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: "2px", bgcolor: "#10B981" }} />
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500 }}>
+                        Arassa peýda
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Chart Rendering */}
+              <Box sx={{ width: "100%", height: 270, flex: 1 }}>
+                {chartType === "bar" ? (
+                  <BarChart
+                    xAxis={[{
+                      scaleType: "band",
+                      data: monthlyCategories,
+                      tickLabelStyle: { fontSize: 11, fontWeight: 500 },
+                    }]}
+                    yAxis={[{
+                      valueFormatter: (v) => `${(v / 1000).toFixed(0)}k$`,
+                      tickLabelStyle: { fontSize: 11 },
+                    }]}
+                    series={[
+                      {
+                        data: monthlyIncome,
+                        label: "Girdeji",
+                        color: "#3B82F6",
+                        valueFormatter: (v) => formatMoney(v, "$"),
+                      },
+                      {
+                        data: monthlyExpense,
+                        label: "Çykdajy",
+                        color: "#64748B",
+                        valueFormatter: (v) => formatMoney(v, "$"),
+                      },
+                    ]}
+                    height={260}
+                    margin={{ top: 15, bottom: 25, left: 55, right: 15 }}
+                    grid={{ horizontal: true }}
+                    borderRadius={6}
+                    slotProps={{ legend: { hidden: true } }}
+                    sx={{
+                      "& .MuiChartsAxis-line": { stroke: "transparent" },
+                      "& .MuiChartsAxis-tick": { stroke: "transparent" },
+                      "& .MuiChartsGrid-line": {
+                        stroke: (theme) => alpha(theme.palette.divider, 0.4),
+                        strokeDasharray: "4 4",
+                      },
+                    }}
+                  />
+                ) : (
+                  <LineChart
+                    xAxis={[{
+                      scaleType: "point",
+                      data: monthlyCategories,
+                      tickLabelStyle: { fontSize: 11, fontWeight: 500 },
+                    }]}
+                    yAxis={[{
+                      valueFormatter: (v) => `${(v / 1000).toFixed(0)}k$`,
+                      tickLabelStyle: { fontSize: 11 },
+                    }]}
+                    series={[
+                      {
+                        data: monthlyIncome,
+                        label: "Girdeji",
+                        color: "#3B82F6",
+                        curve: "monotoneX",
+                        showMark: false,
+                        valueFormatter: (v) => formatMoney(v, "$"),
+                      },
+                      {
+                        data: monthlyExpense,
+                        label: "Çykdajy",
+                        color: "#64748B",
+                        curve: "monotoneX",
+                        showMark: false,
+                        valueFormatter: (v) => formatMoney(v, "$"),
+                      },
+                      {
+                        data: monthlyProfit,
+                        label: "Arassa peýda",
+                        color: "#10B981",
+                        curve: "monotoneX",
+                        area: true,
+                        showMark: false,
+                        valueFormatter: (v) => formatMoney(v, "$"),
+                      },
+                    ]}
+                    height={260}
+                    margin={{ top: 15, bottom: 25, left: 55, right: 15 }}
+                    grid={{ horizontal: true }}
+                    slotProps={{ legend: { hidden: true } }}
+                    sx={{
+                      "& .MuiChartsAxis-line": { stroke: "transparent" },
+                      "& .MuiChartsAxis-tick": { stroke: "transparent" },
+                      "& .MuiChartsGrid-line": {
+                        stroke: (theme) => alpha(theme.palette.divider, 0.4),
+                        strokeDasharray: "4 4",
+                      },
+                      "& .MuiAreaElement-root": {
+                        fill: (theme) => alpha("#10B981", theme.palette.mode === "dark" ? 0.12 : 0.08),
+                      },
+                      "& .MuiLineElement-root": {
+                        strokeWidth: 2.5,
+                      },
+                    }}
+                  />
+                )}
               </Box>
             </Paper>
           </Grid>
