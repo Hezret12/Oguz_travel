@@ -171,7 +171,7 @@ const CashFlowPanel = ({ title, items, total, accentColor }) => (
 const FinanceOverview = () => {
   const { t } = useLocale();
   const navigate = useNavigate();
-  const [outflowMode, setOutflowMode] = useState("bars");
+  const [outflowMode, setOutflowMode] = useState("donut");
 
   const summary = DEFAULT_FINANCE_SUMMARY;
   const cashBoxes = DEFAULT_CASH_BOXES;
@@ -295,11 +295,10 @@ const FinanceOverview = () => {
           </Grid>
         </Grid>
 
-        {/* ═══ ROW 2 — ACCOUNTS + INCOME MIX ═══ */}
+        {/* ═══ ROW 2 — LIQUIDITY + P&L FIFO ═══ */}
         <Grid container spacing={2}>
-
           {/* Liquidity / Accounts */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, lg: 6 }}>
             <Paper sx={cardSx}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2.5 }}>
                 <Box>
@@ -398,452 +397,16 @@ const FinanceOverview = () => {
             </Paper>
           </Grid>
 
-          {/* Income Mix Donut */}
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Paper sx={cardSx}>
-              <Box sx={{ mb: 2.5 }}>
-                <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
-                  Girdeji düzümi
-                </Typography>
-                <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-                  Hyzmatlar boýunça girdeji paýy
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {incomePieData.length > 0 ? (
-                  <>
-                    <Box
-                      sx={{
-                        position: "relative",
-                        width: 200,
-                        height: 200,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        mx: "auto",
-                      }}
-                    >
-                      <PieChart
-                        hideLegend
-                        slots={{ legend: () => null }}
-                        slotProps={{ legend: { hidden: true } }}
-                        series={[
-                          {
-                            data: incomePieData.map((item) => ({
-                              id: item.id,
-                              value: item.value,
-                              color: item.color,
-                              label: "", // Empty to strictly prevent canvas legend rendering
-                            })),
-                            innerRadius: 58,
-                            outerRadius: 88,
-                            paddingAngle: 2,
-                            cornerRadius: 4,
-                            highlightScope: { fade: "global", highlight: "item" },
-                          },
-                        ]}
-                        height={200}
-                        width={200}
-                        margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                      />
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          textAlign: "center",
-                          pointerEvents: "none",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            fontWeight: 800,
-                            color: "text.primary",
-                            fontSize: "20px",
-                            fontFamily: "'Inter', sans-serif",
-                            letterSpacing: "-0.5px",
-                            lineHeight: 1.1,
-                          }}
-                        >
-                          {formatCompact(totalIncome)}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: "text.secondary",
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            display: "block",
-                            mt: 0.3,
-                          }}
-                        >
-                          jemi girdeji
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    {/* Legend */}
-                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 20px", mt: 2, width: "100%", px: 0.5 }}>
-                      {incomePieData.map((item) => {
-                        const pct = totalIncome > 0 ? ((item.value / totalIncome) * 100).toFixed(0) : 0;
-                        return (
-                          <Box key={item.id} sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                            <Box sx={{ width: 6, height: 6, borderRadius: "2px", bgcolor: item.color, flexShrink: 0 }} />
-                            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500, flex: 1 }}>
-                              {item.label}
-                            </Typography>
-                            <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 600, fontSize: "11px" }}>
-                              {pct}%
-                            </Typography>
-                          </Box>
-                        );
-                      })}
-                    </Box>
-                  </>
-                ) : (
-                  <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>Maglumat ýok</Box>
-                )}
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
-
-        {/* ═══ ROW 3 — INCOME / EXPENSE BREAKDOWN ═══ */}
-        <Grid container spacing={2}>
+          {/* P&L FIFO Table */}
           <Grid size={{ xs: 12, lg: 6 }}>
-            <CashFlowPanel
-              title={t("finance.income")}
-              items={incomeItems}
-              total={totalIncome}
-              accentColor="#22C55E"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, lg: 6 }}>
-            <CashFlowPanel
-              title={t("finance.expense")}
-              items={expenseItems}
-              total={totalExpense}
-              accentColor="#EF4444"
-            />
-          </Grid>
-        </Grid>
-
-        {/* ═══ ROW 4 — MONTHLY TREND CHART + P&L FIFO TABLE ═══ */}
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, lg: 7 }}>
-            <Paper sx={cardSx}>
-              {/* Header with Title & Outflow View Switcher */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-                <Box>
-                  <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
-                    Para çykyşy paýlanyşygy
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
-                    Kategoriýalar boýunça çykdajylaryň we harajatlaryň paýy
-                  </Typography>
-                </Box>
-
-                {/* View Switcher */}
-                <Box
-                  sx={{
-                    display: "inline-flex",
-                    p: "2.5px",
-                    borderRadius: "8px",
-                    bgcolor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? alpha(theme.palette.background.default, 0.8)
-                        : alpha(theme.palette.divider, 0.25),
-                    border: "1px solid",
-                    borderColor: "divider",
-                  }}
-                >
-                  <Button
-                    size="small"
-                    onClick={() => setOutflowMode("bars")}
-                    sx={{
-                      py: 0.3,
-                      px: 1.2,
-                      fontSize: "11px",
-                      fontWeight: outflowMode === "bars" ? 700 : 500,
-                      textTransform: "none",
-                      minWidth: "auto",
-                      borderRadius: "6px",
-                      bgcolor: outflowMode === "bars" ? "background.paper" : "transparent",
-                      color: outflowMode === "bars" ? "text.primary" : "text.secondary",
-                      boxShadow: outflowMode === "bars" ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
-                      "&:hover": {
-                        bgcolor: outflowMode === "bars" ? "background.paper" : "transparent",
-                      },
-                    }}
-                  >
-                    Sütünli paý
-                  </Button>
-                  <Button
-                    size="small"
-                    onClick={() => setOutflowMode("donut")}
-                    sx={{
-                      py: 0.3,
-                      px: 1.2,
-                      fontSize: "11px",
-                      fontWeight: outflowMode === "donut" ? 700 : 500,
-                      textTransform: "none",
-                      minWidth: "auto",
-                      borderRadius: "6px",
-                      bgcolor: outflowMode === "donut" ? "background.paper" : "transparent",
-                      color: outflowMode === "donut" ? "text.primary" : "text.secondary",
-                      boxShadow: outflowMode === "donut" ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
-                      "&:hover": {
-                        bgcolor: outflowMode === "donut" ? "background.paper" : "transparent",
-                      },
-                    }}
-                  >
-                    Tegelek (Donut)
-                  </Button>
-                </Box>
-              </Box>
-
-              {/* Subheader: Big KPI & Category Count */}
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5, px: 0.5 }}>
-                <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5 }}>
-                  <Typography
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: "20px",
-                      fontFamily: "'Inter', sans-serif",
-                      color: "#EF4444",
-                      letterSpacing: "-0.4px",
-                    }}
-                  >
-                    {formatMoney(totalExpense, "$")}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11.5px", fontWeight: 500 }}>
-                    jemi çykdajy
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    px: 1,
-                    py: 0.3,
-                    borderRadius: "6px",
-                    bgcolor: (theme) => alpha("#EF4444", theme.palette.mode === "dark" ? 0.12 : 0.08),
-                  }}
-                >
-                  <Typography sx={{ fontSize: "11px", fontWeight: 700, color: "#EF4444" }}>
-                    6 kategoriýa boýunça
-                  </Typography>
-                </Box>
-              </Box>
-
-              {/* Multi-segmented Overview Bar (GitHub / Stripe style) */}
-              <Box
-                sx={{
-                  display: "flex",
-                  width: "100%",
-                  height: 6,
-                  borderRadius: 3,
-                  overflow: "hidden",
-                  mb: 2.2,
-                  bgcolor: "action.hover",
-                }}
-              >
-                {sortedExpenseItems.map((item, idx) => {
-                  const pct = totalExpense > 0 ? (item.amount / totalExpense) * 100 : 0;
-                  return (
-                    <Box
-                      key={item.type}
-                      sx={{
-                        width: `${pct}%`,
-                        height: "100%",
-                        bgcolor: expenseColors[idx % expenseColors.length],
-                        transition: "width 0.3s ease",
-                      }}
-                    />
-                  );
-                })}
-              </Box>
-
-              {/* Content View */}
-              {outflowMode === "bars" ? (
-                /* Ranked Horizontal Progress Breakdown */
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, flex: 1, justifyContent: "center" }}>
-                  {sortedExpenseItems.map((item, idx) => {
-                    const pct = totalExpense > 0 ? (item.amount / totalExpense) * 100 : 0;
-                    const color = expenseColors[idx % expenseColors.length];
-                    return (
-                      <Box key={item.type}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.4 }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                            <Box sx={{ width: 8, height: 8, borderRadius: "2px", bgcolor: color, flexShrink: 0 }} />
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", fontSize: "12.5px" }}>
-                              {item.label}
-                            </Typography>
-                          </Box>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                            <Typography
-                              sx={{
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                color,
-                                bgcolor: (theme) => alpha(color, theme.palette.mode === "dark" ? 0.12 : 0.08),
-                                px: 0.8,
-                                py: 0.15,
-                                borderRadius: "4px",
-                              }}
-                            >
-                              {pct.toFixed(1)}%
-                            </Typography>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight: 700,
-                                color: "text.primary",
-                                fontSize: "13px",
-                                fontFamily: "'Inter', sans-serif",
-                                minWidth: "85px",
-                                textAlign: "right",
-                              }}
-                            >
-                              {formatMoney(item.amount, "$")}
-                            </Typography>
-                          </Box>
-                        </Box>
-                        <LinearProgress
-                          variant="determinate"
-                          value={pct}
-                          sx={{
-                            height: 4,
-                            borderRadius: 2,
-                            bgcolor: (theme) => alpha(color, theme.palette.mode === "dark" ? 0.08 : 0.06),
-                            "& .MuiLinearProgress-bar": {
-                              borderRadius: 2,
-                              bgcolor: color,
-                            },
-                          }}
-                        />
-                      </Box>
-                    );
-                  })}
-                </Box>
-              ) : (
-                /* Donut Chart View */
-                <Box
-                  sx={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      position: "relative",
-                      width: 200,
-                      height: 200,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      mx: "auto",
-                    }}
-                  >
-                    <PieChart
-                      hideLegend
-                      slots={{ legend: () => null }}
-                      slotProps={{ legend: { hidden: true } }}
-                      series={[
-                        {
-                          data: expensePieData.map((item) => ({
-                            id: item.id,
-                            value: item.value,
-                            color: item.color,
-                            label: "",
-                          })),
-                          innerRadius: 58,
-                          outerRadius: 88,
-                          paddingAngle: 2,
-                          cornerRadius: 4,
-                          highlightScope: { fade: "global", highlight: "item" },
-                        },
-                      ]}
-                      height={200}
-                      width={200}
-                      margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
-                    />
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        textAlign: "center",
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontWeight: 800,
-                          color: "#EF4444",
-                          fontSize: "20px",
-                          fontFamily: "'Inter', sans-serif",
-                          letterSpacing: "-0.5px",
-                          lineHeight: 1.1,
-                        }}
-                      >
-                        {formatCompact(totalExpense)}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: "text.secondary",
-                          fontSize: "11px",
-                          fontWeight: 500,
-                          display: "block",
-                          mt: 0.3,
-                        }}
-                      >
-                        jemi çykdajy
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {/* 2-column Legend */}
-                  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 20px", mt: 2, width: "100%", px: 0.5 }}>
-                    {expensePieData.map((item) => {
-                      const pct = totalExpense > 0 ? ((item.value / totalExpense) * 100).toFixed(0) : 0;
-                      return (
-                        <Box key={item.id} sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                          <Box sx={{ width: 6, height: 6, borderRadius: "2px", bgcolor: item.color, flexShrink: 0 }} />
-                          <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500, flex: 1 }}>
-                            {item.label}
-                          </Typography>
-                          <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 600, fontSize: "11px" }}>
-                            {pct}%
-                          </Typography>
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-
-          <Grid size={{ xs: 12, lg: 5 }}>
             <Paper sx={cardSx}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
                 <Box>
                   <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
                     P&L hasabaty (FIFO)
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
+                    Partiýa boýunça özüne düşýän baha we gazanylan peýda
                   </Typography>
                 </Box>
                 <Box
@@ -992,6 +555,387 @@ const FinanceOverview = () => {
                 </Box>
               </Box>
             </Paper>
+          </Grid>
+        </Grid>
+
+        {/* ═══ ROW 3 — INCOME MIX DONUT + EXPENSE OUTFLOW DONUT ═══ */}
+        <Grid container spacing={2}>
+          {/* Income Mix Donut */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Paper sx={cardSx}>
+              <Box sx={{ mb: 2.5 }}>
+                <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
+                  Girdeji düzümi
+                </Typography>
+                <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
+                  Hyzmatlar boýunça girdeji paýy
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {incomePieData.length > 0 ? (
+                  <>
+                    <Box
+                      sx={{
+                        position: "relative",
+                        width: 200,
+                        height: 200,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        mx: "auto",
+                      }}
+                    >
+                      <PieChart
+                        hideLegend
+                        slots={{ legend: () => null }}
+                        slotProps={{ legend: { hidden: true } }}
+                        series={[
+                          {
+                            data: incomePieData.map((item) => ({
+                              id: item.id,
+                              value: item.value,
+                              color: item.color,
+                              label: "",
+                            })),
+                            innerRadius: 58,
+                            outerRadius: 88,
+                            paddingAngle: 2,
+                            cornerRadius: 4,
+                            highlightScope: { fade: "global", highlight: "item" },
+                          },
+                        ]}
+                        height={200}
+                        width={200}
+                        margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
+                      />
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: "50%",
+                          left: "50%",
+                          transform: "translate(-50%, -50%)",
+                          textAlign: "center",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontWeight: 800,
+                            color: "text.primary",
+                            fontSize: "20px",
+                            fontFamily: "'Inter', sans-serif",
+                            letterSpacing: "-0.5px",
+                            lineHeight: 1.1,
+                          }}
+                        >
+                          {formatCompact(totalIncome)}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                            fontSize: "11px",
+                            fontWeight: 500,
+                            display: "block",
+                            mt: 0.3,
+                          }}
+                        >
+                          jemi girdeji
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Legend */}
+                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 20px", mt: 2, width: "100%", px: 0.5 }}>
+                      {incomePieData.map((item) => {
+                        const pct = totalIncome > 0 ? ((item.value / totalIncome) * 100).toFixed(0) : 0;
+                        return (
+                          <Box key={item.id} sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                            <Box sx={{ width: 6, height: 6, borderRadius: "2px", bgcolor: item.color, flexShrink: 0 }} />
+                            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500, flex: 1 }}>
+                              {item.label}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 600, fontSize: "11px" }}>
+                              {pct}%
+                            </Typography>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  </>
+                ) : (
+                  <Box sx={{ p: 4, textAlign: "center", color: "text.secondary" }}>Maglumat ýok</Box>
+                )}
+              </Box>
+            </Paper>
+          </Grid>
+
+          {/* Expense Outflow Donut */}
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Paper sx={cardSx}>
+              {/* Header with Title & Outflow View Switcher */}
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Box>
+                  <Typography variant="body1" sx={{ fontWeight: 700, color: "text.primary", fontSize: "14px" }}>
+                    Para çykyşy paýlanyşygy
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "12px" }}>
+                    Kategoriýalar boýunça çykdajylaryň paýy
+                  </Typography>
+                </Box>
+
+                {/* View Switcher */}
+                <Box
+                  sx={{
+                    display: "inline-flex",
+                    p: "2.5px",
+                    borderRadius: "8px",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? alpha(theme.palette.background.default, 0.8)
+                        : alpha(theme.palette.divider, 0.25),
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <Button
+                    size="small"
+                    onClick={() => setOutflowMode("donut")}
+                    sx={{
+                      py: 0.3,
+                      px: 1.2,
+                      fontSize: "11px",
+                      fontWeight: outflowMode === "donut" ? 700 : 500,
+                      textTransform: "none",
+                      minWidth: "auto",
+                      borderRadius: "6px",
+                      bgcolor: outflowMode === "donut" ? "background.paper" : "transparent",
+                      color: outflowMode === "donut" ? "text.primary" : "text.secondary",
+                      boxShadow: outflowMode === "donut" ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+                      "&:hover": {
+                        bgcolor: outflowMode === "donut" ? "background.paper" : "transparent",
+                      },
+                    }}
+                  >
+                    Tegelek (Donut)
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={() => setOutflowMode("bars")}
+                    sx={{
+                      py: 0.3,
+                      px: 1.2,
+                      fontSize: "11px",
+                      fontWeight: outflowMode === "bars" ? 700 : 500,
+                      textTransform: "none",
+                      minWidth: "auto",
+                      borderRadius: "6px",
+                      bgcolor: outflowMode === "bars" ? "background.paper" : "transparent",
+                      color: outflowMode === "bars" ? "text.primary" : "text.secondary",
+                      boxShadow: outflowMode === "bars" ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+                      "&:hover": {
+                        bgcolor: outflowMode === "bars" ? "background.paper" : "transparent",
+                      },
+                    }}
+                  >
+                    Sütünli paý
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* Content View */}
+              {outflowMode === "donut" ? (
+                /* Donut Chart View (Default) */
+                <Box
+                  sx={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      position: "relative",
+                      width: 200,
+                      height: 200,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      mx: "auto",
+                    }}
+                  >
+                    <PieChart
+                      hideLegend
+                      slots={{ legend: () => null }}
+                      slotProps={{ legend: { hidden: true } }}
+                      series={[
+                        {
+                          data: expensePieData.map((item) => ({
+                            id: item.id,
+                            value: item.value,
+                            color: item.color,
+                            label: "",
+                          })),
+                          innerRadius: 58,
+                          outerRadius: 88,
+                          paddingAngle: 2,
+                          cornerRadius: 4,
+                          highlightScope: { fade: "global", highlight: "item" },
+                        },
+                      ]}
+                      height={200}
+                      width={200}
+                      margin={{ top: 0, bottom: 0, left: 0, right: 0 }}
+                    />
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        textAlign: "center",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontWeight: 800,
+                          color: "#EF4444",
+                          fontSize: "20px",
+                          fontFamily: "'Inter', sans-serif",
+                          letterSpacing: "-0.5px",
+                          lineHeight: 1.1,
+                        }}
+                      >
+                        {formatCompact(totalExpense)}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "text.secondary",
+                          fontSize: "11px",
+                          fontWeight: 500,
+                          display: "block",
+                          mt: 0.3,
+                        }}
+                      >
+                        jemi çykdajy
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* 2-column Legend */}
+                  <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 20px", mt: 2, width: "100%", px: 0.5 }}>
+                    {expensePieData.map((item) => {
+                      const pct = totalExpense > 0 ? ((item.value / totalExpense) * 100).toFixed(0) : 0;
+                      return (
+                        <Box key={item.id} sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                          <Box sx={{ width: 6, height: 6, borderRadius: "2px", bgcolor: item.color, flexShrink: 0 }} />
+                          <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 500, flex: 1 }}>
+                            {item.label}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: "text.primary", fontWeight: 600, fontSize: "11px" }}>
+                            {pct}%
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                </Box>
+              ) : (
+                /* Ranked Horizontal Progress Breakdown */
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, flex: 1, justifyContent: "center" }}>
+                  {sortedExpenseItems.map((item, idx) => {
+                    const pct = totalExpense > 0 ? (item.amount / totalExpense) * 100 : 0;
+                    const color = expenseColors[idx % expenseColors.length];
+                    return (
+                      <Box key={item.type}>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.4 }}>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                            <Box sx={{ width: 8, height: 8, borderRadius: "2px", bgcolor: color, flexShrink: 0 }} />
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary", fontSize: "12.5px" }}>
+                              {item.label}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                            <Typography
+                              sx={{
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                color,
+                                bgcolor: (theme) => alpha(color, theme.palette.mode === "dark" ? 0.12 : 0.08),
+                                px: 0.8,
+                                py: 0.15,
+                                borderRadius: "4px",
+                              }}
+                            >
+                              {pct.toFixed(1)}%
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 700,
+                                color: "text.primary",
+                                fontSize: "13px",
+                                fontFamily: "'Inter', sans-serif",
+                                minWidth: "85px",
+                                textAlign: "right",
+                              }}
+                            >
+                              {formatMoney(item.amount, "$")}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={pct}
+                          sx={{
+                            height: 4,
+                            borderRadius: 2,
+                            bgcolor: (theme) => alpha(color, theme.palette.mode === "dark" ? 0.08 : 0.06),
+                            "& .MuiLinearProgress-bar": {
+                              borderRadius: 2,
+                              bgcolor: color,
+                            },
+                          }}
+                        />
+                      </Box>
+                    );
+                  })}
+                </Box>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+
+        {/* ═══ ROW 4 — DETAILED CASH FLOW PANELS ═══ */}
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <CashFlowPanel
+              title={t("finance.income")}
+              items={incomeItems}
+              total={totalIncome}
+              accentColor="#22C55E"
+            />
+          </Grid>
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <CashFlowPanel
+              title={t("finance.expense")}
+              items={expenseItems}
+              total={totalExpense}
+              accentColor="#EF4444"
+            />
           </Grid>
         </Grid>
       </Box>
