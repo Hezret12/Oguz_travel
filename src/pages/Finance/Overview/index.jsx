@@ -295,9 +295,7 @@ const FinanceOverview = () => {
           </Grid>
         </Grid>
 
-        {/* ═══ ROW 2 — LIQUIDITY + P&L FIFO ═══ */}
         <Grid container spacing={2}>
-          {/* Liquidity / Accounts */}
           <Grid size={{ xs: 12, lg: 6 }}>
             <Paper sx={cardSx}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2.5 }}>
