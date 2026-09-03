@@ -57,14 +57,7 @@ const resolveStatus = (row) => {
   return "Adaty";
 };
 
-/**
- * Export translation table to Excel:
- * - Starts at D4 (Row 4, Column 4)
- * - Green header (#66A64F), white text, AutoFilter on D4:Q4
- * - Header text sized and wrapped to prevent any clipping (height 56)
- * - Continuous medium outer border around the entire table perimeter
- * - Total row at the bottom with Excel formulas
- */
+
 export const exportTranslateExcel = async (translations = [], options = {}) => {
   const fileName = options.fileName || "Terjime_Hasabaty";
   const sheetName = options.sheetName || "Terjime";
