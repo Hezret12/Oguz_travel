@@ -110,18 +110,17 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   worksheet.getRow(2).height = 15;
   worksheet.getRow(3).height = 15;
 
-  // 14 Columns matching user's image starting at Column D
   const columnsConfig = [
     { header: "TERJIMAN\nGELEN GÜNI", key: "received_day", width: 16, align: "center" },
     { header: "TERJIMÄ\nBERLEN WAGTY", key: "received_time", width: 14, align: "center" },
     { header: "NIREDEN\nGELENI", key: "nireden_geleni", width: 18, align: "left" },
     { header: "OPERATOR", key: "operator", width: 26, align: "left" },
-    { header: "SAHYPA\nSANY", key: "page_count", width: 13, align: "right" },
+    { header: "SAHYPA\nSANY", key: "page_count", width: 13, align: "center" },
     { header: "RAÝATYŇ\nADY", key: "client_name", width: 24, align: "left" },
     { header: "HAÝSY DILDEN\nHAÝSY DILE", key: "direction", width: 18, align: "center" },
     { header: "TERJIMEDEN\nGELEN WAGTY", key: "completed_time", width: 16, align: "center" },
     { header: "STATUS", key: "status", width: 14, align: "center" },
-    { header: "TERJIMEDEN GELEN\nSAHYPA SANY", key: "completed_page_count", width: 18, align: "right" },
+    { header: "TERJIMEDEN GELEN\nSAHYPA SANY", key: "completed_page_count", width: 18, align: "center" },
     { header: "TERJIME EDILIP\nGELEN GÜNI", key: "completed_day", width: 17, align: "center" },
     { header: "TERJIME\nEDEN", key: "translator", width: 26, align: "left" },
     { header: "DÜZEDILEN\nTERJIME", key: "correction_status", width: 16, align: "center" },
