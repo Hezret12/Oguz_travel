@@ -46,14 +46,11 @@ import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { deleteB2BApi } from "../../../api/queries/delete";
 import PaymentStatusCell from "../../../components/PaymentStatusCell";
-import { useDateFormat } from "../../../functions/generalHelpers";
+import { useDateFormat, formatDate } from "../../../functions/generalHelpers";
 import { PaymentManagementModal } from "../../../components/Dialog/PaymentManagementModal";
+import ExportExcelButton from "../../../components/ExportExcelButton";
+import { exportB2BExcel } from "./functions/exportB2BExcel";
 
-const formatDate = (value) => {
-  if (!value) return "";
-  const [year, month, day] = String(value).split("-");
-  return `${day}.${month}.${year}`;
-};
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -589,7 +586,15 @@ const B2B = () => {
         filterButtonText={t("filter")}
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}
-      />
+      >
+        <ExportExcelButton
+          apiFn={getAllB2BApi}
+          queryParams={queryParams}
+          fileName="B2B_Hasabaty"
+          sheetName="B2B"
+          customExportFn={exportB2BExcel}
+        />
+      </PageHeader>
 
       <FilterDrawer
         open={isDrawerOpen}
