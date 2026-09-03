@@ -249,7 +249,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     };
     cellCompletedPages.numFmt = "#,##0";
 
-    // Total formula for TÖLENEN PUL (Column Q = 17)
     const cellPrice = totalRow.getCell(START_COL + 13);
     cellPrice.value = {
       formula: `SUM(Q${firstDataRow}:Q${lastDataRow})`,
@@ -258,7 +257,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     cellPrice.numFmt = "#,##0";
   }
 
-  // Export buffer & download
   const buffer = await workbook.xlsx.writeBuffer();
   const cleanFileName = `${fileName}_${dayjs().format("YYYY-MM-DD")}.xlsx`;
 
