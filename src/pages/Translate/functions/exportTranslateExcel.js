@@ -98,22 +98,20 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     { header: "TÖLENEN\nPUL", key: "price", width: 16, align: "right" },
   ];
 
-  // Set widths for table columns (D through Q)
   columnsConfig.forEach((col, idx) => {
     worksheet.getColumn(START_COL + idx).width = col.width;
   });
 
-  const END_COL = START_COL + columnsConfig.length - 1; // Column 17 (Q)
+  const END_COL = START_COL + columnsConfig.length - 1;
   const totalRowIndex = START_ROW + translations.length + 1;
 
-  // Header Row (Row 4)
   const headerRow = worksheet.getRow(START_ROW);
-  headerRow.height = 56; // Generous height to fit all multi-line labels
+  headerRow.height = 56;
 
   const headerFill = {
     type: "pattern",
     pattern: "solid",
-    fgColor: { argb: "FF66A64F" }, // Exact Excel green
+    fgColor: { argb: "FF66A64F" },
   };
 
   columnsConfig.forEach((col, idx) => {
