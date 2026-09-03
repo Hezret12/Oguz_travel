@@ -13,6 +13,9 @@ import {
   Divider,
   Pagination,
   Skeleton,
+  ToggleButton,
+  ToggleButtonGroup,
+  alpha,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -195,6 +198,10 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const [localPayments, setLocalPayments] = useState([]);
   const [editingPayment, setEditingPayment] = useState(null);
   const [prevTicketKey, setPrevTicketKey] = useState(null);
+  const [selectedCurrency, setSelectedCurrency] = useState(() => ticketCurrency || "USD");
+  const exchangeRate = useMemo(() => {
+    return parseFloat(localStorage.getItem("finance_usd_tmt_rate") || "19.5") || 19.5;
+  }, []);
   const queryClient = useQueryClient();
 
   const currentTicketKey = open && ticket ? (ticket.guid || ticket.id || "open") : null;
@@ -202,6 +209,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     setPrevTicketKey(currentTicketKey);
     setEditingPayment(null);
     setLocalPayments([]);
+    setSelectedCurrency(ticketCurrency || "USD");
     if (currentTicketKey) {
       queryClient.removeQueries({ queryKey: [key] });
     }
@@ -400,17 +408,45 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     ticket.saleFare ??
     0
   );
-  const totalPaid = stats?.total_paid !== undefined
-    ? Number(stats.total_paid)
-    : payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-  const remaining = stats?.remaining !== undefined
-    ? Number(stats.remaining)
-    : (salesTotal - totalPaid);
+  const paidUsd = useMemo(() => {
+    return payments
+      .filter((p) => (p.currency || ticketCurrency) === "USD")
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  }, [payments, ticketCurrency]);
 
-  const isFullyPaid = !isInitialLoading && remaining <= 0;
+  const paidTmt = useMemo(() => {
+    return payments
+      .filter((p) => (p.currency || ticketCurrency) === "TMT")
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  }, [payments, ticketCurrency]);
+
+  const hasMixedPaid = paidUsd > 0 && paidTmt > 0;
+
+  const convertedTotalPaid = useMemo(() => {
+    if (hasMixedPaid) {
+      if (ticketCurrency === "USD") {
+        return paidUsd + (paidTmt / exchangeRate);
+      }
+      return paidTmt + (paidUsd * exchangeRate);
+    }
+    return stats?.total_paid !== undefined
+      ? Number(stats.total_paid)
+      : payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  }, [hasMixedPaid, ticketCurrency, paidUsd, paidTmt, exchangeRate, stats?.total_paid, payments]);
+
+  const totalPaid = convertedTotalPaid;
+  const remaining = Math.max(
+    0,
+    stats?.remaining !== undefined && !hasMixedPaid
+      ? Number(stats.remaining)
+      : (salesTotal - convertedTotalPaid)
+  );
+
+  const isFullyPaid = !isInitialLoading && remaining <= 0.01;
 
   const handleEditClick = (p) => {
     setEditingPayment(p);
+    setSelectedCurrency(p.currency || ticketCurrency || "USD");
     reset({
       amount: p.amount,
       paymentDate: p.payment_date || p.date,
@@ -421,6 +457,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   const handleCancelEdit = () => {
     setEditingPayment(null);
+    setSelectedCurrency(ticketCurrency || "USD");
     reset({
       amount: "",
       paymentDate: new Date().toISOString(),
@@ -434,7 +471,13 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     const numAmount = Number(amount);
     if (!amount || numAmount <= 0) return;
 
-    if (!editingPayment && remaining > 0 && numAmount > remaining) {
+    const amountInTicketCurrency = selectedCurrency === ticketCurrency
+      ? numAmount
+      : selectedCurrency === "TMT"
+      ? numAmount / exchangeRate
+      : numAmount * exchangeRate;
+
+    if (!editingPayment && remaining > 0 && amountInTicketCurrency > (remaining + 0.01)) {
       toast.error(
         `${t("payment.amountExceedsRemaining")} (${formatCurrency(remaining, ticketCurrency)})`
       );
@@ -473,7 +516,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         const payload = {
           guid: editingPayment.guid,
           amount: Number(amount),
-          currency: ticketCurrency,
+          currency: selectedCurrency,
           payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
@@ -502,7 +545,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               ? {
                   ...p,
                   amount: Number(amount),
-                  currency: ticketCurrency,
+                  currency: selectedCurrency,
                   payment_date: resolvedPaymentDate,
                   note: description?.trim() || "",
                   opr_guid: resolvedOprGuid,
@@ -516,7 +559,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       if (ticketGuid) {
         const payload = {
           amount: Number(amount),
-          currency: ticketCurrency,
+          currency: selectedCurrency,
           payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
@@ -542,7 +585,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         const newPayment = {
           guid: getNextLocalPaymentGuid(),
           amount: Number(amount),
-          currency: ticketCurrency,
+          currency: selectedCurrency,
           payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
@@ -555,6 +598,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           description: "",
           opr_guid: "",
         });
+        setSelectedCurrency(ticketCurrency || "USD");
       }
     }
   };
@@ -661,6 +705,35 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               </Typography>
               {isInitialLoading ? (
                 <Skeleton variant="rounded" width={80} height={24} />
+              ) : hasMixedPaid ? (
+                <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.6 }}>
+                  <Typography
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1.1rem",
+                      lineHeight: 1,
+                      color: "#16a34a",
+                    }}
+                  >
+                    ${paidUsd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Typography>
+                  <Typography
+                    component="span"
+                    sx={{ fontWeight: 700, fontSize: "0.85rem", color: "text.secondary" }}
+                  >
+                    +
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1.1rem",
+                      lineHeight: 1,
+                      color: "#16a34a",
+                    }}
+                  >
+                    {paidTmt.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m
+                  </Typography>
+                </Box>
               ) : (
                 <Typography
                   sx={{
@@ -731,15 +804,81 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
                   {/* Row 2: Price and Note */}
                   <Grid size={6}>
-                    <CustomTextField
-                      name="amount"
-                      control={control}
-                      label={t("payment.amount")}
-                      placeholder={t("payment.amount")}
-                      type="number"
-                      required
-                      startIcon={<span style={{ fontSize: "0.9rem", fontWeight: 600 }}>{currencySymbol}</span>}
-                    />
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <Typography
+                          variant="caption"
+                          sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.75rem" }}
+                        >
+                          {t("payment.amount")} *
+                        </Typography>
+                        <ToggleButtonGroup
+                          value={selectedCurrency}
+                          exclusive
+                          onChange={(e, val) => {
+                            if (val) setSelectedCurrency(val);
+                          }}
+                          size="small"
+                          sx={{
+                            height: 22,
+                            p: "1px",
+                            borderRadius: "5px",
+                            bgcolor: (theme) => alpha(theme.palette.divider, 0.1),
+                            border: "1px solid",
+                            borderColor: "divider",
+                            "& .MuiToggleButton-root": {
+                              px: 0.8,
+                              py: 0,
+                              fontSize: "10.5px",
+                              fontWeight: 700,
+                              lineHeight: 1,
+                              textTransform: "none",
+                              border: 0,
+                              borderRadius: "4px",
+                              color: "text.secondary",
+                              "&.Mui-selected": {
+                                bgcolor: "primary.main",
+                                color: "#fff",
+                                "&:hover": { bgcolor: "primary.dark" },
+                              },
+                            },
+                          }}
+                        >
+                          <ToggleButton value="USD">$ USD</ToggleButton>
+                          <ToggleButton value="TMT">m TMT</ToggleButton>
+                        </ToggleButtonGroup>
+                      </Box>
+                      <CustomTextField
+                        name="amount"
+                        control={control}
+                        placeholder={t("payment.amount")}
+                        type="number"
+                        required
+                        startIcon={
+                          <span style={{ fontSize: "0.9rem", fontWeight: 700 }}>
+                            {CURRENCY_SYMBOLS[selectedCurrency] || "$"}
+                          </span>
+                        }
+                      />
+                      {selectedCurrency !== ticketCurrency && Number(amountValue) > 0 && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                            fontSize: "11px",
+                            fontWeight: 500,
+                            lineHeight: 1,
+                          }}
+                        >
+                          ≈ {formatCurrency(
+                            selectedCurrency === "TMT"
+                              ? Number(amountValue) / exchangeRate
+                              : Number(amountValue) * exchangeRate,
+                            ticketCurrency
+                          )} (1 $ = {exchangeRate} m)
+                        </Typography>
+                      )}
+                    </Box>
                   </Grid>
                   <Grid size={6}>
                     <CustomTextField
@@ -846,9 +985,28 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1, minWidth: 0 }}>
                             {/* Row 1: Amount & Date/Method */}
                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main" }}>
-                                {formatCurrency(p.amount, ticketCurrency)}
-                              </Typography>
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main" }}>
+                                  {formatCurrency(p.amount, p.currency || ticketCurrency)}
+                                </Typography>
+                                {p.currency && p.currency !== ticketCurrency && (
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      color: "text.secondary",
+                                      fontWeight: 500,
+                                      fontSize: "11px",
+                                    }}
+                                  >
+                                    (≈ {formatCurrency(
+                                      p.currency === "TMT"
+                                        ? Number(p.amount) / exchangeRate
+                                        : Number(p.amount) * exchangeRate,
+                                      ticketCurrency
+                                    )})
+                                  </Typography>
+                                )}
+                              </Box>
                               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                                 {formatDateToDisplay(p.payment_date || p.date)} • {getMethodLabel(p.method)}
                               </Typography>
