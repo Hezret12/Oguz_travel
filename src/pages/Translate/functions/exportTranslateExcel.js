@@ -17,7 +17,6 @@ const formatDate = (val) => {
 const formatTime = (val) => {
   if (!val) return "";
   const str = String(val).trim();
-  // If time is "08:34:00" -> "8:34"
   const parts = str.split(":");
   if (parts.length >= 2) {
     const hours = parseInt(parts[0], 10);
@@ -28,18 +27,45 @@ const formatTime = (val) => {
 };
 
 /**
- * Resolves source/origin office (NIREDEN GELENI)
+ * Safely extracts localized or nested string from potential JSON or objects
+ */
+const extractText = (val) => {
+  if (!val) return "";
+  if (typeof val === "string") {
+    const trimmed = val.trim();
+    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        return parsed.tk || parsed.ru || parsed.en || Object.values(parsed)[0] || "";
+      } catch {
+        return trimmed;
+      }
+    }
+    return trimmed;
+  }
+  if (typeof val === "object") {
+    return val.tk || val.ru || val.en || val.shortName || val.fullName || val.name || "";
+  }
+  return String(val);
+};
+
+/**
+ * Resolves source/origin office (NIREDEN GELENI) without raw JSON leaking
  */
 const resolveOrigin = (row) => {
-  return (
+  const originVal =
     row.nireden_geleni ||
     row.source_origin ||
     row.operator?.office?.shortName ||
     row.client?.office?.shortName ||
     row.office?.shortName ||
-    (row.operator?.office?.fullName ? String(row.operator.office.fullName).toUpperCase() : "") ||
-    "OGUZABAT"
-  );
+    row.operator?.office?.fullName ||
+    row.client?.office?.fullName ||
+    row.office?.fullName ||
+    "OGUZABAT";
+
+  const resolved = extractText(originVal);
+  return resolved ? String(resolved).toUpperCase() : "OGUZABAT";
 };
 
 /**
@@ -52,8 +78,12 @@ const resolveStatus = (row) => {
 };
 
 /**
- * Export translation table to Excel matching the exact visual specification:
- * Green header (#66A64F), white text, AutoFilter on Row 1, 14 columns, and Total row at bottom.
+ * Export translation table to Excel:
+ * - Starts at D4 (Row 4, Column 4)
+ * - Green header (#66A64F), white text, AutoFilter on D4:Q4
+ * - Header text sized and wrapped to prevent any clipping (height 56)
+ * - Continuous medium outer border around the entire table perimeter
+ * - Total row at the bottom with Excel formulas
  */
 export const exportTranslateExcel = async (translations = [], options = {}) => {
   const fileName = options.fileName || "Terjime_Hasabaty";
@@ -67,82 +97,95 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     views: [{ showGridLines: true }],
   });
 
-  // 14 Columns matching user's image exactly
+  const START_ROW = 4;
+  const START_COL = 4; // Column D (4th column)
+
+  // Empty margin column widths (A, B, C)
+  worksheet.getColumn(1).width = 4;
+  worksheet.getColumn(2).width = 4;
+  worksheet.getColumn(3).width = 4;
+
+  // Margin rows height
+  worksheet.getRow(1).height = 15;
+  worksheet.getRow(2).height = 15;
+  worksheet.getRow(3).height = 15;
+
+  // 14 Columns matching user's image starting at Column D
   const columnsConfig = [
-    { header: "TERJIMAN\nGELEN GUNI", key: "received_day", width: 15, align: "center" },
-    { header: "TERJIMA\nBERLEN\nWAGTY", key: "received_time", width: 12, align: "center" },
-    { header: "NIREDEN GELENI", key: "nireden_geleni", width: 18, align: "left" },
+    { header: "TERJIMAN\nGELEN GÜNI", key: "received_day", width: 16, align: "center" },
+    { header: "TERJIMÄ\nBERLEN WAGTY", key: "received_time", width: 14, align: "center" },
+    { header: "NIREDEN\nGELENI", key: "nireden_geleni", width: 18, align: "left" },
     { header: "OPERATOR", key: "operator", width: 26, align: "left" },
-    { header: "SAHYPA\nSANY", key: "page_count", width: 11, align: "right" },
-    { header: "RAYATYN ADY", key: "client_name", width: 22, align: "left" },
-    { header: "HAYSY DILEN\nHAYSY DILE", key: "direction", width: 16, align: "center" },
-    { header: "TERJIMED\nEN GELEN\nWAGTY", key: "completed_time", width: 13, align: "center" },
-    { header: "STATUS", key: "status", width: 12, align: "center" },
-    { header: "TERJIMEDEN\nGELEN\nSAHYPA\nSANY", key: "completed_page_count", width: 14, align: "right" },
-    { header: "TERJIME EDILIP\nGELEN GUNI", key: "completed_day", width: 16, align: "center" },
-    { header: "TERJIME EDEN", key: "translator", width: 24, align: "left" },
-    { header: "DUZEDILEN\nTERJIME", key: "correction_status", width: 14, align: "center" },
-    { header: "TÖLENEN PUL", key: "price", width: 14, align: "right" },
+    { header: "SAHYPA\nSANY", key: "page_count", width: 13, align: "right" },
+    { header: "RAÝATYŇ\nADY", key: "client_name", width: 24, align: "left" },
+    { header: "HAÝSY DILDEN\nHAÝSY DILE", key: "direction", width: 18, align: "center" },
+    { header: "TERJIMEDEN\nGELEN WAGTY", key: "completed_time", width: 16, align: "center" },
+    { header: "STATUS", key: "status", width: 14, align: "center" },
+    { header: "TERJIMEDEN GELEN\nSAHYPA SANY", key: "completed_page_count", width: 18, align: "right" },
+    { header: "TERJIME EDILIP\nGELEN GÜNI", key: "completed_day", width: 17, align: "center" },
+    { header: "TERJIME\nEDEN", key: "translator", width: 26, align: "left" },
+    { header: "DÜZEDILEN\nTERJIME", key: "correction_status", width: 16, align: "center" },
+    { header: "TÖLENEN\nPUL", key: "price", width: 16, align: "right" },
   ];
 
-  // Set column widths
-  worksheet.columns = columnsConfig.map((col) => ({
-    width: col.width,
-  }));
+  // Set widths for table columns (D through Q)
+  columnsConfig.forEach((col, idx) => {
+    worksheet.getColumn(START_COL + idx).width = col.width;
+  });
 
-  // Style Header Row (Row 1)
-  const headerRow = worksheet.getRow(1);
-  headerRow.height = 42;
+  const END_COL = START_COL + columnsConfig.length - 1; // Column 17 (Q)
+  const totalRowIndex = START_ROW + translations.length + 1;
+
+  // Header Row (Row 4)
+  const headerRow = worksheet.getRow(START_ROW);
+  headerRow.height = 56; // Generous height to fit all multi-line labels
 
   const headerFill = {
     type: "pattern",
     pattern: "solid",
-    fgColor: { argb: "FF66A64F" }, // Exact Excel green from image
-  };
-
-  const headerBorder = {
-    top: { style: "thin", color: { argb: "FF5E9C47" } },
-    bottom: { style: "thin", color: { argb: "FF5E9C47" } },
-    left: { style: "thin", color: { argb: "FF5E9C47" } },
-    right: { style: "thin", color: { argb: "FF5E9C47" } },
+    fgColor: { argb: "FF66A64F" }, // Exact Excel green
   };
 
   columnsConfig.forEach((col, idx) => {
-    const cell = headerRow.getCell(idx + 1);
+    const colNumber = START_COL + idx;
+    const cell = headerRow.getCell(colNumber);
     cell.value = col.header;
-    cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+    cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: "FFFFFFFF" } };
     cell.fill = headerFill;
     cell.alignment = {
       vertical: "middle",
       horizontal: "center",
       wrapText: true,
     };
-    cell.border = headerBorder;
+
+    // Header borders with medium top/outer perimeter
+    cell.border = {
+      top: { style: "medium", color: { argb: "FF386624" } },
+      bottom: { style: "thin", color: { argb: "FF5E9C47" } },
+      left: colNumber === START_COL
+        ? { style: "medium", color: { argb: "FF386624" } }
+        : { style: "thin", color: { argb: "FF5E9C47" } },
+      right: colNumber === END_COL
+        ? { style: "medium", color: { argb: "FF386624" } }
+        : { style: "thin", color: { argb: "FF5E9C47" } },
+    };
   });
 
-  // Enable AutoFilter on Row 1 (header dropdown arrows)
+  // Enable AutoFilter on row 4 from Column D (4) to Q (17)
   worksheet.autoFilter = {
-    from: "A1",
-    to: "N1",
-  };
-
-  // Thin cell borders for data
-  const dataBorder = {
-    top: { style: "thin", color: { argb: "FFD9D9D9" } },
-    bottom: { style: "thin", color: { argb: "FFD9D9D9" } },
-    left: { style: "thin", color: { argb: "FFD9D9D9" } },
-    right: { style: "thin", color: { argb: "FFD9D9D9" } },
+    from: { row: START_ROW, column: START_COL },
+    to: { row: START_ROW, column: END_COL },
   };
 
   let sumPrice = 0;
   let sumPages = 0;
   let sumCompletedPages = 0;
 
-  // Populate Data Rows
+  // Populate Data Rows (starting from Row 5)
   translations.forEach((row, offset) => {
-    const rowIndex = offset + 2;
+    const rowIndex = START_ROW + 1 + offset;
     const currentRow = worksheet.getRow(rowIndex);
-    currentRow.height = 20;
+    currentRow.height = 21;
 
     const pageCount = Number(row.page_count || 0);
     const completedPageCount =
@@ -159,82 +202,99 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       formatDate(row.received_day),
       formatTime(row.received_time),
       resolveOrigin(row),
-      row.operator?.fullName ? String(row.operator.fullName).toUpperCase() : "",
+      row.operator?.fullName ? String(extractText(row.operator.fullName)).toUpperCase() : "",
       pageCount,
-      row.client?.fullName ? String(row.client.fullName).toUpperCase() : "",
+      row.client?.fullName ? String(extractText(row.client.fullName)).toUpperCase() : "",
       row.source_to_target ? String(row.source_to_target).toUpperCase() : "",
       formatTime(row.completed_time),
       resolveStatus(row),
       completedPageCount !== null ? completedPageCount : "",
       formatDate(row.completed_day),
-      row.translator?.fullName ? String(row.translator.fullName).toUpperCase() : "",
+      row.translator?.fullName ? String(extractText(row.translator.fullName)).toUpperCase() : "",
       row.correction_status ? String(row.correction_status).toUpperCase() : "DOGRY",
       price,
     ];
 
-    rowData.forEach((val, colIdx) => {
-      const cell = currentRow.getCell(colIdx + 1);
+    rowData.forEach((val, idx) => {
+      const colNumber = START_COL + idx;
+      const cell = currentRow.getCell(colNumber);
       cell.value = val;
       cell.font = { name: "Calibri", size: 10 };
       cell.alignment = {
         vertical: "middle",
-        horizontal: columnsConfig[colIdx].align,
+        horizontal: columnsConfig[idx].align,
       };
-      cell.border = dataBorder;
+
+      // Cell border with outer border handling on D and Q
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFD9D9D9" } },
+        bottom: { style: "thin", color: { argb: "FFD9D9D9" } },
+        left: colNumber === START_COL
+          ? { style: "medium", color: { argb: "FF000000" } }
+          : { style: "thin", color: { argb: "FFD9D9D9" } },
+        right: colNumber === END_COL
+          ? { style: "medium", color: { argb: "FF000000" } }
+          : { style: "thin", color: { argb: "FFD9D9D9" } },
+      };
 
       // Numeric formatting for price
-      if (colIdx === 13 && typeof val === "number") {
+      if (idx === 13 && typeof val === "number") {
         cell.numFmt = "#,##0";
       }
     });
   });
 
   // Total Row at the bottom
-  const totalRowIndex = translations.length + 2;
   const totalRow = worksheet.getRow(totalRowIndex);
-  totalRow.height = 22;
+  totalRow.height = 24;
 
-  const totalBorder = {
-    top: { style: "thin", color: { argb: "FF000000" } },
-    bottom: { style: "thin", color: { argb: "FF000000" } },
-    left: { style: "thin", color: { argb: "FFD9D9D9" } },
-    right: { style: "thin", color: { argb: "FFD9D9D9" } },
-  };
-
-  // Fill Total row cells
-  for (let c = 1; c <= columnsConfig.length; c++) {
+  for (let c = START_COL; c <= END_COL; c++) {
     const cell = totalRow.getCell(c);
-    cell.border = totalBorder;
     cell.font = { name: "Calibri", size: 10, bold: true };
-    cell.alignment = { vertical: "middle", horizontal: columnsConfig[c - 1].align };
+    cell.alignment = { vertical: "middle", horizontal: columnsConfig[c - START_COL].align };
+
+    // Total row border with medium outer perimeter
+    cell.border = {
+      top: { style: "thin", color: { argb: "FF000000" } },
+      bottom: { style: "medium", color: { argb: "FF000000" } },
+      left: c === START_COL
+        ? { style: "medium", color: { argb: "FF000000" } }
+        : { style: "thin", color: { argb: "FFD9D9D9" } },
+      right: c === END_COL
+        ? { style: "medium", color: { argb: "FF000000" } }
+        : { style: "thin", color: { argb: "FFD9D9D9" } },
+    };
   }
 
-  // Label "Total" in Column A
-  const cellA = totalRow.getCell(1);
-  cellA.value = "Total";
-  cellA.alignment = { vertical: "middle", horizontal: "left" };
+  // Label "Total" in Column D (START_COL)
+  const cellTotalLabel = totalRow.getCell(START_COL);
+  cellTotalLabel.value = "Total";
+  cellTotalLabel.alignment = { vertical: "middle", horizontal: "left" };
 
-  // Total formula for SAHYPA SANY (Column 5 / E)
+  const firstDataRow = START_ROW + 1;
+  const lastDataRow = totalRowIndex - 1;
+
   if (translations.length > 0) {
-    const cellPages = totalRow.getCell(5);
+    // Total formula for SAHYPA SANY (Column H = 8)
+    const cellPages = totalRow.getCell(START_COL + 4);
     cellPages.value = {
-      formula: `SUM(E2:E${totalRowIndex - 1})`,
+      formula: `SUM(H${firstDataRow}:H${lastDataRow})`,
       result: sumPages,
     };
     cellPages.numFmt = "#,##0";
 
-    // Total formula for TERJIMEDEN GELEN SAHYPA SANY (Column 10 / J)
-    const cellCompletedPages = totalRow.getCell(10);
+    // Total formula for TERJIMEDEN GELEN SAHYPA SANY (Column M = 13)
+    const cellCompletedPages = totalRow.getCell(START_COL + 9);
     cellCompletedPages.value = {
-      formula: `SUM(J2:J${totalRowIndex - 1})`,
+      formula: `SUM(M${firstDataRow}:M${lastDataRow})`,
       result: sumCompletedPages,
     };
     cellCompletedPages.numFmt = "#,##0";
 
-    // Total formula for TÖLENEN PUL (Column 14 / N)
-    const cellPrice = totalRow.getCell(14);
+    // Total formula for TÖLENEN PUL (Column Q = 17)
+    const cellPrice = totalRow.getCell(START_COL + 13);
     cellPrice.value = {
-      formula: `SUM(N2:N${totalRowIndex - 1})`,
+      formula: `SUM(Q${firstDataRow}:Q${lastDataRow})`,
       result: sumPrice,
     };
     cellPrice.numFmt = "#,##0";
