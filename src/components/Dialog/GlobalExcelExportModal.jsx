@@ -131,11 +131,11 @@ export const GlobalExcelExportModal = ({
         });
       }
 
-      toast.success(t("common.excelExportSuccess", "Excel faýly üstünlikli ýüklenildi"));
+      toast.success(t("common.excelExportSuccess"));
       handleClose();
     } catch (err) {
       console.error("Excel export error:", err);
-      toast.error(err?.message || t("common.exportError", "Excel faýly ýüklenende ýalňyşlyk ýüze çykdy"));
+      toast.error(err?.message || t("common.exportError"));
     } finally {
       setIsExporting(false);
       setProgressInfo(null);
@@ -152,7 +152,6 @@ export const GlobalExcelExportModal = ({
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
           <Grid container spacing={2}>
-            {/* Checkbox to include active page search & filters */}
             <Grid size={{ xs: 12 }}>
               <CustomCheckbox
                 name="include_page_filters"
@@ -164,7 +163,6 @@ export const GlobalExcelExportModal = ({
               />
             </Grid>
 
-            {/* Custom module-specific filter fields or universal date range fallback */}
             {customFilterFields ? (
               customFilterFields({ control })
             ) : (
@@ -173,14 +171,14 @@ export const GlobalExcelExportModal = ({
                   <CustomDatePicker
                     name="date_from"
                     control={control}
-                    label={t("dateFrom", "Başlangyç senesi")}
+                    label={t("dateFrom")}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <CustomDatePicker
                     name="date_to"
                     control={control}
-                    label={t("dateTo", "Soňky senesi")}
+                    label={t("dateTo")}
                   />
                 </Grid>
               </>
@@ -193,10 +191,10 @@ export const GlobalExcelExportModal = ({
           onCancel={handleClose}
           saveText={
             progressInfo && progressInfo.total > 0
-              ? `${t("loading", "Ýüklenýär...")} (${progressInfo.loaded} / ${progressInfo.total})`
-              : t("common.exportExcel", "Excel-e Eksport")
+              ? `${t("loading")} (${progressInfo.loaded} / ${progressInfo.total})`
+              : t("common.exportExcel")
           }
-          cancelText={t("cancel", "Ýatyrmak")}
+          cancelText={t("cancel")}
         />
       </CustomForm>
     </CustomDialog>
