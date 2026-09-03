@@ -71,14 +71,12 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   });
 
   const START_ROW = 4;
-  const START_COL = 4; // Column D (4th column)
+  const START_COL = 4;
 
-  // Empty margin column widths (A, B, C)
   worksheet.getColumn(1).width = 4;
   worksheet.getColumn(2).width = 4;
   worksheet.getColumn(3).width = 4;
 
-  // Margin rows height
   worksheet.getRow(1).height = 15;
   worksheet.getRow(2).height = 15;
   worksheet.getRow(3).height = 15;
