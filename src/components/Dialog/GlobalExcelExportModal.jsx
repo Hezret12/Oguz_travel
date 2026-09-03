@@ -146,7 +146,7 @@ export const GlobalExcelExportModal = ({
     <CustomDialog open={open} close={handleClose} widthX={640}>
       <CustomDialogHeader
         variant="h5"
-        title={t("common.exportExcelModalTitle", "Excel-e Eksport Etmek")}
+        title={t("common.exportExcelModalTitle")}
       />
 
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
@@ -156,10 +156,7 @@ export const GlobalExcelExportModal = ({
               <CustomCheckbox
                 name="include_page_filters"
                 control={control}
-                label={t(
-                  "common.includeCurrentPageFilters",
-                  "Sahypadaky bar bolan gözleg we filterleri hem goşmak",
-                )}
+                label={t("common.includeCurrentPageFilters")}
               />
             </Grid>
 
