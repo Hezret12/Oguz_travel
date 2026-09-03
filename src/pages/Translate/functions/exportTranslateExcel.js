@@ -36,13 +36,9 @@ const extractText = (val) => {
   return String(val);
 };
 
-/**
- * Resolves source/origin office (NIREDEN GELENI) without raw JSON leaking
- */
+
 const resolveOrigin = (row) => {
   const originVal =
-    row.nireden_geleni ||
-    row.source_origin ||
     row.operator?.office?.shortName ||
     row.client?.office?.shortName ||
     row.office?.shortName ||
@@ -55,9 +51,6 @@ const resolveOrigin = (row) => {
   return resolved ? String(resolved).toUpperCase() : "OGUZABAT";
 };
 
-/**
- * Resolves translation status label
- */
 const resolveStatus = (row) => {
   if (row.status === "true" || row.status === true) return "Gyssagly";
   if (row.status === "0") return "Gaýtaryldy";
