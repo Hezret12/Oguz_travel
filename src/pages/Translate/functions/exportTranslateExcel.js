@@ -3,9 +3,7 @@ import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 import { formatDate } from "../../../functions/generalHelpers";
 
-/**
- * Formats time into H:mm (e.g. "8:34", "10:00")
- */
+
 const formatTime = (val) => {
   if (!val) return "";
   const str = String(val).trim();
@@ -18,9 +16,6 @@ const formatTime = (val) => {
   return str.slice(0, 5);
 };
 
-/**
- * Safely extracts localized or nested string from potential JSON or objects
- */
 const extractText = (val) => {
   if (!val) return "";
   if (typeof val === "string") {
