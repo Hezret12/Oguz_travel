@@ -17,10 +17,7 @@ import {
   fetchAllPaginatedData,
 } from "../../functions/excelExportHelper";
 
-/**
- * Universal Global Excel Export Modal.
- * Works with any API endpoint and page module (B2B, Turkish Airlines, Visa, ReferralLetter, etc.)
- */
+
 export const GlobalExcelExportModal = ({
   open,
   close,
@@ -65,7 +62,6 @@ export const GlobalExcelExportModal = ({
     setProgressInfo(null);
 
     try {
-      // 1. Sanitize active page filter parameters (strip UI pagination keys: page, limit, pageSize)
       const sanitizedPageFilters = {};
       if (formData.include_page_filters && baseQueryParams) {
         Object.entries(baseQueryParams).forEach(([key, val]) => {
@@ -82,7 +78,6 @@ export const GlobalExcelExportModal = ({
         });
       }
 
-      // 2. Build final filter payload merging modal inputs with active page filters
       let filterPayload = { ...sanitizedPageFilters };
 
       if (transformPayload) {
@@ -105,7 +100,6 @@ export const GlobalExcelExportModal = ({
         });
       }
 
-      // 3. Automatically fetch all pages in batches
       const items = await fetchAllPaginatedData(
         apiFn,
         filterPayload,
@@ -114,7 +108,7 @@ export const GlobalExcelExportModal = ({
       );
 
       if (!items || items.length === 0) {
-        toast.error(t("common.noDataToExport", "Dışa aktarılacak veri bulunamadı"));
+        toast.error(t("common.noDataToExport"));
         return;
       }
 
