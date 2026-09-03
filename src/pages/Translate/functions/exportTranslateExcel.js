@@ -126,7 +126,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       wrapText: true,
     };
 
-    // Header borders with medium top/outer perimeter
     cell.border = {
       top: { style: "medium", color: { argb: "FF386624" } },
       bottom: { style: "thin", color: { argb: "FF5E9C47" } },
@@ -139,7 +138,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     };
   });
 
-  // Enable AutoFilter on row 4 from Column D (4) to Q (17)
   worksheet.autoFilter = {
     from: { row: START_ROW, column: START_COL },
     to: { row: START_ROW, column: END_COL },
@@ -149,7 +147,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   let sumPages = 0;
   let sumCompletedPages = 0;
 
-  // Populate Data Rows (starting from Row 5)
   translations.forEach((row, offset) => {
     const rowIndex = START_ROW + 1 + offset;
     const currentRow = worksheet.getRow(rowIndex);
@@ -193,7 +190,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
         horizontal: columnsConfig[idx].align,
       };
 
-      // Cell border with outer border handling on D and Q
       cell.border = {
         top: { style: "thin", color: { argb: "FFD9D9D9" } },
         bottom: { style: "thin", color: { argb: "FFD9D9D9" } },
@@ -205,14 +201,12 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
           : { style: "thin", color: { argb: "FFD9D9D9" } },
       };
 
-      // Numeric formatting for price
       if (idx === 13 && typeof val === "number") {
         cell.numFmt = "#,##0";
       }
     });
   });
 
-  // Total Row at the bottom
   const totalRow = worksheet.getRow(totalRowIndex);
   totalRow.height = 24;
 
@@ -221,7 +215,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     cell.font = { name: "Calibri", size: 10, bold: true };
     cell.alignment = { vertical: "middle", horizontal: columnsConfig[c - START_COL].align };
 
-    // Total row border with medium outer perimeter
     cell.border = {
       top: { style: "thin", color: { argb: "FF000000" } },
       bottom: { style: "medium", color: { argb: "FF000000" } },
@@ -234,7 +227,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     };
   }
 
-  // Label "Total" in Column D (START_COL)
   const cellTotalLabel = totalRow.getCell(START_COL);
   cellTotalLabel.value = "Total";
   cellTotalLabel.alignment = { vertical: "middle", horizontal: "left" };
@@ -243,7 +235,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   const lastDataRow = totalRowIndex - 1;
 
   if (translations.length > 0) {
-    // Total formula for SAHYPA SANY (Column H = 8)
     const cellPages = totalRow.getCell(START_COL + 4);
     cellPages.value = {
       formula: `SUM(H${firstDataRow}:H${lastDataRow})`,
@@ -251,7 +242,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     };
     cellPages.numFmt = "#,##0";
 
-    // Total formula for TERJIMEDEN GELEN SAHYPA SANY (Column M = 13)
     const cellCompletedPages = totalRow.getCell(START_COL + 9);
     cellCompletedPages.value = {
       formula: `SUM(M${firstDataRow}:M${lastDataRow})`,
