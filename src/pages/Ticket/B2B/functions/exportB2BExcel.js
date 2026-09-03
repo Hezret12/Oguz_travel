@@ -3,9 +3,7 @@ import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 import { formatDate } from "../../../../functions/generalHelpers";
 
-/**
- * Safely extracts localized or nested string from potential JSON or objects
- */
+
 const extractText = (val) => {
   if (!val) return "";
   if (typeof val === "string") {
@@ -26,9 +24,7 @@ const extractText = (val) => {
   return String(val);
 };
 
-/**
- * Resolves ticket status key
- */
+
 const getStatusKey = (row) => {
   if (row.tstatus?.name?.en) return row.tstatus.name.en;
   if (row.tstatus?.name && typeof row.tstatus.name === "string") return row.tstatus.name;
@@ -38,24 +34,19 @@ const getStatusKey = (row) => {
   return "";
 };
 
-/**
- * Resolves office short name or code
- */
+
 const resolveOffice = (row) => {
   const officeVal =
     row.assignment_operator?.office?.shortName ||
     row.assignment_operator?.office?.fullName ||
     row.office?.shortName ||
     row.office?.fullName ||
-    row.client?.office?.shortName ||
     "AG1";
   const text = extractText(officeVal);
   return text ? String(text).toUpperCase() : "AG1";
 };
 
-/**
- * Resolves trip type (ONE WAY / ROUND TRIP)
- */
+
 const resolveTripType = (row) => {
   if (row.travel_type !== undefined && row.travel_type !== null) {
     return String(row.travel_type) === "1" ? "ROUND TRIP" : "ONE WAY";
@@ -64,9 +55,7 @@ const resolveTripType = (row) => {
   return "ONE WAY";
 };
 
-/**
- * Resolves card digits (e.g. "**0329")
- */
+
 const resolveCard = (row) => {
   if (!row.card) return "";
   const cardStr = String(row.card).trim();
@@ -75,9 +64,7 @@ const resolveCard = (row) => {
   return `**${cardStr}`;
 };
 
-/**
- * Resolves payment percentage accurately (e.g. "100.00%", "50%", 100)
- */
+
 const resolvePercent = (row) => {
   const raw = row.paidPercentage ?? row.payment_percent ?? row.paymentPercentage;
   if (raw !== undefined && raw !== null && raw !== "") {
@@ -94,9 +81,7 @@ const resolvePercent = (row) => {
   return isPaid ? "100%" : "0%";
 };
 
-/**
- * Resolves payment status label
- */
+
 const resolveIsPaid = (row) => {
   if (
     row.is_paid === true ||
@@ -109,16 +94,7 @@ const resolveIsPaid = (row) => {
   return "KREDIT";
 };
 
-/**
- * Export B2B Tickets to Excel matching the exact user specification:
- * - Starts at D4 (4x4)
- * - 22 columns (20 from image + TÖLEG ÝAGDAÝY + TÖLEG GÖTERIMI)
- * - Full continuous medium outer border around the entire table perimeter
- * - Single solid bottom border on total row (not double)
- * - AutoFilter on D4:Y4
- * - Accounting currency formatting ($ #,##0.00;($ #,##0.00);$  -)
- * - Total row with formulas for Net Baha (Col S), Satyş Baha (Col T), and Peýda (Col U)
- */
+
 export const exportB2BExcel = async (tickets = [], options = {}) => {
   const fileName = options.fileName || "B2B_Hasabaty";
   const sheetName = options.sheetName || "B2B";
@@ -144,15 +120,14 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
   worksheet.getRow(2).height = 15;
   worksheet.getRow(3).height = 15;
 
-  // 22 Columns (starting from Column D = 4 through Column Y = 25)
   const columnsConfig = [
     { header: "T/B", key: "index_number", width: 6, align: "center" },
-    { header: "SENE", key: "datetime", width: 13, align: "center" },
-    { header: "OPERATOR", key: "assignment_operator", width: 16, align: "left" },
-    { header: "OFIS", key: "office", width: 10, align: "center" },
-    { header: "OPERATOR2", key: "receiver_operator", width: 16, align: "left" },
-    { header: "AGENT", key: "agent", width: 15, align: "left" },
-    { header: "ÝOLAGÇY", key: "passenger", width: 25, align: "left" },
+    { header: "Sene", key: "datetime", width: 13, align: "center" },
+    { header: "Tabşyryjy, Operator", key: "assignment_operator", width: 30, align: "left" },
+    { header: "Ofis", key: "office", width: 10, align: "center" },
+    { header: "Kabul ediji, Operator", key: "receiver_operator", width: 30, align: "left" },
+    { header: "AGENT", key: "agent", width: 25, align: "left" },
+    { header: "ÝOLAGÇY", key: "passenger", width: 30, align: "left" },
     { header: "PASSPORT NO", key: "passport", width: 14, align: "center" },
     { header: "PNR", key: "pnr", width: 13, align: "center" },
     { header: "STATUS", key: "status", width: 12, align: "center" },
