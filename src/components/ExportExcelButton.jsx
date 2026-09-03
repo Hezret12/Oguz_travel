@@ -32,6 +32,7 @@ const ExportExcelButton = ({
   defaultValues = {},
   customFilterFields = null,
   transformPayload = null,
+  customExportFn = null,
   variant = "outlined",
   size = "medium",
   disabled = false,
@@ -136,6 +137,7 @@ const ExportExcelButton = ({
           defaultValues={defaultValues}
           customFilterFields={customFilterFields}
           transformPayload={transformPayload}
+          customExportFn={customExportFn}
         />
       )}
     </>

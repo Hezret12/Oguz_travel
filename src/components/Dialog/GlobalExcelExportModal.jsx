@@ -34,6 +34,7 @@ export const GlobalExcelExportModal = ({
   defaultValues = {},
   customFilterFields = null,
   transformPayload = null,
+  customExportFn = null,
 }) => {
   const { t } = useLocale();
   const [isExporting, setIsExporting] = useState(false);
@@ -117,14 +118,24 @@ export const GlobalExcelExportModal = ({
         return;
       }
 
-      await exportStyledExcelFile({
-        titleBanner,
-        rightHeader,
-        columns,
-        data: items,
-        fileName,
-        sheetName,
-      });
+      if (customExportFn) {
+        await customExportFn(items, {
+          titleBanner,
+          rightHeader,
+          columns,
+          fileName,
+          sheetName,
+        });
+      } else {
+        await exportStyledExcelFile({
+          titleBanner,
+          rightHeader,
+          columns,
+          data: items,
+          fileName,
+          sheetName,
+        });
+      }
 
       toast.success(t("common.excelExportSuccess", "Excel faýly üstünlikli ýüklenildi"));
       handleClose();

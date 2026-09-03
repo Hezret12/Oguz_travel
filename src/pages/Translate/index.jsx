@@ -38,6 +38,8 @@ import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { deleteTranslationApi } from "../../api/queries/delete";
 import { PaymentManagementModal } from "../../components/Dialog/PaymentManagementModal";
+import ExportExcelButton from "../../components/ExportExcelButton";
+import { exportTranslateExcel } from "./functions/exportTranslateExcel";
 import dayjs from "dayjs";
 
 const FILTER_LABEL_KEYS = {
@@ -536,7 +538,15 @@ const TranslatePage = () => {
         filterButtonText={t("filter")}
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}
-      />
+      >
+        <ExportExcelButton
+          apiFn={getAllTranslationsApi}
+          queryParams={queryParams}
+          fileName="Terjime_Hasabaty"
+          sheetName="Terjime"
+          customExportFn={exportTranslateExcel}
+        />
+      </PageHeader>
 
       <FilterDrawer
         open={isDrawerOpen}
