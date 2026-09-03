@@ -77,6 +77,16 @@ export const useDateFormat = () => {
   return { format, dateOnlyFormat, formatChange };
 };
 
+/**
+ * Format a date string or timestamp directly without requiring React hook context.
+ * Standard format: "DD.MM.YYYY"
+ */
+export const formatDate = (date, format = "DD.MM.YYYY") => {
+  if (!date) return "";
+  const parsed = dayjs(date);
+  return parsed.isValid() ? parsed.format(format) : "";
+};
+
 export const useUserInfo = () => {
   const { user, isAuthenticated } = useAuth();
 

@@ -1,15 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import dayjs from "dayjs";
-
-/**
- * Formats date into DD.MM.YYYY
- */
-const formatDate = (val) => {
-  if (!val) return "";
-  const d = dayjs(val);
-  return d.isValid() ? d.format("DD.MM.YYYY") : String(val);
-};
+import { formatDate } from "../../../functions/generalHelpers";
 
 /**
  * Formats time into H:mm (e.g. "8:34", "10:00")
