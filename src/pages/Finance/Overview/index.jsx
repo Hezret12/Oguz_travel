@@ -248,11 +248,6 @@ const FinanceOverview = () => {
     return isTmt ? (u * rate) + t : u + (t / rate);
   };
 
-  const convertUsd = (val) => {
-    const num = Number(val || 0);
-    return isTmt ? num * rate : num;
-  };
-
   const summary = DEFAULT_FINANCE_SUMMARY;
   const cashBoxes = DEFAULT_CASH_BOXES;
   const realization = summary?.realization || [];
@@ -379,12 +374,9 @@ const FinanceOverview = () => {
 
   const cashBoxesWithConverted = cashBoxes.map((cb) => {
     const rawBalance = Number(cb.current_balance || 0);
-    let convertedBalance = rawBalance;
-    if (isTmt) {
-      convertedBalance = cb.currency === "USD" ? rawBalance * rate : rawBalance;
-    } else {
-      convertedBalance = cb.currency === "TMT" ? rawBalance / rate : rawBalance;
-    }
+    const convertedBalance = isTmt
+      ? (cb.currency === "USD" ? rawBalance * rate : rawBalance)
+      : (cb.currency === "TMT" ? rawBalance / rate : rawBalance);
     return {
       ...cb,
       rawBalance,
