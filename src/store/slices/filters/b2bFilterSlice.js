@@ -4,7 +4,8 @@ export const b2bFilterSlice = createFilterSlice({
   name: 'b2bFilters',
   defaultFilters: {
     search: '',
-    datetime: '',
+    start_date: '',
+    end_date: '',
     assignment_opr_guid: '',
     receiver_opr_guid: '',
     status_guid: '',

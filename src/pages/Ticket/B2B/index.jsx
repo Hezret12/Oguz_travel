@@ -133,6 +133,12 @@ const B2B = () => {
       if (key === "is_paid") {
         return `${t("columns.paymentStatus")}: ${value === "true" ? t("paymentPaid") : t("paymentCredit")}`;
       }
+      if (key === "start_date") {
+        return `${t("columns.startDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      if (key === "end_date") {
+        return `${t("columns.endDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
       if (key === "datetime") {
         return `${t("columns.dateTime")}: ${formatChange(value, { dateOnly: true })}`;
       }
