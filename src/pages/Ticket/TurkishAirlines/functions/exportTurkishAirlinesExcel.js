@@ -35,13 +35,13 @@ const getStatusName = (tstatus) => {
 const getStatusExcelStyle = (status) => {
   const key = String(status || "").trim().toUpperCase();
   if (key === "SALE") {
-    return { bg: "FF16A34A", fg: "FFFFFFFF" }; 
+    return { bg: "FF16A34A", fg: "FFFFFFFF" };
   }
   if (key === "REISSUE") {
-    return { bg: "FF2563EB", fg: "FFFFFFFF" }; // Blue (#2563eb)
+    return { bg: "FF2563EB", fg: "FFFFFFFF" };
   }
   if (key === "REFUND") {
-    return { bg: "FFDC2626", fg: "FFFFFFFF" }; // Red (#dc2626)
+    return { bg: "FFDC2626", fg: "FFFFFFFF" };
   }
   return null;
 };
