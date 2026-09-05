@@ -2,182 +2,48 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 
-const extractText = (val) => {
-  if (!val) return "";
-  if (typeof val === "string") {
-    const trimmed = val.trim();
-    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-      try {
-        const parsed = JSON.parse(trimmed);
-        return parsed.tk || parsed.ru || parsed.en || Object.values(parsed)[0] || "";
-      } catch {
-        return trimmed;
-      }
-    }
-    return trimmed;
-  }
-  if (typeof val === "object") {
-    return val.tk || val.ru || val.en || val.shortName || val.fullName || val.name || "";
-  }
-  return String(val);
-};
-
 const formatDate = (val) => {
   if (!val) return "";
-  const str = String(val).split("T")[0].trim();
-  const parts = str.split("-");
+  const d = String(val).split("T")[0].trim();
+  const parts = d.split("-");
   if (parts.length === 3) {
     return `${parts[2]}.${parts[1]}.${parts[0]}`;
   }
-  return str;
+  return d;
 };
 
-const getStatusKey = (row) => {
-  if (row.tstatus?.name?.en) return row.tstatus.name.en;
-  if (row.tstatus?.name && typeof row.tstatus.name === "string") return row.tstatus.name;
-  if (row.tstatus?.name) return extractText(row.tstatus.name);
-  if (row.status?.name?.en) return row.status.name.en;
-  if (row.status?.name && typeof row.status.name === "string") return row.status.name;
-  if (row.status?.name) return extractText(row.status.name);
-  if (typeof row.status === "string") return row.status;
-  if (row.sale_status) return row.sale_status;
+const getOfficeName = (office) => {
+  if (!office) return "";
+  if (office.shortName?.tk) return String(office.shortName.tk).toUpperCase();
+  if (office.fullName?.tk) return String(office.fullName.tk).toUpperCase();
+  if (typeof office.shortName === "string" && office.shortName) return office.shortName.toUpperCase();
+  if (typeof office.fullName === "string" && office.fullName) return office.fullName.toUpperCase();
+  if (office.shortName?.en) return String(office.shortName.en).toUpperCase();
+  if (office.fullName?.en) return String(office.fullName.en).toUpperCase();
   return "";
+};
+
+const getStatusName = (tstatus) => {
+  if (!tstatus) return "";
+  const name = tstatus.name;
+  if (typeof name === "object" && name) {
+    return String(name.en || name.tk || name.ru || "").trim().toUpperCase();
+  }
+  return String(name || "").trim().toUpperCase();
 };
 
 const getStatusExcelStyle = (status) => {
   const key = String(status || "").trim().toUpperCase();
-  if (key === "SALE" || key.includes("SALE") || key.includes("SAT")) {
-    return {
-      bg: "FF16A34A", // Green (#16a34a)
-      fg: "FFFFFFFF", // White text
-    };
+  if (key === "SALE") {
+    return { bg: "FF16A34A", fg: "FFFFFFFF" }; // Green (#16a34a)
   }
-  if (key === "REISSUE" || key.includes("REISSUE") || key.includes("ÇALŞ") || key.includes("DOLY")) {
-    return {
-      bg: "FF2563EB", // Blue (#2563eb)
-      fg: "FFFFFFFF", // White text
-    };
+  if (key === "REISSUE") {
+    return { bg: "FF2563EB", fg: "FFFFFFFF" }; // Blue (#2563eb)
   }
-  if (key === "REFUND" || key.includes("REFUND") || key.includes("RET") || key.includes("GAÝTAR") || key.includes("GAYTAR")) {
-    return {
-      bg: "FFDC2626", // Red (#dc2626)
-      fg: "FFFFFFFF", // White text
-    };
+  if (key === "REFUND") {
+    return { bg: "FFDC2626", fg: "FFFFFFFF" }; // Red (#dc2626)
   }
   return null;
-};
-
-const resolveOperator1 = (row) => {
-  const opr = row.ta_assignment_operator || row.assignment_operator;
-  const name = opr?.fullName || opr?.name || (typeof opr === "string" ? opr : "");
-  return name ? String(extractText(name)).toUpperCase() : "";
-};
-
-const resolveOperator1Office = (row) => {
-  const opr = row.ta_assignment_operator || row.assignment_operator;
-  const officeVal =
-    opr?.office?.shortName ||
-    opr?.office?.fullName ||
-    opr?.office ||
-    row.office?.shortName ||
-    row.office?.fullName ||
-    row.office;
-  const text = extractText(officeVal);
-  return text ? String(text).toUpperCase() : "";
-};
-
-const resolveOperator2 = (row) => {
-  const opr = row.ta_receiver_operator || row.receiver_operator;
-  const name = opr?.fullName || opr?.name || (typeof opr === "string" ? opr : "");
-  return name ? String(extractText(name)).toUpperCase() : "";
-};
-
-const resolveOperator2Office = (row) => {
-  const opr2 = row.ta_receiver_operator || row.receiver_operator;
-  const officeVal =
-    opr2?.office?.shortName ||
-    opr2?.office?.fullName ||
-    opr2?.office;
-  const text = extractText(officeVal);
-  if (text) return String(text).toUpperCase();
-
-  const opr1 = row.ta_assignment_operator || row.assignment_operator;
-  if (
-    opr2?.guid &&
-    opr1?.guid &&
-    opr2.guid === opr1.guid
-  ) {
-    return resolveOperator1Office(row);
-  }
-  if (
-    opr2?.fullName &&
-    opr1?.fullName &&
-    opr2.fullName === opr1.fullName
-  ) {
-    return resolveOperator1Office(row);
-  }
-  return "";
-};
-
-const resolveClientNames = (client) => {
-  if (!client) return { name: "", surname: "" };
-  let name = client.name || client.firstName || client.first_name || "";
-  let surname = client.surname || client.lastName || client.last_name || "";
-
-  if (!name && !surname && client.fullName) {
-    const parts = String(client.fullName).trim().split(/\s+/);
-    if (parts.length > 1) {
-      name = parts[0];
-      surname = parts.slice(1).join(" ");
-    } else {
-      name = parts[0] || "";
-    }
-  }
-  return {
-    name: name ? String(extractText(name)).toUpperCase() : "",
-    surname: surname ? String(extractText(surname)).toUpperCase() : "",
-  };
-};
-
-const resolvePassport = (row) => {
-  return (
-    row.client?.passport_number ||
-    row.client?.passportNumber ||
-    row.client?.passport ||
-    row.passport_number ||
-    row.passport ||
-    ""
-  );
-};
-
-const resolvePCOI = (row) => {
-  const val =
-    row.client?.passportCountryOfIssue ||
-    row.client?.passport_country ||
-    row.client?.pcoi ||
-    row.pcoi ||
-    "";
-  const text = extractText(val);
-  return text ? String(text).toUpperCase() : "TURKMENISTAN";
-};
-
-const resolvePDOE = (row) => {
-  const val =
-    row.client?.passportExpiryDate ||
-    row.client?.passport_expiry_date ||
-    row.client?.pdoe ||
-    row.pdoe ||
-    "";
-  return formatDate(val);
-};
-
-const resolveKassa = (row) => {
-  const officeVal =
-    row.office?.shortName ||
-    row.office?.fullName ||
-    row.office;
-  const text = extractText(officeVal);
-  return text ? String(text).toUpperCase() : "";
 };
 
 const getExcelColName = (colNum) => {
@@ -204,9 +70,9 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
   });
 
   const START_ROW = 4;
-  const START_COL = 4; // Column D (4th column)
+  const START_COL = 4; // Column D
 
-  // Empty margin column widths (A, B, C)
+  // Empty margin columns (A, B, C)
   worksheet.getColumn(1).width = 4;
   worksheet.getColumn(2).width = 4;
   worksheet.getColumn(3).width = 4;
@@ -219,14 +85,13 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
   const columnsConfig = [
     { header: "#", key: "index_number", width: 8, align: "center" },
     { header: "DATE", key: "datetime", width: 13, align: "center" },
-    { header: "OPERATOR", key: "assignment_operator", width: 22, align: "left" },
-    { header: "OFIS", key: "assignment_office", width: 12, align: "center" },
-    { header: "OP2", key: "receiver_operator", width: 22, align: "left" },
-    { header: "OP2 OFIS", key: "receiver_office", width: 12, align: "center" },
+    { header: "OPERATOR", key: "operator1", width: 22, align: "left" },
+    { header: "OFIS", key: "ofis1", width: 10, align: "center" },
+    { header: "OP2", key: "operator2", width: 22, align: "left" },
+    { header: "OP2 OFIS", key: "ofis2", width: 10, align: "center" },
     { header: "AGENT", key: "agent", width: 20, align: "left" },
     { header: "AGENT TEL", key: "agent_tel", width: 18, align: "center" },
-    { header: "Name", key: "name", width: 18, align: "left" },
-    { header: "Surname", key: "surname", width: 22, align: "left" },
+    { header: "Name, Surname", key: "passenger", width: 26, align: "left" },
     { header: "ÝOLAGÇY TEL", key: "passenger_tel", width: 18, align: "center" },
     { header: "DOB", key: "dob", width: 13, align: "center" },
     { header: "MILES & SMILES", key: "miles", width: 16, align: "center" },
@@ -255,7 +120,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
   const returnedColIdx = columnsConfig.findIndex((c) => c.key === "returned_price");
   const statusColIdx = columnsConfig.findIndex((c) => c.key === "status");
 
-  // Set column widths for table columns
+  // Set column widths
   columnsConfig.forEach((col, idx) => {
     worksheet.getColumn(START_COL + idx).width = col.width;
   });
@@ -270,7 +135,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
   const headerFill = {
     type: "pattern",
     pattern: "solid",
-    fgColor: { argb: "FFF2F2F2" }, // Light gray header
+    fgColor: { argb: "FFF2F2F2" },
   };
 
   columnsConfig.forEach((col, idx) => {
@@ -302,13 +167,12 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     };
   });
 
-  // Enable AutoFilter on row 4
+  // Enable AutoFilter on Row 4
   worksheet.autoFilter = {
     from: { row: START_ROW, column: START_COL },
     to: { row: START_ROW, column: END_COL },
   };
 
-  // Currency format: $ 520.00; $ -520.00; $  -
   const currencyNumFmt = '"$ " #,##0.00;"$ " -#,##0.00;"$  -"';
 
   let sumTotal = 0;
@@ -317,7 +181,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
   let sumAccepted = 0;
   let sumReturned = 0;
 
-  // Populate Data Rows (starting from Row 5)
+  // Data rows
   tickets.forEach((row, offset) => {
     const rowIndex = START_ROW + 1 + offset;
     const currentRow = worksheet.getRow(rowIndex);
@@ -341,29 +205,27 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     if (acceptedPrice !== null) sumAccepted += acceptedPrice;
     if (returnedPrice !== null) sumReturned += returnedPrice;
 
-    const clientNames = resolveClientNames(row.client);
-    const passport = resolvePassport(row);
+    const statusValue = getStatusName(row.tstatus);
 
     const rowData = [
-      offset + 1,
+      row.index_number ?? offset + 1,
       formatDate(row.datetime),
-      resolveOperator1(row),
-      resolveOperator1Office(row),
-      resolveOperator2(row),
-      resolveOperator2Office(row),
-      row.agent?.name ? String(extractText(row.agent.name)).toUpperCase() : "",
+      row.ta_assignment_operator?.fullName ? String(row.ta_assignment_operator.fullName).toUpperCase() : "",
+      getOfficeName(row.ta_assignment_operator?.office),
+      row.ta_receiver_operator?.fullName ? String(row.ta_receiver_operator.fullName).toUpperCase() : "",
+      getOfficeName(row.ta_receiver_operator?.office),
+      row.agent?.name ? String(row.agent.name).toUpperCase() : "",
       row.agent?.phone_number ? String(row.agent.phone_number).trim() : "",
-      clientNames.name,
-      clientNames.surname,
-      row.client?.phone_number || row.client?.phoneNumber || "",
-      formatDate(row.client?.dateOfBirth || row.client?.dob),
-      row.milesSmiles || "",
-      passport ? String(passport).toUpperCase() : "",
-      resolvePCOI(row),
-      resolvePDOE(row),
-      getStatusKey(row).toUpperCase(),
+      row.client?.fullName ? String(row.client.fullName).toUpperCase() : "",
+      row.client?.phone_number ? String(row.client.phone_number).trim() : "",
+      formatDate(row.client?.dateOfBirth),
+      row.milesSmiles ? String(row.milesSmiles).toUpperCase() : "",
+      row.client?.passport_number ? String(row.client.passport_number).toUpperCase() : "",
+      row.client?.passportCountryOfIssue ? String(row.client.passportCountryOfIssue).toUpperCase() : "TURKMENISTAN",
+      formatDate(row.client?.passportExpiryDate),
+      statusValue,
       row.pnr ? String(row.pnr).toUpperCase() : "",
-      row.ticket_number ? String(row.ticket_number) : "",
+      row.ticket_number ? String(row.ticket_number).trim() : "",
       row.route ? String(row.route).toUpperCase() : "",
       row.class ? String(row.class).toUpperCase() : "",
       formatDate(row.flight_date),
@@ -372,8 +234,8 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
       quotedPrice,
       acceptedPrice !== null ? acceptedPrice : "",
       returnedPrice !== null ? returnedPrice : "",
-      resolveKassa(row),
-      row.note || "",
+      getOfficeName(row.office),
+      row.note ? String(row.note).trim() : "",
     ];
 
     rowData.forEach((val, idx) => {
@@ -386,7 +248,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
         horizontal: columnsConfig[idx].align,
       };
 
-      // Cell borders
+      // Borders
       cell.border = {
         top: { style: "thin", color: { argb: "FFD9D9D9" } },
         bottom: { style: "thin", color: { argb: "FFD9D9D9" } },
@@ -398,7 +260,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
           : { style: "thin", color: { argb: "FFD9D9D9" } },
       };
 
-      // Status styling with badge colors
+      // Status styling
       if (idx === statusColIdx && val) {
         const statusStyle = getStatusExcelStyle(val);
         if (statusStyle) {
@@ -421,7 +283,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
         cell.font = { name: "Calibri", size: 10, color: { argb: "FFDC2626" } };
       }
 
-      // Currency formatting for financial columns
+      // Currency formatting
       if (
         (idx === totalColIdx ||
           idx === baseFareColIdx ||
@@ -435,7 +297,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     });
   });
 
-  // Total Row at the bottom
+  // Total Row
   const totalRow = worksheet.getRow(totalRowIndex);
   totalRow.height = 24;
 
@@ -456,7 +318,6 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     };
   }
 
-  // Label "Total" in Column D (START_COL)
   const cellTotalLabel = totalRow.getCell(START_COL);
   cellTotalLabel.value = "Total";
   cellTotalLabel.alignment = { vertical: "middle", horizontal: "left" };
@@ -489,7 +350,6 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
       }
     });
 
-    // BELLIK cell displays $ - in total row as shown in Image 1
     const noteColIdx = columnsConfig.findIndex((c) => c.key === "note");
     if (noteColIdx !== -1) {
       const cellNote = totalRow.getCell(START_COL + noteColIdx);
