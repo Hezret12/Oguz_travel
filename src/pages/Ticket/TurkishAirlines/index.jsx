@@ -652,9 +652,11 @@ const TurkishAirlines = () => {
       {Boolean(paymentModalRow) && (
         <PaymentManagementModal
           open={Boolean(paymentModalRow)}
-          onClose={() => {
+          onClose={(hasChanged) => {
             setPaymentModalRow(null);
-            refetch();
+            if (hasChanged) {
+              refetch();
+            }
           }}
           row={paymentModalRow}
         />

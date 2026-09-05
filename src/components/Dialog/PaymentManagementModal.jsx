@@ -162,7 +162,6 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const isTTP = isTour || isTransfer || isPackage;
 
   const ticketCurrency = ticket?.currency || (isTranslation ? "TMT" : "USD");
-  const currencySymbol = CURRENCY_SYMBOLS[ticketCurrency] || ticketCurrency;
 
   const isCredit =
     ticket?.is_paid === false ||
@@ -199,6 +198,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const [editingPayment, setEditingPayment] = useState(null);
   const [prevTicketKey, setPrevTicketKey] = useState(null);
   const [selectedCurrency, setSelectedCurrency] = useState(() => ticketCurrency || "USD");
+  const [hasChanged, setHasChanged] = useState(false);
   const exchangeRate = useMemo(() => {
     return parseFloat(localStorage.getItem("finance_usd_tmt_rate") || "19.5") || 19.5;
   }, []);
@@ -210,6 +210,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     setEditingPayment(null);
     setLocalPayments([]);
     setSelectedCurrency(ticketCurrency || "USD");
+    setHasChanged(false);
     if (currentTicketKey) {
       queryClient.removeQueries({ queryKey: [key] });
     }
@@ -303,6 +304,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     key: key,
     invalidateQueries: [key],
     onSuccess: () => {
+      setHasChanged(true);
       reset({
         amount: "",
         paymentDate: new Date().toISOString(),
@@ -342,13 +344,14 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     idKey: "guid",
     invalidateQueries: [key],
     onSuccessUpdate: () => {
+      setHasChanged(true);
       handleCancelEdit();
       refetchPayments?.();
     },
   });
 
   const handleModalClose = () => {
-    onClose?.();
+    onClose?.(hasChanged);
   };
 
   const loading = paymentsLoading || createLoading || deleteLoading || updateLoading;
@@ -396,16 +399,14 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   }, [allPayments, ticket, localPayments, isTurkish, isTranslation, isHAR, isHotel, isAirway, isRailway, isTTP, isTour, isTransfer, isPackage]);
 
 
-  if (!ticket) return null;
-
   const isInitialLoading = paymentsLoading && !rawResponse;
   const stats = responseData?.stats || responseData?.data?.stats || allPayments?.stats;
   const salesTotal = Number(
     stats?.total_sales ??
-    ticket.price ??
-    ticket.total_price ??
-    ticket.sale_price ??
-    ticket.saleFare ??
+    ticket?.price ??
+    ticket?.total_price ??
+    ticket?.sale_price ??
+    ticket?.saleFare ??
     0
   );
   const paidUsd = useMemo(() => {
@@ -432,7 +433,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     return stats?.total_paid !== undefined
       ? Number(stats.total_paid)
       : payments.reduce((sum, p) => sum + Number(p.amount || 0), 0);
-  }, [hasMixedPaid, ticketCurrency, paidUsd, paidTmt, exchangeRate, stats?.total_paid, payments]);
+  }, [hasMixedPaid, ticketCurrency, paidUsd, paidTmt, exchangeRate, stats, payments]);
 
   const totalPaid = convertedTotalPaid;
   const remaining = Math.max(
@@ -605,13 +606,21 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   // Handle deleting payment
   const handleDeletePayment = async (guid) => {
-    if (ticket.guid && guid && !String(guid).startsWith("p-")) {
-      deletePayment(guid);
+    if (ticket?.guid && guid && !String(guid).startsWith("p-")) {
+      deletePayment(guid, {
+        onSuccess: () => {
+          setHasChanged(true);
+          refetchPayments?.();
+        },
+      });
     } else {
       // Local fallback
       setLocalPayments((prev) => prev.filter((p) => (p.guid || p.id) !== guid));
+      setHasChanged(true);
     }
   };
+
+  if (!ticket) return null;
 
   return (
     <CustomDialog widthX={700} open={open} close={handleModalClose}>
