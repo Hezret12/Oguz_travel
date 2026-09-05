@@ -28,24 +28,87 @@ const extractText = (val) => {
 const getStatusKey = (row) => {
   if (row.tstatus?.name?.en) return row.tstatus.name.en;
   if (row.tstatus?.name && typeof row.tstatus.name === "string") return row.tstatus.name;
+  if (row.tstatus?.name) return extractText(row.tstatus.name);
   if (row.status?.name?.en) return row.status.name.en;
   if (row.status?.name && typeof row.status.name === "string") return row.status.name;
+  if (row.status?.name) return extractText(row.status.name);
   if (typeof row.status === "string") return row.status;
+  if (row.sale_status) return row.sale_status;
   return "";
 };
 
+const getStatusExcelStyle = (status) => {
+  const key = String(status || "").trim().toUpperCase();
+  if (key === "SALE" || key.includes("SALE") || key.includes("SAT")) {
+    return {
+      bg: "FF16A34A", // Green (#16a34a)
+      fg: "FFFFFFFF", // White text
+    };
+  }
+  if (key === "REISSUE" || key.includes("REISSUE") || key.includes("ÇALŞ") || key.includes("DOLY")) {
+    return {
+      bg: "FF2563EB", // Blue (#2563eb)
+      fg: "FFFFFFFF", // White text
+    };
+  }
+  if (key === "REFUND" || key.includes("REFUND") || key.includes("RET") || key.includes("GAÝTAR") || key.includes("GAYTAR")) {
+    return {
+      bg: "FFDC2626", // Red (#dc2626)
+      fg: "FFFFFFFF", // White text
+    };
+  }
+  return null;
+};
 
-const resolveOffice = (row) => {
+const resolveAssignmentOffice = (row) => {
   const officeVal =
     row.assignment_operator?.office?.shortName ||
     row.assignment_operator?.office?.fullName ||
     row.office?.shortName ||
     row.office?.fullName ||
-    "AG1";
+    row.assignment_operator?.office ||
+    row.office;
   const text = extractText(officeVal);
   return text ? String(text).toUpperCase() : "AG1";
 };
 
+const resolveReceiverOffice = (row) => {
+  const officeVal =
+    row.receiver_operator?.office?.shortName ||
+    row.receiver_operator?.office?.fullName ||
+    row.receiver_operator?.office;
+  const text = extractText(officeVal);
+  if (text) return String(text).toUpperCase();
+
+  if (
+    row.receiver_opr_guid &&
+    row.assignment_opr_guid &&
+    row.receiver_opr_guid === row.assignment_opr_guid
+  ) {
+    return resolveAssignmentOffice(row);
+  }
+
+  if (
+    row.receiver_operator?.fullName &&
+    row.assignment_operator?.fullName &&
+    row.receiver_operator.fullName === row.assignment_operator.fullName
+  ) {
+    return resolveAssignmentOffice(row);
+  }
+
+  return "";
+};
+
+const getExcelColName = (colNum) => {
+  let colName = "";
+  let num = colNum;
+  while (num > 0) {
+    const mod = (num - 1) % 26;
+    colName = String.fromCharCode(65 + mod) + colName;
+    num = Math.floor((num - 1) / 26);
+  }
+  return colName;
+};
 
 const resolveTripType = (row) => {
   if (row.travel_type !== undefined && row.travel_type !== null) {
@@ -55,7 +118,6 @@ const resolveTripType = (row) => {
   return "ONE WAY";
 };
 
-
 const resolveCard = (row) => {
   if (!row.card) return "";
   const cardStr = String(row.card).trim();
@@ -63,7 +125,6 @@ const resolveCard = (row) => {
   if (cardStr.length > 4) return `**${cardStr.slice(-4)}`;
   return `**${cardStr}`;
 };
-
 
 const resolvePercent = (row) => {
   const raw = row.paidPercentage ?? row.payment_percent ?? row.paymentPercentage;
@@ -81,7 +142,6 @@ const resolvePercent = (row) => {
   return isPaid ? "100%" : "0%";
 };
 
-
 const resolveIsPaid = (row) => {
   if (
     row.is_paid === true ||
@@ -93,7 +153,6 @@ const resolveIsPaid = (row) => {
   }
   return "KREDIT";
 };
-
 
 export const exportB2BExcel = async (tickets = [], options = {}) => {
   const fileName = options.fileName || "B2B_Hasabaty";
@@ -124,33 +183,40 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
     { header: "T/B", key: "index_number", width: 6, align: "center" },
     { header: "Sene", key: "datetime", width: 13, align: "center" },
     { header: "Tabşyryjy, Operator", key: "assignment_operator", width: 30, align: "left" },
-    { header: "Ofis", key: "office", width: 10, align: "center" },
+    { header: "Tabşyryjy, Ofis", key: "assignment_office", width: 15, align: "center" },
     { header: "Kabul ediji, Operator", key: "receiver_operator", width: 30, align: "left" },
+    { header: "Kabul ediji, Ofis", key: "receiver_office", width: 15, align: "center" },
     { header: "AGENT", key: "agent", width: 25, align: "left" },
     { header: "ÝOLAGÇY", key: "passenger", width: 30, align: "left" },
-    { header: "PASSPORT NO", key: "passport", width: 14, align: "center" },
-    { header: "PNR", key: "pnr", width: 13, align: "center" },
-    { header: "STATUS", key: "status", width: 12, align: "center" },
-    { header: "HOWA ÝOLY", key: "airline", width: 18, align: "left" },
-    { header: "GATNAW UGUR", key: "route", width: 18, align: "center" },
+    { header: "PASSPORT NO", key: "passport", width: 20, align: "center" },
+    { header: "PNR", key: "pnr", width: 15, align: "center" },
+    { header: "STATUS", key: "status", width: 15, align: "center" },
+    { header: "HOWA ÝOLY", key: "airline", width: 28, align: "left" },
+    { header: "GATNAW UGUR", key: "route", width: 28, align: "center" },
     { header: "CLASS", key: "class", width: 12, align: "center" },
     { header: "GATNAWYŇ GÖRNÜŞI", key: "travel_type", width: 17, align: "center" },
-    { header: "UÇUŞ GÜNI", key: "flight_date", width: 13, align: "center" },
-    { header: "NET BAHA", key: "net_price", width: 15, align: "right" },
-    { header: "SATYŞ BAHA", key: "sale_price", width: 15, align: "right" },
-    { header: "PEÝDA", key: "profit", width: 15, align: "right" },
+    { header: "UÇUŞ GÜNI", key: "flight_date", width: 15, align: "center" },
+    { header: "NET BAHA", key: "net_price", width: 18, align: "right" },
+    { header: "SATYŞ BAHA", key: "sale_price", width: 18, align: "right" },
+    { header: "PEÝDA", key: "profit", width: 18, align: "right" },
     { header: "KART", key: "card", width: 12, align: "center" },
-    { header: "BELLIK", key: "note", width: 18, align: "left" },
+    { header: "BELLIK", key: "note", width: 25, align: "left" },
     { header: "TÖLEG ÝAGDAÝY", key: "is_paid", width: 15, align: "center" },
     { header: "TÖLEG GÖTERIMI", key: "percent", width: 15, align: "center" },
   ];
 
-  // Set column widths for table columns (D through Y)
+  const netColIdx = columnsConfig.findIndex((c) => c.key === "net_price");
+  const saleColIdx = columnsConfig.findIndex((c) => c.key === "sale_price");
+  const profitColIdx = columnsConfig.findIndex((c) => c.key === "profit");
+  const cardColIdx = columnsConfig.findIndex((c) => c.key === "card");
+  const statusColIdx = columnsConfig.findIndex((c) => c.key === "status");
+
+  // Set column widths for table columns
   columnsConfig.forEach((col, idx) => {
     worksheet.getColumn(START_COL + idx).width = col.width;
   });
 
-  const END_COL = START_COL + columnsConfig.length - 1; // Column 25 (Y)
+  const END_COL = START_COL + columnsConfig.length - 1;
   const totalRowIndex = START_ROW + tickets.length + 1;
 
   // Header Row (Row 4)
@@ -167,7 +233,12 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
     const colNumber = START_COL + idx;
     const cell = headerRow.getCell(colNumber);
     cell.value = col.header;
-    cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FF000000" } };
+    cell.font = {
+      name: "Calibri",
+      size: 10,
+      bold: true,
+      color: { argb: idx === netColIdx ? "FFDC2626" : "FF000000" },
+    };
     cell.fill = headerFill;
     cell.alignment = {
       vertical: "middle",
@@ -188,7 +259,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
     };
   });
 
-  // Enable AutoFilter on row 4 from Column D (4) to Y (25)
+  // Enable AutoFilter on row 4
   worksheet.autoFilter = {
     from: { row: START_ROW, column: START_COL },
     to: { row: START_ROW, column: END_COL },
@@ -233,8 +304,9 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
       offset + 1,
       formatDate(row.datetime),
       row.assignment_operator?.fullName ? String(extractText(row.assignment_operator.fullName)).toUpperCase() : "",
-      resolveOffice(row),
+      resolveAssignmentOffice(row),
       row.receiver_operator?.fullName ? String(extractText(row.receiver_operator.fullName)).toUpperCase() : "",
+      resolveReceiverOffice(row),
       row.agent?.name ? String(extractText(row.agent.name)).toUpperCase() : "",
       row.client?.fullName ? String(extractText(row.client.fullName)).toUpperCase() : "",
       passport ? String(passport).toUpperCase() : "",
@@ -264,7 +336,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
         horizontal: columnsConfig[idx].align,
       };
 
-      // Cell borders with medium outer perimeter on D and Y
+      // Cell borders with medium outer perimeter on START_COL and END_COL
       cell.border = {
         top: { style: "thin", color: { argb: "FFD9D9D9" } },
         bottom: { style: "thin", color: { argb: "FFD9D9D9" } },
@@ -276,9 +348,32 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
           : { style: "thin", color: { argb: "FFD9D9D9" } },
       };
 
-      // Currency formatting for Net (idx 15 = Col S), Sale (idx 16 = Col T), Profit (idx 17 = Col U)
-      if ((idx === 15 || idx === 16 || idx === 17) && typeof val === "number") {
+      // Status styling with badge colors
+      if (idx === statusColIdx && val) {
+        const statusStyle = getStatusExcelStyle(val);
+        if (statusStyle) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: statusStyle.bg },
+          };
+          cell.font = {
+            name: "Calibri",
+            size: 10,
+            bold: true,
+            color: { argb: statusStyle.fg },
+          };
+        }
+      }
+
+      // Currency formatting for Net, Sale, Profit
+      if ((idx === netColIdx || idx === saleColIdx || idx === profitColIdx) && typeof val === "number") {
         cell.numFmt = currencyNumFmt;
+      }
+
+      // Red font color for NET BAHA (Net fare)
+      if (idx === netColIdx) {
+        cell.font = { name: "Calibri", size: 10, color: { argb: "FFDC2626" } };
       }
     });
   });
@@ -292,10 +387,10 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
     cell.font = { name: "Calibri", size: 10, bold: true };
     cell.alignment = { vertical: "middle", horizontal: columnsConfig[c - START_COL].align };
 
-    // Total row single solid bottom border (not double) and outer border
+    // Total row single solid bottom border and outer border
     cell.border = {
       top: { style: "thin", color: { argb: "FF000000" } },
-      bottom: { style: "medium", color: { argb: "FF000000" } }, // Single solid medium line
+      bottom: { style: "medium", color: { argb: "FF000000" } },
       left: c === START_COL
         ? { style: "medium", color: { argb: "FF000000" } }
         : { style: "thin", color: { argb: "FFD9D9D9" } },
@@ -314,34 +409,46 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
   const lastDataRow = totalRowIndex - 1;
 
   if (tickets.length > 0) {
-    // NET BAHA formula (Col 19 = S)
-    const cellNet = totalRow.getCell(START_COL + 15);
-    cellNet.value = {
-      formula: `SUM(S${firstDataRow}:S${lastDataRow})`,
-      result: sumNet,
-    };
-    cellNet.numFmt = currencyNumFmt;
+    // NET BAHA formula
+    if (netColIdx !== -1) {
+      const netColLetter = getExcelColName(START_COL + netColIdx);
+      const cellNet = totalRow.getCell(START_COL + netColIdx);
+      cellNet.value = {
+        formula: `SUM(${netColLetter}${firstDataRow}:${netColLetter}${lastDataRow})`,
+        result: sumNet,
+      };
+      cellNet.numFmt = currencyNumFmt;
+      cellNet.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FFDC2626" } };
+    }
 
-    // SATYŞ BAHA formula (Col 20 = T)
-    const cellSale = totalRow.getCell(START_COL + 16);
-    cellSale.value = {
-      formula: `SUM(T${firstDataRow}:T${lastDataRow})`,
-      result: sumSale,
-    };
-    cellSale.numFmt = currencyNumFmt;
+    // SATYŞ BAHA formula
+    if (saleColIdx !== -1) {
+      const saleColLetter = getExcelColName(START_COL + saleColIdx);
+      const cellSale = totalRow.getCell(START_COL + saleColIdx);
+      cellSale.value = {
+        formula: `SUM(${saleColLetter}${firstDataRow}:${saleColLetter}${lastDataRow})`,
+        result: sumSale,
+      };
+      cellSale.numFmt = currencyNumFmt;
+    }
 
-    // PEÝDA formula (Col 21 = U)
-    const cellProfit = totalRow.getCell(START_COL + 17);
-    cellProfit.value = {
-      formula: `SUM(U${firstDataRow}:U${lastDataRow})`,
-      result: sumProfit,
-    };
-    cellProfit.numFmt = currencyNumFmt;
+    // PEÝDA formula
+    if (profitColIdx !== -1) {
+      const profitColLetter = getExcelColName(START_COL + profitColIdx);
+      const cellProfit = totalRow.getCell(START_COL + profitColIdx);
+      cellProfit.value = {
+        formula: `SUM(${profitColLetter}${firstDataRow}:${profitColLetter}${lastDataRow})`,
+        result: sumProfit,
+      };
+      cellProfit.numFmt = currencyNumFmt;
+    }
 
-    // KART total value (Col 22 = V) - displays 0 like in the screenshot
-    const cellCard = totalRow.getCell(START_COL + 18);
-    cellCard.value = 0;
-    cellCard.alignment = { vertical: "middle", horizontal: "center" };
+    // KART total value (displays 0)
+    if (cardColIdx !== -1) {
+      const cellCard = totalRow.getCell(START_COL + cardColIdx);
+      cellCard.value = 0;
+      cellCard.alignment = { vertical: "middle", horizontal: "center" };
+    }
   }
 
   // Export buffer & download

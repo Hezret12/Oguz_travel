@@ -43,6 +43,8 @@ import PaymentStatusCell from "../../../components/PaymentStatusCell";
 
 import FilterDrawer from "../../../components/FilterDrawer";
 import TurkishAirlinesFilter from "./Contents/TurkishAirlinesFilter";
+import ExportExcelButton from "../../../components/ExportExcelButton";
+import { exportTurkishAirlinesExcel } from "./functions/exportTurkishAirlinesExcel";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -611,7 +613,15 @@ const TurkishAirlines = () => {
           table.setCreatingRow(true);
         }}
         onFilterClick={openDrawer}
-      />
+      >
+        <ExportExcelButton
+          apiFn={getAllTurkishAirlinesApi}
+          queryParams={queryParams}
+          fileName="Turkish_Airlines_Hasabaty"
+          sheetName="Turkish Airlines"
+          customExportFn={exportTurkishAirlinesExcel}
+        />
+      </PageHeader>
 
       <FilterDrawer
         open={isDrawerOpen}
