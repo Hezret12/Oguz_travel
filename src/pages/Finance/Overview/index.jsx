@@ -496,20 +496,22 @@ const FinanceOverview = () => {
                 value={rateInput}
                 onChange={handleRateChange}
                 variant="standard"
-                inputProps={{
-                  step: "0.1",
-                  min: "0.01",
-                  style: {
-                    padding: "2px 0",
-                    width: "56px",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    textAlign: "center",
-                    fontFamily: "'Inter', sans-serif",
+                slotProps={{
+                  htmlInput: {
+                    step: "0.1",
+                    min: "0.01",
+                    style: {
+                      padding: "2px 0",
+                      width: "56px",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      textAlign: "center",
+                      fontFamily: "'Inter', sans-serif",
+                    },
                   },
-                }}
-                InputProps={{
-                  disableUnderline: true,
+                  input: {
+                    disableUnderline: true,
+                  },
                 }}
                 sx={{
                   "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button": {
