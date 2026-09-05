@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { Box, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ChevronDown } from "lucide-react";
@@ -98,7 +98,7 @@ const FilterSelect = ({
   </FormControl>
 );
 
-const FilterDatePicker = ({ label, name, value, onChange }) => (
+const FilterDatePicker = ({ label, name, value, onChange, minDate, maxDate }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -116,9 +116,12 @@ const FilterDatePicker = ({ label, name, value, onChange }) => (
             : ""
         );
       }}
+      minDate={minDate ? dayjs(minDate) : undefined}
+      maxDate={maxDate ? dayjs(maxDate) : undefined}
       format="DD.MM.YYYY"
       views={["year", "month", "day"]}
       slotProps={{
+        field: { clearable: true, onClear: () => onChange(name, "") },
         textField: {
           fullWidth: true,
           size: "small",
@@ -187,17 +190,30 @@ export const TurkishAirlinesFilter = ({
 
   const allText = t("all");
 
-  const handleDateChange = (name, val) => {
-    onFilterChange(name, val);
-  };
+  const handleDateChange = useCallback(
+    (name, val) => {
+      onFilterChange(name, val);
+    },
+    [onFilterChange]
+  );
 
   return (
     <Stack spacing={2.5}>
-      {/* Date Time */}
+      {/* Start Date */}
       <FilterDatePicker
-        label={t("columns.dateTime")}
-        name="datetime"
-        value={filters?.datetime}
+        label={t("columns.startDate")}
+        name="start_date"
+        value={filters?.start_date}
+        maxDate={filters?.end_date}
+        onChange={handleDateChange}
+      />
+
+      {/* End Date */}
+      <FilterDatePicker
+        label={t("columns.endDate")}
+        name="end_date"
+        value={filters?.end_date}
+        minDate={filters?.start_date}
         onChange={handleDateChange}
       />
 
