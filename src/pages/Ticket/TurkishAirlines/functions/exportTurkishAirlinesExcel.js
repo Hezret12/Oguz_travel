@@ -57,6 +57,34 @@ const getExcelColName = (colNum) => {
   return colName;
 };
 
+const resolvePercent = (row) => {
+  const raw = row.paidPercentage ?? row.payment_percent ?? row.paymentPercentage;
+  if (raw !== undefined && raw !== null && raw !== "") {
+    const str = String(raw).trim();
+    if (str.endsWith("%")) return str;
+    const num = parseFloat(str);
+    if (!isNaN(num)) return `${num.toFixed(0)}%`;
+  }
+  const isPaid =
+    row.is_paid === true ||
+    row.is_paid === "true" ||
+    row.is_paid === 1 ||
+    row.is_paid === "1";
+  return isPaid ? "100%" : "0%";
+};
+
+const resolveIsPaid = (row) => {
+  if (
+    row.is_paid === true ||
+    row.is_paid === "true" ||
+    row.is_paid === 1 ||
+    row.is_paid === "1"
+  ) {
+    return "TÖLENDI";
+  }
+  return "KREDIT";
+};
+
 export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => {
   const fileName = options.fileName || "Turkish_Airlines_Hasabaty";
   const sheetName = options.sheetName || "Turkish Airlines";
@@ -102,6 +130,8 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     { header: "Route", key: "route", width: 20, align: "center" },
     { header: "Class", key: "class", width: 10, align: "center" },
     { header: "Flight Date", key: "flight_date", width: 14, align: "center" },
+    { header: "Töleg ýagdayy", key: "is_paid", width: 15, align: "center" },
+    { header: "Töleg Göterimi", key: "percent", width: 15, align: "center" },
     { header: "Base Fare", key: "base_fare", width: 16, align: "right" },
     { header: "Total", key: "total_price", width: 16, align: "right" },
     { header: "Aýdylan baha", key: "quoted_price", width: 16, align: "right" },
@@ -207,6 +237,8 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     if (returnedPrice !== null) sumReturned += returnedPrice;
 
     const statusValue = getStatusName(row.tstatus);
+    const isPaidLabel = resolveIsPaid(row);
+    const pctValue = resolvePercent(row);
 
     const rowData = [
       row.index_number ?? offset + 1,
@@ -230,8 +262,10 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
       row.route ? String(row.route).toUpperCase() : "",
       row.class ? String(row.class).toUpperCase() : "",
       formatDate(row.flight_date),
-      totalPrice,
+      isPaidLabel,
+      pctValue,
       baseFare,
+      totalPrice,
       quotedPrice,
       acceptedPrice !== null ? acceptedPrice : "",
       returnedPrice !== null ? returnedPrice : "",
