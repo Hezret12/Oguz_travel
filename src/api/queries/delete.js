@@ -150,3 +150,8 @@ export const deleteTotalCalculationApi = async (guid) => {
   return await api.deletePrivate('/total-calculations/delete-total-calculation', { guid: actualGuid });
 };
 
+export const deleteCategoryApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/category/delete-category', { guid: actualGuid });
+};
+

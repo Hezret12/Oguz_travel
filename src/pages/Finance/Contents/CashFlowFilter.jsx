@@ -14,6 +14,7 @@ import { useGet } from "../../../hooks/CRUD/useGet";
 import {
   getAllEmployeeApi,
   getAllOfficeApi,
+  getAllCategoriesApi,
 } from "../../../api/queries/getters";
 
 const selectSx = {
@@ -143,6 +144,27 @@ const CashFlowFilter = ({
     params: { limit: 100 },
   });
 
+  const { data: categoriesData } = useGet({
+    apiFn: getAllCategoriesApi,
+    key: "categories",
+  });
+
+  const categoryOptions = useMemo(() => {
+    const raw =
+      categoriesData?.data?.data ??
+      categoriesData?.data ??
+      categoriesData ??
+      [];
+    const list = Array.isArray(raw) ? raw : [];
+    return list.map((cat) => ({
+      label:
+        typeof cat.name === "object"
+          ? selectedLang(cat.name) || cat.name?.tk || cat.name?.ru || cat.name?.en || "—"
+          : String(cat.name || "—"),
+      value: cat.guid,
+    }));
+  }, [categoriesData, selectedLang]);
+
   const employeeOptions = useMemo(() => {
     const raw = employeesData?.data ?? employeesData ?? [];
     const list = Array.isArray(raw) ? raw : [];
@@ -179,27 +201,17 @@ const CashFlowFilter = ({
 
   return (
     <Stack spacing={2.5}>
-      <Box>
-        <Typography
-          variant="body2"
-          sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
-        >
-          {t("category", "Kategoriýa")}
-        </Typography>
-        <TextField
-          size="small"
-          fullWidth
-          value={draft.category || ""}
-          onChange={(e) => setDraftFilter("category", e.target.value)}
-          placeholder={t("category", "Kategoriýa")}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "8px",
-              bgcolor: "background.paper",
-            },
-          }}
-        />
-      </Box>
+      <FilterSelect
+        label={t("category", "Kategoriýa")}
+        name="category_guid"
+        value={draft.category_guid}
+        options={categoryOptions}
+        isOpen={selectsOpen.category_guid}
+        allText={t("all")}
+        onChange={setDraftFilter}
+        onOpen={openSelect}
+        onClose={closeSelect}
+      />
 
       <FilterSelect
         label={t("operator", "Jogapkär / Operator")}

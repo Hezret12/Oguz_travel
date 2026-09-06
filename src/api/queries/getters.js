@@ -224,3 +224,7 @@ export const getAllTotalCalculationsApi = async (params = {}) => {
   return await api.getPrivate('/total-calculations/get-all-total-calculations', params);
 };
 
+export const getAllCategoriesApi = async (params = {}) => {
+  return await api.getPrivate('/category/get-all-category', params);
+};
+

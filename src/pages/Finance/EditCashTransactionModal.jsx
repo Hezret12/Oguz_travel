@@ -15,6 +15,8 @@ import { updateTotalCalculationApi } from "../../api/queries/patch";
 import { getAllEmployeeApi } from "../../api/queries/getters";
 import { useGet } from "../../hooks/CRUD/useGet";
 
+import CategorySelectWithManagement from "./Components/CategorySelectWithManagement";
+
 const CURRENCY_OPTIONS = [
   { label: "TMT", value: "TMT" },
   { label: "USD", value: "USD" },
@@ -35,9 +37,9 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
     close?.();
   };
 
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset, setValue } = useForm({
     defaultValues: {
-      category: currentRow.category || "",
+      category_guid: currentRow.category_guid || currentRow.category?.guid || "",
       net_price: currentRow.net_price !== undefined ? String(currentRow.net_price) : "",
       currency: currentRow.currency || "USD",
       receiver_opr_guid: currentRow.receiver_opr_guid || currentRow.receiver_operator?.guid || "",
@@ -48,7 +50,7 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
   useEffect(() => {
     if (isModalOpen && row?.original) {
       reset({
-        category: row.original.category || "",
+        category_guid: row.original.category_guid || row.original.category?.guid || "",
         net_price: row.original.net_price !== undefined ? String(row.original.net_price) : "",
         currency: row.original.currency || "USD",
         receiver_opr_guid: row.original.receiver_opr_guid || row.original.receiver_operator?.guid || "",
@@ -84,7 +86,7 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
   const onSubmit = (formData) => {
     const payload = {
       guid: currentRow.guid || currentRow.id,
-      category: formData.category?.trim() || "",
+      category_guid: formData.category_guid || undefined,
       net_price: Number(formData.net_price || 0),
       currency: formData.currency || "USD",
       receiver_opr_guid: formData.receiver_opr_guid || undefined,
@@ -102,9 +104,10 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2.5}>
           <Grid size={{ xs: 12 }}>
-            <CustomTextField
-              name="category"
+            <CategorySelectWithManagement
+              name="category_guid"
               control={control}
+              setValue={setValue}
               label={t("category", "Kategoriýa / Düşündiriş")}
               required
             />

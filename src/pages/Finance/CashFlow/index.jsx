@@ -206,9 +206,14 @@ const CashFlow = () => {
         Cell: ({ cell }) => {
           const val = cell.getValue();
           if (!val) return "—";
+          const label =
+            typeof val === "object"
+              ? (selectedLang(val.name) || val.name?.tk || val.name?.ru || val.name?.en || "")
+              : String(val);
+          if (!label) return "—";
           return (
             <Chip
-              label={val}
+              label={label}
               size="small"
               variant="outlined"
               sx={{
@@ -216,10 +221,7 @@ const CashFlow = () => {
                 fontSize: "12px",
                 borderRadius: "6px",
                 borderColor: "divider",
-                bgcolor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.03)"
-                    : "rgba(0,0,0,0.02)",
+                bgcolor: "action.hover",
               }}
             />
           );

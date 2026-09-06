@@ -4,7 +4,7 @@ export const cashFlowFilterSlice = createFilterSlice({
   name: 'cashFlowFilters',
   defaultFilters: {
     search: '',
-    category: '',
+    category_guid: '',
     datetime: '',
     receiver_opr_guid: '',
     office_guid: '',
