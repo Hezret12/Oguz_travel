@@ -94,8 +94,8 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     { header: "Doglan senesi", key: "dob", width: 13, align: "center" },
     { header: "Miles & Smiles", key: "miles", width: 16, align: "center" },
     { header: "Passport №", key: "passport", width: 15, align: "center" },
-    { header: "PCOI", key: "pcoi", width: 16, align: "center" },
-    { header: "PDOE", key: "pdoe", width: 13, align: "center" },
+    { header: "PCOI", key: "pcoi", width: 16, align: "center", note: "Passport Country of Issue" },
+    { header: "PDOE", key: "pdoe", width: 13, align: "center", note: "Passport Date of Expiry" },
     { header: "Status", key: "status", width: 14, align: "center" },
     { header: "PNR", key: "pnr", width: 14, align: "center" },
     { header: "Ticket №", key: "ticket_number", width: 18, align: "center" },
@@ -140,6 +140,9 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     const colNumber = START_COL + idx;
     const cell = headerRow.getCell(colNumber);
     cell.value = col.header;
+    if (col.note) {
+      cell.note = col.note;
+    }
     cell.font = {
       name: "Calibri",
       size: 10,
