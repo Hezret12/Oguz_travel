@@ -6,6 +6,7 @@ import SidebarItem from "./SidebarItem";
 import SidebarFooter from "./SidebarFooter";
 import { useAuth } from "../../context/useAuth";
 import { useNavItems } from "../../hooks/useSidebarItems";
+import OguzLogo from "../../assets/icons/OguzLogo";
 
 const SIDEBAR_W = 280;
 const SIDEBAR_CW = 68;
@@ -60,7 +61,7 @@ const SidebarPanel = ({
         transition: "padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       }}
     >
-      {/* <Box
+      <Box
         sx={{
           display: "flex",
           alignItems: "center",
@@ -77,7 +78,7 @@ const SidebarPanel = ({
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         />
-      </Box> */}
+      </Box>
     </Box>
 
     <List
