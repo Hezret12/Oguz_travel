@@ -34,7 +34,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [activeCellCoord, setActiveCellCoord] = useState(null); // { r: rowIndex, c: colIndex }
 
-  const rows = table.rows || [];
+  const rows = useMemo(() => table.rows || [], [table.rows]);
 
   const headerRowCount = useMemo(() => {
     if (!rows || rows.length === 0) return 1;
