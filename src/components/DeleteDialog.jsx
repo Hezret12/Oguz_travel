@@ -22,13 +22,16 @@ const DeleteDialog = ({
   description,
   confirmText,
   cancelText,
+  title,
+  maxWidth = "xs",
 }) => {
   const { t } = useLocale();
 
   const resolvedDescription =
-    (typeof description === "string" ? description : null) ??
+    (description !== undefined && description !== null ? description : null) ??
     t("deleteDialog.description") ??
     "Are you sure you want to delete this record? This action cannot be undone.";
+  const resolvedTitle = title ?? t("delete");
   const resolvedConfirm = confirmText ?? t("delete") ?? "Delete";
   const resolvedCancel = cancelText ?? t("cancel") ?? "Cancel";
 
@@ -36,7 +39,7 @@ const DeleteDialog = ({
     <Dialog
       open={open}
       onClose={isLoading ? undefined : onClose}
-      maxWidth="xs"
+      maxWidth={maxWidth}
       fullWidth
       slots={{ transition: Fade }}
       transitionDuration={200}
@@ -88,7 +91,7 @@ const DeleteDialog = ({
             variant="h6"
             sx={{ fontWeight: 700, fontSize: "1.15rem", color: "text.primary" }}
           >
-            {t('delete')}
+            {resolvedTitle}
           </Typography>
         </Typography>
 
@@ -110,13 +113,17 @@ const DeleteDialog = ({
       </DialogTitle>
 
       <DialogContent sx={{ px: 3.5, py: 0, pb: 3 }}>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ fontSize: "0.95rem", lineHeight: 1.65, fontWeight: 400 }}
-        >
-          {resolvedDescription}
-        </Typography>
+        {typeof resolvedDescription === "string" ? (
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ fontSize: "0.95rem", lineHeight: 1.65, fontWeight: 400 }}
+          >
+            {resolvedDescription}
+          </Typography>
+        ) : (
+          resolvedDescription
+        )}
       </DialogContent>
 
       <DialogActions sx={{ px: 3.5, pb: 3.5, pt: 0, gap: 1.25 }}>

@@ -67,7 +67,7 @@ const Package = () => {
   });
 
   // 4. Delete Visa Doc Mutation
-  const { mutate: deleteVisaDoc } = useDelete({
+  const { mutate: deleteVisaDoc, isPending: isDeleting } = useDelete({
     deleteFn: deleteVisaDocApi,
     queryKey: "visaDocs",
     idKey: "guid",
@@ -115,14 +115,23 @@ const Package = () => {
     }
   };
 
-  const handleDeleteDocument = (docId, docGuid) => {
+  const handleDeleteDocument = (docId, docGuid, options = {}) => {
     const targetGuid = docGuid || docId;
     if (activeDocument && (activeDocument.guid === targetGuid || activeDocument.id === targetGuid)) {
       setActiveDocument(null);
     }
 
     if (targetGuid && !String(targetGuid).startsWith("doc-")) {
-      deleteVisaDoc(targetGuid);
+      deleteVisaDoc(targetGuid, {
+        onSuccess: () => {
+          options?.onSuccess?.();
+        },
+        onError: (err) => {
+          options?.onError?.(err);
+        },
+      });
+    } else {
+      options?.onSuccess?.();
     }
   };
 
@@ -154,6 +163,7 @@ const Package = () => {
           documents={serverDocs}
           isLoading={isLoading || isLoadingDetail}
           isFetching={isFetching}
+          isDeleting={isDeleting}
           onRefetch={refetch}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
