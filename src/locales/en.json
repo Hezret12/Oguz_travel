@@ -698,10 +698,7 @@
     "copyError": "Failed to copy.",
     "loadingDetails": "Loading document details...",
     "dateLabel": "Date",
-    "deleteTitle": "Delete Visa Package",
-    "deleteConfirm": "Are you sure you want to permanently delete the following visa package?",
-    "deleteWarning": "This action cannot be undone. All tables and details will be permanently removed.",
-    "tablesCount": "{{count}} table(s)"
+    "deleteConfirmWithName": "Are you sure you want to delete the visa package \"{{title}}\"?"
   },
   "common": {
     "save": "Save",
