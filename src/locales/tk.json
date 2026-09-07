@@ -698,10 +698,7 @@
     "copyError": "Göçürip bolmady.",
     "loadingDetails": "Dokument maglumatlary ýüklenýär...",
     "dateLabel": "Senesi",
-    "deleteTitle": "Wiza paketini pozmak",
-    "deleteConfirm": "Siz hakykatdan hem aşakdaky wiza bukjasyny doly pozmak isleýärsiňizmi?",
-    "deleteWarning": "Bu amaly yzyna gaýtaryp bolmaýar. Ähli tablisalar we maglumatlar doly aýrylar.",
-    "tablesCount": "{{count}} tablisa"
+    "deleteConfirmWithName": "Siz hakykatdan hem \"{{title}}\" wiza bukjasyny pozmak isleýärsiňizmi?"
   },
   "common": {
     "save": "Ýatda sakla",
