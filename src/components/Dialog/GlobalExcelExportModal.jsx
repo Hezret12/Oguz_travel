@@ -5,7 +5,7 @@ import {
   Typography,
   LinearProgress,
 } from "@mui/material";
-import { Filter } from "lucide-react";
+import { FileSpreadsheet, Filter } from "lucide-react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
@@ -338,7 +338,21 @@ export const GlobalExcelExportModal = ({
           loading={isExporting}
           disabled={isZeroItems || isExporting}
           onCancel={handleClose}
-          icon={<ExcelIcon size={18} />}
+          icon={<FileSpreadsheet size={18} />}
+          saveButtonSx={{
+            backgroundColor: "#107C41",
+            border: "0.5px solid #16A34A",
+            boxShadow: "0 2px 8px rgba(16, 124, 65, 0.30)",
+            "&:hover": {
+              backgroundColor: "#0D6535",
+              transform: "translateY(-1px)",
+              boxShadow: "0 4px 14px rgba(16, 124, 65, 0.36)",
+            },
+            "&:active": {
+              transform: "scale(0.98)",
+              boxShadow: "0 1px 4px rgba(16, 124, 65, 0.24)",
+            },
+          }}
           saveText={
             progressInfo && progressInfo.total > 0
               ? `${t("loading")} (${progressInfo.loaded} / ${progressInfo.total})`

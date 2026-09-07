@@ -12,6 +12,7 @@ export const FooterButton = ({
   type = "submit",
   sx,
   icon,
+  saveButtonSx,
 }) => {
   const { t } = useLocale();
 
@@ -72,34 +73,37 @@ export const FooterButton = ({
             icon ?? <SaveIcon sx={{ fontSize: "18px !important" }} />
           )
         }
-        sx={{
-          height: "40px",
-          px: 3,
-          borderRadius: "7px",
-          textTransform: "none",
-          fontWeight: 600,
-          minWidth: 140,
-          fontSize: "14px",
-          backgroundColor: "#0E8584",
-          border: "0.5px solid #2CA7A6",
-          color: "#ffffff",
-          boxShadow: "0 2px 8px rgba(14, 133, 132, 0.30)",
-          transition: "all 200ms ease",
-          "&:hover": {
-            backgroundColor: "#0C7776",
-            transform: "translateY(-1px)",
-            boxShadow: "0 4px 14px rgba(14, 133, 132, 0.36)",
+        sx={[
+          {
+            height: "40px",
+            px: 3,
+            borderRadius: "7px",
+            textTransform: "none",
+            fontWeight: 600,
+            minWidth: 140,
+            fontSize: "14px",
+            backgroundColor: "#0E8584",
+            border: "0.5px solid #2CA7A6",
+            color: "#ffffff",
+            boxShadow: "0 2px 8px rgba(14, 133, 132, 0.30)",
+            transition: "all 200ms ease",
+            "&:hover": {
+              backgroundColor: "#0C7776",
+              transform: "translateY(-1px)",
+              boxShadow: "0 4px 14px rgba(14, 133, 132, 0.36)",
+            },
+            "&:active": {
+              transform: "scale(0.98)",
+              boxShadow: "0 1px 4px rgba(14, 133, 132, 0.24)",
+            },
+            "&.Mui-disabled": {
+              backgroundColor: "action.disabledBackground",
+              color: "action.disabled",
+              boxShadow: "none",
+            },
           },
-          "&:active": {
-            transform: "scale(0.98)",
-            boxShadow: "0 1px 4px rgba(14, 133, 132, 0.24)",
-          },
-          "&.Mui-disabled": {
-            backgroundColor: "action.disabledBackground",
-            color: "action.disabled",
-            boxShadow: "none",
-          },
-        }}
+          saveButtonSx,
+        ]}
       >
         {saveText ?? t("save")}
       </Button>
