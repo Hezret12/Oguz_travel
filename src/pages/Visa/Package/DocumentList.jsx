@@ -40,6 +40,13 @@ const DocumentList = ({
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [previewTarget, setPreviewTarget] = useState(null);
 
+  // Preserve the last delete target during dialog close animation to prevent text flicker
+  const [cachedDeleteTarget, setCachedDeleteTarget] = useState(null);
+  if (deleteTarget && deleteTarget !== cachedDeleteTarget) {
+    setCachedDeleteTarget(deleteTarget);
+  }
+  const displayDeleteTarget = deleteTarget || cachedDeleteTarget;
+
   const filteredDocuments = useMemo(() => {
     if (!documents || !Array.isArray(documents)) return [];
     if (!searchQuery.trim()) return documents;
@@ -355,7 +362,7 @@ const DocumentList = ({
         onConfirm={confirmDelete}
         isLoading={isDeleting}
         description={
-          deleteTarget?.title ? (
+          displayDeleteTarget?.title ? (
             <Typography
               variant="body1"
               color="text.secondary"
@@ -363,7 +370,7 @@ const DocumentList = ({
             >
               {t("visaDocument.deleteConfirmPrefix", "Siz hakykatdan hem")}{" "}
               <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
-                "{deleteTarget.title}"
+                "{displayDeleteTarget.title}"
               </Box>
               {t("visaDocument.deleteConfirmSuffix", "wiza bukjasyny pozmak isleýärsiňizmi?").startsWith("?")
                 ? t("visaDocument.deleteConfirmSuffix")

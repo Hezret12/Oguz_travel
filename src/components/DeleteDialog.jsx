@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Button,
   CircularProgress,
@@ -27,11 +28,27 @@ const DeleteDialog = ({
 }) => {
   const { t } = useLocale();
 
+  // Cache description and title while open to prevent UI flicker during exit transitions
+  const [cachedDescription, setCachedDescription] = useState(description);
+  const [cachedTitle, setCachedTitle] = useState(title);
+
+  if (open) {
+    if (description !== undefined && description !== null && description !== cachedDescription) {
+      setCachedDescription(description);
+    }
+    if (title !== undefined && title !== null && title !== cachedTitle) {
+      setCachedTitle(title);
+    }
+  }
+
+  const activeDescription = open ? description : (cachedDescription ?? description);
+  const activeTitle = open ? title : (cachedTitle ?? title);
+
   const resolvedDescription =
-    (description !== undefined && description !== null ? description : null) ??
+    (activeDescription !== undefined && activeDescription !== null ? activeDescription : null) ??
     t("deleteDialog.description") ??
     "Are you sure you want to delete this record? This action cannot be undone.";
-  const resolvedTitle = title ?? t("delete");
+  const resolvedTitle = activeTitle ?? t("delete");
   const resolvedConfirm = confirmText ?? t("delete") ?? "Delete";
   const resolvedCancel = cancelText ?? t("cancel") ?? "Cancel";
 
