@@ -835,7 +835,7 @@
     "exchangeRate": "USD / TMT Kursy",
     "rate": "Kurs",
     "currency": "Walýuta",
-    "rateLabel": "1 USD kursy (TMT):",
+    "rateLabel": "1 USD kursy, TMT:",
     "addTransaction": "Pul amaly goşmak",
     "editTransaction": "Amaly üýtgetmek",
     "deleteTransaction": "Pul amalyny pozmak",
@@ -848,20 +848,6 @@
     "totalSale": "Jemi Satyş",
     "totalCost": "Jemi Harajat",
     "netProfit": "Arassa Peýda",
-    "totalCredit": "Algy / Bergi",
-    "categories": {
-      "TICKET_SALES": "Bilet satuwy",
-      "TOUR_OUTBOUND": "Tur / Outbound satuwy",
-      "VISA_SERVICE": "Wiza hyzmaty",
-      "TRANSLATION": "Terjime hyzmaty",
-      "HOTEL_RAIL": "Otel / Demir ýol",
-      "OTHER_INCOME": "Beýleki girdejiler",
-      "SALARY_COMMISSION": "Aýlyk we komissiýa",
-      "SUBCONTRACTOR": "Subpodratçy (terjime we ş.m.)",
-      "OFFICE_RENT": "Ofis kärendesi",
-      "COMMUNICATION": "Internet / Aragatnaşyk",
-      "TRANSPORT": "Ulag çykdajylary",
-      "OTHER_EXPENSE": "Beýleki çykdajylar"
-    }
+    "totalCredit": "Algy / Bergi"
   }
 }

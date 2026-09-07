@@ -149,9 +149,9 @@ const resolveIsPaid = (row) => {
     row.is_paid === 1 ||
     row.is_paid === "1"
   ) {
-    return "TÖLENDI";
+    return "Tölendi";
   }
-  return "KREDIT";
+  return "Kredit";
 };
 
 export const exportB2BExcel = async (tickets = [], options = {}) => {
