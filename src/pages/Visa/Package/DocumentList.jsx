@@ -6,10 +6,7 @@ import {
   Paper,
   IconButton,
   Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Chip,
   CircularProgress,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
@@ -20,6 +17,7 @@ import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import PageHeader from "../../../components/PageHeader";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
+import DeleteDialog from "../../../components/DeleteDialog";
 import DocumentPreviewModal from "./DocumentPreviewModal";
 import { useLocale } from "../../../hooks/useLocale";
 
@@ -27,6 +25,7 @@ const DocumentList = ({
   documents = [],
   isLoading = false,
   isFetching = false,
+  isDeleting = false,
   onRefetch,
   searchQuery = "",
   setSearchQuery,
@@ -57,8 +56,11 @@ const DocumentList = ({
 
   const confirmDelete = () => {
     if (deleteTarget) {
-      onDeleteDocument(deleteTarget.guid || deleteTarget.id, deleteTarget.guid);
-      setDeleteTarget(null);
+      onDeleteDocument(deleteTarget.guid || deleteTarget.id, deleteTarget.guid, {
+        onSuccess: () => {
+          setDeleteTarget(null);
+        },
+      });
     }
   };
 
@@ -349,76 +351,143 @@ const DocumentList = ({
       />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog
+      <DeleteDialog
         open={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: "16px",
-              p: 1.5,
-              maxWidth: "420px",
-            },
-          },
-        }}
-      >
-        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.5, pb: 1 }}>
-          <Box
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: "10px",
-              bgcolor: "error.lighter",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "error.main",
-            }}
-          >
-            <WarningAmberRoundedIcon sx={{ fontSize: 24 }} />
-          </Box>
-          <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              Dokumenti pozmak
+        onClose={() => !isDeleting && setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        isLoading={isDeleting}
+        maxWidth="sm"
+        title={t("visaDocument.deleteTitle")}
+        description={
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ fontSize: "0.95rem", lineHeight: 1.6 }}
+            >
+              {t("visaDocument.deleteConfirm")}
             </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              Bu amaly yzyna gaýtaryp bolmaýar
-            </Typography>
+
+            {/* Selected Package Details Card */}
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: "14px",
+                backgroundColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(255, 255, 255, 0.04)"
+                    : "rgba(0, 0, 0, 0.02)",
+                border: "1px solid",
+                borderColor: "divider",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(24, 90, 189, 0.18)"
+                      : "rgba(24, 90, 189, 0.10)",
+                  color: "#185abd",
+                  flexShrink: 0,
+                }}
+              >
+                <DescriptionOutlinedIcon sx={{ fontSize: 24 }} />
+              </Box>
+
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 700,
+                    color: "text.primary",
+                    fontSize: "1.02rem",
+                    lineHeight: 1.35,
+                    mb: 1,
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {deleteTarget?.title || t("visaDocument.newDocument")}
+                </Typography>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                  {deleteTarget?.country && (
+                    <Chip
+                      size="small"
+                      label={deleteTarget.country}
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: "0.78rem",
+                        height: 24,
+                        bgcolor: "background.paper",
+                        border: "1px solid",
+                        borderColor: "divider",
+                        color: "text.primary",
+                      }}
+                    />
+                  )}
+                  <Chip
+                    size="small"
+                    label={t("visaDocument.tablesCount", {
+                      count: deleteTarget?.tableCount ?? deleteTarget?.tables?.length ?? 0,
+                    })}
+                    sx={{
+                      fontWeight: 500,
+                      fontSize: "0.78rem",
+                      height: 24,
+                      bgcolor: "background.paper",
+                      border: "1px solid",
+                      borderColor: "divider",
+                      color: "text.secondary",
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Irreversible Warning Notice */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.25,
+                p: 1.5,
+                borderRadius: "10px",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(239, 68, 68, 0.12)"
+                    : "rgba(239, 68, 68, 0.06)",
+                border: "1px solid",
+                borderColor: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "rgba(239, 68, 68, 0.25)"
+                    : "rgba(239, 68, 68, 0.15)",
+              }}
+            >
+              <WarningAmberRoundedIcon sx={{ fontSize: 20, color: "error.main", flexShrink: 0 }} />
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "error.main",
+                  fontWeight: 600,
+                  lineHeight: 1.45,
+                  fontSize: "0.82rem",
+                }}
+              >
+                {t("visaDocument.deleteWarning")}
+              </Typography>
+            </Box>
           </Box>
-        </DialogTitle>
-        <DialogContent sx={{ py: 1.5 }}>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            Hakykatdan hem <strong>"{deleteTarget?.title}"</strong> atly wiza dokumentini pozmak isleýärsiňizmi?
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 2, pb: 1.5, gap: 1 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setDeleteTarget(null)}
-            sx={{
-              borderRadius: "8px",
-              textTransform: "none",
-              fontWeight: 600,
-              color: "text.secondary",
-              borderColor: "divider",
-            }}
-          >
-            Ýatyr
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={confirmDelete}
-            sx={{
-              borderRadius: "8px",
-              textTransform: "none",
-              fontWeight: 600,
-            }}
-          >
-            Poz
-          </Button>
-        </DialogActions>
-      </Dialog>
+        }
+      />
     </Box>
   );
 };
