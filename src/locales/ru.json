@@ -698,7 +698,9 @@
     "copyError": "Не удалось скопировать.",
     "loadingDetails": "Загрузка данных документа...",
     "dateLabel": "Дата",
-    "deleteConfirmWithName": "Вы действительно хотите удалить визовый пакет \"{{title}}\"?"
+    "deleteConfirmWithName": "Вы действительно хотите удалить визовый пакет \"{{title}}\"?",
+    "deleteConfirmPrefix": "Вы действительно хотите удалить визовый пакет",
+    "deleteConfirmSuffix": "?"
   },
   "common": {
     "save": "Сохранить",

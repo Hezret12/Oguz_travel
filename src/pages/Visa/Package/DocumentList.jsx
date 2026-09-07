@@ -355,9 +355,23 @@ const DocumentList = ({
         onConfirm={confirmDelete}
         isLoading={isDeleting}
         description={
-          deleteTarget?.title
-            ? t("visaDocument.deleteConfirmWithName", { title: deleteTarget.title })
-            : t("deleteDialog.description")
+          deleteTarget?.title ? (
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              sx={{ fontSize: "0.95rem", lineHeight: 1.65 }}
+            >
+              {t("visaDocument.deleteConfirmPrefix", "Siz hakykatdan hem")}{" "}
+              <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
+                "{deleteTarget.title}"
+              </Box>
+              {t("visaDocument.deleteConfirmSuffix", "wiza bukjasyny pozmak isleýärsiňizmi?").startsWith("?")
+                ? t("visaDocument.deleteConfirmSuffix")
+                : ` ${t("visaDocument.deleteConfirmSuffix")}`}
+            </Typography>
+          ) : (
+            t("deleteDialog.description")
+          )
         }
       />
     </Box>

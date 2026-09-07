@@ -698,7 +698,9 @@
     "copyError": "Failed to copy.",
     "loadingDetails": "Loading document details...",
     "dateLabel": "Date",
-    "deleteConfirmWithName": "Are you sure you want to delete the visa package \"{{title}}\"?"
+    "deleteConfirmWithName": "Are you sure you want to delete the visa package \"{{title}}\"?",
+    "deleteConfirmPrefix": "Are you sure you want to delete the visa package",
+    "deleteConfirmSuffix": "?"
   },
   "common": {
     "save": "Save",

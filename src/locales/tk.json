@@ -698,7 +698,9 @@
     "copyError": "Göçürip bolmady.",
     "loadingDetails": "Dokument maglumatlary ýüklenýär...",
     "dateLabel": "Senesi",
-    "deleteConfirmWithName": "Siz hakykatdan hem \"{{title}}\" wiza bukjasyny pozmak isleýärsiňizmi?"
+    "deleteConfirmWithName": "Siz hakykatdan hem \"{{title}}\" wiza bukjasyny pozmak isleýärsiňizmi?",
+    "deleteConfirmPrefix": "Siz hakykatdan hem",
+    "deleteConfirmSuffix": "wiza bukjasyny pozmak isleýärsiňizmi?"
   },
   "common": {
     "save": "Ýatda sakla",
