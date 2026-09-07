@@ -2,7 +2,10 @@ import { useState } from "react";
 import {
   Box,
   Grid,
+  Typography,
+  LinearProgress,
 } from "@mui/material";
+import { Filter } from "lucide-react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
@@ -10,8 +13,7 @@ import { CustomDialog } from "./CustomDialog";
 import { CustomDialogHeader } from "./CustomDialogHeader";
 import { CustomForm } from "./CustomForm";
 import FooterButton from "./FooterButton";
-import CustomDatePicker from "../CustomDatePicker";
-import CustomCheckbox from "../CustomCheckbox";
+import { ExcelIcon } from "../ExportExcelButton";
 import {
   exportStyledExcelFile,
   fetchAllPaginatedData,
@@ -28,6 +30,7 @@ export const GlobalExcelExportModal = ({
   fileName = "Export",
   sheetName = "Hasabat",
   baseQueryParams = {},
+  totalItems = null,
   defaultValues = {},
   customFilterFields = null,
   transformPayload = null,
@@ -37,15 +40,10 @@ export const GlobalExcelExportModal = ({
   const [isExporting, setIsExporting] = useState(false);
   const [progressInfo, setProgressInfo] = useState(null);
 
-  const fallbackDefaultValues = {
-    include_page_filters: true,
-    date_from: null,
-    date_to: null,
-    ...defaultValues,
-  };
-
   const { control, handleSubmit, reset } = useForm({
-    defaultValues: fallbackDefaultValues,
+    defaultValues: {
+      ...defaultValues,
+    },
     mode: "onSubmit",
   });
 
@@ -58,12 +56,18 @@ export const GlobalExcelExportModal = ({
 
   const onSubmit = async (formData) => {
     if (isExporting) return;
+    if (totalItems === 0) {
+      toast.error(t("common.noDataToExport"));
+      return;
+    }
+
     setIsExporting(true);
     setProgressInfo(null);
 
     try {
+      // Always extract sanitized page filters from baseQueryParams
       const sanitizedPageFilters = {};
-      if (formData.include_page_filters && baseQueryParams) {
+      if (baseQueryParams) {
         Object.entries(baseQueryParams).forEach(([key, val]) => {
           if (
             key !== "page" &&
@@ -82,10 +86,9 @@ export const GlobalExcelExportModal = ({
 
       if (transformPayload) {
         filterPayload = transformPayload(formData, sanitizedPageFilters);
-      } else {
+      } else if (customFilterFields) {
         Object.entries(formData).forEach(([key, val]) => {
           if (
-            key !== "include_page_filters" &&
             val !== null &&
             val !== undefined &&
             val !== ""
@@ -142,8 +145,10 @@ export const GlobalExcelExportModal = ({
     }
   };
 
+  const isZeroItems = totalItems === 0;
+
   return (
-    <CustomDialog open={open} close={handleClose} widthX={640}>
+    <CustomDialog open={open} close={handleClose} widthX={customFilterFields ? 640 : 500}>
       <CustomDialogHeader
         variant="h5"
         title={t("common.exportExcelModalTitle")}
@@ -151,45 +156,193 @@ export const GlobalExcelExportModal = ({
 
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12 }}>
-              <CustomCheckbox
-                name="include_page_filters"
-                control={control}
-                label={t("common.includeCurrentPageFilters")}
-              />
+          {customFilterFields ? (
+            <Grid container spacing={2}>
+              {customFilterFields({ control })}
             </Grid>
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                textAlign: "center",
+                py: 2,
+                px: 1,
+                gap: 2,
+              }}
+            >
+              {/* Excel Icon Badge */}
+              <Box
+                sx={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(16, 185, 129, 0.15)"
+                      : "rgba(16, 124, 65, 0.08)",
+                  border: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "1px solid rgba(16, 185, 129, 0.3)"
+                      : "1px solid rgba(16, 124, 65, 0.2)",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "0 4px 20px rgba(16, 185, 129, 0.2)"
+                      : "0 4px 16px rgba(16, 124, 65, 0.12)",
+                }}
+              >
+                <ExcelIcon size={32} />
+              </Box>
 
-            {customFilterFields ? (
-              customFilterFields({ control })
-            ) : (
-              <>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <CustomDatePicker
-                    name="date_from"
-                    control={control}
-                    label={t("dateFrom")}
+              {/* Confirmation Text & Item Count */}
+              <Box sx={{ maxWidth: 420 }}>
+                {totalItems !== null && totalItems !== undefined ? (
+                  totalItems > 0 ? (
+                    <>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 700,
+                          color: "text.primary",
+                          fontSize: "1.05rem",
+                          mb: 0.75,
+                        }}
+                      >
+                        {t("common.exportExcelConfirmCount", { count: totalItems })}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary", lineHeight: 1.5 }}
+                      >
+                        {t("common.exportExcelConfirmText")}
+                      </Typography>
+                    </>
+                  ) : (
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 600,
+                        color: "warning.main",
+                        fontSize: "0.95rem",
+                      }}
+                    >
+                      {t("common.exportExcelNoData")}
+                    </Typography>
+                  )
+                ) : (
+                  <>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        color: "text.primary",
+                        fontSize: "1.05rem",
+                        mb: 0.75,
+                      }}
+                    >
+                      {t("common.exportExcelModalTitle")}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary", lineHeight: 1.5 }}
+                    >
+                      {t("common.exportExcelConfirmAll")}
+                    </Typography>
+                  </>
+                )}
+              </Box>
+
+              {/* Active Filter Helper Badge */}
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 2,
+                  py: 0.75,
+                  borderRadius: "20px",
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "rgba(255, 255, 255, 0.05)"
+                      : "rgba(0, 0, 0, 0.03)",
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Filter size={14} style={{ opacity: 0.7 }} />
+                <Typography
+                  variant="caption"
+                  sx={{ color: "text.secondary", fontWeight: 500 }}
+                >
+                  {t("common.exportExcelPageFiltersApplied")}
+                </Typography>
+              </Box>
+
+              {/* Progress Bar during Export */}
+              {isExporting && (
+                <Box sx={{ width: "100%", mt: 1 }}>
+                  <LinearProgress
+                    variant={
+                      progressInfo && progressInfo.total > 0
+                        ? "determinate"
+                        : "indeterminate"
+                    }
+                    value={
+                      progressInfo && progressInfo.total > 0
+                        ? Math.min(
+                            100,
+                            Math.round(
+                              (progressInfo.loaded / progressInfo.total) * 100
+                            )
+                          )
+                        : 0
+                    }
+                    sx={{
+                      height: 6,
+                      borderRadius: 3,
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark"
+                          ? "rgba(255, 255, 255, 0.1)"
+                          : "rgba(0, 0, 0, 0.08)",
+                      "& .MuiLinearProgress-bar": {
+                        borderRadius: 3,
+                        backgroundColor: "#107c41",
+                      },
+                    }}
                   />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  <CustomDatePicker
-                    name="date_to"
-                    control={control}
-                    label={t("dateTo")}
-                  />
-                </Grid>
-              </>
-            )}
-          </Grid>
+                  {progressInfo && progressInfo.total > 0 && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: "block",
+                        textAlign: "center",
+                        mt: 0.75,
+                        color: "text.secondary",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {`${progressInfo.loaded} / ${progressInfo.total} (${Math.round((progressInfo.loaded / progressInfo.total) * 100)}%)`}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+            </Box>
+          )}
         </Box>
 
         <FooterButton
           loading={isExporting}
+          disabled={isZeroItems || isExporting}
           onCancel={handleClose}
+          icon={<ExcelIcon size={18} />}
           saveText={
             progressInfo && progressInfo.total > 0
               ? `${t("loading")} (${progressInfo.loaded} / ${progressInfo.total})`
-              : t("common.exportExcel")
+              : t("common.exportExcelBtn") || t("common.exportExcel")
           }
           cancelText={t("cancel")}
         />

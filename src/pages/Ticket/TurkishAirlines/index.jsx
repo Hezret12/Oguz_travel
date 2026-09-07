@@ -617,6 +617,7 @@ const TurkishAirlines = () => {
         <ExportExcelButton
           apiFn={getAllTurkishAirlinesApi}
           queryParams={queryParams}
+          totalItems={totalItems}
           fileName="Turkish_Airlines_Hasabaty"
           sheetName="Turkish Airlines"
           customExportFn={exportTurkishAirlinesExcel}

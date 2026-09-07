@@ -528,6 +528,7 @@ const ReferalLetter = () => {
         <ExportExcelButton
           apiFn={getAllReferralLettersApi}
           queryParams={queryParams}
+          totalItems={totalItems}
           columns={REFERRAL_LETTER_EXCEL_COLUMNS}
           titleBanner={REFERRAL_LETTER_EXCEL_BANNER}
           rightHeader={REFERRAL_LETTER_EXCEL_RIGHT_HEADER}

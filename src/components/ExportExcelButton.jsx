@@ -24,6 +24,7 @@ export const ExcelIcon = ({ size = 18, style = {}, ...props }) => (
 const ExportExcelButton = ({
   apiFn,
   queryParams = {},
+  totalItems = null,
   columns = [],
   fileName = "Export",
   sheetName = "Hasabat",
@@ -129,6 +130,7 @@ const ExportExcelButton = ({
           close={handleCloseModal}
           apiFn={apiFn}
           baseQueryParams={queryParams}
+          totalItems={totalItems}
           columns={columns}
           fileName={fileName}
           sheetName={sheetName}

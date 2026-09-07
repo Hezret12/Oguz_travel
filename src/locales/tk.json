@@ -740,7 +740,13 @@
     "exportError": "Excel faýly ýüklenende ýalňyşlyk ýüze çykdy",
     "exportExcelModalTitle": "Excele geçirmek",
     "exportExcelModalDesc": "Eksport ediljek maglumatlar üçin aşakdaky süzgüçleri saýlap bilersiňiz:",
-    "includeCurrentPageFilters": "Sahapadaky bar bolan gözleg we filterleri hem goşmak"
+    "includeCurrentPageFilters": "Sahapadaky bar bolan gözleg we filterleri hem goşmak",
+    "exportExcelConfirmCount": "Sahapda saýlanan filterlere laýyk gelýän jemi {{count}} sany ýazgy tapyldy.",
+    "exportExcelConfirmText": "Bu maglumatlaryň hemmesini (ähli sahypalar) Excel faýlyna eksport etmek isleýärsiňizmi?",
+    "exportExcelConfirmAll": "Sahapadaky bar bolan filterlere laýyk gelýän ähli ýazgylar (ähli sahypalar) Excel faýlyna eksport ediler. Dowam etmek isleýärsiňizmi?",
+    "exportExcelPageFiltersApplied": "Sahapadaky bar bolan gözleg we filterler awtomatiki goşular.",
+    "exportExcelNoData": "Eksport etmek üçin hiç hili ýazgy tapylmady.",
+    "exportExcelBtn": "Excele geçir"
   },
   "autocomplete": {
     "addClient": "Täze müşderi goşmak",

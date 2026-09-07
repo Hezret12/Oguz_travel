@@ -738,9 +738,15 @@
     "excelExportSuccess": "Excel file downloaded successfully",
     "noDataToExport": "No data to export",
     "exportError": "Error exporting Excel file",
-    "exportExcelModalTitle": "Export to Excel (Filter)",
+    "exportExcelModalTitle": "Export to Excel",
     "exportExcelModalDesc": "You can configure filters for the exported data:",
-    "includeCurrentPageFilters": "Include current page filters and search"
+    "includeCurrentPageFilters": "Include current page filters and search",
+    "exportExcelConfirmCount": "A total of {{count}} records matching the active page filters were found.",
+    "exportExcelConfirmText": "Do you want to export all these records (including all pages) to an Excel file?",
+    "exportExcelConfirmAll": "All records matching the active page filters across all pages will be exported to an Excel file. Do you want to proceed?",
+    "exportExcelPageFiltersApplied": "Current page filters and search terms will be applied automatically.",
+    "exportExcelNoData": "No records found matching the active filters to export.",
+    "exportExcelBtn": "Export to Excel"
   },
   "autocomplete": {
     "addClient": "Add Client",

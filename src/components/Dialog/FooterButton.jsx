@@ -4,12 +4,14 @@ import { useLocale } from "../../hooks/useLocale";
 
 export const FooterButton = ({
   loading = false,
+  disabled = false,
   onCancel,
   onSave,
   saveText,
   cancelText,
   type = "submit",
   sx,
+  icon,
 }) => {
   const { t } = useLocale();
 
@@ -61,13 +63,13 @@ export const FooterButton = ({
         type={type}
         variant="contained"
         onClick={onSave}
-        disabled={loading}
+        disabled={loading || disabled}
         disableElevation
         startIcon={
           loading ? (
             <CircularProgress size={18} color="inherit" />
           ) : (
-            <SaveIcon sx={{ fontSize: "18px !important" }} />
+            icon ?? <SaveIcon sx={{ fontSize: "18px !important" }} />
           )
         }
         sx={{

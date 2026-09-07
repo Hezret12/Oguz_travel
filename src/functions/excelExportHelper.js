@@ -26,8 +26,14 @@ export const fetchAllPaginatedData = async (
   onProgress = null,
   pageSize = 100
 ) => {
+  // Strip any page / limit from filterParams so they don't override pagination
+  const cleanFilterParams = { ...filterParams };
+  delete cleanFilterParams.page;
+  delete cleanFilterParams.limit;
+  delete cleanFilterParams.pageSize;
+
   // 1. Fetch First Page
-  const firstRes = await apiFn({ ...filterParams, page: 1, limit: pageSize });
+  const firstRes = await apiFn({ ...cleanFilterParams, page: 1, limit: pageSize });
   const firstBody = firstRes?.data;
 
   let allItems = [];
@@ -41,13 +47,6 @@ export const fetchAllPaginatedData = async (
     allItems = [...firstBody];
   }
 
-  const totalPages =
-    firstBody?.data?.totalPages ??
-    firstBody?.totalPages ??
-    firstBody?.meta?.totalPages ??
-    firstBody?.data?.meta?.totalPages ??
-    1;
-
   const totalItems =
     firstBody?.data?.totalItems ??
     firstBody?.totalItems ??
@@ -55,12 +54,28 @@ export const fetchAllPaginatedData = async (
     firstBody?.data?.meta?.totalItems ??
     allItems.length;
 
+  const pageSizeEffective = allItems.length > 0 ? allItems.length : pageSize;
+
+  let totalPages =
+    firstBody?.data?.totalPages ??
+    firstBody?.totalPages ??
+    firstBody?.meta?.totalPages ??
+    firstBody?.data?.meta?.totalPages;
+
+  if (!totalPages || (totalItems > allItems.length && totalPages <= 1)) {
+    totalPages = Math.ceil(totalItems / pageSizeEffective);
+  } else if (totalItems > 0 && pageSizeEffective > 0) {
+    totalPages = Math.max(totalPages, Math.ceil(totalItems / pageSizeEffective));
+  } else {
+    totalPages = 1;
+  }
+
   if (onProgress) {
-    onProgress(allItems.length, totalItems);
+    onProgress(Math.min(allItems.length, totalItems), totalItems);
   }
 
   // If all data fits in page 1
-  if (totalPages <= 1) {
+  if (totalPages <= 1 || allItems.length >= totalItems) {
     return allItems;
   }
 
@@ -74,7 +89,7 @@ export const fetchAllPaginatedData = async (
   for (let i = 0; i < remainingPages.length; i += CHUNK_SIZE) {
     const pageChunk = remainingPages.slice(i, i + CHUNK_SIZE);
     const chunkPromises = pageChunk.map((p) =>
-      apiFn({ ...filterParams, page: p, limit: pageSize })
+      apiFn({ ...cleanFilterParams, page: p, limit: pageSizeEffective })
     );
 
     const chunkResponses = await Promise.all(chunkPromises);
@@ -91,11 +106,26 @@ export const fetchAllPaginatedData = async (
     });
 
     if (onProgress) {
-      onProgress(allItems.length, totalItems);
+      onProgress(Math.min(allItems.length, totalItems), totalItems);
     }
   }
 
-  return allItems;
+  // Deduplicate by guid/id if available
+  const seen = new Set();
+  const dedupedItems = [];
+  for (const item of allItems) {
+    const key = item?.guid || item?.id;
+    if (key) {
+      if (!seen.has(key)) {
+        seen.add(key);
+        dedupedItems.push(item);
+      }
+    } else {
+      dedupedItems.push(item);
+    }
+  }
+
+  return dedupedItems;
 };
 
 

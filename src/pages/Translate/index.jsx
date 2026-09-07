@@ -542,6 +542,7 @@ const TranslatePage = () => {
         <ExportExcelButton
           apiFn={getAllTranslationsApi}
           queryParams={queryParams}
+          totalItems={totalItems}
           fileName="Terjime_Hasabaty"
           sheetName="Terjime"
           customExportFn={exportTranslateExcel}

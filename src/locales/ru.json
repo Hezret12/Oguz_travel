@@ -738,9 +738,15 @@
     "excelExportSuccess": "Excel файл успешно скачан",
     "noDataToExport": "Нет данных для экспорта",
     "exportError": "Ошибка при экспорте Excel файла",
-    "exportExcelModalTitle": "Экспорт в Excel (Фильтр)",
+    "exportExcelModalTitle": "Экспорт в Excel",
     "exportExcelModalDesc": "Вы можете выбрать фильтры для экспортируемых данных:",
-    "includeCurrentPageFilters": "Включить текущие фильтры и поиск со страницы"
+    "includeCurrentPageFilters": "Включить текущие фильтры и поиск со страницы",
+    "exportExcelConfirmCount": "По выбранным фильтрам на странице найдено всего {{count}} записей.",
+    "exportExcelConfirmText": "Вы действительно хотите экспортировать все эти данные (все страницы) в файл Excel?",
+    "exportExcelConfirmAll": "Все данные, соответствующие текущим фильтрам со всех страниц, будут экспортированы в файл Excel. Продолжить?",
+    "exportExcelPageFiltersApplied": "Текущие фильтры и поиск страницы будут применены автоматически.",
+    "exportExcelNoData": "Нет записей для экспорта по выбранным фильтрам.",
+    "exportExcelBtn": "Экспортировать"
   },
   "autocomplete": {
     "addClient": "Добавить клиента",

@@ -596,6 +596,7 @@ const B2B = () => {
         <ExportExcelButton
           apiFn={getAllB2BApi}
           queryParams={queryParams}
+          totalItems={totalItems}
           fileName="B2B_Hasabaty"
           sheetName="B2B"
           customExportFn={exportB2BExcel}
