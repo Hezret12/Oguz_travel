@@ -4,7 +4,8 @@ export const outboundFilterSlice = createFilterSlice({
   name: 'outboundFilters',
   defaultFilters: {
     search: '',
-    application_date: null,
+    start_date: '',
+    end_date: '',
     opr_guid: null,
     prepared_opr_guid: null,
     is_paid: null,

@@ -106,7 +106,7 @@ const FilterSelect = ({
   </FormControl>
 );
 
-const FilterDatePicker = ({ label, name, value, onChange }) => (
+const FilterDatePicker = ({ label, name, value, onChange, minDate, maxDate }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -124,9 +124,12 @@ const FilterDatePicker = ({ label, name, value, onChange }) => (
             : ""
         );
       }}
+      minDate={minDate ? dayjs(minDate) : undefined}
+      maxDate={maxDate ? dayjs(maxDate) : undefined}
       format="DD.MM.YYYY"
       views={["year", "month", "day"]}
       slotProps={{
+        field: { clearable: true, onClear: () => onChange(name, "") },
         textField: {
           fullWidth: true,
           size: "small",
@@ -167,9 +170,18 @@ const OutboundFilter = ({
     <Stack spacing={2.5}>
       {/* ================= GLOBAL / ORTAK FİLTRELER ================= */}
       <FilterDatePicker
-        label={t("outbound.requestDate")}
-        name="application_date"
-        value={filters.application_date}
+        label={t("outbound.start_date")}
+        name="start_date"
+        value={filters?.start_date}
+        maxDate={filters?.end_date}
+        onChange={onFilterChange}
+      />
+
+      <FilterDatePicker
+        label={t("outbound.end_date")}
+        name="end_date"
+        value={filters?.end_date}
+        minDate={filters?.start_date}
         onChange={onFilterChange}
       />
 

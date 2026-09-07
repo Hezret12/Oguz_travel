@@ -326,6 +326,8 @@ const HotelTab = ({
           if (key === "is_paid") {
             const num = Number(value);
             displayVal = num === 1 ? "Tölendi" : num === 2 ? "Kredit" : num === 3 ? "Gaýtaryldy" : value;
+          } else if (key === "start_date" || key === "end_date") {
+            displayVal = formatChange(value, { dateOnly: true });
           }
           return (
             <Chip

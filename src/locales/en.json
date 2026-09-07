@@ -420,6 +420,8 @@
     "addSale": "Add Sale",
     "editSale": "Edit Sale",
     "requestDate": "Request Date",
+    "start_date": "Start Date",
+    "end_date": "End Date",
     "office": "Office",
     "clientName": "Client Name",
     "operator": "Operator",

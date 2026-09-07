@@ -420,6 +420,8 @@
     "addSale": "Satyş goşmak",
     "editSale": "Satyşy üýtgetmek",
     "requestDate": "Arza senesi",
+    "start_date": "Başlangyç senesi",
+    "end_date": "Gutarýan senesi",
     "office": "Ofis",
     "clientName": "Müşderiniň ady",
     "operator": "Operator",
