@@ -5,7 +5,7 @@ import {
   Typography,
   LinearProgress,
 } from "@mui/material";
-import { FileSpreadsheet, Filter } from "lucide-react";
+import { FileSpreadsheet } from "lucide-react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
@@ -199,7 +199,7 @@ export const GlobalExcelExportModal = ({
               </Box>
 
               {/* Confirmation Text & Item Count */}
-              <Box sx={{ maxWidth: 420 }}>
+              <Box sx={{ maxWidth: 360 }}>
                 {totalItems !== null && totalItems !== undefined ? (
                   totalItems > 0 ? (
                     <>
@@ -209,25 +209,24 @@ export const GlobalExcelExportModal = ({
                           fontWeight: 700,
                           color: "text.primary",
                           fontSize: "1.05rem",
-                          mb: 0.75,
+                          mb: 0.5,
                         }}
                       >
                         {t("common.exportExcelConfirmCount", { count: totalItems })}
                       </Typography>
                       <Typography
                         variant="body2"
-                        sx={{ color: "text.secondary", lineHeight: 1.5 }}
+                        sx={{ color: "text.secondary" }}
                       >
                         {t("common.exportExcelConfirmText")}
                       </Typography>
                     </>
                   ) : (
                     <Typography
-                      variant="body1"
+                      variant="body2"
                       sx={{
                         fontWeight: 600,
-                        color: "warning.main",
-                        fontSize: "0.95rem",
+                        color: "text.secondary",
                       }}
                     >
                       {t("common.exportExcelNoData")}
@@ -241,45 +240,19 @@ export const GlobalExcelExportModal = ({
                         fontWeight: 700,
                         color: "text.primary",
                         fontSize: "1.05rem",
-                        mb: 0.75,
+                        mb: 0.5,
                       }}
                     >
                       {t("common.exportExcelModalTitle")}
                     </Typography>
                     <Typography
                       variant="body2"
-                      sx={{ color: "text.secondary", lineHeight: 1.5 }}
+                      sx={{ color: "text.secondary" }}
                     >
                       {t("common.exportExcelConfirmAll")}
                     </Typography>
                   </>
                 )}
-              </Box>
-
-              {/* Active Filter Helper Badge */}
-              <Box
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 1,
-                  px: 2,
-                  py: 0.75,
-                  borderRadius: "20px",
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.05)"
-                      : "rgba(0, 0, 0, 0.03)",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Filter size={14} style={{ opacity: 0.7 }} />
-                <Typography
-                  variant="caption"
-                  sx={{ color: "text.secondary", fontWeight: 500 }}
-                >
-                  {t("common.exportExcelPageFiltersApplied")}
-                </Typography>
               </Box>
 
               {/* Progress Bar during Export */}
