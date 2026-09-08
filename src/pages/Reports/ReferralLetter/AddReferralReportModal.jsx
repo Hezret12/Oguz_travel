@@ -13,10 +13,10 @@ import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { useLocale } from "../../../hooks/useLocale";
 import { addReportShareApi } from "../../../api/queries/post";
 
-
 const AddReferralReportModal = ({ open, close, table }) => {
   const { t } = useLocale();
-  const isModalOpen = open !== undefined ? Boolean(open) : Boolean(table?.getState().creatingRow);
+  const isModalOpen =
+    open !== undefined ? Boolean(open) : Boolean(table?.getState().creatingRow);
 
   const statusOptions = useMemo(
     () => [
@@ -24,7 +24,7 @@ const AddReferralReportModal = ({ open, close, table }) => {
       { label: t("referralLetter.statusDamaged"), value: 2, color: "#ea580c" },
       { label: t("referralLetter.statusLost"), value: 3, color: "#dc2626" },
     ],
-    [t]
+    [t],
   );
 
   const { control, handleSubmit, reset } = useForm({
@@ -32,7 +32,7 @@ const AddReferralReportModal = ({ open, close, table }) => {
       date: new Date().toISOString(),
       quantity: "",
       assignment_opr_guid: "",
-      receiver_opr_guid: "",
+      received_by: "",
       startNo: "",
       endNo: "",
       status: 1,
@@ -46,7 +46,7 @@ const AddReferralReportModal = ({ open, close, table }) => {
       date: new Date().toISOString(),
       quantity: "",
       assignment_opr_guid: "",
-      receiver_opr_guid: "",
+      received_by: "",
       startNo: "",
       endNo: "",
       status: 1,
@@ -65,9 +65,11 @@ const AddReferralReportModal = ({ open, close, table }) => {
 
   const handleFormSubmit = (data) => {
     createReportShare({
-      datetime: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+      datetime: data.date
+        ? new Date(data.date).toISOString()
+        : new Date().toISOString(),
       assignment_opr_guid: data.assignment_opr_guid,
-      receiver_opr_guid: data.receiver_opr_guid,
+      received_by: data.received_by,
       start_yh_number: Number(data.startNo || 0),
       end_yh_number: Number(data.endNo || 0),
       total_count: Number(data.quantity || 0),
@@ -106,11 +108,10 @@ const AddReferralReportModal = ({ open, close, table }) => {
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <GlobalEmployeeAutocomplete
-              name="receiver_opr_guid"
+            <CustomTextField
+              name="received_by"
               control={control}
               label={t("referralLetter.receivedBy")}
-              required
             />
           </Grid>
 

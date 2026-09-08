@@ -163,11 +163,10 @@ const ReferralLetterPage = () => {
         Cell: ({ row }) => row.original?.reportAS_operator?.fullName || "",
       },
       {
-        accessorKey: "reportRE_operator",
+        accessorFn: (row) => row.reportRE_operator?.fullName || "",
         id: "receivedBy",
         header: t("referralLetter.receivedBy"),
         size: 180,
-        Cell: ({ row }) => row.original?.reportRE_operator?.fullName || "",
       },
       {
         accessorKey: "start_yh_number",

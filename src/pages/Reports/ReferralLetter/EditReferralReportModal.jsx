@@ -15,7 +15,9 @@ import { updateReportShareApi } from "../../../api/queries/patch";
 
 const EditReferralReportModal = ({ table, row }) => {
   const { t } = useLocale();
-  const isModalOpen = Boolean(table && row && table.getState().editingRow?.id === row.id);
+  const isModalOpen = Boolean(
+    table && row && table.getState().editingRow?.id === row.id,
+  );
 
   const statusOptions = useMemo(
     () => [
@@ -23,21 +25,15 @@ const EditReferralReportModal = ({ table, row }) => {
       { label: t("referralLetter.statusDamaged"), value: 2, color: "#ea580c" },
       { label: t("referralLetter.statusLost"), value: 3, color: "#dc2626" },
     ],
-    [t]
+    [t],
   );
 
   const initialValues = useMemo(() => {
     return {
       date: row?.original?.datetime || null,
       quantity: row?.original?.total_count ?? "",
-      assignment_opr_guid:
-        row?.original?.assignment_opr_guid ||
-        row?.original?.reportAS_operator?.guid ||
-        "",
-      receiver_opr_guid:
-        row?.original?.receiver_opr_guid ||
-        row?.original?.reportRE_operator?.guid ||
-        "",
+      assignment_opr_guid: row?.original?.assignment_opr_guid || "",
+      receivedBy: row?.original?.receivedBy ||        "",
       startNo: String(row?.original?.start_yh_number ?? ""),
       endNo: String(row?.original?.end_yh_number ?? ""),
       status: Number(row?.original?.status || 1),
@@ -50,7 +46,8 @@ const EditReferralReportModal = ({ table, row }) => {
   });
 
   const [prevRowId, setPrevRowId] = useState(null);
-  const currentRowId = isModalOpen && row?.original ? row.original.guid || row.original.id : null;
+  const currentRowId =
+    isModalOpen && row?.original ? row.original.guid || row.original.id : null;
   if (currentRowId !== prevRowId) {
     setPrevRowId(currentRowId);
     reset(initialValues);
@@ -68,10 +65,12 @@ const EditReferralReportModal = ({ table, row }) => {
   const handleFormSubmit = (data) => {
     updateReportShare({
       guid: row.original.guid || row.original.id,
-      datetime: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
+      datetime: data.date
+        ? new Date(data.date).toISOString()
+        : new Date().toISOString(),
       total_count: Number(data.quantity || 0),
       assignment_opr_guid: data.assignment_opr_guid || undefined,
-      receiver_opr_guid: data.receiver_opr_guid || undefined,
+      receiver_opr: data.receiver_opr || undefined,
       start_yh_number: Number(data.startNo || 0),
       end_yh_number: Number(data.endNo || 0),
       status: Number(data.status || 1),
@@ -113,11 +112,10 @@ const EditReferralReportModal = ({ table, row }) => {
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <GlobalEmployeeAutocomplete
-              name="receiver_opr_guid"
+            <CustomTextField
+              name="receivedBy"
               control={control}
               label={t("referralLetter.receivedBy")}
-              required
             />
           </Grid>
 
