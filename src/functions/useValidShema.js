@@ -126,6 +126,7 @@ export const useValidShema = () => {
     opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
     page_count: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
     price: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
+    profit: yup.number().nullable().transform((v, o) => o === "" ? null : v).typeError(t("validation.requiredNumber") || "San bolmaly").optional(),
     note: stringOptionalValidSchema(),
   });
 

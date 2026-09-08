@@ -92,6 +92,7 @@ const TranslatePage = () => {
     pageCount,
     totalItems,
     totalPrice = 0,
+    meta,
   } = usePagginationGet({
     apiFn: getAllTranslationsApi,
     key: "translations",
@@ -253,6 +254,34 @@ const TranslatePage = () => {
         Cell: ({ cell }) => {
           const val = Number(cell.getValue() || 0);
           return `${val.toFixed(2)} TMT`;
+        },
+      },
+      {
+        accessorFn: (row) => row.profit,
+        id: "profit",
+        header: t("columns.profit"),
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+        Cell: ({ cell }) => {
+          const profit = Number(cell.getValue() || 0);
+          return (
+            <Box
+              sx={{
+                fontWeight: 600,
+                fontVariantNumeric: "tabular-nums",
+                color:
+                  profit > 0
+                    ? "#16a34a"
+                    : profit < 0
+                      ? "#ef4444"
+                      : "text.secondary",
+              }}
+            >
+              {profit > 0 ? "+" : ""}
+              {profit.toFixed(2)} TMT
+            </Box>
+          );
         },
       },
       {
@@ -516,6 +545,47 @@ const TranslatePage = () => {
                 TMT
               </Box>
             </Typography>
+            {meta?.totalProfit != null && (
+              <>
+                <Box
+                  component="span"
+                  sx={{
+                    width: "1px",
+                    height: "14px",
+                    backgroundColor: "divider",
+                    mx: 0.5,
+                  }}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "0.825rem",
+                    color: "text.secondary",
+                    fontWeight: 500,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.6,
+                  }}
+                >
+                  {t("columns.profit")}:
+                  <Box
+                    component="span"
+                    sx={{
+                      color: Number(meta.totalProfit) >= 0 ? "#16a34a" : "#ef4444",
+                      fontWeight: 700,
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {Number(meta.totalProfit) > 0 ? "+" : ""}
+                    {new Intl.NumberFormat("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }).format(Number(meta.totalProfit))}{" "}
+                    TMT
+                  </Box>
+                </Typography>
+              </>
+            )}
           </Box>
           <Pagination
             pageIndex={pageIndex}

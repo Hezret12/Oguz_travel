@@ -96,6 +96,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     { header: "TERJIME\nEDEN", key: "translator", width: 26, align: "left" },
     { header: "DÜZEDILEN\nTERJIME", key: "correction_status", width: 16, align: "center" },
     { header: "TÖLENEN\nPUL", key: "price", width: 16, align: "right" },
+    { header: "PEÝDA", key: "profit", width: 16, align: "right" },
   ];
 
   columnsConfig.forEach((col, idx) => {
@@ -144,6 +145,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   };
 
   let sumPrice = 0;
+  let sumProfit = 0;
   let sumPages = 0;
   let sumCompletedPages = 0;
 
@@ -158,10 +160,12 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
         ? Number(row.completed_page_count)
         : null;
     const price = Number(row.price || 0);
+    const profit = Number(row.profit || 0);
 
     sumPages += pageCount;
     if (completedPageCount !== null) sumCompletedPages += completedPageCount;
     sumPrice += price;
+    sumProfit += profit;
 
     const rowData = [
       formatDate(row.received_day),
@@ -178,6 +182,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       row.translator?.fullName ? String(extractText(row.translator.fullName)).toUpperCase() : "",
       row.correction_status ? String(row.correction_status).toUpperCase() : "DOGRY",
       price,
+      profit,
     ];
 
     rowData.forEach((val, idx) => {
@@ -201,8 +206,8 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
           : { style: "thin", color: { argb: "FFD9D9D9" } },
       };
 
-      if (idx === 13 && typeof val === "number") {
-        cell.numFmt = "#,##0";
+      if ((idx === 13 || idx === 14) && typeof val === "number") {
+        cell.numFmt = "#,##0.00";
       }
     });
   });
@@ -254,7 +259,14 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       formula: `SUM(Q${firstDataRow}:Q${lastDataRow})`,
       result: sumPrice,
     };
-    cellPrice.numFmt = "#,##0";
+    cellPrice.numFmt = "#,##0.00";
+
+    const cellProfit = totalRow.getCell(START_COL + 14);
+    cellProfit.value = {
+      formula: `SUM(R${firstDataRow}:R${lastDataRow})`,
+      result: sumProfit,
+    };
+    cellProfit.numFmt = "#,##0.00";
   }
 
   const buffer = await workbook.xlsx.writeBuffer();

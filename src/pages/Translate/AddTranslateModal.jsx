@@ -65,6 +65,7 @@ const AddTranslateModal = ({ table }) => {
       translator_guid: null,
       correction_status: null,
       price: 0,
+      profit: 0,
       note: '',
       is_paid: null,
     },
@@ -109,6 +110,7 @@ const AddTranslateModal = ({ table }) => {
       page_count: Number(data.page_count || 0),
       completed_page_count: Number(data.completed_page_count || 0),
       price: Number(data.price || 0),
+      profit: Number(data.profit || 0),
       is_paid: data.is_paid === 0 || data.is_paid === "0"
         ? 0
         : (data.is_paid === true || data.is_paid === "true"),
@@ -256,7 +258,7 @@ const AddTranslateModal = ({ table }) => {
               </Box>
             </Grid>
 
-            <Grid size={4}>
+            <Grid size={6}>
               <CustomTextField
                 name="source_to_target"
                 control={control}
@@ -265,7 +267,7 @@ const AddTranslateModal = ({ table }) => {
             </Grid>
 
             {/* Page Count */}
-            <Grid size={4}>
+            <Grid size={6}>
               <CustomTextField
                 name="page_count"
                 control={control}
@@ -284,6 +286,17 @@ const AddTranslateModal = ({ table }) => {
                 label={t("columns.price") || "Baha"}
                 endIcon="TMT"
                 required
+              />
+            </Grid>
+
+            {/* Profit */}
+            <Grid size={4}>
+              <CustomTextField
+                name="profit"
+                control={control}
+                type="number"
+                label={t("columns.profit")}
+                endIcon="TMT"
               />
             </Grid>
 
@@ -325,7 +338,7 @@ const AddTranslateModal = ({ table }) => {
             </Grid>
 
             {/* Correction Status */}
-            <Grid size={4}>
+            <Grid size={12}>
               <CustomTextField
                 name="correction_status"
                 control={control}
