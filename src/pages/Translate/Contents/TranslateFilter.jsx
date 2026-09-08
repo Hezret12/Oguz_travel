@@ -201,21 +201,49 @@ const TranslateFilter = ({
 
   return (
     <Stack spacing={2.5}>
-      <FilterDatePicker
-        label={t("columns.startReceivedDay")}
-        name="start_received_day"
-        value={filters?.start_received_day}
-        maxDate={filters?.end_received_day}
-        onChange={onFilterChange}
-      />
+      {/* Gelen güni (Received Day Group) */}
+      <Box
+        sx={{
+          p: 1.75,
+          borderRadius: "10px",
+          border: "1px solid",
+          borderColor: "divider",
+          backgroundColor: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.02)"
+              : "rgba(0, 0, 0, 0.015)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            color: "primary.main",
+          }}
+        >
+          {t("columns.receivedDay")}
+        </Typography>
 
-      <FilterDatePicker
-        label={t("columns.endReceivedDay")}
-        name="end_received_day"
-        value={filters?.end_received_day}
-        minDate={filters?.start_received_day}
-        onChange={onFilterChange}
-      />
+        <FilterDatePicker
+          label={t("columns.startDate")}
+          name="start_received_day"
+          value={filters?.start_received_day}
+          maxDate={filters?.end_received_day}
+          onChange={onFilterChange}
+        />
+
+        <FilterDatePicker
+          label={t("columns.endDate")}
+          name="end_received_day"
+          value={filters?.end_received_day}
+          minDate={filters?.start_received_day}
+          onChange={onFilterChange}
+        />
+      </Box>
 
       <FilterTimePicker
         label={t("columns.receivedTime")}
@@ -240,21 +268,49 @@ const TranslateFilter = ({
         onChange={onFilterChange}
       />
 
-      <FilterDatePicker
-        label={t("columns.startCompletedDay")}
-        name="start_completed_day"
-        value={filters?.start_completed_day}
-        maxDate={filters?.end_completed_day}
-        onChange={onFilterChange}
-      />
+      {/* Tabşyrylan güni (Completed Day Group) */}
+      <Box
+        sx={{
+          p: 1.75,
+          borderRadius: "10px",
+          border: "1px solid",
+          borderColor: "divider",
+          backgroundColor: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.02)"
+              : "rgba(0, 0, 0, 0.015)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            color: "primary.main",
+          }}
+        >
+          {t("columns.completedDay")}
+        </Typography>
 
-      <FilterDatePicker
-        label={t("columns.endCompletedDay")}
-        name="end_completed_day"
-        value={filters?.end_completed_day}
-        minDate={filters?.start_completed_day}
-        onChange={onFilterChange}
-      />
+        <FilterDatePicker
+          label={t("columns.startDate")}
+          name="start_completed_day"
+          value={filters?.start_completed_day}
+          maxDate={filters?.end_completed_day}
+          onChange={onFilterChange}
+        />
+
+        <FilterDatePicker
+          label={t("columns.endDate")}
+          name="end_completed_day"
+          value={filters?.end_completed_day}
+          minDate={filters?.start_completed_day}
+          onChange={onFilterChange}
+        />
+      </Box>
 
       <FilterSelect
         label={t("columns.translator")}
