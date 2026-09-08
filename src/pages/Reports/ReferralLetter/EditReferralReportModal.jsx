@@ -33,7 +33,7 @@ const EditReferralReportModal = ({ table, row }) => {
       date: row?.original?.datetime || null,
       quantity: row?.original?.total_count ?? "",
       assignment_opr_guid: row?.original?.assignment_opr_guid || "",
-      receivedBy: row?.original?.receivedBy ||        "",
+      received_by: row?.original?.received_by || "",
       startNo: String(row?.original?.start_yh_number ?? ""),
       endNo: String(row?.original?.end_yh_number ?? ""),
       status: Number(row?.original?.status || 1),
@@ -70,7 +70,7 @@ const EditReferralReportModal = ({ table, row }) => {
         : new Date().toISOString(),
       total_count: Number(data.quantity || 0),
       assignment_opr_guid: data.assignment_opr_guid || undefined,
-      receiver_opr: data.receiver_opr || undefined,
+      received_by: data.received_by,
       start_yh_number: Number(data.startNo || 0),
       end_yh_number: Number(data.endNo || 0),
       status: Number(data.status || 1),
@@ -113,7 +113,7 @@ const EditReferralReportModal = ({ table, row }) => {
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
-              name="receivedBy"
+              name="received_by"
               control={control}
               label={t("referralLetter.receivedBy")}
             />

@@ -163,8 +163,8 @@ const ReferralLetterPage = () => {
         Cell: ({ row }) => row.original?.reportAS_operator?.fullName || "",
       },
       {
-        accessorFn: (row) => row.reportRE_operator?.fullName || "",
-        id: "receivedBy",
+        accessorKey: "received_by",
+        id: "received_by",
         header: t("referralLetter.receivedBy"),
         size: 180,
       },
