@@ -233,7 +233,6 @@ const TranslateFilter = ({
         onOpen={onSelectOpen}
         onClose={onSelectClose}
       />
-      {/* Gelen güni (Received Day Group) */}
       <Box
         sx={{
           p: 1.75,
