@@ -35,9 +35,9 @@ const STATUS_BY_INDEX = {
   2: {
     label: "REISSUE",
     style: {
-      bg: "FFDBEAFE", // Light soft royal / sky tint (#DBEAFE)
-      fg: "FF1E40AF", // Deep corporate navy (#1E40AF)
-      border: "FF93C5FD", // Subtle sky border (#93C5FD)
+      bg: "FFDBEAFE",
+      fg: "FF1E40AF", 
+      border: "FF93C5FD",
     },
   },
   3: {
