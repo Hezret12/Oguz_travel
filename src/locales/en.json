@@ -128,6 +128,8 @@
     "total_usd": "Jemi, USD",
     "total_tmt": "Jemi, TMT",
     "totalPrice": "Total Price",
+    "totalExpense": "Total Expense",
+    "totalProfit": "Total Profit",
     "price": "Price",
     "category": "Category",
     "sortOrder": "Sort Order",

@@ -91,7 +91,9 @@ const TranslatePage = () => {
     refetch,
     pageCount,
     totalItems,
+    totalPrice = 0,
     totalExpense = 0,
+    totalProfit = 0,
     meta,
   } = usePagginationGet({
     apiFn: getAllTranslationsApi,
@@ -518,34 +520,50 @@ const TranslatePage = () => {
               borderColor: "divider",
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{
-                fontSize: "0.825rem",
-                color: "text.secondary",
-                fontWeight: 500,
-                display: "flex",
-                alignItems: "center",
-                gap: 0.6,
-              }}
-            >
-              {t("columns.totalProfit")}:
-              <Box
-                component="span"
-                sx={{
-                  color: "text.primary",
-                  fontWeight: 700,
-                  fontVariantNumeric: "tabular-nums",
-                }}
-              >
-                {new Intl.NumberFormat("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }).format(Number(totalExpense || 0))}{" "}
-                TMT
-              </Box>
-            </Typography>
-            {meta?.totalProfit != null && (
+            {(Number(totalExpense) > 0 || Number(totalPrice) === 0) && (
+              <>
+                {Number(totalPrice) > 0 && (
+                  <Box
+                    component="span"
+                    sx={{
+                      width: "1px",
+                      height: "14px",
+                      backgroundColor: "divider",
+                      mx: 0.5,
+                    }}
+                  />
+                )}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "0.825rem",
+                    color: "text.secondary",
+                    fontWeight: 500,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.6,
+                  }}
+                >
+                  {t("columns.totalPrice")}:
+                  <Box
+                    component="span"
+                    sx={{
+                      color: "text.primary",
+                      fontWeight: 700,
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {new Intl.NumberFormat("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }).format(Number(totalExpense))}{" "}
+                    TMT
+                  </Box>
+                </Typography>
+              </>
+            )}
+
+            {(Number(totalProfit) !== 0 || meta?.totalProfit != null) && (
               <>
                 <Box
                   component="span"
@@ -567,20 +585,23 @@ const TranslatePage = () => {
                     gap: 0.6,
                   }}
                 >
-                  {t("columns.profit")}:
+                  {t("columns.totalProfit")}:
                   <Box
                     component="span"
                     sx={{
-                      color: Number(meta.totalProfit) >= 0 ? "#16a34a" : "#ef4444",
+                      color:
+                        Number(totalProfit || meta?.totalProfit || 0) >= 0
+                          ? "#16a34a"
+                          : "#ef4444",
                       fontWeight: 700,
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
-                    {Number(meta.totalProfit) > 0 ? "+" : ""}
+                    {Number(totalProfit || meta?.totalProfit || 0) > 0 ? "+" : ""}
                     {new Intl.NumberFormat("en-US", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
-                    }).format(Number(meta.totalProfit))}{" "}
+                    }).format(Number(totalProfit || meta?.totalProfit || 0))}{" "}
                     TMT
                   </Box>
                 </Typography>
