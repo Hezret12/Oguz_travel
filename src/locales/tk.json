@@ -466,7 +466,7 @@
     "selectCountryDescription": "Arzalary görmek üçin ýokardan ýurt saýlaň",
     "selectCountryPlaceholder": "Ýurt saýlaň...",
     "selectCountryToAdd": "Arza goşmak üçin ilki bilen ýurt saýlaň",
-    "defaultFieldsInfoTitle": "Standart Meýdançalar:",
+    "defaultFieldsInfoTitle": "Standart Sütünler:",
     "defaultFieldsInfoDesc": "Müşderi, Arza berlen senesi, Operator 1, Operator 2 we Bellikler awtomatiki birikdirilýär.",
     "fields": {
       "applicationDate": "Arza senesi",
@@ -599,24 +599,24 @@
     "task": "Ýumuş"
   },
   "customFields": {
-    "title": "Meýdançalar",
-    "addTitle": "Täze meýdança döretmek",
-    "editTitle": "Meýdançany üýtgetmek",
-    "deleteTitle": "Meýdançany pozmak",
+    "title": "Sütünler",
+    "addTitle": "Täze sütün döretmek",
+    "editTitle": "Sütüni üýtgetmek",
+    "deleteTitle": "Sütüni pozmak",
     "labelTm": "Ady (Türkmen)",
     "labelRu": "Ady (Русский)",
     "labelEn": "Ady (English)",
-    "fieldType": "Meýdança görnüşi",
+    "fieldType": "Sütün görnüşi",
     "options": "Opsiýalar",
     "sortOrder": "Tertip belgisi",
-    "fieldKey": "Meýdança açary",
+    "fieldKey": "Sütün açary",
     "isRequired": "Hökmanylygy",
     "typeText": "Tekst (Text)",
     "typeNumber": "San (Number)",
     "typeDate": "Sene (Date)",
     "typeSelect": "Saýlawly (Select)",
-    "searchPlaceholder": "Meýdança gözleň...",
-    "emptyState": "Heniz meýdança saýlanmady"
+    "searchPlaceholder": "Sütün gözleň...",
+    "emptyState": "Heniz sütün saýlanmady"
   },
   "errorBoundary": {
     "networkErrorTitle": "Baglanyşyk Ýalňyşlygy",
