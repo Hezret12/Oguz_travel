@@ -121,7 +121,7 @@ const EditReferralLetterModal = ({ table, row }) => {
           <GlobalEmployeeAutocomplete
             name="received_opr_guid"
             control={control}
-            label={t("columns.operatorTwo")}
+            label={t("outbound.operator")}
             required
           />
 

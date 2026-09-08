@@ -167,7 +167,7 @@ const ReferalLetter = () => {
       },
       {
         id: "operator",
-        header: t("columns.operator"),
+        header: t("outbound.operator"),
         size: 200,
         accessorFn: (row) =>
           row.refferaloperator?.fullName || row.operator?.fullName || "",
