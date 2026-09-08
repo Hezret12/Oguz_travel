@@ -27,9 +27,9 @@ const STATUS_BY_INDEX = {
   1: {
     label: "SALE",
     style: {
-      bg: "FFDCFCE7", // Light soft emerald / mint tint (#DCFCE7)
-      fg: "FF166534", // Deep rich forest emerald (#166534)
-      border: "FF86EFAC", // Subtle mint border (#86EFAC)
+      bg: "FFDCFCE7",
+      fg: "FF166534", 
+      border: "FF86EFAC",
     },
   },
   2: {
