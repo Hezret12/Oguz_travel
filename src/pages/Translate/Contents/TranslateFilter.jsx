@@ -93,7 +93,7 @@ const FilterSelect = ({
   </FormControl>
 );
 
-const FilterDatePicker = ({ label, name, value, onChange }) => (
+const FilterDatePicker = ({ label, name, value, onChange, minDate, maxDate }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -111,9 +111,12 @@ const FilterDatePicker = ({ label, name, value, onChange }) => (
             : ""
         );
       }}
+      minDate={minDate ? dayjs(minDate) : undefined}
+      maxDate={maxDate ? dayjs(maxDate) : undefined}
       format="DD.MM.YYYY"
       views={["year", "month", "day"]}
       slotProps={{
+        field: { clearable: true, onClear: () => onChange(name, "") },
         textField: {
           fullWidth: true,
           size: "small",
@@ -199,16 +202,25 @@ const TranslateFilter = ({
   return (
     <Stack spacing={2.5}>
       <FilterDatePicker
-        label={t("columns.receivedDay") || "Alnan güni"}
-        name="received_day"
-        value={filters.received_day}
+        label={t("columns.startReceivedDay")}
+        name="start_received_day"
+        value={filters?.start_received_day}
+        maxDate={filters?.end_received_day}
+        onChange={onFilterChange}
+      />
+
+      <FilterDatePicker
+        label={t("columns.endReceivedDay")}
+        name="end_received_day"
+        value={filters?.end_received_day}
+        minDate={filters?.start_received_day}
         onChange={onFilterChange}
       />
 
       <FilterTimePicker
-        label={t("columns.receivedTime") || "Alnan wagty"}
+        label={t("columns.receivedTime")}
         name="received_time"
-        value={filters.received_time}
+        value={filters?.received_time}
         onChange={onFilterChange}
       />
 
@@ -216,29 +228,38 @@ const TranslateFilter = ({
         name="opr_guid"
         value={filters?.opr_guid ?? ""}
         onChange={(val) => onFilterChange("opr_guid", val)}
-        label={t("columns.operator") || "Operator"}
+        label={t("columns.operator")}
         placeholder={allText}
         size="small"
       />
 
       <FilterTimePicker
-        label={t("columns.completedTime") || "Tabşyrylan wagty"}
+        label={t("columns.completedTime")}
         name="completed_time"
-        value={filters.completed_time}
+        value={filters?.completed_time}
         onChange={onFilterChange}
       />
 
       <FilterDatePicker
-        label={t("columns.completedDay") || "Tabşyrylan güni"}
-        name="completed_day"
-        value={filters.completed_day}
+        label={t("columns.startCompletedDay")}
+        name="start_completed_day"
+        value={filters?.start_completed_day}
+        maxDate={filters?.end_completed_day}
+        onChange={onFilterChange}
+      />
+
+      <FilterDatePicker
+        label={t("columns.endCompletedDay")}
+        name="end_completed_day"
+        value={filters?.end_completed_day}
+        minDate={filters?.start_completed_day}
         onChange={onFilterChange}
       />
 
       <FilterSelect
-        label={t("columns.translator") || "Terjimeçi"}
+        label={t("columns.translator")}
         name="translator_guid"
-        value={filters.translator_guid}
+        value={filters?.translator_guid}
         options={translatorOptions}
         isOpen={selectsOpen?.translator_guid ?? false}
         allText={allText}

@@ -3,11 +3,13 @@ import { createFilterSlice } from './createFilterSlice';
 export const translateFilterSlice = createFilterSlice({
   name: 'translateFilters',
   defaultFilters: {
-    received_day: '',
+    start_received_day: '',
+    end_received_day: '',
     received_time: '',
     opr_guid: '',
     completed_time: '',
-    completed_day: '',
+    start_completed_day: '',
+    end_completed_day: '',
     translator_guid: '',
   },
   defaultPageSize: 40,

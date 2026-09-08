@@ -45,9 +45,11 @@ import dayjs from "dayjs";
 const FILTER_LABEL_KEYS = {
   opr_guid: "columns.operator",
   translator_guid: "columns.translator",
-  received_day: "columns.receivedDay",
+  start_received_day: "columns.startReceivedDay",
+  end_received_day: "columns.endReceivedDay",
   received_time: "columns.receivedTime",
-  completed_day: "columns.completedDay",
+  start_completed_day: "columns.startCompletedDay",
+  end_completed_day: "columns.endCompletedDay",
   completed_time: "columns.completedTime",
 };
 
@@ -132,7 +134,14 @@ const TranslatePage = () => {
         displayVal = employeeMap.get(value) || value;
       } else if (key === "translator_guid") {
         displayVal = translatorMap.get(value) || value;
-      } else if (key === "received_day" || key === "completed_day") {
+      } else if (
+        key === "start_received_day" ||
+        key === "end_received_day" ||
+        key === "start_completed_day" ||
+        key === "end_completed_day" ||
+        key === "received_day" ||
+        key === "completed_day"
+      ) {
         displayVal = dayjs(value).isValid()
           ? dayjs(value).format("DD.MM.YYYY")
           : value;
