@@ -111,7 +111,7 @@ const TourTab = ({
             primary={row.original.operator?.fullName}
             secondary={selectedLang(
               row.original.operator?.office?.fullName ||
-                row.original.operator?.office?.shortName,
+              row.original.operator?.office?.shortName,
             )}
           />
         ),
@@ -126,7 +126,7 @@ const TourTab = ({
             primary={row.original.preparedOpr?.fullName}
             secondary={selectedLang(
               row?.original?.preparedOpr?.office?.fullName ||
-                row?.original?.preparedOpr?.office?.shortName,
+              row?.original?.preparedOpr?.office?.shortName,
             )}
           />
         ),
@@ -219,7 +219,7 @@ const TourTab = ({
       },
       {
         id: "tour_name",
-        header: t("outbound.tourName") || "Tur ady",
+        header: t("outbound.tourName"),
         size: 200,
         accessorFn: (row) => row.tour_name || "",
         muiTableHeadCellProps: { align: "center" },
