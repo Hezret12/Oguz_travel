@@ -3,6 +3,7 @@ import CustomDatePicker from "../../components/CustomDatePicker";
 import CustomTextField from "../../components/CustomTextField";
 import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { formatExcelDate } from "../../functions/excelExportHelper";
+export { exportReferralLetterExcel } from "./functions/exportReferralLetterExcel";
 
 export const REFERRAL_LETTER_EXCEL_BANNER =
   'OGUZABAT Hojalyk Jemgyýetiniň "OGUZTRAVEL" syýahatçylyk bölümi tarapyndan daşary ýurtlara ugradylan syýahatçylar baradaky hasabat';

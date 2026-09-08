@@ -34,13 +34,7 @@ import ReferralLetterFilter from "./Contents/ReferralLetterFilter";
 import AddReferralLetterModal from "./AddReferralLetterModal";
 import EditReferralLetterModal from "./EditReferralLetterModal";
 import ExportExcelButton from "../../components/ExportExcelButton";
-import {
-  REFERRAL_LETTER_EXCEL_COLUMNS,
-  REFERRAL_LETTER_EXCEL_BANNER,
-  REFERRAL_LETTER_EXCEL_RIGHT_HEADER,
-  REFERRAL_LETTER_EXCEL_DEFAULT_VALUES,
-  renderReferralLetterFilterFields,
-} from "./referralLetterExcel.jsx";
+import { exportReferralLetterExcel } from "./functions/exportReferralLetterExcel";
 import { useDateFormat } from "../../functions/generalHelpers";
 
 const CURRENCY_SYMBOLS = {
@@ -529,12 +523,9 @@ const ReferalLetter = () => {
           apiFn={getAllReferralLettersApi}
           queryParams={queryParams}
           totalItems={totalItems}
-          columns={REFERRAL_LETTER_EXCEL_COLUMNS}
-          titleBanner={REFERRAL_LETTER_EXCEL_BANNER}
-          rightHeader={REFERRAL_LETTER_EXCEL_RIGHT_HEADER}
-          fileName="OGUZTRAVEL_Yollanma_Hatlary"
-          defaultValues={REFERRAL_LETTER_EXCEL_DEFAULT_VALUES}
-          customFilterFields={renderReferralLetterFilterFields}
+          fileName="Yollanma_Hatlary_Hasabaty"
+          sheetName="Ýollanma Hatlary"
+          customExportFn={exportReferralLetterExcel}
         />
       </PageHeader>
 
