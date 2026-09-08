@@ -43,9 +43,9 @@ const STATUS_BY_INDEX = {
   3: {
     label: "REFUND",
     style: {
-      bg: "FFFEF2F2", // Soft warm rose / blush tint (#FEF2F2)
-      fg: "FF991B1B", // Deep executive wine / crimson (#991B1B)
-      border: "FFFCA5A5", // Subtle rose border (#FCA5A5)
+      bg: "FFFEF2F2",
+      fg: "FF991B1B", 
+      border: "FFFCA5A5", 
     },
   },
 };
