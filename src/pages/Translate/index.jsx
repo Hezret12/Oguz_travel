@@ -91,7 +91,7 @@ const TranslatePage = () => {
     refetch,
     pageCount,
     totalItems,
-    totalPrice = 0,
+    totalExpense = 0,
     meta,
   } = usePagginationGet({
     apiFn: getAllTranslationsApi,
@@ -529,7 +529,7 @@ const TranslatePage = () => {
                 gap: 0.6,
               }}
             >
-              {t("columns.totalPrice")}:
+              {t("columns.totalProfit")}:
               <Box
                 component="span"
                 sx={{
@@ -541,7 +541,7 @@ const TranslatePage = () => {
                 {new Intl.NumberFormat("en-US", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                }).format(Number(totalPrice || 0))}{" "}
+                }).format(Number(totalExpense || 0))}{" "}
                 TMT
               </Box>
             </Typography>
