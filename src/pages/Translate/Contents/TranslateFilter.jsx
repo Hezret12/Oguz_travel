@@ -1,5 +1,12 @@
 import { useMemo } from "react";
-import { Box, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  MenuItem,
+  Select,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { ChevronDown } from "lucide-react";
@@ -93,7 +100,14 @@ const FilterSelect = ({
   </FormControl>
 );
 
-const FilterDatePicker = ({ label, name, value, onChange, minDate, maxDate }) => (
+const FilterDatePicker = ({
+  label,
+  name,
+  value,
+  onChange,
+  minDate,
+  maxDate,
+}) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -106,9 +120,7 @@ const FilterDatePicker = ({ label, name, value, onChange, minDate, maxDate }) =>
       onChange={(newValue) => {
         onChange(
           name,
-          newValue && newValue.isValid()
-            ? newValue.format("YYYY-MM-DD")
-            : ""
+          newValue && newValue.isValid() ? newValue.format("YYYY-MM-DD") : "",
         );
       }}
       minDate={minDate ? dayjs(minDate) : undefined}
@@ -150,14 +162,13 @@ const FilterTimePicker = ({ label, name, value, onChange }) => (
       onChange={(newValue) => {
         onChange(
           name,
-          newValue && newValue.isValid()
-            ? newValue.format("HH:mm")
-            : ""
+          newValue && newValue.isValid() ? newValue.format("HH:mm") : "",
         );
       }}
       format="HH:mm"
       ampm={false}
       slotProps={{
+        field: { clearable: true, onClear: () => onChange(name, "") },
         textField: {
           fullWidth: true,
           size: "small",
@@ -193,14 +204,35 @@ const TranslateFilter = ({
   });
 
   const translatorOptions = useMemo(
-    () => (translators || []).map((tr) => ({ value: tr.guid, label: tr.fullName })),
-    [translators]
+    () =>
+      (translators || []).map((tr) => ({ value: tr.guid, label: tr.fullName })),
+    [translators],
   );
 
   const allText = t("all") ?? "All";
 
   return (
     <Stack spacing={2.5}>
+      <GlobalEmployeeAutocomplete
+        name="opr_guid"
+        value={filters?.opr_guid ?? ""}
+        onChange={(val) => onFilterChange("opr_guid", val)}
+        label={t("columns.operator")}
+        placeholder={allText}
+        size="small"
+      />
+
+      <FilterSelect
+        label={t("columns.translator")}
+        name="translator_guid"
+        value={filters?.translator_guid}
+        options={translatorOptions}
+        isOpen={selectsOpen?.translator_guid ?? false}
+        allText={allText}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
+      />
       {/* Gelen güni (Received Day Group) */}
       <Box
         sx={{
@@ -244,29 +276,6 @@ const TranslateFilter = ({
           onChange={onFilterChange}
         />
       </Box>
-
-      <FilterTimePicker
-        label={t("columns.receivedTime")}
-        name="received_time"
-        value={filters?.received_time}
-        onChange={onFilterChange}
-      />
-
-      <GlobalEmployeeAutocomplete
-        name="opr_guid"
-        value={filters?.opr_guid ?? ""}
-        onChange={(val) => onFilterChange("opr_guid", val)}
-        label={t("columns.operator")}
-        placeholder={allText}
-        size="small"
-      />
-
-      <FilterTimePicker
-        label={t("columns.completedTime")}
-        name="completed_time"
-        value={filters?.completed_time}
-        onChange={onFilterChange}
-      />
 
       {/* Tabşyrylan güni (Completed Day Group) */}
       <Box
@@ -312,17 +321,22 @@ const TranslateFilter = ({
         />
       </Box>
 
-      <FilterSelect
-        label={t("columns.translator")}
-        name="translator_guid"
-        value={filters?.translator_guid}
-        options={translatorOptions}
-        isOpen={selectsOpen?.translator_guid ?? false}
-        allText={allText}
-        onChange={onFilterChange}
-        onOpen={onSelectOpen}
-        onClose={onSelectClose}
-      />
+      {/* Received Time & Completed Time Side-by-Side */}
+      <Stack direction="row" spacing={1.5} sx={{ "& > *": { flex: 1 } }}>
+        <FilterTimePicker
+          label={t("columns.receivedTime")}
+          name="received_time"
+          value={filters?.received_time}
+          onChange={onFilterChange}
+        />
+
+        <FilterTimePicker
+          label={t("columns.completedTime")}
+          name="completed_time"
+          value={filters?.completed_time}
+          onChange={onFilterChange}
+        />
+      </Stack>
     </Stack>
   );
 };
