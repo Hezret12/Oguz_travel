@@ -19,6 +19,11 @@ import LabelWithTooltip from "../../components/LabelWithTooltip";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addReferralLetterApi } from "../../api/queries/post";
 
+const REFERRAL_CURRENCIES = [
+  { code: "USD", symbol: "$" },
+  { code: "TMT", symbol: "m" },
+];
+
 const AddReferralLetterModal = ({ table }) => {
   const { t } = useLocale();
   const { addReferralLetter } = useValidShema();
@@ -147,6 +152,7 @@ const AddReferralLetterModal = ({ table }) => {
             control={control}
             label={t("price")}
             currency={selectedCurrency}
+            currencies={REFERRAL_CURRENCIES}
             onCurrencyChange={(curr) => setValue("currency", curr)}
             required
           />
