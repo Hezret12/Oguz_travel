@@ -25,40 +25,68 @@ const extractText = (val) => {
 };
 
 
-const getStatusKey = (row) => {
-  if (row.tstatus?.name?.en) return row.tstatus.name.en;
-  if (row.tstatus?.name && typeof row.tstatus.name === "string") return row.tstatus.name;
-  if (row.tstatus?.name) return extractText(row.tstatus.name);
-  if (row.status?.name?.en) return row.status.name.en;
-  if (row.status?.name && typeof row.status.name === "string") return row.status.name;
-  if (row.status?.name) return extractText(row.status.name);
-  if (typeof row.status === "string") return row.status;
-  if (row.sale_status) return row.sale_status;
-  return "";
+const STATUS_BY_INDEX = {
+  1: {
+    label: "SALE",
+    style: {
+      bg: "FFDCFCE7", // Light soft emerald / mint tint (#DCFCE7)
+      fg: "FF166534", // Deep rich forest emerald (#166534)
+      border: "FF86EFAC", // Subtle mint border (#86EFAC)
+    },
+  },
+  2: {
+    label: "REISSUE",
+    style: {
+      bg: "FFDBEAFE", // Light soft royal / sky tint (#DBEAFE)
+      fg: "FF1E40AF", // Deep corporate navy (#1E40AF)
+      border: "FF93C5FD", // Subtle sky border (#93C5FD)
+    },
+  },
+  3: {
+    label: "REFUND",
+    style: {
+      bg: "FFFEF2F2", // Soft warm rose / blush tint (#FEF2F2)
+      fg: "FF991B1B", // Deep executive wine / crimson (#991B1B)
+      border: "FFFCA5A5", // Subtle rose border (#FCA5A5)
+    },
+  },
 };
 
-const getStatusExcelStyle = (status) => {
-  const key = String(status || "").trim().toUpperCase();
-  if (key === "SALE" || key.includes("SALE") || key.includes("SAT")) {
-    return {
-      bg: "FF16A34A", // Green (#16a34a)
-      fg: "FFFFFFFF", // White text
-    };
+const resolveStatusInfo = (rowOrStatus) => {
+  if (!rowOrStatus) return { label: "", style: null };
+
+  // 1. Primary: match by index_number directly (1: SALE, 2: REISSUE, 3: REFUND)
+  const statusObj = rowOrStatus.tstatus || rowOrStatus.status || rowOrStatus;
+  const indexNumber =
+    typeof statusObj === "number"
+      ? statusObj
+      : typeof rowOrStatus === "number"
+      ? rowOrStatus
+      : statusObj?.index_number ?? rowOrStatus.status_index_number;
+
+  if (indexNumber !== undefined && indexNumber !== null && STATUS_BY_INDEX[Number(indexNumber)]) {
+    return STATUS_BY_INDEX[Number(indexNumber)];
   }
-  if (key === "REISSUE" || key.includes("REISSUE") || key.includes("ÇALŞ") || key.includes("DOLY")) {
-    return {
-      bg: "FF2563EB", // Blue (#2563eb)
-      fg: "FFFFFFFF", // White text
-    };
-  }
-  if (key === "REFUND" || key.includes("REFUND") || key.includes("RET") || key.includes("GAÝTAR") || key.includes("GAYTAR")) {
-    return {
-      bg: "FFDC2626", // Red (#dc2626)
-      fg: "FFFFFFFF", // White text
-    };
-  }
-  return null;
+
+  // 2. Fallback: match by name string if index_number is not present
+  const name =
+    statusObj?.name?.en ||
+    statusObj?.name?.tk ||
+    (typeof statusObj?.name === "string" ? statusObj.name : "") ||
+    (typeof statusObj === "string" ? statusObj : "") ||
+    rowOrStatus.sale_status ||
+    "";
+
+  const key = String(name).trim().toUpperCase();
+  if (key === "SALE" || key === "1") return STATUS_BY_INDEX[1];
+  if (key === "REISSUE" || key === "2") return STATUS_BY_INDEX[2];
+  if (key === "REFUND" || key === "3") return STATUS_BY_INDEX[3];
+
+  return { label: key, style: null };
 };
+
+const getStatusKey = (rowOrStatus) => resolveStatusInfo(rowOrStatus).label;
+const getStatusExcelStyle = (rowOrStatus) => resolveStatusInfo(rowOrStatus).style;
 
 const resolveAssignmentOffice = (row) => {
   const officeVal =
@@ -238,7 +266,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
       name: "Calibri",
       size: 10,
       bold: true,
-      color: { argb: idx === netColIdx ? "FFDC2626" : "FF000000" },
+      color: { argb: idx === netColIdx ? "FF991B1B" : "FF000000" },
     };
     cell.fill = headerFill;
     cell.alignment = {
@@ -301,8 +329,9 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
       row.passport ||
       "";
 
+    const statusInfo = resolveStatusInfo(row);
     const rowData = [
-      offset + 1,
+      row.index_number ?? offset + 1,
       formatDate(row.datetime),
       row.assignment_operator?.fullName ? String(extractText(row.assignment_operator.fullName)).toUpperCase() : "",
       resolveAssignmentOffice(row),
@@ -312,7 +341,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
       row.client?.fullName ? String(extractText(row.client.fullName)).toUpperCase() : "",
       passport ? String(passport).toUpperCase() : "",
       row.pnr ? String(row.pnr).toUpperCase() : "",
-      getStatusKey(row).toUpperCase(),
+      statusInfo.label,
       row.airline ? String(row.airline).toUpperCase() : "",
       row.route ? String(row.route).toUpperCase() : "",
       row.class ? String(row.class).toUpperCase() : "",
@@ -351,7 +380,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
 
       // Status styling with badge colors
       if (idx === statusColIdx && val) {
-        const statusStyle = getStatusExcelStyle(val);
+        const statusStyle = statusInfo.style || getStatusExcelStyle(val);
         if (statusStyle) {
           cell.fill = {
             type: "pattern",
@@ -364,6 +393,16 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
             bold: true,
             color: { argb: statusStyle.fg },
           };
+          cell.border = {
+            top: { style: "thin", color: { argb: statusStyle.border || "FFD9D9D9" } },
+            bottom: { style: "thin", color: { argb: statusStyle.border || "FFD9D9D9" } },
+            left: colNumber === START_COL
+              ? { style: "medium", color: { argb: "FF000000" } }
+              : { style: "thin", color: { argb: statusStyle.border || "FFD9D9D9" } },
+            right: colNumber === END_COL
+              ? { style: "medium", color: { argb: "FF000000" } }
+              : { style: "thin", color: { argb: statusStyle.border || "FFD9D9D9" } },
+          };
         }
       }
 
@@ -374,7 +413,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
 
       // Red font color for NET BAHA (Net fare)
       if (idx === netColIdx) {
-        cell.font = { name: "Calibri", size: 10, color: { argb: "FFDC2626" } };
+        cell.font = { name: "Calibri", size: 10, color: { argb: "FF991B1B" } };
       }
     });
   });
@@ -419,7 +458,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
         result: sumNet,
       };
       cellNet.numFmt = currencyNumFmt;
-      cellNet.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FFDC2626" } };
+      cellNet.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FF991B1B" } };
     }
 
     // SATYŞ BAHA formula

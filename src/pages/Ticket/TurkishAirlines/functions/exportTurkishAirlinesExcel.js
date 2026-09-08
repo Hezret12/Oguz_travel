@@ -23,28 +23,68 @@ const getOfficeName = (office) => {
   return "";
 };
 
-const getStatusName = (tstatus) => {
-  if (!tstatus) return "";
-  const name = tstatus.name;
-  if (typeof name === "object" && name) {
-    return String(name.en || name.tk || name.ru || "").trim().toUpperCase();
-  }
-  return String(name || "").trim().toUpperCase();
+const STATUS_BY_INDEX = {
+  1: {
+    label: "SALE",
+    style: {
+      bg: "FFDCFCE7", // Light soft emerald / mint tint (#DCFCE7)
+      fg: "FF166534", // Deep rich forest emerald (#166534)
+      border: "FF86EFAC", // Subtle mint border (#86EFAC)
+    },
+  },
+  2: {
+    label: "REISSUE",
+    style: {
+      bg: "FFDBEAFE", // Light soft royal / sky tint (#DBEAFE)
+      fg: "FF1E40AF", // Deep corporate navy (#1E40AF)
+      border: "FF93C5FD", // Subtle sky border (#93C5FD)
+    },
+  },
+  3: {
+    label: "REFUND",
+    style: {
+      bg: "FFFEF2F2", // Soft warm rose / blush tint (#FEF2F2)
+      fg: "FF991B1B", // Deep executive wine / crimson (#991B1B)
+      border: "FFFCA5A5", // Subtle rose border (#FCA5A5)
+    },
+  },
 };
 
-const getStatusExcelStyle = (status) => {
-  const key = String(status || "").trim().toUpperCase();
-  if (key === "SALE") {
-    return { bg: "FF16A34A", fg: "FFFFFFFF" };
+const resolveStatusInfo = (rowOrStatus) => {
+  if (!rowOrStatus) return { label: "", style: null };
+
+  // 1. Primary: match by index_number directly (1: SALE, 2: REISSUE, 3: REFUND)
+  const statusObj = rowOrStatus.tstatus || rowOrStatus.status || rowOrStatus;
+  const indexNumber =
+    typeof statusObj === "number"
+      ? statusObj
+      : typeof rowOrStatus === "number"
+      ? rowOrStatus
+      : statusObj?.index_number ?? rowOrStatus.status_index_number;
+
+  if (indexNumber !== undefined && indexNumber !== null && STATUS_BY_INDEX[Number(indexNumber)]) {
+    return STATUS_BY_INDEX[Number(indexNumber)];
   }
-  if (key === "REISSUE") {
-    return { bg: "FF2563EB", fg: "FFFFFFFF" };
-  }
-  if (key === "REFUND") {
-    return { bg: "FFDC2626", fg: "FFFFFFFF" };
-  }
-  return null;
+
+  // 2. Fallback: match by name string if index_number is not present
+  const name =
+    statusObj?.name?.en ||
+    statusObj?.name?.tk ||
+    (typeof statusObj?.name === "string" ? statusObj.name : "") ||
+    (typeof statusObj === "string" ? statusObj : "") ||
+    rowOrStatus.sale_status ||
+    "";
+
+  const key = String(name).trim().toUpperCase();
+  if (key === "SALE" || key === "1") return STATUS_BY_INDEX[1];
+  if (key === "REISSUE" || key === "2") return STATUS_BY_INDEX[2];
+  if (key === "REFUND" || key === "3") return STATUS_BY_INDEX[3];
+
+  return { label: key, style: null };
 };
+
+const getStatusName = (rowOrStatus) => resolveStatusInfo(rowOrStatus).label;
+const getStatusExcelStyle = (rowOrStatus) => resolveStatusInfo(rowOrStatus).style;
 
 const getExcelColName = (colNum) => {
   let colName = "";
@@ -177,7 +217,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
       name: "Calibri",
       size: 10,
       bold: true,
-      color: { argb: idx === baseFareColIdx ? "FFDC2626" : "FF000000" },
+      color: { argb: idx === baseFareColIdx ? "FF991B1B" : "FF000000" },
     };
     cell.fill = headerFill;
     cell.alignment = {
@@ -236,7 +276,8 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     if (acceptedPrice !== null) sumAccepted += acceptedPrice;
     if (returnedPrice !== null) sumReturned += returnedPrice;
 
-    const statusValue = getStatusName(row.tstatus);
+    const statusInfo = resolveStatusInfo(row);
+    const statusValue = statusInfo.label;
     const isPaidLabel = resolveIsPaid(row);
     const pctValue = resolvePercent(row);
 
@@ -297,7 +338,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
 
       // Status styling
       if (idx === statusColIdx && val) {
-        const statusStyle = getStatusExcelStyle(val);
+        const statusStyle = statusInfo.style || getStatusExcelStyle(val);
         if (statusStyle) {
           cell.fill = {
             type: "pattern",
@@ -310,12 +351,22 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
             bold: true,
             color: { argb: statusStyle.fg },
           };
+          cell.border = {
+            top: { style: "thin", color: { argb: statusStyle.border || "FFD9D9D9" } },
+            bottom: { style: "thin", color: { argb: statusStyle.border || "FFD9D9D9" } },
+            left: colNumber === START_COL
+              ? { style: "medium", color: { argb: "FF000000" } }
+              : { style: "thin", color: { argb: statusStyle.border || "FFD9D9D9" } },
+            right: colNumber === END_COL
+              ? { style: "medium", color: { argb: "FF000000" } }
+              : { style: "thin", color: { argb: statusStyle.border || "FFD9D9D9" } },
+          };
         }
       }
 
       // Red font color for BASE FARE
       if (idx === baseFareColIdx) {
-        cell.font = { name: "Calibri", size: 10, color: { argb: "FFDC2626" } };
+        cell.font = { name: "Calibri", size: 10, color: { argb: "FF991B1B" } };
       }
 
       // Currency formatting
@@ -380,7 +431,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
         };
         cell.numFmt = currencyNumFmt;
         if (isRed) {
-          cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FFDC2626" } };
+          cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FF991B1B" } };
         }
       }
     });

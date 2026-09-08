@@ -307,7 +307,7 @@ const AddTurkishAirlinesContent = ({ table }) => {
                 <CustomSelect
                   name="status_guid"
                   control={control}
-                  label={t("columns.status") ?? "Status"}
+                  label={t("columns.status")}
                   options={statusList}
                   isLoading={isStatusLoading}
                   isError={isStatusError}
