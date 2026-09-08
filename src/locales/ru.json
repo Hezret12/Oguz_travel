@@ -128,6 +128,8 @@
     "total_usd": "Jemi, USD",
     "total_tmt": "Jemi, TMT",
     "totalPrice": "Общая сумма",
+    "totalExpense": "Общий расход",
+    "totalProfit": "Общая прибыль",
     "price": "Цена",
     "category": "Категория",
     "sortOrder": "Порядок сортировки",

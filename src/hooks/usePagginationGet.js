@@ -51,6 +51,20 @@ export function usePagginationGet({ apiFn, key, params, options = {} }) {
     responseBody?.totalPrice ??
     0;
 
+  const totalExpense =
+    responseBody?.data?.meta?.totalExpense ??
+    responseBody?.meta?.totalExpense ??
+    responseBody?.data?.totalExpense ??
+    responseBody?.totalExpense ??
+    0;
+
+  const totalProfit =
+    responseBody?.data?.meta?.totalProfit ??
+    responseBody?.meta?.totalProfit ??
+    responseBody?.data?.totalProfit ??
+    responseBody?.totalProfit ??
+    0;
+
   const meta =
     responseBody?.data?.meta ??
     responseBody?.meta ??
@@ -62,6 +76,8 @@ export function usePagginationGet({ apiFn, key, params, options = {} }) {
     pageCount,
     currentPage,
     totalPrice,
+    totalExpense,
+    totalProfit,
     meta,
     isLoading,
     isFetching,
