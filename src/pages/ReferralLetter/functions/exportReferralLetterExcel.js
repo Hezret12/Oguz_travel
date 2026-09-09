@@ -45,13 +45,13 @@ const resolveOfficeName = (row) => {
 const getTurkmenOrdinalSuffix = (year) => {
   const y = Number(year);
   const lastTwo = y % 100;
-  if (lastTwo === 0) return "nji";
+  if (lastTwo === 0) return "-nji";
   if (lastTwo % 10 === 0) {
     const backVowels = [30, 40, 60, 90];
-    return backVowels.includes(lastTwo) ? "njy" : "nji";
+    return backVowels.includes(lastTwo) ? "-njy" : "-nji";
   }
   const lastDigit = y % 10;
-  return lastDigit === 6 || lastDigit === 9 ? "njy" : "nji";
+  return lastDigit === 6 || lastDigit === 9 ? "-njy" : "-nji";
 };
 
 const resolveDateText = (letters = [], options = {}) => {
