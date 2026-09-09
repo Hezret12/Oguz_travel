@@ -131,6 +131,12 @@ const ReferalLetter = () => {
 
   const getFilterLabel = useCallback(
     (key, value) => {
+      if (key === "start_date") {
+        return `${t("columns.startDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      if (key === "end_date") {
+        return `${t("columns.endDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
       if (key === "received_opr_guid") {
         return `${t("columns.operator")}: ${employeeById[value]?.fullName || value}`;
       }
@@ -158,6 +164,16 @@ const ReferalLetter = () => {
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
+      },
+      {
+        id: "datetime",
+        accessorFn: (row) =>
+          row.datetime || row.date || row.createdAt || row.created_at,
+        header: t("columns.date"),
+        size: 100,
+        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "operator",

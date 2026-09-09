@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Box } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import dayjs from "dayjs";
 
 import { useLocale } from "../../hooks/useLocale";
 import { useValidShema } from "../../functions/useValidShema";
@@ -38,6 +39,7 @@ const AddReferralLetterModal = ({ table }) => {
 
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
+      datetime: dayjs().format("YYYY-MM-DD"),
       client_guid: null,
       application_number: null,
       received_opr_guid: null,
@@ -64,8 +66,14 @@ const AddReferralLetterModal = ({ table }) => {
   };
 
   const submitHandler = (values) => {
+    const formattedDate = values.datetime
+      ? dayjs(values.datetime).format("YYYY-MM-DD")
+      : dayjs().format("YYYY-MM-DD");
+
     createReferralLetter({
       ...values,
+      datetime: values.datetime || formattedDate,
+      date: formattedDate,
       price: Number(values.price || 0),
     });
   };
@@ -92,12 +100,26 @@ const AddReferralLetterModal = ({ table }) => {
             mb: 2,
           }}
         >
-          <Box sx={{ gridColumn: "1 / -1" }}>
+          <Box
+            sx={{
+              gridColumn: "1 / -1",
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 200px" },
+              gap: 2.5,
+              alignItems: "flex-start",
+            }}
+          >
             <GlobalClientAutocomplete
               control={control}
               name="client_guid"
               label={t("columns.client")}
               columns={autocompleteColumns}
+            />
+            <CustomDatePicker
+              name="datetime"
+              control={control}
+              label={t("columns.date")}
+              required
             />
           </Box>
 

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import dayjs from "dayjs";
 
 import { useLocale } from "../../hooks/useLocale";
 import { useValidShema } from "../../functions/useValidShema";
@@ -40,6 +41,12 @@ const EditReferralLetterModal = ({ table, row }) => {
   const initialValues = useMemo(() => {
     return {
       guid: row?.original?.guid || null,
+      datetime:
+        row?.original?.datetime ||
+        row?.original?.date ||
+        row?.original?.created_at ||
+        row?.original?.createdAt ||
+        null,
       client_guid: row?.original?.client_guid || row?.original?.client?.guid || null,
       application_number: row?.original?.application_number || null,
       received_opr_guid: row?.original?.received_opr_guid || null,
@@ -83,8 +90,14 @@ const EditReferralLetterModal = ({ table, row }) => {
   };
 
   const submitHandler = (values) => {
+    const formattedDate = values.datetime
+      ? dayjs(values.datetime).format("YYYY-MM-DD")
+      : null;
+
     updateReferralLetter({
       ...values,
+      datetime: values.datetime || formattedDate,
+      date: formattedDate,
       price: Number(values.price || 0),
     });
   };
@@ -114,12 +127,26 @@ const EditReferralLetterModal = ({ table, row }) => {
             mb: 2,
           }}
         >
-          <Box sx={{ gridColumn: "1 / -1" }}>
+          <Box
+            sx={{
+              gridColumn: "1 / -1",
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 200px" },
+              gap: 2.5,
+              alignItems: "flex-start",
+            }}
+          >
             <GlobalClientAutocomplete
               control={control}
               name="client_guid"
               label={t("columns.client")}
               columns={autocompleteColumns}
+            />
+            <CustomDatePicker
+              name="datetime"
+              control={control}
+              label={t("columns.date")}
+              required
             />
           </Box>
 

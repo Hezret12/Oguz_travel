@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
 import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 
-const FilterDatePicker = ({ label, name, value, onChange }) => (
+const FilterDatePicker = ({ label, name, value, onChange, minDate, maxDate }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -14,6 +14,8 @@ const FilterDatePicker = ({ label, name, value, onChange }) => (
     </Typography>
     <DatePicker
       value={value ? dayjs(value) : null}
+      minDate={minDate ? dayjs(minDate) : undefined}
+      maxDate={maxDate ? dayjs(maxDate) : undefined}
       onChange={(newValue) => {
         onChange(
           name,
@@ -56,6 +58,24 @@ const ReferralLetterFilter = ({
 
   return (
     <Stack spacing={2.5}>
+      {/* Start Date */}
+      <FilterDatePicker
+        label={t("columns.startDate")}
+        name="start_date"
+        value={filters?.start_date}
+        maxDate={filters?.end_date}
+        onChange={handleDateChange}
+      />
+
+      {/* End Date */}
+      <FilterDatePicker
+        label={t("columns.endDate")}
+        name="end_date"
+        value={filters?.end_date}
+        minDate={filters?.start_date}
+        onChange={handleDateChange}
+      />
+
       {/* Operator (received_opr_guid) */}
       <GlobalEmployeeAutocomplete
         name="received_opr_guid"

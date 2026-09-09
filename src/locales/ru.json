@@ -78,6 +78,7 @@
     "passportCountryOfIssue": "Страна выдачи паспорта",
     "dateTime": "Senesi",
     "date": "Дата",
+    "createdAt": "Дата создания",
     "paymentStatus": "Статус оплаты",
     "paymentPercentage": "Оплата %",
     "gender": "Пол",
