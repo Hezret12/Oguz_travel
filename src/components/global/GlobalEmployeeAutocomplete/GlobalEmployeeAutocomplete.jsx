@@ -68,11 +68,10 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
     <Box
       sx={(theme) => ({
         display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
+        flexDirection: "column",
         width: "100%",
         px: 1.5,
-        py: 1,
+        py: 0.85,
         border: "1px solid",
         borderColor: selected ? "primary.main" : "divider",
         borderRadius: "8px",
@@ -82,31 +81,34 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
             : "rgba(14, 133, 132, 0.06)"
           : "transparent",
         transition: "all 150ms ease",
-        gap: 1.5,
+        gap: 0.35,
       })}
     >
-      {/* Left: Employee Details */}
-      <Box
+      {/* Full Width Employee Name */}
+      <Typography
+        variant="body2"
+        noWrap
         sx={{
-          minWidth: 0,
-          display: "flex",
-          flexDirection: "column",
-          gap: 0.25,
+          fontWeight: 650,
+          color: "text.primary",
+          fontSize: "0.875rem",
+          width: "100%",
         }}
       >
-        <Typography
-          variant="body2"
-          noWrap
+        <HighlightedText text={employee?.fullName} query={query} />
+      </Typography>
+
+      {/* Subtitle Row: Phone Number & Office Name Side-by-Side */}
+      {(employee?.phone_number || officeName) && (
+        <Box
           sx={{
-            fontWeight: 650,
-            color: "text.primary",
-            fontSize: "0.875rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+            gap: 1,
           }}
         >
-          <HighlightedText text={employee?.fullName} query={query} />
-        </Typography>
-
-        {employee?.phone_number && (
           <Typography
             variant="caption"
             noWrap
@@ -115,13 +117,25 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
               fontSize: "0.75rem",
             }}
           >
-            {employee.phone_number || ""}
+            {employee?.phone_number || ""}
           </Typography>
-        )}
-      </Box>
 
-      {/* Right: Office Name */}
-      {officeName && <Typography variant="caption">{officeName}</Typography>}
+          {officeName && (
+            <Typography
+              variant="caption"
+              noWrap
+              sx={{
+                color: "text.secondary",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                ml: "auto",
+              }}
+            >
+              {officeName}
+            </Typography>
+          )}
+        </Box>
+      )}
     </Box>
   );
 };
