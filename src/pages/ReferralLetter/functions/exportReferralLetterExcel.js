@@ -146,24 +146,47 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   worksheet.getColumn(3).width = 4;
 
   const columnsConfig = [
-    { header: "T/b", key: "index_number", width: 7, align: "center" },
-    { header: "Arza №", key: "application_number", width: 12, align: "center" },
-    { header: "Ofis", key: "office", width: 10, align: "center" },
-    { header: "Syýahatçynyň F.A.A.a.", key: "client_name", width: 30, align: "left" },
-    { header: "Jynsy", key: "gender", width: 10, align: "center" },
-    { header: "Doglan senesi", key: "dob", width: 14, align: "center" },
-    { header: "Pasport №", key: "passport", width: 15, align: "center" },
-    { header: "Gidýän ýurdy", key: "destination_country", width: 16, align: "center" },
-    { header: "Tranzit", key: "tranzit", width: 12, align: "center" },
-    { header: "S-ÝH №", key: "travel_doc", width: 14, align: "center" },
-    { header: "Gidýän wagty", key: "departure_date", width: 14, align: "center" },
-    { header: "Gelýän wagty", key: "return_date", width: 14, align: "center" },
-    { header: "Bahasy (TMT)", key: "price", width: 16, align: "right" },
-    { header: "Operator", key: "operator", width: 14, align: "center" },
-    { header: "AGENT", key: "agent_name", width: 16, align: "left" },
-    { header: "şertnama №", key: "contract_number", width: 14, align: "center" },
-    { header: "şertnama sene", key: "contract_date", width: 14, align: "center" },
-    { header: "Bellik", key: "note", width: 22, align: "left" },
+    { header: "T/b", key: "index_number", width: 8, align: "center" },
+    { header: "Arza №", key: "application_number", width: 14, align: "center" },
+    { header: "Ofis", key: "office", width: 14, align: "center" },
+    { header: "Syýahatçynyň F.A.A.a.", key: "client_name", width: 34, align: "left" },
+    { header: "Jynsy", key: "gender", width: 12, align: "center" },
+    { header: "Doglan senesi", key: "dob", width: 16, align: "center" },
+    {
+      header: "Pasport №",
+      key: "passport",
+      width: 18,
+      align: "center",
+      note: "Pasportynyň seriýasy we belgisi",
+    },
+    {
+      header: "Gidýän ýurdy",
+      key: "destination_country",
+      width: 18,
+      align: "center",
+      note: "Gidýän Ýurdy",
+    },
+    {
+      header: "Tranzit",
+      key: "tranzit",
+      width: 16,
+      align: "center",
+      note: "1nji geçýän üstaşyr ýurdy",
+    },
+    {
+      header: "S-ÝH №",
+      key: "travel_doc",
+      width: 18,
+      align: "center",
+      note: "Syýahat ýolhatynyň №",
+    },
+    { header: "Gidýän wagty", key: "departure_date", width: 16, align: "center" },
+    { header: "Gelýän wagty", key: "return_date", width: 16, align: "center" },
+    { header: "Bahasy (TMT)", key: "price", width: 18, align: "right" },
+    { header: "Operator", key: "operator", width: 16, align: "center" },
+    { header: "AGENT", key: "agent_name", width: 18, align: "left" },
+    { header: "şertnama №", key: "contract_number", width: 16, align: "center" },
+    { header: "şertnama sene", key: "contract_date", width: 16, align: "center" },
   ];
 
   const priceColIdx = columnsConfig.findIndex((c) => c.key === "price");
@@ -260,6 +283,21 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       left: { style: "thin", color: { argb: "FF000000" } },
       right: { style: "thin", color: { argb: "FF000000" } },
     };
+
+    if (col.note) {
+      cell.note = {
+        texts: [
+          {
+            text: col.note,
+            font: {
+              name: "Tahoma",
+              size: 9,
+              bold: true,
+            },
+          },
+        ],
+      };
+    }
   });
 
   const currencyNumFmt = '#,##0.00" TMT"';
@@ -298,7 +336,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       agentName,
       row.contract_number ? String(row.contract_number).trim() : "",
       formatDate(row.contract_date),
-      row.note ? String(row.note).trim() : "",
     ];
 
     rowData.forEach((val, idx) => {
