@@ -15,9 +15,9 @@ const formatDate = (val) => {
 const formatGender = (gender) => {
   if (!gender) return "";
   const g = String(gender).trim().toLowerCase();
-  if (g === "male" || g === "erkek") return "Erkek";
-  if (g === "female" || g === "aýal" || g === "ayal") return "Aýal";
-  return String(gender).toUpperCase();
+  if (g === "male" || g === "erkek") return "erkek";
+  if (g === "female" || g === "aýal" || g === "ayal") return "aýal";
+  return g;
 };
 
 const getExcelColName = (colNum) => {
@@ -34,16 +34,16 @@ const getExcelColName = (colNum) => {
 const getTurkmenOrdinalSuffix = (year) => {
   const y = Number(year);
   const lastTwo = y % 100;
-  if (lastTwo === 0) return "-nji";
+  if (lastTwo === 0) return "nji";
   if (lastTwo % 10 === 0) {
     const backVowels = [30, 40, 60, 90];
-    return backVowels.includes(lastTwo) ? "-njy" : "-nji";
+    return backVowels.includes(lastTwo) ? "njy" : "nji";
   }
   const lastDigit = y % 10;
-  return lastDigit === 6 || lastDigit === 9 ? "-njy" : "-nji";
+  return lastDigit === 6 || lastDigit === 9 ? "njy" : "nji";
 };
 
-const resolveTitleBanner = (letters = [], options = {}) => {
+const resolveDateText = (letters = [], options = {}) => {
   let years = [];
 
   const startD = options.start_date || options.queryParams?.start_date;
@@ -107,19 +107,16 @@ const resolveTitleBanner = (letters = [], options = {}) => {
 
   const lastYear = years[years.length - 1];
   const suffix = getTurkmenOrdinalSuffix(lastYear);
-  const dateText =
-    years.length === 1
-      ? `${years[0]}${suffix} ýylyň DOWAMYNDA`
-      : `${years.join("-")}${suffix} ýyllaryň DOWAMYNDA`;
-
-  return `OGUZABAT Hojalyk Jemgyýetiniň "OGUZTRAVEL" syýahatçylyk bölümi tarapyndan ${dateText} daşary ýurtlara ugradylan syýahatçylar baradaky hasabat`;
+  return years.length === 1
+    ? `${years[0]}${suffix} ýylyň DOWAMYNDA`
+    : `${years.join("-")}${suffix} ýyllaryň DOWAMYNDA`;
 };
 
 export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   const fileName = options.fileName || "Yollanma_Hatlary_Hasabaty";
   const sheetName = options.sheetName || "Ýollanma Hatlary";
-  const titleBanner =
-    options.titleBanner || resolveTitleBanner(letters, options);
+  const dateText = options.dateText || resolveDateText(letters, options);
+  const titleBanner = options.titleBanner;
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "OGUZTRAVEL";
@@ -138,23 +135,24 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   worksheet.getColumn(3).width = 4;
 
   const columnsConfig = [
-    { header: "T/B", key: "index_number", width: 8, align: "center" },
-    { header: "Arza №", key: "application_number", width: 14, align: "center" },
-    { header: "Ofis", key: "office", width: 14, align: "center" },
-    { header: "Syýahatçynyň F.A.A.a", key: "client_name", width: 28, align: "left" },
-    { header: "Jynsy", key: "gender", width: 12, align: "center" },
+    { header: "T/b", key: "index_number", width: 7, align: "center" },
+    { header: "Arza №", key: "application_number", width: 12, align: "center" },
+    { header: "Ofis", key: "office", width: 10, align: "center" },
+    { header: "Syýahatçynyň F.A.A.a.", key: "client_name", width: 30, align: "left" },
+    { header: "Jynsy", key: "gender", width: 10, align: "center" },
     { header: "Doglan senesi", key: "dob", width: 14, align: "center" },
-    { header: "Passport №", key: "passport", width: 16, align: "center" },
-    { header: "Gidýän ýurdy", key: "destination_country", width: 18, align: "center" },
-    { header: "Tranzit", key: "tranzit", width: 14, align: "center" },
-    { header: "S-ÝH №", key: "travel_doc", width: 16, align: "center" },
+    { header: "Pasport №", key: "passport", width: 15, align: "center" },
+    { header: "Gidýän ýurdy", key: "destination_country", width: 16, align: "center" },
+    { header: "Tranzit", key: "tranzit", width: 12, align: "center" },
+    { header: "S-ÝH №", key: "travel_doc", width: 14, align: "center" },
     { header: "Gidýän wagty", key: "departure_date", width: 14, align: "center" },
     { header: "Gelýän wagty", key: "return_date", width: 14, align: "center" },
     { header: "Bahasy (TMT)", key: "price", width: 16, align: "right" },
     { header: "Operator", key: "operator", width: 14, align: "center" },
-    { header: "Agent", key: "agent_name", width: 20, align: "left" },
-    { header: "Şertnama №", key: "contract_number", width: 16, align: "center" },
-    { header: "Şertnama sene", key: "contract_date", width: 14, align: "center" },
+    { header: "AGENT", key: "agent_name", width: 16, align: "left" },
+    { header: "şertnama №", key: "contract_number", width: 14, align: "center" },
+    { header: "şertnama sene", key: "contract_date", width: 14, align: "center" },
+    { header: "Bellik", key: "note", width: 22, align: "left" },
   ];
 
   const priceColIdx = columnsConfig.findIndex((c) => c.key === "price");
@@ -172,16 +170,52 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
 
   // Row 2: Title Banner Row merged across table columns
   const titleRow = worksheet.getRow(2);
-  titleRow.height = 34;
+  titleRow.height = 30;
   worksheet.mergeCells(2, START_COL, 2, END_COL);
   const titleCell = worksheet.getCell(2, START_COL);
-  titleCell.value = titleBanner;
-  titleCell.font = {
-    name: "Calibri",
-    size: 11,
-    bold: true,
-    color: { argb: "FF000000" },
-  };
+
+  if (titleBanner) {
+    titleCell.value = titleBanner;
+    titleCell.font = {
+      name: "Times New Roman",
+      size: 11,
+      bold: true,
+      color: { argb: "FF000000" },
+    };
+  } else {
+    titleCell.value = {
+      richText: [
+        {
+          text: 'OGUZABAT Hojalyk Jemgyýetiniň "OGUZTRAVEL" syýahatçylyk bölümi tarapyndan ',
+          font: {
+            name: "Times New Roman",
+            size: 11,
+            bold: true,
+            color: { argb: "FF000000" },
+          },
+        },
+        {
+          text: dateText,
+          font: {
+            name: "Times New Roman",
+            size: 11,
+            bold: true,
+            color: { argb: "FFFF0000" }, // Red date as in user reference
+          },
+        },
+        {
+          text: " daşary ýurtlara ugradylan syýahatçylar baradaky hasabat",
+          font: {
+            name: "Times New Roman",
+            size: 11,
+            bold: true,
+            color: { argb: "FF000000" },
+          },
+        },
+      ],
+    };
+  }
+
   titleCell.alignment = {
     vertical: "middle",
     horizontal: "center",
@@ -193,46 +227,32 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
 
   // Header Row (Row 4)
   const headerRow = worksheet.getRow(START_ROW);
-  headerRow.height = 38;
-
-  const headerFill = {
-    type: "pattern",
-    pattern: "solid",
-    fgColor: { argb: "FFF2F2F2" },
-  };
+  headerRow.height = 28;
 
   columnsConfig.forEach((col, idx) => {
     const colNumber = START_COL + idx;
     const cell = headerRow.getCell(colNumber);
     cell.value = col.header;
     cell.font = {
-      name: "Calibri",
+      name: "Times New Roman",
       size: 10,
       bold: true,
       color: { argb: "FF000000" },
     };
-    cell.fill = headerFill;
     cell.alignment = {
       vertical: "middle",
       horizontal: "center",
       wrapText: true,
     };
-
     cell.border = {
-      top: { style: "medium", color: { argb: "FF000000" } },
-      bottom: { style: "medium", color: { argb: "FF000000" } },
-      left:
-        colNumber === START_COL
-          ? { style: "medium", color: { argb: "FF000000" } }
-          : { style: "thin", color: { argb: "FFBFBFBF" } },
-      right:
-        colNumber === END_COL
-          ? { style: "medium", color: { argb: "FF000000" } }
-          : { style: "thin", color: { argb: "FFBFBFBF" } },
+      top: { style: "thin", color: { argb: "FF000000" } },
+      bottom: { style: "thin", color: { argb: "FF000000" } },
+      left: { style: "thin", color: { argb: "FF000000" } },
+      right: { style: "thin", color: { argb: "FF000000" } },
     };
   });
 
-  const currencyNumFmt = '#,##0.00;-#,##0.00;"-"';
+  const currencyNumFmt = '#,##0.00" TMT"';
   let sumPrice = 0;
 
   // Data rows
@@ -247,9 +267,9 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
     const clientName = row.client?.fullName ? String(row.client.fullName).toUpperCase() : "";
 
     const agentName = row.agent?.name
-      ? String(row.agent.name).toUpperCase()
+      ? String(row.agent.name).trim()
       : typeof row.agent === "string"
-      ? row.agent.toUpperCase()
+      ? row.agent.trim()
       : "";
 
     const rowData = [
@@ -260,9 +280,9 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       formatGender(row.client?.gender),
       formatDate(row.client?.dateOfBirth),
       row.client?.passport_number ? String(row.client.passport_number).toUpperCase() : "",
-      row.destination_country ? String(row.destination_country).toUpperCase() : "",
-      row.tranzit ? String(row.tranzit).toUpperCase() : "",
-      row.travel_document_number ? String(row.travel_document_number).toUpperCase() : "",
+      row.destination_country ? String(row.destination_country).trim() : "",
+      row.tranzit ? String(row.tranzit).trim() : "",
+      row.travel_document_number ? String(row.travel_document_number).trim() : "",
       formatDate(row.departure_date),
       formatDate(row.return_date),
       price,
@@ -277,27 +297,24 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       const colNumber = START_COL + idx;
       const cell = currentRow.getCell(colNumber);
       cell.value = val;
-      cell.font = { name: "Calibri", size: 10 };
+      cell.font = {
+        name: "Times New Roman",
+        size: 10,
+        bold: columnsConfig[idx].key === "operator",
+        color: { argb: "FF000000" },
+      };
       cell.alignment = {
         vertical: "middle",
         horizontal: columnsConfig[idx].align,
       };
-
-      // Cell borders with medium outer perimeter on START_COL and END_COL
       cell.border = {
-        top: { style: "thin", color: { argb: "FFD9D9D9" } },
-        bottom: { style: "thin", color: { argb: "FFD9D9D9" } },
-        left:
-          colNumber === START_COL
-            ? { style: "medium", color: { argb: "FF000000" } }
-            : { style: "thin", color: { argb: "FFD9D9D9" } },
-        right:
-          colNumber === END_COL
-            ? { style: "medium", color: { argb: "FF000000" } }
-            : { style: "thin", color: { argb: "FFD9D9D9" } },
+        top: { style: "thin", color: { argb: "FF000000" } },
+        bottom: { style: "thin", color: { argb: "FF000000" } },
+        left: { style: "thin", color: { argb: "FF000000" } },
+        right: { style: "thin", color: { argb: "FF000000" } },
       };
 
-      // Numerical formatting for price
+      // Numerical formatting for price with currency suffix
       if (idx === priceColIdx && typeof val === "number") {
         cell.numFmt = currencyNumFmt;
       }
@@ -310,20 +327,13 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
 
   for (let c = START_COL; c <= END_COL; c++) {
     const cell = totalRow.getCell(c);
-    cell.font = { name: "Calibri", size: 10, bold: true };
+    cell.font = { name: "Times New Roman", size: 10, bold: true, color: { argb: "FF000000" } };
     cell.alignment = { vertical: "middle", horizontal: columnsConfig[c - START_COL].align };
-
     cell.border = {
       top: { style: "thin", color: { argb: "FF000000" } },
       bottom: { style: "medium", color: { argb: "FF000000" } },
-      left:
-        c === START_COL
-          ? { style: "medium", color: { argb: "FF000000" } }
-          : { style: "thin", color: { argb: "FFD9D9D9" } },
-      right:
-        c === END_COL
-          ? { style: "medium", color: { argb: "FF000000" } }
-          : { style: "thin", color: { argb: "FFD9D9D9" } },
+      left: { style: "thin", color: { argb: "FF000000" } },
+      right: { style: "thin", color: { argb: "FF000000" } },
     };
   }
 
