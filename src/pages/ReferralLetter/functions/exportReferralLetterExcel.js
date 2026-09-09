@@ -20,15 +20,26 @@ const formatGender = (gender) => {
   return g;
 };
 
-const getExcelColName = (colNum) => {
-  let colName = "";
-  let num = colNum;
-  while (num > 0) {
-    const mod = (num - 1) % 26;
-    colName = String.fromCharCode(65 + mod) + colName;
-    num = Math.floor((num - 1) / 26);
-  }
-  return colName;
+const getOfficeName = (office) => {
+  if (!office) return "";
+  if (typeof office === "string") return office.trim();
+  if (office.shortName?.tk) return String(office.shortName.tk).trim();
+  if (office.fullName?.tk) return String(office.fullName.tk).trim();
+  if (typeof office.shortName === "string" && office.shortName) return office.shortName.trim();
+  if (typeof office.fullName === "string" && office.fullName) return office.fullName.trim();
+  if (office.shortName?.en) return String(office.shortName.en).trim();
+  if (office.fullName?.en) return String(office.fullName.en).trim();
+  if (office.shortName?.ru) return String(office.shortName.ru).trim();
+  if (office.fullName?.ru) return String(office.fullName.ru).trim();
+  if (office.name) return String(office.name).trim();
+  if (office.title) return String(office.title).trim();
+  return "";
+};
+
+const resolveOfficeName = (row) => {
+  const opr = row.refferaloperator || row.operator || row.received_opr;
+  const office = row.office || opr?.office || row.office_name || row.officeName;
+  return getOfficeName(office);
 };
 
 const getTurkmenOrdinalSuffix = (year) => {
@@ -163,7 +174,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   });
 
   const END_COL = START_COL + columnsConfig.length - 1;
-  const totalRowIndex = START_ROW + letters.length + 1;
 
   // Row 1: top margin row
   worksheet.getRow(1).height = 12;
@@ -253,7 +263,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   });
 
   const currencyNumFmt = '#,##0.00" TMT"';
-  let sumPrice = 0;
 
   // Data rows
   letters.forEach((row, offset) => {
@@ -262,7 +271,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
     currentRow.height = 20;
 
     const price = Number(row.price || 0);
-    sumPrice += price;
 
     const clientName = row.client?.fullName ? String(row.client.fullName).toUpperCase() : "";
 
@@ -275,7 +283,7 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
     const rowData = [
       row.index_number ?? offset + 1,
       row.application_number ? String(row.application_number).trim() : "",
-      "",
+      resolveOfficeName(row),
       clientName,
       formatGender(row.client?.gender),
       formatDate(row.client?.dateOfBirth),
@@ -320,39 +328,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       }
     });
   });
-
-  // Total Row
-  const totalRow = worksheet.getRow(totalRowIndex);
-  totalRow.height = 24;
-
-  for (let c = START_COL; c <= END_COL; c++) {
-    const cell = totalRow.getCell(c);
-    cell.font = { name: "Times New Roman", size: 10, bold: true, color: { argb: "FF000000" } };
-    cell.alignment = { vertical: "middle", horizontal: columnsConfig[c - START_COL].align };
-    cell.border = {
-      top: { style: "thin", color: { argb: "FF000000" } },
-      bottom: { style: "medium", color: { argb: "FF000000" } },
-      left: { style: "thin", color: { argb: "FF000000" } },
-      right: { style: "thin", color: { argb: "FF000000" } },
-    };
-  }
-
-  const cellTotalLabel = totalRow.getCell(START_COL);
-  cellTotalLabel.value = "Total";
-  cellTotalLabel.alignment = { vertical: "middle", horizontal: "left" };
-
-  const firstDataRow = START_ROW + 1;
-  const lastDataRow = totalRowIndex - 1;
-
-  if (letters.length > 0 && priceColIdx !== -1) {
-    const colLetter = getExcelColName(START_COL + priceColIdx);
-    const cellPrice = totalRow.getCell(START_COL + priceColIdx);
-    cellPrice.value = {
-      formula: `SUM(${colLetter}${firstDataRow}:${colLetter}${lastDataRow})`,
-      result: sumPrice,
-    };
-    cellPrice.numFmt = currencyNumFmt;
-  }
 
   // Export buffer & download
   const buffer = await workbook.xlsx.writeBuffer();
