@@ -6,16 +6,13 @@ import {
   Select,
   Divider,
   InputAdornment,
-  Typography,
-  FormHelperText,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
+import OverflowTooltipLabel from "../OverflowTooltipLabel";
 
 const DEFAULT_CURRENCIES = [
   { code: "USD", symbol: "$" },
-  { code: "EUR", symbol: "€" },
   { code: "TMT", symbol: "m" },
-  { code: "RUB", symbol: "₽" },
 ];
 
 function sanitizeDecimalInput(raw) {
@@ -172,21 +169,11 @@ const CurrencyAmount = forwardRef(function CurrencyAmount(
     return (
       <Box sx={{ width: "100%" }}>
         {label && (
-          <Typography
-            variant="body2"
-            component="div"
-            sx={{
-              mb: 0.75,
-              fontWeight: 600,
-              fontSize: "0.875rem",
-              color: "text.primary",
-            }}
-          >
-            {label}
-            {required && (
-              <span style={{ color: "#ef4444", marginLeft: "4px", fontSize: "17px" }}>*</span>
-            )}
-          </Typography>
+          <OverflowTooltipLabel
+            label={label}
+            required={required}
+            fontSize={size === "small" ? "0.8125rem" : "0.875rem"}
+          />
         )}
 
         <TextField
@@ -307,12 +294,6 @@ const CurrencyAmount = forwardRef(function CurrencyAmount(
             ...sx,
           }}
         />
-
-        {hasError && resolvedHelperText && (
-          <FormHelperText sx={{ mx: 1, mt: 0.5, fontSize: "0.75rem", fontWeight: 500 }}>
-            {resolvedHelperText}
-          </FormHelperText>
-        )}
       </Box>
     );
   };

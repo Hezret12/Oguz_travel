@@ -6,12 +6,12 @@ export const SALE_STATUS_CONFIG = {
 
 export const PAYMENT_STATUS_CONFIG = {
   TOLENDI: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
-  KREDIT: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
+  KREDIT: { label: "Kredit", labelKey: "paymentCredit", color: "#dc2626" },
   TRUE: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
-  FALSE: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
+  FALSE: { label: "Kredit", labelKey: "paymentCredit", color: "#dc2626" },
   1: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
-  2: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
-  0: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
+  2: { label: "Kredit", labelKey: "paymentCredit", color: "#dc2626" },
+  0: { label: "Kredit", labelKey: "paymentCredit", color: "#dc2626" },
 };
 
 export const OUTBOUND_PAYMENT_STATUS_CONFIG = {

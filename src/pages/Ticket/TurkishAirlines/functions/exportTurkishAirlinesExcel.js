@@ -14,14 +14,27 @@ const formatDate = (val) => {
 
 const getOfficeName = (office) => {
   if (!office) return "";
-  if (office.shortName?.tk) return String(office.shortName.tk).toUpperCase();
-  if (office.fullName?.tk) return String(office.fullName.tk).toUpperCase();
-  if (typeof office.shortName === "string" && office.shortName) return office.shortName.toUpperCase();
-  if (typeof office.fullName === "string" && office.fullName) return office.fullName.toUpperCase();
-  if (office.shortName?.en) return String(office.shortName.en).toUpperCase();
-  if (office.fullName?.en) return String(office.fullName.en).toUpperCase();
+  const short = office.shortName ?? office;
+  if (!short) return "";
+
+  if (typeof short === "string") {
+    const trimmed = short.trim();
+    return trimmed.toLowerCase() !== "string" ? trimmed.toUpperCase() : "";
+  }
+
+  if (typeof short === "object") {
+    const val =
+      (short.tk && String(short.tk).trim().toLowerCase() !== "string" ? short.tk : "") ||
+      (short.ru && String(short.ru).trim().toLowerCase() !== "string" ? short.ru : "") ||
+      (short.en && String(short.en).trim().toLowerCase() !== "string" ? short.en : "") ||
+      "";
+    return val ? String(val).trim().toUpperCase() : "";
+  }
+
   return "";
 };
+
+const ACCENT_RED = "FFDC2626"; // Refined corporate red (#DC2626)
 
 const STATUS_BY_INDEX = {
   1: {
@@ -44,8 +57,8 @@ const STATUS_BY_INDEX = {
     label: "REFUND",
     style: {
       bg: "FFFEF2F2",
-      fg: "FF991B1B", 
-      border: "FFFCA5A5", 
+      fg: ACCENT_RED, 
+      border: "FFFECACA", 
     },
   },
 };
@@ -83,7 +96,6 @@ const resolveStatusInfo = (rowOrStatus) => {
   return { label: key, style: null };
 };
 
-const getStatusName = (rowOrStatus) => resolveStatusInfo(rowOrStatus).label;
 const getStatusExcelStyle = (rowOrStatus) => resolveStatusInfo(rowOrStatus).style;
 
 const getExcelColName = (colNum) => {
@@ -150,10 +162,10 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
 
   const columnsConfig = [
     { header: "T/B", key: "index_number", width: 8, align: "center" },
-    { header: "Senesi", key: "datetime", width: 13, align: "center" },
-    { header: "Tabşyryjy, Operator", key: "operator1", width: 22, align: "left" },
+    { header: "Sene", key: "datetime", width: 13, align: "center" },
+    { header: "Tabşyryjy, operator", key: "operator1", width: 22, align: "left" },
     { header: "Ofis", key: "ofis1", width: 10, align: "center" },
-    { header: "Kabul ediji, Operator", key: "operator2", width: 22, align: "left" },
+    { header: "Kabul ediji, operator", key: "operator2", width: 22, align: "left" },
     { header: "Ofis", key: "ofis2", width: 10, align: "center" },
     { header: "Agent", key: "agent", width: 20, align: "left" },
     { header: "Agent Tel", key: "agent_tel", width: 18, align: "center" },
@@ -161,19 +173,19 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     { header: "Ýolagçy Tel", key: "passenger_tel", width: 18, align: "center" },
     { header: "Doglan senesi", key: "dob", width: 13, align: "center" },
     { header: "Miles & Smiles", key: "miles", width: 16, align: "center" },
-    { header: "Passport №", key: "passport", width: 15, align: "center" },
+    { header: "Pasport Nº", key: "passport", width: 15, align: "center" },
     { header: "PCOI", key: "pcoi", width: 16, align: "center", note: "Passport Country of Issue" },
     { header: "PDOE", key: "pdoe", width: 13, align: "center", note: "Passport Date of Expiry" },
     { header: "Status", key: "status", width: 14, align: "center" },
     { header: "PNR", key: "pnr", width: 14, align: "center" },
     { header: "Ticket №", key: "ticket_number", width: 18, align: "center" },
-    { header: "Route", key: "route", width: 20, align: "center" },
+    { header: "Gatnaw ugur", key: "route", width: 20, align: "center" },
     { header: "Class", key: "class", width: 10, align: "center" },
-    { header: "Flight Date", key: "flight_date", width: 14, align: "center" },
-    { header: "Töleg ýagdayy", key: "is_paid", width: 15, align: "center" },
-    { header: "Töleg Göterimi", key: "percent", width: 15, align: "center" },
-    { header: "Base Fare", key: "base_fare", width: 16, align: "right" },
-    { header: "Total", key: "total_price", width: 16, align: "right" },
+    { header: "Uçuş güni", key: "flight_date", width: 14, align: "center" },
+    { header: "Töleg ýagdaýy", key: "is_paid", width: 15, align: "center" },
+    { header: "Töleg %", key: "percent", width: 15, align: "center" },
+    { header: "Net baha", key: "base_fare", width: 16, align: "right" },
+    { header: "Satyş baha", key: "total_price", width: 16, align: "right" },
     { header: "Aýdylan baha", key: "quoted_price", width: 16, align: "right" },
     { header: "Kabul edildi", key: "accepted_price", width: 16, align: "right" },
     { header: "Gaýtaryldy", key: "returned_price", width: 16, align: "right" },
@@ -187,6 +199,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
   const acceptedColIdx = columnsConfig.findIndex((c) => c.key === "accepted_price");
   const returnedColIdx = columnsConfig.findIndex((c) => c.key === "returned_price");
   const statusColIdx = columnsConfig.findIndex((c) => c.key === "status");
+  const isPaidColIdx = columnsConfig.findIndex((c) => c.key === "is_paid");
 
   // Set column widths
   columnsConfig.forEach((col, idx) => {
@@ -198,12 +211,12 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
 
   // Header Row (Row 4)
   const headerRow = worksheet.getRow(START_ROW);
-  headerRow.height = 38;
+  headerRow.height = 30;
 
   const headerFill = {
     type: "pattern",
     pattern: "solid",
-    fgColor: { argb: "FFF2F2F2" },
+    fgColor: { argb: "FFFFFFFF" },
   };
 
   columnsConfig.forEach((col, idx) => {
@@ -215,9 +228,9 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     }
     cell.font = {
       name: "Calibri",
-      size: 10,
+      size: 11,
       bold: true,
-      color: { argb: idx === baseFareColIdx ? "FF991B1B" : "FF000000" },
+      color: { argb: idx === baseFareColIdx ? ACCENT_RED : "FF000000" },
     };
     cell.fill = headerFill;
     cell.alignment = {
@@ -281,47 +294,64 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     const isPaidLabel = resolveIsPaid(row);
     const pctValue = resolvePercent(row);
 
-    const rowData = [
-      row.index_number ?? offset + 1,
-      formatDate(row.datetime),
-      row.ta_assignment_operator?.fullName ? String(row.ta_assignment_operator.fullName).toUpperCase() : "",
-      getOfficeName(row.ta_assignment_operator?.office),
-      row.ta_receiver_operator?.fullName ? String(row.ta_receiver_operator.fullName).toUpperCase() : "",
-      getOfficeName(row.ta_receiver_operator?.office),
-      row.agent?.name ? String(row.agent.name).toUpperCase() : "",
-      row.agent?.phone_number ? String(row.agent.phone_number).trim() : "",
-      row.client?.fullName ? String(row.client.fullName).toUpperCase() : "",
-      row.client?.phone_number ? String(row.client.phone_number).trim() : "",
-      formatDate(row.client?.dateOfBirth),
-      row.milesSmiles ? String(row.milesSmiles).toUpperCase() : "",
-      row.client?.passport_number ? String(row.client.passport_number).toUpperCase() : "",
-      row.client?.passportCountryOfIssue ? String(row.client.passportCountryOfIssue).toUpperCase() : "TURKMENISTAN",
-      formatDate(row.client?.passportExpiryDate),
-      statusValue,
-      row.pnr ? String(row.pnr).toUpperCase() : "",
-      row.ticket_number ? String(row.ticket_number).trim() : "",
-      row.route ? String(row.route).toUpperCase() : "",
-      row.class ? String(row.class).toUpperCase() : "",
-      formatDate(row.flight_date),
-      isPaidLabel,
-      pctValue,
-      baseFare,
-      totalPrice,
-      quotedPrice,
-      acceptedPrice !== null ? acceptedPrice : "",
-      returnedPrice !== null ? returnedPrice : "",
-      getOfficeName(row.office),
-      row.note ? String(row.note).trim() : "",
-    ];
+    const rowValues = {
+      index_number: row.index_number ?? offset + 1,
+      datetime: formatDate(row.datetime),
+      operator1: row.ta_assignment_operator?.fullName
+        ? String(row.ta_assignment_operator.fullName).toUpperCase()
+        : "",
+      ofis1: getOfficeName(row.ta_assignment_operator?.office),
+      operator2: row.ta_receiver_operator?.fullName
+        ? String(row.ta_receiver_operator.fullName).toUpperCase()
+        : "",
+      ofis2: getOfficeName(row.ta_receiver_operator?.office),
+      agent: row.agent?.name ? String(row.agent.name).toUpperCase() : "",
+      agent_tel: row.agent?.phone_number ? String(row.agent.phone_number).trim() : "",
+      passenger: row.client?.fullName ? String(row.client.fullName).toUpperCase() : "",
+      passenger_tel: row.client?.phone_number ? String(row.client.phone_number).trim() : "",
+      dob: formatDate(row.client?.dateOfBirth),
+      miles: row.milesSmiles ? String(row.milesSmiles).toUpperCase() : "",
+      passport: row.client?.passport_number ? String(row.client.passport_number).toUpperCase() : "",
+      pcoi: row.client?.passportCountryOfIssue ? String(row.client.passportCountryOfIssue).toUpperCase() : "TURKMENISTAN",
+      pdoe: formatDate(row.client?.passportExpiryDate),
+      status: statusValue,
+      pnr: row.pnr ? String(row.pnr).toUpperCase() : "",
+      ticket_number: row.ticket_number ? String(row.ticket_number).trim() : "",
+      route: row.route ? String(row.route).toUpperCase() : "",
+      class: row.class ? String(row.class).toUpperCase() : "",
+      flight_date: formatDate(row.flight_date),
+      is_paid: isPaidLabel,
+      percent: pctValue,
+      base_fare: baseFare,
+      total_price: totalPrice,
+      quoted_price: quotedPrice,
+      accepted_price: acceptedPrice !== null ? acceptedPrice : "",
+      returned_price: returnedPrice !== null ? returnedPrice : "",
+      kassa: getOfficeName(row.office),
+      note: row.note ? String(row.note).trim() : "",
+    };
+
+    const rowData = columnsConfig.map((col) => rowValues[col.key] ?? "");
+
+    // Zebra striping: Alternate between White (#FFFFFF) and Subtle Gray (#E5E7EB)
+    const isEvenRow = offset % 2 === 1;
+    const zebraBg = isEvenRow ? "FFE5E7EB" : "FFFFFFFF";
 
     rowData.forEach((val, idx) => {
       const colNumber = START_COL + idx;
       const cell = currentRow.getCell(colNumber);
       cell.value = val;
-      cell.font = { name: "Calibri", size: 10 };
+      cell.font = { name: "Calibri", size: 10, color: { argb: "FF000000" } };
       cell.alignment = {
         vertical: "middle",
         horizontal: columnsConfig[idx].align,
+      };
+
+      // Apply Zebra background
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: zebraBg },
       };
 
       // Borders
@@ -364,9 +394,25 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
         }
       }
 
-      // Red font color for BASE FARE
+      // Payment status (is_paid) pill styling
+      if (idx === isPaidColIdx && val) {
+        const isPaid = val === "Tölendi";
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: isPaid ? "FFDCFCE7" : "FFFEF2F2" },
+        };
+        cell.font = {
+          name: "Calibri",
+          size: 10,
+          bold: true,
+          color: { argb: isPaid ? "FF166534" : ACCENT_RED },
+        };
+      }
+
+      // Red font color for Net baha (base fare)
       if (idx === baseFareColIdx) {
-        cell.font = { name: "Calibri", size: 10, color: { argb: "FF991B1B" } };
+        cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: ACCENT_RED } };
       }
 
       // Currency formatting
@@ -431,7 +477,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
         };
         cell.numFmt = currencyNumFmt;
         if (isRed) {
-          cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: "FF991B1B" } };
+          cell.font = { name: "Calibri", size: 10.5, bold: true, color: { argb: ACCENT_RED } };
         }
       }
     });

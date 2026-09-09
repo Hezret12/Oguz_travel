@@ -63,7 +63,42 @@ export const useValidShema = () => {
   });
 
   const addB2BTicket = yup.object({
-   
+    client_guid: yup
+      .string()
+      .nullable()
+      .required(t("validation.required")),
+    assignment_opr_guid: yup
+      .string()
+      .nullable()
+      .required(t("validation.required")),
+    receiver_opr_guid: yup
+      .string()
+      .nullable()
+      .required(t("validation.required")),
+    status_guid: yup
+      .string()
+      .nullable()
+      .required(t("validation.required")),
+    net_price: yup
+      .number()
+      .nullable()
+      .transform((value, originalValue) =>
+        originalValue === "" || originalValue === null || originalValue === undefined
+          ? undefined
+          : Number(originalValue)
+      )
+      .typeError(t("validation.requiredNumber"))
+      .required(t("validation.required")),
+    sale_price: yup
+      .number()
+      .nullable()
+      .transform((value, originalValue) =>
+        originalValue === "" || originalValue === null || originalValue === undefined
+          ? undefined
+          : Number(originalValue)
+      )
+      .typeError(t("validation.requiredNumber"))
+      .required(t("validation.required")),
   });
 
   const addTurkishAirlinesTicket = yup.object({

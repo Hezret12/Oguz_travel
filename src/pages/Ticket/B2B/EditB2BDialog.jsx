@@ -145,6 +145,18 @@ const EditB2BDialog = ({ table, row, open, close }) => {
             display: "flex",
             flexDirection: "column",
             minHeight: 0,
+            "& .MuiFormHelperText-root": {
+              display: "none !important",
+            },
+            "& .Mui-error .MuiOutlinedInput-notchedOutline": {
+              borderColor: (theme) => `${theme.palette.error.main} !important`,
+            },
+            "& .Mui-error.Mui-focused": {
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 0 0 3px rgba(239, 68, 68, 0.25) !important"
+                  : "0 0 0 3px rgba(239, 68, 68, 0.2) !important",
+            },
           }}
         >
           <Box
@@ -179,6 +191,7 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   label={t("columns.client")}
                   initialClient={row?.original?.client}
                   columns={["fullName", "phoneNumber", "passport_number"]}
+                  required
                 />
               </Grid>
 
@@ -189,6 +202,7 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   control={control}
                   label={t("columns.operator")}
                   initialEmployee={row?.original?.assignment_operator}
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
@@ -197,6 +211,7 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   control={control}
                   label={t("columns.operatorTwo")}
                   initialEmployee={row?.original?.receiver_operator}
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
@@ -241,6 +256,7 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   isError={isStatusError}
                   getRowId={(item) => item.guid}
                   getRowLabel={(item) => selectedLang(item.name)}
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
@@ -267,6 +283,8 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   label={t("columns.netFare")}
                   currency={selectedCurrency}
                   onCurrencyChange={(curr) => setValue("currency", curr)}
+                  placeholder=""
+                  required
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "7px",
@@ -304,6 +322,7 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   type="number"
                   label={t("columns.saleFare")}
                   startIcon={currencySymbol}
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
