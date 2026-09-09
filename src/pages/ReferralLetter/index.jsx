@@ -525,6 +525,12 @@ const ReferalLetter = () => {
     }),
   });
 
+  const handleExportExcel = useCallback(
+    (items, options) =>
+      exportReferralLetterExcel(items, { ...options, queryParams }),
+    [queryParams]
+  );
+
   return (
     <>
       <PageHeader
@@ -541,7 +547,7 @@ const ReferalLetter = () => {
           totalItems={totalItems}
           fileName="Yollanma_Hatlary_Hasabaty"
           sheetName="Ýollanma Hatlary"
-          customExportFn={exportReferralLetterExcel}
+          customExportFn={handleExportExcel}
         />
       </PageHeader>
 

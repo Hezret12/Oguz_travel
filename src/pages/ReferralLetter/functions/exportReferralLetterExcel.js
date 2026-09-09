@@ -12,17 +12,6 @@ const formatDate = (val) => {
   return d;
 };
 
-const getOfficeName = (office) => {
-  if (!office) return "";
-  if (office.shortName?.tk) return String(office.shortName.tk).toUpperCase();
-  if (office.fullName?.tk) return String(office.fullName.tk).toUpperCase();
-  if (typeof office.shortName === "string" && office.shortName) return office.shortName.toUpperCase();
-  if (typeof office.fullName === "string" && office.fullName) return office.fullName.toUpperCase();
-  if (office.shortName?.en) return String(office.shortName.en).toUpperCase();
-  if (office.fullName?.en) return String(office.fullName.en).toUpperCase();
-  return "";
-};
-
 const formatGender = (gender) => {
   if (!gender) return "";
   const g = String(gender).trim().toLowerCase();
@@ -42,9 +31,95 @@ const getExcelColName = (colNum) => {
   return colName;
 };
 
+const getTurkmenOrdinalSuffix = (year) => {
+  const y = Number(year);
+  const lastTwo = y % 100;
+  if (lastTwo === 0) return "-nji";
+  if (lastTwo % 10 === 0) {
+    const backVowels = [30, 40, 60, 90];
+    return backVowels.includes(lastTwo) ? "-njy" : "-nji";
+  }
+  const lastDigit = y % 10;
+  return lastDigit === 6 || lastDigit === 9 ? "-njy" : "-nji";
+};
+
+const resolveTitleBanner = (letters = [], options = {}) => {
+  let years = [];
+
+  const startD = options.start_date || options.queryParams?.start_date;
+  const endD = options.end_date || options.queryParams?.end_date;
+
+  if (startD && endD) {
+    const sY = dayjs(startD).year();
+    const eY = dayjs(endD).year();
+    if (sY && eY && sY <= eY) {
+      if (eY - sY <= 5) {
+        for (let y = sY; y <= eY; y++) {
+          years.push(y);
+        }
+      } else {
+        years = [sY, eY];
+      }
+    }
+  } else if (startD) {
+    const sY = dayjs(startD).year();
+    if (sY) years.push(sY);
+  } else if (endD) {
+    const eY = dayjs(endD).year();
+    if (eY) years.push(eY);
+  }
+
+  if (years.length === 0) {
+    const yearsSet = new Set();
+    letters.forEach((row) => {
+      const raw =
+        row.date_time ||
+        row.datetime ||
+        row.date ||
+        row.departure_date ||
+        row.contract_date ||
+        row.createdAt ||
+        row.created_at;
+      if (raw) {
+        const y = dayjs(raw).year();
+        if (y && !isNaN(y) && y > 2000 && y < 2100) {
+          yearsSet.add(y);
+        }
+      }
+    });
+    const sortedYears = Array.from(yearsSet).sort((a, b) => a - b);
+    if (sortedYears.length > 0) {
+      const minY = sortedYears[0];
+      const maxY = sortedYears[sortedYears.length - 1];
+      if (maxY > minY && maxY - minY <= 5) {
+        for (let y = minY; y <= maxY; y++) {
+          years.push(y);
+        }
+      } else {
+        years = sortedYears;
+      }
+    }
+  }
+
+  if (years.length === 0) {
+    years = [dayjs().year()];
+  }
+
+  const lastYear = years[years.length - 1];
+  const suffix = getTurkmenOrdinalSuffix(lastYear);
+  const dateText =
+    years.length === 1
+      ? `${years[0]}${suffix} ýylyň DOWAMYNDA`
+      : `${years.join("-")}${suffix} ýyllaryň DOWAMYNDA`;
+
+  return `OGUZABAT Hojalyk Jemgyýetiniň "OGUZTRAVEL" syýahatçylyk bölümi tarapyndan ${dateText} daşary ýurtlara ugradylan syýahatçylar baradaky hasabat`;
+};
+
 export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   const fileName = options.fileName || "Yollanma_Hatlary_Hasabaty";
   const sheetName = options.sheetName || "Ýollanma Hatlary";
+  const titleBanner =
+    options.titleBanner || resolveTitleBanner(letters, options);
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "OGUZTRAVEL";
@@ -62,18 +137,11 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   worksheet.getColumn(2).width = 4;
   worksheet.getColumn(3).width = 4;
 
-  // Padding rows: 1, 2, 3 height 15
-  worksheet.getRow(1).height = 15;
-  worksheet.getRow(2).height = 15;
-  worksheet.getRow(3).height = 15;
-
   const columnsConfig = [
     { header: "T/B", key: "index_number", width: 8, align: "center" },
     { header: "Arza №", key: "application_number", width: 14, align: "center" },
-    { header: "Operator", key: "operator", width: 22, align: "left" },
     { header: "Ofis", key: "office", width: 14, align: "center" },
     { header: "Syýahatçynyň F.A.A.", key: "client_name", width: 28, align: "left" },
-    { header: "Telefon", key: "client_phone", width: 18, align: "center" },
     { header: "Jynsy", key: "gender", width: 12, align: "center" },
     { header: "Doglan senesi", key: "dob", width: 14, align: "center" },
     { header: "Passport №", key: "passport", width: 16, align: "center" },
@@ -87,7 +155,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
     { header: "Şertnama №", key: "contract_number", width: 16, align: "center" },
     { header: "Şertnama sene", key: "contract_date", width: 14, align: "center" },
     { header: "Agent", key: "agent_name", width: 20, align: "left" },
-    { header: "Agent Tel", key: "agent_tel", width: 18, align: "center" },
     { header: "Bellik", key: "note", width: 24, align: "left" },
   ];
 
@@ -100,6 +167,30 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
 
   const END_COL = START_COL + columnsConfig.length - 1;
   const totalRowIndex = START_ROW + letters.length + 1;
+
+  // Row 1: top margin row
+  worksheet.getRow(1).height = 12;
+
+  // Row 2: Title Banner Row merged across table columns
+  const titleRow = worksheet.getRow(2);
+  titleRow.height = 34;
+  worksheet.mergeCells(2, START_COL, 2, END_COL);
+  const titleCell = worksheet.getCell(2, START_COL);
+  titleCell.value = titleBanner;
+  titleCell.font = {
+    name: "Calibri",
+    size: 11,
+    bold: true,
+    color: { argb: "FF000000" },
+  };
+  titleCell.alignment = {
+    vertical: "middle",
+    horizontal: "center",
+    wrapText: true,
+  };
+
+  // Row 3: spacing row
+  worksheet.getRow(3).height = 12;
 
   // Header Row (Row 4)
   const headerRow = worksheet.getRow(START_ROW);
@@ -154,35 +245,19 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
     const price = Number(row.price || 0);
     sumPrice += price;
 
-    const operatorObj = row.refferaloperator || row.operator || row.received_opr;
-    const operatorName = operatorObj?.fullName ? String(operatorObj.fullName).toUpperCase() : "";
-    const officeName = getOfficeName(operatorObj?.office);
-
     const clientName = row.client?.fullName ? String(row.client.fullName).toUpperCase() : "";
-    const clientPhone = row.client?.phone_number
-      ? String(row.client.phone_number).trim()
-      : row.yolagcyTel
-      ? String(row.yolagcyTel).trim()
-      : "";
 
     const agentName = row.agent?.name
       ? String(row.agent.name).toUpperCase()
       : typeof row.agent === "string"
       ? row.agent.toUpperCase()
       : "";
-    const agentPhone = row.agent?.phone_number
-      ? String(row.agent.phone_number).trim()
-      : row.phone_number
-      ? String(row.phone_number).trim()
-      : "";
 
     const rowData = [
       row.index_number ?? offset + 1,
       row.application_number ? String(row.application_number).trim() : "",
-      operatorName,
-      officeName,
+      "",
       clientName,
-      clientPhone,
       formatGender(row.client?.gender),
       formatDate(row.client?.dateOfBirth),
       row.client?.passport_number ? String(row.client.passport_number).toUpperCase() : "",
@@ -196,7 +271,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       row.contract_number ? String(row.contract_number).trim() : "",
       formatDate(row.contract_date),
       agentName,
-      agentPhone,
       row.note ? String(row.note).trim() : "",
     ];
 
