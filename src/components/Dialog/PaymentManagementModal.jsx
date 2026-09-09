@@ -13,10 +13,11 @@ import {
   Divider,
   Pagination,
   Skeleton,
+  Tooltip,
+  alpha,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import EditIcon from "@mui/icons-material/Edit";
+import { PenLine, Trash2 } from "lucide-react";
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
 
@@ -980,33 +981,61 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                             )}
                           </Box>
                         </Box>
-                        <Box sx={{ display: "flex", gap: 0.5 }}>
-                          <IconButton
-                            color="primary"
-                            size="small"
-                            onClick={() => handleEditClick(p)}
-                            sx={{
-                              p: 0.75,
-                              "&:hover": {
-                                bgcolor: "action.hover",
-                              },
-                            }}
-                          >
-                            <EditIcon sx={{ fontSize: 18 }} />
-                          </IconButton>
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleDeletePayment(p.guid || p.id)}
-                            sx={{
-                              p: 0.75,
-                              "&:hover": {
-                                bgcolor: "action.hover",
-                              },
-                            }}
-                          >
-                            <DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
-                          </IconButton>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                          <Tooltip title={t("edit")} arrow>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleEditClick(p)}
+                              sx={(theme) => ({
+                                width: 28,
+                                height: 28,
+                                borderRadius: "6px",
+                                border: "1px solid",
+                                borderColor: alpha(theme.palette.primary.main, 0.25),
+                                bgcolor: alpha(theme.palette.primary.main, 0.06),
+                                color: "primary.main",
+                                transition: "all 0.15s ease",
+                                "&:hover": {
+                                  bgcolor: alpha(theme.palette.primary.main, 0.16),
+                                  borderColor: "primary.main",
+                                  transform: "translateY(-1px)",
+                                  boxShadow: `0 2px 6px ${alpha(theme.palette.primary.main, 0.25)}`,
+                                },
+                                "&:active": {
+                                  transform: "scale(0.95)",
+                                },
+                              })}
+                            >
+                              <PenLine size={14} strokeWidth={2} />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={t("delete")} arrow>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDeletePayment(p.guid || p.id)}
+                              sx={(theme) => ({
+                                width: 28,
+                                height: 28,
+                                borderRadius: "6px",
+                                border: "1px solid",
+                                borderColor: alpha(theme.palette.error.main, 0.25),
+                                bgcolor: alpha(theme.palette.error.main, 0.06),
+                                color: "error.main",
+                                transition: "all 0.15s ease",
+                                "&:hover": {
+                                  bgcolor: alpha(theme.palette.error.main, 0.16),
+                                  borderColor: "error.main",
+                                  transform: "translateY(-1px)",
+                                  boxShadow: `0 2px 6px ${alpha(theme.palette.error.main, 0.25)}`,
+                                },
+                                "&:active": {
+                                  transform: "scale(0.95)",
+                                },
+                              })}
+                            >
+                              <Trash2 size={14} strokeWidth={2} />
+                            </IconButton>
+                          </Tooltip>
                         </Box>
                       </ListItem>
                     );

@@ -51,11 +51,41 @@ const resolveOrigin = (row) => {
   return resolved ? String(resolved).toUpperCase() : "OGUZABAT";
 };
 
-const resolveStatus = (row) => {
-  if (row.status === "true" || row.status === true) return "Gyssagly";
-  if (row.status === "0") return "Gaýtaryldy";
-  return "Adaty";
+const TRANSLATION_STATUS_EXCEL_CONFIG = {
+  TRUE: {
+    label: "Gyssagly",
+    dotColor: "FFE11D48",    // #e11d48 (Rose)
+    textColor: "FF9F1239",   // #9f1239 (Deep rose)
+    bgColor: "FFFFE4E6",     // #ffe4e6 (Soft rose tint)
+    borderColor: "FFFECDD3", // #fecdd3
+  },
+  FALSE: {
+    label: "Adaty",
+    dotColor: "FF0284C7",    // #0284c7 (Sky blue)
+    textColor: "FF0369A1",   // #0369a1 (Deep sky)
+    bgColor: "FFE0F2FE",     // #e0f2fe (Soft sky tint)
+    borderColor: "FFBAE6FD", // #bae6fd
+  },
+  "0": {
+    label: "Gaýtaryldy",
+    dotColor: "FFEA580C",    // #ea580c (Orange)
+    textColor: "FFC2410C",   // #c2410c (Deep orange)
+    bgColor: "FFFFEDD5",     // #ffedd5 (Soft orange tint)
+    borderColor: "FFFED7AA", // #fed7aa
+  },
 };
+
+const resolveStatusInfo = (statusVal) => {
+  if (statusVal === "true" || statusVal === true) {
+    return TRANSLATION_STATUS_EXCEL_CONFIG.TRUE;
+  }
+  if (statusVal === "0" || statusVal === 0) {
+    return TRANSLATION_STATUS_EXCEL_CONFIG["0"];
+  }
+  return TRANSLATION_STATUS_EXCEL_CONFIG.FALSE;
+};
+
+const resolveStatus = (row) => resolveStatusInfo(row?.status).label;
 
 
 export const exportTranslateExcel = async (translations = [], options = {}) => {
@@ -90,7 +120,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     { header: "RAÝATYŇ\nADY", key: "client_name", width: 24, align: "left" },
     { header: "HAÝSY DILDEN\nHAÝSY DILE", key: "direction", width: 18, align: "center" },
     { header: "TERJIMEDEN\nGELEN WAGTY", key: "completed_time", width: 16, align: "center" },
-    { header: "STATUS", key: "status", width: 14, align: "center" },
+    { header: "STATUS", key: "status", width: 16, align: "center" },
     { header: "TERJIMEDEN GELEN\nSAHYPA SANY", key: "completed_page_count", width: 18, align: "center" },
     { header: "TERJIME EDILIP\nGELEN GÜNI", key: "completed_day", width: 17, align: "center" },
     { header: "TERJIME\nEDEN", key: "translator", width: 26, align: "left" },
@@ -98,6 +128,10 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     { header: "TÖLENEN\nPUL", key: "price", width: 16, align: "right" },
     { header: "PEÝDA", key: "profit", width: 16, align: "right" },
   ];
+
+  const statusColIdx = columnsConfig.findIndex((c) => c.key === "status");
+  const priceColIdx = columnsConfig.findIndex((c) => c.key === "price");
+  const profitColIdx = columnsConfig.findIndex((c) => c.key === "profit");
 
   columnsConfig.forEach((col, idx) => {
     worksheet.getColumn(START_COL + idx).width = col.width;
@@ -206,7 +240,51 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
           : { style: "thin", color: { argb: "FFD9D9D9" } },
       };
 
-      if ((idx === 13 || idx === 14) && typeof val === "number") {
+      // Professional status styling: colored dot indicator & soft badge
+      if (idx === statusColIdx) {
+        const statusInfo = resolveStatusInfo(row.status);
+        cell.value = {
+          richText: [
+            {
+              text: "● ",
+              font: {
+                name: "Calibri",
+                size: 9,
+                bold: true,
+                color: { argb: statusInfo.dotColor },
+              },
+            },
+            {
+              text: statusInfo.label,
+              font: {
+                name: "Calibri",
+                size: 9.5,
+                bold: true,
+                color: { argb: statusInfo.textColor },
+              },
+            },
+          ],
+        };
+
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: statusInfo.bgColor },
+        };
+
+        cell.border = {
+          top: { style: "thin", color: { argb: statusInfo.borderColor } },
+          bottom: { style: "thin", color: { argb: statusInfo.borderColor } },
+          left: colNumber === START_COL
+            ? { style: "medium", color: { argb: "FF000000" } }
+            : { style: "thin", color: { argb: statusInfo.borderColor } },
+          right: colNumber === END_COL
+            ? { style: "medium", color: { argb: "FF000000" } }
+            : { style: "thin", color: { argb: statusInfo.borderColor } },
+        };
+      }
+
+      if ((idx === priceColIdx || idx === profitColIdx) && typeof val === "number") {
         cell.numFmt = "#,##0.00";
       }
     });

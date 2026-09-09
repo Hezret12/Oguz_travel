@@ -141,9 +141,9 @@ const AddTranslateModal = ({ table }) => {
 
   const statusOptions = useMemo(
     () => [
-      { value: "false", label: t("statusNormal") || "Adaty" },
-      { value: "true", label: t("statusUrgent") || "Gyssagly" },
-      { value: "0", label: t("paymentRefunded") || "Gaýtaryldy" },
+      { value: "false", label: t("statusNormal")},
+      { value: "true", label: t("statusUrgent")},
+      { value: "0", label: t("paymentRefunded")},
     ],
     [t],
   );
