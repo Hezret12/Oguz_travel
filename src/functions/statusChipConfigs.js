@@ -5,10 +5,13 @@ export const SALE_STATUS_CONFIG = {
 };
 
 export const PAYMENT_STATUS_CONFIG = {
-  TOLENDI: { label: "Tolendi", color: "#16a34a" },
+  TOLENDI: { label: "Tölendi", color: "#16a34a" },
   KREDIT: { label: "Kredit", color: "#d97706" },
   TRUE: { label: "Tölendi", color: "#16a34a" },
   FALSE: { label: "Kredit", color: "#d97706" },
+  1: { label: "Tölendi", color: "#16a34a" },
+  2: { label: "Kredit", color: "#d97706" },
+  0: { label: "Kredit", color: "#d97706" },
 };
 
 export const OUTBOUND_PAYMENT_STATUS_CONFIG = {

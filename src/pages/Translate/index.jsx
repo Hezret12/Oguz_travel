@@ -31,7 +31,10 @@ import TranslateFilter from "./Contents/TranslateFilter";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import PaymentStatusCell from "../../components/PaymentStatusCell";
 import StatusChip from "../../components/StatusChip";
-import { TRANSLATION_STATUS_CONFIG } from "../../functions/statusChipConfigs";
+import {
+  TRANSLATION_STATUS_CONFIG,
+  PAYMENT_STATUS_CONFIG,
+} from "../../functions/statusChipConfigs";
 import { nameColSize } from "../../utils/helperConstant";
 import DeleteDialog from "../../components/DeleteDialog";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
@@ -296,9 +299,23 @@ const TranslatePage = () => {
         },
       },
       {
+        accessorFn: (row) => row.is_paid,
         id: "is_paid",
-        accessorFn: (row) => row.paidPercentage,
         header: t("columns.paymentStatus"),
+        size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ cell }) => (
+          <StatusChip
+            status={cell.getValue()}
+            config={PAYMENT_STATUS_CONFIG}
+            size="small"
+          />
+        ),
+      },
+      {
+        id: "payment_status",
+        header: t("columns.paymentPercentage"),
         size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
