@@ -5,30 +5,30 @@ export const SALE_STATUS_CONFIG = {
 };
 
 export const PAYMENT_STATUS_CONFIG = {
-  TOLENDI: { label: "Tölendi", color: "#16a34a" },
-  KREDIT: { label: "Kredit", color: "#d97706" },
-  TRUE: { label: "Tölendi", color: "#16a34a" },
-  FALSE: { label: "Kredit", color: "#d97706" },
-  1: { label: "Tölendi", color: "#16a34a" },
-  2: { label: "Kredit", color: "#d97706" },
-  0: { label: "Kredit", color: "#d97706" },
+  TOLENDI: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
+  KREDIT: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
+  TRUE: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
+  FALSE: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
+  1: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
+  2: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
+  0: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
 };
 
 export const OUTBOUND_PAYMENT_STATUS_CONFIG = {
-  1: { label: "Tölendi", color: "#16a34a" },
-  2: { label: "Kredit", color: "#d97706" },
-  3: { label: "Gaýtaryldy", color: "#dc2626" },
-  TOLENDI: { label: "Tölendi", color: "#16a34a" },
-  KREDIT: { label: "Kredit", color: "#d97706" },
-  GAYTARYLDY: { label: "Gaýtaryldy", color: "#dc2626" },
-  TRUE: { label: "Tölendi", color: "#16a34a" },
-  FALSE: { label: "Kredit", color: "#d97706" },
+  1: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
+  2: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
+  3: { label: "Gaýtaryldy", labelKey: "paymentRefunded", color: "#dc2626" },
+  TOLENDI: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
+  KREDIT: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
+  GAYTARYLDY: { label: "Gaýtaryldy", labelKey: "paymentRefunded", color: "#dc2626" },
+  TRUE: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
+  FALSE: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
 };
 
 export const TRANSLATION_STATUS_CONFIG = {
-  TRUE: { label: "Gyssagly", color: "#e11d48" },
-  FALSE: { label: "Adaty", color: "#0284c7" },
-  "0": { label: "Gaýtaryldy", color: "#ea580c" },
+  TRUE: { label: "Gyssagly", labelKey: "statusUrgent", color: "#e11d48" },
+  FALSE: { label: "Adaty", labelKey: "statusNormal", color: "#0284c7" },
+  "0": { label: "Gaýtaryldy", labelKey: "paymentRefunded", color: "#ea580c" },
 };
 
 export const VISA_CATEGORY_CONFIG = {

@@ -1,6 +1,8 @@
 import { Box, Typography } from "@mui/material";
+import { useLocale } from "../hooks/useLocale";
 
 const StatusChip = ({ status, config, size = "small" }) => {
+  const { t } = useLocale();
   const key = status?.toString().toUpperCase();
   const item = config?.[key];
 
@@ -15,7 +17,10 @@ const StatusChip = ({ status, config, size = "small" }) => {
     );
   }
 
-  const { label, color = "#64748b" } = item;
+  const { label, labelKey, color = "#64748b" } = item;
+  const targetKey = labelKey || label;
+  const translated = targetKey ? t(targetKey) : "";
+  const displayLabel = (translated && translated !== targetKey) ? translated : (label || targetKey || "—");
 
   const dotSize = size === "small" ? 7 : 8;
 
@@ -40,7 +45,7 @@ const StatusChip = ({ status, config, size = "small" }) => {
           whiteSpace: "nowrap",
         }}
       >
-        {label}
+        {displayLabel}
       </Typography>
     </Box>
   );
