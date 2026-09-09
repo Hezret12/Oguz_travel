@@ -166,9 +166,8 @@ const ReferalLetter = () => {
         muiTableBodyCellProps: { align: "right" },
       },
       {
+        accessorKey: "date_time",
         id: "date_time",
-        accessorFn: (row) =>
-          row.date_time || row.datetime || row.date || row.createdAt || row.created_at,
         header: t("columns.date"),
         size: 100,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
@@ -179,27 +178,17 @@ const ReferalLetter = () => {
         id: "operator",
         header: t("outbound.operator"),
         size: 200,
-        accessorFn: (row) =>
-          row.refferaloperator?.fullName || row.operator?.fullName || "",
-        Cell: ({ row }) => {
-          const opr =
-            row.original.refferaloperator ||
-            row.original.operator ||
-            row.original.received_opr;
-          return <OperatorsCell assignmentOperator={opr} />;
-        },
+        accessorFn: (row) => row.refferaloperator?.fullName ?? "",
+        Cell: ({ row }) => (
+          <OperatorsCell assignmentOperator={row.original.refferaloperator} />
+        ),
       },
       {
         header: t("columns.client"),
         id: "fullName",
         size: 220,
         accessorFn: (row) => row.client?.fullName ?? "",
-        Cell: ({ row }) => (
-          <ClientCell
-            client={row.original?.client}
-            secondary={row.original?.yolagcyTel}
-          />
-        ),
+        Cell: ({ row }) => <ClientCell client={row.original.client} />,
       },
       {
         accessorFn: (row) => row.client?.gender ?? "",
@@ -255,27 +244,6 @@ const ReferalLetter = () => {
         id: "travel_document_number",
         header: t("columns.syhNo"),
         size: 100,
-        Cell: ({ row, cell }) => {
-          const value = cell.getValue();
-          const isHighlighted = row.original.syhHighlighted;
-          return (
-            <Box
-              component="span"
-              sx={{
-                display: "inline-block",
-                px: 1,
-                py: 0.25,
-                borderRadius: 1,
-                bgcolor: isHighlighted ? "error.main" : "transparent",
-                color: isHighlighted ? "error.contrastText" : "inherit",
-                fontWeight: isHighlighted ? 700 : 400,
-                textAlign: "center",
-              }}
-            >
-              {value}
-            </Box>
-          );
-        },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },
@@ -304,9 +272,9 @@ const ReferalLetter = () => {
         size: 130,
         Cell: ({ row, cell }) => {
           const amount = cell.getValue();
-          const currency = row.original.currency || "USD";
+          const currency = row.original.currency || "TMT";
           const symbol = CURRENCY_SYMBOLS[currency] || currency;
-          return `${Number(amount ?? 0).toFixed(2)} ${symbol}`;
+          return `${Number(amount || 0).toFixed(2)} ${symbol}`;
         },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
@@ -332,11 +300,11 @@ const ReferalLetter = () => {
         id: "agent",
         header: t("columns.agent"),
         size: 170,
-        accessorFn: (row) => row.agent?.name,
+        accessorFn: (row) => row.agent?.name ?? "",
         Cell: ({ row }) => (
           <StackedCell
             primary={row.original.agent?.name}
-            secondary={row.original.phone_number}
+            secondary={row.original.agent?.phone_number}
           />
         ),
       },
