@@ -41,13 +41,7 @@ const EditReferralLetterModal = ({ table, row }) => {
   const initialValues = useMemo(() => {
     return {
       guid: row?.original?.guid || null,
-      date_time:
-        row?.original?.date_time ||
-        row?.original?.datetime ||
-        row?.original?.date ||
-        row?.original?.created_at ||
-        row?.original?.createdAt ||
-        null,
+      date_time: row?.original?.date_time || null,
       client_guid: row?.original?.client_guid || row?.original?.client?.guid || null,
       application_number: row?.original?.application_number || null,
       received_opr_guid: row?.original?.received_opr_guid || null,
