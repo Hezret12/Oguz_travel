@@ -234,6 +234,18 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
             display: "flex",
             flexDirection: "column",
             minHeight: 0,
+            "& .MuiFormHelperText-root": {
+              display: "none !important",
+            },
+            "& .Mui-error .MuiOutlinedInput-notchedOutline": {
+              borderColor: (theme) => `${theme.palette.error.main} !important`,
+            },
+            "& .Mui-error.Mui-focused": {
+              boxShadow: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "0 0 0 3px rgba(239, 68, 68, 0.25) !important"
+                  : "0 0 0 3px rgba(239, 68, 68, 0.2) !important",
+            },
           }}
         >
           <Box
@@ -274,6 +286,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                     "passportExpiryDate",
                     "passportCountryOfIssue",
                   ]}
+                  required
                 />
               </Grid>
 
@@ -296,6 +309,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   name="ticket_number"
                   control={control}
                   label={t("columns.ticketNo") ?? "TICKET #"}
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -330,6 +344,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   isError={isStatusError}
                   getRowId={(item) => item.guid}
                   getRowLabel={(item) => selectedLang(item.name)}
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -347,6 +362,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   label={t("columns.baseFare")}
                   currency={selectedCurrency}
                   onCurrencyChange={(curr) => setValue("currency", curr)}
+                  required
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "7px",
@@ -385,6 +401,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   label={t("columns.total")}
                   onChange={handleTotalAmountChange}
                   startIcon={currencySymbol}
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -400,6 +417,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                     selectedLang(item?.shortName) ||
                     selectedLang(item?.fullName)
                   }
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -448,6 +466,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   control={control}
                   label={t("columns.operator")}
                   initialEmployee={row?.original?.ta_assignment_operator || row?.original?.assignment_operator}
+                  required
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
@@ -456,6 +475,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
                   control={control}
                   label={t("columns.operatorTwo")}
                   initialEmployee={row?.original?.ta_receiver_operator || row?.original?.receiver_operator}
+                  required
                 />
               </Grid>
 

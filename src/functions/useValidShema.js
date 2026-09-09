@@ -66,19 +66,19 @@ export const useValidShema = () => {
     client_guid: yup
       .string()
       .nullable()
-      .required(t("validation.required")),
+      .required(""),
     assignment_opr_guid: yup
       .string()
       .nullable()
-      .required(t("validation.required")),
+      .required(""),
     receiver_opr_guid: yup
       .string()
       .nullable()
-      .required(t("validation.required")),
+      .required(""),
     status_guid: yup
       .string()
       .nullable()
-      .required(t("validation.required")),
+      .required(""),
     net_price: yup
       .number()
       .nullable()
@@ -87,8 +87,8 @@ export const useValidShema = () => {
           ? undefined
           : Number(originalValue)
       )
-      .typeError(t("validation.requiredNumber"))
-      .required(t("validation.required")),
+      .typeError("")
+      .required(""),
     sale_price: yup
       .number()
       .nullable()
@@ -97,11 +97,61 @@ export const useValidShema = () => {
           ? undefined
           : Number(originalValue)
       )
-      .typeError(t("validation.requiredNumber"))
-      .required(t("validation.required")),
+      .typeError("")
+      .required(""),
   });
 
   const addTurkishAirlinesTicket = yup.object({
+    client_guid: yup
+      .string()
+      .nullable()
+      .transform((val, orig) => (!orig || !String(orig).trim() ? undefined : String(orig).trim()))
+      .required(""),
+    assignment_opr_guid: yup
+      .string()
+      .nullable()
+      .transform((val, orig) => (!orig || !String(orig).trim() ? undefined : String(orig).trim()))
+      .required(""),
+    receiver_opr_guid: yup
+      .string()
+      .nullable()
+      .transform((val, orig) => (!orig || !String(orig).trim() ? undefined : String(orig).trim()))
+      .required(""),
+    ticket_number: yup
+      .string()
+      .nullable()
+      .transform((val, orig) => (!orig || !String(orig).trim() ? undefined : String(orig).trim()))
+      .required(""),
+    base_fare: yup
+      .number()
+      .nullable()
+      .transform((value, originalValue) =>
+        originalValue === "" || originalValue === null || originalValue === undefined
+          ? undefined
+          : Number(originalValue)
+      )
+      .typeError("")
+      .required(""),
+    total_price: yup
+      .number()
+      .nullable()
+      .transform((value, originalValue) =>
+        originalValue === "" || originalValue === null || originalValue === undefined
+          ? undefined
+          : Number(originalValue)
+      )
+      .typeError("")
+      .required(""),
+    status_guid: yup
+      .string()
+      .nullable()
+      .transform((val, orig) => (!orig || !String(orig).trim() ? undefined : String(orig).trim()))
+      .required(""),
+    office_guid: yup
+      .string()
+      .nullable()
+      .transform((val, orig) => (!orig || !String(orig).trim() ? undefined : String(orig).trim()))
+      .required(""),
     note: stringOptionalValidSchema(),
   });
 
