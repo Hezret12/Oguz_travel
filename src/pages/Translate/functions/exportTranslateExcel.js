@@ -87,6 +87,37 @@ const resolveStatusInfo = (statusVal) => {
 
 const resolveStatus = (row) => resolveStatusInfo(row?.status).label;
 
+const resolvePercent = (row) => {
+  const raw = row?.paidPercentage ?? row?.payment_percent ?? row?.paymentPercentage;
+  if (raw !== undefined && raw !== null && raw !== "") {
+    const str = String(raw).trim();
+    if (str.endsWith("%")) return str;
+    const num = parseFloat(str);
+    if (!isNaN(num)) return `${num.toFixed(0)}%`;
+  }
+  const isPaid =
+    row?.is_paid === true ||
+    row?.is_paid === "true" ||
+    row?.is_paid === 1 ||
+    row?.is_paid === "1" ||
+    String(row?.is_paid).toUpperCase() === "TOLENDI";
+  return isPaid ? "100%" : "0%";
+};
+
+const resolveIsPaid = (row) => {
+  const val = row?.is_paid;
+  if (
+    val === true ||
+    val === "true" ||
+    val === 1 ||
+    val === "1" ||
+    String(val).toUpperCase() === "TOLENDI"
+  ) {
+    return "Tölendi";
+  }
+  return "Kredit";
+};
+
 
 export const exportTranslateExcel = async (translations = [], options = {}) => {
   const fileName = options.fileName || "Terjime_Hasabaty";
@@ -126,12 +157,14 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     { header: "TERJIME\nEDEN", key: "translator", width: 26, align: "left" },
     { header: "DÜZEDILEN\nTERJIME", key: "correction_status", width: 16, align: "center" },
     { header: "TÖLENEN\nPUL", key: "price", width: 16, align: "right" },
-    { header: "PEÝDA", key: "profit", width: 16, align: "right" },
+    { header: "TÖLEG\nÝAGDAÝY", key: "is_paid", width: 15, align: "center" },
+    { header: "TÖLEG\nGÖTERIMI", key: "paid_percentage", width: 15, align: "center" },
   ];
 
   const statusColIdx = columnsConfig.findIndex((c) => c.key === "status");
   const priceColIdx = columnsConfig.findIndex((c) => c.key === "price");
-  const profitColIdx = columnsConfig.findIndex((c) => c.key === "profit");
+  const isPaidColIdx = columnsConfig.findIndex((c) => c.key === "is_paid");
+  const pctColIdx = columnsConfig.findIndex((c) => c.key === "paid_percentage");
 
   columnsConfig.forEach((col, idx) => {
     worksheet.getColumn(START_COL + idx).width = col.width;
@@ -179,7 +212,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   };
 
   let sumPrice = 0;
-  let sumProfit = 0;
   let sumPages = 0;
   let sumCompletedPages = 0;
 
@@ -194,12 +226,13 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
         ? Number(row.completed_page_count)
         : null;
     const price = Number(row.price || 0);
-    const profit = Number(row.profit || 0);
 
     sumPages += pageCount;
     if (completedPageCount !== null) sumCompletedPages += completedPageCount;
     sumPrice += price;
-    sumProfit += profit;
+
+    const isPaidLabel = resolveIsPaid(row);
+    const pctValue = resolvePercent(row);
 
     const rowData = [
       formatDate(row.received_day),
@@ -216,7 +249,8 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       row.translator?.fullName ? String(extractText(row.translator.fullName)).toUpperCase() : "",
       row.correction_status ? String(row.correction_status).toUpperCase() : "DOGRY",
       price,
-      profit,
+      isPaidLabel,
+      pctValue,
     ];
 
     rowData.forEach((val, idx) => {
@@ -284,7 +318,98 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
         };
       }
 
-      if ((idx === priceColIdx || idx === profitColIdx) && typeof val === "number") {
+      // Professional is_paid badge styling with dot
+      if (idx === isPaidColIdx) {
+        const isPaidInfo = isPaidLabel === "Tölendi"
+          ? {
+              dotColor: "FF16A34A",
+              textColor: "FF15803D",
+              bgColor: "FFF0FDF4",
+              borderColor: "FFBBF7D0",
+            }
+          : {
+              dotColor: "FFD97706",
+              textColor: "FFB45309",
+              bgColor: "FFFFFBEB",
+              borderColor: "FFFDE68A",
+            };
+
+        cell.value = {
+          richText: [
+            {
+              text: "● ",
+              font: {
+                name: "Calibri",
+                size: 9,
+                bold: true,
+                color: { argb: isPaidInfo.dotColor },
+              },
+            },
+            {
+              text: isPaidLabel,
+              font: {
+                name: "Calibri",
+                size: 9.5,
+                bold: true,
+                color: { argb: isPaidInfo.textColor },
+              },
+            },
+          ],
+        };
+
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: isPaidInfo.bgColor },
+        };
+
+        cell.border = {
+          top: { style: "thin", color: { argb: isPaidInfo.borderColor } },
+          bottom: { style: "thin", color: { argb: isPaidInfo.borderColor } },
+          left: colNumber === START_COL
+            ? { style: "medium", color: { argb: "FF000000" } }
+            : { style: "thin", color: { argb: isPaidInfo.borderColor } },
+          right: colNumber === END_COL
+            ? { style: "medium", color: { argb: "FF000000" } }
+            : { style: "thin", color: { argb: isPaidInfo.borderColor } },
+        };
+      }
+
+      // Professional percentage styling
+      if (idx === pctColIdx) {
+        const num = parseFloat(pctValue);
+        let fgColor = "FFDC2626";
+        let bgColor = "FFFEE2E2";
+        let borderColor = "FFFECACA";
+        if (num >= 100) {
+          fgColor = "FF15803D";
+          bgColor = "FFF0FDF4";
+          borderColor = "FFBBF7D0";
+        } else if (num > 0) {
+          fgColor = "FFB45309";
+          bgColor = "FFFFFBEB";
+          borderColor = "FFFDE68A";
+        }
+
+        cell.font = { name: "Calibri", size: 9.5, bold: true, color: { argb: fgColor } };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: bgColor },
+        };
+        cell.border = {
+          top: { style: "thin", color: { argb: borderColor } },
+          bottom: { style: "thin", color: { argb: borderColor } },
+          left: colNumber === START_COL
+            ? { style: "medium", color: { argb: "FF000000" } }
+            : { style: "thin", color: { argb: borderColor } },
+          right: colNumber === END_COL
+            ? { style: "medium", color: { argb: "FF000000" } }
+            : { style: "thin", color: { argb: borderColor } },
+        };
+      }
+
+      if (idx === priceColIdx && typeof val === "number") {
         cell.numFmt = "#,##0.00";
       }
     });
@@ -338,13 +463,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       result: sumPrice,
     };
     cellPrice.numFmt = "#,##0.00";
-
-    const cellProfit = totalRow.getCell(START_COL + 14);
-    cellProfit.value = {
-      formula: `SUM(R${firstDataRow}:R${lastDataRow})`,
-      result: sumProfit,
-    };
-    cellProfit.numFmt = "#,##0.00";
   }
 
   const buffer = await workbook.xlsx.writeBuffer();
