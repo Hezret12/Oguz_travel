@@ -39,7 +39,7 @@ const AddReferralLetterModal = ({ table }) => {
 
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
-      datetime: dayjs().format("YYYY-MM-DD"),
+      date_time: dayjs().format("YYYY-MM-DD"),
       client_guid: null,
       application_number: null,
       received_opr_guid: null,
@@ -66,13 +66,14 @@ const AddReferralLetterModal = ({ table }) => {
   };
 
   const submitHandler = (values) => {
-    const formattedDate = values.datetime
-      ? dayjs(values.datetime).format("YYYY-MM-DD")
+    const formattedDate = values.date_time
+      ? dayjs(values.date_time).format("YYYY-MM-DD")
       : dayjs().format("YYYY-MM-DD");
 
     createReferralLetter({
       ...values,
-      datetime: values.datetime || formattedDate,
+      date_time: values.date_time || formattedDate,
+      datetime: values.date_time || formattedDate,
       date: formattedDate,
       price: Number(values.price || 0),
     });
@@ -116,7 +117,7 @@ const AddReferralLetterModal = ({ table }) => {
               columns={autocompleteColumns}
             />
             <CustomDatePicker
-              name="datetime"
+              name="date_time"
               control={control}
               label={t("columns.date")}
               required

@@ -11,6 +11,7 @@ export const referralLetterFilterSlice = createFilterSlice({
     return_date: '',
     contract_date: '',
     status: '',
+    date_time: '',
     datetime: '',
   },
   defaultPageSize: 40,

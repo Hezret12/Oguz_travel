@@ -41,7 +41,8 @@ const EditReferralLetterModal = ({ table, row }) => {
   const initialValues = useMemo(() => {
     return {
       guid: row?.original?.guid || null,
-      datetime:
+      date_time:
+        row?.original?.date_time ||
         row?.original?.datetime ||
         row?.original?.date ||
         row?.original?.created_at ||
@@ -90,13 +91,14 @@ const EditReferralLetterModal = ({ table, row }) => {
   };
 
   const submitHandler = (values) => {
-    const formattedDate = values.datetime
-      ? dayjs(values.datetime).format("YYYY-MM-DD")
+    const formattedDate = values.date_time
+      ? dayjs(values.date_time).format("YYYY-MM-DD")
       : null;
 
     updateReferralLetter({
       ...values,
-      datetime: values.datetime || formattedDate,
+      date_time: values.date_time || formattedDate,
+      datetime: values.date_time || formattedDate,
       date: formattedDate,
       price: Number(values.price || 0),
     });
@@ -143,7 +145,7 @@ const EditReferralLetterModal = ({ table, row }) => {
               columns={autocompleteColumns}
             />
             <CustomDatePicker
-              name="datetime"
+              name="date_time"
               control={control}
               label={t("columns.date")}
               required

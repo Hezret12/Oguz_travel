@@ -166,9 +166,9 @@ const ReferalLetter = () => {
         muiTableBodyCellProps: { align: "right" },
       },
       {
-        id: "datetime",
+        id: "date_time",
         accessorFn: (row) =>
-          row.datetime || row.date || row.createdAt || row.created_at,
+          row.date_time || row.datetime || row.date || row.createdAt || row.created_at,
         header: t("columns.date"),
         size: 100,
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
