@@ -162,6 +162,12 @@ export const REFERRAL_LETTER_EXCEL_COLUMNS = [
     },
   },
   {
+    header: "Operator",
+    width: 14,
+    align: "center",
+    accessor: () => "Oguzabat",
+  },
+  {
     header: "AGENT",
     width: 12,
     align: "center",
