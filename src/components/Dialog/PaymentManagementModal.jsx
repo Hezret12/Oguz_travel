@@ -7,15 +7,12 @@ import {
   Grid,
   IconButton,
   Button,
-  Card,
-  CardContent,
+  List,
+  ListItem,
   CircularProgress,
   Divider,
   Pagination,
   Skeleton,
-  ToggleButton,
-  ToggleButtonGroup,
-  alpha,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -197,7 +194,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const [localPayments, setLocalPayments] = useState([]);
   const [editingPayment, setEditingPayment] = useState(null);
   const [prevTicketKey, setPrevTicketKey] = useState(null);
-  const [selectedCurrency, setSelectedCurrency] = useState(() => ticketCurrency || "USD");
+  const activeCurrency = editingPayment?.currency || ticketCurrency || "USD";
   const [hasChanged, setHasChanged] = useState(false);
   const exchangeRate = useMemo(() => {
     return parseFloat(localStorage.getItem("finance_usd_tmt_rate") || "19.5") || 19.5;
@@ -209,7 +206,6 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     setPrevTicketKey(currentTicketKey);
     setEditingPayment(null);
     setLocalPayments([]);
-    setSelectedCurrency(ticketCurrency || "USD");
     setHasChanged(false);
     if (currentTicketKey) {
       queryClient.removeQueries({ queryKey: [key] });
@@ -447,7 +443,6 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   const handleEditClick = (p) => {
     setEditingPayment(p);
-    setSelectedCurrency(p.currency || ticketCurrency || "USD");
     reset({
       amount: p.amount,
       paymentDate: p.payment_date || p.date,
@@ -458,7 +453,6 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   const handleCancelEdit = () => {
     setEditingPayment(null);
-    setSelectedCurrency(ticketCurrency || "USD");
     reset({
       amount: "",
       paymentDate: new Date().toISOString(),
@@ -472,13 +466,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     const numAmount = Number(amount);
     if (!amount || numAmount <= 0) return;
 
-    const amountInTicketCurrency = selectedCurrency === ticketCurrency
-      ? numAmount
-      : selectedCurrency === "TMT"
-      ? numAmount / exchangeRate
-      : numAmount * exchangeRate;
-
-    if (!editingPayment && remaining > 0 && amountInTicketCurrency > (remaining + 0.01)) {
+    if (!editingPayment && remaining > 0 && numAmount > (remaining + 0.01)) {
       toast.error(
         `${t("payment.amountExceedsRemaining")} (${formatCurrency(remaining, ticketCurrency)})`
       );
@@ -517,7 +505,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         const payload = {
           guid: editingPayment.guid,
           amount: Number(amount),
-          currency: selectedCurrency,
+          currency: activeCurrency,
           payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
@@ -546,7 +534,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               ? {
                   ...p,
                   amount: Number(amount),
-                  currency: selectedCurrency,
+                  currency: activeCurrency,
                   payment_date: resolvedPaymentDate,
                   note: description?.trim() || "",
                   opr_guid: resolvedOprGuid,
@@ -560,7 +548,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       if (ticketGuid) {
         const payload = {
           amount: Number(amount),
-          currency: selectedCurrency,
+          currency: ticketCurrency,
           payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
@@ -586,7 +574,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         const newPayment = {
           guid: getNextLocalPaymentGuid(),
           amount: Number(amount),
-          currency: selectedCurrency,
+          currency: ticketCurrency,
           payment_date: resolvedPaymentDate,
           note: description?.trim() || "",
           opr_guid: resolvedOprGuid,
@@ -599,7 +587,6 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           description: "",
           opr_guid: "",
         });
-        setSelectedCurrency(ticketCurrency || "USD");
       }
     }
   };
@@ -813,81 +800,19 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
                   {/* Row 2: Price and Note */}
                   <Grid size={6}>
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Typography
-                          variant="caption"
-                          sx={{ fontWeight: 600, color: "text.secondary", fontSize: "0.75rem" }}
-                        >
-                          {t("payment.amount")} *
-                        </Typography>
-                        <ToggleButtonGroup
-                          value={selectedCurrency}
-                          exclusive
-                          onChange={(e, val) => {
-                            if (val) setSelectedCurrency(val);
-                          }}
-                          size="small"
-                          sx={{
-                            height: 22,
-                            p: "1px",
-                            borderRadius: "5px",
-                            bgcolor: (theme) => alpha(theme.palette.divider, 0.1),
-                            border: "1px solid",
-                            borderColor: "divider",
-                            "& .MuiToggleButton-root": {
-                              px: 0.8,
-                              py: 0,
-                              fontSize: "10.5px",
-                              fontWeight: 700,
-                              lineHeight: 1,
-                              textTransform: "none",
-                              border: 0,
-                              borderRadius: "4px",
-                              color: "text.secondary",
-                              "&.Mui-selected": {
-                                bgcolor: "primary.main",
-                                color: "#fff",
-                                "&:hover": { bgcolor: "primary.dark" },
-                              },
-                            },
-                          }}
-                        >
-                          <ToggleButton value="USD">$ USD</ToggleButton>
-                          <ToggleButton value="TMT">m TMT</ToggleButton>
-                        </ToggleButtonGroup>
-                      </Box>
-                      <CustomTextField
-                        name="amount"
-                        control={control}
-                        placeholder={t("payment.amount")}
-                        type="number"
-                        required
-                        startIcon={
-                          <span style={{ fontSize: "0.9rem", fontWeight: 700 }}>
-                            {CURRENCY_SYMBOLS[selectedCurrency] || "$"}
-                          </span>
-                        }
-                      />
-                      {selectedCurrency !== ticketCurrency && Number(amountValue) > 0 && (
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: "text.secondary",
-                            fontSize: "11px",
-                            fontWeight: 500,
-                            lineHeight: 1,
-                          }}
-                        >
-                          ≈ {formatCurrency(
-                            selectedCurrency === "TMT"
-                              ? Number(amountValue) / exchangeRate
-                              : Number(amountValue) * exchangeRate,
-                            ticketCurrency
-                          )} (1 $ = {exchangeRate} m)
-                        </Typography>
-                      )}
-                    </Box>
+                    <CustomTextField
+                      name="amount"
+                      control={control}
+                      label={t("payment.amount")}
+                      placeholder={t("payment.amount")}
+                      type="number"
+                      required
+                      startIcon={
+                        <span style={{ fontSize: "0.9rem", fontWeight: 700 }}>
+                          {CURRENCY_SYMBOLS[activeCurrency] || "$"}
+                        </span>
+                      }
+                    />
                   </Grid>
                   <Grid size={6}>
                     <CustomTextField
@@ -939,171 +864,154 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
               {t("payment.paymentHistory")}
             </Typography>
-            <Box sx={{ height: "228px", display: "flex", flexDirection: "column" }}>
+            <Box sx={{ minHeight: "80px", display: "flex", flexDirection: "column" }}>
               {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
                   <CircularProgress size={24} />
                 </Box>
               ) : payments.length === 0 ? (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 3 }}>
                   <Typography variant="body2" color="text.secondary">
                     {t("payment.noPayments")}
                   </Typography>
                 </Box>
               ) : (
-                <Box
+                <List
+                  disablePadding
                   sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1.5,
+                    maxHeight: "230px",
                     overflowY: "auto",
-                    flex: 1,
-                    pr: 0.5,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: "8px",
                   }}
                 >
-                  {payments.map((p) => {
+                  {payments.map((p, idx) => {
                     const operator = employees.find((emp) => emp.guid === p.opr_guid);
                     const operatorName = operator ? operator.fullName : (p.operator?.fullName || p.operator_name || "");
 
                     return (
-                      <Card
+                      <ListItem
                         key={p.guid || p.id}
-                        variant="outlined"
-                        sx={(theme) => ({
-                          borderRadius: "8px",
-                          borderColor: theme.palette.divider,
-                          height: "72px",
-                          flexShrink: 0,
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.01)"
-                              : "rgba(0,0,0,0.005)",
-                        })}
+                        divider={idx < payments.length - 1}
+                        sx={{
+                          py: 1,
+                          px: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 2,
+                          "&:hover": {
+                            bgcolor: "action.hover",
+                          },
+                          transition: "background-color 0.15s ease",
+                        }}
                       >
-                        <CardContent
-                          sx={{
-                            p: "10px 16px !important",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            height: "100%",
-                            boxSizing: "border-box",
-                            gap: 2,
-                          }}
-                        >
-                          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1, minWidth: 0 }}>
-                            {/* Row 1: Amount & Date/Method */}
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main" }}>
-                                  {formatCurrency(p.amount, p.currency || ticketCurrency)}
-                                </Typography>
-                                {p.currency && p.currency !== ticketCurrency && (
-                                  <Typography
-                                    variant="caption"
-                                    sx={{
-                                      color: "text.secondary",
-                                      fontWeight: 500,
-                                      fontSize: "11px",
-                                    }}
-                                  >
-                                    (≈ {formatCurrency(
-                                      p.currency === "TMT"
-                                        ? Number(p.amount) / exchangeRate
-                                        : Number(p.amount) * exchangeRate,
-                                      ticketCurrency
-                                    )})
-                                  </Typography>
-                                )}
-                              </Box>
-                              <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                {formatDateToDisplay(p.payment_date || p.date)} • {getMethodLabel(p.method)}
+                        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1, minWidth: 0 }}>
+                          {/* Row 1: Amount & Date/Method */}
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main" }}>
+                                {formatCurrency(p.amount, p.currency || ticketCurrency)}
                               </Typography>
-                            </Box>
-
-                            {/* Row 2: Operator & Note */}
-                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", minHeight: "22px" }}>
-                              {operatorName ? (
-                                <Typography
-                                   variant="caption"
-                                  color="text.secondary"
-                                  sx={{
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: 0.5,
-                                    fontWeight: 600,
-                                    backgroundColor: (theme) =>
-                                      theme.palette.mode === "dark"
-                                        ? "rgba(255,255,255,0.06)"
-                                        : "rgba(0,0,0,0.04)",
-                                    px: 1,
-                                    py: 0.25,
-                                    borderRadius: "4px",
-                                    fontSize: "0.725rem",
-                                  }}
-                                >
-                                  👤 {operatorName}
-                                </Typography>
-                              ) : (
-                                <span />
-                              )}
-
-                              {(p.note || p.description) ? (
+                              {p.currency && p.currency !== ticketCurrency && (
                                 <Typography
                                   variant="caption"
-                                  color="text.secondary"
-                                  noWrap
                                   sx={{
-                                    fontStyle: "italic",
-                                    maxWidth: "220px",
-                                    fontSize: "0.75rem",
+                                    color: "text.secondary",
+                                    fontWeight: 500,
+                                    fontSize: "11px",
                                   }}
-                                  title={p.note || p.description}
                                 >
-                                  {p.note || p.description}
+                                  (≈ {formatCurrency(
+                                    p.currency === "TMT"
+                                      ? Number(p.amount) / exchangeRate
+                                      : Number(p.amount) * exchangeRate,
+                                    ticketCurrency
+                                  )})
                                 </Typography>
-                              ) : (
-                                <span />
                               )}
                             </Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                              {formatDateToDisplay(p.payment_date || p.date)} • {getMethodLabel(p.method)}
+                            </Typography>
                           </Box>
-                          <Box sx={{ display: "flex", gap: 1 }}>
-                            <IconButton
-                              color="primary"
-                              size="small"
-                              onClick={() => handleEditClick(p)}
-                              sx={{
-                                border: "1px solid rgba(25, 118, 210, 0.2)",
-                                backgroundColor: "rgba(25, 118, 210, 0.05)",
-                                "&:hover": {
-                                  backgroundColor: "rgba(25, 118, 210, 0.12)",
-                                  borderColor: "primary.main",
-                                },
-                              }}
-                            >
-                              <EditIcon sx={{ fontSize: 18 }} />
-                            </IconButton>
-                            <IconButton
-                              color="error"
-                              size="small"
-                              onClick={() => handleDeletePayment(p.guid || p.id)}
-                              sx={{
-                                border: "1px solid rgba(239, 68, 68, 0.2)",
-                                backgroundColor: "rgba(239, 68, 68, 0.05)",
-                                "&:hover": {
-                                  backgroundColor: "rgba(239, 68, 68, 0.12)",
-                                  borderColor: "error.main",
-                                },
-                              }}
-                            >
-                              <DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
-                            </IconButton>
+
+                          {/* Row 2: Operator & Note */}
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", minHeight: "22px" }}>
+                            {operatorName ? (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                  fontWeight: 600,
+                                  bgcolor: "action.hover",
+                                  px: 1,
+                                  py: 0.25,
+                                  borderRadius: "4px",
+                                  fontSize: "0.725rem",
+                                }}
+                              >
+                                👤 {operatorName}
+                              </Typography>
+                            ) : (
+                              <span />
+                            )}
+
+                            {(p.note || p.description) ? (
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                noWrap
+                                sx={{
+                                  fontStyle: "italic",
+                                  maxWidth: "220px",
+                                  fontSize: "0.75rem",
+                                }}
+                                title={p.note || p.description}
+                              >
+                                {p.note || p.description}
+                              </Typography>
+                            ) : (
+                              <span />
+                            )}
                           </Box>
-                        </CardContent>
-                      </Card>
+                        </Box>
+                        <Box sx={{ display: "flex", gap: 0.5 }}>
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={() => handleEditClick(p)}
+                            sx={{
+                              p: 0.75,
+                              "&:hover": {
+                                bgcolor: "action.hover",
+                              },
+                            }}
+                          >
+                            <EditIcon sx={{ fontSize: 18 }} />
+                          </IconButton>
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleDeletePayment(p.guid || p.id)}
+                            sx={{
+                              p: 0.75,
+                              "&:hover": {
+                                bgcolor: "action.hover",
+                              },
+                            }}
+                          >
+                            <DeleteOutlineOutlinedIcon sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Box>
+                      </ListItem>
                     );
                   })}
-                </Box>
+                </List>
               )}
             </Box>
             {totalPages > 1 && !loading && payments.length > 0 && (
