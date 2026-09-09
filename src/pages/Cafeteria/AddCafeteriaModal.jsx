@@ -1,5 +1,5 @@
 import { Box, Grid, Typography, ButtonBase, alpha } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
@@ -10,6 +10,7 @@ import { useValidShema } from "../../functions/useValidShema";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../components/Dialog/CustomForm";
+import CurrencyAmount from "../../components/inputs/CurrencyAmount";
 import CustomTextField from "../../components/CustomTextField";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import FooterButton from "../../components/Dialog/FooterButton";
@@ -29,11 +30,12 @@ const AddCafeteriaModal = ({ table }) => {
     },
   });
 
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
       date: dayjs().toISOString(),
       type: false,
       amount: "",
+      currency: "TMT",
       description: "",
     },
     resolver: yupResolver(addCafeteriaTransaction),
@@ -44,11 +46,17 @@ const AddCafeteriaModal = ({ table }) => {
     table.setCreatingRow(null);
   };
 
+  const [selectedCurrency] = useWatch({
+    control,
+    name: ["currency"],
+  });
+
   const submitHandler = (values) => {
     const payload = {
       ...values,
       type: Boolean(values.type),
       amount: Number(values.amount || 0),
+      currency: values.currency || "TMT",
       date: dayjs(values.date).format("YYYY-MM-DD"),
     };
     createTransaction(payload);
@@ -158,17 +166,19 @@ const AddCafeteriaModal = ({ table }) => {
               name="date"
               control={control}
               label={t("cafeteria.date")}
+              showTime
               required
             />
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomTextField
+            <CurrencyAmount
               name="amount"
               control={control}
-              type="number"
               label={t("cafeteria.amount")}
-              endIcon="TMT"
+              currency={selectedCurrency}
+              onCurrencyChange={(curr) => setValue("currency", curr)}
+              placeholder=""
               required
             />
           </Grid>

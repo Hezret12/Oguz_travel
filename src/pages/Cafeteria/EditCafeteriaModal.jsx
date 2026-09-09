@@ -1,5 +1,5 @@
 import { Box, Grid, Typography, ButtonBase, alpha } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
@@ -11,6 +11,7 @@ import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../components/Dialog/CustomForm";
 import CustomTextField from "../../components/CustomTextField";
+import CurrencyAmount from "../../components/inputs/CurrencyAmount";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import FooterButton from "../../components/Dialog/FooterButton";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
@@ -30,7 +31,7 @@ const EditCafeteriaModal = ({ table, row }) => {
     },
   });
 
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
       guid: row?.original?.guid || row?.original?.id || null,
       date: row?.original?.date || dayjs().toISOString(),
@@ -39,6 +40,7 @@ const EditCafeteriaModal = ({ table, row }) => {
         row?.original?.type === 1 ||
         String(row?.original?.type) === "true",
       amount: row?.original?.amount != null ? Number(row.original.amount) : "",
+      currency: row?.original?.currency || "TMT",
       description: row?.original?.description || "",
     },
     resolver: yupResolver(addCafeteriaTransaction),
@@ -49,11 +51,17 @@ const EditCafeteriaModal = ({ table, row }) => {
     table.setEditingRow(null);
   };
 
+  const [selectedCurrency] = useWatch({
+    control,
+    name: ["currency"],
+  });
+
   const submitHandler = (values) => {
     const payload = {
       ...values,
       type: Boolean(values.type),
       amount: Number(values.amount || 0),
+      currency: values.currency || "TMT",
       date: dayjs(values.date).format("YYYY-MM-DD"),
     };
     updateTransaction(payload);
@@ -163,17 +171,19 @@ const EditCafeteriaModal = ({ table, row }) => {
               name="date"
               control={control}
               label={t("cafeteria.date")}
+              showTime
               required
             />
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomTextField
+            <CurrencyAmount
               name="amount"
               control={control}
-              type="number"
               label={t("cafeteria.amount")}
-              endIcon="TMT"
+              currency={selectedCurrency}
+              onCurrencyChange={(curr) => setValue("currency", curr)}
+              placeholder=""
               required
             />
           </Grid>

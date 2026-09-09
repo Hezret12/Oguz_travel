@@ -242,7 +242,7 @@ export const addVisaDocApi = async (data) => {
 };
 
 export const addCafeteriaTransactionApi = async (data) => {
-  return await api.postPrivate("/cafeteria/add", data);
+  return await api.postPrivate("/cafeteria/add-cafeteria", data);
 };
 
 export const addTotalCalculationApi = async (data) => {

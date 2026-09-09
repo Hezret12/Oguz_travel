@@ -80,16 +80,10 @@ const CafeteriaHeaderStats = ({ queryParams = {} }) => {
     params: queryParams,
   });
 
-  const totalIncome = Number(
-    summaryData?.totalIncome ?? summaryData?.data?.totalIncome ?? 0
-  );
-  const totalExpense = Number(
-    summaryData?.totalExpense ?? summaryData?.data?.totalExpense ?? 0
-  );
+  const totalIncome = Number(summaryData?.totalIncome ?? 0);
+  const totalExpense = Number(summaryData?.totalExpense ?? 0);
   const balance = Number(
-    summaryData?.balance ??
-      summaryData?.data?.balance ??
-      totalIncome - totalExpense
+    summaryData?.balance ?? totalIncome - totalExpense
   );
 
   return (

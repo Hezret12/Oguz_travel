@@ -141,7 +141,7 @@ export const deleteVisaDocApi = async (guid) => {
 
 export const deleteCafeteriaTransactionApi = async (guid) => {
   const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
-  return await api.deletePrivate(`/cafeteria/delete/${actualGuid}`, { guid: actualGuid });
+  return await api.deletePrivate('/cafeteria/delete-cafeteria', { guid: actualGuid });
 };
 
 

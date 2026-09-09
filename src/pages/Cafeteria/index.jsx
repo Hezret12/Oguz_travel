@@ -4,6 +4,8 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { Box, Chip } from "@mui/material";
+import StatusChip from "../../components/StatusChip";
+import { CAFETERIA_TYPE_CONFIG } from "../../functions/statusChipConfigs";
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
@@ -31,7 +33,7 @@ import EditCafeteriaModal from "./EditCafeteriaModal";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 
 const Cafeteria = () => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
@@ -76,7 +78,7 @@ const Cafeteria = () => {
   });
 
   const transactions = useMemo(
-    () => transactionsData?.data ?? transactionsData ?? [],
+    () => (Array.isArray(transactionsData) ? transactionsData : []),
     [transactionsData]
   );
 
@@ -106,8 +108,8 @@ const Cafeteria = () => {
   const columns = useMemo(
     () => [
       {
-        accessorFn: "index",
-        id: "index",
+        accessorKey: "index_number",
+        id: "index_number",
         header: "#",
         size: 50,
         enableSorting: false,
@@ -120,10 +122,22 @@ const Cafeteria = () => {
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
+        accessorFn: (row) => row.type,
+        id: "type",
+        header: t("cafeteria.type"),
+        size: 110,
+        Cell: ({ row }) => (
+          <StatusChip
+            status={row.original.type === true || String(row.original.type) === "true" ? "TRUE" : "FALSE"}
+            config={CAFETERIA_TYPE_CONFIG}
+          />
+        ),
+      },
+      {
         accessorKey: "description",
         id: "description",
         header: t("cafeteria.description"),
-        size: 260,
+        size: 220,
       },
       {
         accessorKey: "amount",
@@ -153,7 +167,7 @@ const Cafeteria = () => {
               }}
             >
               {isIncome ? "+" : "-"}
-              {formatted} TMT
+              {formatted} {row.original?.currency || "TMT"}
             </Box>
           );
         },
@@ -164,11 +178,11 @@ const Cafeteria = () => {
         size: 180,
         accessorFn: (row) => row.createdBy?.fullName,
         Cell: ({ row }) => {
-          const creator = row.original.createdBy
+          const creator = row.original.createdBy;
           return (
             <StackedCell
               primary={creator?.fullName}
-              secondary={creator?.phone_number}
+              secondary={selectedLang(creator?.office?.shortName)}
             />
           );
         },
@@ -190,7 +204,7 @@ const Cafeteria = () => {
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t, formatChange, page, limit]
+    [t, selectedLang, formatChange, page, limit, handleDeleteClick]
   );
 
   const table = useMaterialReactTable({
@@ -210,7 +224,7 @@ const Cafeteria = () => {
     },
     initialState: {
       columnPinning: {
-        left: ["index"],
+        left: ["index_number"],
         right: ["actions"],
       },
     },
