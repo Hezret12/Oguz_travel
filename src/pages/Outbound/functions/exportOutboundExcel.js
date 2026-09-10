@@ -143,7 +143,8 @@ const resolveText = (val, selectedLang) => {
 const resolveOffice = (row, selectedLang) => {
   const officeObj = row?.operator?.office || row?.office || row?.preparedOpr?.office;
   if (!officeObj) return "";
-  return resolveText(officeObj.fullName || officeObj.shortName || officeObj, selectedLang).toUpperCase();
+  const target = officeObj.shortName || officeObj.fullName || officeObj.name || officeObj;
+  return resolveText(target, selectedLang).toUpperCase();
 };
 
 const resolveStaffName = (staff) => {
