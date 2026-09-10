@@ -7,10 +7,21 @@ import {
   Button,
   Grid,
   Avatar,
+  Tooltip,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import ContactMailOutlinedIcon from "@mui/icons-material/ContactMailOutlined";
+import FormatQuoteOutlinedIcon from "@mui/icons-material/FormatQuoteOutlined";
+import PsychologyOutlinedIcon from "@mui/icons-material/PsychologyOutlined";
+import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import TranslateRoundedIcon from "@mui/icons-material/TranslateRounded";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import { useForm, useWatch, useFieldArray } from "react-hook-form";
 import toast from "react-hot-toast";
 import CustomTextField from "../../components/CustomTextField";
@@ -153,26 +164,87 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
     setValue("avatar_url", "", { shouldDirty: true });
   };
 
-  const getSectionTitle = () => {
-    switch (sectionKey) {
-      case "basic":
-        return t("profile.editTitleBasic");
-      case "contact":
-        return t("profile.editTitleContact");
-      case "skills":
-        return t("profile.editTitleSkills");
-      case "summary":
-        return t("profile.editTitleSummary");
-      case "experience":
-        return t("profile.editTitleExperience");
-      case "education":
-        return t("profile.editTitleEducation");
-      case "languages":
-        return t("profile.editTitleLanguages");
-      default:
-        return t("edit");
+  const handleDownloadPhoto = async () => {
+    if (selectedImageFile instanceof File) {
+      const url = URL.createObjectURL(selectedImageFile);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = selectedImageFile.name || `${(watchedFullName || "profile").trim().replace(/\s+/g, "_")}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success(t("profile.photoDownloaded") || "Surat üstünlikli ýüklendi");
+      return;
+    }
+
+    const fullUrl = getFileUrl(watchedAvatarUrl);
+    if (!fullUrl) return;
+
+    try {
+      const fileName = `${(watchedFullName || "profile").trim().replace(/\s+/g, "_")}_avatar.jpg`;
+      const response = await fetch(fullUrl);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+      toast.success(t("profile.photoDownloaded") || "Surat üstünlikli ýüklendi");
+    } catch {
+      window.open(fullUrl, "_blank", "noopener,noreferrer");
     }
   };
+
+  const getSectionMetadata = () => {
+    switch (sectionKey) {
+      case "basic":
+        return {
+          title: t("profile.editTitleBasic"),
+          icon: <AccountCircleOutlinedIcon sx={{ fontSize: 20 }} />,
+        };
+      case "contact":
+        return {
+          title: t("profile.editTitleContact"),
+          icon: <ContactMailOutlinedIcon sx={{ fontSize: 20 }} />,
+        };
+      case "skills":
+        return {
+          title: t("profile.editTitleSkills"),
+          icon: <PsychologyOutlinedIcon sx={{ fontSize: 20 }} />,
+        };
+      case "summary":
+        return {
+          title: t("profile.editTitleSummary"),
+          icon: <FormatQuoteOutlinedIcon sx={{ fontSize: 20 }} />,
+        };
+      case "experience":
+        return {
+          title: t("profile.editTitleExperience"),
+          icon: <WorkOutlineRoundedIcon sx={{ fontSize: 20 }} />,
+        };
+      case "education":
+        return {
+          title: t("profile.editTitleEducation"),
+          icon: <SchoolOutlinedIcon sx={{ fontSize: 20 }} />,
+        };
+      case "languages":
+        return {
+          title: t("profile.editTitleLanguages"),
+          icon: <TranslateRoundedIcon sx={{ fontSize: 20 }} />,
+        };
+      default:
+        return {
+          title: t("edit"),
+          icon: null,
+        };
+    }
+  };
+
+  const { title: sectionTitle, icon: sectionIcon } = getSectionMetadata();
 
   const handleFormSubmit = (data) => {
     let updated = {
@@ -254,9 +326,31 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
     <CustomDialog
       open={open}
       close={onClose}
-      widthX={sectionKey === "experience" || sectionKey === "education" ? 640 : 520}
+      widthX={sectionKey === "experience" || sectionKey === "education" ? 680 : 540}
     >
-      <CustomDialogHeader variant="h6" title={getSectionTitle()} />
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, px: 3, pt: 2.5, pb: 1.5 }}>
+        {sectionIcon && (
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              borderRadius: "10px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+              color: "primary.main",
+            }}
+          >
+            {sectionIcon}
+          </Box>
+        )}
+        <CustomDialogHeader
+          variant="h6"
+          title={sectionTitle}
+          sx={{ p: 0, border: "none", flexGrow: 1 }}
+        />
+      </Box>
 
       <CustomForm
         onSubmit={handleSubmit(handleFormSubmit)}
@@ -270,7 +364,8 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
         {/* Scrollable Body */}
         <Box
           sx={{
-            p: 3,
+            p: { xs: 2.5, sm: 3 },
+            pt: 1,
             overflowY: "auto",
             flexGrow: 1,
             display: "flex",
@@ -286,490 +381,651 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
           {/* 1. Basic Info (Avatar & Full Name) */}
           {sectionKey === "basic" && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {/* Instagram-Style Minimal Avatar Container */}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 1.5,
-                pt: 1,
-              }}
-            >
-              {/* Hidden File Input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageFileChange}
-                style={{ display: "none" }}
-              />
-
-              {/* Clickable Avatar with Smooth Overlay */}
+              {/* Avatar Uploader Card */}
               <Box
-                onClick={() => fileInputRef.current?.click()}
                 sx={{
-                  position: "relative",
-                  width: 96,
-                  height: 96,
-                  borderRadius: "50%",
-                  cursor: "pointer",
-                  overflow: "hidden",
-                  "&:hover .instagram-avatar-overlay": {
-                    opacity: 1,
-                  },
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 2,
+                  p: 3,
+                  borderRadius: "16px",
+                  border: "1px dashed",
+                  borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.02),
                 }}
               >
-                <Avatar
-                  src={getFileUrl(watchedAvatarUrl)}
-                  alt={watchedFullName}
-                  sx={{
-                    width: 96,
-                    height: 96,
-                    border: "3px solid",
-                    borderColor: (theme) =>
-                      theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "#e2e8f0",
-                    bgcolor: "#0E8584",
-                    color: "#ffffff",
-                    fontSize: "2.2rem",
-                    fontWeight: 800,
-                    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
-                  }}
-                >
-                  {watchedFullName?.charAt(0) || "U"}
-                </Avatar>
+                {/* Hidden File Input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageFileChange}
+                  style={{ display: "none" }}
+                />
 
-                {/* Dark Glassmorphic Hover Camera Icon */}
+                {/* Avatar with Smooth Hover Camera Effect */}
                 <Box
-                  className="instagram-avatar-overlay"
-                  sx={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: "50%",
-                    backgroundColor: "rgba(0, 0, 0, 0.45)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#ffffff",
-                    opacity: 0,
-                    transition: "opacity 0.2s ease",
-                  }}
-                >
-                  <PhotoCameraRoundedIcon sx={{ fontSize: 28 }} />
-                </Box>
-              </Box>
-
-              {/* Instagram-Style Action Links */}
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <Button
-                  size="small"
-                  variant="text"
                   onClick={() => fileInputRef.current?.click()}
                   sx={{
-                    textTransform: "none",
-                    fontWeight: 700,
-                    fontSize: "0.88rem",
-                    color: "#0E8584",
-                    p: 0,
-                    minWidth: "auto",
+                    position: "relative",
+                    width: 108,
+                    height: 108,
+                    borderRadius: "50%",
+                    p: "3.5px",
+                    background: (theme) =>
+                      `linear-gradient(135deg, ${theme.palette.primary.main}, ${alpha(
+                        theme.palette.primary.main,
+                        0.3
+                      )})`,
+                    cursor: "pointer",
+                    transition: "transform 0.2s ease",
                     "&:hover": {
-                      color: "#0C7776",
-                      backgroundColor: "transparent",
-                      textDecoration: "underline",
+                      transform: "scale(1.02)",
+                    },
+                    "&:hover .avatar-modal-overlay": {
+                      opacity: 1,
                     },
                   }}
                 >
-                  {watchedAvatarUrl
-                    ? t("profile.changePhoto") || "Suraty çalyş"
-                    : t("profile.uploadPhoto") || "Surat ýükle"}
-                </Button>
+                  <Avatar
+                    src={getFileUrl(watchedAvatarUrl)}
+                    alt={watchedFullName}
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      border: "3px solid",
+                      borderColor: "background.paper",
+                      bgcolor: "primary.main",
+                      color: "#ffffff",
+                      fontSize: "2.3rem",
+                      fontWeight: 800,
+                      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)",
+                    }}
+                  >
+                    {watchedFullName?.charAt(0) || "U"}
+                  </Avatar>
 
-                {watchedAvatarUrl && (
-                  <>
-                    <Typography sx={{ color: "text.disabled", fontSize: "0.8rem", userSelect: "none" }}>
-                      •
+                  {/* Dark Glassmorphic Hover Camera Overlay */}
+                  <Box
+                    className="avatar-modal-overlay"
+                    sx={{
+                      position: "absolute",
+                      inset: "3.5px",
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(0, 0, 0, 0.48)",
+                      backdropFilter: "blur(2px)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#ffffff",
+                      opacity: 0,
+                      transition: "opacity 0.2s ease",
+                    }}
+                  >
+                    <PhotoCameraRoundedIcon sx={{ fontSize: 26 }} />
+                  </Box>
+                </Box>
+
+                {/* Pill Action Buttons */}
+                <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", alignItems: "center", gap: 1 }}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<CloudUploadOutlinedIcon sx={{ fontSize: 16 }} />}
+                    onClick={() => fileInputRef.current?.click()}
+                    sx={{
+                      borderRadius: "8px",
+                      textTransform: "none",
+                      fontWeight: 650,
+                      fontSize: "0.82rem",
+                      borderColor: (theme) => alpha(theme.palette.primary.main, 0.35),
+                      color: "primary.main",
+                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.05),
+                      "&:hover": {
+                        borderColor: "primary.main",
+                        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
+                      },
+                    }}
+                  >
+                    {watchedAvatarUrl
+                      ? t("profile.changePhoto") || "Suraty çalyş"
+                      : t("profile.uploadPhoto") || "Surat ýükle"}
+                  </Button>
+
+                  {watchedAvatarUrl && (
+                    <>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<DownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                        onClick={handleDownloadPhoto}
+                        sx={{
+                          borderRadius: "8px",
+                          textTransform: "none",
+                          fontWeight: 650,
+                          fontSize: "0.82rem",
+                          borderColor: "divider",
+                          color: "text.primary",
+                          bgcolor: "background.paper",
+                          "&:hover": {
+                            borderColor: "primary.main",
+                            bgcolor: "action.hover",
+                          },
+                        }}
+                      >
+                        {t("profile.downloadPhoto") || "Suraty ýükläp al"}
+                      </Button>
+
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<DeleteOutlineRoundedIcon sx={{ fontSize: 16 }} />}
+                        onClick={handleRemovePhoto}
+                        sx={{
+                          borderRadius: "8px",
+                          textTransform: "none",
+                          fontWeight: 650,
+                          fontSize: "0.82rem",
+                          borderColor: (theme) => alpha(theme.palette.error.main, 0.3),
+                          color: "error.main",
+                          bgcolor: (theme) => alpha(theme.palette.error.main, 0.05),
+                          "&:hover": {
+                            borderColor: "error.main",
+                            bgcolor: (theme) => alpha(theme.palette.error.main, 0.12),
+                          },
+                        }}
+                      >
+                        {t("profile.removePhoto") || "Suraty aýyr"}
+                      </Button>
+                    </>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Name Input */}
+              <Box sx={{ width: "100%" }}>
+                <CustomTextField
+                  name="full_name"
+                  control={control}
+                  label={t("profile.fullName")}
+                  required
+                />
+              </Box>
+            </Box>
+          )}
+
+          {/* 2. Contact Info */}
+          {sectionKey === "contact" && (
+            <Grid container spacing={2.25}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <CustomTextField
+                  name="email"
+                  control={control}
+                  label={t("profile.email")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <CustomTextField
+                  name="phone"
+                  control={control}
+                  label={t("profile.phone")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <CustomTextField
+                  name="location"
+                  control={control}
+                  label={t("profile.location")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <CustomTextField
+                  name="website"
+                  control={control}
+                  label={t("profile.website")}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <CustomTextField
+                  name="linkedin"
+                  control={control}
+                  label={t("profile.linkedin")}
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          {/* 3. Personal Summary */}
+          {sectionKey === "summary" && (
+            <Grid container spacing={2.25}>
+              <Grid size={{ xs: 12 }}>
+                <CustomTextField
+                  name="personal_summary"
+                  control={control}
+                  label={t("profile.personalSummary")}
+                  multiline
+                  rows={6}
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          {/* 4. Skills */}
+          {sectionKey === "skills" && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+              <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-end" }}>
+                <Box sx={{ flexGrow: 1 }}>
+                  <CustomTextField
+                    name="new_skill"
+                    control={control}
+                    label={t("profile.addSkill")}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddSkill();
+                      }
+                    }}
+                  />
+                </Box>
+                <Button
+                  variant="contained"
+                  onClick={handleAddSkill}
+                  startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
+                  sx={{
+                    height: "44px",
+                    px: 3,
+                    borderRadius: "10px",
+                    textTransform: "none",
+                    fontWeight: 700,
+                    fontSize: "0.88rem",
+                    background: (theme) =>
+                      `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(
+                        theme.palette.primary.main,
+                        0.85
+                      )} 100%)`,
+                    color: "#ffffff",
+                    boxShadow: (theme) => `0 4px 12px ${alpha(theme.palette.primary.main, 0.25)}`,
+                    whiteSpace: "nowrap",
+                    mb: "2px",
+                    "&:hover": {
+                      transform: "translateY(-1px)",
+                      boxShadow: (theme) => `0 6px 16px ${alpha(theme.palette.primary.main, 0.35)}`,
+                    },
+                  }}
+                >
+                  {t("profile.addSkill")}
+                </Button>
+              </Box>
+
+              <Box>
+                <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, mb: 1.25, display: "block", fontSize: "0.82rem" }}>
+                  {t("profile.currentSkills")} ({skillsList.length}):
+                </Typography>
+                {skillsList.length > 0 ? (
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {skillsList.map((skill, idx) => (
+                      <Chip
+                        key={idx}
+                        label={skill}
+                        onDelete={() => handleRemoveSkill(skill)}
+                        sx={{
+                          borderRadius: "8px",
+                          fontWeight: 650,
+                          fontSize: "0.82rem",
+                          backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                          color: "primary.main",
+                          border: "1px solid",
+                          borderColor: (theme) => alpha(theme.palette.primary.main, 0.25),
+                          "& .MuiChip-deleteIcon": {
+                            color: "primary.main",
+                            "&:hover": { color: "error.main" },
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      p: 2.5,
+                      borderRadius: "10px",
+                      border: "1px dashed",
+                      borderColor: "divider",
+                      textAlign: "center",
+                      bgcolor: "action.hover",
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: "text.secondary", fontStyle: "italic", fontSize: "0.85rem" }}>
+                      {t("profile.noSkills")}
                     </Typography>
-                    <Button
-                      size="small"
-                      variant="text"
-                      onClick={handleRemovePhoto}
-                      sx={{
-                        textTransform: "none",
-                        fontWeight: 600,
-                        fontSize: "0.85rem",
-                        color: "error.main",
-                        p: 0,
-                        minWidth: "auto",
-                        "&:hover": {
-                          color: "error.dark",
-                          backgroundColor: "transparent",
-                          textDecoration: "underline",
-                        },
-                      }}
-                    >
-                      {t("profile.removePhoto") || "Suraty aýyr"}
-                    </Button>
-                  </>
+                  </Box>
                 )}
               </Box>
             </Box>
+          )}
 
-            {/* Name Input */}
-            <Box sx={{ width: "100%", mt: 1 }}>
-              <CustomTextField
-                name="full_name"
-                control={control}
-                label={t("profile.fullName")}
-                required
-              />
-            </Box>
-          </Box>
-        )}
-
-        {/* 2. Contact Info */}
-        {sectionKey === "contact" && (
-          <Grid container spacing={2.25}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                name="email"
-                control={control}
-                label={t("profile.email")}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                name="phone"
-                control={control}
-                label={t("profile.phone")}
-              />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <CustomTextField
-                name="location"
-                control={control}
-                label={t("profile.location")}
-              />
-            </Grid>
-          </Grid>
-        )}
-
-        {/* 3. Personal Summary */}
-        {sectionKey === "summary" && (
-          <Grid container spacing={2.25}>
-            <Grid size={{ xs: 12 }}>
-              <CustomTextField
-                name="personal_summary"
-                control={control}
-                label={t("profile.personalSummary")}
-                multiline
-                rows={5}
-              />
-            </Grid>
-          </Grid>
-        )}
-
-        {/* 4. Skills */}
-        {sectionKey === "skills" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-            <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-end" }}>
-              <Box sx={{ flexGrow: 1 }}>
-                <CustomTextField
-                  name="new_skill"
-                  control={control}
-                  label={t("profile.addSkill")}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddSkill();
-                    }
+          {/* 5. Work Experience */}
+          {sectionKey === "experience" && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+              {experienceFields.map((fieldItem, idx) => (
+                <Box
+                  key={fieldItem.id}
+                  sx={{
+                    p: 2.5,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: "14px",
+                    backgroundColor: "background.paper",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
                   }}
-                />
-              </Box>
+                >
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Chip
+                        label={`#${idx + 1}`}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontWeight: 800,
+                          fontSize: "0.75rem",
+                          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                          color: "primary.main",
+                        }}
+                      />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "text.primary", fontSize: "0.9rem" }}>
+                        {t("profile.workExperience")}
+                      </Typography>
+                    </Box>
+
+                    <Tooltip title={t("delete") || "Poz"}>
+                      <IconButton
+                        size="small"
+                        onClick={() => removeExperience(idx)}
+                        sx={{
+                          color: "text.secondary",
+                          borderRadius: "8px",
+                          "&:hover": {
+                            color: "error.main",
+                            bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
+                          },
+                        }}
+                      >
+                        <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        name={`work_experience.${idx}.role`}
+                        control={control}
+                        label={t("profile.roleLabel")}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        name={`work_experience.${idx}.company`}
+                        control={control}
+                        label={t("profile.company")}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        name={`work_experience.${idx}.location`}
+                        control={control}
+                        label={t("profile.location")}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        name={`work_experience.${idx}.period`}
+                        control={control}
+                        label={t("profile.period")}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12 }}>
+                      <CustomTextField
+                        name={`work_experience.${idx}.bullets`}
+                        control={control}
+                        label={t("profile.bullets")}
+                        multiline
+                        rows={3}
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+              ))}
+
               <Button
-                variant="contained"
-                onClick={handleAddSkill}
+                variant="outlined"
+                startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
+                onClick={() => appendExperience({ role: "", company: "", location: "", period: "", bullets: "" })}
                 sx={{
-                  height: "44px",
-                  px: 3,
-                  borderRadius: "7px",
+                  borderRadius: "12px",
+                  borderStyle: "dashed",
+                  borderWidth: "1.5px",
                   textTransform: "none",
-                  fontWeight: 600,
-                  bgcolor: "#0E8584",
-                  color: "#ffffff",
-                  whiteSpace: "nowrap",
-                  mb: "2px",
-                  "&:hover": { bgcolor: "#0C7776" },
+                  fontWeight: 700,
+                  fontSize: "0.88rem",
+                  borderColor: (theme) => alpha(theme.palette.primary.main, 0.4),
+                  color: "primary.main",
+                  py: 1.25,
+                  "&:hover": {
+                    borderStyle: "dashed",
+                    borderWidth: "1.5px",
+                    borderColor: "primary.main",
+                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.06),
+                  },
                 }}
               >
-                {t("profile.addSkill")}
+                {t("profile.addExperience")}
               </Button>
             </Box>
+          )}
 
-            <Box>
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, mb: 1, display: "block" }}>
-                {t("profile.currentSkills")} ({skillsList.length}):
-              </Typography>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {skillsList.map((skill, idx) => (
-                  <Chip
-                    key={idx}
-                    label={skill}
-                    onDelete={() => handleRemoveSkill(skill)}
-                    sx={{
-                      borderRadius: "7px",
-                      fontWeight: 600,
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark" ? "rgba(14, 133, 132, 0.2)" : "rgba(14, 133, 132, 0.1)",
-                      color: "#0E8584",
-                      border: "1px solid",
-                      borderColor: "rgba(14, 133, 132, 0.3)",
-                      "& .MuiChip-deleteIcon": {
-                        color: "#0E8584",
-                        "&:hover": { color: "error.main" },
-                      },
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
-          </Box>
-        )}
-
-        {/* 5. Work Experience */}
-        {sectionKey === "experience" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {experienceFields.map((fieldItem, idx) => (
-              <Box
-                key={fieldItem.id}
-                sx={{
-                  p: 1.75,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: "8px",
-                  backgroundColor: "background.paper",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1.5,
-                }}
-              >
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0c8a7b", fontSize: "0.82rem" }}>
-                    #{idx + 1}
-                  </Typography>
-                  <IconButton size="small" color="error" onClick={() => removeExperience(idx)} sx={{ p: 0.5 }}>
-                    <DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />
-                  </IconButton>
-                </Box>
-
-                <Grid container spacing={1.5}>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <CustomTextField
-                      name={`work_experience.${idx}.role`}
-                      control={control}
-                      label={t("profile.roleLabel")}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <CustomTextField
-                      name={`work_experience.${idx}.company`}
-                      control={control}
-                      label={t("profile.company")}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <CustomTextField
-                      name={`work_experience.${idx}.location`}
-                      control={control}
-                      label={t("profile.location")}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <CustomTextField
-                      name={`work_experience.${idx}.period`}
-                      control={control}
-                      label={t("profile.period")}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12 }}>
-                    <CustomTextField
-                      name={`work_experience.${idx}.bullets`}
-                      control={control}
-                      label={t("profile.bullets")}
-                      multiline
-                      rows={2.5}
-                    />
-                  </Grid>
-                </Grid>
-              </Box>
-            ))}
-
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<AddRoundedIcon />}
-              onClick={() => appendExperience({ role: "", company: "", location: "", period: "", bullets: "" })}
-              sx={{
-                borderRadius: "7px",
-                textTransform: "none",
-                fontWeight: 600,
-                borderColor: "#0c8a7b",
-                color: "#0c8a7b",
-                py: 0.75,
-                "&:hover": { borderColor: "#096e62", backgroundColor: "rgba(12, 138, 123, 0.04)" },
-              }}
-            >
-              {t("profile.addExperience")}
-            </Button>
-          </Box>
-        )}
-
-        {/* 6. Education */}
-        {sectionKey === "education" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {educationFields.map((fieldItem, idx) => (
-              <Box
-                key={fieldItem.id}
-                sx={{
-                  p: 1.75,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: "8px",
-                  backgroundColor: "background.paper",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1.5,
-                }}
-              >
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0c8a7b", fontSize: "0.82rem" }}>
-                    #{idx + 1}
-                  </Typography>
-                  <IconButton size="small" color="error" onClick={() => removeEducation(idx)} sx={{ p: 0.5 }}>
-                    <DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />
-                  </IconButton>
-                </Box>
-
-                <Grid container spacing={1.5}>
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <CustomTextField
-                      name={`education.${idx}.degree`}
-                      control={control}
-                      label={t("profile.degree")}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12, sm: 6 }}>
-                    <CustomTextField
-                      name={`education.${idx}.school`}
-                      control={control}
-                      label={t("profile.school")}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12 }}>
-                    <CustomTextField
-                      name={`education.${idx}.period`}
-                      control={control}
-                      label={t("profile.period")}
-                    />
-                  </Grid>
-                </Grid>
-              </Box>
-            ))}
-
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<AddRoundedIcon />}
-              onClick={() => appendEducation({ degree: "", school: "", period: "" })}
-              sx={{
-                borderRadius: "7px",
-                textTransform: "none",
-                fontWeight: 600,
-                borderColor: "#0c8a7b",
-                color: "#0c8a7b",
-                py: 0.75,
-                "&:hover": { borderColor: "#096e62", backgroundColor: "rgba(12, 138, 123, 0.04)" },
-              }}
-            >
-              {t("profile.addEducation")}
-            </Button>
-          </Box>
-        )}
-
-        {/* 7. Languages */}
-        {sectionKey === "languages" && (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-            {languageFields.map((fieldItem, idx) => (
-              <Box
-                key={fieldItem.id}
-                sx={{
-                  display: "flex",
-                  gap: 1.25,
-                  alignItems: "flex-start",
-                  p: 1.25,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: "8px",
-                  backgroundColor: "background.paper",
-                }}
-              >
-                <Box sx={{ flexGrow: 1 }}>
-                  <CustomTextField
-                    name={`languages.${idx}.name`}
-                    control={control}
-                    label={t("profile.languageName")}
-                  />
-                </Box>
-                <Box sx={{ width: 160 }}>
-                  <CustomTextField
-                    name={`languages.${idx}.level`}
-                    control={control}
-                    label={t("profile.languageLevel")}
-                  />
-                </Box>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => removeLanguage(idx)}
-                  sx={{ mt: 3, p: 0.5 }}
+          {/* 6. Education */}
+          {sectionKey === "education" && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+              {educationFields.map((fieldItem, idx) => (
+                <Box
+                  key={fieldItem.id}
+                  sx={{
+                    p: 2.5,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: "14px",
+                    backgroundColor: "background.paper",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
+                  }}
                 >
-                  <DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />
-                </IconButton>
-              </Box>
-            ))}
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Chip
+                        label={`#${idx + 1}`}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontWeight: 800,
+                          fontSize: "0.75rem",
+                          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                          color: "primary.main",
+                        }}
+                      />
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "text.primary", fontSize: "0.9rem" }}>
+                        {t("profile.education")}
+                      </Typography>
+                    </Box>
 
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<AddRoundedIcon />}
-              onClick={() => appendLanguage({ name: "", level: "" })}
-              sx={{
-                borderRadius: "7px",
-                textTransform: "none",
-                fontWeight: 600,
-                borderColor: "#0c8a7b",
-                color: "#0c8a7b",
-                py: 0.75,
-                "&:hover": { borderColor: "#096e62", backgroundColor: "rgba(12, 138, 123, 0.04)" },
-              }}
-            >
-              {t("profile.addLanguage")}
-            </Button>
-          </Box>
-        )}
+                    <Tooltip title={t("delete") || "Poz"}>
+                      <IconButton
+                        size="small"
+                        onClick={() => removeEducation(idx)}
+                        sx={{
+                          color: "text.secondary",
+                          borderRadius: "8px",
+                          "&:hover": {
+                            color: "error.main",
+                            bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
+                          },
+                        }}
+                      >
+                        <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        name={`education.${idx}.degree`}
+                        control={control}
+                        label={t("profile.degree")}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        name={`education.${idx}.school`}
+                        control={control}
+                        label={t("profile.school")}
+                      />
+                    </Grid>
+
+                    <Grid size={{ xs: 12 }}>
+                      <CustomTextField
+                        name={`education.${idx}.period`}
+                        control={control}
+                        label={t("profile.period")}
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+              ))}
+
+              <Button
+                variant="outlined"
+                startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
+                onClick={() => appendEducation({ degree: "", school: "", period: "" })}
+                sx={{
+                  borderRadius: "12px",
+                  borderStyle: "dashed",
+                  borderWidth: "1.5px",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  fontSize: "0.88rem",
+                  borderColor: (theme) => alpha(theme.palette.primary.main, 0.4),
+                  color: "primary.main",
+                  py: 1.25,
+                  "&:hover": {
+                    borderStyle: "dashed",
+                    borderWidth: "1.5px",
+                    borderColor: "primary.main",
+                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.06),
+                  },
+                }}
+              >
+                {t("profile.addEducation")}
+              </Button>
+            </Box>
+          )}
+
+          {/* 7. Languages */}
+          {sectionKey === "languages" && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {languageFields.map((fieldItem, idx) => (
+                <Box
+                  key={fieldItem.id}
+                  sx={{
+                    display: "flex",
+                    gap: 1.5,
+                    alignItems: "center",
+                    p: 2,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: "12px",
+                    backgroundColor: "background.paper",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
+                  }}
+                >
+                  <Box sx={{ flexGrow: 1 }}>
+                    <CustomTextField
+                      name={`languages.${idx}.name`}
+                      control={control}
+                      label={t("profile.languageName")}
+                    />
+                  </Box>
+                  <Box sx={{ width: { xs: 130, sm: 180 } }}>
+                    <CustomTextField
+                      name={`languages.${idx}.level`}
+                      control={control}
+                      label={t("profile.languageLevel")}
+                    />
+                  </Box>
+                  <Tooltip title={t("delete") || "Poz"}>
+                    <IconButton
+                      size="small"
+                      onClick={() => removeLanguage(idx)}
+                      sx={{
+                        color: "text.secondary",
+                        borderRadius: "8px",
+                        "&:hover": {
+                          color: "error.main",
+                          bgcolor: (theme) => alpha(theme.palette.error.main, 0.08),
+                        },
+                      }}
+                    >
+                      <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+              ))}
+
+              <Button
+                variant="outlined"
+                startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
+                onClick={() => appendLanguage({ name: "", level: "" })}
+                sx={{
+                  borderRadius: "12px",
+                  borderStyle: "dashed",
+                  borderWidth: "1.5px",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  fontSize: "0.88rem",
+                  borderColor: (theme) => alpha(theme.palette.primary.main, 0.4),
+                  color: "primary.main",
+                  py: 1.25,
+                  "&:hover": {
+                    borderStyle: "dashed",
+                    borderWidth: "1.5px",
+                    borderColor: "primary.main",
+                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.06),
+                  },
+                }}
+              >
+                {t("profile.addLanguage")}
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {/* Fixed Pinned Footer */}
         <Box
           sx={{
             p: 1.5,
-            px: 2.5,
+            px: 3,
             borderTop: "1px solid",
             borderColor: "divider",
             backgroundColor: "background.paper",

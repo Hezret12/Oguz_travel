@@ -284,6 +284,8 @@
     "avatarUrl": "Profile Photo",
     "uploadPhoto": "Upload Photo",
     "changePhoto": "Change Photo",
+    "downloadPhoto": "Download Photo",
+    "photoDownloaded": "Photo downloaded successfully",
     "removePhoto": "Remove Photo",
     "photoHint": "PNG, JPG or WEBP (max 5MB)",
     "email": "Email",
@@ -310,7 +312,18 @@
     "noEducation": "No education added.",
     "noLanguages": "No languages added.",
     "noSkills": "No skills added.",
-    "noContact": "No contact information added."
+    "noContact": "No contact information added.",
+    "profileCompletion": "Profile Completion",
+    "profileStrengthHigh": "Strong Profile",
+    "profileStrengthMedium": "Good Completion",
+    "profileStrengthLow": "Incomplete Profile",
+    "viewAndPrintCv": "View & Print CV",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "activeStatus": "Active",
+    "experiencesCount": "Experience",
+    "skillsCount": "Skill",
+    "languagesCount": "Language"
   },
   "header": {
     "languageTooltip": "Language / Dil",

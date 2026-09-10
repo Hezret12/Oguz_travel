@@ -284,6 +284,8 @@
     "avatarUrl": "Profil suraty",
     "uploadPhoto": "Surat ýükle",
     "changePhoto": "Suraty çalyş",
+    "downloadPhoto": "Suraty ýükläp al",
+    "photoDownloaded": "Surat üstünlikli ýüklendi",
     "removePhoto": "Suraty aýyr",
     "photoHint": "PNG, JPG ýa-da WEBP (iň köp 5MB)",
     "email": "E-poçta",
@@ -310,7 +312,18 @@
     "noEducation": "Bilim maglumaty goşulmady.",
     "noLanguages": "Dil maglumaty goşulmady.",
     "noSkills": "Ukyp we başarnyklar goşulmady.",
-    "noContact": "Habarlaşmak üçin maglumat goşulmady."
+    "noContact": "Habarlaşmak üçin maglumat goşulmady.",
+    "profileCompletion": "Profil dolulygy",
+    "profileStrengthHigh": "Güýçli profil",
+    "profileStrengthMedium": "Ortaça dolulyk",
+    "profileStrengthLow": "Doly däl profil",
+    "viewAndPrintCv": "CV Gör we Çap et",
+    "copy": "Kopiýala",
+    "copied": "Kopiýalandy!",
+    "activeStatus": "Işjeň",
+    "experiencesCount": "Tejribe",
+    "skillsCount": "Ukyp",
+    "languagesCount": "Dil"
   },
   "header": {
     "languageTooltip": "Dil / Language",

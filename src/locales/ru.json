@@ -285,6 +285,8 @@
     "avatarUrl": "Фото профиля",
     "uploadPhoto": "Загрузить фото",
     "changePhoto": "Изменить фото",
+    "downloadPhoto": "Скачать фото",
+    "photoDownloaded": "Фото успешно скачано",
     "removePhoto": "Удалить фото",
     "photoHint": "PNG, JPG или WEBP (макс. 5MB)",
     "email": "Эл. почта",
@@ -311,7 +313,18 @@
     "noEducation": "Информация об образовании не добавлена.",
     "noLanguages": "Информация о языках не добавлена.",
     "noSkills": "Навыки не добавлены.",
-    "noContact": "Контактные данные не добавлены."
+    "noContact": "Контактные данные не добавлены.",
+    "profileCompletion": "Заполненность профиля",
+    "profileStrengthHigh": "Отличный профиль",
+    "profileStrengthMedium": "Хорошая заполненность",
+    "profileStrengthLow": "Требуется заполнение",
+    "viewAndPrintCv": "Посмотреть и распечатать CV",
+    "copy": "Копировать",
+    "copied": "Скопировано!",
+    "activeStatus": "Активен",
+    "experiencesCount": "Опыт",
+    "skillsCount": "Навык",
+    "languagesCount": "Язык"
   },
   "header": {
     "languageTooltip": "Язык / Dil",

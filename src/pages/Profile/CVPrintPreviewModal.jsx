@@ -9,6 +9,7 @@ import {
   IconButton,
   Avatar,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
 import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";

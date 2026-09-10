@@ -1,11 +1,8 @@
 import { useState, useMemo } from "react";
 import {
   Box,
-  Typography,
-  Button,
   Grid,
 } from "@mui/material";
-import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../hooks/useLocale";
@@ -150,7 +147,6 @@ const ProfilePage = () => {
     mutateUpdateProfile(payload);
   };
 
-
   return (
     <Box
       id="profile-cv-page-container"
@@ -159,87 +155,15 @@ const ProfilePage = () => {
         flexDirection: "column",
         minHeight: "100%",
         pb: 6,
+        pt: { xs: 1.5, sm: 2 },
       }}
     >
       <Helmet>
         <title>{`${t("profile.title")} | Oguz Travel`}</title>
       </Helmet>
 
-      <Box
-        className="no-print"
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 2,
-          py: 2,
-          px: { xs: 0.5, sm: 1 },
-          mb: 3,
-        }}
-      >
-        <Box>
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 800,
-              color: "text.primary",
-              fontSize: { xs: "1.3rem", sm: "1.55rem" },
-              letterSpacing: "-0.3px",
-              lineHeight: 1.2,
-            }}
-          >
-            {t("profile.cvBuilder")}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-              fontWeight: 500,
-              fontSize: "0.86rem",
-              mt: 0.25,
-            }}
-          >
-            {t("profile.cvBuilderSubtitle")}
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Button
-            variant="contained"
-            onClick={() => setCvPrintOpen(true)}
-            startIcon={<PrintRoundedIcon sx={{ fontSize: 18 }} />}
-            sx={{
-              borderRadius: "10px",
-              textTransform: "none",
-              fontWeight: 700,
-              fontSize: "0.88rem",
-              px: 2.25,
-              py: 0.75,
-              background: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "linear-gradient(135deg, #0D9488 0%, #06B6D4 100%)"
-                  : "#0E8584",
-              border: "0.5px solid #2CA7A6",
-              color: "#ffffff",
-              boxShadow: "0 2px 8px rgba(14, 133, 132, 0.28)",
-              transition: "all 0.2s ease",
-              "&:hover": {
-                background: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "linear-gradient(135deg, #0B7F74 0%, #0891B2 100%)"
-                    : "#0C7776",
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 14px rgba(14, 133, 132, 0.36)",
-              },
-            }}
-          >
-            {t("profile.printCv")}
-          </Button>
-        </Box>
-      </Box>
-
-      <Grid container spacing={3} sx={{ px: { xs: 0.5, sm: 1 } }}>
+      {/* Main Grid: Left Column (Identity & Contacts & Skills & Print CV) + Right Column (Summary & Experience & Education & Languages) */}
+      <Grid container spacing={3.5} sx={{ px: { xs: 0.5, sm: 1 } }}>
         <Grid size={{ xs: 12, md: 4.2, lg: 3.8 }}>
           <ProfileLeftCol
             profile={profile}
@@ -247,6 +171,7 @@ const ProfilePage = () => {
             onAvatarChange={(newAvatarUrl, file) => {
               handleUpdateProfile({ ...profile, avatar_url: newAvatarUrl, avatar_file: file });
             }}
+            onPrintCv={() => setCvPrintOpen(true)}
           />
         </Grid>
 
@@ -258,6 +183,7 @@ const ProfilePage = () => {
         </Grid>
       </Grid>
 
+      {/* Edit Section Modal */}
       <EditSectionModal
         open={Boolean(activeModalSection)}
         sectionKey={activeModalSection}
@@ -267,6 +193,7 @@ const ProfilePage = () => {
         onSave={handleUpdateProfile}
       />
 
+      {/* CV Print Preview Modal */}
       <CVPrintPreviewModal
         open={cvPrintOpen}
         onClose={() => setCvPrintOpen(false)}
