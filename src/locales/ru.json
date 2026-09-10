@@ -324,8 +324,7 @@
     "activeStatus": "Активен",
     "experiencesCount": "Опыт",
     "skillsCount": "Навык",
-    "languagesCount": "Язык",
-    "downloadPdf": "Скачать PDF"
+    "languagesCount": "Язык"
   },
   "header": {
     "languageTooltip": "Язык / Dil",
