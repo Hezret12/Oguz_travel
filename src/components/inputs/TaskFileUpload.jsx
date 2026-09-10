@@ -24,7 +24,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 import { useLocale } from "../../hooks/useLocale";
 
-const MAX_FILES = 4;
+const DEFAULT_MAX_FILES = 10;
 const MAX_FILE_SIZE_MB = 10;
 
 const ALLOWED_EXTENSIONS = [
@@ -190,6 +190,7 @@ export function TaskFileList({
   onChange,
   disabled = false,
   isSubmitting = false,
+  maxFiles = DEFAULT_MAX_FILES,
 }) {
   const { t } = useLocale();
   const [previewModal, setPreviewModal] = useState(null);
@@ -219,158 +220,249 @@ export function TaskFileList({
     onChange?.(updated);
   };
 
+  const handleClearAll = () => {
+    onChange?.([]);
+  };
+
   if (!files || files.length === 0) return null;
 
+  const isLimitReached = files.length >= maxFiles;
+
   return (
-    <Box sx={{ width: "100%" }}>
-      <Grid
-        container
-        spacing={1}
+    <Box sx={{ width: "100%", mt: 0.5 }}>
+      {/* List Header: File Count & Clear All */}
+      <Box
         sx={{
-          mt: 0.5,
-          maxHeight: "120px",
-          overflowY: "auto",
-          pr: 0.5,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 0.75,
+          px: 0.5,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 700,
+              color: "text.secondary",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              fontSize: "0.72rem",
+            }}
+          >
+            {t("task.uploadedFiles", "Birikdirilen faýllar")}
+          </Typography>
+          <Chip
+            label={`${files.length} / ${maxFiles}`}
+            size="small"
+            color={isLimitReached ? "warning" : "default"}
+            sx={{
+              height: "20px",
+              fontSize: "0.68rem",
+              fontWeight: 700,
+              borderRadius: "5px",
+              bgcolor: isLimitReached ? "warning.main" : "action.hover",
+              color: isLimitReached ? "warning.contrastText" : "text.secondary",
+            }}
+          />
+        </Box>
+
+        {files.length > 1 && !disabled && !isSubmitting && (
+          <Typography
+            variant="caption"
+            onClick={handleClearAll}
+            sx={{
+              color: "error.main",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: "0.72rem",
+              userSelect: "none",
+              transition: "opacity 0.15s ease",
+              "&:hover": {
+                opacity: 0.8,
+                textDecoration: "underline",
+              },
+            }}
+          >
+            {t("clearAll", "Hemmesini arassala")}
+          </Typography>
+        )}
+      </Box>
+
+      {/* Grid of File Cards with Responsive Scroll Container */}
+      <Box
+        sx={{
+          maxHeight: files.length > 4 ? "230px" : "auto",
+          overflowY: files.length > 4 ? "auto" : "visible",
+          pr: files.length > 4 ? 0.5 : 0,
           "&::-webkit-scrollbar": {
-            width: "4px",
+            width: "5px",
           },
           "&::-webkit-scrollbar-track": {
             background: "transparent",
           },
           "&::-webkit-scrollbar-thumb": {
-            background: "rgba(100, 116, 139, 0.2)",
+            background: "divider",
             borderRadius: "4px",
           },
           "&::-webkit-scrollbar-thumb:hover": {
-            background: "rgba(100, 116, 139, 0.4)",
+            background: "text.disabled",
           },
         }}
       >
-        {files.map((file, idx) => {
-          const fileName =
-            typeof file === "string"
-              ? file.split("/").pop()
-              : file?.name || `File ${idx + 1}`;
-          const fileSize = file instanceof File ? formatFileSize(file.size) : "";
-          const category = getFileCategory(file);
-          const previewUrl = previews[idx];
+        <Grid container spacing={1}>
+          {files.map((file, idx) => {
+            const fileName =
+              typeof file === "string"
+                ? file.split("/").pop()
+                : file?.name || `File ${idx + 1}`;
+            const fileSize = file instanceof File ? formatFileSize(file.size) : "";
+            const category = getFileCategory(file);
+            const previewUrl = previews[idx];
 
-          return (
-            <Grid size={{ xs: 12, sm: 6 }} key={idx}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  p: 0.75,
-                  px: 1.25,
-                  height: "48px",
-                  boxSizing: "border-box",
-                  borderRadius: "8px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  bgcolor: "background.paper",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.02)",
-                  transition: "all 0.15s ease-in-out",
-                  "&:hover": {
-                    borderColor: "primary.main",
-                    bgcolor: "action.hover",
-                  },
-                }}
-              >
+            return (
+              <Grid size={{ xs: 12, sm: 6 }} key={idx}>
                 <Box
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 1,
-                    minWidth: 0,
-                    flex: 1,
+                    justifyContent: "space-between",
+                    p: 0.75,
+                    px: 1,
+                    height: "50px",
+                    boxSizing: "border-box",
+                    borderRadius: "8px",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+                    transition: "all 0.18s cubic-bezier(0.4, 0, 0.2, 1)",
+                    "&:hover": {
+                      borderColor: "primary.main",
+                      bgcolor: "action.hover",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                    },
                   }}
                 >
-                  {previewUrl ? (
-                    <Tooltip title={t("preview", "Uly görmek")}>
+                  {/* Left: Thumbnail or Icon + Info */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      minWidth: 0,
+                      flex: 1,
+                    }}
+                  >
+                    {previewUrl ? (
+                      <Tooltip title={t("task.imagePreview", "Uly görmek")} arrow placement="top">
+                        <Box
+                          component="img"
+                          src={previewUrl}
+                          alt={fileName}
+                          onClick={() =>
+                            setPreviewModal({ url: previewUrl, name: fileName, file })
+                          }
+                          sx={{
+                            width: 34,
+                            height: 34,
+                            borderRadius: "6px",
+                            objectFit: "cover",
+                            border: "1px solid",
+                            borderColor: "divider",
+                            flexShrink: 0,
+                            cursor: "pointer",
+                            transition: "transform 0.15s ease, border-color 0.15s ease",
+                            "&:hover": {
+                              transform: "scale(1.08)",
+                              borderColor: "primary.main",
+                            },
+                          }}
+                        />
+                      </Tooltip>
+                    ) : (
                       <Box
-                        component="img"
-                        src={previewUrl}
-                        alt={fileName}
-                        onClick={() =>
-                          setPreviewModal({ url: previewUrl, name: fileName, file })
-                        }
                         sx={{
-                          width: 32,
-                          height: 32,
+                          width: 34,
+                          height: 34,
                           borderRadius: "6px",
-                          objectFit: "cover",
-                          border: "1px solid",
-                          borderColor: "divider",
+                          bgcolor: "action.hover",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                           flexShrink: 0,
-                          cursor: "pointer",
-                          transition:
-                            "transform 0.15s ease, border-color 0.15s ease",
-                          "&:hover": {
-                            transform: "scale(1.08)",
-                            borderColor: "primary.main",
-                          },
-                        }}
-                      />
-                    </Tooltip>
-                  ) : (
-                    <Box
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: "6px",
-                        bgcolor: "action.hover",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <FileTypeIcon category={category} />
-                    </Box>
-                  )}
-
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 0 }}>
-                      <Typography
-                        variant="body2"
-                        noWrap
-                        sx={{
-                          fontWeight: 600,
-                          fontSize: "0.8rem",
-                          color: "text.primary",
-                          minWidth: 0,
-                          flexShrink: 1,
                         }}
                       >
-                        {fileName}
-                      </Typography>
-                      <FileCategoryBadge category={category} />
-                    </Box>
+                        <FileTypeIcon category={category} />
+                      </Box>
+                    )}
 
-                    {fileSize && (
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, minWidth: 0 }}>
+                        <Tooltip title={fileName} placement="top" arrow>
+                          <Typography
+                            variant="body2"
+                            noWrap
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: "0.8rem",
+                              color: "text.primary",
+                              minWidth: 0,
+                              flexShrink: 1,
+                              cursor: "default",
+                            }}
+                          >
+                            {fileName}
+                          </Typography>
+                        </Tooltip>
+                        <FileCategoryBadge category={category} />
+                      </Box>
+
                       <Typography
                         variant="caption"
                         noWrap
-                        sx={{ color: "text.secondary", fontSize: "0.675rem", display: "block" }}
+                        sx={{
+                          color: "text.secondary",
+                          fontSize: "0.675rem",
+                          display: "block",
+                          lineHeight: 1.2,
+                        }}
                       >
-                        {fileSize}
+                        {fileSize || (typeof file === "string" ? t("task.serverFile", "Serwer faýly") : "")}
                       </Typography>
-                    )}
+                    </Box>
                   </Box>
-                </Box>
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.2, flexShrink: 0 }}>
-                  {previewUrl && (
-                    <Tooltip title={t("preview", "Uly görmek")}>
+                  {/* Right Actions */}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.2, flexShrink: 0, ml: 0.5 }}>
+                    {previewUrl && (
+                      <Tooltip title={t("task.imagePreview", "Uly görmek")} arrow placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            setPreviewModal({ url: previewUrl, name: fileName, file })
+                          }
+                          sx={{
+                            p: 0.4,
+                            color: "text.secondary",
+                            "&:hover": {
+                              color: "primary.main",
+                              bgcolor: "action.hover",
+                            },
+                          }}
+                        >
+                          <VisibilityOutlinedIcon sx={{ fontSize: 17 }} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+
+                    <Tooltip title={t("download", "Ýükläp al")} arrow placement="top">
                       <IconButton
                         size="small"
-                        onClick={() =>
-                          setPreviewModal({ url: previewUrl, name: fileName, file })
-                        }
+                        onClick={() => downloadFile(file, fileName)}
                         sx={{
-                          p: 0.35,
+                          p: 0.4,
                           color: "text.secondary",
                           "&:hover": {
                             color: "primary.main",
@@ -378,51 +470,34 @@ export function TaskFileList({
                           },
                         }}
                       >
-                        <VisibilityOutlinedIcon sx={{ fontSize: 17 }} />
+                        <Download size={16} />
                       </IconButton>
                     </Tooltip>
-                  )}
 
-                  <Tooltip title={t("download", "Ýükläp al")}>
-                    <IconButton
-                      size="small"
-                      onClick={() => downloadFile(file, fileName)}
-                      sx={{
-                        p: 0.35,
-                        color: "text.secondary",
-                        "&:hover": {
-                          color: "primary.main",
-                          bgcolor: "action.hover",
-                        },
-                      }}
-                    >
-                      <Download size={16} />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip title={t("remove", "Aýyr")}>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemoveFile(idx)}
-                      disabled={disabled || isSubmitting}
-                      sx={{
-                        p: 0.35,
-                        color: "text.secondary",
-                        "&:hover": {
-                          color: "error.main",
-                          bgcolor: "action.hover",
-                        },
-                      }}
-                    >
-                      <DeleteOutlinedIcon sx={{ fontSize: 17 }} />
-                    </IconButton>
-                  </Tooltip>
+                    <Tooltip title={t("remove", "Aýyr")} arrow placement="top">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveFile(idx)}
+                        disabled={disabled || isSubmitting}
+                        sx={{
+                          p: 0.4,
+                          color: "text.secondary",
+                          "&:hover": {
+                            color: "error.main",
+                            bgcolor: "action.hover",
+                          },
+                        }}
+                      >
+                        <DeleteOutlinedIcon sx={{ fontSize: 17 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </Box>
-              </Box>
-            </Grid>
-          );
-        })}
-      </Grid>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Box>
 
       {/* Image Preview Lightbox Modal */}
       <Dialog
@@ -527,6 +602,7 @@ export default function TaskFileUpload({
   disabled = false,
   isSubmitting = false,
   hideList = false,
+  maxFiles = DEFAULT_MAX_FILES,
 }) {
   const { t } = useLocale();
   const fileInputRef = useRef(null);
@@ -537,22 +613,24 @@ export default function TaskFileUpload({
       const validFiles = [];
       const currentCount = files.length;
 
-      if (currentCount >= MAX_FILES) {
+      if (currentCount >= maxFiles) {
         toast.error(
           t(
             "task.maxFilesReached",
-            `Maksimum ${MAX_FILES} faýl ýükläp bilersiňiz.`
+            { count: maxFiles },
+            `Maksimum ${maxFiles} faýl ýükläp bilersiňiz.`
           )
         );
         return;
       }
 
       for (const file of newFiles) {
-        if (validFiles.length + currentCount >= MAX_FILES) {
+        if (validFiles.length + currentCount >= maxFiles) {
           toast.error(
             t(
               "task.maxFilesLimitExceeded",
-              `Maksimum ${MAX_FILES} faýl çäklendirmesi sebäpli käbir faýllar goşulmady.`
+              { count: maxFiles },
+              `Maksimum ${maxFiles} faýl çäklendirmesi sebäpli käbir faýllar goşulmady.`
             )
           );
           break;
@@ -615,7 +693,7 @@ export default function TaskFileUpload({
         onChange?.([...files, ...validFiles]);
       }
     },
-    [files, onChange, t]
+    [files, maxFiles, onChange, t]
   );
 
   const handleInputChange = (e) => {
@@ -629,7 +707,7 @@ export default function TaskFileUpload({
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (files.length < MAX_FILES) {
+    if (files.length < maxFiles) {
       setIsDragging(true);
     }
   };
@@ -649,7 +727,7 @@ export default function TaskFileUpload({
     processFiles(droppedFiles);
   };
 
-  const isFull = files.length >= MAX_FILES;
+  const isFull = files.length >= maxFiles;
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -675,7 +753,11 @@ export default function TaskFileUpload({
         >
           {label || t("task.attachments")}
           <Tooltip
-            title={t("task.fileUploadTooltip")}
+            title={t(
+              "task.fileUploadTooltip",
+              { count: maxFiles },
+              `Maksimum ${maxFiles} faýl | Ölçeg çägi: 10MB | Goldanýanlar: PNG, JPG, PDF, XLS, DOC`
+            )}
             arrow
             placement="top"
             slotProps={{
@@ -757,9 +839,12 @@ export default function TaskFileUpload({
           opacity: disabled || isSubmitting ? 0.6 : 1,
           pointerEvents: disabled || isSubmitting ? "none" : "auto",
           cursor: disabled || isSubmitting || isFull ? "not-allowed" : "pointer",
-          borderColor: isDragging ? "primary.main" : "divider",
+          borderColor: isDragging ? "primary.main" : isFull ? "divider" : "divider",
           boxSizing: "border-box",
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+          "&:hover": {
+            borderColor: disabled || isSubmitting || isFull ? "divider" : "primary.main",
+          },
         }}
       >
         <Box
@@ -775,7 +860,7 @@ export default function TaskFileUpload({
           <CloudUploadOutlinedIcon
             sx={{
               fontSize: 18,
-              color: "text.secondary",
+              color: isFull ? "warning.main" : "text.secondary",
               flexShrink: 0,
             }}
           />
@@ -785,19 +870,21 @@ export default function TaskFileUpload({
             sx={{
               fontSize: "0.875rem",
               fontWeight: 400,
-              color: files.length > 0 ? "text.primary" : "text.secondary",
+              color: isFull ? "text.secondary" : files.length > 0 ? "text.primary" : "text.secondary",
             }}
           >
-            {files.length > 0
+            {isFull
+              ? `${files.length} / ${maxFiles} ${t("task.filesSelectedMax", "resminama birikdirildi (Maksimum)")}`
+              : files.length > 0
               ? `${files.length} ${t("task.filesSelected", "resminama birikdirildi")}`
               : t("task.dragOrClickToUpload", "Resminamany saýlaň ýa-da süýräň...")}
           </Typography>
         </Box>
 
         <Chip
-          label={`${files.length} / ${MAX_FILES}`}
+          label={`${files.length} / ${maxFiles}`}
           size="small"
-          color={files.length === MAX_FILES ? "warning" : "default"}
+          color={isFull ? "warning" : "default"}
           sx={{
             height: "20px",
             fontSize: "0.675rem",
@@ -805,7 +892,8 @@ export default function TaskFileUpload({
             borderRadius: "4px",
             flexShrink: 0,
             ml: 1,
-            bgcolor: files.length === MAX_FILES ? "warning.main" : "action.hover",
+            bgcolor: isFull ? "warning.main" : "action.hover",
+            color: isFull ? "warning.contrastText" : "text.secondary",
           }}
         />
       </Paper>
@@ -817,6 +905,7 @@ export default function TaskFileUpload({
           onChange={onChange}
           disabled={disabled}
           isSubmitting={isSubmitting}
+          maxFiles={maxFiles}
         />
       )}
     </Box>

@@ -21,7 +21,7 @@ import CustomDatePicker from "../../../components/CustomDatePicker";
 const AddClient = ({ table }) => {
   const { t } = useLocale();
   const { user } = useAuth();
-  const isAdmin = Boolean(user?.role === "admin");
+  const isAdmin = Boolean(user?.role === "admin" || user?.user_is_admin || user?.isAdmin);
 
   const { clientValidShema } = useValidShema();
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -237,6 +237,7 @@ const AddClient = ({ table }) => {
               files={selectedFiles}
               onChange={setSelectedFiles}
               label={t("clients.documents", "Resminamalar / Suratlar")}
+              maxFiles={10}
               hideList
             />
           </Grid>
@@ -247,6 +248,7 @@ const AddClient = ({ table }) => {
               <TaskFileList
                 files={selectedFiles}
                 onChange={setSelectedFiles}
+                maxFiles={10}
               />
             </Grid>
           )}

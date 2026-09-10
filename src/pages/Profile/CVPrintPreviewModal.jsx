@@ -15,9 +15,10 @@ import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
 import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import { useLocale } from "../../hooks/useLocale";
 import { getFileUrl } from "../../functions/generalHelpers";
 import { printElement } from "../../functions/printHelper";
@@ -29,6 +30,17 @@ const formatText = (val) => {
     return val.fullName || val.name || val.shortName || val.title || "";
   }
   return String(val);
+};
+
+const getLanguageDots = (level) => {
+  if (!level) return 4;
+  const l = String(level).toLowerCase();
+  if (l.includes("native") || l.includes("ýerli") || l.includes("ene dili") || l.includes("родной") || l.includes("c2")) return 5;
+  if (l.includes("fluent") || l.includes("erkin") || l.includes("свободн") || l.includes("c1")) return 4;
+  if (l.includes("advanced") || l.includes("ýokary") || l.includes("продвинут") || l.includes("b2")) return 4;
+  if (l.includes("intermediate") || l.includes("orta") || l.includes("средн") || l.includes("b1")) return 3;
+  if (l.includes("beginner") || l.includes("başlangyç") || l.includes("начинающ") || l.includes("a1") || l.includes("a2")) return 2;
+  return 3;
 };
 
 const CVPrintPreviewModal = ({ open, onClose, profile }) => {
@@ -49,12 +61,10 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
   const emailStr = formatText(contact.email);
   const phoneStr = formatText(contact.phone);
   const locationStr = formatText(contact.location);
-  const websiteStr = formatText(contact.website);
-  const linkedinStr = formatText(contact.linkedin);
 
   const handlePrint = () => {
     if (sheetRef.current) {
-      printElement(sheetRef.current, "");
+      printElement(sheetRef.current, `${fullName || "CV"}_Resume`);
     }
   };
 
@@ -78,6 +88,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
         },
       }}
     >
+      {/* Top Modal Navigation / Action Bar */}
       <DialogTitle
         className="no-print"
         sx={{
@@ -111,7 +122,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               {fullName} — {t("profile.previewTitle")}
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
-              {t("profile.previewSubtitle")}
+              {t("profile.previewSubtitle")} (A4)
             </Typography>
           </Box>
         </Box>
@@ -127,20 +138,20 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               borderRadius: "10px",
               textTransform: "none",
               fontWeight: 700,
-              fontSize: "0.85rem",
-              px: 2.5,
-              py: 0.75,
+              fontSize: "0.86rem",
+              px: 2.75,
+              py: 0.85,
               background: (theme) =>
                 `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(
                   theme.palette.primary.main,
-                  0.82
+                  0.85
                 )} 100%)`,
               color: "#ffffff",
-              boxShadow: (theme) => `0 4px 14px ${alpha(theme.palette.primary.main, 0.28)}`,
+              boxShadow: (theme) => `0 4px 14px ${alpha(theme.palette.primary.main, 0.3)}`,
               transition: "all 0.2s ease",
               "&:hover": {
                 transform: "translateY(-1px)",
-                boxShadow: (theme) => `0 6px 18px ${alpha(theme.palette.primary.main, 0.38)}`,
+                boxShadow: (theme) => `0 6px 18px ${alpha(theme.palette.primary.main, 0.4)}`,
               },
             }}
           >
@@ -165,7 +176,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
         </Box>
       </DialogTitle>
 
-      {/* Main A4 Document Sheet Canvas */}
+      {/* Preview Canvas Area */}
       <DialogContent
         sx={{
           p: { xs: 2, sm: 4 },
@@ -176,6 +187,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           justifyContent: "center",
         }}
       >
+        {/* Printable Executive A4 Sheet Container */}
         <Box
           ref={sheetRef}
           id="printable-cv-sheet"
@@ -184,141 +196,154 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
             maxWidth: "794px",
             minHeight: "1123px",
             backgroundColor: "#ffffff",
-            color: "#1e293b",
-            p: { xs: 4, sm: 6 },
+            color: "#0f172a",
+            p: { xs: "32px 24px", sm: "44px 48px" },
             borderRadius: "4px",
-            boxShadow: "0 15px 35px -5px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06)",
-            fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif)",
+            boxShadow: "0 20px 40px -8px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.06)",
+            fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif)",
             display: "flex",
             flexDirection: "column",
             gap: 3.5,
+            boxSizing: "border-box",
+            printColorAdjust: "exact",
+            WebkitPrintColorAdjust: "exact",
           }}
         >
+          {/* 1. Executive Corporate Header */}
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
               gap: 3.5,
               pb: 3,
-              borderBottom: "2px solid #0f766e",
+              borderBottom: "2px solid #0d9488",
+              position: "relative",
             }}
           >
+            {/* Professional Portrait Avatar */}
             <Avatar
               src={getFileUrl(avatarUrl)}
               alt={fullName}
               sx={{
-                width: 90,
-                height: 90,
-                boxShadow: "0 4px 14px rgba(0, 0, 0, 0.12)",
-                border: "2px solid #0f766e",
-                bgcolor: "#0f766e",
-                fontSize: "2rem",
-                fontWeight: 700,
+                width: 96,
+                height: 96,
+                borderRadius: "50%",
+                border: "3px solid #ffffff",
+                boxShadow: "0 4px 12px rgba(15, 23, 42, 0.15), 0 0 0 2px #0d9488",
+                bgcolor: "#0d9488",
+                color: "#ffffff",
+                fontSize: "2.2rem",
+                fontWeight: 800,
+                flexShrink: 0,
               }}
             >
               {fullName?.charAt(0) || "U"}
             </Avatar>
 
-            <Box sx={{ flexGrow: 1 }}>
+            {/* Candidate Identity & Contact Metadata */}
+            <Box sx={{ flexGrow: 1, minWidth: 0 }}>
               <Typography
-                variant="h4"
                 sx={{
                   fontWeight: 900,
                   color: "#0f172a",
-                  fontSize: "1.75rem",
+                  fontSize: "1.85rem",
                   lineHeight: 1.15,
                   letterSpacing: "-0.5px",
-                  mb: 0.5,
+                  mb: 0.6,
                 }}
               >
-                {fullName}
+                {fullName || "—"}
               </Typography>
 
-              <Typography
-                sx={{
-                  color: "#0f766e",
-                  fontWeight: 700,
-                  fontSize: "1.05rem",
-                  letterSpacing: "0.2px",
-                  mb: 1.5,
-                }}
-              >
-                {role}
-              </Typography>
+              {role && (
+                <Typography
+                  sx={{
+                    color: "#0d9488",
+                    fontWeight: 800,
+                    fontSize: "0.95rem",
+                    letterSpacing: "1.5px",
+                    textTransform: "uppercase",
+                    mb: 1.5,
+                  }}
+                >
+                  {role}
+                </Typography>
+              )}
 
+              {/* Clean Contact Metadata Strip */}
               <Box
                 sx={{
                   display: "flex",
                   flexWrap: "wrap",
                   alignItems: "center",
-                  gap: { xs: 1.5, sm: 2.5 },
+                  gap: { xs: 1.25, sm: 2.25 },
                   fontSize: "0.82rem",
                   color: "#475569",
+                  fontWeight: 550,
                 }}
               >
+                {locationStr && (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.65 }}>
+                    <LocationOnOutlinedIcon sx={{ fontSize: 16, color: "#0d9488" }} />
+                    <span>{locationStr}</span>
+                  </Box>
+                )}
                 {emailStr && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                    <MailOutlineRoundedIcon sx={{ fontSize: 16, color: "#0f766e" }} />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.65 }}>
+                    <MailOutlineRoundedIcon sx={{ fontSize: 16, color: "#0d9488" }} />
                     <span>{emailStr}</span>
                   </Box>
                 )}
                 {phoneStr && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                    <PhoneOutlinedIcon sx={{ fontSize: 16, color: "#0f766e" }} />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.65 }}>
+                    <PhoneOutlinedIcon sx={{ fontSize: 16, color: "#0d9488" }} />
                     <span>{phoneStr}</span>
-                  </Box>
-                )}
-                {locationStr && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                    <LocationOnOutlinedIcon sx={{ fontSize: 16, color: "#0f766e" }} />
-                    <span>{locationStr}</span>
-                  </Box>
-                )}
-                {websiteStr && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                    <LanguageOutlinedIcon sx={{ fontSize: 16, color: "#0f766e" }} />
-                    <span>{websiteStr}</span>
-                  </Box>
-                )}
-                {linkedinStr && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                    <LinkedInIcon sx={{ fontSize: 16, color: "#0f766e" }} />
-                    <span>{linkedinStr}</span>
                   </Box>
                 )}
               </Box>
             </Box>
           </Box>
 
+          {/* 2. Executive Professional Summary */}
           {summary && (
-            <Box>
-              <Typography
+            <Box sx={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                <Typography
+                  sx={{
+                    fontWeight: 850,
+                    fontSize: "0.88rem",
+                    letterSpacing: "1.2px",
+                    color: "#0f172a",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {t("profile.personalSummary")}
+                </Typography>
+                <Box sx={{ flexGrow: 1, height: "1px", bgcolor: "#e2e8f0", ml: 1 }} />
+              </Box>
+
+              <Box
                 sx={{
-                  fontWeight: 800,
-                  fontSize: "0.92rem",
-                  letterSpacing: "0.5px",
-                  color: "#0f766e",
-                  textTransform: "uppercase",
-                  mb: 1,
-                  borderBottom: "1px solid #e2e8f0",
-                  pb: 0.5,
+                  borderLeft: "3.5px solid #0d9488",
+                  pl: 2,
+                  py: 0.25,
                 }}
               >
-                {t("profile.personalSummary")}
-              </Typography>
-              <Typography
-                sx={{
-                  color: "#334155",
-                  fontSize: "0.88rem",
-                  lineHeight: 1.6,
-                  textAlign: "justify",
-                }}
-              >
-                {summary}
-              </Typography>
+                <Typography
+                  sx={{
+                    color: "#334155",
+                    fontSize: "0.88rem",
+                    lineHeight: 1.65,
+                    textAlign: "justify",
+                  }}
+                >
+                  {summary}
+                </Typography>
+              </Box>
             </Box>
           )}
 
+          {/* 3. Executive Two-Column Grid: Main Experience (65%) + Sidebar Credentials (35%) */}
           <Box
             sx={{
               display: "grid",
@@ -327,91 +352,257 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               alignItems: "start",
             }}
           >
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
+            {/* Left Column: Work Experience */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
               {experiences.length > 0 && (
                 <Box>
-                  <Typography
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: "0.92rem",
-                      letterSpacing: "0.5px",
-                      color: "#0f766e",
-                      textTransform: "uppercase",
-                      mb: 1.5,
-                      borderBottom: "1px solid #e2e8f0",
-                      pb: 0.5,
-                    }}
-                  >
-                    {t("profile.workExperience")}
-                  </Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                    <Typography
+                      sx={{
+                        fontWeight: 850,
+                        fontSize: "0.88rem",
+                        letterSpacing: "1.2px",
+                        color: "#0f172a",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {t("profile.workExperience")}
+                    </Typography>
+                    <Box sx={{ flexGrow: 1, height: "1px", bgcolor: "#e2e8f0", ml: 1 }} />
+                  </Box>
 
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-                    {experiences.map((exp, idx) => (
-                      <Box key={exp.id || idx}>
-                        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.25 }}>
-                          <Typography sx={{ fontWeight: 800, fontSize: "0.9rem", color: "#0f172a" }}>
-                            {exp.role}
-                          </Typography>
-                          <Typography sx={{ color: "#64748b", fontSize: "0.78rem", fontWeight: 600 }}>
-                            {exp.period}
-                          </Typography>
-                        </Box>
-
-                        {(exp.company || exp.location) && (
-                          <Typography sx={{ color: "#0f766e", fontSize: "0.82rem", fontWeight: 600, mb: 0.75 }}>
-                            {exp.company} {exp.location ? `• ${exp.location}` : ""}
-                          </Typography>
-                        )}
-
-                        {exp.bullets && exp.bullets.length > 0 && (
-                          <Box component="ul" sx={{ pl: 2.25, m: 0, display: "flex", flexDirection: "column", gap: 0.4 }}>
-                            {exp.bullets.filter(Boolean).map((bullet, bIdx) => (
-                              <Typography
-                                key={bIdx}
-                                component="li"
-                                sx={{ color: "#334155", fontSize: "0.82rem", lineHeight: 1.45 }}
-                              >
-                                {bullet}
-                              </Typography>
-                            ))}
+                  {/* Vertical Timeline */}
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    {experiences.map((exp, idx) => {
+                      const isLast = idx === experiences.length - 1;
+                      return (
+                        <Box
+                          key={exp.id || idx}
+                          sx={{
+                            display: "flex",
+                            gap: 2,
+                            position: "relative",
+                            breakInside: "avoid",
+                            pageBreakInside: "avoid",
+                          }}
+                        >
+                          {/* Timeline Node & Connector */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: "50%",
+                                bgcolor: "#0d9488",
+                                boxShadow: "0 0 0 3px rgba(13, 148, 136, 0.2)",
+                                mt: "5px",
+                              }}
+                            />
+                            {!isLast && (
+                              <Box
+                                sx={{
+                                  width: "1.5px",
+                                  bgcolor: "#cbd5e1",
+                                  flexGrow: 1,
+                                  my: 0.75,
+                                  minHeight: 24,
+                                }}
+                              />
+                            )}
                           </Box>
-                        )}
-                      </Box>
-                    ))}
+
+                          {/* Experience Content */}
+                          <Box sx={{ pb: isLast ? 0 : 3, flexGrow: 1, minWidth: 0 }}>
+                            {/* Role & Period */}
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "flex-start",
+                                flexWrap: "wrap",
+                                gap: 1,
+                                mb: 0.5,
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  fontWeight: 800,
+                                  fontSize: "0.94rem",
+                                  color: "#0f172a",
+                                  lineHeight: 1.25,
+                                }}
+                              >
+                                {exp.role}
+                              </Typography>
+
+                              {exp.period && (
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 0.5,
+                                    bgcolor: "#f1f5f9",
+                                    color: "#475569",
+                                    fontSize: "0.74rem",
+                                    fontWeight: 700,
+                                    px: 1,
+                                    py: 0.25,
+                                    borderRadius: "4px",
+                                  }}
+                                >
+                                  <CalendarMonthRoundedIcon sx={{ fontSize: 13, color: "#0d9488" }} />
+                                  <span>{exp.period}</span>
+                                </Box>
+                              )}
+                            </Box>
+
+                            {/* Company & Location */}
+                            {(exp.company || exp.location) && (
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.6,
+                                  color: "#0d9488",
+                                  fontSize: "0.84rem",
+                                  fontWeight: 700,
+                                  mb: 1,
+                                }}
+                              >
+                                <BusinessRoundedIcon sx={{ fontSize: 15 }} />
+                                <span>{exp.company}</span>
+                                {exp.location && (
+                                  <span style={{ color: "#64748b", fontWeight: 500 }}>
+                                    • {exp.location}
+                                  </span>
+                                )}
+                              </Box>
+                            )}
+
+                            {/* Achievements & Bullet Points */}
+                            {exp.bullets && exp.bullets.length > 0 && (
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: 0.5,
+                                  pl: 0.5,
+                                }}
+                              >
+                                {exp.bullets.filter(Boolean).map((bullet, bIdx) => (
+                                  <Box
+                                    key={bIdx}
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "flex-start",
+                                      gap: 1,
+                                    }}
+                                  >
+                                    <Box
+                                      sx={{
+                                        width: 4,
+                                        height: 4,
+                                        borderRadius: "50%",
+                                        bgcolor: "#0d9488",
+                                        mt: "7px",
+                                        flexShrink: 0,
+                                      }}
+                                    />
+                                    <Typography
+                                      sx={{
+                                        color: "#334155",
+                                        fontSize: "0.82rem",
+                                        lineHeight: 1.5,
+                                      }}
+                                    >
+                                      {bullet}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </Box>
+                            )}
+                          </Box>
+                        </Box>
+                      );
+                    })}
                   </Box>
                 </Box>
               )}
+            </Box>
 
+            {/* Right Column (Sidebar): Education, Skills, Languages */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
+              {/* Education Section */}
               {educations.length > 0 && (
-                <Box>
-                  <Typography
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: "0.92rem",
-                      letterSpacing: "0.5px",
-                      color: "#0f766e",
-                      textTransform: "uppercase",
-                      mb: 1.5,
-                      borderBottom: "1px solid #e2e8f0",
-                      pb: 0.5,
-                    }}
-                  >
-                    {t("profile.education")}
-                  </Typography>
+                <Box sx={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.75 }}>
+                    <Typography
+                      sx={{
+                        fontWeight: 850,
+                        fontSize: "0.88rem",
+                        letterSpacing: "1.2px",
+                        color: "#0f172a",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {t("profile.education")}
+                    </Typography>
+                    <Box sx={{ flexGrow: 1, height: "1px", bgcolor: "#e2e8f0", ml: 1 }} />
+                  </Box>
 
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.75 }}>
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     {educations.map((edu, idx) => (
-                      <Box key={edu.id || idx}>
-                        <Typography sx={{ fontWeight: 800, fontSize: "0.88rem", color: "#0f172a" }}>
+                      <Box
+                        key={edu.id || idx}
+                        sx={{
+                          p: 1.5,
+                          borderRadius: "8px",
+                          bgcolor: "#f8fafc",
+                          border: "1px solid #e2e8f0",
+                          breakInside: "avoid",
+                          pageBreakInside: "avoid",
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontWeight: 800,
+                            fontSize: "0.88rem",
+                            color: "#0f172a",
+                            lineHeight: 1.25,
+                            mb: 0.4,
+                          }}
+                        >
                           {edu.degree}
                         </Typography>
                         {edu.school && (
-                          <Typography sx={{ color: "#475569", fontSize: "0.82rem", fontWeight: 500 }}>
-                            {edu.school}
-                          </Typography>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
+                            <SchoolOutlinedIcon sx={{ fontSize: 15, color: "#64748b" }} />
+                            <Typography
+                              sx={{
+                                color: "#475569",
+                                fontSize: "0.8rem",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {edu.school}
+                            </Typography>
+                          </Box>
                         )}
                         {edu.period && (
-                          <Typography sx={{ color: "#64748b", fontSize: "0.78rem", fontWeight: 500, mt: 0.2 }}>
+                          <Typography
+                            sx={{
+                              color: "#0d9488",
+                              fontSize: "0.75rem",
+                              fontWeight: 700,
+                            }}
+                          >
                             {edu.period}
                           </Typography>
                         )}
@@ -420,38 +611,38 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                   </Box>
                 </Box>
               )}
-            </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
+              {/* Skills Section */}
               {skills.length > 0 && (
-                <Box>
-                  <Typography
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: "0.92rem",
-                      letterSpacing: "0.5px",
-                      color: "#0f766e",
-                      textTransform: "uppercase",
-                      mb: 1.25,
-                      borderBottom: "1px solid #e2e8f0",
-                      pb: 0.5,
-                    }}
-                  >
-                    {t("profile.skills")}
-                  </Typography>
+                <Box sx={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.75 }}>
+                    <Typography
+                      sx={{
+                        fontWeight: 850,
+                        fontSize: "0.88rem",
+                        letterSpacing: "1.2px",
+                        color: "#0f172a",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {t("profile.skills")}
+                    </Typography>
+                    <Box sx={{ flexGrow: 1, height: "1px", bgcolor: "#e2e8f0", ml: 1 }} />
+                  </Box>
+
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
                     {skills.map((skill, idx) => (
                       <Box
                         key={idx}
                         sx={{
-                          bgcolor: "#f1f5f9",
+                          bgcolor: "#f8fafc",
                           border: "1px solid #e2e8f0",
-                          color: "#1e293b",
+                          color: "#0f172a",
                           px: 1.25,
                           py: 0.4,
                           borderRadius: "6px",
-                          fontSize: "0.76rem",
-                          fontWeight: 600,
+                          fontSize: "0.78rem",
+                          fontWeight: 650,
                         }}
                       >
                         {skill}
@@ -461,39 +652,81 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                 </Box>
               )}
 
-
+              {/* Languages Section */}
               {languages.length > 0 && (
-                <Box>
-                  <Typography
-                    sx={{
-                      fontWeight: 800,
-                      fontSize: "0.92rem",
-                      letterSpacing: "0.5px",
-                      color: "#0f766e",
-                      textTransform: "uppercase",
-                      mb: 1.25,
-                      borderBottom: "1px solid #e2e8f0",
-                      pb: 0.5,
-                    }}
-                  >
-                    {t("profile.languages")}
-                  </Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                    {languages.map((lang, idx) => (
-                      <Box key={lang.id || idx} sx={{ display: "flex", justifyContent: "space-between" }}>
-                        <Typography sx={{ fontWeight: 700, fontSize: "0.82rem", color: "#1e293b" }}>
-                          {lang.name}
-                        </Typography>
-                        <Typography sx={{ color: "#64748b", fontSize: "0.78rem", fontWeight: 500 }}>
-                          {lang.level}
-                        </Typography>
-                      </Box>
-                    ))}
+                <Box sx={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.75 }}>
+                    <Typography
+                      sx={{
+                        fontWeight: 850,
+                        fontSize: "0.88rem",
+                        letterSpacing: "1.2px",
+                        color: "#0f172a",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {t("profile.languages")}
+                    </Typography>
+                    <Box sx={{ flexGrow: 1, height: "1px", bgcolor: "#e2e8f0", ml: 1 }} />
+                  </Box>
+
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+                    {languages.map((lang, idx) => {
+                      const dots = getLanguageDots(lang.level);
+                      return (
+                        <Box
+                          key={lang.id || idx}
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            p: 1.25,
+                            borderRadius: "6px",
+                            bgcolor: "#f8fafc",
+                            border: "1px solid #f1f5f9",
+                          }}
+                        >
+                          <Box>
+                            <Typography
+                              sx={{
+                                fontWeight: 750,
+                                fontSize: "0.82rem",
+                                color: "#0f172a",
+                              }}
+                            >
+                              {lang.name}
+                            </Typography>
+                            <Typography
+                              sx={{
+                                color: "#64748b",
+                                fontSize: "0.74rem",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {lang.level}
+                            </Typography>
+                          </Box>
+
+                          {/* 5-Dot Proficiency Indicator */}
+                          <Box sx={{ display: "flex", gap: 0.4 }}>
+                            {[1, 2, 3, 4, 5].map((dot) => (
+                              <Box
+                                key={dot}
+                                sx={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: "50%",
+                                  bgcolor: dot <= dots ? "#0d9488" : "#cbd5e1",
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      );
+                    })}
                   </Box>
                 </Box>
               )}
-
-
             </Box>
           </Box>
         </Box>

@@ -7,6 +7,7 @@ import {
 } from "material-react-table";
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../hooks/useLocale";
+import { useAuth } from "../../context/useAuth";
 import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
@@ -36,6 +37,9 @@ const formatDate = (value) => {
 
 const Clients = () => {
   const { t } = useLocale();
+  const { user } = useAuth();
+  const isAdmin = Boolean(user?.role === "admin" || user?.user_is_admin || user?.isAdmin);
+
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
   const [selectedDocClient, setSelectedDocClient] = useState(null);
@@ -197,6 +201,9 @@ const Clients = () => {
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         Cell: ({ row, table }) => {
+          const isVip = Boolean(row.original?.vip);
+          const canAccessFiles = isAdmin || !isVip;
+
           return (
             <Box
               sx={{
@@ -206,45 +213,47 @@ const Clients = () => {
                 gap: 1,
               }}
             >
-              <Tooltip title={t("clients.documents")} arrow>
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.currentTarget.blur();
-                    setSelectedDocClient(row.original);
-                  }}
-                  size="small"
-                  aria-label={t("clients.documents")}
-                  sx={(theme) => ({
-                    width: "28px",
-                    height: "28px",
-                    borderRadius: "6px",
-                    border:
-                      theme.palette.mode === "dark"
-                        ? "1px solid rgba(20, 184, 166, 0.3)"
-                        : "1px solid rgba(14, 133, 132, 0.25)",
-                    backgroundColor:
-                      theme.palette.mode === "dark"
-                        ? "rgba(20, 184, 166, 0.1)"
-                        : "rgba(14, 133, 132, 0.07)",
-                    color:
-                      theme.palette.mode === "dark" ? "#2DD4BF" : "#0E8584",
-                    transition: "all 0.15s ease",
-                    "&:hover": {
+              {canAccessFiles && (
+                <Tooltip title={t("clients.documents")} arrow>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.currentTarget.blur();
+                      setSelectedDocClient(row.original);
+                    }}
+                    size="small"
+                    aria-label={t("clients.documents")}
+                    sx={(theme) => ({
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "6px",
+                      border:
+                        theme.palette.mode === "dark"
+                          ? "1px solid rgba(20, 184, 166, 0.3)"
+                          : "1px solid rgba(14, 133, 132, 0.25)",
                       backgroundColor:
                         theme.palette.mode === "dark"
-                          ? "rgba(20, 184, 166, 0.2)"
-                          : "rgba(14, 133, 132, 0.15)",
-                      borderColor:
+                          ? "rgba(20, 184, 166, 0.1)"
+                          : "rgba(14, 133, 132, 0.07)",
+                      color:
                         theme.palette.mode === "dark" ? "#2DD4BF" : "#0E8584",
-                      transform: "translateY(-1px)",
-                    },
-                    "&:active": { transform: "scale(0.95)" },
-                  })}
-                >
-                  <FileUp size={15} strokeWidth={2} />
-                </IconButton>
-              </Tooltip>
+                      transition: "all 0.15s ease",
+                      "&:hover": {
+                        backgroundColor:
+                          theme.palette.mode === "dark"
+                            ? "rgba(20, 184, 166, 0.2)"
+                            : "rgba(14, 133, 132, 0.15)",
+                        borderColor:
+                          theme.palette.mode === "dark" ? "#2DD4BF" : "#0E8584",
+                        transform: "translateY(-1px)",
+                      },
+                      "&:active": { transform: "scale(0.95)" },
+                    })}
+                  >
+                    <FileUp size={15} strokeWidth={2} />
+                  </IconButton>
+                </Tooltip>
+              )}
 
               <ColumnActionButtons
                 row={row}
@@ -256,7 +265,7 @@ const Clients = () => {
         },
       },
     ],
-    [t, handleDeleteClick],
+    [t, handleDeleteClick, isAdmin],
   );
 
   const activeFilters = useMemo(
@@ -423,7 +432,7 @@ const Clients = () => {
 
       <MaterialReactTable table={table} />
 
-      {selectedDocClient && (
+      {selectedDocClient && (isAdmin || !selectedDocClient.vip) && (
         <ClientDocumentModal
           open={Boolean(selectedDocClient)}
           onClose={() => setSelectedDocClient(null)}

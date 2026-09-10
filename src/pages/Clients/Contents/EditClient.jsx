@@ -27,15 +27,29 @@ const EditClient = ({ table, row, queryParams }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [prevRowKey, setPrevRowKey] = useState(null);
 
+  const isVip = Boolean(row?.original?.vip);
+  const canAccessFiles = isAdmin || !isVip;
+
   const currentRowKey = row?.original?.guid || null;
   if (currentRowKey !== prevRowKey) {
     setPrevRowKey(currentRowKey);
-    const existingImages = Array.isArray(row?.original?.images)
-      ? row.original.images
-      : Array.isArray(row?.original?.attachments)
-      ? row.original.attachments
-      : [];
-    setSelectedFiles(existingImages);
+    if (!canAccessFiles) {
+      setSelectedFiles([]);
+    } else {
+      const rawImages = row?.original?.images || row?.original?.attachments;
+      let existingImages = [];
+      if (Array.isArray(rawImages)) {
+        existingImages = rawImages;
+      } else if (typeof rawImages === "string" && rawImages.trim()) {
+        try {
+          const parsed = JSON.parse(rawImages);
+          existingImages = Array.isArray(parsed) ? parsed : [rawImages];
+        } catch {
+          existingImages = [rawImages];
+        }
+      }
+      setSelectedFiles(existingImages);
+    }
   }
 
   const { mutate: updateClient, isPending } = useUpdate({
@@ -76,6 +90,15 @@ const EditClient = ({ table, row, queryParams }) => {
         ...data,
         vip: isAdmin ? Boolean(data.vip) : Boolean(row?.original?.vip),
       };
+
+      if (!canAccessFiles) {
+        // When non-admin edits a VIP client, preserve original files and VIP status
+        const preservedImages = Array.isArray(row?.original?.images)
+          ? row.original.images
+          : [];
+        await updateClient({ ...payload, images: preservedImages, vip: true });
+        return;
+      }
 
       const rawFiles = selectedFiles.filter((f) => f instanceof File);
       if (rawFiles.length > 0) {
@@ -247,24 +270,28 @@ const EditClient = ({ table, row, queryParams }) => {
             </Grid>
           )}
 
-          {/* Task-style File Upload */}
-          <Grid size={{ xs: 12, sm: isAdmin ? 6 : 12 }}>
-            <TaskFileUpload
-              files={selectedFiles}
-              onChange={setSelectedFiles}
-              label={t("clients.documents", "Resminamalar / Suratlar")}
-              disabled={isPending}
-              isSubmitting={isPending}
-              hideList
-            />
-          </Grid>
+          {/* Task-style File Upload - Hidden for non-admin when client is VIP */}
+          {canAccessFiles && (
+            <Grid size={{ xs: 12, sm: isAdmin ? 6 : 12 }}>
+              <TaskFileUpload
+                files={selectedFiles}
+                onChange={setSelectedFiles}
+                label={t("clients.documents", "Resminamalar / Suratlar")}
+                maxFiles={10}
+                disabled={isPending}
+                isSubmitting={isPending}
+                hideList
+              />
+            </Grid>
+          )}
 
-          {/* Task-style File List Previews */}
-          {selectedFiles.length > 0 && (
+          {/* Task-style File List Previews - Hidden for non-admin when client is VIP */}
+          {canAccessFiles && selectedFiles.length > 0 && (
             <Grid size={12}>
               <TaskFileList
                 files={selectedFiles}
                 onChange={setSelectedFiles}
+                maxFiles={10}
                 disabled={isPending}
                 isSubmitting={isPending}
               />
