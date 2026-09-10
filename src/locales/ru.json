@@ -475,7 +475,12 @@
     "summarySheet": "Общий Отчет",
     "service": "Услуга",
     "serviceDetails": "Детали услуги",
-    "total": "Итого"
+    "total": "Итого",
+    "dateRange": "Диапазон дат",
+    "thisMonth": "Этот месяц",
+    "lastMonth": "Прошлый месяц",
+    "thisYear": "Этот год",
+    "allTime": "Все время"
   },
   "visaIntake": {
     "title": "Прием документов",

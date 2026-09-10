@@ -51,6 +51,21 @@ export const OUTBOUND_SERVICE_MAP = {
   },
 };
 
+const ACCENT_RED = "FFDC2626"; // Crimson red (#DC2626) as used in TurkishAirlines & B2B
+const ACCENT_GREEN = "FF166534"; // Deep emerald (#166534)
+const CURRENCY_FMT = '"$ " #,##0.00;"$ " -#,##0.00;"$  -"';
+
+const getExcelColName = (colNum) => {
+  let colName = "";
+  let num = colNum;
+  while (num > 0) {
+    const mod = (num - 1) % 26;
+    colName = String.fromCharCode(65 + mod) + colName;
+    num = Math.floor((num - 1) / 26);
+  }
+  return colName;
+};
+
 const resolveText = (val, selectedLang) => {
   if (!val) return "";
   if (typeof val === "string") return val.trim();
@@ -67,9 +82,9 @@ const resolveText = (val, selectedLang) => {
 
 const resolveStaff = (staff, selectedLang) => {
   if (!staff) return "";
-  const name = staff.fullName || staff.name || "";
+  const name = (staff.fullName || staff.name || "").toUpperCase();
   const officeObj = staff.office;
-  const officeName = officeObj ? resolveText(officeObj.fullName || officeObj.shortName || officeObj, selectedLang) : "";
+  const officeName = officeObj ? resolveText(officeObj.fullName || officeObj.shortName || officeObj, selectedLang).toUpperCase() : "";
   return officeName ? `${name} (${officeName})` : name;
 };
 
@@ -85,7 +100,7 @@ const resolveServiceDetail = (serviceKey, row) => {
   switch (serviceKey) {
     case "hotel": {
       const parts = [row.hotel_name, row.room_type, row.meal_plan].filter(Boolean);
-      return parts.join(" - ");
+      return parts.join(" - ").toUpperCase();
     }
     case "airway": {
       const parts = [
@@ -93,7 +108,7 @@ const resolveServiceDetail = (serviceKey, row) => {
         row.route,
         row.ticket_type,
       ].filter(Boolean);
-      return parts.join(" | ");
+      return parts.join(" | ").toUpperCase();
     }
     case "railway": {
       const parts = [
@@ -101,43 +116,50 @@ const resolveServiceDetail = (serviceKey, row) => {
         row.train_type,
         row.route,
       ].filter(Boolean);
-      return parts.join(" | ");
+      return parts.join(" | ").toUpperCase();
     }
     case "tour": {
       const parts = [row.tour_name, row.tour_type].filter(Boolean);
-      return parts.join(" - ");
+      return parts.join(" - ").toUpperCase();
     }
     case "transfer": {
       const parts = [row.transfer_type, row.machine_type, row.route].filter(Boolean);
-      return parts.join(" | ");
+      return parts.join(" | ").toUpperCase();
     }
     case "package": {
       const parts = [row.package_name, row.partner ? `[${row.partner}]` : null].filter(Boolean);
-      return parts.join(" ");
+      return parts.join(" ").toUpperCase();
     }
     default:
       return "";
   }
 };
 
-const THIN_BORDER = {
-  top: { style: "thin", color: { argb: "FFCBD5E1" } },
-  left: { style: "thin", color: { argb: "FFCBD5E1" } },
-  bottom: { style: "thin", color: { argb: "FFCBD5E1" } },
-  right: { style: "thin", color: { argb: "FFCBD5E1" } },
+// Computes visual character length accounting for Cyrillic and capital characters
+const getVisualLength = (str) => {
+  if (!str) return 0;
+  const s = String(str);
+  let len = 0;
+  for (let i = 0; i < s.length; i++) {
+    const code = s.charCodeAt(i);
+    // Cyrillic (0x0400-0x04FF) & uppercase letters take ~1.28x space in proportional fonts
+    if ((code >= 0x0400 && code <= 0x04FF) || (s[i] >= "A" && s[i] <= "Z")) {
+      len += 1.28;
+    } else {
+      len += 1;
+    }
+  }
+  return len;
 };
-
-const TOTAL_BORDER = {
-  top: { style: "thin", color: { argb: "FF000000" } },
-  left: { style: "thin", color: { argb: "FFCBD5E1" } },
-  bottom: { style: "double", color: { argb: "FF000000" } },
-  right: { style: "thin", color: { argb: "FFCBD5E1" } },
-};
-
-const CURRENCY_FMT = '#,##0.00" USD"';
 
 /**
- * Creates and formats a worksheet with banner, headers, data, and totals
+ * Creates and formats a worksheet matching the TurkishAirlines & B2B design standard:
+ * - Margins on Columns A, B, C (width 4)
+ * - Row 2 Title Banner across table
+ * - Row 4 Header with medium borders & autoFilter
+ * - Alternating subtle zebra striping (White / #F3F4F6)
+ * - Mint / Blush status badges
+ * - Bottom Total Row with SUM formulas & medium borders
  */
 const buildStyledSheet = ({
   workbook,
@@ -153,136 +175,269 @@ const buildStyledSheet = ({
     views: [{ showGridLines: true }],
   });
 
-  const totalCols = columns.length;
+  const START_ROW = 4;
+  const START_COL = 4; // Column D (matches TurkishAirlines & B2B standard)
+  const END_COL = START_COL + columns.length - 1;
+  const totalRowIndex = START_ROW + data.length + 1;
 
-  // Row 1: Title Banner
-  worksheet.mergeCells(1, 1, 1, totalCols);
-  const titleRow = worksheet.getRow(1);
+  // Margin Columns A, B, C (width 4)
+  worksheet.getColumn(1).width = 4;
+  worksheet.getColumn(2).width = 4;
+  worksheet.getColumn(3).width = 4;
+
+  // Margin Rows 1 & 3
+  worksheet.getRow(1).height = 12;
+  worksheet.getRow(3).height = 10;
+
+  // Row 2: Title Banner Row merged across table
+  const titleRow = worksheet.getRow(2);
   titleRow.height = 30;
-  const titleCell = worksheet.getCell("A1");
-  titleCell.value = titleBanner;
-  titleCell.font = { name: "Segoe UI", size: 12, bold: true, color: { argb: "FF0F172A" } };
-  titleCell.alignment = { vertical: "middle", horizontal: "center" };
-  titleCell.fill = {
-    type: "pattern",
-    pattern: "solid",
-    fgColor: { argb: "FFF8FAFC" },
+  worksheet.mergeCells(2, START_COL, 2, END_COL);
+  const titleCell = worksheet.getCell(2, START_COL);
+  titleCell.value = {
+    richText: [
+      {
+        text: 'OGUZABAT Hojalyk Jemgyýetiniň "OGUZTRAVEL" syýahatçylyk bölümi | ',
+        font: { name: "Calibri", size: 11, bold: true, color: { argb: "FF000000" } },
+      },
+      {
+        text: titleBanner,
+        font: { name: "Calibri", size: 11, bold: true, color: { argb: "FF0E8584" } }, // Brand Teal
+      },
+      {
+        text: periodText ? ` (${periodText})` : "",
+        font: { name: "Calibri", size: 10, italic: true, color: { argb: ACCENT_RED } },
+      },
+    ],
   };
-  titleCell.border = THIN_BORDER;
+  titleCell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
 
-  // Row 2: Subtitle with Date / Total info
-  worksheet.mergeCells(2, 1, 2, totalCols);
-  const subtitleRow = worksheet.getRow(2);
-  subtitleRow.height = 20;
-  const subCell = worksheet.getCell("A2");
-  subCell.value = periodText;
-  subCell.font = { name: "Segoe UI", size: 9.5, italic: true, color: { argb: "FF475569" } };
-  subCell.alignment = { vertical: "middle", horizontal: "center" };
-  subCell.border = THIN_BORDER;
-
-  // Row 3: Empty spacing row
-  worksheet.getRow(3).height = 8;
-
-  // Row 4: Column Headers
-  const headerRowIndex = 4;
-  const headerRow = worksheet.getRow(headerRowIndex);
-  headerRow.height = 26;
-
-  columns.forEach((col, colIdx) => {
-    const cell = headerRow.getCell(colIdx + 1);
-    cell.value = col.header;
-    cell.font = { name: "Segoe UI", size: 10, bold: true, color: { argb: "FF0F172A" } };
-    cell.alignment = {
-      vertical: "middle",
-      horizontal: col.align || "center",
-      wrapText: true,
-    };
-    cell.border = THIN_BORDER;
-    cell.fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: "FFE2E8F0" },
-    };
+  // Calculate dynamic column widths with Cyrillic & uppercase safety padding
+  const colWidths = columns.map((col) => {
+    const headerVisual = getVisualLength(col.header);
+    return Math.max(col.width || 12, Math.ceil(headerVisual + 4));
   });
 
-  // Track max lengths for dynamic column width calculation
-  const colWidths = columns.map((col) => col.width || Math.max(col.header.length + 4, 12));
-
-  // Rows 5+: Data Rows
-  let startDataRow = 5;
+  // Pre-calculate widths from data rows
   data.forEach((item, rowOffset) => {
-    const currentRowIndex = startDataRow + rowOffset;
-    const row = worksheet.getRow(currentRowIndex);
-    row.height = 20;
-
     columns.forEach((col, colIdx) => {
-      const cell = row.getCell(colIdx + 1);
-      const val = col.accessor ? col.accessor(item, rowOffset) : item[col.key];
-
-      cell.value = val !== null && val !== undefined ? val : "";
-      cell.font = { name: "Segoe UI", size: 9.5 };
-      cell.alignment = {
-        vertical: "middle",
-        horizontal: col.align || "center",
-      };
-      cell.border = THIN_BORDER;
-
-      if (col.isCurrency && typeof val === "number") {
-        cell.numFmt = CURRENCY_FMT;
-      }
-
-      // Calculate width
-      const strVal = String(val ?? "");
-      if (strVal.length > colWidths[colIdx]) {
-        colWidths[colIdx] = Math.min(Math.max(colWidths[colIdx], strVal.length + 3), 45);
+      const rawVal = col.accessor ? col.accessor(item, rowOffset) : item[col.key];
+      const strVal = String(rawVal ?? "");
+      const visualLen = getVisualLength(strVal);
+      const maxColLimit = col.key === "details" || col.key === "note" ? 65 : 48;
+      const targetWidth = Math.min(Math.ceil(visualLen + 4), maxColLimit);
+      if (targetWidth > colWidths[colIdx]) {
+        colWidths[colIdx] = targetWidth;
       }
     });
   });
 
-  // Total Summary Row at the bottom
-  const totalRowIndex = startDataRow + data.length;
+  // Apply column widths to worksheet
+  columns.forEach((_, colIdx) => {
+    worksheet.getColumn(START_COL + colIdx).width = colWidths[colIdx];
+  });
+
+  // Row 4: Header Row
+  const headerRow = worksheet.getRow(START_ROW);
+  headerRow.height = 30;
+
+  const headerFill = {
+    type: "pattern",
+    pattern: "solid",
+    fgColor: { argb: "FFFFFFFF" },
+  };
+
+  const profitColIdx = columns.findIndex((c) => c.key === "profit");
+  const isPaidColIdx = columns.findIndex((c) => c.key === "is_paid");
+  const netFareColIdx = columns.findIndex((c) => c.key === "net_fare");
+  const priceColIdx = columns.findIndex((c) => c.key === "price");
+
+  columns.forEach((col, idx) => {
+    const colNumber = START_COL + idx;
+    const cell = headerRow.getCell(colNumber);
+    cell.value = col.header;
+    cell.font = {
+      name: "Calibri",
+      size: 11,
+      bold: true,
+      color: { argb: col.key === "net_fare" ? ACCENT_RED : "FF000000" },
+    };
+    cell.fill = headerFill;
+    cell.alignment = {
+      vertical: "middle",
+      horizontal: "center",
+      wrapText: true,
+    };
+
+    // Header Borders matching TurkishAirlines & B2B
+    cell.border = {
+      top: { style: "medium", color: { argb: "FF000000" } },
+      bottom: { style: "medium", color: { argb: "FF000000" } },
+      left: colNumber === START_COL
+        ? { style: "medium", color: { argb: "FF000000" } }
+        : { style: "thin", color: { argb: "FFBFBFBF" } },
+      right: colNumber === END_COL
+        ? { style: "medium", color: { argb: "FF000000" } }
+        : { style: "thin", color: { argb: "FFBFBFBF" } },
+    };
+  });
+
+  // Enable AutoFilter on Row 4
+  worksheet.autoFilter = {
+    from: { row: START_ROW, column: START_COL },
+    to: { row: START_ROW, column: END_COL },
+  };
+
+  // Data Rows (Starting at Row 5)
+  data.forEach((item, rowOffset) => {
+    const rowIndex = START_ROW + 1 + rowOffset;
+    const row = worksheet.getRow(rowIndex);
+
+    // Subtle zebra striping: White and #F3F4F6
+    const isEvenRow = rowOffset % 2 === 1;
+    const zebraBg = isEvenRow ? "FFF3F4F6" : "FFFFFFFF";
+
+    let maxLinesInRow = 1;
+
+    columns.forEach((col, colIdx) => {
+      const colNumber = START_COL + colIdx;
+      const cell = row.getCell(colNumber);
+      const val = col.accessor ? col.accessor(item, rowOffset) : item[col.key];
+
+      cell.value = val !== null && val !== undefined ? val : "";
+      cell.font = { name: "Calibri", size: 10, color: { argb: "FF000000" } };
+      cell.alignment = {
+        vertical: "middle",
+        horizontal: col.align || "center",
+        wrapText: col.wrapText !== false,
+      };
+
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: zebraBg },
+      };
+
+      // Border styles matching TurkishAirlines & B2B
+      cell.border = {
+        top: { style: "thin", color: { argb: "FFD9D9D9" } },
+        bottom: { style: "thin", color: { argb: "FFD9D9D9" } },
+        left: colNumber === START_COL
+          ? { style: "medium", color: { argb: "FF000000" } }
+          : { style: "thin", color: { argb: "FFD9D9D9" } },
+        right: colNumber === END_COL
+          ? { style: "medium", color: { argb: "FF000000" } }
+          : { style: "thin", color: { argb: "FFD9D9D9" } },
+      };
+
+      // Currency Formatting
+      if (col.isCurrency && typeof val === "number") {
+        cell.numFmt = CURRENCY_FMT;
+      }
+
+      // Net Baha accent color
+      if (col.key === "net_fare") {
+        cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: ACCENT_RED } };
+      }
+
+      // Profit colored text
+      if (col.key === "profit" && typeof val === "number") {
+        cell.font = {
+          name: "Calibri",
+          size: 10,
+          bold: true,
+          color: { argb: val > 0 ? ACCENT_GREEN : val < 0 ? ACCENT_RED : "FF64748B" },
+        };
+      }
+
+      // Payment Status Pill (Mint for Paid, Blush for Credit/Refund)
+      if (colIdx === isPaidColIdx && val) {
+        const isPaid = String(val).toLowerCase().includes("tölendi") || String(val).toLowerCase().includes("paid");
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: isPaid ? "FFDCFCE7" : "FFFEF2F2" },
+        };
+        cell.font = {
+          name: "Calibri",
+          size: 10,
+          bold: true,
+          color: { argb: isPaid ? ACCENT_GREEN : ACCENT_RED },
+        };
+      }
+
+      // Multi-line height calculation
+      const strVal = String(val ?? "");
+      const visualLen = getVisualLength(strVal);
+      const effectiveW = colWidths[colIdx];
+      if (visualLen > effectiveW) {
+        const lines = Math.ceil(visualLen / (effectiveW - 2));
+        if (lines > maxLinesInRow) {
+          maxLinesInRow = lines;
+        }
+      }
+    });
+
+    row.height = maxLinesInRow > 1 ? Math.min(maxLinesInRow * 16 + 6, 75) : 21;
+  });
+
+  // Total Summary Row (Bottom)
   const totalRow = worksheet.getRow(totalRowIndex);
   totalRow.height = 24;
 
-  const netFareColIdx = columns.findIndex((c) => c.key === "net_fare");
-  const priceColIdx = columns.findIndex((c) => c.key === "price");
-  const profitColIdx = columns.findIndex((c) => c.key === "profit");
-
-  columns.forEach((col, colIdx) => {
-    const cell = totalRow.getCell(colIdx + 1);
-    cell.font = { name: "Segoe UI", size: 10, bold: true, color: { argb: "FF0F172A" } };
-    cell.border = TOTAL_BORDER;
+  for (let c = START_COL; c <= END_COL; c++) {
+    const cell = totalRow.getCell(c);
+    cell.font = { name: "Calibri", size: 10, bold: true };
+    cell.alignment = { vertical: "middle", horizontal: columns[c - START_COL]?.align || "center" };
     cell.fill = {
       type: "pattern",
       pattern: "solid",
-      fgColor: { argb: "FFF1F5F9" },
+      fgColor: { argb: "FFF8FAFC" },
     };
 
-    if (colIdx === 0) {
-      cell.value = t ? t("outbound.total") : "JEMI";
-      cell.alignment = { vertical: "middle", horizontal: "center" };
-    } else if (colIdx === netFareColIdx && data.length > 0) {
-      const colLetter = cell.address.replace(/[0-9]/g, "");
-      cell.value = { formula: `SUM(${colLetter}5:${colLetter}${totalRowIndex - 1})` };
-      cell.numFmt = CURRENCY_FMT;
-      cell.alignment = { vertical: "middle", horizontal: "right" };
-    } else if (colIdx === priceColIdx && data.length > 0) {
-      const colLetter = cell.address.replace(/[0-9]/g, "");
-      cell.value = { formula: `SUM(${colLetter}5:${colLetter}${totalRowIndex - 1})` };
-      cell.numFmt = CURRENCY_FMT;
-      cell.alignment = { vertical: "middle", horizontal: "right" };
-    } else if (colIdx === profitColIdx && data.length > 0) {
-      const colLetter = cell.address.replace(/[0-9]/g, "");
-      cell.value = { formula: `SUM(${colLetter}5:${colLetter}${totalRowIndex - 1})` };
-      cell.numFmt = CURRENCY_FMT;
-      cell.alignment = { vertical: "middle", horizontal: "right" };
-    } else {
-      cell.value = "";
-    }
-  });
+    cell.border = {
+      top: { style: "thin", color: { argb: "FF000000" } },
+      bottom: { style: "medium", color: { argb: "FF000000" } },
+      left: c === START_COL
+        ? { style: "medium", color: { argb: "FF000000" } }
+        : { style: "thin", color: { argb: "FFD9D9D9" } },
+      right: c === END_COL
+        ? { style: "medium", color: { argb: "FF000000" } }
+        : { style: "thin", color: { argb: "FFD9D9D9" } },
+    };
+  }
 
-  // Apply column widths
-  worksheet.columns = colWidths.map((width) => ({ width }));
+  const cellTotalLabel = totalRow.getCell(START_COL);
+  cellTotalLabel.value = t ? t("outbound.total") : "Total";
+  cellTotalLabel.alignment = { vertical: "middle", horizontal: "left" };
+
+  const firstDataRow = START_ROW + 1;
+  const lastDataRow = totalRowIndex - 1;
+
+  if (data.length > 0) {
+    const sumCols = [
+      { idx: netFareColIdx, isRed: true },
+      { idx: priceColIdx, isRed: false },
+      { idx: profitColIdx, isRed: false, isGreen: true },
+    ];
+
+    sumCols.forEach(({ idx, isRed, isGreen }) => {
+      if (idx !== -1) {
+        const colLetter = getExcelColName(START_COL + idx);
+        const cell = totalRow.getCell(START_COL + idx);
+        cell.value = {
+          formula: `SUM(${colLetter}${firstDataRow}:${colLetter}${lastDataRow})`,
+        };
+        cell.numFmt = CURRENCY_FMT;
+        cell.font = {
+          name: "Calibri",
+          size: 10.5,
+          bold: true,
+          color: { argb: isRed ? ACCENT_RED : isGreen ? ACCENT_GREEN : "FF000000" },
+        };
+      }
+    });
+  }
 };
 
 /**
@@ -329,7 +484,7 @@ export const exportOutboundExcel = async ({
         message: t
           ? t("outbound.fetchingService", { service: serviceName })
           : `${serviceName} maglumatlary alynýar...`,
-        percent: Math.round(((i) / selectedServiceKeys.length) * 85),
+        percent: Math.round((i / selectedServiceKeys.length) * 85),
       });
     }
 
@@ -358,14 +513,16 @@ export const exportOutboundExcel = async ({
   workbook.created = new Date();
 
   // Date range description for subtitles
-  let periodText = `Eksport senesi: ${dayjs().format("DD.MM.YYYY HH:mm")}`;
+  let periodText = "";
   if (cleanFilterParams.start_date || cleanFilterParams.end_date) {
     const s = cleanFilterParams.start_date ? dayjs(cleanFilterParams.start_date).format("DD.MM.YYYY") : "...";
     const e = cleanFilterParams.end_date ? dayjs(cleanFilterParams.end_date).format("DD.MM.YYYY") : "...";
-    periodText = `Döwür: ${s} - ${e} | ${periodText}`;
+    periodText = `${s} - ${e}`;
+  } else {
+    periodText = dayjs().format("DD.MM.YYYY");
   }
 
-  // 4. Consolidated Summary Sheet (if enabled and more than 0 records)
+  // 4. Consolidated Summary Sheet (Umumy Hasabat)
   if (includeSummary) {
     const summaryRows = [];
     selectedServiceKeys.forEach((serviceKey) => {
@@ -383,10 +540,10 @@ export const exportOutboundExcel = async ({
     });
 
     const summaryColumns = [
-      { header: "#", key: "index_number", width: 6, align: "center", accessor: (_, idx) => idx + 1 },
-      { header: t ? t("outbound.service") : "Hyzmat", key: "_serviceTitle", width: 14, align: "center" },
+      { header: "T/B", key: "index_number", width: 7, align: "center", accessor: (_, idx) => idx + 1 },
+      { header: t ? t("outbound.service") : "Hyzmat", key: "_serviceTitle", width: 15, align: "center" },
       {
-        header: t ? t("outbound.requestDate") : "Arza senesi",
+        header: t ? t("outbound.requestDate") : "Sene",
         key: "application_date",
         width: 13,
         align: "center",
@@ -395,9 +552,9 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.clientName") : "Müşderi",
         key: "client_name",
-        width: 24,
+        width: 26,
         align: "left",
-        accessor: (r) => r.client?.fullName || r.client_name || "",
+        accessor: (r) => (r.client?.fullName || r.client_name || "").toUpperCase(),
       },
       {
         header: t ? t("outbound.operator") : "Operator",
@@ -416,15 +573,15 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.netFare") : "Net baha",
         key: "net_fare",
-        width: 14,
+        width: 15,
         align: "right",
         isCurrency: true,
         accessor: (r) => Number(r.net_fare || 0),
       },
       {
-        header: t ? t("outbound.price") : "Bahasy",
+        header: t ? t("outbound.price") : "Satyş baha",
         key: "price",
-        width: 14,
+        width: 15,
         align: "right",
         isCurrency: true,
         accessor: (r) => Number(r.price || 0),
@@ -432,7 +589,7 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.profit") : "Peýda",
         key: "profit",
-        width: 14,
+        width: 15,
         align: "right",
         isCurrency: true,
         accessor: (r) => Number(r.profit ?? ((r.price || 0) - (r.net_fare || 0))),
@@ -440,7 +597,7 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.paymentStatus") : "Töleg ýagdaýy",
         key: "is_paid",
-        width: 14,
+        width: 15,
         align: "center",
         accessor: (r) => resolvePaymentStatus(r.is_paid, t),
       },
@@ -454,21 +611,21 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.destinationCountry") : "Barmaly ýurt",
         key: "destination_country",
-        width: 16,
-        align: "center",
-        accessor: (r) => r.destination_country || "",
+        width: 22,
+        align: "left",
+        accessor: (r) => (r.destination_country || "").toUpperCase(),
       },
       {
         header: t ? t("outbound.serviceDetails") : "Hyzmat jikme-jikligi",
         key: "details",
-        width: 32,
+        width: 34,
         align: "left",
         accessor: (r) => resolveServiceDetail(r._serviceKey, r),
       },
       {
         header: t ? t("outbound.note") : "Bellik",
         key: "note",
-        width: 20,
+        width: 22,
         align: "left",
         accessor: (r) => r.note || "",
       },
@@ -477,8 +634,8 @@ export const exportOutboundExcel = async ({
     buildStyledSheet({
       workbook,
       sheetName: t ? t("outbound.summarySheet") : "Umumy Hasabat",
-      titleBanner: 'OGUZTRAVEL - Outbound Satuwlar Umumy Hasabaty',
-      periodText: `${periodText} | Jemi: ${summaryRows.length} sany satyş`,
+      titleBanner: "Outbound Satuwlar Umumy Hasabaty",
+      periodText,
       columns: summaryColumns,
       data: summaryRows,
       t,
@@ -491,11 +648,10 @@ export const exportOutboundExcel = async ({
     const def = OUTBOUND_SERVICE_MAP[serviceKey];
     const serviceTitle = t ? t(def.labelKey) : def.sheetName;
 
-    // Common columns present in every service
     const baseColumns = [
-      { header: "#", key: "index_number", width: 6, align: "center", accessor: (_, idx) => idx + 1 },
+      { header: "T/B", key: "index_number", width: 7, align: "center", accessor: (_, idx) => idx + 1 },
       {
-        header: t ? t("outbound.requestDate") : "Arza senesi",
+        header: t ? t("outbound.requestDate") : "Sene",
         key: "application_date",
         width: 13,
         align: "center",
@@ -504,9 +660,9 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.clientName") : "Müşderi",
         key: "client_name",
-        width: 24,
+        width: 26,
         align: "left",
-        accessor: (r) => r.client?.fullName || r.client_name || "",
+        accessor: (r) => (r.client?.fullName || r.client_name || "").toUpperCase(),
       },
       {
         header: t ? t("outbound.operator") : "Operator",
@@ -525,15 +681,15 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.netFare") : "Net baha",
         key: "net_fare",
-        width: 14,
+        width: 15,
         align: "right",
         isCurrency: true,
         accessor: (r) => Number(r.net_fare || 0),
       },
       {
-        header: t ? t("outbound.price") : "Bahasy",
+        header: t ? t("outbound.price") : "Satyş baha",
         key: "price",
-        width: 14,
+        width: 15,
         align: "right",
         isCurrency: true,
         accessor: (r) => Number(r.price || 0),
@@ -541,7 +697,7 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.profit") : "Peýda",
         key: "profit",
-        width: 14,
+        width: 15,
         align: "right",
         isCurrency: true,
         accessor: (r) => Number(r.profit ?? ((r.price || 0) - (r.net_fare || 0))),
@@ -549,7 +705,7 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.paymentStatus") : "Töleg ýagdaýy",
         key: "is_paid",
-        width: 14,
+        width: 15,
         align: "center",
         accessor: (r) => resolvePaymentStatus(r.is_paid, t),
       },
@@ -563,54 +719,53 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.destinationCountry") : "Barmaly ýurt",
         key: "destination_country",
-        width: 16,
-        align: "center",
-        accessor: (r) => r.destination_country || "",
+        width: 22,
+        align: "left",
+        accessor: (r) => (r.destination_country || "").toUpperCase(),
       },
     ];
 
-    // Service-specific columns
     let specificColumns = [];
     if (serviceKey === "hotel") {
       specificColumns = [
-        { header: t ? t("outbound.hotelName") : "Otel ady", key: "hotel_name", width: 22, align: "left", accessor: (r) => r.hotel_name || "" },
-        { header: t ? t("outbound.roomType") : "Otag görnüşi", key: "room_type", width: 16, align: "center", accessor: (r) => r.room_type || "" },
-        { header: t ? t("outbound.mealPlan") : "Iýmit", key: "meal_plan", width: 12, align: "center", accessor: (r) => r.meal_plan || "" },
+        { header: t ? t("outbound.hotelName") : "Otel ady", key: "hotel_name", width: 22, align: "left", accessor: (r) => (r.hotel_name || "").toUpperCase() },
+        { header: t ? t("outbound.roomType") : "Otag görnüşi", key: "room_type", width: 16, align: "center", accessor: (r) => (r.room_type || "").toUpperCase() },
+        { header: t ? t("outbound.mealPlan") : "Iýmit", key: "meal_plan", width: 12, align: "center", accessor: (r) => (r.meal_plan || "").toUpperCase() },
         { header: t ? t("outbound.guestCount") : "Myhman sany", key: "guests_count", width: 13, align: "center", accessor: (r) => r.guests_count || "" },
-        { header: t ? t("outbound.source") : "Ulgam", key: "system", width: 14, align: "center", accessor: (r) => r.system || "" },
+        { header: t ? t("outbound.source") : "Ulgam", key: "system", width: 14, align: "center", accessor: (r) => (r.system || "").toUpperCase() },
       ];
     } else if (serviceKey === "airway") {
       specificColumns = [
-        { header: t ? t("outbound.ticketNumber") : "Bilet №", key: "ticket_number", width: 16, align: "center", accessor: (r) => r.ticket_number || "" },
-        { header: t ? t("outbound.ticketType") : "Bilet görnüşi", key: "ticket_type", width: 15, align: "center", accessor: (r) => r.ticket_type || "" },
-        { header: t ? t("outbound.route") : "Ugur", key: "route", width: 18, align: "center", accessor: (r) => r.route || "" },
+        { header: t ? t("outbound.ticketNumber") : "Ticket №", key: "ticket_number", width: 18, align: "center", accessor: (r) => (r.ticket_number || "").toUpperCase() },
+        { header: t ? t("outbound.ticketType") : "Görnüşi", key: "ticket_type", width: 15, align: "center", accessor: (r) => (r.ticket_type || "").toUpperCase() },
+        { header: t ? t("outbound.route") : "Gatnaw ugur", key: "route", width: 20, align: "center", accessor: (r) => (r.route || "").toUpperCase() },
         { header: t ? t("outbound.guestCount") : "Ýolagçy sany", key: "passenger_count", width: 13, align: "center", accessor: (r) => r.passenger_count || "" },
       ];
     } else if (serviceKey === "railway") {
       specificColumns = [
-        { header: t ? t("outbound.ticketNumber") : "Bilet №", key: "ticket_number", width: 16, align: "center", accessor: (r) => r.ticket_number || "" },
-        { header: t ? t("outbound.trainType") : "Otly görnüşi", key: "train_type", width: 15, align: "center", accessor: (r) => r.train_type || "" },
-        { header: t ? t("outbound.ticketType") : "Bilet görnüşi", key: "ticket_type", width: 15, align: "center", accessor: (r) => r.ticket_type || "" },
-        { header: t ? t("outbound.route") : "Ugur", key: "route", width: 18, align: "center", accessor: (r) => r.route || "" },
+        { header: t ? t("outbound.ticketNumber") : "Ticket №", key: "ticket_number", width: 18, align: "center", accessor: (r) => (r.ticket_number || "").toUpperCase() },
+        { header: t ? t("outbound.trainType") : "Otly görnüşi", key: "train_type", width: 15, align: "center", accessor: (r) => (r.train_type || "").toUpperCase() },
+        { header: t ? t("outbound.ticketType") : "Görnüşi", key: "ticket_type", width: 15, align: "center", accessor: (r) => (r.ticket_type || "").toUpperCase() },
+        { header: t ? t("outbound.route") : "Gatnaw ugur", key: "route", width: 20, align: "center", accessor: (r) => (r.route || "").toUpperCase() },
         { header: t ? t("outbound.guestCount") : "Ýolagçy sany", key: "passenger_count", width: 13, align: "center", accessor: (r) => r.passenger_count || "" },
       ];
     } else if (serviceKey === "tour") {
       specificColumns = [
-        { header: t ? t("outbound.tourName") : "Tur ady", key: "tour_name", width: 22, align: "left", accessor: (r) => r.tour_name || "" },
+        { header: t ? t("outbound.tourName") : "Tur ady", key: "tour_name", width: 22, align: "left", accessor: (r) => (r.tour_name || "").toUpperCase() },
         { header: t ? t("outbound.guestCount") : "Myhman sany", key: "guests_count", width: 13, align: "center", accessor: (r) => r.guests_count || "" },
-        { header: t ? t("outbound.source") : "Ulgam", key: "system", width: 14, align: "center", accessor: (r) => r.system || "" },
+        { header: t ? t("outbound.source") : "Ulgam", key: "system", width: 14, align: "center", accessor: (r) => (r.system || "").toUpperCase() },
       ];
     } else if (serviceKey === "transfer") {
       specificColumns = [
-        { header: t ? t("outbound.transferType") : "Transfer görnüşi", key: "transfer_type", width: 16, align: "center", accessor: (r) => r.transfer_type || "" },
-        { header: t ? t("outbound.route") : "Ugur", key: "route", width: 18, align: "center", accessor: (r) => r.route || "" },
-        { header: t ? t("outbound.carType") : "Maşyn görnüşi", key: "machine_type", width: 15, align: "center", accessor: (r) => r.machine_type || "" },
-        { header: t ? t("outbound.guestCount") : "Myhman sany", key: "guests_count", width: 13, align: "center", accessor: (r) => r.guests_count || "" },
-        { header: t ? t("outbound.source") : "Ulgam", key: "system", width: 14, align: "center", accessor: (r) => r.system || "" },
+        { header: t ? t("outbound.transferType") : "Transfer", key: "transfer_type", width: 16, align: "center", accessor: (r) => (r.transfer_type || "").toUpperCase() },
+        { header: t ? t("outbound.route") : "Gatnaw ugur", key: "route", width: 20, align: "center", accessor: (r) => (r.route || "").toUpperCase() },
+        { header: t ? t("outbound.carType") : "Maşyn", key: "machine_type", width: 15, align: "center", accessor: (r) => (r.machine_type || "").toUpperCase() },
+        { header: t ? t("outbound.guestCount") : "Ýolagçy sany", key: "guests_count", width: 13, align: "center", accessor: (r) => r.guests_count || "" },
+        { header: t ? t("outbound.source") : "Ulgam", key: "system", width: 14, align: "center", accessor: (r) => (r.system || "").toUpperCase() },
       ];
     } else if (serviceKey === "package") {
       specificColumns = [
-        { header: t ? t("outbound.partner") : "Hyzmatdaş", key: "partner", width: 16, align: "center", accessor: (r) => r.partner || "" },
+        { header: t ? t("outbound.partner") : "Hyzmatdaş", key: "partner", width: 16, align: "center", accessor: (r) => (r.partner || "").toUpperCase() },
       ];
     }
 
@@ -618,7 +773,7 @@ export const exportOutboundExcel = async ({
       {
         header: t ? t("outbound.note") : "Bellik",
         key: "note",
-        width: 20,
+        width: 22,
         align: "left",
         accessor: (r) => r.note || "",
       },
@@ -629,8 +784,8 @@ export const exportOutboundExcel = async ({
     buildStyledSheet({
       workbook,
       sheetName: serviceTitle,
-      titleBanner: `OGUZTRAVEL - ${serviceTitle} Satuwlar Hasabaty`,
-      periodText: `${periodText} | Jemi: ${data.length} sany satyş`,
+      titleBanner: `${serviceTitle} Satuwlar Hasabaty`,
+      periodText,
       columns: finalColumns,
       data,
       t,
@@ -649,10 +804,10 @@ export const exportOutboundExcel = async ({
 
   // 6. Write Buffer & Save file
   const buffer = await workbook.xlsx.writeBuffer();
-  const fileName = `Outbound_Hasabat_${dayjs().format("YYYY-MM-DD")}.xlsx`;
+  const cleanFileName = `Outbound_Hasabat_${dayjs().format("YYYY-MM-DD")}.xlsx`;
 
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  saveAs(blob, fileName);
+  saveAs(blob, cleanFileName);
 };

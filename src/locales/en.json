@@ -474,7 +474,12 @@
     "summarySheet": "General Summary",
     "service": "Service",
     "serviceDetails": "Service details",
-    "total": "Total"
+    "total": "Total",
+    "dateRange": "Date Range",
+    "thisMonth": "This Month",
+    "lastMonth": "Last Month",
+    "thisYear": "This Year",
+    "allTime": "All Time"
   },
   "visaIntake": {
     "title": "Visa Intake",

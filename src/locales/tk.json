@@ -474,7 +474,12 @@
     "summarySheet": "Umumy Hasabat",
     "service": "Hyzmat",
     "serviceDetails": "Hyzmat jikme-jikligi",
-    "total": "Jemi"
+    "total": "Jemi",
+    "dateRange": "Seneler aralygy",
+    "thisMonth": "Şu aý",
+    "lastMonth": "Geçen aý",
+    "thisYear": "Şu ýyl",
+    "allTime": "Ähli döwür"
   },
   "visaIntake": {
     "title": "Kabul ediji bölümi",
