@@ -13,13 +13,6 @@ import { alpha } from "@mui/material/styles";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import ContactMailOutlinedIcon from "@mui/icons-material/ContactMailOutlined";
-import FormatQuoteOutlinedIcon from "@mui/icons-material/FormatQuoteOutlined";
-import PsychologyOutlinedIcon from "@mui/icons-material/PsychologyOutlined";
-import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
-import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
-import TranslateRoundedIcon from "@mui/icons-material/TranslateRounded";
 import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import { useForm, useWatch, useFieldArray } from "react-hook-form";
@@ -56,8 +49,6 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
       email: formatPlainString(contact.email),
       phone: formatPlainString(contact.phone),
       location: formatPlainString(contact.location),
-      website: formatPlainString(contact.website),
-      linkedin: formatPlainString(contact.linkedin),
       personal_summary: formatPlainString(profileData?.personal_summary || profileData?.personalSummary),
       new_skill: "",
       work_experience: (Array.isArray(profileData?.work_experience)
@@ -199,52 +190,26 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
     }
   };
 
-  const getSectionMetadata = () => {
+  const getSectionTitle = () => {
     switch (sectionKey) {
       case "basic":
-        return {
-          title: t("profile.editTitleBasic"),
-          icon: <AccountCircleOutlinedIcon sx={{ fontSize: 20 }} />,
-        };
+        return t("profile.editTitleBasic");
       case "contact":
-        return {
-          title: t("profile.editTitleContact"),
-          icon: <ContactMailOutlinedIcon sx={{ fontSize: 20 }} />,
-        };
+        return t("profile.editTitleContact");
       case "skills":
-        return {
-          title: t("profile.editTitleSkills"),
-          icon: <PsychologyOutlinedIcon sx={{ fontSize: 20 }} />,
-        };
+        return t("profile.editTitleSkills");
       case "summary":
-        return {
-          title: t("profile.editTitleSummary"),
-          icon: <FormatQuoteOutlinedIcon sx={{ fontSize: 20 }} />,
-        };
+        return t("profile.editTitleSummary");
       case "experience":
-        return {
-          title: t("profile.editTitleExperience"),
-          icon: <WorkOutlineRoundedIcon sx={{ fontSize: 20 }} />,
-        };
+        return t("profile.editTitleExperience");
       case "education":
-        return {
-          title: t("profile.editTitleEducation"),
-          icon: <SchoolOutlinedIcon sx={{ fontSize: 20 }} />,
-        };
+        return t("profile.editTitleEducation");
       case "languages":
-        return {
-          title: t("profile.editTitleLanguages"),
-          icon: <TranslateRoundedIcon sx={{ fontSize: 20 }} />,
-        };
+        return t("profile.editTitleLanguages");
       default:
-        return {
-          title: t("edit"),
-          icon: null,
-        };
+        return t("edit");
     }
   };
-
-  const { title: sectionTitle, icon: sectionIcon } = getSectionMetadata();
 
   const handleFormSubmit = (data) => {
     let updated = {
@@ -274,8 +239,6 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
         email: formatPlainString(data.email),
         phone: formatPlainString(data.phone),
         location: formatPlainString(data.location),
-        website: formatPlainString(data.website),
-        linkedin: formatPlainString(data.linkedin),
       };
     } else if (sectionKey === "summary") {
       updated.personal_summary = formatPlainString(data.personal_summary);
@@ -328,49 +291,27 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
       close={onClose}
       widthX={sectionKey === "experience" || sectionKey === "education" ? 680 : 540}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, px: 3, pt: 2.5, pb: 1.5 }}>
-        {sectionIcon && (
-          <Box
-            sx={{
-              width: 36,
-              height: 36,
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
-              color: "primary.main",
-            }}
-          >
-            {sectionIcon}
-          </Box>
-        )}
-        <CustomDialogHeader
-          variant="h6"
-          title={sectionTitle}
-          sx={{ p: 0, border: "none", flexGrow: 1 }}
-        />
-      </Box>
+      <CustomDialogHeader variant="h5" title={getSectionTitle()} />
 
       <CustomForm
-        onSubmit={handleSubmit(handleFormSubmit)}
+        handleSubmit={handleSubmit(handleFormSubmit)}
         sx={{
           display: "flex",
           flexDirection: "column",
-          maxHeight: "calc(85vh - 70px)",
+          maxHeight: "calc(85vh - 80px)",
           overflow: "hidden",
         }}
       >
         {/* Scrollable Body */}
         <Box
           sx={{
-            p: { xs: 2.5, sm: 3 },
-            pt: 1,
             overflowY: "auto",
             flexGrow: 1,
             display: "flex",
             flexDirection: "column",
             gap: 2.5,
+            pt: 1.5,
+            pr: 0.5,
             "&::-webkit-scrollbar": { width: "6px" },
             "&::-webkit-scrollbar-thumb": {
               backgroundColor: "divider",
@@ -578,20 +519,6 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
                   name="location"
                   control={control}
                   label={t("profile.location")}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <CustomTextField
-                  name="website"
-                  control={control}
-                  label={t("profile.website")}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <CustomTextField
-                  name="linkedin"
-                  control={control}
-                  label={t("profile.linkedin")}
                 />
               </Grid>
             </Grid>
@@ -1021,16 +948,8 @@ const EditSectionModal = ({ open, onClose, sectionKey, profileData, onSave, isSa
           )}
         </Box>
 
-        {/* Fixed Pinned Footer */}
-        <Box
-          sx={{
-            p: 1.5,
-            px: 3,
-            borderTop: "1px solid",
-            borderColor: "divider",
-            backgroundColor: "background.paper",
-          }}
-        >
+        {/* Footer */}
+        <Box sx={{ pt: 2, mt: 1 }}>
           <FooterButton
             onCancel={onClose}
             loading={isSaving}

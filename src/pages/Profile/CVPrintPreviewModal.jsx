@@ -69,8 +69,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           sx: {
             borderRadius: "20px",
             maxHeight: "95vh",
-            backgroundColor: (theme) =>
-              theme.palette.mode === "dark" ? "#0f172a" : "#f1f5f9",
+            backgroundColor: "background.default",
             boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.3)",
             overflow: "hidden",
             display: "flex",
@@ -89,8 +88,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           py: 2,
           borderBottom: "1px solid",
           borderColor: "divider",
-          backgroundColor: (theme) =>
-            theme.palette.mode === "dark" ? "#1e293b" : "#ffffff",
+          backgroundColor: "background.paper",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -99,17 +97,17 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: 36,
-              height: 36,
+              width: 38,
+              height: 38,
               borderRadius: "10px",
-              bgcolor: "rgba(12, 138, 123, 0.12)",
-              color: "#0c8a7b",
+              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+              color: "primary.main",
             }}
           >
             <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />
           </Box>
           <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2, color: "text.primary" }}>
               {fullName} — {t("profile.previewTitle")}
             </Typography>
             <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
@@ -133,20 +131,16 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               px: 2.5,
               py: 0.75,
               background: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "linear-gradient(135deg, #0D9488 0%, #06B6D4 100%)"
-                  : "#0E8584",
-              border: "0.5px solid #2CA7A6",
+                `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(
+                  theme.palette.primary.main,
+                  0.82
+                )} 100%)`,
               color: "#ffffff",
-              boxShadow: "0 2px 8px rgba(14, 133, 132, 0.28)",
+              boxShadow: (theme) => `0 4px 14px ${alpha(theme.palette.primary.main, 0.28)}`,
               transition: "all 0.2s ease",
               "&:hover": {
-                background: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "linear-gradient(135deg, #0B7F74 0%, #0891B2 100%)"
-                    : "#0C7776",
                 transform: "translateY(-1px)",
-                boxShadow: "0 4px 14px rgba(14, 133, 132, 0.36)",
+                boxShadow: (theme) => `0 6px 18px ${alpha(theme.palette.primary.main, 0.38)}`,
               },
             }}
           >
@@ -158,9 +152,12 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
             onClick={onClose}
             sx={{
               color: "text.secondary",
-              p: 0.75,
               borderRadius: "8px",
-              "&:hover": { backgroundColor: "action.hover" },
+              p: 0.75,
+              "&:hover": {
+                color: "text.primary",
+                backgroundColor: "action.hover",
+              },
             }}
           >
             <CloseRoundedIcon sx={{ fontSize: 20 }} />

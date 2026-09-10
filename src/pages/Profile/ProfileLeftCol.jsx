@@ -16,12 +16,9 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import MailOutlineRoundedIcon from "@mui/icons-material/MailOutlineRounded";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
 import toast from "react-hot-toast";
@@ -80,10 +77,8 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange, onPrintCv, rea
   const emailStr = formatText(contact.email);
   const phoneStr = formatText(contact.phone);
   const locationStr = formatText(contact.location);
-  const websiteStr = formatText(contact.website);
-  const linkedinStr = formatText(contact.linkedin);
 
-  const hasContactInfo = Boolean(emailStr || phoneStr || locationStr || websiteStr || linkedinStr);
+  const hasContactInfo = Boolean(emailStr || phoneStr || locationStr);
 
   return (
     <Paper
@@ -613,140 +608,6 @@ const ProfileLeftCol = ({ profile, onEditSection, onAvatarChange, onPrintCv, rea
                     {locationStr}
                   </Typography>
                 </Box>
-              </Box>
-            )}
-
-            {/* Website External Link */}
-            {websiteStr && (
-              <Box
-                component="a"
-                href={websiteStr.startsWith("http") ? websiteStr : `https://${websiteStr}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  p: 1.25,
-                  borderRadius: "10px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  bgcolor: "background.paper",
-                  textDecoration: "none",
-                  transition: "all 0.18s ease",
-                  "&:hover": {
-                    bgcolor: "action.hover",
-                    borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
-                    transform: "translateX(2px)",
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0, mr: 1 }}>
-                  <Box
-                    sx={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.09),
-                      color: "primary.main",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <LanguageRoundedIcon sx={{ fontSize: 18 }} />
-                  </Box>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography
-                      variant="caption"
-                      sx={{ color: "text.secondary", display: "block", fontSize: "0.72rem", fontWeight: 600 }}
-                    >
-                      {t("profile.website")}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "primary.main",
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {websiteStr}
-                    </Typography>
-                  </Box>
-                </Box>
-                <OpenInNewRoundedIcon sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }} />
-              </Box>
-            )}
-
-            {/* LinkedIn External Link */}
-            {linkedinStr && (
-              <Box
-                component="a"
-                href={linkedinStr.startsWith("http") ? linkedinStr : `https://${linkedinStr}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  p: 1.25,
-                  borderRadius: "10px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  bgcolor: "background.paper",
-                  textDecoration: "none",
-                  transition: "all 0.18s ease",
-                  "&:hover": {
-                    bgcolor: "action.hover",
-                    borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
-                    transform: "translateX(2px)",
-                  },
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0, mr: 1 }}>
-                  <Box
-                    sx={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.09),
-                      color: "primary.main",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <LinkedInIcon sx={{ fontSize: 18 }} />
-                  </Box>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography
-                      variant="caption"
-                      sx={{ color: "text.secondary", display: "block", fontSize: "0.72rem", fontWeight: 600 }}
-                    >
-                      {t("profile.linkedin")}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "primary.main",
-                        fontSize: "0.85rem",
-                        fontWeight: 600,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {linkedinStr}
-                    </Typography>
-                  </Box>
-                </Box>
-                <OpenInNewRoundedIcon sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }} />
               </Box>
             )}
           </Box>

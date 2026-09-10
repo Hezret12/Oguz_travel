@@ -7,8 +7,6 @@ export const EMPTY_PROFILE = {
     email: "",
     phone: "",
     location: "",
-    website: "",
-    linkedin: "",
   },
   skills: [],
   personal_summary: "",

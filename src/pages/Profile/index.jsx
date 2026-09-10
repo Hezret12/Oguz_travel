@@ -66,8 +66,6 @@ const ProfilePage = () => {
         email: extractPlainString(contact.email || user?.email),
         phone: extractPlainString(contact.phone || user?.phone_number),
         location: extractPlainString(contact.location),
-        website: extractPlainString(contact.website),
-        linkedin: extractPlainString(contact.linkedin),
       },
       skills: Array.isArray(serverData.skills) ? serverData.skills : [],
       personal_summary: extractPlainString(
@@ -110,8 +108,6 @@ const ProfilePage = () => {
       email: extractPlainString(profileData.contact?.email),
       phone: extractPlainString(profileData.contact?.phone),
       location: extractPlainString(profileData.contact?.location),
-      website: extractPlainString(profileData.contact?.website),
-      linkedin: extractPlainString(profileData.contact?.linkedin),
     },
     skills: Array.isArray(profileData.skills) ? profileData.skills : [],
     personal_summary: extractPlainString(profileData.personal_summary || profileData.personalSummary),
