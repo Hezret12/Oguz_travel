@@ -5,6 +5,8 @@ import { usePageFilters } from "../../hooks/usePageFilters";
 import PageHeader from "../../components/PageHeader";
 import FilterDrawer from "../../components/FilterDrawer";
 import OutboundFilter from "./Contents/OutboundFilter";
+import OutboundExportModal from "./Contents/OutboundExportModal";
+import ExportExcelButton from "../../components/ExportExcelButton";
 import { OUTBOUND_TABS } from "./constants";
 import { tabStyles } from "../Users/shared/modalStyles";
 import {
@@ -25,6 +27,7 @@ const OutboundPage = () => {
   // Tab State
   const [activeTab, setActiveTab] = useState("hotel");
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   // Filters State
   const {
@@ -73,7 +76,7 @@ const OutboundPage = () => {
           }}
           sx={{
             ...tabStyles,
-            mr: 2,
+            mr: 1,
           }}
         >
           {OUTBOUND_TABS.map((tab) => (
@@ -81,11 +84,21 @@ const OutboundPage = () => {
               key={tab.key}
               value={tab.key}
               label={t(tab.labelKey) || tab.key}
-              sx={{minWidth: 130}}
+              sx={{ minWidth: 130 }}
             />
           ))}
         </Tabs>
+        <ExportExcelButton onClick={() => setIsExportOpen(true)} />
       </PageHeader>
+
+      {isExportOpen && (
+        <OutboundExportModal
+          open={isExportOpen}
+          close={() => setIsExportOpen(false)}
+          queryParams={queryParams}
+          activeTab={activeTab}
+        />
+      )}
 
       <FilterDrawer
         open={isDrawerOpen}
