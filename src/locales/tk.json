@@ -154,6 +154,8 @@
     "isAdmin": "Admin",
     "startDate": "Başlangyç senesi",
     "endDate": "Gutarýan senesi",
+    "start_date": "Başlangyç senesi",
+    "end_date": "Ahyrky senesi",
     "visaStatus": "Wiza ýagdaýy"
   },
   "visa": {

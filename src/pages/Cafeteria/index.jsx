@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
+import dayjs from "dayjs";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -99,10 +100,44 @@ const Cafeteria = () => {
   const activeFilters = useMemo(
     () =>
       Object.entries(applied).filter(
-        // eslint-disable-next-line no-unused-vars
-        ([_, value]) => value !== undefined && value !== null && value !== ""
+        ([key, value]) =>
+          key !== "search" &&
+          value !== undefined &&
+          value !== null &&
+          value !== ""
       ),
     [applied]
+  );
+
+  const getFilterChipLabel = useCallback(
+    (key, value) => {
+      let fieldTitle = t(`columns.${key}`, key);
+      if (key === "start_date") {
+        fieldTitle = t("columns.startDate") || t("columns.start_date") || "Başlangyç senesi";
+      } else if (key === "end_date") {
+        fieldTitle = t("columns.endDate") || t("columns.end_date") || "Ahyrky senesi";
+      } else if (key === "type") {
+        fieldTitle = t("cafeteria.type") || "Görnüşi";
+      }
+
+      let displayVal = value;
+      if (key === "type") {
+        displayVal =
+          value === true ||
+          value === "true" ||
+          value === 1 ||
+          value === "INCOME"
+            ? t("cafeteria.types.income")
+            : t("cafeteria.types.expense");
+      } else if (key === "start_date" || key === "end_date") {
+        displayVal = dayjs(value).isValid()
+          ? dayjs(value).format("DD.MM.YYYY")
+          : value;
+      }
+
+      return `${fieldTitle}: ${displayVal}`;
+    },
+    [t]
   );
 
   const columns = useMemo(
@@ -298,37 +333,25 @@ const Cafeteria = () => {
           isFetching={isFetching}
         />
 
-        {activeFilters.map(([key, value]) => {
-          let displayVal = value;
-          if (key === "type") {
-            displayVal =
-              value === true ||
-                value === "true" ||
-                value === 1 ||
-                value === "INCOME"
-                ? t("cafeteria.types.income")
-                : t("cafeteria.types.expense");
-          }
-          return (
-            <Chip
-              key={key}
-              label={`${t(`columns.${key}`, key)}: ${displayVal}`}
-              onDelete={() => setFilter(key, "")}
-              color="primary"
-              variant="outlined"
-              size="small"
-              sx={{
-                borderRadius: "8px",
-                height: "32px",
-                fontWeight: 500,
-                "& .MuiChip-deleteIcon": {
-                  color: "primary.main",
-                  transition: "all 0.15s ease",
-                },
-              }}
-            />
-          );
-        })}
+        {activeFilters.map(([key, value]) => (
+          <Chip
+            key={key}
+            label={getFilterChipLabel(key, value)}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{
+              borderRadius: "8px",
+              height: "32px",
+              fontWeight: 500,
+              "& .MuiChip-deleteIcon": {
+                color: "primary.main",
+                transition: "all 0.15s ease",
+              },
+            }}
+          />
+        ))}
       </Box>
     ),
 

@@ -154,6 +154,8 @@
     "isAdmin": "Admin",
     "startDate": "Start Date",
     "endDate": "End Date",
+    "start_date": "Start Date",
+    "end_date": "End Date",
     "visaStatus": "Visa Status"
   },
   "visa": {
