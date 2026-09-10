@@ -37,8 +37,8 @@ const getOfficeName = (office) => {
 };
 
 const resolveOfficeName = (row) => {
-  const opr = row.refferaloperator || row.operator || row.received_opr;
-  const office = row.office || opr?.office || row.office_name || row.officeName;
+  const opr = row.received_opr;
+  const office = row.office || opr?.office;
   return getOfficeName(office);
 };
 
@@ -124,7 +124,7 @@ const resolveDateText = (letters = [], options = {}) => {
 };
 
 export const exportReferralLetterExcel = async (letters = [], options = {}) => {
-  const fileName = options.fileName || "Yollanma_Hatlary_Hasabaty";
+  const fileName = options.fileName || "Ýollanma_Hatlary_Hasabaty";
   const sheetName = options.sheetName || "Ýollanma Hatlary";
   const dateText = options.dateText || resolveDateText(letters, options);
   const titleBanner = options.titleBanner;
@@ -310,7 +310,7 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
 
     const price = Number(row.price || 0);
 
-    const clientName = row.client?.fullName ? String(row.client.fullName).toUpperCase() : "";
+    const clientName = row.client?.fullName ? String(row.client.fullName) : "";
 
     const agentName = row.agent?.name
       ? String(row.agent.name).trim()
