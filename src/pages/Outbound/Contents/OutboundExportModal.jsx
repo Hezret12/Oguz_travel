@@ -30,7 +30,7 @@ import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeade
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import FooterButton from "../../../components/Dialog/FooterButton";
 import { ExcelIcon } from "../../../components/ExportExcelButton";
-import { exportOutboundExcel, OUTBOUND_SERVICE_MAP } from "../functions/exportOutboundExcel";
+import { exportOutboundExcel } from "../functions/exportOutboundExcel";
 
 const SERVICE_CONFIGS = [
   { key: "hotel", labelKey: "outbound.hotel", icon: Building2, color: "#0E8584" },
@@ -45,7 +45,6 @@ export const OutboundExportModal = ({
   open,
   close,
   queryParams = {},
-  activeTab = "hotel",
 }) => {
   const { t, selectedLang } = useLocale();
   const theme = useTheme();
@@ -90,38 +89,6 @@ export const OutboundExportModal = ({
     }));
   };
 
-  const handleSelectAll = () => {
-    setSelectedServices({
-      hotel: true,
-      airway: true,
-      railway: true,
-      tour: true,
-      transfer: true,
-      package: true,
-    });
-  };
-
-  const handleDeselectAll = () => {
-    setSelectedServices({
-      hotel: false,
-      airway: false,
-      railway: false,
-      tour: false,
-      transfer: false,
-      package: false,
-    });
-  };
-
-  const handleSelectCurrentTabOnly = () => {
-    setSelectedServices({
-      hotel: activeTab === "hotel",
-      airway: activeTab === "airway",
-      railway: activeTab === "railway",
-      tour: activeTab === "tour",
-      transfer: activeTab === "transfer",
-      package: activeTab === "package",
-    });
-  };
 
   // Quick Date Presets
   const activePreset = useMemo(() => {
@@ -386,8 +353,8 @@ export const OutboundExportModal = ({
                               ? "rgba(14, 133, 132, 0.35)"
                               : "#FFFFFF"
                             : isDark
-                            ? "rgba(255,255,255,0.08)"
-                            : "#E2E8F0",
+                              ? "rgba(255,255,255,0.08)"
+                              : "#E2E8F0",
                         },
                       }}
                     >
@@ -501,13 +468,13 @@ export const OutboundExportModal = ({
                         borderColor: isSelected
                           ? alpha(service.color, 0.85)
                           : isDark
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(0,0,0,0.08)",
+                            ? "rgba(255,255,255,0.08)"
+                            : "rgba(0,0,0,0.08)",
                         backgroundColor: isSelected
                           ? alpha(service.color, isDark ? 0.16 : 0.07)
                           : isDark
-                          ? "rgba(255,255,255,0.02)"
-                          : "#FFFFFF",
+                            ? "rgba(255,255,255,0.02)"
+                            : "#FFFFFF",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",

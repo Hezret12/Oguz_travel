@@ -55,6 +55,60 @@ const ACCENT_RED = "FFDC2626"; // Crimson red (#DC2626) as used in TurkishAirlin
 const ACCENT_GREEN = "FF166534"; // Deep emerald (#166534)
 const CURRENCY_FMT = '"$ " #,##0.00;"$ " -#,##0.00;"$  -"';
 
+const getPaymentPillStyle = (val) => {
+  if (!val) return null;
+  const s = String(val).toLowerCase().trim();
+
+  // 1. Gaýtaryldy / Refunded / Возврат (Rich Corporate Crimson Red)
+  if (
+    s.includes("gaýtaryldy") ||
+    s.includes("gaytaryldy") ||
+    s.includes("возврат") ||
+    s.includes("refund") ||
+    s === "3"
+  ) {
+    return {
+      bg: "FFFEE2E2", // Soft rose/red tint (#FEE2E2)
+      fg: "FFB91C1C", // Deep bold crimson red (#B91C1C)
+      border: "FFF87171", // Defined red border (#F87171)
+    };
+  }
+
+  // 2. Tölendi / Paid / Оплачено (Mint & Deep Emerald Green)
+  if (
+    s.includes("tölendi") ||
+    s.includes("tolendi") ||
+    s.includes("оплачено") ||
+    s.includes("paid") ||
+    s === "1" ||
+    s === "true"
+  ) {
+    return {
+      bg: "FFDCFCE7", // Soft mint (#DCFCE7)
+      fg: "FF166534", // Deep emerald (#166534)
+      border: "FF86EFAC", // Emerald border (#86EFAC)
+    };
+  }
+
+  // 3. Kredit / Credit / Кредит (Warm Amber / Dark Orange)
+  if (
+    s.includes("kredit") ||
+    s.includes("кредит") ||
+    s.includes("credit") ||
+    s === "2" ||
+    s === "false" ||
+    s === "0"
+  ) {
+    return {
+      bg: "FFFEF3C7", // Soft amber tint (#FEF3C7)
+      fg: "FFB45309", // Warm dark amber/orange (#B45309)
+      border: "FFFCD34D", // Amber border (#FCD34D)
+    };
+  }
+
+  return null;
+};
+
 const getExcelColName = (colNum) => {
   let colName = "";
   let num = colNum;
@@ -80,13 +134,18 @@ const resolveText = (val, selectedLang) => {
   return String(val);
 };
 
-const resolveStaff = (staff, selectedLang) => {
-  if (!staff) return "";
-  const name = (staff.fullName || staff.name || "").toUpperCase();
-  const officeObj = staff.office;
-  const officeName = officeObj ? resolveText(officeObj.fullName || officeObj.shortName || officeObj, selectedLang).toUpperCase() : "";
-  return officeName ? `${name} (${officeName})` : name;
+const resolveOffice = (row, selectedLang) => {
+  const officeObj = row?.operator?.office || row?.office || row?.preparedOpr?.office;
+  if (!officeObj) return "";
+  return resolveText(officeObj.fullName || officeObj.shortName || officeObj, selectedLang).toUpperCase();
 };
+
+const resolveStaffName = (staff) => {
+  if (!staff) return "";
+  if (typeof staff === "string") return staff.trim().toUpperCase();
+  return (staff.fullName || staff.name || "").toUpperCase();
+};
+
 
 const resolvePaymentStatus = (status, t) => {
   const num = Number(status);
@@ -350,20 +409,32 @@ const buildStyledSheet = ({
         };
       }
 
-      // Payment Status Pill (Mint for Paid, Blush for Credit/Refund)
+      // Payment Status Pill (Mint for Tölendi, Warm Amber for Kredit, Bold Red for Gaýtaryldy)
       if (colIdx === isPaidColIdx && val) {
-        const isPaid = String(val).toLowerCase().includes("tölendi") || String(val).toLowerCase().includes("paid");
-        cell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: isPaid ? "FFDCFCE7" : "FFFEF2F2" },
-        };
-        cell.font = {
-          name: "Calibri",
-          size: 10,
-          bold: true,
-          color: { argb: isPaid ? ACCENT_GREEN : ACCENT_RED },
-        };
+        const pillStyle = getPaymentPillStyle(val);
+        if (pillStyle) {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: pillStyle.bg },
+          };
+          cell.font = {
+            name: "Calibri",
+            size: 10,
+            bold: true,
+            color: { argb: pillStyle.fg },
+          };
+          cell.border = {
+            top: { style: "thin", color: { argb: pillStyle.border } },
+            bottom: { style: "thin", color: { argb: pillStyle.border } },
+            left: colNumber === START_COL
+              ? { style: "medium", color: { argb: "FF000000" } }
+              : { style: "thin", color: { argb: pillStyle.border } },
+            right: colNumber === END_COL
+              ? { style: "medium", color: { argb: "FF000000" } }
+              : { style: "thin", color: { argb: pillStyle.border } },
+          };
+        }
       }
 
       // Multi-line height calculation
@@ -550,6 +621,20 @@ export const exportOutboundExcel = async ({
         accessor: (r) => formatExcelDate(r.application_date),
       },
       {
+        header: t ? t("outbound.office") : "Ofis",
+        key: "office",
+        width: 18,
+        align: "left",
+        accessor: (r) => resolveOffice(r, selectedLang),
+      },
+      {
+        header: t ? t("outbound.operator") : "Operator",
+        key: "operator",
+        width: 22,
+        align: "left",
+        accessor: (r) => resolveStaffName(r.operator),
+      },
+      {
         header: t ? t("outbound.clientName") : "Müşderi",
         key: "client_name",
         width: 26,
@@ -557,18 +642,11 @@ export const exportOutboundExcel = async ({
         accessor: (r) => (r.client?.fullName || r.client_name || "").toUpperCase(),
       },
       {
-        header: t ? t("outbound.operator") : "Operator",
-        key: "operator",
-        width: 24,
-        align: "left",
-        accessor: (r) => resolveStaff(r.operator, selectedLang),
-      },
-      {
         header: t ? t("outbound.preparedBy") : "Taýýarlan",
         key: "prepared_by",
-        width: 24,
+        width: 22,
         align: "left",
-        accessor: (r) => resolveStaff(r.preparedOpr, selectedLang),
+        accessor: (r) => resolveStaffName(r.preparedOpr),
       },
       {
         header: t ? t("outbound.netFare") : "Net baha",
@@ -606,7 +684,7 @@ export const exportOutboundExcel = async ({
         key: "paidPercentage",
         width: 10,
         align: "center",
-        accessor: (r) => `${r.paidPercentage ?? 0}%`,
+        accessor: (r) => `${r.paidPercentage ?? 0}`,
       },
       {
         header: t ? t("outbound.destinationCountry") : "Barmaly ýurt",
@@ -658,6 +736,20 @@ export const exportOutboundExcel = async ({
         accessor: (r) => formatExcelDate(r.application_date),
       },
       {
+        header: t ? t("outbound.office") : "Ofis",
+        key: "office",
+        width: 18,
+        align: "left",
+        accessor: (r) => resolveOffice(r, selectedLang),
+      },
+      {
+        header: t ? t("outbound.operator") : "Operator",
+        key: "operator",
+        width: 22,
+        align: "left",
+        accessor: (r) => resolveStaffName(r.operator),
+      },
+      {
         header: t ? t("outbound.clientName") : "Müşderi",
         key: "client_name",
         width: 26,
@@ -665,18 +757,11 @@ export const exportOutboundExcel = async ({
         accessor: (r) => (r.client?.fullName || r.client_name || "").toUpperCase(),
       },
       {
-        header: t ? t("outbound.operator") : "Operator",
-        key: "operator",
-        width: 24,
-        align: "left",
-        accessor: (r) => resolveStaff(r.operator, selectedLang),
-      },
-      {
         header: t ? t("outbound.preparedBy") : "Taýýarlan",
         key: "prepared_by",
-        width: 24,
+        width: 22,
         align: "left",
-        accessor: (r) => resolveStaff(r.preparedOpr, selectedLang),
+        accessor: (r) => resolveStaffName(r.preparedOpr),
       },
       {
         header: t ? t("outbound.netFare") : "Net baha",
