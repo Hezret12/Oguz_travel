@@ -323,7 +323,8 @@
     "activeStatus": "Işjeň",
     "experiencesCount": "Tejribe",
     "skillsCount": "Ukyp",
-    "languagesCount": "Dil"
+    "languagesCount": "Dil",
+    "downloadPdf": "PDF Ýükle"
   },
   "header": {
     "languageTooltip": "Dil / Language",

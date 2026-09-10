@@ -323,7 +323,8 @@
     "activeStatus": "Active",
     "experiencesCount": "Experience",
     "skillsCount": "Skill",
-    "languagesCount": "Language"
+    "languagesCount": "Language",
+    "downloadPdf": "Download PDF"
   },
   "header": {
     "languageTooltip": "Language / Dil",
