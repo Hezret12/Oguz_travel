@@ -55,6 +55,12 @@ const ACCENT_RED = "FFDC2626"; // Crimson red (#DC2626) as used in TurkishAirlin
 const ACCENT_GREEN = "FF166534"; // Deep emerald (#166534)
 const CURRENCY_FMT = '"$ " #,##0.00;"$ " -#,##0.00;"$  -"';
 
+const toSafeNumber = (v) => {
+  if (v === null || v === undefined || v === "") return 0;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+
 const getPaymentPillStyle = (val) => {
   if (!val) return null;
   const s = String(val).toLowerCase().trim();
@@ -229,7 +235,13 @@ const buildStyledSheet = ({
   data,
   t,
 }) => {
-  const safeSheetName = sheetName.replace(/[:*?/\\[\]]/g, "_").substring(0, 31);
+  let safeSheetName = (sheetName || "Sheet").replace(/[:*?/\\[\]]/g, "_").substring(0, 31);
+  let counter = 1;
+  while (workbook.getWorksheet(safeSheetName)) {
+    const suffix = `_${counter}`;
+    safeSheetName = `${(sheetName || "Sheet").substring(0, 31 - suffix.length)}${suffix}`;
+    counter++;
+  }
   const worksheet = workbook.addWorksheet(safeSheetName, {
     views: [{ showGridLines: true }],
   });
@@ -508,6 +520,16 @@ const buildStyledSheet = ({
         };
       }
     });
+  } else {
+    // Graceful display of $ 0.00 when sheet has 0 data records
+    [netFareColIdx, priceColIdx, profitColIdx].forEach((idx) => {
+      if (idx !== -1) {
+        const cell = totalRow.getCell(START_COL + idx);
+        cell.value = 0;
+        cell.numFmt = CURRENCY_FMT;
+        cell.font = { name: "Calibri", size: 10.5, bold: true, color: { argb: "FF000000" } };
+      }
+    });
   }
 };
 
@@ -559,9 +581,19 @@ export const exportOutboundExcel = async ({
       });
     }
 
-    const items = await fetchAllPaginatedData(def.apiFn, cleanFilterParams, null, 100);
-    servicesData[key] = items || [];
-    totalLoadedRecords += (items || []).length;
+    try {
+      const items = await fetchAllPaginatedData(def.apiFn, cleanFilterParams, null, 100);
+      servicesData[key] = items || [];
+      totalLoadedRecords += (items || []).length;
+    } catch (fetchErr) {
+      console.error(`Error loading ${serviceName} outbound data:`, fetchErr);
+      throw new Error(
+        t
+          ? `${serviceName} maglumatlary alynýarka säwlik ýüze çykdy: ${fetchErr?.message || ""}`
+          : `Error loading data for ${serviceName}: ${fetchErr?.message || ""}`,
+        { cause: fetchErr }
+      );
+    }
   }
 
   if (totalLoadedRecords === 0) {
@@ -654,7 +686,7 @@ export const exportOutboundExcel = async ({
         width: 15,
         align: "right",
         isCurrency: true,
-        accessor: (r) => Number(r.net_fare || 0),
+        accessor: (r) => toSafeNumber(r.net_fare),
       },
       {
         header: t ? t("outbound.price") : "Satyş baha",
@@ -662,7 +694,7 @@ export const exportOutboundExcel = async ({
         width: 15,
         align: "right",
         isCurrency: true,
-        accessor: (r) => Number(r.price || 0),
+        accessor: (r) => toSafeNumber(r.price),
       },
       {
         header: t ? t("outbound.profit") : "Peýda",
@@ -670,7 +702,7 @@ export const exportOutboundExcel = async ({
         width: 15,
         align: "right",
         isCurrency: true,
-        accessor: (r) => Number(r.profit ?? ((r.price || 0) - (r.net_fare || 0))),
+        accessor: (r) => toSafeNumber(r.profit ?? (toSafeNumber(r.price) - toSafeNumber(r.net_fare))),
       },
       {
         header: t ? t("outbound.paymentStatus") : "Töleg ýagdaýy",
@@ -769,7 +801,7 @@ export const exportOutboundExcel = async ({
         width: 15,
         align: "right",
         isCurrency: true,
-        accessor: (r) => Number(r.net_fare || 0),
+        accessor: (r) => toSafeNumber(r.net_fare),
       },
       {
         header: t ? t("outbound.price") : "Satyş baha",
@@ -777,7 +809,7 @@ export const exportOutboundExcel = async ({
         width: 15,
         align: "right",
         isCurrency: true,
-        accessor: (r) => Number(r.price || 0),
+        accessor: (r) => toSafeNumber(r.price),
       },
       {
         header: t ? t("outbound.profit") : "Peýda",
@@ -785,7 +817,7 @@ export const exportOutboundExcel = async ({
         width: 15,
         align: "right",
         isCurrency: true,
-        accessor: (r) => Number(r.profit ?? ((r.price || 0) - (r.net_fare || 0))),
+        accessor: (r) => toSafeNumber(r.profit ?? (toSafeNumber(r.price) - toSafeNumber(r.net_fare))),
       },
       {
         header: t ? t("outbound.paymentStatus") : "Töleg ýagdaýy",
@@ -799,7 +831,7 @@ export const exportOutboundExcel = async ({
         key: "paidPercentage",
         width: 10,
         align: "center",
-        accessor: (r) => `${r.paidPercentage ?? 0}%`,
+        accessor: (r) => `${r.paidPercentage ?? 0}`,
       },
       {
         header: t ? t("outbound.destinationCountry") : "Barmaly ýurt",
