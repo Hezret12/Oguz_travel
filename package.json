@@ -23,6 +23,7 @@
     "dayjs": "^1.11.21",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
+    "html2pdf.js": "^0.14.0",
     "i18next": "^26.3.0",
     "js-cookie": "^3.0.8",
     "lucide-react": "^1.28.0",
