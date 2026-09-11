@@ -131,23 +131,26 @@ const ReferalLetter = () => {
 
   const getFilterLabel = useCallback(
     (key, value) => {
-      if (key === "start_date") {
-        return `${t("columns.startDate")}: ${formatChange(value, { dateOnly: true })}`;
-      }
-      if (key === "end_date") {
-        return `${t("columns.endDate")}: ${formatChange(value, { dateOnly: true })}`;
-      }
       if (key === "received_opr_guid") {
         return `${t("columns.operator")}: ${employeeById[value]?.fullName || value}`;
       }
-      if (key === "departure_date") {
-        return `${t("columns.departureDate")}: ${formatChange(value, { dateOnly: true })}`;
+      if (key === "start_departure_date") {
+        return `${t("columns.startDepartureDate")}: ${formatChange(value, { dateOnly: true })}`;
       }
-      if (key === "return_date") {
-        return `${t("columns.returnDate")}: ${formatChange(value, { dateOnly: true })}`;
+      if (key === "end_departure_date") {
+        return `${t("columns.endDepartureDate")}: ${formatChange(value, { dateOnly: true })}`;
       }
-      if (key === "contract_date") {
-        return `${t("columns.contractDate")}: ${formatChange(value, { dateOnly: true })}`;
+      if (key === "start_return_date") {
+        return `${t("columns.startReturnDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      if (key === "end_return_date") {
+        return `${t("columns.endReturnDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      if (key === "start_contract_date") {
+        return `${t("columns.startContractDate")}: ${formatChange(value, { dateOnly: true })}`;
+      }
+      if (key === "end_contract_date") {
+        return `${t("columns.endContractDate")}: ${formatChange(value, { dateOnly: true })}`;
       }
       return `${t(`columns.${key}`, key)}: ${value}`;
     },

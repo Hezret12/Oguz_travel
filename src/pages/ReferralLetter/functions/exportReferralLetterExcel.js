@@ -57,8 +57,16 @@ const getTurkmenOrdinalSuffix = (year) => {
 const resolveDateText = (letters = [], options = {}) => {
   let years = [];
 
-  const startD = options.start_date || options.queryParams?.start_date;
-  const endD = options.end_date || options.queryParams?.end_date;
+  const startD =
+    options.start_date ||
+    options.queryParams?.start_date ||
+    options.queryParams?.start_departure_date ||
+    options.queryParams?.start_contract_date;
+  const endD =
+    options.end_date ||
+    options.queryParams?.end_date ||
+    options.queryParams?.end_departure_date ||
+    options.queryParams?.end_contract_date;
 
   if (startD && endD) {
     const sY = dayjs(startD).year();

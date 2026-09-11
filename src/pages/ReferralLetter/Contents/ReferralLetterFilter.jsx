@@ -1,4 +1,4 @@
-import { FormControl, Stack, Typography } from "@mui/material";
+import { Box, FormControl, Stack, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
@@ -68,29 +68,137 @@ const ReferralLetterFilter = ({
         size="small"
       />
 
-      {/* Departure Date */}
-      <FilterDatePicker
-        label={t("columns.departureDate")}
-        name="departure_date"
-        value={filters?.departure_date}
-        onChange={handleDateChange}
-      />
+      {/* Departure Date Group */}
+      <Box
+        sx={{
+          p: 1.75,
+          borderRadius: "10px",
+          border: "1px solid",
+          borderColor: "divider",
+          backgroundColor: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.02)"
+              : "rgba(0, 0, 0, 0.015)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            color: "primary.main",
+          }}
+        >
+          {t("columns.departureDate")}
+        </Typography>
 
-      {/* Return Date */}
-      <FilterDatePicker
-        label={t("columns.returnDate")}
-        name="return_date"
-        value={filters?.return_date}
-        onChange={handleDateChange}
-      />
+        <FilterDatePicker
+          label={t("columns.startDate")}
+          name="start_departure_date"
+          value={filters?.start_departure_date}
+          maxDate={filters?.end_departure_date}
+          onChange={handleDateChange}
+        />
 
-      {/* Contract Date */}
-      <FilterDatePicker
-        label={t("columns.contractDate")}
-        name="contract_date"
-        value={filters?.contract_date}
-        onChange={handleDateChange}
-      />
+        <FilterDatePicker
+          label={t("columns.endDate")}
+          name="end_departure_date"
+          value={filters?.end_departure_date}
+          minDate={filters?.start_departure_date}
+          onChange={handleDateChange}
+        />
+      </Box>
+
+      {/* Return Date Group */}
+      <Box
+        sx={{
+          p: 1.75,
+          borderRadius: "10px",
+          border: "1px solid",
+          borderColor: "divider",
+          backgroundColor: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.02)"
+              : "rgba(0, 0, 0, 0.015)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            color: "primary.main",
+          }}
+        >
+          {t("columns.returnDate")}
+        </Typography>
+
+        <FilterDatePicker
+          label={t("columns.startDate")}
+          name="start_return_date"
+          value={filters?.start_return_date}
+          maxDate={filters?.end_return_date}
+          onChange={handleDateChange}
+        />
+
+        <FilterDatePicker
+          label={t("columns.endDate")}
+          name="end_return_date"
+          value={filters?.end_return_date}
+          minDate={filters?.start_return_date}
+          onChange={handleDateChange}
+        />
+      </Box>
+
+      {/* Contract Date Group */}
+      <Box
+        sx={{
+          p: 1.75,
+          borderRadius: "10px",
+          border: "1px solid",
+          borderColor: "divider",
+          backgroundColor: (theme) =>
+            theme.palette.mode === "dark"
+              ? "rgba(255, 255, 255, 0.02)"
+              : "rgba(0, 0, 0, 0.015)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{
+            fontWeight: 700,
+            fontSize: "0.85rem",
+            color: "primary.main",
+          }}
+        >
+          {t("columns.contractDate")}
+        </Typography>
+
+        <FilterDatePicker
+          label={t("columns.startDate")}
+          name="start_contract_date"
+          value={filters?.start_contract_date}
+          maxDate={filters?.end_contract_date}
+          onChange={handleDateChange}
+        />
+
+        <FilterDatePicker
+          label={t("columns.endDate")}
+          name="end_contract_date"
+          value={filters?.end_contract_date}
+          minDate={filters?.start_contract_date}
+          onChange={handleDateChange}
+        />
+      </Box>
     </Stack>
   );
 };
