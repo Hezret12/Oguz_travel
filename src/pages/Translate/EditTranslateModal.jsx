@@ -95,7 +95,7 @@ const EditTranslateModal = ({ table, row }) => {
       expense_price:
         row?.original?.expense_price != null
           ? Number(row.original.expense_price)
-          : (row?.original?.profit != null ? Number(row.original.profit) : 0),
+          : 0,
       note: row?.original?.note || "",
       is_paid:
         row?.original?.is_paid !== undefined ? row.original.is_paid : true,

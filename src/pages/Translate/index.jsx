@@ -98,7 +98,6 @@ const TranslatePage = () => {
     totalItems,
     totalPrice = 0,
     totalExpense = 0,
-    totalProfit = 0,
     meta,
   } = usePagginationGet({
     apiFn: getAllTranslationsApi,
@@ -271,7 +270,7 @@ const TranslatePage = () => {
         },
       },
       {
-        accessorFn: (row) => (row.expense_price != null ? row.expense_price : row.profit),
+        accessorFn: (row) => row.expense_price,
         id: "expense_price",
         header: t("columns.expensePrice"),
         size: 110,
@@ -573,50 +572,6 @@ const TranslatePage = () => {
               </>
             )}
 
-            {(Number(totalProfit) !== 0 || meta?.totalProfit != null) && (
-              <>
-                <Box
-                  component="span"
-                  sx={{
-                    width: "1px",
-                    height: "14px",
-                    backgroundColor: "divider",
-                    mx: 0.5,
-                  }}
-                />
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontSize: "0.825rem",
-                    color: "text.secondary",
-                    fontWeight: 500,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.6,
-                  }}
-                >
-                  {t("columns.totalProfit")}:
-                  <Box
-                    component="span"
-                    sx={{
-                      color:
-                        Number(totalProfit || meta?.totalProfit || 0) >= 0
-                          ? "#16a34a"
-                          : "#ef4444",
-                      fontWeight: 700,
-                      fontVariantNumeric: "tabular-nums",
-                    }}
-                  >
-                    {Number(totalProfit || meta?.totalProfit || 0) > 0 ? "+" : ""}
-                    {new Intl.NumberFormat("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }).format(Number(totalProfit || meta?.totalProfit || 0))}{" "}
-                    TMT
-                  </Box>
-                </Typography>
-              </>
-            )}
           </Box>
           <Pagination
             pageIndex={pageIndex}
