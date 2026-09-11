@@ -65,7 +65,7 @@ const AddTranslateModal = ({ table }) => {
       translator_guid: null,
       correction_status: null,
       price: null,
-      profit: null,
+      expense_price: null,
       note: '',
       is_paid: null,
     },
@@ -110,7 +110,7 @@ const AddTranslateModal = ({ table }) => {
       page_count: Number(data.page_count || 0),
       completed_page_count: Number(data.completed_page_count || 0),
       price: Number(data.price || 0),
-      profit: Number(data.profit || 0),
+      expense_price: Number(data.expense_price || 0),
       is_paid: data.is_paid === 0 || data.is_paid === "0"
         ? 0
         : (data.is_paid === true || data.is_paid === "true"),
@@ -289,13 +289,13 @@ const AddTranslateModal = ({ table }) => {
               />
             </Grid>
 
-            {/* Profit */}
+            {/* Expense Price */}
             <Grid size={4}>
               <CustomTextField
-                name="profit"
+                name="expense_price"
                 control={control}
                 type="number"
-                label={t("columns.profit")}
+                label={t("columns.expensePrice")}
                 endIcon="TMT"
               />
             </Grid>

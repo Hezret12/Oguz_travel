@@ -92,7 +92,10 @@ const EditTranslateModal = ({ table, row }) => {
         "",
       correction_status: row?.original?.correction_status || "",
       price: row?.original?.price != null ? Number(row.original.price) : 0,
-      profit: row?.original?.profit != null ? Number(row.original.profit) : 0,
+      expense_price:
+        row?.original?.expense_price != null
+          ? Number(row.original.expense_price)
+          : (row?.original?.profit != null ? Number(row.original.profit) : 0),
       note: row?.original?.note || "",
       is_paid:
         row?.original?.is_paid !== undefined ? row.original.is_paid : true,
@@ -153,7 +156,7 @@ const EditTranslateModal = ({ table, row }) => {
       page_count: Number(data.page_count || 0),
       completed_page_count: Number(data.completed_page_count || 0),
       price: Number(data.price || 0),
-      profit: Number(data.profit || 0),
+      expense_price: Number(data.expense_price || 0),
       is_paid:
         data.is_paid === 0 || data.is_paid === "0"
           ? 0
@@ -379,13 +382,13 @@ const EditTranslateModal = ({ table, row }) => {
               />
             </Grid>
 
-            {/* Profit */}
+            {/* Profit / Expense Price */}
             <Grid size={4}>
               <CustomTextField
                 name="profit"
                 control={control}
                 type="number"
-                label={t("columns.profit")}
+                label={t("columns.expensePrice")}
                 endIcon="TMT"
               />
             </Grid>
