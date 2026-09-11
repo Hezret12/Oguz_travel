@@ -58,24 +58,6 @@ const ReferralLetterFilter = ({
 
   return (
     <Stack spacing={2.5}>
-      {/* Start Date */}
-      <FilterDatePicker
-        label={t("columns.startDate")}
-        name="start_date"
-        value={filters?.start_date}
-        maxDate={filters?.end_date}
-        onChange={handleDateChange}
-      />
-
-      {/* End Date */}
-      <FilterDatePicker
-        label={t("columns.endDate")}
-        name="end_date"
-        value={filters?.end_date}
-        minDate={filters?.start_date}
-        onChange={handleDateChange}
-      />
-
       {/* Operator (received_opr_guid) */}
       <GlobalEmployeeAutocomplete
         name="received_opr_guid"

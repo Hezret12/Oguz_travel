@@ -166,15 +166,6 @@ const ReferalLetter = () => {
         muiTableBodyCellProps: { align: "right" },
       },
       {
-        accessorKey: "date_time",
-        id: "date_time",
-        header: t("columns.date"),
-        size: 100,
-        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-      },
-      {
         id: "operator",
         header: t("outbound.operator"),
         size: 200,
