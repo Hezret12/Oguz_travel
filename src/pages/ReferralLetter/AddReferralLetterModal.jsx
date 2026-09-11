@@ -101,26 +101,12 @@ const AddReferralLetterModal = ({ table }) => {
             mb: 2,
           }}
         >
-          <Box
-            sx={{
-              gridColumn: "1 / -1",
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "1fr 200px" },
-              gap: 2.5,
-              alignItems: "flex-start",
-            }}
-          >
+          <Box sx={{ gridColumn: "1 / -1" }}>
             <GlobalClientAutocomplete
               control={control}
               name="client_guid"
               label={t("columns.client")}
               columns={autocompleteColumns}
-            />
-            <CustomDatePicker
-              name="date_time"
-              control={control}
-              label={t("columns.date")}
-              required
             />
           </Box>
 
