@@ -55,6 +55,7 @@ export const useValidShema = () => {
   });
 
   const addReferralLetter = yup.object({
+    bgn_departure: stringOptionalValidSchema(),
     note: stringOptionalValidSchema(),
   });
 

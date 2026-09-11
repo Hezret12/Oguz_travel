@@ -45,7 +45,7 @@ const AddReferralLetterModal = ({ table }) => {
       received_opr_guid: null,
       agent: { name: null, phone_number: null },
       destination_country: null,
-      tranzit: null,
+      bgn_departure: null,
       travel_document_number: null,
       departure_date: null,
       return_date: null,
@@ -139,9 +139,9 @@ const AddReferralLetterModal = ({ table }) => {
           />
 
           <CustomTextField
-            name="tranzit"
+            name="bgn_departure"
             control={control}
-            label={t("columns.transit")}
+            label={t("columns.bgnDeparture")}
           />
 
           <CustomDatePicker

@@ -167,11 +167,11 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       note: "Gidýän Ýurdy",
     },
     {
-      header: "Tranzit",
-      key: "tranzit",
+      header: "BGN Gidiş",
+      key: "bgn_departure",
       width: 16,
       align: "center",
-      note: "1nji geçýän üstaşyr ýurdy",
+      note: "BGN Gidiş",
     },
     {
       header: "S-ÝH №",
@@ -327,7 +327,7 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       formatDate(row.client?.dateOfBirth),
       row.client?.passport_number ? String(row.client.passport_number).toUpperCase() : "",
       row.destination_country ? String(row.destination_country).trim() : "",
-      row.tranzit ? String(row.tranzit).trim() : "",
+      row.bgn_departure ? String(row.bgn_departure).trim() : (row.tranzit ? String(row.tranzit).trim() : ""),
       row.travel_document_number ? String(row.travel_document_number).trim() : "",
       formatDate(row.departure_date),
       formatDate(row.return_date),

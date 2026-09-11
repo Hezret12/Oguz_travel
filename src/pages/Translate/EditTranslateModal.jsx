@@ -390,6 +390,7 @@ const EditTranslateModal = ({ table, row }) => {
                 type="number"
                 label={t("columns.expensePrice")}
                 endIcon="TMT"
+                required
               />
             </Grid>
 

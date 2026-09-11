@@ -50,7 +50,7 @@ const EditReferralLetterModal = ({ table, row }) => {
         phone_number: row?.original?.agent?.phone_number || null,
       },
       destination_country: row?.original?.destination_country || null,
-      tranzit: row?.original?.tranzit || null,
+      bgn_departure: row?.original?.bgn_departure || row?.original?.tranzit || null,
       travel_document_number: row?.original?.travel_document_number || null,
       departure_date: row?.original?.departure_date || null,
       return_date: row?.original?.return_date || null,
@@ -161,9 +161,9 @@ const EditReferralLetterModal = ({ table, row }) => {
           />
 
           <CustomTextField
-            name="tranzit"
+            name="bgn_departure"
             control={control}
-            label={t("columns.transit")}
+            label={t("columns.bgnDeparture")}
           />
 
           <CustomDatePicker

@@ -114,6 +114,7 @@
     "changeAmount": "Сдача",
     "destinationCountry": "Страна назначения",
     "transit": "Транзит",
+    "bgnDeparture": "BGN Выезд",
     "departureDate": "Дата выезда",
     "returnDate": "Дата возврата",
     "contractDate": "Дата договора",

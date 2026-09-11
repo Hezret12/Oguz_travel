@@ -113,6 +113,7 @@
     "changeAmount": "Change",
     "destinationCountry": "Destination Country",
     "transit": "Transit",
+    "bgnDeparture": "BGN Departure",
     "departureDate": "Departure Date",
     "returnDate": "Return Date",
     "contractDate": "Contract Date",

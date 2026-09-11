@@ -297,6 +297,7 @@ const AddTranslateModal = ({ table }) => {
                 type="number"
                 label={t("columns.expensePrice")}
                 endIcon="TMT"
+                required
               />
             </Grid>
 

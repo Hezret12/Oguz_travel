@@ -98,7 +98,6 @@ const TranslatePage = () => {
     totalItems,
     totalPrice = 0,
     totalExpense = 0,
-    meta,
   } = usePagginationGet({
     apiFn: getAllTranslationsApi,
     key: "translations",

@@ -125,10 +125,10 @@ export const REFERRAL_LETTER_EXCEL_COLUMNS = [
     accessor: (row) => row.destination_country || "",
   },
   {
-    header: "Tranzit",
-    width: 11,
+    header: "BGN Gidiş",
+    width: 14,
     align: "center",
-    accessor: (row) => row.tranzit || "",
+    accessor: (row) => row.bgn_departure || row.tranzit || "",
   },
   {
     header: "S-ÝH №",
