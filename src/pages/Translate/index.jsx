@@ -271,31 +271,15 @@ const TranslatePage = () => {
         },
       },
       {
-        accessorFn: (row) => row.profit,
-        id: "profit",
-        header: t("columns.profit"),
+        accessorFn: (row) => (row.expense_price != null ? row.expense_price : row.profit),
+        id: "expense_price",
+        header: t("columns.expensePrice"),
         size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
         Cell: ({ cell }) => {
-          const profit = Number(cell.getValue() || 0);
-          return (
-            <Box
-              sx={{
-                fontWeight: 600,
-                fontVariantNumeric: "tabular-nums",
-                color:
-                  profit > 0
-                    ? "#16a34a"
-                    : profit < 0
-                      ? "#ef4444"
-                      : "text.secondary",
-              }}
-            >
-              {profit > 0 ? "+" : ""}
-              {profit.toFixed(2)} TMT
-            </Box>
-          );
+          const val = Number(cell.getValue() || 0);
+          return `${val.toFixed(2)} TMT`;
         },
       },
       {
@@ -570,7 +554,7 @@ const TranslatePage = () => {
                     gap: 0.6,
                   }}
                 >
-                  {t("columns.totalPrice")}:
+                  {t("columns.totalExpense")}:
                   <Box
                     component="span"
                     sx={{

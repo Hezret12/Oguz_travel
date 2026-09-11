@@ -382,10 +382,10 @@ const EditTranslateModal = ({ table, row }) => {
               />
             </Grid>
 
-            {/* Profit / Expense Price */}
+            {/* Expense Price */}
             <Grid size={4}>
               <CustomTextField
-                name="profit"
+                name="expense_price"
                 control={control}
                 type="number"
                 label={t("columns.expensePrice")}
