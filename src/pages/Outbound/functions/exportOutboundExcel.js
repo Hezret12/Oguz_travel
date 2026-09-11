@@ -53,11 +53,14 @@ export const OUTBOUND_SERVICE_MAP = {
 
 const ACCENT_RED = "FFDC2626"; // Crimson red (#DC2626) as used in TurkishAirlines & B2B
 const ACCENT_GREEN = "FF166534"; // Deep emerald (#166534)
-const CURRENCY_FMT = '"$ " #,##0.00;"$ " -#,##0.00;"$  -"';
+const CURRENCY_FMT = '"$ "#,##0.00;"$ "-#,##0.00;"$ -"';
 
 const toSafeNumber = (v) => {
   if (v === null || v === undefined || v === "") return 0;
-  const n = Number(v);
+  if (typeof v === "number") return Number.isFinite(v) ? v : 0;
+  const cleaned = String(v).replace(/,/g, ".").replace(/[^0-9.-]/g, "").trim();
+  if (cleaned === "" || cleaned === "-") return 0;
+  const n = Number(cleaned);
   return Number.isFinite(n) ? n : 0;
 };
 
@@ -360,6 +363,8 @@ const buildStyledSheet = ({
     to: { row: START_ROW, column: END_COL },
   };
 
+  const colMaxLens = columns.map((c) => (c.header ? String(c.header).length : 10));
+
   // Data Rows (Starting at Row 5)
   data.forEach((item, rowOffset) => {
     const rowIndex = START_ROW + 1 + rowOffset;
@@ -401,6 +406,14 @@ const buildStyledSheet = ({
           ? { style: "medium", color: { argb: "FF000000" } }
           : { style: "thin", color: { argb: "FFD9D9D9" } },
       };
+
+      // Single-pass length tracking
+      if (val !== null && val !== undefined && val !== "") {
+        const len = String(val).length;
+        if (len > colMaxLens[colIdx]) {
+          colMaxLens[colIdx] = len;
+        }
+      }
 
       // Currency Formatting
       if (col.isCurrency && typeof val === "number") {
@@ -532,6 +545,12 @@ const buildStyledSheet = ({
       }
     });
   }
+
+  // Apply auto-fitted column widths (O(Columns) - zero extra cell lookups)
+  columns.forEach((col, idx) => {
+    const baseWidth = col.width || 14;
+    worksheet.getColumn(START_COL + idx).width = Math.min(Math.max(baseWidth, colMaxLens[idx] + 3), 48);
+  });
 };
 
 /**

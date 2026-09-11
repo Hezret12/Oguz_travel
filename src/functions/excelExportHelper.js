@@ -208,6 +208,8 @@ export const exportStyledExcelFile = async ({
     width: col.width || 15,
   }));
 
+  const colMaxLens = columns.map((c) => (c.header ? String(c.header).length : 10));
+
   // Data Rows
   data.forEach((rowItem, rowOffset) => {
     const currentRow = worksheet.getRow(startRowIndex + 1 + rowOffset);
@@ -224,7 +226,24 @@ export const exportStyledExcelFile = async ({
         horizontal: col.align || "center",
       };
       cell.border = thinBorder;
+
+      // Single-pass length tracking
+      if (rawValue != null && rawValue !== "") {
+        const len = String(rawValue).length;
+        if (len > colMaxLens[colIdx]) {
+          colMaxLens[colIdx] = len;
+        }
+        if (len > 40) {
+          cell.alignment.wrapText = true;
+        }
+      }
     });
+  });
+
+  // Apply auto-fitted column widths (O(Columns) - zero extra cell lookups)
+  columns.forEach((col, colIdx) => {
+    const baseWidth = col.width || 15;
+    worksheet.getColumn(colIdx + 1).width = Math.min(Math.max(baseWidth, colMaxLens[colIdx] + 3), 48);
   });
 
   // Generate buffer and trigger download

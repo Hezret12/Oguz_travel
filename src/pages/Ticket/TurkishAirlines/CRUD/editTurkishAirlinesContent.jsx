@@ -141,6 +141,12 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
   });
   const currencySymbol = CURRENCY_SYMBOLS[selectedCurrency] || "$";
 
+  const parseSafeNumber = (val) => {
+    if (val === "" || val === null || val === undefined || val === "-") return 0;
+    const num = Number(val);
+    return Number.isFinite(num) ? num : 0;
+  };
+
   const handleTotalAmountChange = (event) => {
     const nextValue = event?.target?.value ?? event ?? "";
     setValue("total_price", nextValue, {
@@ -152,7 +158,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
       return;
     }
 
-    if (nextValue === "") {
+    if (nextValue === "" || nextValue === "-") {
       setValue("quoted_price", "", {
         shouldDirty: true,
         shouldValidate: true,
@@ -200,11 +206,11 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
         flight_date: data.flight_date
           ? new Date(data.flight_date).toISOString()
           : new Date().toISOString(),
-        total_price: Number(data.total_price || 0),
-        base_fare: Number(data.base_fare || 0),
-        quoted_price: Number(data.quoted_price || 0),
-        accepted_price: Number(data.accepted_price || 0),
-        returned_price: Number(data.returned_price || 0),
+        total_price: parseSafeNumber(data.total_price),
+        base_fare: parseSafeNumber(data.base_fare),
+        quoted_price: parseSafeNumber(data.quoted_price),
+        accepted_price: parseSafeNumber(data.accepted_price),
+        returned_price: parseSafeNumber(data.returned_price),
         currency: data.currency || "USD",
         office_guid: data.office_guid || null,
         note: data.note?.trim() || "",

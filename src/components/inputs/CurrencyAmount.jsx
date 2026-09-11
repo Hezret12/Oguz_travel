@@ -15,8 +15,11 @@ const DEFAULT_CURRENCIES = [
   { code: "TMT", symbol: "m" },
 ];
 
-function sanitizeDecimalInput(raw) {
-  let value = raw.replace(",", ".").replace(/[^0-9.]/g, "");
+function sanitizeDecimalInput(raw, allowNegative = true) {
+  if (raw === null || raw === undefined) return "";
+  const rawStr = String(raw);
+  const isNegative = allowNegative && rawStr.includes("-");
+  let value = rawStr.replace(",", ".").replace(/[^0-9.]/g, "");
 
   const firstDot = value.indexOf(".");
   if (firstDot !== -1) {
@@ -27,6 +30,10 @@ function sanitizeDecimalInput(raw) {
 
   if (value.length > 1 && value[0] === "0" && value[1] !== ".") {
     value = value.replace(/^0+/, "") || "0";
+  }
+
+  if (isNegative) {
+    return "-" + value;
   }
 
   return value;
@@ -94,6 +101,7 @@ const CurrencyAmount = forwardRef(function CurrencyAmount(
     size = "medium",
     placeholder = "0.00",
     required = false,
+    allowNegative = true,
     sx = {},
   },
   ref
@@ -103,7 +111,7 @@ const CurrencyAmount = forwardRef(function CurrencyAmount(
   );
 
   const handleAmountChange = (nextValue, fieldOnChange, fieldValue) => {
-    const cleaned = sanitizeDecimalInput(nextValue);
+    const cleaned = sanitizeDecimalInput(nextValue, allowNegative);
 
     if (fieldValue && typeof fieldValue === "object" && !Array.isArray(fieldValue)) {
       const nextFieldValue = {

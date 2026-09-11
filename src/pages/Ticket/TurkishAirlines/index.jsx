@@ -342,7 +342,9 @@ const TurkishAirlines = () => {
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          return `${symbol}${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(cell.getValue() ?? 0))}`;
+          const val = Number(cell.getValue() ?? 0);
+          const formatted = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(val));
+          return `${val < 0 ? "-" : ""}${symbol}${formatted}`;
         },
         muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
@@ -355,18 +357,20 @@ const TurkishAirlines = () => {
         Cell: ({ row }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          const quoted = new Intl.NumberFormat("en-US", {
+          const quotedNum = Number(row.original.quoted_price ?? 0);
+          const totalNum = Number(row.original.total_price ?? 0);
+          const quotedFormatted = new Intl.NumberFormat("en-US", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-          }).format(Number(row.original.quoted_price ?? 0));
-          const total = new Intl.NumberFormat("en-US", {
+          }).format(Math.abs(quotedNum));
+          const totalFormatted = new Intl.NumberFormat("en-US", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-          }).format(Number(row.original.total_price ?? 0));
+          }).format(Math.abs(totalNum));
           return (
             <StackedCell
-              primary={`${symbol}${quoted}`}
-              secondary={`${symbol}${total}`}
+              primary={`${quotedNum < 0 ? "-" : ""}${symbol}${quotedFormatted}`}
+              secondary={`${totalNum < 0 ? "-" : ""}${symbol}${totalFormatted}`}
             />
           );
         },
@@ -380,7 +384,9 @@ const TurkishAirlines = () => {
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          return `${symbol}${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(cell.getValue() ?? 0))}`;
+          const val = Number(cell.getValue() ?? 0);
+          const formatted = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(val));
+          return `${val < 0 ? "-" : ""}${symbol}${formatted}`;
         },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
@@ -392,7 +398,9 @@ const TurkishAirlines = () => {
         Cell: ({ row, cell }) => {
           const currencyCode = row.original.currency || "USD";
           const symbol = CURRENCY_SYMBOLS[currencyCode] || "$";
-          return `${symbol}${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(cell.getValue() ?? 0))}`;
+          const val = Number(cell.getValue() ?? 0);
+          const formatted = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(val));
+          return `${val < 0 ? "-" : ""}${symbol}${formatted}`;
         },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },

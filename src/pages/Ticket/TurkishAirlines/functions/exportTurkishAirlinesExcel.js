@@ -257,7 +257,18 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     to: { row: START_ROW, column: END_COL },
   };
 
-  const currencyNumFmt = '"$ " #,##0.00;"$ " -#,##0.00;"$  -"';
+  const parseExcelNumber = (val) => {
+    if (val === null || val === undefined || val === "") return null;
+    if (typeof val === "number") return Number.isFinite(val) ? val : null;
+    const cleaned = String(val).replace(/,/g, ".").replace(/[^0-9.-]/g, "").trim();
+    if (cleaned === "" || cleaned === "-") return null;
+    const num = Number(cleaned);
+    return Number.isFinite(num) ? num : null;
+  };
+
+  const currencyNumFmt = '"$ "#,##0.00;"$ "-#,##0.00;"$ -"';
+
+  const colMaxLens = columnsConfig.map((c) => (c.header ? String(c.header).length : 10));
 
   let sumTotal = 0;
   let sumBase = 0;
@@ -271,17 +282,11 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     const currentRow = worksheet.getRow(rowIndex);
     currentRow.height = 20;
 
-    const totalPrice = Number(row.total_price || 0);
-    const baseFare = Number(row.base_fare || 0);
-    const quotedPrice = Number(row.quoted_price || 0);
-    const acceptedPrice =
-      row.accepted_price !== null && row.accepted_price !== undefined && row.accepted_price !== ""
-        ? Number(row.accepted_price)
-        : null;
-    const returnedPrice =
-      row.returned_price !== null && row.returned_price !== undefined && row.returned_price !== ""
-        ? Number(row.returned_price)
-        : null;
+    const totalPrice = parseExcelNumber(row.total_price) ?? 0;
+    const baseFare = parseExcelNumber(row.base_fare) ?? 0;
+    const quotedPrice = parseExcelNumber(row.quoted_price) ?? 0;
+    const acceptedPrice = parseExcelNumber(row.accepted_price);
+    const returnedPrice = parseExcelNumber(row.returned_price);
 
     sumTotal += totalPrice;
     sumBase += baseFare;
@@ -346,6 +351,17 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
         vertical: "middle",
         horizontal: columnsConfig[idx].align,
       };
+
+      // Single-pass length tracking (zero extra DOM/cell lookups)
+      if (val !== null && val !== undefined && val !== "") {
+        const len = String(val).length;
+        if (len > colMaxLens[idx]) {
+          colMaxLens[idx] = len;
+        }
+        if (len > 40) {
+          cell.alignment.wrapText = true;
+        }
+      }
 
       // Apply Zebra background
       cell.fill = {
@@ -481,14 +497,13 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
         }
       }
     });
-
-    const noteColIdx = columnsConfig.findIndex((c) => c.key === "note");
-    if (noteColIdx !== -1) {
-      const cellNote = totalRow.getCell(START_COL + noteColIdx);
-      cellNote.value = 0;
-      cellNote.numFmt = currencyNumFmt;
-    }
   }
+
+  // Apply auto-fitted column widths (O(Columns) - zero extra cell lookups)
+  columnsConfig.forEach((col, idx) => {
+    const baseWidth = col.width || 12;
+    worksheet.getColumn(START_COL + idx).width = Math.min(Math.max(baseWidth, colMaxLens[idx] + 3), 48);
+  });
 
   // Export buffer & download
   const buffer = await workbook.xlsx.writeBuffer();

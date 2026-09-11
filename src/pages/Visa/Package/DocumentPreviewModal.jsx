@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -7,15 +7,11 @@ import {
   Box,
   Typography,
   IconButton,
-  Tooltip,
   CircularProgress,
 } from "@mui/material";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
-import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
-import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { getOneVisaDocApi } from "../../../api/queries/getters";
 import { deserializeBackendToDocument } from "./constants";
@@ -24,7 +20,6 @@ import { printElement } from "../../../functions/printHelper";
 
 const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
   const { t } = useLocale();
-  const [copied, setCopied] = useState(false);
   const docSheetRef = useRef(null);
 
   const docGuid = doc?.guid || doc?.id;
@@ -58,43 +53,6 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
   const handlePrint = () => {
     if (docSheetRef.current) {
       printElement(docSheetRef.current, "");
-    }
-  };
-
-  const handleCopyText = () => {
-    if (!currentDoc) return;
-    try {
-      let textContent = `${currentDoc.title || t("visaDocument.title")}\n`;
-      if (currentDoc.country) textContent += `${t("visaDocument.country")}: ${currentDoc.country}\n\n`;
-
-      (currentDoc.tables || []).forEach((tbl, idx) => {
-        textContent += `--- ${tbl.title || `TABLISA ${idx + 1}`} ---\n`;
-        (tbl.rows || []).forEach((row, rIdx) => {
-          const rowText = row
-            .filter((c) => !c.isMerged)
-            .map((c, cIdx) => {
-              if (cIdx === 0) {
-                return rIdx === 0 ? "№" : String(rIdx);
-              }
-              return c.text || "-";
-            })
-            .join(" | ");
-          textContent += `${rowText}\n`;
-        });
-        if (tbl.note) textContent += `${t("visaDocument.tableNote")}: ${tbl.note}\n`;
-        textContent += `\n`;
-      });
-
-      if (currentDoc.generalNote) {
-        textContent += `${t("visaDocument.generalNote")}: ${currentDoc.generalNote}\n`;
-      }
-
-      navigator.clipboard.writeText(textContent);
-      setCopied(true);
-      toast.success(t("visaDocument.copiedSuccess"));
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error(t("visaDocument.copyError"));
     }
   };
 
@@ -160,37 +118,6 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
 
         {/* Action Buttons on Toolbar */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-          <Tooltip title={t("visaDocument.copy")} placement="top">
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleCopyText}
-              startIcon={
-                copied ? (
-                  <CheckRoundedIcon sx={{ fontSize: 16, color: "success.main" }} />
-                ) : (
-                  <ContentCopyRoundedIcon sx={{ fontSize: 16 }} />
-                )
-              }
-              sx={{
-                borderRadius: "8px",
-                textTransform: "none",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                borderColor: "divider",
-                color: "text.secondary",
-                px: 1.75,
-                py: 0.6,
-                "&:hover": {
-                  borderColor: "text.primary",
-                  color: "text.primary",
-                  backgroundColor: "action.hover",
-                },
-              }}
-            >
-              {copied ? t("visaDocument.copied") : t("visaDocument.copy")}
-            </Button>
-          </Tooltip>
 
           <Button
             size="small"

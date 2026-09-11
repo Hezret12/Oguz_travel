@@ -82,21 +82,25 @@ export const useValidShema = () => {
     net_price: yup
       .number()
       .nullable()
-      .transform((value, originalValue) =>
-        originalValue === "" || originalValue === null || originalValue === undefined
-          ? undefined
-          : Number(originalValue)
-      )
+      .transform((value, originalValue) => {
+        if (originalValue === "" || originalValue === null || originalValue === undefined || String(originalValue).trim() === "-") {
+          return undefined;
+        }
+        const num = Number(originalValue);
+        return Number.isFinite(num) ? num : undefined;
+      })
       .typeError("")
       .required(""),
     sale_price: yup
       .number()
       .nullable()
-      .transform((value, originalValue) =>
-        originalValue === "" || originalValue === null || originalValue === undefined
-          ? undefined
-          : Number(originalValue)
-      )
+      .transform((value, originalValue) => {
+        if (originalValue === "" || originalValue === null || originalValue === undefined || String(originalValue).trim() === "-") {
+          return undefined;
+        }
+        const num = Number(originalValue);
+        return Number.isFinite(num) ? num : undefined;
+      })
       .typeError("")
       .required(""),
   });
@@ -125,21 +129,25 @@ export const useValidShema = () => {
     base_fare: yup
       .number()
       .nullable()
-      .transform((value, originalValue) =>
-        originalValue === "" || originalValue === null || originalValue === undefined
-          ? undefined
-          : Number(originalValue)
-      )
+      .transform((value, originalValue) => {
+        if (originalValue === "" || originalValue === null || originalValue === undefined || String(originalValue).trim() === "-") {
+          return undefined;
+        }
+        const num = Number(originalValue);
+        return Number.isFinite(num) ? num : undefined;
+      })
       .typeError("")
       .required(""),
     total_price: yup
       .number()
       .nullable()
-      .transform((value, originalValue) =>
-        originalValue === "" || originalValue === null || originalValue === undefined
-          ? undefined
-          : Number(originalValue)
-      )
+      .transform((value, originalValue) => {
+        if (originalValue === "" || originalValue === null || originalValue === undefined || String(originalValue).trim() === "-") {
+          return undefined;
+        }
+        const num = Number(originalValue);
+        return Number.isFinite(num) ? num : undefined;
+      })
       .typeError("")
       .required(""),
     status_guid: yup

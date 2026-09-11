@@ -22,10 +22,11 @@ const formatMoneyDisplay = (val) => {
     return "$  -";
   }
   const num = Number(val);
-  return `$ ${num.toLocaleString("ru-RU", {
+  const formatted = Math.abs(num).toLocaleString("ru-RU", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })}`;
+  });
+  return num < 0 ? `-$ ${formatted}` : `$ ${formatted}`;
 };
 
 export const exportTurkishAirlinesExcel = async ({
@@ -207,7 +208,7 @@ export const exportTurkishAirlinesExcel = async ({
         cell.font = {
           name: "Calibri",
           size: 9.5,
-          bold: val > 0,
+          bold: Math.abs(val) > 0,
           color: { argb: "FF000000" },
         };
         cell.alignment = { vertical: "middle", horizontal: "right" };

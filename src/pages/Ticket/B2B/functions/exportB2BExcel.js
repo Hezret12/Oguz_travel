@@ -303,8 +303,19 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
     to: { row: START_ROW, column: END_COL },
   };
 
+  const parseExcelNumber = (val) => {
+    if (val === null || val === undefined || val === "") return null;
+    if (typeof val === "number") return Number.isFinite(val) ? val : null;
+    const cleaned = String(val).replace(/,/g, ".").replace(/[^0-9.-]/g, "").trim();
+    if (cleaned === "" || cleaned === "-") return null;
+    const num = Number(cleaned);
+    return Number.isFinite(num) ? num : null;
+  };
+
   // Currency format matching reference image: $ 520.00; $ -60.00; $  -
-  const currencyNumFmt = '"$ " #,##0.00;"$ " -#,##0.00;"$  -"';
+  const currencyNumFmt = '"$ "#,##0.00;"$ "-#,##0.00;"$ -"';
+
+  const colMaxLens = columnsConfig.map((c) => (c.header ? String(c.header).length : 10));
 
   let sumNet = 0;
   let sumSale = 0;
@@ -316,8 +327,8 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
     const currentRow = worksheet.getRow(rowIndex);
     currentRow.height = 20;
 
-    const netPrice = Number(row.net_price || 0);
-    const salePrice = Number(row.sale_price || 0);
+    const netPrice = parseExcelNumber(row.net_price) ?? 0;
+    const salePrice = parseExcelNumber(row.sale_price) ?? 0;
     const profit = Number(
       row.profit !== undefined && row.profit !== null
         ? row.profit
@@ -398,6 +409,17 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
         pattern: "solid",
         fgColor: { argb: zebraBg },
       };
+
+      // Single-pass length tracking (zero extra cell lookups)
+      if (val !== null && val !== undefined && val !== "") {
+        const len = String(val).length;
+        if (len > colMaxLens[idx]) {
+          colMaxLens[idx] = len;
+        }
+        if (len > 40) {
+          cell.alignment.wrapText = true;
+        }
+      }
 
       // Cell borders with medium outer perimeter on START_COL and END_COL
       cell.border = {
@@ -542,15 +564,13 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
         bold: true,
       };
     }
-
-    // KART total value (displays 0 matching reference template)
-    if (cardColIdx !== -1) {
-      const cellCard = totalRow.getCell(START_COL + cardColIdx);
-      cellCard.value = 0;
-      cellCard.alignment = { vertical: "middle", horizontal: "center" };
-      cellCard.font = { name: "Calibri", size: 10, bold: true };
-    }
   }
+
+  // Apply auto-fitted column widths (O(Columns) - zero extra cell lookups)
+  columnsConfig.forEach((col, idx) => {
+    const baseWidth = col.width || 12;
+    worksheet.getColumn(START_COL + idx).width = Math.min(Math.max(baseWidth, colMaxLens[idx] + 3), 48);
+  });
 
   // Export buffer & download
   const buffer = await workbook.xlsx.writeBuffer();

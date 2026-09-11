@@ -17,6 +17,7 @@ const CustomTextField = ({
   startIcon,
   endIcon,
   onChange,
+  allowNegative = true,
   sx = {},
   InputProps = {},
   InputLabelProps,
@@ -29,9 +30,24 @@ const CustomTextField = ({
       rules={rules}
       render={({ field, fieldState: { error } }) => {
         const hasError = Boolean(error);
+        const isNumberType = type === 'number';
 
         const handleChange = (event) => {
-          const nextValue = event?.target?.value ?? event;
+          let nextValue = event?.target?.value ?? event;
+          if (isNumberType && typeof nextValue === 'string') {
+            const isNegative = allowNegative && nextValue.includes('-');
+            let cleaned = nextValue.replace(',', '.').replace(/[^0-9.]/g, '');
+            const firstDot = cleaned.indexOf('.');
+            if (firstDot !== -1) {
+              cleaned =
+                cleaned.slice(0, firstDot + 1) +
+                cleaned.slice(firstDot + 1).replace(/\./g, '');
+            }
+            if (cleaned.length > 1 && cleaned[0] === '0' && cleaned[1] !== '.') {
+              cleaned = cleaned.replace(/^0+/, '') || '0';
+            }
+            nextValue = isNegative ? `-${cleaned}` : cleaned;
+          }
           field.onChange(nextValue);
           onChange?.(event);
         };
@@ -45,7 +61,7 @@ const CustomTextField = ({
               {...field}
               inputRef={field.ref}
               value={field.value ?? ''}
-              type={type}
+              type={isNumberType ? 'text' : type}
               onChange={handleChange}
               size={size}
               disabled={disabled}
@@ -59,6 +75,7 @@ const CustomTextField = ({
                 ...(InputLabelProps ? { inputLabel: InputLabelProps } : {}),
                 input: {
                   ...InputProps,
+                  inputMode: isNumberType ? 'decimal' : InputProps.inputMode,
                   startAdornment: startIcon ? (
                     <span style={{ display: 'flex', alignItems: 'center', marginRight: '8px', color: 'inherit' }}>
                       {startIcon}
