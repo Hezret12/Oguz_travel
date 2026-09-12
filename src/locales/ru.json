@@ -79,6 +79,7 @@
     "dateTime": "Senesi",
     "date": "Дата",
     "createdAt": "Дата создания",
+    "updatedAt": "Дата изменения",
     "paymentStatus": "Статус оплаты",
     "paymentPercentage": "Оплата %",
     "gender": "Пол",
@@ -372,7 +373,13 @@
     "finance": "Финансы",
     "cashFlow": "Движение денег",
     "financeOverview": "Финансовый отчет",
-    "taskFlow": "Задачи"
+    "taskFlow": "Задачи",
+    "general": "Общие",
+    "professionalTranslation": "Общие",
+    "office": "Офис",
+    "department": "Отдел",
+    "position": "Должность",
+    "translator": "Переводчик"
   },
   "turkish": {
     "addTicket": "Добавить билет Turkish Airlines",
@@ -918,6 +925,56 @@
       "COMMUNICATION": "Связь и интернет",
       "TRANSPORT": "Транспортные расходы",
       "OTHER_EXPENSE": "Прочие расходы"
+    }
+  },
+  "professionalTranslation": {
+    "title": "Профессиональный перевод",
+    "office": {
+      "title": "Офисы",
+      "addOffice": "Добавить офис",
+      "editOffice": "Редактировать офис",
+      "fullName": "Полное название",
+      "shortName": "Краткое название",
+      "fullNameTk": "Полное название, Tk",
+      "fullNameRu": "Полное название, Ru",
+      "fullNameEn": "Полное название, En",
+      "shortNameTk": "Краткое название, Tk",
+      "shortNameRu": "Краткое название, Ru",
+      "shortNameEn": "Краткое название, En",
+      "deleteConfirm": "Вы уверены, что хотите удалить этот офис?",
+      "totalOffices": "Всего офисов",
+      "withShortCode": "С кратким кодом",
+      "fullCoverage": "Полный перевод",
+      "copyTkToAll": "Скопировать TK во все языки",
+      "languages": "Языки"
+    },
+    "department": {
+      "title": "Отделы",
+      "addDepartment": "Добавить отдел",
+      "editDepartment": "Редактировать отдел",
+      "name": "Название отдела",
+      "nameTk": "Название отдела, Tk",
+      "nameRu": "Название отдела, Ru",
+      "nameEn": "Название отдела, En",
+      "deleteConfirm": "Вы уверены, что хотите удалить этот отдел?"
+    },
+    "position": {
+      "title": "Должности",
+      "addPosition": "Добавить должность",
+      "editPosition": "Редактировать должность",
+      "name": "Название должности",
+      "nameTk": "Название должности, Tk",
+      "nameRu": "Название должности, Ru",
+      "nameEn": "Название должности, En",
+      "deleteConfirm": "Вы уверены, что хотите удалить эту должность?"
+    },
+    "translator": {
+      "title": "Переводчики",
+      "addTranslator": "Добавить переводчика",
+      "editTranslator": "Редактировать переводчика",
+      "fullName": "ФИО",
+      "indexNumber": "Номер",
+      "deleteConfirm": "Вы уверены, что хотите удалить этого переводчика?"
     }
   }
 }

@@ -253,3 +253,15 @@ export const addCategoryApi = async (data) => {
   return await api.postPrivate('/category/add-category', data);
 };
 
+export const addOfficeApi = async (data) => {
+  return await api.postPrivate('/office/add-office', data);
+};
+
+export const addDepartmentApi = async (data) => {
+  return await api.postPrivate('/department/add-department', data);
+};
+
+export const addPositionApi = async (data) => {
+  return await api.postPrivate('/position/add-position', data);
+};
+

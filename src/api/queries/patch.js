@@ -223,4 +223,16 @@ export const updateCategoryApi = async (data) => {
   return await api.patchPrivate('/category/update-category', data);
 };
 
+export const updateOfficeApi = async (data) => {
+  return await api.patchPrivate('/office/update-office', data);
+};
+
+export const updateDepartmentApi = async (data) => {
+  return await api.patchPrivate('/department/update-department', data);
+};
+
+export const updatePositionApi = async (data) => {
+  return await api.patchPrivate('/position/update-postion', data);
+};
+
 

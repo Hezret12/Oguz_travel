@@ -78,6 +78,8 @@
     "passportCountryOfIssue": "Passport Country of Issue",
     "dateTime": "Date",
     "date": "Date",
+    "createdAt": "Created Date",
+    "updatedAt": "Updated Date",
     "paymentStatus": "Payment Status",
     "paymentPercentage": "Payment %",
     "gender": "Gender",
@@ -371,7 +373,13 @@
     "finance": "Finance",
     "cashFlow": "Cash Flow",
     "financeOverview": "Financial Report",
-    "taskFlow": "Tasks"
+    "taskFlow": "Tasks",
+    "general": "General",
+    "professionalTranslation": "General",
+    "office": "Office",
+    "department": "Department",
+    "position": "Position",
+    "translator": "Translator"
   },
   "turkish": {
     "addTicket": "Add Turkish Airlines Ticket",
@@ -917,6 +925,56 @@
       "COMMUNICATION": "Internet & Telecom",
       "TRANSPORT": "Transport Expenses",
       "OTHER_EXPENSE": "Other Expenses"
+    }
+  },
+  "professionalTranslation": {
+    "title": "Professional Translation",
+    "office": {
+      "title": "Offices",
+      "addOffice": "Add Office",
+      "editOffice": "Edit Office",
+      "fullName": "Full Name",
+      "shortName": "Short Name",
+      "fullNameTk": "Full Name, Tk",
+      "fullNameRu": "Full Name, Ru",
+      "fullNameEn": "Full Name, En",
+      "shortNameTk": "Short Name, Tk",
+      "shortNameRu": "Short Name, Ru",
+      "shortNameEn": "Short Name, En",
+      "deleteConfirm": "Are you sure you want to delete this office?",
+      "totalOffices": "Total Offices",
+      "withShortCode": "With Short Code",
+      "fullCoverage": "Full Translation",
+      "copyTkToAll": "Copy TK to all languages",
+      "languages": "Languages"
+    },
+    "department": {
+      "title": "Departments",
+      "addDepartment": "Add Department",
+      "editDepartment": "Edit Department",
+      "name": "Department Name",
+      "nameTk": "Department Name, Tk",
+      "nameRu": "Department Name, Ru",
+      "nameEn": "Department Name, En",
+      "deleteConfirm": "Are you sure you want to delete this department?"
+    },
+    "position": {
+      "title": "Positions",
+      "addPosition": "Add Position",
+      "editPosition": "Edit Position",
+      "name": "Position Name",
+      "nameTk": "Position Name, Tk",
+      "nameRu": "Position Name, Ru",
+      "nameEn": "Position Name, En",
+      "deleteConfirm": "Are you sure you want to delete this position?"
+    },
+    "translator": {
+      "title": "Translators",
+      "addTranslator": "Add Translator",
+      "editTranslator": "Edit Translator",
+      "fullName": "Full Name",
+      "indexNumber": "Number",
+      "deleteConfirm": "Are you sure you want to delete this translator?"
     }
   }
 }

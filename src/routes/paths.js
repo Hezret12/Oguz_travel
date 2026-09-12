@@ -38,6 +38,13 @@ export const PATHS = {
   },
   PROFILE: '/profile',
   PACKAGES: '/packages',
+  PROFESSIONAL_TRANSLATION: {
+    ROOT: '/professional-translation',
+    OFFICE: '/professional-translation/office',
+    DEPARTMENT: '/professional-translation/department',
+    POSITION: '/professional-translation/position',
+    TRANSLATOR: '/professional-translation/translator',
+  },
 };
 
 export function joinPath(...segments) {

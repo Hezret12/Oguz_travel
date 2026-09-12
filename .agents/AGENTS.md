@@ -394,4 +394,18 @@ src/pages/<Feature>/
   ```
 - **Rationale**: Direct `setState` calls inside `useEffect` force extra cascading re-render passes, harming UI performance and triggering React 19 strict compiler errors (*"Calling setState synchronously within an effect can trigger cascading renders"*). Adjusting state during render allows React to immediately retry rendering with updated state in a single execution pass.
 
+---
+
+## 16. Multilingual Form Labels Formatting Standard
+
+- **ALWAYS** format multilingual form labels using a comma followed by capitalized language tag: `, Tk`, `, Ru`, `, En`.
+- **NEVER** use parentheses like `(TK)`, `(RU)`, `(EN)`.
+- **Examples**:
+  - `Doly ady, Tk` (NOT `Doly ady (TK)`)
+  - `Doly ady, Ru` (NOT `Doly ady (RU)`)
+  - `Doly ady, En` (NOT `Doly ady (EN)`)
+  - `Gysga ady, Tk` (NOT `Gysga ady (TK)`)
+  - `Bölüm ady, Tk` (NOT `Bölüm ady (TK)`)
+- **Rationale**: Ensures a clean, modern, and unified typographical style across all forms, modals, and locale translation files.
+
 

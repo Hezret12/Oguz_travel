@@ -78,6 +78,8 @@
     "passportCountryOfIssue": "Berlen ýurdy",
     "dateTime": "Senesi",
     "date": "Senesi",
+    "createdAt": "Döredilen senesi",
+    "updatedAt": "Üýtgedilen senesi",
     "paymentStatus": "Töleg ýagdaýy",
     "paymentPercentage": "Töleg %",
     "gender": "Jynsy",
@@ -371,7 +373,13 @@
     "finance": "Maliýe",
     "cashFlow": "Pul Akymy",
     "financeOverview": "Maliýe Hasabaty",
-    "taskFlow": "Ýumuşlar"
+    "taskFlow": "Ýumuşlar",
+    "general": "Umumy",
+    "professionalTranslation": "Umumy",
+    "office": "Ofis",
+    "department": "Bölüm",
+    "position": "Wezipe",
+    "translator": "Terjimeçi"
   },
   "turkish": {
     "addTicket": "Türk howa ýollary bilet goşmak",
@@ -904,5 +912,55 @@
     "totalCost": "Jemi Harajat",
     "netProfit": "Arassa Peýda",
     "totalCredit": "Algy / Bergi"
+  },
+  "professionalTranslation": {
+    "title": "Professional terjime",
+    "office": {
+      "title": "Ofisler",
+      "addOffice": "Ofis goşmak",
+      "editOffice": "Ofisi üýtgetmek",
+      "fullName": "Doly ady",
+      "shortName": "Gysga ady",
+      "fullNameTk": "Doly ady, Tk",
+      "fullNameRu": "Doly ady, Ru",
+      "fullNameEn": "Doly ady, En",
+      "shortNameTk": "Gysga ady, Tk",
+      "shortNameRu": "Gysga ady, Ru",
+      "shortNameEn": "Gysga ady, En",
+      "deleteConfirm": "Bu ofisi pozmak isleýändigiňize ynanýarsyňyzmy?",
+      "totalOffices": "Jemi ofisler",
+      "withShortCode": "Gysga atly",
+      "fullCoverage": "Doly terjimeli",
+      "copyTkToAll": "TK adyny beýlekilere göçür",
+      "languages": "Diller"
+    },
+    "department": {
+      "title": "Bölümler",
+      "addDepartment": "Bölüm goşmak",
+      "editDepartment": "Bölümi üýtgetmek",
+      "name": "Bölüm ady",
+      "nameTk": "Bölüm ady, Tk",
+      "nameRu": "Bölüm ady, Ru",
+      "nameEn": "Bölüm ady, En",
+      "deleteConfirm": "Bu bölümi pozmak isleýändigiňize ynanýarsyňyzmy?"
+    },
+    "position": {
+      "title": "Wezipeler",
+      "addPosition": "Wezipe goşmak",
+      "editPosition": "Wezipäni üýtgetmek",
+      "name": "Wezipe ady",
+      "nameTk": "Wezipe ady, Tk",
+      "nameRu": "Wezipe ady, Ru",
+      "nameEn": "Wezipe ady, En",
+      "deleteConfirm": "Bu wezipäni pozmak isleýändigiňize ynanýarsyňyzmy?"
+    },
+    "translator": {
+      "title": "Terjimeçiler",
+      "addTranslator": "Terjimeçi goşmak",
+      "editTranslator": "Terjimeçini üýtgetmek",
+      "fullName": "Doly ady",
+      "indexNumber": "Belgisi",
+      "deleteConfirm": "Bu terjimeçini pozmak isleýändigiňize ynanýarsyňyzmy?"
+    }
   }
 }

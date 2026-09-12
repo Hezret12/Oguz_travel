@@ -2,21 +2,37 @@ import { memo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Tooltip, ListItemButton, ListItemIcon, ListItemText, Collapse, List, Box } from '@mui/material';
 import { ChevronDown } from 'lucide-react';
+import { PATHS } from '../../routes/paths';
 
 const isPathActive = (targetPath, currentPath) => {
   if (!targetPath || !currentPath) return false;
-  return currentPath === targetPath;
+  if (targetPath === '/' || targetPath === PATHS.ROOT) {
+    return currentPath === '/' || currentPath === '';
+  }
+  const cleanTarget = targetPath.replace(/\/+$/, '');
+  const cleanCurrent = currentPath.replace(/\/+$/, '');
+  return cleanCurrent === cleanTarget || cleanCurrent.startsWith(`${cleanTarget}/`);
 };
 
 const getTokens = (isDark) => ({
-  text: isDark ? '#A1B5C4' : '#475569',
-  textActive: isDark ? '#FFFFFF' : '#0F172A',
-  icon: isDark ? '#6B96A8' : '#64748B',
+  text: isDark ? '#94A3B8' : '#475569',
+  textActive: isDark ? '#FFFFFF' : '#0E8584',
+  icon: isDark ? '#64748B' : '#64748B',
   iconActive: isDark ? '#2DD4BF' : '#0E8584',
-  activeBg: isDark ? 'linear-gradient(90deg, rgba(20, 184, 166, 0.22) 0%, rgba(45, 212, 191, 0.08) 100%)' : 'rgba(14, 133, 132, 0.08)',
-  activeHoverBg: isDark ? 'linear-gradient(90deg, rgba(20, 184, 166, 0.28) 0%, rgba(45, 212, 191, 0.14) 100%)' : 'rgba(14, 133, 132, 0.12)',
-  hoverBg: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.04)',
-  treeRail: isDark ? 'rgba(45, 212, 191, 0.18)' : 'rgba(0, 0, 0, 0.07)',
+  activeBg: isDark
+    ? 'linear-gradient(90deg, rgba(45, 212, 191, 0.16) 0%, rgba(45, 212, 191, 0.04) 100%)'
+    : 'linear-gradient(90deg, rgba(14, 133, 132, 0.10) 0%, rgba(14, 133, 132, 0.03) 100%)',
+  activeHoverBg: isDark
+    ? 'linear-gradient(90deg, rgba(45, 212, 191, 0.22) 0%, rgba(45, 212, 191, 0.08) 100%)'
+    : 'linear-gradient(90deg, rgba(14, 133, 132, 0.14) 0%, rgba(14, 133, 132, 0.05) 100%)',
+  activeIndicator: isDark
+    ? 'inset 3.5px 0 0 #2DD4BF'
+    : 'inset 3.5px 0 0 #0E8584',
+  childActiveIndicator: isDark
+    ? 'inset 2.5px 0 0 #2DD4BF'
+    : 'inset 2.5px 0 0 #0E8584',
+  hoverBg: isDark ? 'rgba(255, 255, 255, 0.045)' : 'rgba(0, 0, 0, 0.035)',
+  treeRail: isDark ? 'rgba(45, 212, 191, 0.14)' : 'rgba(0, 0, 0, 0.07)',
   expandIcon: isDark ? '#6B96A8' : '#94A3B8',
 });
 
@@ -27,7 +43,8 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
     <ListItemButton
       component={NavLink}
       to={item.path}
-      end
+      end={item.path === '/' || item.path === PATHS.ROOT}
+      selected={isActive}
       onClick={onSidebarClose}
       sx={{
         display: 'flex',
@@ -40,16 +57,25 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
         minWidth: collapsed ? '44px' : 'auto',
         justifyContent: collapsed ? 'center' : 'flex-start',
         color: isActive ? t.textActive : t.text,
-        backgroundColor: isActive ? t.activeBg : 'transparent',
+        background: isActive ? t.activeBg : 'transparent',
+        boxShadow: isActive ? t.activeIndicator : 'none',
         fontFamily: "'Inter', sans-serif",
+        '&.active, &.Mui-selected': {
+          background: `${t.activeBg} !important`,
+          color: `${t.textActive} !important`,
+          boxShadow: `${t.activeIndicator} !important`,
+          '& .MuiListItemIcon-root': {
+            color: `${t.iconActive} !important`,
+          },
+        },
         '&:hover': {
-          backgroundColor: isActive ? t.activeHoverBg : t.hoverBg,
+          background: isActive ? t.activeHoverBg : t.hoverBg,
           color: t.textActive,
           '& .MuiListItemIcon-root': {
             color: t.iconActive,
           },
         },
-        transition: 'all 0.15s ease',
+        transition: 'all 0.18s ease',
       }}
     >
       <ListItemIcon
@@ -75,7 +101,7 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
               noWrap: true,
               sx: {
                 fontSize: '0.915rem',
-                fontWeight: isActive ? 650 : 500,
+                fontWeight: isActive ? 600 : 500,
                 fontFamily: "'Inter', sans-serif",
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -118,16 +144,17 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
         minWidth: collapsed ? '44px' : 'auto',
         justifyContent: collapsed ? 'center' : 'flex-start',
         color: hasActiveChild ? t.textActive : t.text,
-        backgroundColor: hasActiveChild && !isExpanded ? t.activeBg : 'transparent',
+        background: hasActiveChild && !isExpanded ? t.activeBg : 'transparent',
+        boxShadow: hasActiveChild && !isExpanded ? t.activeIndicator : 'none',
         fontFamily: "'Inter', sans-serif",
         '&:hover': {
-          backgroundColor: t.hoverBg,
+          background: hasActiveChild && !isExpanded ? t.activeHoverBg : t.hoverBg,
           color: t.textActive,
           '& .MuiListItemIcon-root': {
             color: t.iconActive,
           },
         },
-        transition: 'all 0.15s ease',
+        transition: 'all 0.18s ease',
       }}
     >
       <ListItemIcon
@@ -154,7 +181,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                 noWrap: true,
                 sx: {
                   fontSize: '0.915rem',
-                  fontWeight: hasActiveChild ? 650 : 500,
+                  fontWeight: hasActiveChild ? 600 : 500,
                   fontFamily: "'Inter', sans-serif",
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -208,7 +235,8 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                 key={childKey}
                 component={NavLink}
                 to={child.path}
-                end
+                end={child.path === '/' || child.path === PATHS.ROOT}
+                selected={isChildActive}
                 onClick={onSidebarClose}
                 sx={{
                   display: 'flex',
@@ -219,16 +247,25 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                   borderRadius: '8px',
                   width: '100%',
                   color: isChildActive ? t.textActive : t.text,
-                  backgroundColor: isChildActive ? t.activeBg : 'transparent',
+                  background: isChildActive ? t.activeBg : 'transparent',
+                  boxShadow: isChildActive ? t.childActiveIndicator : 'none',
                   fontFamily: "'Inter', sans-serif",
+                  '&.active, &.Mui-selected': {
+                    background: `${t.activeBg} !important`,
+                    color: `${t.textActive} !important`,
+                    boxShadow: `${t.childActiveIndicator} !important`,
+                    '& .MuiListItemIcon-root': {
+                      color: `${t.iconActive} !important`,
+                    },
+                  },
                   '&:hover': {
-                    backgroundColor: isChildActive ? t.activeHoverBg : t.hoverBg,
+                    background: isChildActive ? t.activeHoverBg : t.hoverBg,
                     color: t.textActive,
                     '& .MuiListItemIcon-root': {
                       color: t.iconActive,
                     },
                   },
-                  transition: 'all 0.15s ease',
+                  transition: 'all 0.18s ease',
                 }}
               >
                 <ListItemIcon
@@ -253,7 +290,7 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
                       noWrap: true,
                       sx: {
                         fontSize: '0.865rem',
-                        fontWeight: isChildActive ? 650 : 500,
+                        fontWeight: isChildActive ? 600 : 500,
                         fontFamily: "'Inter', sans-serif",
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',

@@ -21,6 +21,10 @@ import {
   Wallet,
   ArrowLeftRight,
   PieChart,
+  LayoutGrid,
+  Building,
+  Award,
+  Landmark,
 } from "lucide-react";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 import { PATHS } from "../routes/paths";
@@ -141,6 +145,38 @@ export const useSidebarItems = () => {
         text: t("sidebar.translation"),
         path: PATHS.TRANSLATION,
         icon: createElement(Languages, { size: 20, strokeWidth: 2.2 }),
+      },
+      {
+        id: "professional-translation",
+        isGroup: true,
+        text: t("sidebar.general"),
+        icon: createElement(LayoutGrid, { size: 20, strokeWidth: 2.2 }),
+        children: [
+          {
+            id: "pt-office",
+            text: t("sidebar.office"),
+            path: PATHS.PROFESSIONAL_TRANSLATION.OFFICE,
+            icon: createElement(Landmark, { size: 18, strokeWidth: 2.2 }),
+          },
+          {
+            id: "pt-department",
+            text: t("sidebar.department"),
+            path: PATHS.PROFESSIONAL_TRANSLATION.DEPARTMENT,
+            icon: createElement(Building, { size: 18, strokeWidth: 2.2 }),
+          },
+          {
+            id: "pt-position",
+            text: t("sidebar.position"),
+            path: PATHS.PROFESSIONAL_TRANSLATION.POSITION,
+            icon: createElement(Award, { size: 18, strokeWidth: 2.2 }),
+          },
+          {
+            id: "pt-translator",
+            text: t("sidebar.translator"),
+            path: PATHS.PROFESSIONAL_TRANSLATION.TRANSLATOR,
+            icon: createElement(Languages, { size: 18, strokeWidth: 2.2 }),
+          },
+        ],
       },
       {
         id: "referal-letters",

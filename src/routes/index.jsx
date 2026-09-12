@@ -53,6 +53,11 @@ const ProfilePage = lazyRetry(() => import('../pages/Profile/index'));
 const CafeteriaPage = lazyRetry(() => import('../pages/Cafeteria'));
 const FinanceCashFlowPage = lazyRetry(() => import('../pages/Finance/CashFlow'));
 const FinanceOverviewPage = lazyRetry(() => import('../pages/Finance/Overview'));
+const ProfessionalTranslationPage = lazyRetry(() => import('../pages/ProfessionalTranslation'));
+const OfficePage = lazyRetry(() => import('../pages/ProfessionalTranslation/Office'));
+const DepartmentPage = lazyRetry(() => import('../pages/ProfessionalTranslation/Department'));
+const PositionPage = lazyRetry(() => import('../pages/ProfessionalTranslation/Position'));
+const TranslatorPage = lazyRetry(() => import('../pages/ProfessionalTranslation/Translator'));
 
 function PageLoader() {
   const [visible, setVisible] = useState(false);
@@ -121,6 +126,11 @@ const Profile = Loadable(ProfilePage);
 const Cafeteria = Loadable(CafeteriaPage);
 const FinanceCashFlow = Loadable(FinanceCashFlowPage);
 const FinanceOverview = Loadable(FinanceOverviewPage);
+const ProfessionalTranslation = Loadable(ProfessionalTranslationPage);
+const Office = Loadable(OfficePage);
+const Department = Loadable(DepartmentPage);
+const Position = Loadable(PositionPage);
+const Translator = Loadable(TranslatorPage);
 const Unauthorized = Loadable(UnauthorizedPage);
 const NotFound = Loadable(NotFoundPage);
 const Login = Loadable(LoginPage);
@@ -178,6 +188,17 @@ const router = createBrowserRouter([
               { path: 'finance', element: <Navigate to="/finance/cash-flow" replace /> },
               { path: 'finance/cash-flow', element: <FinanceCashFlow /> },
               { path: 'finance/overview', element: <FinanceOverview /> },
+              {
+                path: 'professional-translation',
+                element: <ProfessionalTranslation />,
+                children: [
+                  { index: true, element: <Navigate to="office" replace /> },
+                  { path: 'office', element: <Office /> },
+                  { path: 'department', element: <Department /> },
+                  { path: 'position', element: <Position /> },
+                  { path: 'translator', element: <Translator /> },
+                ],
+              },
               { path: 'notifications', element: <Notification /> },
               { path: 'unauthorized', element: <Unauthorized /> },
             ],

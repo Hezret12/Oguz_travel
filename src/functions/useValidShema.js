@@ -225,7 +225,18 @@ export const useValidShema = () => {
   });
 
   const addTranslator = yup.object({
-    fullName: stringRequiredValidSchema(t("employee.validation.fullNameRequired")),
+    fullName: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
+  });
+
+  const editTranslator = yup.object({
+    guid: guidRequiredValidSchema(),
+    fullName: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
   });
 
   const addOutbound = yup.object({
@@ -263,6 +274,69 @@ export const useValidShema = () => {
     description: stringOptionalValidSchema(),
   });
 
+  const addOffice = yup.object({
+    fullName_tk: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
+    fullName_ru: stringOptionalValidSchema(),
+    fullName_en: stringOptionalValidSchema(),
+    shortName_tk: stringOptionalValidSchema(),
+    shortName_ru: stringOptionalValidSchema(),
+    shortName_en: stringOptionalValidSchema(),
+  });
+
+  const editOffice = yup.object({
+    guid: guidRequiredValidSchema(),
+    fullName_tk: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
+    fullName_ru: stringOptionalValidSchema(),
+    fullName_en: stringOptionalValidSchema(),
+    shortName_tk: stringOptionalValidSchema(),
+    shortName_ru: stringOptionalValidSchema(),
+    shortName_en: stringOptionalValidSchema(),
+  });
+
+  const addDepartment = yup.object({
+    name_tk: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
+    name_ru: stringOptionalValidSchema(),
+    name_en: stringOptionalValidSchema(),
+  });
+
+  const editDepartment = yup.object({
+    guid: guidRequiredValidSchema(),
+    name_tk: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
+    name_ru: stringOptionalValidSchema(),
+    name_en: stringOptionalValidSchema(),
+  });
+
+  const addPosition = yup.object({
+    name_tk: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
+    name_ru: stringOptionalValidSchema(),
+    name_en: stringOptionalValidSchema(),
+  });
+
+  const editPosition = yup.object({
+    guid: guidRequiredValidSchema(),
+    name_tk: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
+    name_ru: stringOptionalValidSchema(),
+    name_en: stringOptionalValidSchema(),
+  });
+
   return {
     addB2BTicket,
     addTurkishAirlinesTicket,
@@ -279,6 +353,13 @@ export const useValidShema = () => {
     addOutbound,
     addNotification,
     addCafeteriaTransaction,
+    addOffice,
+    editOffice,
+    addDepartment,
+    editDepartment,
+    addPosition,
+    editPosition,
+    editTranslator,
   };
 };
 

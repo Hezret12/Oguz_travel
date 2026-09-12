@@ -245,7 +245,6 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
   const netColIdx = columnsConfig.findIndex((c) => c.key === "net_price");
   const saleColIdx = columnsConfig.findIndex((c) => c.key === "sale_price");
   const profitColIdx = columnsConfig.findIndex((c) => c.key === "profit");
-  const cardColIdx = columnsConfig.findIndex((c) => c.key === "card");
   const statusColIdx = columnsConfig.findIndex((c) => c.key === "status");
   const isPaidColIdx = columnsConfig.findIndex((c) => c.key === "is_paid");
 
