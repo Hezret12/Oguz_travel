@@ -16,7 +16,6 @@ import {
   FileCheck,
   Languages,
   PlaneTakeoff,
-  BarChart3,
   ClipboardCheck,
   UtensilsCrossed,
   Wallet,
@@ -48,7 +47,6 @@ export const useSidebarItems = () => {
         isGroup: true,
         text: t("sidebar.finance", "Maliýe"),
         icon: createElement(Wallet, { size: 20, strokeWidth: 2.2 }),
-        alwaysVisible: true,
         children: [
           {
             id: "finance-cash-flow",
@@ -63,6 +61,22 @@ export const useSidebarItems = () => {
             path: PATHS.FINANCE.OVERVIEW,
             icon: createElement(PieChart, { size: 18, strokeWidth: 2.2 }),
             alwaysVisible: true,
+          },
+          {
+            id: "report-turkish-airlines",
+            text: t("sidebar.reportTurkishAirlines"),
+            path: PATHS.REPORTS.TURKISH_AIRLINES,
+            icon: createElement("img", {
+              src: TurkishAirlinesIcon,
+              alt: "Turkish Airlines",
+              style: { width: 30, height: 28, objectFit: "contain" },
+            }),
+          },
+          {
+            id: "report-referral-letter",
+            text: t("sidebar.reportReferralLetter"),
+            path: PATHS.REPORTS.REFERRAL_LETTER,
+            icon: createElement(FileText, { size: 18, strokeWidth: 2.2 }),
           },
         ],
       },
@@ -146,30 +160,6 @@ export const useSidebarItems = () => {
         path: PATHS.PACKAGES,
         icon: createElement(Package, { size: 20, strokeWidth: 2.2 }),
         alwaysVisible: true,
-      },
-      {
-        id: "reports",
-        isGroup: true,
-        text: t("sidebar.reports"),
-        icon: createElement(BarChart3, { size: 20, strokeWidth: 2.2 }),
-        children: [
-          {
-            id: "report-turkish-airlines",
-            text: t("sidebar.reportTurkishAirlines"),
-            path: PATHS.REPORTS.TURKISH_AIRLINES,
-            icon: createElement("img", {
-              src: TurkishAirlinesIcon,
-              alt: "Turkish Airlines",
-              style: { width: 30, height: 28, objectFit: "contain" },
-            }),
-          },
-          {
-            id: "report-referral-letter",
-            text: t("sidebar.reportReferralLetter", t("sidebar.referalLetters")),
-            path: PATHS.REPORTS.REFERRAL_LETTER,
-            icon: createElement(FileText, { size: 18, strokeWidth: 2.2 }),
-          },
-        ],
       },
       {
         id: "cafeteria",
