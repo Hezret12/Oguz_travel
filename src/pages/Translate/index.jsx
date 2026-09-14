@@ -116,12 +116,12 @@ const TranslatePage = () => {
 
   const employeeMap = useMemo(
     () => new Map(employees.map((e) => [e.guid, e.fullName])),
-    [employees]
+    [employees],
   );
 
   const translatorMap = useMemo(
     () => new Map(translators.map((tr) => [tr.guid, tr.fullName])),
-    [translators]
+    [translators],
   );
 
   const getFilterChipLabel = useCallback(
@@ -149,7 +149,7 @@ const TranslatePage = () => {
 
       return `${fieldTitle}: ${displayVal}`;
     },
-    [t, employeeMap, translatorMap]
+    [t, employeeMap, translatorMap],
   );
 
   const activeFilters = useMemo(
@@ -213,9 +213,7 @@ const TranslatePage = () => {
         Cell: ({ row }) => (
           <StackedCell
             primary={row.original.operator?.fullName}
-            secondary={selectedLang(
-              row?.original?.operator?.office?.fullName
-            )}
+            secondary={selectedLang(row?.original?.operator?.office?.fullName)}
           />
         ),
       },
@@ -280,6 +278,30 @@ const TranslatePage = () => {
         },
       },
       {
+        accessorFn: (row) => row.profit,
+        id: "profit",
+        header: t("columns.profit"),
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+        Cell: ({ cell }) => {
+          const val = Number(cell.getValue() || 0);
+          return (
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "inherit",
+                fontWeight: 650,
+                color: val >= 0 ? "success.main" : "error.main",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {val.toFixed(2)} TMT
+            </Typography>
+          );
+        },
+      },
+      {
         accessorFn: (row) => row.is_paid,
         id: "is_paid",
         header: t("columns.paymentStatus"),
@@ -305,19 +327,20 @@ const TranslatePage = () => {
         },
       },
       {
-        accessorFn: (row) => (row.status !== undefined ? row.status : row.status_guid),
+        accessorFn: (row) =>
+          row.status !== undefined ? row.status : row.status_guid,
         id: "status",
         header: t("columns.status"),
         size: 100,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
-          const statusVal = row.original.status !== undefined ? row.original.status : row.original.status_guid;
+          const statusVal =
+            row.original.status !== undefined
+              ? row.original.status
+              : row.original.status_guid;
           return (
-            <StatusChip
-              status={statusVal}
-              config={TRANSLATION_STATUS_CONFIG}
-            />
+            <StatusChip status={statusVal} config={TRANSLATION_STATUS_CONFIG} />
           );
         },
       },
@@ -448,7 +471,9 @@ const TranslatePage = () => {
       return <TableEmptyState onResetFilters={resetFilters} />;
     },
 
-    renderCreateRowDialogContent: ({ table }) => <AddTranslateModal table={table} />,
+    renderCreateRowDialogContent: ({ table }) => (
+      <AddTranslateModal table={table} />
+    ),
     renderEditRowDialogContent: ({ table, row }) => (
       <EditTranslateModal table={table} row={row} queryParams={queryParams} />
     ),
@@ -548,7 +573,9 @@ const TranslatePage = () => {
             }}
           >
             {/* Total Price (Jemi baha) */}
-            <Box sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.75 }}>
+            <Box
+              sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.75 }}
+            >
               <Typography
                 component="span"
                 sx={{
@@ -582,7 +609,9 @@ const TranslatePage = () => {
             />
 
             {/* Total Expense (Jemi çykdajy) */}
-            <Box sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.75 }}>
+            <Box
+              sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.75 }}
+            >
               <Typography
                 component="span"
                 sx={{
@@ -616,7 +645,9 @@ const TranslatePage = () => {
             />
 
             {/* Total Profit (Jemi peýda) */}
-            <Box sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.75 }}>
+            <Box
+              sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.75 }}
+            >
               <Typography
                 component="span"
                 sx={{
