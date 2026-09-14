@@ -44,41 +44,54 @@ export function usePagginationGet({ apiFn, key, params, options = {} }) {
     responseBody?.data?.meta?.currentPage ??
     1;
 
-  const totalPrice =
-    responseBody?.data?.meta?.totalPrice ??
-    responseBody?.meta?.totalPrice ??
-    responseBody?.data?.totalPrice ??
-    responseBody?.totalPrice ??
-    0;
-
-  const totalExpense =
-    responseBody?.data?.meta?.totalExpense ??
-    responseBody?.meta?.totalExpense ??
-    responseBody?.data?.totalExpense ??
-    responseBody?.totalExpense ??
-    0;
-
-  const totalProfit =
-    responseBody?.data?.meta?.totalProfit ??
-    responseBody?.meta?.totalProfit ??
-    responseBody?.data?.totalProfit ??
-    responseBody?.totalProfit ??
-    0;
-
-  const meta =
+  // Global meta aggregation: extract explicit meta and any additional non-row attributes
+  const explicitMeta =
     responseBody?.data?.meta ??
     responseBody?.meta ??
-    null;
+    data?.meta ??
+    {};
+
+  const extraMeta = {};
+  if (responseBody && typeof responseBody === "object" && !Array.isArray(responseBody)) {
+    for (const [k, v] of Object.entries(responseBody)) {
+      if (!["data", "items", "status", "message", "meta"].includes(k)) {
+        extraMeta[k] = v;
+      }
+    }
+  }
+
+  if (
+    responseBody?.data &&
+    typeof responseBody.data === "object" &&
+    !Array.isArray(responseBody.data)
+  ) {
+    for (const [k, v] of Object.entries(responseBody.data)) {
+      if (!["data", "items", "status", "message", "meta"].includes(k)) {
+        extraMeta[k] = v;
+      }
+    }
+  }
+
+  const meta = {
+    ...extraMeta,
+    ...(typeof explicitMeta === "object" ? explicitMeta : {}),
+    totalItems,
+    pageCount,
+    totalPages: pageCount,
+    currentPage,
+  };
 
   return {
     data: items,
     totalItems,
     pageCount,
     currentPage,
-    totalPrice,
-    totalExpense,
-    totalProfit,
     meta,
+    // Convenience backward-compatible properties
+    totalPrice: meta?.totalPrice ?? 0,
+    totalExpense: meta?.totalExpense ?? meta?.totalExpensePrice ?? 0,
+    totalExpensePrice: meta?.totalExpensePrice ?? meta?.totalExpense ?? 0,
+    totalProfit: meta?.totalProfit ?? 0,
     isLoading,
     isFetching,
     isError,

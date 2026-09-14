@@ -96,8 +96,7 @@ const TranslatePage = () => {
     refetch,
     pageCount,
     totalItems,
-    totalPrice = 0,
-    totalExpense = 0,
+    meta = {},
   } = usePagginationGet({
     apiFn: getAllTranslationsApi,
     key: "translations",
@@ -497,81 +496,165 @@ const TranslatePage = () => {
 
     renderBottomToolbar: ({ table: mrtTable }) => {
       const { pageIndex } = mrtTable.getState().pagination;
+
+      const numPrice = Number(meta?.totalPrice) || 0;
+      const numExpense =
+        Number(meta?.totalExpensePrice ?? meta?.totalExpense) || 0;
+      const numProfit =
+        meta?.totalProfit !== undefined &&
+        meta?.totalProfit !== null &&
+        meta?.totalProfit !== ""
+          ? Number(meta.totalProfit)
+          : numPrice - numExpense;
+      const isProfitPositive = numProfit >= 0;
+      const marginPercent =
+        numPrice > 0 ? ((numProfit / numPrice) * 100).toFixed(1) : null;
+
+      const formatCurrency = (val) =>
+        new Intl.NumberFormat("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(Number(val) || 0) + " TMT";
+
       return (
         <Box
-          sx={(theme) => ({
+          sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            px: 2,
-            py: 0.75,
-            minHeight: "52px",
-            borderTop: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
+            px: { xs: 1.5, sm: 2 },
+            py: 1,
+            minHeight: "56px",
+            borderTop: "1px solid",
+            borderColor: "divider",
+            backgroundColor: "background.paper",
             gap: 2,
             flexWrap: "wrap",
-          })}
+          }}
         >
+          {/* Financial Summary */}
           <Box
             sx={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 1,
-              px: 1.5,
-              py: 0.5,
+              gap: { xs: 1.5, sm: 2.5 },
+              px: 2,
+              py: 0.75,
               borderRadius: "8px",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.04)"
-                  : "rgba(0, 0, 0, 0.03)",
+              backgroundColor: "action.hover",
               border: "1px solid",
               borderColor: "divider",
+              flexWrap: "wrap",
             }}
           >
-            {(Number(totalExpense) > 0 || Number(totalPrice) === 0) && (
-              <>
-                {Number(totalPrice) > 0 && (
-                  <Box
-                    component="span"
-                    sx={{
-                      width: "1px",
-                      height: "14px",
-                      backgroundColor: "divider",
-                      mx: 0.5,
-                    }}
-                  />
-                )}
+            {/* Total Price (Jemi baha) */}
+            <Box sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.75 }}>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "0.8rem",
+                  color: "text.secondary",
+                  fontWeight: 500,
+                }}
+              >
+                {t("totalPrice")}:
+              </Typography>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "0.875rem",
+                  fontWeight: 650,
+                  color: "text.primary",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {formatCurrency(numPrice)}
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                width: "1px",
+                height: "16px",
+                backgroundColor: "divider",
+                display: { xs: "none", sm: "block" },
+              }}
+            />
+
+            {/* Total Expense (Jemi çykdajy) */}
+            <Box sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.75 }}>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "0.8rem",
+                  color: "text.secondary",
+                  fontWeight: 500,
+                }}
+              >
+                {t("totalExpense")}:
+              </Typography>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "0.875rem",
+                  fontWeight: 650,
+                  color: "text.primary",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {formatCurrency(numExpense)}
+              </Typography>
+            </Box>
+
+            <Box
+              sx={{
+                width: "1px",
+                height: "16px",
+                backgroundColor: "divider",
+                display: { xs: "none", sm: "block" },
+              }}
+            />
+
+            {/* Total Profit (Jemi peýda) */}
+            <Box sx={{ display: "inline-flex", alignItems: "baseline", gap: 0.75 }}>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "0.8rem",
+                  color: "text.secondary",
+                  fontWeight: 500,
+                }}
+              >
+                {t("totalProfit")}:
+              </Typography>
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "0.875rem",
+                  fontWeight: 700,
+                  color: isProfitPositive ? "success.main" : "error.main",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {numProfit >= 0
+                  ? `+${formatCurrency(numProfit)}`
+                  : `-${formatCurrency(Math.abs(numProfit))}`}
+              </Typography>
+              {marginPercent !== null && (
                 <Typography
-                  variant="body2"
+                  component="span"
                   sx={{
-                    fontSize: "0.825rem",
+                    fontSize: "0.75rem",
                     color: "text.secondary",
                     fontWeight: 500,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.6,
                   }}
                 >
-                  {t("columns.totalExpense")}:
-                  <Box
-                    component="span"
-                    sx={{
-                      color: "text.primary",
-                      fontWeight: 700,
-                      fontVariantNumeric: "tabular-nums",
-                    }}
-                  >
-                    {new Intl.NumberFormat("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }).format(Number(totalExpense))}{" "}
-                    TMT
-                  </Box>
+                  ({marginPercent}%)
                 </Typography>
-              </>
-            )}
-
+              )}
+            </Box>
           </Box>
+
           <Pagination
             pageIndex={pageIndex}
             pageCount={pageCount}
