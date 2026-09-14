@@ -527,8 +527,8 @@ const TranslatePage = () => {
         Number(meta?.totalExpensePrice ?? meta?.totalExpense) || 0;
       const numProfit =
         meta?.totalProfit !== undefined &&
-        meta?.totalProfit !== null &&
-        meta?.totalProfit !== ""
+          meta?.totalProfit !== null &&
+          meta?.totalProfit !== ""
           ? Number(meta.totalProfit)
           : numPrice - numExpense;
       const isProfitPositive = numProfit >= 0;
