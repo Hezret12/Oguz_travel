@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { Box, FormControl, MenuItem, Select, Stack, Typography, TextField } from "@mui/material";
 import { ChevronDown } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
@@ -186,4 +186,4 @@ const VisaFilter = ({
   );
 };
 
-export default VisaFilter;
+export default memo(VisaFilter);

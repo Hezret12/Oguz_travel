@@ -19,7 +19,7 @@ import DeleteDialog from "../../components/DeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { deleteCafeteriaTransactionApi } from "../../api/queries/delete";
-import { usePageFilters } from "../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
 import { getAllCafeteriaTransactionsApi } from "../../api/queries/getters";
 import {
@@ -33,6 +33,41 @@ import AddCafeteriaModal from "./AddCafeteriaModal";
 import EditCafeteriaModal from "./EditCafeteriaModal";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 
+const CafeteriaFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    selectsOpen,
+    setDraftFilter,
+    openSelect,
+    closeSelect,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+  } = useDrawerFilters({
+    actions: cafeteriaFilterActions,
+    selectors: cafeteriaFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={applyFilters}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <CafeteriaFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const Cafeteria = () => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -41,13 +76,8 @@ const Cafeteria = () => {
 
   const {
     applied,
-    draft,
-    isDrawerOpen,
     openDrawer,
-    setDraftFilter,
     setFilter,
-    applyFilters,
-    cancelFilters,
     resetFilters,
     searchQuery,
     setSearch,
@@ -56,11 +86,8 @@ const Cafeteria = () => {
     setPage,
     setPageSize,
     setSort,
-    selectsOpen,
-    openSelect,
-    closeSelect,
     queryParams,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: cafeteriaFilterActions,
     selectors: cafeteriaFilterSelectors,
   });
@@ -403,21 +430,7 @@ const Cafeteria = () => {
         <CafeteriaHeaderStats queryParams={queryParams} />
       </PageHeader>
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={applyFilters}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <CafeteriaFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <CafeteriaFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}

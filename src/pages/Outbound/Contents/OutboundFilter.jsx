@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import {
   Box,
   Divider,
@@ -370,4 +370,4 @@ const OutboundFilter = ({
   );
 };
 
-export default OutboundFilter;
+export default memo(OutboundFilter);

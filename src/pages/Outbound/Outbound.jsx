@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tab, Tabs } from "@mui/material";
 import { useLocale } from "../../hooks/useLocale";
-import { usePageFilters } from "../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import PageHeader from "../../components/PageHeader";
 import FilterDrawer from "../../components/FilterDrawer";
 import OutboundFilter from "./Contents/OutboundFilter";
@@ -21,6 +21,42 @@ import TourTab from "./tabs/Tour";
 import TransferTab from "./tabs/Transfer";
 import PackageTab from "./tabs/Package";
 
+const OutboundFilterDrawer = ({ activeTab }) => {
+  const {
+    draft,
+    isDrawerOpen,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: outboundFilterActions,
+    selectors: outboundFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={applyFilters}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <OutboundFilter
+        activeTab={activeTab}
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const OutboundPage = () => {
   const { t } = useLocale();
 
@@ -31,14 +67,8 @@ const OutboundPage = () => {
 
   // Filters State
   const {
-    draft,
-    isDrawerOpen,
     openDrawer,
-    setDraftFilter,
     setFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
@@ -46,10 +76,7 @@ const OutboundPage = () => {
     setPage,
     setPageSize,
     queryParams,
-    selectsOpen,
-    openSelect,
-    closeSelect,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: outboundFilterActions,
     selectors: outboundFilterSelectors,
   });
@@ -100,22 +127,7 @@ const OutboundPage = () => {
         />
       )}
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={applyFilters}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <OutboundFilter
-          activeTab={activeTab}
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <OutboundFilterDrawer activeTab={activeTab} />
 
       {(() => {
         const tabProps = {

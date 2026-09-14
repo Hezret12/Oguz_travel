@@ -24,7 +24,7 @@ import DeleteDialog from "../../components/DeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { deleteVisaApi } from "../../api/queries/delete";
-import { usePageFilters } from "../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
 import { getAllVisasApi } from "../../api/queries/getters";
 import {
@@ -35,6 +35,41 @@ import FilterDrawer from "../../components/FilterDrawer";
 import VisaFilter from "./Contents/VisaFilter";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 
+const VisaFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: visaFilterActions,
+    selectors: visaFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={applyFilters}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <VisaFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const Visa = () => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -43,14 +78,7 @@ const Visa = () => {
 
   const {
     applied,
-    draft,
-    isDrawerOpen,
     openDrawer,
-    setDraftFilter,
-    setFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
@@ -58,11 +86,8 @@ const Visa = () => {
     setPage,
     setPageSize,
     setSort,
-    selectsOpen,
-    openSelect,
-    closeSelect,
     queryParams,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: visaFilterActions,
     selectors: visaFilterSelectors,
   });
@@ -419,21 +444,7 @@ const Visa = () => {
         onFilterClick={openDrawer}
       />
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={applyFilters}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <VisaFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <VisaFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}

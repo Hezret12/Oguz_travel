@@ -126,7 +126,7 @@ const AddTranslateModal = ({ table }) => {
   const handleSaveTranslator = () => {
     const val = translatorInputValue.trim();
     if (!val) {
-      setTranslatorInputError(t("validation.required") || "Required");
+      setTranslatorInputError(t("validation.required"));
       return;
     }
     createTranslator({ fullName: val });

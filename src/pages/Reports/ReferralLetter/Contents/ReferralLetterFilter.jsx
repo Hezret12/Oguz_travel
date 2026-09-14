@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { Box, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ChevronDown } from "lucide-react";
@@ -195,4 +195,4 @@ const ReferralLetterFilter = ({
   );
 };
 
-export default ReferralLetterFilter;
+export default memo(ReferralLetterFilter);

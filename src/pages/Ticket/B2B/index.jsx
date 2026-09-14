@@ -27,7 +27,7 @@ import {
   SALE_STATUS_CONFIG,
   PAYMENT_STATUS_CONFIG,
 } from "../../../functions/statusChipConfigs";
-import { usePageFilters } from "../../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../../hooks/usePageFilters";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import {
@@ -59,6 +59,45 @@ const CURRENCY_SYMBOLS = {
   RUB: "₽",
 };
 
+const B2BFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    closeDrawer,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: b2bFilterActions,
+    selectors: b2bFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={() => {
+        applyFilters();
+        closeDrawer();
+      }}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <B2BFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const B2B = () => {
   const { t, selectedLang } = useLocale();
   const { formatChange } = useDateFormat();
@@ -67,16 +106,7 @@ const B2B = () => {
   const [paymentModalRow, setPaymentModalRow] = useState(null);
 
   const {
-    applied,
-    draft,
-    isDrawerOpen,
     openDrawer,
-    closeDrawer,
-    setDraftFilter,
-    setFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
@@ -84,11 +114,8 @@ const B2B = () => {
     setPage,
     setPageSize,
     setSort,
-    selectsOpen,
-    openSelect,
-    closeSelect,
     queryParams,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: b2bFilterActions,
     selectors: b2bFilterSelectors,
   });
@@ -603,24 +630,7 @@ const B2B = () => {
         />
       </PageHeader>
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={() => {
-          applyFilters();
-          closeDrawer();
-        }}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <B2BFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <B2BFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}

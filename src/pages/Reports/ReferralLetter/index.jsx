@@ -25,7 +25,7 @@ import EditLetterStockModal from "./EditLetterStockModal";
 import EditReferralReportModal from "./EditReferralReportModal";
 import ReferralLetterFilter from "./Contents/ReferralLetterFilter";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
-import { usePageFilters } from "../../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../../hooks/usePageFilters";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import {
   referralLetterFilterActions,
@@ -40,6 +40,45 @@ import {
   deleteReportShareApi,
 } from "../../../api/queries/delete";
 
+const ReferralLetterReportFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    closeDrawer,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: referralLetterFilterActions,
+    selectors: referralLetterFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={() => {
+        applyFilters();
+        closeDrawer();
+      }}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <ReferralLetterFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const ReferralLetterPage = () => {
   const { t } = useLocale();
   const theme = useTheme();
@@ -50,25 +89,14 @@ const ReferralLetterPage = () => {
   const [activeTab, setActiveTab] = useState("reports");
 
   const {
-    applied,
-    draft,
-    queryParams,
-    isDrawerOpen,
     openDrawer,
-    closeDrawer,
-    setDraftFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
+    queryParams,
     searchQuery,
     setSearch,
     page,
     limit,
     setPage,
-    selectsOpen,
-    openSelect,
-    closeSelect,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: referralLetterFilterActions,
     selectors: referralLetterFilterSelectors,
   });
@@ -704,24 +732,7 @@ const ReferralLetterPage = () => {
         <MaterialReactTable table={stockTable} />
       )}
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={() => {
-          applyFilters();
-          closeDrawer();
-        }}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <ReferralLetterFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <ReferralLetterReportFilterDrawer />
 
       <DeleteDialog
         open={reportDeleteDialog.isOpen}

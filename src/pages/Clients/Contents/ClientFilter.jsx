@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Box,
   FormControl,
@@ -185,4 +186,4 @@ const ClientFilter = ({
   );
 };
 
-export default ClientFilter;
+export default memo(ClientFilter);

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { ChevronDown } from "lucide-react";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -179,4 +180,4 @@ const EmployeeFilter = ({
   );
 };
 
-export default EmployeeFilter;
+export default memo(EmployeeFilter);

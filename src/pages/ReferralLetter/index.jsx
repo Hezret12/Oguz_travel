@@ -16,7 +16,7 @@ import OperatorsCell from "../../components/OperatorsCell";
 import ClientCell from "../../components/ClientCell";
 import FilterDrawer from "../../components/FilterDrawer";
 import DeleteDialog from "../../components/DeleteDialog";
-import { usePageFilters } from "../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { useDelete } from "../../hooks/CRUD/useDelete";
@@ -44,6 +44,45 @@ const CURRENCY_SYMBOLS = {
   RUB: "₽",
 };
 
+const ReferralLetterFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    closeDrawer,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: referralLetterFilterActions,
+    selectors: referralLetterFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={() => {
+        applyFilters();
+        closeDrawer();
+      }}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <ReferralLetterFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const ReferalLetter = () => {
   const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -51,16 +90,7 @@ const ReferalLetter = () => {
   const [rowSelection, setRowSelection] = useState({});
 
   const {
-    applied,
-    draft,
-    isDrawerOpen,
     openDrawer,
-    closeDrawer,
-    setDraftFilter,
-    setFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
@@ -68,11 +98,8 @@ const ReferalLetter = () => {
     setPage,
     setPageSize,
     setSort,
-    selectsOpen,
-    openSelect,
-    closeSelect,
     queryParams,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: referralLetterFilterActions,
     selectors: referralLetterFilterSelectors,
   });
@@ -513,24 +540,7 @@ const ReferalLetter = () => {
         />
       </PageHeader>
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={() => {
-          applyFilters();
-          closeDrawer();
-        }}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <ReferralLetterFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <ReferralLetterFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}

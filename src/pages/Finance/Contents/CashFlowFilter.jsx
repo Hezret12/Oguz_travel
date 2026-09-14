@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import {
   Box,
   FormControl,
@@ -271,4 +271,4 @@ const CashFlowFilter = ({
   );
 };
 
-export default CashFlowFilter;
+export default memo(CashFlowFilter);

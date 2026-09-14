@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { Box, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ChevronDown } from "lucide-react";
@@ -127,7 +127,7 @@ const FilterDatePicker = ({ label, name, value, onChange }) => (
   </FormControl>
 );
 
-export default function TaskFilter({
+function TaskFilter({
   filters,
   draft,
   onFilterChange,
@@ -200,3 +200,5 @@ export default function TaskFilter({
     </Stack>
   );
 }
+
+export default memo(TaskFilter);

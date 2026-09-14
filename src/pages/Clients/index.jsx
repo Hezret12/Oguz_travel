@@ -16,7 +16,7 @@ import AddClient from "./Contents/AddClient";
 import EditClient from "./Contents/EditClient";
 import ClientFilter from "./Contents/ClientFilter";
 import ClientDocumentModal from "../../components/Dialog/ClientDocumentModal";
-import { usePageFilters } from "../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
 import {
   clientFilterActions,
@@ -35,6 +35,41 @@ const formatDate = (value) => {
   return `${day}.${month}.${year}`;
 };
 
+const ClientFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: clientFilterActions,
+    selectors: clientFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={applyFilters}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <ClientFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const Clients = () => {
   const { t } = useLocale();
   const { user } = useAuth();
@@ -45,15 +80,7 @@ const Clients = () => {
   const [selectedDocClient, setSelectedDocClient] = useState(null);
 
   const {
-    applied,
-    draft,
-    isDrawerOpen,
     openDrawer,
-    setDraftFilter,
-    setFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
@@ -61,11 +88,8 @@ const Clients = () => {
     setPage,
     setPageSize,
     setSort,
-    selectsOpen,
-    openSelect,
-    closeSelect,
     queryParams,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: clientFilterActions,
     selectors: clientFilterSelectors,
   });
@@ -406,21 +430,7 @@ const Clients = () => {
         onFilterClick={openDrawer}
       />
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={applyFilters}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <ClientFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <ClientFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}

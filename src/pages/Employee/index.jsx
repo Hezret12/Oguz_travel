@@ -10,8 +10,7 @@ import { Box, Chip, Tooltip } from "@mui/material";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import AddEmployee from "./Contents/AddEmployee";
 import EditEmployee from "./Contents/EditEmployee";
-import { usePageFilters } from "../../hooks/usePageFilters";
-import { usePagginationGet } from "../../hooks/usePagginationGet";
+import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import {
   employeeFilterActions,
   employeeFilterSelectors,
@@ -31,21 +30,48 @@ import { useDelete } from "../../hooks/CRUD/useDelete";
 import { deleteEmployee } from "../../api/queries/delete";
 import { actions } from "../../utils/helperConstant";
 
+const EmployeeFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: employeeFilterActions,
+    selectors: employeeFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={applyFilters}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <EmployeeFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const Employee = () => {
   const [rowSelection, setRowSelection] = useState({});
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
 
   const {
-    applied,
-    draft,
-    isDrawerOpen,
     openDrawer,
-    setDraftFilter,
-    setFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
@@ -53,11 +79,8 @@ const Employee = () => {
     setPage,
     setPageSize,
     setSort,
-    selectsOpen,
-    openSelect,
-    closeSelect,
     queryParams,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: employeeFilterActions,
     selectors: employeeFilterSelectors,
   });
@@ -416,21 +439,7 @@ const Employee = () => {
         onFilterClick={openDrawer}
       />
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={applyFilters}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <EmployeeFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <EmployeeFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}

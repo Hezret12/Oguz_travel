@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import {
   Box,
   ButtonBase,
@@ -341,4 +341,4 @@ const CafeteriaFilter = ({ filters, onFilterChange }) => {
   );
 };
 
-export default CafeteriaFilter;
+export default memo(CafeteriaFilter);

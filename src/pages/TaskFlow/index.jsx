@@ -20,12 +20,48 @@ import {
   taskFilterActions,
   taskFilterSelectors,
 } from "../../store/slices/filters/taskFilterSlice";
+import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { getAllTasksApi } from "../../api/queries/getters";
 import { updateTaskApi } from "../../api/queries/patch";
 import { deleteTaskApi } from "../../api/queries/delete";
+
+const TaskFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: taskFilterActions,
+    selectors: taskFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={applyFilters}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <TaskFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
 
 export default function TaskFlow() {
   const { t } = useLocale();
@@ -38,24 +74,15 @@ export default function TaskFlow() {
 
   const {
     applied,
-    draft,
-    isDrawerOpen,
     openDrawer,
-    setDraftFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
     limit,
     setPage,
     setPageSize,
-    selectsOpen,
-    openSelect,
-    closeSelect,
     queryParams,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: taskFilterActions,
     selectors: taskFilterSelectors,
   });
@@ -256,21 +283,7 @@ export default function TaskFlow() {
         isFetching={isCurrentFetching}
       />
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={applyFilters}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <TaskFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <TaskFilterDrawer />
 
       <Box
         sx={{

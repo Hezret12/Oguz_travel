@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, memo } from "react";
 import { Box, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ChevronDown } from "lucide-react";
@@ -273,4 +273,4 @@ const B2BFilter = ({
   );
 };
 
-export default B2BFilter;
+export default memo(B2BFilter);

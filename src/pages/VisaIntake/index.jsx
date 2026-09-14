@@ -5,7 +5,7 @@ import { useLocale } from "../../hooks/useLocale";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import CustomTabs from "../../components/CustomTabs";
 import FilterDrawer from "../../components/FilterDrawer";
-import { usePageFilters } from "../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import {
   visaIntakeFilterActions,
   visaIntakeFilterSelectors,
@@ -14,6 +14,40 @@ import VisaIntakeFilter from "./ApplicationsTab/Contents/VisaIntakeFilter";
 import ApplicationsTable from "./ApplicationsTab/ApplicationsTable";
 import CountriesTable from "./CountriesTab/CountriesTable";
 import CustomFieldsTable from "./CustomFieldsTab/CustomFieldsTable";
+
+const VisaIntakeFilterDrawer = () => {
+  const {
+    draft: filterDraft,
+    isDrawerOpen,
+    closeDrawer,
+    setDraftFilter,
+    applyFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: visaIntakeFilterActions,
+    selectors: visaIntakeFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={closeDrawer}
+      onApply={applyFilters}
+      onReset={resetFilters}
+    >
+      <VisaIntakeFilter
+        filters={filterDraft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
 
 export const VisaIntake = () => {
   const { t } = useLocale();
@@ -25,24 +59,15 @@ export const VisaIntake = () => {
 
   const {
     applied: filterApplied,
-    draft: filterDraft,
     queryParams,
-    isDrawerOpen,
     openDrawer,
-    closeDrawer,
-    setDraftFilter,
-    applyFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
     limit,
     setPage,
     setPageSize,
-    selectsOpen,
-    openSelect,
-    closeSelect,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: visaIntakeFilterActions,
     selectors: visaIntakeFilterSelectors,
   });
@@ -173,20 +198,7 @@ export const VisaIntake = () => {
 
       {activeTab === "custom_fields" && <CustomFieldsTable ref={activeTabRef} />}
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={closeDrawer}
-        onApply={applyFilters}
-        onReset={resetFilters}
-      >
-        <VisaIntakeFilter
-          filters={filterDraft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <VisaIntakeFilterDrawer />
     </Box>
   );
 };

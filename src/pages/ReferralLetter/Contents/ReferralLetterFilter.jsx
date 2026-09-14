@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Box,
   FormControl,
@@ -283,4 +284,4 @@ const ReferralLetterFilter = ({
   );
 };
 
-export default ReferralLetterFilter;
+export default memo(ReferralLetterFilter);

@@ -15,7 +15,7 @@ import DeleteDialog from "../../../components/DeleteDialog";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { deleteTotalCalculationApi } from "../../../api/queries/delete";
-import { usePageFilters } from "../../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../../hooks/usePageFilters";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { getAllTotalCalculationsApi } from "../../../api/queries/getters";
 import {
@@ -79,6 +79,40 @@ const fmtMoney = (val, currency = "$") => {
   })} ${currency}`;
 };
 
+const CashFlowFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    closeDrawer,
+    setDraftFilter,
+    applyFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: cashFlowFilterActions,
+    selectors: cashFlowFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={closeDrawer}
+      onApply={applyFilters}
+      onReset={resetFilters}
+    >
+      <CashFlowFilter
+        draft={draft}
+        setDraftFilter={setDraftFilter}
+        selectsOpen={selectsOpen}
+        openSelect={openSelect}
+        closeSelect={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const CashFlow = () => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -86,24 +120,15 @@ const CashFlow = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const {
-    draft,
-    isDrawerOpen,
     openDrawer,
-    closeDrawer,
-    setDraftFilter,
-    applyFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
     setPage,
     limit,
     setPageSize,
-    selectsOpen,
-    openSelect,
-    closeSelect,
     queryParams,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: cashFlowFilterActions,
     selectors: cashFlowFilterSelectors,
   });
@@ -544,20 +569,7 @@ const CashFlow = () => {
       />
 
       {/* Filter Drawer */}
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={closeDrawer}
-        onApply={applyFilters}
-        onReset={resetFilters}
-      >
-        <CashFlowFilter
-          draft={draft}
-          setDraftFilter={setDraftFilter}
-          selectsOpen={selectsOpen}
-          openSelect={openSelect}
-          closeSelect={closeSelect}
-        />
-      </FilterDrawer>
+      <CashFlowFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}

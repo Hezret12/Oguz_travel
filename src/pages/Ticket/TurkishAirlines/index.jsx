@@ -21,7 +21,7 @@ import {
   SALE_STATUS_CONFIG,
   PAYMENT_STATUS_CONFIG,
 } from "../../../functions/statusChipConfigs";
-import { usePageFilters } from "../../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../../hooks/usePageFilters";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import DeleteDialog from "../../../components/DeleteDialog";
@@ -53,6 +53,45 @@ const CURRENCY_SYMBOLS = {
   RUB: "₽",
 };
 
+const TurkishAirlinesFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    closeDrawer,
+    setDraftFilter,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+    selectsOpen,
+    openSelect,
+    closeSelect,
+  } = useDrawerFilters({
+    actions: turkishAirlinesFilterActions,
+    selectors: turkishAirlinesFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={() => {
+        applyFilters();
+        closeDrawer();
+      }}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <TurkishAirlinesFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const TurkishAirlines = () => {
   const { t, selectedLang } = useLocale();
   const { formatChange } = useDateFormat();
@@ -61,17 +100,7 @@ const TurkishAirlines = () => {
   const [paymentModalRow, setPaymentModalRow] = useState(null);
 
   const {
-    applied,
-    draft,
-    queryParams,
-    isDrawerOpen,
     openDrawer,
-    closeDrawer,
-    setDraftFilter,
-    setFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
     searchQuery,
     setSearch,
     page,
@@ -79,10 +108,8 @@ const TurkishAirlines = () => {
     setPage,
     setPageSize,
     setSort,
-    selectsOpen,
-    openSelect,
-    closeSelect,
-  } = usePageFilters({
+    queryParams,
+  } = useTableFilters({
     actions: turkishAirlinesFilterActions,
     selectors: turkishAirlinesFilterSelectors,
   });
@@ -632,24 +659,7 @@ const TurkishAirlines = () => {
         />
       </PageHeader>
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={() => {
-          applyFilters();
-          closeDrawer();
-        }}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <TurkishAirlinesFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <TurkishAirlinesFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}
