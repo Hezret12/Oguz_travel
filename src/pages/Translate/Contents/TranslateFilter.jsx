@@ -21,13 +21,22 @@ import { useGet } from "../../../hooks/CRUD/useGet";
 import { getAllTranslatorsApi } from "../../../api/queries/getters";
 import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 
-const selectSx = {
-  borderRadius: "8px",
-  "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
-  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "primary.main",
-  },
+// Standalone blue accent for this filter only — the app's theme primary is teal.
+const getAccent = (theme) =>
+  theme.palette.mode === "dark"
+    ? { main: "#3B82F6", dark: "#2563EB", contrastText: "#F8FAFC" }
+    : { main: "#2563EB", dark: "#1D4ED8", contrastText: "#ffffff" };
+
+const selectSx = (theme) => {
+  const accent = getAccent(theme);
+  return {
+    borderRadius: "8px",
+    "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+    "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: accent.main },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: accent.main,
+    },
+  };
 };
 
 const menuPaperProps = {
@@ -57,7 +66,7 @@ const FilterSelect = ({
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
-      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
+      sx={{ mb: 0.5, fontWeight: 600, color: "text.primary", fontSize: "12.5px" }}
     >
       {label}
     </Typography>
@@ -116,7 +125,7 @@ const FilterDatePicker = ({
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
-      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary", fontSize: "13px" }}
+      sx={{ mb: 0.5, fontWeight: 600, color: "text.primary", fontSize: "12.5px" }}
     >
       {label}
     </Typography>
@@ -137,24 +146,27 @@ const FilterDatePicker = ({
         textField: {
           fullWidth: true,
           size: "small",
-          sx: {
-            "& .MuiInputBase-root": {
-              fontSize: "0.875rem",
-              height: "42px",
-              minHeight: "42px",
-              borderRadius: "10px",
-              backgroundColor: "background.paper",
-            },
-            "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "primary.main",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "primary.main",
-            },
-            "& .MuiInputAdornment-root .MuiIconButton-root": {
-              color: "primary.main",
-            },
+          sx: (theme) => {
+            const accent = getAccent(theme);
+            return {
+              "& .MuiInputBase-root": {
+                fontSize: "0.8125rem",
+                height: "36px",
+                minHeight: "36px",
+                borderRadius: "9px",
+                backgroundColor: "background.paper",
+              },
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: accent.main,
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: accent.main,
+              },
+              "& .MuiInputAdornment-root .MuiIconButton-root": {
+                color: accent.main,
+              },
+            };
           },
         },
       }}
@@ -166,7 +178,7 @@ const FilterTimePicker = ({ label, name, value, onChange }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
-      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary", fontSize: "13px" }}
+      sx={{ mb: 0.5, fontWeight: 600, color: "text.primary", fontSize: "12.5px" }}
     >
       {label}
     </Typography>
@@ -185,24 +197,27 @@ const FilterTimePicker = ({ label, name, value, onChange }) => (
         textField: {
           fullWidth: true,
           size: "small",
-          sx: {
-            "& .MuiInputBase-root": {
-              fontSize: "0.875rem",
-              height: "42px",
-              minHeight: "42px",
-              borderRadius: "10px",
-              backgroundColor: "background.paper",
-            },
-            "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "primary.main",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "primary.main",
-            },
-            "& .MuiInputAdornment-root .MuiIconButton-root": {
-              color: "primary.main",
-            },
+          sx: (theme) => {
+            const accent = getAccent(theme);
+            return {
+              "& .MuiInputBase-root": {
+                fontSize: "0.8125rem",
+                height: "36px",
+                minHeight: "36px",
+                borderRadius: "9px",
+                backgroundColor: "background.paper",
+              },
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: accent.main,
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: accent.main,
+              },
+              "& .MuiInputAdornment-root .MuiIconButton-root": {
+                color: accent.main,
+              },
+            };
           },
         },
       }}
@@ -264,7 +279,7 @@ const useDayPresets = ({ filters, onFilterChange, startKey, endKey, t }) =>
   }, [filters, onFilterChange, startKey, endKey, t]);
 
 const PresetChips = ({ presets }) => (
-  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mb: 2 }}>
+  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.25 }}>
     {presets.map((p) => (
       <Chip
         key={p.id}
@@ -273,25 +288,26 @@ const PresetChips = ({ presets }) => (
         clickable
         onClick={p.onClick}
         variant={p.isActive ? "filled" : "outlined"}
-        color={p.isActive ? "primary" : "default"}
-        sx={{
-          borderRadius: "8px",
-          fontSize: "12px",
-          fontWeight: p.isActive ? 650 : 500,
-          height: "28px",
-          transition: "all 0.15s ease",
-          borderColor: p.isActive ? "primary.main" : "divider",
-          backgroundColor: (theme) =>
-            p.isActive
-              ? theme.palette.primary.main
+        sx={(theme) => {
+          const accent = getAccent(theme);
+          return {
+            borderRadius: "7px",
+            fontSize: "11px",
+            fontWeight: p.isActive ? 650 : 500,
+            height: "24px",
+            transition: "all 0.15s ease",
+            color: p.isActive ? accent.contrastText : "text.secondary",
+            borderColor: p.isActive ? accent.main : "divider",
+            backgroundColor: p.isActive
+              ? accent.main
               : alpha(theme.palette.text.primary, 0.02),
-          "&:hover": {
-            borderColor: "primary.main",
-            backgroundColor: (theme) =>
-              p.isActive
-                ? theme.palette.primary.dark
-                : alpha(theme.palette.primary.main, 0.08),
-          },
+            "&:hover": {
+              borderColor: accent.main,
+              backgroundColor: p.isActive
+                ? accent.dark
+                : alpha(accent.main, 0.08),
+            },
+          };
         }}
       />
     ))}
@@ -312,7 +328,7 @@ const DayGroup = ({
 }) => (
   <Box
     sx={{
-      p: 1.75,
+      p: 1.25,
       borderRadius: "10px",
       border: "1px solid",
       borderColor: "divider",
@@ -322,14 +338,18 @@ const DayGroup = ({
           : "rgba(0, 0, 0, 0.015)",
       display: "flex",
       flexDirection: "column",
-      gap: 1.5,
+      gap: 1,
     }}
   >
-    <Stack direction="row" alignItems="center" spacing={1}>
+    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
       {icon}
       <Typography
         variant="subtitle2"
-        sx={{ fontWeight: 700, fontSize: "0.85rem", color: "primary.main" }}
+        sx={(theme) => ({
+          fontWeight: 700,
+          fontSize: "0.8rem",
+          color: getAccent(theme).main,
+        })}
       >
         {title}
       </Typography>
@@ -337,7 +357,7 @@ const DayGroup = ({
 
     <PresetChips presets={presets} />
 
-    <Stack spacing={2}>
+    <Stack direction="row" spacing={1}>
       <FilterDatePicker
         label={t("columns.startDate")}
         name={startKey}
@@ -353,14 +373,14 @@ const DayGroup = ({
         minDate={filters?.[startKey]}
         onChange={onFilterChange}
       />
-
-      <FilterTimePicker
-        label={timeLabel}
-        name={timeKey}
-        value={filters?.[timeKey]}
-        onChange={onFilterChange}
-      />
     </Stack>
+
+    <FilterTimePicker
+      label={timeLabel}
+      name={timeKey}
+      value={filters?.[timeKey]}
+      onChange={onFilterChange}
+    />
   </Box>
 );
 
@@ -403,7 +423,7 @@ const TranslateFilter = ({
   });
 
   return (
-    <Stack spacing={2.5}>
+    <Stack spacing={2}>
       <GlobalEmployeeAutocomplete
         name="opr_guid"
         value={filters?.opr_guid ?? ""}
@@ -428,7 +448,11 @@ const TranslateFilter = ({
       <Divider sx={{ borderColor: "divider" }} />
 
       <DayGroup
-        icon={<EventRoundedIcon sx={{ fontSize: 18, color: "primary.main" }} />}
+        icon={
+          <EventRoundedIcon
+            sx={(theme) => ({ fontSize: 16, color: getAccent(theme).main })}
+          />
+        }
         title={t("columns.receivedDay")}
         presets={receivedPresets}
         startKey="start_received_day"
@@ -443,7 +467,7 @@ const TranslateFilter = ({
       <DayGroup
         icon={
           <EventAvailableRoundedIcon
-            sx={{ fontSize: 18, color: "primary.main" }}
+            sx={(theme) => ({ fontSize: 16, color: getAccent(theme).main })}
           />
         }
         title={t("columns.completedDay")}
