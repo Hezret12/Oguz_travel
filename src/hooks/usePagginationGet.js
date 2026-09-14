@@ -87,7 +87,6 @@ export function usePagginationGet({ apiFn, key, params, options = {} }) {
     pageCount,
     currentPage,
     meta,
-    // Convenience backward-compatible properties
     totalPrice: meta?.totalPrice ?? 0,
     totalExpense: meta?.totalExpense ?? meta?.totalExpensePrice ?? 0,
     totalExpensePrice: meta?.totalExpensePrice ?? meta?.totalExpense ?? 0,
