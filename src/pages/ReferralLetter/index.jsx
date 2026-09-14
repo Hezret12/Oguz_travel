@@ -90,15 +90,18 @@ const ReferalLetter = () => {
   const [rowSelection, setRowSelection] = useState({});
 
   const {
+    applied,
     openDrawer,
     searchQuery,
     setSearch,
+    setFilter,
     page,
     limit,
     setPage,
     setPageSize,
     setSort,
     queryParams,
+    resetFilters,
   } = useTableFilters({
     actions: referralLetterFilterActions,
     selectors: referralLetterFilterSelectors,

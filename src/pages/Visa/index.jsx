@@ -87,6 +87,7 @@ const Visa = () => {
     setPageSize,
     setSort,
     queryParams,
+    resetFilters,
   } = useTableFilters({
     actions: visaFilterActions,
     selectors: visaFilterSelectors,
