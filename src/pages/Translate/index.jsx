@@ -557,7 +557,7 @@ const TranslatePage = () => {
                   fontWeight: 500,
                 }}
               >
-                {t("totalPrice")}:
+                {t("columns.totalPrice")}:
               </Typography>
               <Typography
                 component="span"
@@ -591,7 +591,7 @@ const TranslatePage = () => {
                   fontWeight: 500,
                 }}
               >
-                {t("totalExpense")}:
+                {t("columns.totalExpense")}:
               </Typography>
               <Typography
                 component="span"
@@ -625,7 +625,7 @@ const TranslatePage = () => {
                   fontWeight: 500,
                 }}
               >
-                {t("totalProfit")}:
+                {t("columns.totalProfit")}:
               </Typography>
               <Typography
                 component="span"
