@@ -75,6 +75,8 @@ const AddTranslateModal = ({ table }) => {
     useCreate({
       apiFn: addTranslationApi,
       key: "translations",
+      isPaginated: true,
+      invalidateQueries: ["translations"],
       onSuccess: () => {
         table.setCreatingRow(null);
       },

@@ -56,10 +56,6 @@ export const GlobalExcelExportModal = ({
 
   const onSubmit = async (formData) => {
     if (isExporting) return;
-    if (totalItems === 0) {
-      toast.error(t("common.noDataToExport"));
-      return;
-    }
 
     setIsExporting(true);
     setProgressInfo(null);
@@ -144,8 +140,6 @@ export const GlobalExcelExportModal = ({
       setProgressInfo(null);
     }
   };
-
-  const isZeroItems = totalItems === 0;
 
   return (
     <CustomDialog open={open} close={handleClose} widthX={customFilterFields ? 640 : 500}>
@@ -309,7 +303,7 @@ export const GlobalExcelExportModal = ({
 
         <FooterButton
           loading={isExporting}
-          disabled={isZeroItems || isExporting}
+          disabled={isExporting}
           onCancel={handleClose}
           icon={<FileSpreadsheet size={18} />}
           saveButtonSx={{

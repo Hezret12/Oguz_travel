@@ -6,6 +6,7 @@ export const useCreate = ({
   key = "",
   onSuccess,
   invalidateQueries = [],
+  isPaginated = false,
 }) => {
   const queryClient = useQueryClient();
 
@@ -19,62 +20,73 @@ export const useCreate = ({
       const finalKey = Array.isArray(key) ? key : [key];
       const createdItem = newItem?.data?.data || newItem?.data;
 
-      queryClient.setQueriesData(
-        { queryKey: finalKey, exact: false },
-        (oldData) => {
-          if (!oldData) return oldData;
-          if (oldData?.pages?.length) {
-            const firstPage = oldData.pages[0];
-            const existingItems =
-              firstPage?.data?.data ?? firstPage?.data ?? [];
+      if (isPaginated) {
+        queryClient.invalidateQueries({
+          queryKey: finalKey,
+          refetchType: "active",
+        });
+      } else {
+        queryClient.setQueriesData(
+          { queryKey: finalKey, exact: false },
+          (oldData) => {
+            if (!oldData) return oldData;
+            if (oldData?.pages?.length) {
+              const firstPage = oldData.pages[0];
+              const existingItems =
+                firstPage?.data?.data ?? firstPage?.data ?? [];
 
-            const updatedFirstPage = {
-              ...firstPage,
-              data: {
-                ...(firstPage?.data || {}),
-                data: [createdItem, ...existingItems],
-              },
-            };
+              const updatedFirstPage = {
+                ...firstPage,
+                data: {
+                  ...(firstPage?.data || {}),
+                  data: [createdItem, ...existingItems],
+                },
+              };
 
-            return {
-              ...oldData,
-              pages: [updatedFirstPage, ...oldData.pages.slice(1)],
-            };
-          }
-          if (Array.isArray(oldData?.data?.data)) {
-            return {
-              ...oldData,
-              data: {
-                ...oldData.data,
-                data: [createdItem, ...oldData.data.data],
-                total: (oldData.data.total ?? oldData.data.data.length) + 1,
-                totalRowCount:
-                  oldData.data.totalRowCount != null
-                    ? oldData.data.totalRowCount + 1
-                    : undefined,
-              },
-            };
-          }
-          if (Array.isArray(oldData?.data)) {
-            return {
-              ...oldData,
-              data: [createdItem, ...oldData.data],
-            };
-          }
-          return oldData;
-        },
-      );
+              return {
+                ...oldData,
+                pages: [updatedFirstPage, ...oldData.pages.slice(1)],
+              };
+            }
+            if (Array.isArray(oldData?.data?.data)) {
+              return {
+                ...oldData,
+                data: {
+                  ...oldData.data,
+                  data: [createdItem, ...oldData.data.data],
+                  total: (oldData.data.total ?? oldData.data.data.length) + 1,
+                  totalItems:
+                    (oldData.data.totalItems ??
+                      oldData.data.total ??
+                      oldData.data.data.length) + 1,
+                  totalRowCount:
+                    oldData.data.totalRowCount != null
+                      ? oldData.data.totalRowCount + 1
+                      : undefined,
+                },
+              };
+            }
+            if (Array.isArray(oldData?.data)) {
+              return {
+                ...oldData,
+                data: [createdItem, ...oldData.data],
+              };
+            }
+            return oldData;
+          },
+        );
+      }
 
       if (invalidateQueries?.length > 0) {
         invalidateQueries.forEach((queryKey) => {
           queryClient.invalidateQueries({
-            queryKey: [queryKey],
+            queryKey: Array.isArray(queryKey) ? queryKey : [queryKey],
             refetchType: "active",
           });
         });
       }
 
-      onSuccess?.();
+      onSuccess?.(newItem);
       hdlSuccessResMsg(newItem);
     },
 
