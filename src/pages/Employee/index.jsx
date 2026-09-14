@@ -24,6 +24,7 @@ import {
   getAllOfficeApi,
 } from "../../api/queries/getters";
 import { useGet } from "../../hooks/CRUD/useGet";
+import { usePagginationGet } from "../../hooks/usePagginationGet";
 import DeleteDialog from "../../components/DeleteDialog";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
@@ -71,9 +72,11 @@ const Employee = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
 
   const {
+    applied,
     openDrawer,
     searchQuery,
     setSearch,
+    setFilter,
     page,
     limit,
     setPage,

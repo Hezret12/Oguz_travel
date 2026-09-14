@@ -80,9 +80,11 @@ const Clients = () => {
   const [selectedDocClient, setSelectedDocClient] = useState(null);
 
   const {
+    applied,
     openDrawer,
     searchQuery,
     setSearch,
+    setFilter,
     page,
     limit,
     setPage,

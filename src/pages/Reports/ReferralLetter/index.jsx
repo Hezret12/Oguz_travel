@@ -89,6 +89,7 @@ const ReferralLetterPage = () => {
   const [activeTab, setActiveTab] = useState("reports");
 
   const {
+    applied,
     openDrawer,
     queryParams,
     searchQuery,

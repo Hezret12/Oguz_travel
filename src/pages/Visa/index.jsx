@@ -81,6 +81,7 @@ const Visa = () => {
     openDrawer,
     searchQuery,
     setSearch,
+    setFilter,
     page,
     limit,
     setPage,

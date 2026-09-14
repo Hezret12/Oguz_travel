@@ -100,9 +100,11 @@ const TurkishAirlines = () => {
   const [paymentModalRow, setPaymentModalRow] = useState(null);
 
   const {
+    applied,
     openDrawer,
     searchQuery,
     setSearch,
+    setFilter,
     page,
     limit,
     setPage,
