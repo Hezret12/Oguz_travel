@@ -1,15 +1,20 @@
 import { useMemo, memo } from "react";
 import {
   Box,
+  Chip,
+  Divider,
   FormControl,
   MenuItem,
   Select,
   Stack,
   Typography,
+  alpha,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { ChevronDown } from "lucide-react";
+import EventRoundedIcon from "@mui/icons-material/EventRounded";
+import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -111,7 +116,7 @@ const FilterDatePicker = ({
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
-      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
+      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary", fontSize: "13px" }}
     >
       {label}
     </Typography>
@@ -134,13 +139,21 @@ const FilterDatePicker = ({
           size: "small",
           sx: {
             "& .MuiInputBase-root": {
-              fontSize: "0.9rem",
-              height: "44px",
-              minHeight: "44px",
+              fontSize: "0.875rem",
+              height: "42px",
+              minHeight: "42px",
               borderRadius: "10px",
+              backgroundColor: "background.paper",
+            },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "primary.main",
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "primary.main",
             },
             "& .MuiInputAdornment-root .MuiIconButton-root": {
-              color: "#1565C0",
+              color: "primary.main",
             },
           },
         },
@@ -153,7 +166,7 @@ const FilterTimePicker = ({ label, name, value, onChange }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
-      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
+      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary", fontSize: "13px" }}
     >
       {label}
     </Typography>
@@ -174,19 +187,181 @@ const FilterTimePicker = ({ label, name, value, onChange }) => (
           size: "small",
           sx: {
             "& .MuiInputBase-root": {
-              fontSize: "0.9rem",
-              height: "44px",
-              minHeight: "44px",
+              fontSize: "0.875rem",
+              height: "42px",
+              minHeight: "42px",
               borderRadius: "10px",
+              backgroundColor: "background.paper",
+            },
+            "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "primary.main",
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "primary.main",
             },
             "& .MuiInputAdornment-root .MuiIconButton-root": {
-              color: "#1565C0",
+              color: "primary.main",
             },
           },
         },
       }}
     />
   </FormControl>
+);
+
+const useDayPresets = ({ filters, onFilterChange, startKey, endKey, t }) =>
+  useMemo(() => {
+    const sDate = filters?.[startKey];
+    const eDate = filters?.[endKey];
+
+    const thisMonthStart = dayjs().startOf("month").format("YYYY-MM-DD");
+    const thisMonthEnd = dayjs().endOf("month").format("YYYY-MM-DD");
+
+    const lastMonthStart = dayjs()
+      .subtract(1, "month")
+      .startOf("month")
+      .format("YYYY-MM-DD");
+    const lastMonthEnd = dayjs()
+      .subtract(1, "month")
+      .endOf("month")
+      .format("YYYY-MM-DD");
+
+    const thisYearStart = dayjs().startOf("year").format("YYYY-MM-DD");
+    const thisYearEnd = dayjs().endOf("year").format("YYYY-MM-DD");
+
+    const apply = (start, end) => {
+      onFilterChange(startKey, start);
+      onFilterChange(endKey, end);
+    };
+
+    return [
+      {
+        id: "thisMonth",
+        label: t("outbound.thisMonth"),
+        isActive: sDate === thisMonthStart && eDate === thisMonthEnd,
+        onClick: () => apply(thisMonthStart, thisMonthEnd),
+      },
+      {
+        id: "lastMonth",
+        label: t("outbound.lastMonth"),
+        isActive: sDate === lastMonthStart && eDate === lastMonthEnd,
+        onClick: () => apply(lastMonthStart, lastMonthEnd),
+      },
+      {
+        id: "thisYear",
+        label: t("outbound.thisYear"),
+        isActive: sDate === thisYearStart && eDate === thisYearEnd,
+        onClick: () => apply(thisYearStart, thisYearEnd),
+      },
+      {
+        id: "allTime",
+        label: t("outbound.allTime"),
+        isActive: !sDate && !eDate,
+        onClick: () => apply("", ""),
+      },
+    ];
+  }, [filters, onFilterChange, startKey, endKey, t]);
+
+const PresetChips = ({ presets }) => (
+  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mb: 2 }}>
+    {presets.map((p) => (
+      <Chip
+        key={p.id}
+        label={p.label}
+        size="small"
+        clickable
+        onClick={p.onClick}
+        variant={p.isActive ? "filled" : "outlined"}
+        color={p.isActive ? "primary" : "default"}
+        sx={{
+          borderRadius: "8px",
+          fontSize: "12px",
+          fontWeight: p.isActive ? 650 : 500,
+          height: "28px",
+          transition: "all 0.15s ease",
+          borderColor: p.isActive ? "primary.main" : "divider",
+          backgroundColor: (theme) =>
+            p.isActive
+              ? theme.palette.primary.main
+              : alpha(theme.palette.text.primary, 0.02),
+          "&:hover": {
+            borderColor: "primary.main",
+            backgroundColor: (theme) =>
+              p.isActive
+                ? theme.palette.primary.dark
+                : alpha(theme.palette.primary.main, 0.08),
+          },
+        }}
+      />
+    ))}
+  </Box>
+);
+
+const DayGroup = ({
+  icon,
+  title,
+  presets,
+  startKey,
+  endKey,
+  timeKey,
+  timeLabel,
+  filters,
+  onFilterChange,
+  t,
+}) => (
+  <Box
+    sx={{
+      p: 1.75,
+      borderRadius: "10px",
+      border: "1px solid",
+      borderColor: "divider",
+      backgroundColor: (theme) =>
+        theme.palette.mode === "dark"
+          ? "rgba(255, 255, 255, 0.02)"
+          : "rgba(0, 0, 0, 0.015)",
+      display: "flex",
+      flexDirection: "column",
+      gap: 1.5,
+    }}
+  >
+    <Stack direction="row" alignItems="center" spacing={1}>
+      {icon}
+      <Typography
+        variant="subtitle2"
+        sx={{ fontWeight: 700, fontSize: "0.85rem", color: "primary.main" }}
+      >
+        {title}
+      </Typography>
+    </Stack>
+
+    <PresetChips presets={presets} />
+
+    <Stack spacing={2}>
+      <FilterDatePicker
+        label={t("columns.startDate")}
+        name={startKey}
+        value={filters?.[startKey]}
+        maxDate={filters?.[endKey]}
+        onChange={onFilterChange}
+      />
+
+      <FilterDatePicker
+        label={t("columns.endDate")}
+        name={endKey}
+        value={filters?.[endKey]}
+        minDate={filters?.[startKey]}
+        onChange={onFilterChange}
+      />
+
+      <FilterTimePicker
+        label={timeLabel}
+        name={timeKey}
+        value={filters?.[timeKey]}
+        onChange={onFilterChange}
+      />
+    </Stack>
+  </Box>
 );
 
 const TranslateFilter = ({
@@ -211,6 +386,22 @@ const TranslateFilter = ({
 
   const allText = t("all") ?? "All";
 
+  const receivedPresets = useDayPresets({
+    filters,
+    onFilterChange,
+    startKey: "start_received_day",
+    endKey: "end_received_day",
+    t,
+  });
+
+  const completedPresets = useDayPresets({
+    filters,
+    onFilterChange,
+    startKey: "start_completed_day",
+    endKey: "end_completed_day",
+    t,
+  });
+
   return (
     <Stack spacing={2.5}>
       <GlobalEmployeeAutocomplete
@@ -233,109 +424,38 @@ const TranslateFilter = ({
         onOpen={onSelectOpen}
         onClose={onSelectClose}
       />
-      <Box
-        sx={{
-          p: 1.75,
-          borderRadius: "10px",
-          border: "1px solid",
-          borderColor: "divider",
-          backgroundColor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(255, 255, 255, 0.02)"
-              : "rgba(0, 0, 0, 0.015)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.5,
-        }}
-      >
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: 700,
-            fontSize: "0.85rem",
-            color: "primary.main",
-          }}
-        >
-          {t("columns.receivedDay")}
-        </Typography>
 
-        <FilterDatePicker
-          label={t("columns.startDate")}
-          name="start_received_day"
-          value={filters?.start_received_day}
-          maxDate={filters?.end_received_day}
-          onChange={onFilterChange}
-        />
+      <Divider sx={{ borderColor: "divider" }} />
 
-        <FilterDatePicker
-          label={t("columns.endDate")}
-          name="end_received_day"
-          value={filters?.end_received_day}
-          minDate={filters?.start_received_day}
-          onChange={onFilterChange}
-        />
-      </Box>
+      <DayGroup
+        icon={<EventRoundedIcon sx={{ fontSize: 18, color: "primary.main" }} />}
+        title={t("columns.receivedDay")}
+        presets={receivedPresets}
+        startKey="start_received_day"
+        endKey="end_received_day"
+        timeKey="received_time"
+        timeLabel={t("columns.receivedTime")}
+        filters={filters}
+        onFilterChange={onFilterChange}
+        t={t}
+      />
 
-      {/* Tabşyrylan güni (Completed Day Group) */}
-      <Box
-        sx={{
-          p: 1.75,
-          borderRadius: "10px",
-          border: "1px solid",
-          borderColor: "divider",
-          backgroundColor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(255, 255, 255, 0.02)"
-              : "rgba(0, 0, 0, 0.015)",
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.5,
-        }}
-      >
-        <Typography
-          variant="subtitle2"
-          sx={{
-            fontWeight: 700,
-            fontSize: "0.85rem",
-            color: "primary.main",
-          }}
-        >
-          {t("columns.completedDay")}
-        </Typography>
-
-        <FilterDatePicker
-          label={t("columns.startDate")}
-          name="start_completed_day"
-          value={filters?.start_completed_day}
-          maxDate={filters?.end_completed_day}
-          onChange={onFilterChange}
-        />
-
-        <FilterDatePicker
-          label={t("columns.endDate")}
-          name="end_completed_day"
-          value={filters?.end_completed_day}
-          minDate={filters?.start_completed_day}
-          onChange={onFilterChange}
-        />
-      </Box>
-
-      {/* Received Time & Completed Time Side-by-Side */}
-      <Stack direction="row" spacing={1.5} sx={{ "& > *": { flex: 1 } }}>
-        <FilterTimePicker
-          label={t("columns.receivedTime")}
-          name="received_time"
-          value={filters?.received_time}
-          onChange={onFilterChange}
-        />
-
-        <FilterTimePicker
-          label={t("columns.completedTime")}
-          name="completed_time"
-          value={filters?.completed_time}
-          onChange={onFilterChange}
-        />
-      </Stack>
+      <DayGroup
+        icon={
+          <EventAvailableRoundedIcon
+            sx={{ fontSize: 18, color: "primary.main" }}
+          />
+        }
+        title={t("columns.completedDay")}
+        presets={completedPresets}
+        startKey="start_completed_day"
+        endKey="end_completed_day"
+        timeKey="completed_time"
+        timeLabel={t("columns.completedTime")}
+        filters={filters}
+        onFilterChange={onFilterChange}
+        t={t}
+      />
     </Stack>
   );
 };
