@@ -38,6 +38,8 @@ const FilterDrawer = ({
       anchor="right"
       open={open}
       onClose={onClose}
+      disableScrollLock
+      transitionDuration={{ enter: 260, exit: 200 }}
       sx={(theme) => ({
         zIndex: theme.zIndex.drawer + 2,
       })}
@@ -47,9 +49,16 @@ const FilterDrawer = ({
             width: { xs: "100%", sm: 380 },
             zIndex: "inherit",
             backgroundColor: theme.palette.background.paper,
-            boxShadow: "-4px 0 24px rgba(0,0,0,0.12)",
+            borderLeft: "1px solid",
+            borderColor: "divider",
+            boxShadow: (t) =>
+              t.palette.mode === "dark"
+                ? "-4px 0 20px rgba(0,0,0,0.4)"
+                : "-4px 0 20px rgba(0,0,0,0.07)",
             display: "flex",
             flexDirection: "column",
+            willChange: "transform",
+            transform: "translateZ(0)",
           }),
         },
       }}

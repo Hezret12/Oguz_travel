@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import {
   Box,
   FormControl,
@@ -340,4 +340,4 @@ const TranslateFilter = ({
   );
 };
 
-export default TranslateFilter;
+export default memo(TranslateFilter);

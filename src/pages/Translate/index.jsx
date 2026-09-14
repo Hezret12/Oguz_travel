@@ -14,7 +14,7 @@ import { useDateFormat } from "../../functions/generalHelpers";
 import AddTranslateModal from "./AddTranslateModal";
 import EditTranslateModal from "./EditTranslateModal";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
-import { usePageFilters } from "../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
 import { useGet } from "../../hooks/CRUD/useGet";
 import {
@@ -56,6 +56,41 @@ const FILTER_LABEL_KEYS = {
   completed_time: "columns.completedTime",
 };
 
+const TranslateFilterDrawer = () => {
+  const {
+    draft,
+    isDrawerOpen,
+    selectsOpen,
+    setDraftFilter,
+    openSelect,
+    closeSelect,
+    applyFilters,
+    cancelFilters,
+    resetFilters,
+  } = useDrawerFilters({
+    actions: translateFilterActions,
+    selectors: translateFilterSelectors,
+  });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={applyFilters}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <TranslateFilter
+        filters={draft}
+        selectsOpen={selectsOpen}
+        onFilterChange={setDraftFilter}
+        onSelectOpen={openSelect}
+        onSelectClose={closeSelect}
+      />
+    </FilterDrawer>
+  );
+};
+
 const TranslatePage = () => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
@@ -65,13 +100,8 @@ const TranslatePage = () => {
 
   const {
     applied,
-    draft,
-    isDrawerOpen,
     openDrawer,
-    setDraftFilter,
     setFilter,
-    applyFilters,
-    cancelFilters,
     resetFilters,
     searchQuery,
     setSearch,
@@ -80,11 +110,8 @@ const TranslatePage = () => {
     setPage,
     setPageSize,
     setSort,
-    selectsOpen,
-    openSelect,
-    closeSelect,
     queryParams,
-  } = usePageFilters({
+  } = useTableFilters({
     actions: translateFilterActions,
     selectors: translateFilterSelectors,
   });
@@ -718,21 +745,7 @@ const TranslatePage = () => {
         />
       </PageHeader>
 
-      <FilterDrawer
-        open={isDrawerOpen}
-        onClose={cancelFilters}
-        onApply={applyFilters}
-        onReset={resetFilters}
-        onCancel={cancelFilters}
-      >
-        <TranslateFilter
-          filters={draft}
-          selectsOpen={selectsOpen}
-          onFilterChange={setDraftFilter}
-          onSelectOpen={openSelect}
-          onSelectClose={closeSelect}
-        />
-      </FilterDrawer>
+      <TranslateFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}

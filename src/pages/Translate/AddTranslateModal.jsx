@@ -45,11 +45,7 @@ const AddTranslateModal = ({ table }) => {
   });
 
   // react-hook-form setup
-  const {
-    control,
-    handleSubmit,
-    setValue,
-  } = useForm({
+  const { control, handleSubmit, setValue } = useForm({
     resolver: yupResolver(addTranslation),
     defaultValues: {
       received_day: dayjs().format("YYYY-MM-DD"),
@@ -66,7 +62,7 @@ const AddTranslateModal = ({ table }) => {
       correction_status: null,
       price: null,
       expense_price: null,
-      note: '',
+      note: "",
       is_paid: null,
     },
   });
@@ -113,9 +109,10 @@ const AddTranslateModal = ({ table }) => {
       completed_page_count: Number(data.completed_page_count || 0),
       price: Number(data.price || 0),
       expense_price: Number(data.expense_price || 0),
-      is_paid: data.is_paid === 0 || data.is_paid === "0"
-        ? 0
-        : (data.is_paid === true || data.is_paid === "true"),
+      is_paid:
+        data.is_paid === 0 || data.is_paid === "0"
+          ? 0
+          : data.is_paid === true || data.is_paid === "true",
     };
     createTranslation(payload);
   };
@@ -143,9 +140,9 @@ const AddTranslateModal = ({ table }) => {
 
   const statusOptions = useMemo(
     () => [
-      { value: "false", label: t("statusNormal")},
-      { value: "true", label: t("statusUrgent")},
-      { value: "0", label: t("paymentRefunded")},
+      { value: "false", label: t("statusNormal") },
+      { value: "true", label: t("statusUrgent") },
+      { value: "0", label: t("paymentRefunded") },
     ],
     [t],
   );
@@ -163,12 +160,9 @@ const AddTranslateModal = ({ table }) => {
       <CustomDialog
         open={true}
         close={() => table.setCreatingRow(null)}
-        widthX={700}
+        widthX={780}
       >
-        <CustomDialogHeader
-          variant="h5"
-          title={t("addTranslation")}
-        />
+        <CustomDialogHeader variant="h5" title={t("addTranslation")} />
         <CustomForm onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
             <Grid size={12}>
@@ -264,18 +258,27 @@ const AddTranslateModal = ({ table }) => {
               <CustomTextField
                 name="source_to_target"
                 control={control}
-                label={t("columns.direction") || "Ugur (Meselem: TK -> RU)"}
+                label={t("columns.direction")}
               />
             </Grid>
 
             {/* Page Count */}
-            <Grid size={6}>
+            <Grid size={3}>
               <CustomTextField
                 name="page_count"
                 control={control}
                 type="number"
-                label={t("columns.pageCount") || "Sahypa sany"}
+                label={t("columns.pageCount")}
                 required
+              />
+            </Grid>
+
+            <Grid size={3}>
+              <CustomTextField
+                name="completed_page_count"
+                control={control}
+                type="number"
+                label={t("columns.completedPageCount")}
               />
             </Grid>
 
@@ -329,19 +332,8 @@ const AddTranslateModal = ({ table }) => {
               />
             </Grid>
 
-            <Grid size={4}>
-              <CustomTextField
-                name="completed_page_count"
-                control={control}
-                type="number"
-                label={
-                  t("columns.completedPageCount") || "Tabşyrylan sahypa sany"
-                }
-              />
-            </Grid>
-
             {/* Correction Status */}
-            <Grid size={12}>
+            <Grid size={4}>
               <CustomTextField
                 name="correction_status"
                 control={control}
