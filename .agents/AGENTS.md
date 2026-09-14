@@ -8,7 +8,7 @@
 
 ### `useCreate` (`src/hooks/CRUD/useCreate.js`)
 ```js
-useCreate({ apiFn, key, onSuccess, invalidateQueries = [] })
+useCreate({ apiFn, key, onSuccess, invalidateQueries = [], isPaginated = false })
 ```
 | Param | Type | Required | Notes |
 |---|---|---|---|
@@ -16,8 +16,9 @@ useCreate({ apiFn, key, onSuccess, invalidateQueries = [] })
 | `key` | string \| string[] | **YES** | React Query cache key (e.g., `"translations"`). **NOT** `queryKey`. |
 | `onSuccess` | function | optional | Called after mutation succeeds and cache is updated. Receives raw Axios response. |
 | `invalidateQueries` | string[] | optional | Additional query keys to invalidate. |
+| `isPaginated` | boolean | optional | When `true`, invalidates query instead of optimistic prepending (essential for server-paginated tables). |
 
-- **Cache behavior**: Automatically prepends the created item to the cache (`setQueriesData`). No manual `invalidateQueries` call needed for the primary key.
+- **Cache behavior**: When `isPaginated: false`, automatically prepends the created item to the cache (`setQueriesData`). When `isPaginated: true`, invalidates the primary query key to fetch fresh relations and accurate server counts.
 - **Success handler**: `onSuccess?.()` is called after cache update. Use it only for UI side effects (close modal, reset form).
 
 ### `useUpdate` (`src/hooks/CRUD/useUpdate.js`)
