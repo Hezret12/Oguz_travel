@@ -119,6 +119,17 @@ const resolveIsPaid = (row) => {
 };
 
 
+const getColLetter = (colIndex) => {
+  let temp = "";
+  let letter = "";
+  while (colIndex > 0) {
+    temp = (colIndex - 1) % 26;
+    letter = String.fromCharCode(temp + 65) + letter;
+    colIndex = Math.floor((colIndex - temp - 1) / 26);
+  }
+  return letter;
+};
+
 export const exportTranslateExcel = async (translations = [], options = {}) => {
   const fileName = options.fileName || "Terjime_Hasabaty";
   const sheetName = options.sheetName || "Terjime";
@@ -157,12 +168,18 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     { header: "TERJIME\nEDEN", key: "translator", width: 26, align: "left" },
     { header: "DÜZEDILEN\nTERJIME", key: "correction_status", width: 16, align: "center" },
     { header: "TÖLENEN\nPUL", key: "price", width: 16, align: "right" },
+    { header: "ÇYKDAJY", key: "expense_price", width: 16, align: "right" },
+    { header: "PEÝDA", key: "profit", width: 16, align: "right" },
     { header: "TÖLEG\nÝAGDAÝY", key: "is_paid", width: 15, align: "center" },
     { header: "TÖLEG\nGÖTERIMI", key: "paid_percentage", width: 15, align: "center" },
   ];
 
   const statusColIdx = columnsConfig.findIndex((c) => c.key === "status");
+  const pageCountColIdx = columnsConfig.findIndex((c) => c.key === "page_count");
+  const completedPageColIdx = columnsConfig.findIndex((c) => c.key === "completed_page_count");
   const priceColIdx = columnsConfig.findIndex((c) => c.key === "price");
+  const expensePriceColIdx = columnsConfig.findIndex((c) => c.key === "expense_price");
+  const profitColIdx = columnsConfig.findIndex((c) => c.key === "profit");
   const isPaidColIdx = columnsConfig.findIndex((c) => c.key === "is_paid");
   const pctColIdx = columnsConfig.findIndex((c) => c.key === "paid_percentage");
 
@@ -212,6 +229,8 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   };
 
   let sumPrice = 0;
+  let sumExpense = 0;
+  let sumProfit = 0;
   let sumPages = 0;
   let sumCompletedPages = 0;
 
@@ -226,10 +245,17 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
         ? Number(row.completed_page_count)
         : null;
     const price = Number(row.price || 0);
+    const expensePrice = Number(row.expense_price ?? row.expense ?? 0);
+    const profit =
+      row.profit !== undefined && row.profit !== null && row.profit !== ""
+        ? Number(row.profit)
+        : price - expensePrice;
 
     sumPages += pageCount;
     if (completedPageCount !== null) sumCompletedPages += completedPageCount;
     sumPrice += price;
+    sumExpense += expensePrice;
+    sumProfit += profit;
 
     const isPaidLabel = resolveIsPaid(row);
     const pctValue = resolvePercent(row);
@@ -249,6 +275,8 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       row.translator?.fullName ? String(extractText(row.translator.fullName)).toUpperCase() : "",
       row.correction_status ? String(row.correction_status).toUpperCase() : "DOGRY",
       price,
+      expensePrice,
+      profit,
       isPaidLabel,
       pctValue,
     ];
@@ -412,6 +440,20 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       if (idx === priceColIdx && typeof val === "number") {
         cell.numFmt = "#,##0.00";
       }
+
+      if (idx === expensePriceColIdx && typeof val === "number") {
+        cell.numFmt = "#,##0.00";
+      }
+
+      if (idx === profitColIdx && typeof val === "number") {
+        cell.numFmt = "#,##0.00";
+        cell.font = {
+          name: "Calibri",
+          size: 10,
+          bold: true,
+          color: { argb: val >= 0 ? "FF15803D" : "FFDC2626" },
+        };
+      }
     });
   });
 
@@ -443,26 +485,66 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   const lastDataRow = totalRowIndex - 1;
 
   if (translations.length > 0) {
-    const cellPages = totalRow.getCell(START_COL + 4);
-    cellPages.value = {
-      formula: `SUM(H${firstDataRow}:H${lastDataRow})`,
-      result: sumPages,
-    };
-    cellPages.numFmt = "#,##0";
+    if (pageCountColIdx !== -1) {
+      const colNum = START_COL + pageCountColIdx;
+      const letter = getColLetter(colNum);
+      const cell = totalRow.getCell(colNum);
+      cell.value = {
+        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        result: sumPages,
+      };
+      cell.numFmt = "#,##0";
+    }
 
-    const cellCompletedPages = totalRow.getCell(START_COL + 9);
-    cellCompletedPages.value = {
-      formula: `SUM(M${firstDataRow}:M${lastDataRow})`,
-      result: sumCompletedPages,
-    };
-    cellCompletedPages.numFmt = "#,##0";
+    if (completedPageColIdx !== -1) {
+      const colNum = START_COL + completedPageColIdx;
+      const letter = getColLetter(colNum);
+      const cell = totalRow.getCell(colNum);
+      cell.value = {
+        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        result: sumCompletedPages,
+      };
+      cell.numFmt = "#,##0";
+    }
 
-    const cellPrice = totalRow.getCell(START_COL + 13);
-    cellPrice.value = {
-      formula: `SUM(Q${firstDataRow}:Q${lastDataRow})`,
-      result: sumPrice,
-    };
-    cellPrice.numFmt = "#,##0.00";
+    if (priceColIdx !== -1) {
+      const colNum = START_COL + priceColIdx;
+      const letter = getColLetter(colNum);
+      const cell = totalRow.getCell(colNum);
+      cell.value = {
+        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        result: sumPrice,
+      };
+      cell.numFmt = "#,##0.00";
+    }
+
+    if (expensePriceColIdx !== -1) {
+      const colNum = START_COL + expensePriceColIdx;
+      const letter = getColLetter(colNum);
+      const cell = totalRow.getCell(colNum);
+      cell.value = {
+        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        result: sumExpense,
+      };
+      cell.numFmt = "#,##0.00";
+    }
+
+    if (profitColIdx !== -1) {
+      const colNum = START_COL + profitColIdx;
+      const letter = getColLetter(colNum);
+      const cell = totalRow.getCell(colNum);
+      cell.value = {
+        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        result: sumProfit,
+      };
+      cell.numFmt = "#,##0.00";
+      cell.font = {
+        name: "Calibri",
+        size: 10,
+        bold: true,
+        color: { argb: sumProfit >= 0 ? "FF15803D" : "FFDC2626" },
+      };
+    }
   }
 
   const buffer = await workbook.xlsx.writeBuffer();
