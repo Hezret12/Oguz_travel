@@ -191,7 +191,7 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
               <CustomDatePicker
                 name="received_day"
                 control={control}
-                label={t("columns.receivedDay") || "Alnan güni"}
+                label={t("columns.receivedDay")}
                 required
               />
             </Grid>
@@ -200,7 +200,7 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
               <CustomTextField
                 name="received_time"
                 control={control}
-                label={t("columns.receivedTime") || "Alnan wagty"}
+                label={t("columns.receivedTime")}
                 type="time"
               />
             </Grid>
@@ -209,7 +209,7 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
               <CustomSelect
                 name="status"
                 control={control}
-                label={t("columns.status") || "Ýagdaýy"}
+                label={t("columns.status")}
                 options={statusOptions}
                 required
               />
@@ -219,7 +219,7 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
               <GlobalEmployeeAutocomplete
                 name="opr_guid"
                 control={control}
-                label={t("columns.operator") || "Operator"}
+                label={t("outbound.operator")}
                 required
               />
             </Grid>

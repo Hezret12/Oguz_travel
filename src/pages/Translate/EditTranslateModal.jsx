@@ -221,17 +221,17 @@ const EditTranslateModal = ({ row, onClose }) => {
 
   const statusOptions = useMemo(
     () => [
-      { value: "false", label: t("statusNormal") || "Adaty" },
-      { value: "true", label: t("statusUrgent") || "Gyssagly" },
-      { value: "0", label: t("paymentRefunded") || "Gaýtaryldy" },
+      { value: "false", label: t("statusNormal") },
+      { value: "true", label: t("statusUrgent") },
+      { value: "0", label: t("paymentRefunded") },
     ],
     [t],
   );
 
   const paymentOptions = useMemo(
     () => [
-      { label: t("paymentPaid") || "Tölendi", value: true },
-      { label: t("paymentCredit") || "Kredit", value: false },
+      { label: t("paymentPaid"), value: true },
+      { label: t("paymentCredit"), value: false },
     ],
     [t],
   );
@@ -246,7 +246,7 @@ const EditTranslateModal = ({ row, onClose }) => {
       >
         <CustomDialogHeader
           variant="h5"
-          title={t("editTranslation") || "Terjime üýtgetmek"}
+          title={t("editTranslation")}
         />
         <CustomForm onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -264,7 +264,7 @@ const EditTranslateModal = ({ row, onClose }) => {
               <CustomDatePicker
                 name="received_day"
                 control={control}
-                label={t("columns.receivedDay") || "Alnan güni"}
+                label={t("columns.receivedDay")}
                 required
               />
             </Grid>
@@ -273,7 +273,7 @@ const EditTranslateModal = ({ row, onClose }) => {
               <CustomTextField
                 name="received_time"
                 control={control}
-                label={t("columns.receivedTime") || "Alnan wagty"}
+                label={t("columns.receivedTime")}
                 type="time"
               />
             </Grid>
@@ -282,7 +282,7 @@ const EditTranslateModal = ({ row, onClose }) => {
               <CustomSelect
                 name="status"
                 control={control}
-                label={t("columns.status") || "Ýagdaýy"}
+                label={t("columns.status")}
                 options={statusOptions}
                 required
               />
@@ -292,7 +292,7 @@ const EditTranslateModal = ({ row, onClose }) => {
               <GlobalEmployeeAutocomplete
                 name="opr_guid"
                 control={control}
-                label={t("columns.operator") || "Operator"}
+                label={t("outbound.operator")}
                 required
                 initialEmployee={row?.original?.operator}
               />
@@ -373,7 +373,7 @@ const EditTranslateModal = ({ row, onClose }) => {
               <CustomTextField
                 name="source_to_target"
                 control={control}
-                label={t("columns.direction") || "Ugur (Meselem: TK -> RU)"}
+                label={t("columns.direction")}
               />
             </Grid>
 
@@ -383,7 +383,7 @@ const EditTranslateModal = ({ row, onClose }) => {
                 name="page_count"
                 control={control}
                 type="number"
-                label={t("columns.pageCount") || "Sahypa sany"}
+                label={t("columns.pageCount")}
                 required
               />
             </Grid>
@@ -394,7 +394,7 @@ const EditTranslateModal = ({ row, onClose }) => {
                 name="price"
                 control={control}
                 type="number"
-                label={t("columns.price") || "Baha"}
+                label={t("columns.price")}
                 endIcon="TMT"
                 required
               />
