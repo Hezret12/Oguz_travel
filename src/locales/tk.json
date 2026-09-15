@@ -437,6 +437,9 @@
     "statusSold": "Satyldy",
     "statusDamaged": "Zyýan ýeten",
     "statusLost": "Ýitirilen",
+    "usedCount": "Ulanylan",
+    "remainingCount": "Galan",
+    "noReports": "Bu topbada entek hasabat ýok",
     "deleteReportConfirm": "Bu hasabaty pozmak isleýärsiňizmi?",
     "deleteStockConfirm": "Bu hat stokyny pozmak isleýärsiňizmi?"
   },

@@ -437,6 +437,9 @@
     "statusSold": "Продано",
     "statusDamaged": "Повреждено",
     "statusLost": "Утеряно",
+    "usedCount": "Использовано",
+    "remainingCount": "Осталось",
+    "noReports": "Для этой партии пока нет отчетов",
     "deleteReportConfirm": "Вы уверены, что хотите удалить этот отчет?",
     "deleteStockConfirm": "Вы уверены, что хотите удалить этот склад писем?"
   },

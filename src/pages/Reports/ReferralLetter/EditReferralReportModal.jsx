@@ -13,11 +13,12 @@ import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { useLocale } from "../../../hooks/useLocale";
 import { updateReportShareApi } from "../../../api/queries/patch";
 
-const EditReferralReportModal = ({ table, row }) => {
+const EditReferralReportModal = ({ open, close, table, row }) => {
   const { t } = useLocale();
-  const isModalOpen = Boolean(
-    table && row && table.getState().editingRow?.id === row.id,
-  );
+  const isModalOpen =
+    open !== undefined
+      ? Boolean(open)
+      : Boolean(table && row && table.getState().editingRow?.id === row.id);
 
   const statusOptions = useMemo(
     () => [
@@ -58,7 +59,7 @@ const EditReferralReportModal = ({ table, row }) => {
     key: "reportShares",
     idKey: "guid",
     onSuccessUpdate: () => {
-      table?.setEditingRow(null);
+      handleClose();
     },
   });
 
@@ -80,6 +81,7 @@ const EditReferralReportModal = ({ table, row }) => {
 
   const handleClose = () => {
     table?.setEditingRow(null);
+    close?.();
   };
 
   return (

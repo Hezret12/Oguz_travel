@@ -1,18 +1,8 @@
-import { useMemo, useState, useEffect, memo } from "react";
-import {
-  Box,
-  Grid,
-  IconButton,
-  Typography,
-  TextField,
-  Button,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import { useForm, useWatch } from "react-hook-form";
+import { useMemo, useEffect, memo } from "react";
+import { Grid } from "@mui/material";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
-import { useQueryClient } from "@tanstack/react-query";
 
 import { useLocale } from "../../hooks/useLocale";
 import { useValidShema } from "../../functions/useValidShema";
@@ -25,11 +15,9 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { useGet } from "../../hooks/CRUD/useGet";
-import { useCreate } from "../../hooks/CRUD/useCreate";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { getAllTranslatorsApi } from "../../api/queries/getters";
-import { addTranslatorApi } from "../../api/queries/post";
-import { updateTranslatorApi, updateTranslationApi } from "../../api/queries/patch";
+import { updateTranslationApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
 
 const buildDefaultValues = (row) => ({
@@ -80,13 +68,6 @@ const buildDefaultValues = (row) => ({
 const EditTranslateModal = ({ row, onClose }) => {
   const { t } = useLocale();
   const { addTranslation } = useValidShema();
-  const queryClient = useQueryClient();
-
-  // Translator dialog state
-  const [translatorDialogOpen, setTranslatorDialogOpen] = useState(false);
-  const [translatorDialogMode, setTranslatorDialogMode] = useState("add"); // "add" | "edit"
-  const [translatorInputValue, setTranslatorInputValue] = useState("");
-  const [translatorInputError, setTranslatorInputError] = useState("");
 
   const { data: translators = [] } = useGet({
     apiFn: getAllTranslatorsApi,
@@ -97,7 +78,6 @@ const EditTranslateModal = ({ row, onClose }) => {
   const {
     control,
     handleSubmit,
-    setValue,
     reset,
     formState: { isSubmitting },
   } = useForm({
@@ -127,38 +107,6 @@ const EditTranslateModal = ({ row, onClose }) => {
     },
   });
 
-  const selectedTranslatorGuid = useWatch({ control, name: "translator_guid" });
-
-  const { mutate: createTranslator, isPending: isCreatingTranslator } =
-    useCreate({
-      apiFn: addTranslatorApi,
-      key: "translators",
-      onSuccess: (res) => {
-        // Invalidate query to refetch translators list
-        queryClient.invalidateQueries({ queryKey: ["translators"] });
-        // Set value of newly created translator in main form
-        const newGuid = res?.data?.guid;
-        if (newGuid) {
-          setValue("translator_guid", newGuid);
-        }
-        setTranslatorDialogOpen(false);
-        setTranslatorInputValue("");
-      },
-    });
-
-  const { mutate: updateTranslator, isPending: isUpdatingTranslator } =
-    useUpdate({
-      apiFn: updateTranslatorApi,
-      key: "translators",
-      idKey: "guid",
-      onSuccessUpdate: () => {
-        // Invalidate query to refetch translators list
-        queryClient.invalidateQueries({ queryKey: ["translators"] });
-        setTranslatorDialogOpen(false);
-        setTranslatorInputValue("");
-      },
-    });
-
   const onSubmit = (data) => {
     const payload = {
       ...data,
@@ -179,38 +127,6 @@ const EditTranslateModal = ({ row, onClose }) => {
           : data.is_paid === true || data.is_paid === "true",
     };
     updateTranslation(payload);
-  };
-
-  const openAddTranslator = () => {
-    setTranslatorDialogMode("add");
-    setTranslatorInputValue("");
-    setTranslatorInputError("");
-    setTranslatorDialogOpen(true);
-  };
-
-  const openEditTranslator = () => {
-    const selectedTranslator = translators.find(
-      (t) => t.guid === selectedTranslatorGuid,
-    );
-    if (selectedTranslator) {
-      setTranslatorDialogMode("edit");
-      setTranslatorInputValue(selectedTranslator.fullName);
-      setTranslatorInputError("");
-      setTranslatorDialogOpen(true);
-    }
-  };
-
-  const handleSaveTranslator = () => {
-    const val = translatorInputValue.trim();
-    if (!val) {
-      setTranslatorInputError(t("validation.required") || "Required");
-      return;
-    }
-    if (translatorDialogMode === "edit") {
-      updateTranslator({ guid: selectedTranslatorGuid, fullName: val });
-    } else {
-      createTranslator({ fullName: val });
-    }
   };
 
   const translatorOptions = useMemo(
@@ -237,318 +153,176 @@ const EditTranslateModal = ({ row, onClose }) => {
   );
 
   return (
-    <>
-      <CustomDialog
-        open={Boolean(row)}
-        close={onClose}
-        widthX={700}
-        keepMounted
-      >
-        <CustomDialogHeader
-          variant="h5"
-          title={t("editTranslation")}
-        />
-        <CustomForm onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            <Grid size={12}>
-              <GlobalClientAutocomplete
-                name="client_guid"
-                control={control}
-                columns={["fullName", "phone_number"]}
-                initialClient={row?.original?.client}
-                required
-              />
-            </Grid>
-
-            <Grid size={4}>
-              <CustomDatePicker
-                name="received_day"
-                control={control}
-                label={t("columns.receivedDay")}
-                required
-              />
-            </Grid>
-
-            <Grid size={4}>
-              <CustomTextField
-                name="received_time"
-                control={control}
-                label={t("columns.receivedTime")}
-                type="time"
-              />
-            </Grid>
-
-            <Grid size={4}>
-              <CustomSelect
-                name="status"
-                control={control}
-                label={t("columns.status")}
-                options={statusOptions}
-                required
-              />
-            </Grid>
-
-            <Grid size={6}>
-              <GlobalEmployeeAutocomplete
-                name="opr_guid"
-                control={control}
-                label={t("outbound.operator")}
-                required
-                initialEmployee={row?.original?.operator}
-              />
-            </Grid>
-
-            <Grid size={6}>
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 0.75,
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                }}
-              >
-                {t("columns.translator")}
-              </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Box sx={{ flexGrow: 1 }}>
-                  <CustomSelect
-                    name="translator_guid"
-                    control={control}
-                    options={translatorOptions}
-                  />
-                </Box>
-                <IconButton
-                  onClick={openAddTranslator}
-                  color="primary"
-                  sx={{
-                    height: "40px",
-                    width: "40px",
-                    borderRadius: "7px",
-                    border: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "1px solid rgba(255, 255, 255, 0.12)"
-                        : "1px solid rgba(0, 0, 0, 0.23)",
-                    "&:hover": {
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.08)"
-                          : "rgba(0, 0, 0, 0.04)",
-                    },
-                  }}
-                >
-                  <AddIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  onClick={openEditTranslator}
-                  disabled={!selectedTranslatorGuid}
-                  color="primary"
-                  sx={{
-                    height: "40px",
-                    width: "40px",
-                    borderRadius: "7px",
-                    border: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "1px solid rgba(255, 255, 255, 0.12)"
-                        : "1px solid rgba(0, 0, 0, 0.23)",
-                    "&.Mui-disabled": {
-                      borderColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.06)"
-                          : "rgba(0, 0, 0, 0.12)",
-                    },
-                    "&:hover": {
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255, 255, 255, 0.08)"
-                          : "rgba(0, 0, 0, 0.04)",
-                    },
-                  }}
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            </Grid>
-
-            <Grid size={6}>
-              <CustomTextField
-                name="source_to_target"
-                control={control}
-                label={t("columns.direction")}
-              />
-            </Grid>
-
-            {/* Page Count */}
-            <Grid size={6}>
-              <CustomTextField
-                name="page_count"
-                control={control}
-                type="number"
-                label={t("columns.pageCount")}
-                required
-              />
-            </Grid>
-
-            {/* Price */}
-            <Grid size={4}>
-              <CustomTextField
-                name="price"
-                control={control}
-                type="number"
-                label={t("columns.price")}
-                endIcon="TMT"
-                required
-              />
-            </Grid>
-
-            {/* Expense Price */}
-            <Grid size={4}>
-              <CustomTextField
-                name="expense_price"
-                control={control}
-                type="number"
-                label={t("columns.expensePrice")}
-                endIcon="TMT"
-                required
-              />
-            </Grid>
-
-            <Grid size={4}>
-              <CustomSelect
-                name="is_paid"
-                control={control}
-                label={t("columns.paymentStatus") || "Töleg görnüşi"}
-                options={paymentOptions}
-              />
-            </Grid>
-
-            <Grid size={4}>
-              <CustomDatePicker
-                name="completed_day"
-                control={control}
-                label={t("columns.completedDay") || "Tabşyrylan güni"}
-              />
-            </Grid>
-
-            <Grid size={4}>
-              <CustomTextField
-                name="completed_time"
-                control={control}
-                label={t("columns.completedTime") || "Tabşyrylan wagty"}
-                type="time"
-              />
-            </Grid>
-
-            <Grid size={4}>
-              <CustomTextField
-                name="completed_page_count"
-                control={control}
-                type="number"
-                label={
-                  t("columns.completedPageCount") || "Tabşyrylan sahypa sany"
-                }
-              />
-            </Grid>
-
-            {/* Correction Status */}
-            <Grid size={12}>
-              <CustomTextField
-                name="correction_status"
-                control={control}
-                label={t("columns.correctionStatus") || "Düzeliş ýagdaýy"}
-              />
-            </Grid>
-
-            {/* Note */}
-            <Grid size={12}>
-              <CustomTextField
-                name="note"
-                control={control}
-                label={t("columns.note") || "Bellik"}
-                multiline
-                rows={2}
-              />
-            </Grid>
+    <CustomDialog open={Boolean(row)} close={onClose} widthX={780} keepMounted>
+      <CustomDialogHeader variant="h5" title={t("editTranslation")} />
+      <CustomForm onSubmit={handleSubmit(onSubmit)}>
+        <Grid container spacing={2} sx={{ mt: 0.5 }}>
+          <Grid size={12}>
+            <GlobalClientAutocomplete
+              name="client_guid"
+              control={control}
+              columns={["fullName", "phone_number"]}
+              initialClient={row?.original?.client}
+              required
+            />
           </Grid>
 
-          <FooterButton
-            loading={isSubmitting || isUpdatingTranslation}
-            onCancel={onClose}
-            type="submit"
-            sx={{ mt: 3 }}
-          />
-        </CustomForm>
-      </CustomDialog>
-
-      <CustomDialog
-        open={translatorDialogOpen}
-        close={() => setTranslatorDialogOpen(false)}
-        widthX={400}
-      >
-        <CustomDialogHeader
-          variant="h6"
-          title={
-            translatorDialogMode === "edit"
-              ? t("editTranslator") || "Terjimeçini düzeltmek"
-              : t("addTranslator") || "Täze terjimeçi goşmak"
-          }
-        />
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1.5 }}>
-          <Box sx={{ width: "100%" }}>
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 0.75,
-                fontWeight: 600,
-                fontSize: "0.875rem",
-              }}
-            >
-              {t("columns.fullName") || "Doly ady"}
-              <span style={{ color: "#ef4444", marginLeft: "4px" }}>*</span>
-            </Typography>
-            <TextField
-              fullWidth
-              placeholder={t("columns.fullName") || "Doly ady"}
-              value={translatorInputValue}
-              onChange={(e) => {
-                setTranslatorInputValue(e.target.value);
-                if (e.target.value.trim()) setTranslatorInputError("");
-              }}
-              error={Boolean(translatorInputError)}
-              helperText={translatorInputError}
-              autoFocus
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "7px",
-                  minHeight: "44px",
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? "rgba(255, 255, 255, 0.03)"
-                      : "#ffffff",
-                },
-              }}
+          <Grid size={4}>
+            <CustomDatePicker
+              name="received_day"
+              control={control}
+              label={t("columns.receivedDay")}
+              required
             />
-          </Box>
-          <Box
-            sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}
-          >
-            <Button
-              onClick={() => setTranslatorDialogOpen(false)}
-              variant="outlined"
-            >
-              {t("cancel")}
-            </Button>
-            <Button
-              onClick={handleSaveTranslator}
-              variant="contained"
-              color="primary"
-              disabled={isCreatingTranslator || isUpdatingTranslator}
-            >
-              {t("save")}
-            </Button>
-          </Box>
-        </Box>
-      </CustomDialog>
-    </>
+          </Grid>
+
+          <Grid size={4}>
+            <CustomTextField
+              name="received_time"
+              control={control}
+              label={t("columns.receivedTime")}
+              type="time"
+            />
+          </Grid>
+
+          <Grid size={4}>
+            <CustomSelect
+              name="status"
+              control={control}
+              label={t("columns.status")}
+              options={statusOptions}
+              required
+            />
+          </Grid>
+
+          <Grid size={6}>
+            <GlobalEmployeeAutocomplete
+              name="opr_guid"
+              control={control}
+              label={t("outbound.operator")}
+              required
+              initialEmployee={row?.original?.operator}
+            />
+          </Grid>
+
+          <Grid size={6}>
+            <CustomSelect
+              name="translator_guid"
+              control={control}
+              label={t("columns.translator")}
+              options={translatorOptions}
+            />
+          </Grid>
+
+          <Grid size={6}>
+            <CustomTextField
+              name="source_to_target"
+              control={control}
+              label={t("columns.direction")}
+            />
+          </Grid>
+
+          {/* Page Count */}
+          <Grid size={3}>
+            <CustomTextField
+              name="page_count"
+              control={control}
+              type="number"
+              label={t("columns.pageCount")}
+              required
+            />
+          </Grid>
+
+          <Grid size={3}>
+            <CustomTextField
+              name="completed_page_count"
+              control={control}
+              type="number"
+              label={
+                t("columns.completedPageCount") || "Tabşyrylan sahypa sany"
+              }
+            />
+          </Grid>
+
+          {/* Price */}
+          <Grid size={4}>
+            <CustomTextField
+              name="price"
+              control={control}
+              type="number"
+              label={t("columns.price")}
+              endIcon="TMT"
+              required
+            />
+          </Grid>
+
+          {/* Expense Price */}
+          <Grid size={4}>
+            <CustomTextField
+              name="expense_price"
+              control={control}
+              type="number"
+              label={t("columns.expensePrice")}
+              endIcon="TMT"
+              required
+            />
+          </Grid>
+
+          <Grid size={4}>
+            <CustomSelect
+              name="is_paid"
+              control={control}
+              label={t("columns.paymentStatus") || "Töleg görnüşi"}
+              options={paymentOptions}
+            />
+          </Grid>
+
+          <Grid size={4}>
+            <CustomDatePicker
+              name="completed_day"
+              control={control}
+              label={t("columns.completedDay") || "Tabşyrylan güni"}
+            />
+          </Grid>
+
+          <Grid size={4}>
+            <CustomTextField
+              name="completed_time"
+              control={control}
+              label={t("columns.completedTime") || "Tabşyrylan wagty"}
+              type="time"
+            />
+          </Grid>
+
+          {/* Correction Status */}
+          <Grid size={4}>
+            <CustomTextField
+              name="correction_status"
+              control={control}
+              label={t("columns.correctionStatus") || "Düzeliş ýagdaýy"}
+            />
+          </Grid>
+
+          {/* Note */}
+          <Grid size={12}>
+            <CustomTextField
+              name="note"
+              control={control}
+              label={t("columns.note") || "Bellik"}
+              multiline
+              rows={2}
+            />
+          </Grid>
+        </Grid>
+
+        <FooterButton
+          loading={isSubmitting || isUpdatingTranslation}
+          onCancel={onClose}
+          type="submit"
+          sx={{ mt: 3 }}
+        />
+      </CustomForm>
+    </CustomDialog>
   );
 };
 

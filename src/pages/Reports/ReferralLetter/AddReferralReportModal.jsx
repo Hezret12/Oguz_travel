@@ -13,7 +13,7 @@ import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { useLocale } from "../../../hooks/useLocale";
 import { addReportShareApi } from "../../../api/queries/post";
 
-const AddReferralReportModal = ({ open, close, table }) => {
+const AddReferralReportModal = ({ open, close, table, defaultStartNo }) => {
   const { t } = useLocale();
   const isModalOpen =
     open !== undefined ? Boolean(open) : Boolean(table?.getState().creatingRow);
@@ -33,7 +33,7 @@ const AddReferralReportModal = ({ open, close, table }) => {
       quantity: "",
       assignment_opr_guid: "",
       received_by: "",
-      startNo: "",
+      startNo: defaultStartNo != null ? String(defaultStartNo) : "",
       endNo: "",
       status: 1,
       note: "",
@@ -47,7 +47,7 @@ const AddReferralReportModal = ({ open, close, table }) => {
       quantity: "",
       assignment_opr_guid: "",
       received_by: "",
-      startNo: "",
+      startNo: defaultStartNo != null ? String(defaultStartNo) : "",
       endNo: "",
       status: 1,
       note: "",

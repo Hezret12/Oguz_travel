@@ -437,6 +437,9 @@
     "statusSold": "Sold",
     "statusDamaged": "Damaged",
     "statusLost": "Lost",
+    "usedCount": "Used",
+    "remainingCount": "Remaining",
+    "noReports": "No reports for this batch yet",
     "deleteReportConfirm": "Are you sure you want to delete this report?",
     "deleteStockConfirm": "Are you sure you want to delete this letter stock?"
   },

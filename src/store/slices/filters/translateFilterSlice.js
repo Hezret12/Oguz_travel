@@ -12,7 +12,7 @@ export const translateFilterSlice = createFilterSlice({
     end_completed_day: '',
     translator_guid: '',
   },
-  defaultPageSize: 40,
+  defaultPageSize: 30,
 });
 
 export const translateFilterActions = translateFilterSlice.actions;
