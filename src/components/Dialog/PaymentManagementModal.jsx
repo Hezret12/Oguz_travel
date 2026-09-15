@@ -35,6 +35,11 @@ import { useCreate } from "../../hooks/CRUD/useCreate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 
+// Fixed body height so the modal doesn't jump around as the add/edit form,
+// payment count, or credit/non-credit branch change — only the scrollable
+// history list adapts inside this fixed frame.
+const MODAL_BODY_HEIGHT = 600;
+
 const CURRENCY_SYMBOLS = {
   USD: "$",
   EUR: "€",
@@ -656,7 +661,16 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       </Box>
 
       {(isCredit || payments.length > 0 || paymentsLoading) ? (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            height: MODAL_BODY_HEIGHT,
+            maxHeight: "80vh",
+            overflowY: "auto",
+          }}
+        >
           {/* Summary Cards Section (Inline & Sleek) */}
           <Box
             sx={(theme) => ({
@@ -673,6 +687,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               justifyContent: "space-between",
               flexWrap: "wrap",
               gap: 1.5,
+              flexShrink: 0,
             })}
           >
             {/* Jemi satuw */}
@@ -775,7 +790,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
           {(remaining > 0 || editingPayment) && (
             <>
-              <Box component="form" onSubmit={handleSubmit(handleSavePayment)}>
+              <Box component="form" onSubmit={handleSubmit(handleSavePayment)} sx={{ flexShrink: 0 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
                   {editingPayment ? t("payment.editPayment") : t("payment.addPayment")}
                 </Typography>
@@ -861,17 +876,27 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             </>
           )}
 
-          <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5 }}>
+          <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1.5, flexShrink: 0 }}>
               {t("payment.paymentHistory")}
             </Typography>
-            <Box sx={{ minHeight: "80px", display: "flex", flexDirection: "column" }}>
+            <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
               {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 4 }}>
+                <Box sx={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
                   <CircularProgress size={24} />
                 </Box>
               ) : payments.length === 0 ? (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 3 }}>
+                <Box
+                  sx={{
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: "8px",
+                  }}
+                >
                   <Typography variant="body2" color="text.secondary">
                     {t("payment.noPayments")}
                   </Typography>
@@ -880,7 +905,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                 <List
                   disablePadding
                   sx={{
-                    maxHeight: "230px",
+                    flex: 1,
+                    minHeight: 0,
                     overflowY: "auto",
                     border: "1px solid",
                     borderColor: "divider",
@@ -1044,7 +1070,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
               )}
             </Box>
             {totalPages > 1 && !loading && payments.length > 0 && (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 2, flexShrink: 0 }}>
                 <Pagination
                   count={totalPages}
                   page={page}
@@ -1058,7 +1084,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           </Box>
 
           {/* Modal Footer Close Button */}
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1, flexShrink: 0 }}>
             <Button
               variant="outlined"
               onClick={handleModalClose}
@@ -1074,11 +1100,21 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           </Box>
         </Box>
       ) : (
-        <Box sx={{ py: 4, textAlign: "center" }}>
+        <Box
+          sx={{
+            height: MODAL_BODY_HEIGHT,
+            maxHeight: "80vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+          }}
+        >
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             {t("payment.nonCreditMessage")} ({ticket.payment_status || "Unknown"}).
           </Typography>
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
             <Button
               variant="contained"
               onClick={handleModalClose}
