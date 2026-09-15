@@ -394,14 +394,16 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
             placeholder={t("visaDocument.tableTitlePlaceholder", { number: tableIndex + 1 })}
             slotProps={{
               input: {
-                sx: {
+                sx: (theme) => ({
                   borderRadius: "8px",
                   fontSize: "0.95rem",
                   fontWeight: 600,
                   minHeight: "44px",
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
-                },
+                  backgroundColor: "#ffffff",
+                  ...theme.applyStyles("dark", {
+                    backgroundColor: "rgba(255, 255, 255, 0.03)",
+                  }),
+                }),
               },
             }}
           />
@@ -502,7 +504,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                         key={cell.id || `${rIdx}-${cIdx}`}
                         colSpan={cellColSpan}
                         rowSpan={cellRowSpan}
-                        sx={{
+                        sx={(theme) => ({
                           border: "1px solid",
                           borderColor: "divider",
                           p: 0,
@@ -514,24 +516,23 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                             maxWidth: "52px",
                             textAlign: "center",
                           }),
-                          backgroundColor: (theme) => {
-                            if (isOrderCol) {
-                              return theme.palette.mode === "dark"
-                                ? "rgba(255, 255, 255, 0.03)"
-                                : "#f8fafc";
-                            }
-                            if (isHeaderRow) {
-                              return theme.palette.mode === "dark"
-                                ? "rgba(255, 255, 255, 0.05)"
-                                : "#f1f5f9";
-                            }
-                            return "transparent";
-                          },
+                          backgroundColor: isOrderCol
+                            ? "#f8fafc"
+                            : isHeaderRow
+                              ? "#f1f5f9"
+                              : "transparent",
                           "&:hover .cell-menu-btn": {
                             opacity: isOrderCol ? 0 : 1,
                             visibility: isOrderCol ? "hidden" : "visible",
                           },
-                        }}
+                          ...theme.applyStyles("dark", {
+                            backgroundColor: isOrderCol
+                              ? "rgba(255, 255, 255, 0.03)"
+                              : isHeaderRow
+                                ? "rgba(255, 255, 255, 0.05)"
+                                : "transparent",
+                          }),
+                        })}
                       >
                         {isOrderCol ? (
                           <Box
@@ -655,13 +656,15 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
           placeholder={t("visaDocument.tableNotePlaceholder")}
           slotProps={{
             input: {
-              sx: {
+              sx: (theme) => ({
                 borderRadius: "8px",
                 fontSize: "0.92rem",
                 p: 1.5,
-                backgroundColor: (theme) =>
-                  theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
-              },
+                backgroundColor: "#ffffff",
+                ...theme.applyStyles("dark", {
+                  backgroundColor: "rgba(255, 255, 255, 0.03)",
+                }),
+              }),
             },
           }}
         />

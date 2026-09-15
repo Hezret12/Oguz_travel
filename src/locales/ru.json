@@ -811,7 +811,8 @@
     "exportExcelConfirmText": "Экспортировать в файл Excel?",
     "exportExcelConfirmAll": "Экспортировать данные в файл Excel?",
     "exportExcelNoData": "Нет записей для экспорта.",
-    "exportExcelBtn": "Экспортировать"
+    "exportExcelBtn": "Экспортировать",
+    "offlineNotice": "Нет подключения к интернету. Переподключение выполняется автоматически..."
   },
   "autocomplete": {
     "addClient": "Добавить клиента",

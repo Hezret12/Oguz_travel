@@ -2,6 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import i18n from '../libs/i18n';
 import { getCookieOptions } from '../utils/auth';
+import { emitNetworkError, emitNetworkRecovered } from '../utils/networkStatusBus';
 
 const BASE_URL =
   import.meta.env.VITE_API_MODE === 'development'
@@ -52,8 +53,15 @@ const processQueue = (error, token = null) => {
 };
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    emitNetworkRecovered();
+    return response;
+  },
   async (error) => {
+    if (!error.response && !axios.isCancel(error)) {
+      emitNetworkError();
+    }
+
     const originalRequest = error.config;
 
     if (!originalRequest) {
@@ -154,6 +162,10 @@ axiosInstance.interceptors.response.use(
         status === 403 ||
         refreshError.message === 'No refresh token available' ||
         refreshError.message === 'No access token in refresh response';
+
+      if (!refreshError.response && !isAuthFailure) {
+        emitNetworkError();
+      }
 
       if (isAuthFailure) {
         const removeOpts = { path: '/' };

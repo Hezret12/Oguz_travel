@@ -811,7 +811,8 @@
     "exportExcelConfirmText": "Excel faýlyna eksport etmek isleýärsiňizmi?",
     "exportExcelConfirmAll": "Maglumatlary Excel faýlyna eksport etmek isleýärsiňizmi?",
     "exportExcelNoData": "Eksport etmek üçin ýazgy tapylmady.",
-    "exportExcelBtn": "Excele geçir"
+    "exportExcelBtn": "Excele geçir",
+    "offlineNotice": "Internet baglanyşygy ýok. Awtomatiki usulda gaýtadan baglanylýar..."
   },
   "autocomplete": {
     "addClient": "Täze müşderi goşmak",

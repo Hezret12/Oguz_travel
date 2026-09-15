@@ -75,10 +75,10 @@ export const getDefaultMRTOptions = () => ({
       backgroundColor: theme.palette.background.paper,
       transition: "background-color 0.15s ease",
       "&:hover": {
-        backgroundColor:
-          theme.palette.mode === "dark"
-            ? "rgba(255, 255, 255, 0.05)"
-            : "rgba(0, 0, 0, 0.03) !important",
+        backgroundColor: "rgba(0, 0, 0, 0.03) !important",
+        ...theme.applyStyles("dark", {
+          backgroundColor: "rgba(255, 255, 255, 0.05)",
+        }),
       },
     }),
   }),
@@ -95,19 +95,25 @@ export const getDefaultMRTOptions = () => ({
         width: "8px",
       },
       "&::-webkit-scrollbar-track": {
-        background: theme.palette.mode === "dark" ? "#1e1e1e" : "#f0f0f0",
+        background: "#f0f0f0",
+        ...theme.applyStyles("dark", {
+          background: "#1e1e1e",
+        }),
       },
       "&::-webkit-scrollbar-thumb": {
-        backgroundColor: theme.palette.mode === "dark" ? "#555" : "#c0c0c0",
+        backgroundColor: "#c0c0c0",
         borderRadius: "4px",
-        border: `2px solid ${
-          theme.palette.mode === "dark" ? "#1e1e1e" : "#f0f0f0"
-        }`,
+        border: "2px solid #f0f0f0",
+        ...theme.applyStyles("dark", {
+          backgroundColor: "#555",
+          border: "2px solid #1e1e1e",
+        }),
       },
       scrollbarWidth: "thin",
-      scrollbarColor: `${
-        theme.palette.mode === "dark" ? "#555 #1e1e1e" : "#c0c0c0 #f0f0f0"
-      }`,
+      scrollbarColor: "#c0c0c0 #f0f0f0",
+      ...theme.applyStyles("dark", {
+        scrollbarColor: "#555 #1e1e1e",
+      }),
     }),
   },
   muiTableHeadProps: {
@@ -120,54 +126,56 @@ export const getDefaultMRTOptions = () => ({
   },
   muiTableHeadCellProps: ({ column }) => {
     const isPinned = column.getIsPinned();
+    const pinnedShadowLight = !isPinned
+      ? undefined
+      : isPinned === "left"
+        ? "4px 0 8px -2px rgba(0, 0, 0, 0.06) !important"
+        : "-4px 0 8px -2px rgba(0, 0, 0, 0.06) !important";
+    const pinnedShadowDark = !isPinned
+      ? undefined
+      : isPinned === "left"
+        ? "4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
+        : "-4px 0 8px -2px rgba(0, 0, 0, 0.5) !important";
+
     return {
-      sx: (theme) => {
-        const isDark = theme.palette.mode === "dark";
-        const base = {
-          fontSize: "14px",
-          fontWeight: 650,
-          backgroundColor: theme.palette.background.paper,
-          color: isDark ? "#F8FAFC" : "#334155",
-          borderBottom: `1px solid ${theme.palette.divider}`,
-        };
-        if (!isPinned) return base;
-        return {
-          ...base,
-          boxShadow:
-            isPinned === "left"
-              ? isDark
-                ? "4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
-                : "4px 0 8px -2px rgba(0, 0, 0, 0.06) !important"
-              : isDark
-                ? "-4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
-                : "-4px 0 8px -2px rgba(0, 0, 0, 0.06) !important",
-        };
-      },
+      sx: (theme) => ({
+        fontSize: "14px",
+        fontWeight: 650,
+        backgroundColor: theme.palette.background.paper,
+        color: "#334155",
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        ...(isPinned && { boxShadow: pinnedShadowLight }),
+        ...theme.applyStyles("dark", {
+          color: "#F8FAFC",
+          ...(isPinned && { boxShadow: pinnedShadowDark }),
+        }),
+      }),
     };
   },
   muiTableBodyCellProps: ({ column }) => {
     const isPinned = column.getIsPinned();
+    const pinnedShadowLight = !isPinned
+      ? undefined
+      : isPinned === "left"
+        ? "4px 0 8px -2px rgba(0, 0, 0, 0.06) !important"
+        : "-4px 0 8px -2px rgba(0, 0, 0, 0.06) !important";
+    const pinnedShadowDark = !isPinned
+      ? undefined
+      : isPinned === "left"
+        ? "4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
+        : "-4px 0 8px -2px rgba(0, 0, 0, 0.5) !important";
+
     return {
-      sx: (theme) => {
-        const isDark = theme.palette.mode === "dark";
-        const base = {
-          backgroundColor: theme.palette.background.paper,
-          color: isDark ? "#E2E8F0" : "#1E293B",
-          borderBottom: `1px solid ${theme.palette.divider}`,
-        };
-        if (!isPinned) return base;
-        return {
-          ...base,
-          boxShadow:
-            isPinned === "left"
-              ? isDark
-                ? "4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
-                : "4px 0 8px -2px rgba(0, 0, 0, 0.06) !important"
-              : isDark
-                ? "-4px 0 8px -2px rgba(0, 0, 0, 0.5) !important"
-                : "-4px 0 8px -2px rgba(0, 0, 0, 0.06) !important",
-        };
-      },
+      sx: (theme) => ({
+        backgroundColor: theme.palette.background.paper,
+        color: "#1E293B",
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        ...(isPinned && { boxShadow: pinnedShadowLight }),
+        ...theme.applyStyles("dark", {
+          color: "#E2E8F0",
+          ...(isPinned && { boxShadow: pinnedShadowDark }),
+        }),
+      }),
     };
   },
 

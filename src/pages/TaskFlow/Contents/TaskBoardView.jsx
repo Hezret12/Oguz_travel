@@ -92,14 +92,10 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
       }}
     >
       <Box
-        sx={{
-          bgcolor: (theme) =>
-            theme.palette.mode === "dark"
-              ? "background.default"
-              : col.bgLight,
+        sx={(theme) => ({
+          bgcolor: col.bgLight,
           border: "1px solid",
-          borderColor: (theme) =>
-            theme.palette.mode === "dark" ? "divider" : col.borderLight,
+          borderColor: col.borderLight,
           borderRadius: "12px",
           p: 1.5,
           height: "100%",
@@ -109,7 +105,11 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
           flexDirection: "column",
           boxSizing: "border-box",
           overflow: "hidden",
-        }}
+          ...theme.applyStyles("dark", {
+            bgcolor: "background.default",
+            borderColor: "divider",
+          }),
+        })}
       >
         {/* Column Header with Counter */}
         <Box
@@ -167,7 +167,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
         <Box
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          sx={{
+          sx={(theme) => ({
             display: "flex",
             flexDirection: "column",
             gap: 1.25,
@@ -176,10 +176,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
             overflowY: "auto",
             pr: 0.5,
             scrollbarWidth: "thin",
-            scrollbarColor: (theme) =>
-              theme.palette.mode === "dark"
-                ? "rgba(100, 116, 139, 0.4) transparent"
-                : "rgba(148, 163, 184, 0.4) transparent",
+            scrollbarColor: "rgba(148, 163, 184, 0.4) transparent",
             "&::-webkit-scrollbar": {
               width: "4px",
             },
@@ -187,20 +184,23 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
               backgroundColor: "transparent",
             },
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(100, 116, 139, 0.35)"
-                  : "rgba(148, 163, 184, 0.35)",
+              backgroundColor: "rgba(148, 163, 184, 0.35)",
               borderRadius: "10px",
               transition: "background-color 0.2s ease-in-out",
             },
             "&:hover::-webkit-scrollbar-thumb": {
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(148, 163, 184, 0.6)"
-                  : "rgba(100, 116, 139, 0.5)",
+              backgroundColor: "rgba(100, 116, 139, 0.5)",
             },
-          }}
+            ...theme.applyStyles("dark", {
+              scrollbarColor: "rgba(100, 116, 139, 0.4) transparent",
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "rgba(100, 116, 139, 0.35)",
+              },
+              "&:hover::-webkit-scrollbar-thumb": {
+                backgroundColor: "rgba(148, 163, 184, 0.6)",
+              },
+            }),
+          })}
         >
           {isLoading && tasks.length === 0 ? (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>

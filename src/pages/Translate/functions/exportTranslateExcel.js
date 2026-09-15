@@ -120,7 +120,7 @@ const resolveIsPaid = (row) => {
 
 
 const getColLetter = (colIndex) => {
-  let temp = "";
+  let temp;
   let letter = "";
   while (colIndex > 0) {
     temp = (colIndex - 1) % 26;
@@ -188,7 +188,10 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   });
 
   const END_COL = START_COL + columnsConfig.length - 1;
-  const totalRowIndex = START_ROW + translations.length + 1;
+  const lastDataRow = START_ROW + translations.length;
+  // One blank row between data and total keeps the total row outside Excel's
+  // AutoFilter list range, so filtering the data doesn't hide the total too.
+  const totalRowIndex = lastDataRow + 2;
 
   const headerRow = worksheet.getRow(START_ROW);
   headerRow.height = 56;
@@ -225,7 +228,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
 
   worksheet.autoFilter = {
     from: { row: START_ROW, column: START_COL },
-    to: { row: START_ROW, column: END_COL },
+    to: { row: lastDataRow, column: END_COL },
   };
 
   let sumPrice = 0;
@@ -482,7 +485,6 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
   cellTotalLabel.alignment = { vertical: "middle", horizontal: "left" };
 
   const firstDataRow = START_ROW + 1;
-  const lastDataRow = totalRowIndex - 1;
 
   if (translations.length > 0) {
     if (pageCountColIdx !== -1) {
@@ -490,7 +492,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       const letter = getColLetter(colNum);
       const cell = totalRow.getCell(colNum);
       cell.value = {
-        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
         result: sumPages,
       };
       cell.numFmt = "#,##0";
@@ -501,7 +503,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       const letter = getColLetter(colNum);
       const cell = totalRow.getCell(colNum);
       cell.value = {
-        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
         result: sumCompletedPages,
       };
       cell.numFmt = "#,##0";
@@ -512,7 +514,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       const letter = getColLetter(colNum);
       const cell = totalRow.getCell(colNum);
       cell.value = {
-        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
         result: sumPrice,
       };
       cell.numFmt = "#,##0.00";
@@ -523,7 +525,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       const letter = getColLetter(colNum);
       const cell = totalRow.getCell(colNum);
       cell.value = {
-        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
         result: sumExpense,
       };
       cell.numFmt = "#,##0.00";
@@ -534,7 +536,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       const letter = getColLetter(colNum);
       const cell = totalRow.getCell(colNum);
       cell.value = {
-        formula: `SUM(${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
         result: sumProfit,
       };
       cell.numFmt = "#,##0.00";

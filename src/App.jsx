@@ -7,6 +7,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import GlobalModal from "./components/GlobalModal";
 import AddClientModal from "./components/global/AddClientModal/AddClientModal";
+import NetworkStatusBanner from "./components/NetworkStatusBanner";
 
 import dayjs from "dayjs";
 import updateLocale from "dayjs/plugin/updateLocale";
@@ -121,6 +122,7 @@ function App() {
           <OguzTravelLogo autoPlay style={{ width: 400, maxWidth: "90vw" }} />
         </div>
       )}
+      <NetworkStatusBanner />
       <AppRouter />
       <GlobalModal />
       <AddClientModal />

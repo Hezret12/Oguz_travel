@@ -60,30 +60,41 @@ export const themeConfig = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           backgroundImage: 'none',
-          boxShadow: theme.palette.mode === 'dark' ? '0 4px 24px rgba(0, 0, 0, 0.50)' : 'none',
+          boxShadow: 'none',
+          ...theme.applyStyles('dark', {
+            boxShadow: '0 4px 24px rgba(0, 0, 0, 0.50)',
+          }),
         }),
       },
     },
     MuiTooltip: {
       styleOverrides: {
         tooltip: ({ theme }) => ({
-          backgroundColor: theme.palette.mode === 'dark' ? '#181A24' : '#ffffff',
+          backgroundColor: '#ffffff',
           color: theme.palette.text.primary,
-          border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : theme.palette.divider}`,
+          border: `1px solid ${theme.palette.divider}`,
           borderRadius: 8,
           fontSize: '0.78rem',
           fontWeight: 500,
           padding: '6px 10px',
-          boxShadow:
-            theme.palette.mode === 'dark'
-              ? '0 8px 24px rgba(0, 0, 0, 0.65)'
-              : '0 8px 24px rgba(0, 0, 0, 0.08)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+          ...theme.applyStyles('dark', {
+            backgroundColor: '#181A24',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.65)',
+          }),
         }),
         arrow: ({ theme }) => ({
-          color: theme.palette.mode === 'dark' ? '#181A24' : '#ffffff',
+          color: '#ffffff',
           '&::before': {
-            border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : theme.palette.divider}`,
+            border: `1px solid ${theme.palette.divider}`,
+            ...theme.applyStyles('dark', {
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+            }),
           },
+          ...theme.applyStyles('dark', {
+            color: '#181A24',
+          }),
         }),
       },
     },
@@ -103,7 +114,10 @@ export const themeConfig = createTheme({
         root: ({ theme }) => ({
           backgroundImage: 'none',
           borderRadius: 12,
-          border: theme.palette.mode === 'dark' ? `1px solid ${theme.palette.divider}` : 'none',
+          border: 'none',
+          ...theme.applyStyles('dark', {
+            border: `1px solid ${theme.palette.divider}`,
+          }),
         }),
       },
     },
@@ -112,8 +126,12 @@ export const themeConfig = createTheme({
         paper: ({ theme }) => ({
           backgroundImage: 'none',
           borderRadius: 14,
-          border: theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
-          boxShadow: theme.palette.mode === 'dark' ? '0 24px 60px rgba(0, 0, 0, 0.70)' : '0 20px 40px rgba(0, 0, 0, 0.10)',
+          border: 'none',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.10)',
+          ...theme.applyStyles('dark', {
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.70)',
+          }),
         }),
       },
     },
@@ -187,18 +205,18 @@ export const themeConfig = createTheme({
             backgroundColor: theme.palette.action.hover,
           },
           '&.Mui-selected': {
-            backgroundColor:
-              theme.palette.mode === 'dark'
-                ? 'rgba(20, 184, 166, 0.16)'
-                : 'rgba(14, 133, 132, 0.08)',
+            backgroundColor: 'rgba(14, 133, 132, 0.08)',
             color: theme.palette.primary.main,
             fontWeight: 600,
             '&:hover': {
-              backgroundColor:
-                theme.palette.mode === 'dark'
-                  ? 'rgba(20, 184, 166, 0.22)'
-                  : 'rgba(14, 133, 132, 0.12)',
+              backgroundColor: 'rgba(14, 133, 132, 0.12)',
             },
+            ...theme.applyStyles('dark', {
+              backgroundColor: 'rgba(20, 184, 166, 0.16)',
+              '&:hover': {
+                backgroundColor: 'rgba(20, 184, 166, 0.22)',
+              },
+            }),
           },
         }),
       },

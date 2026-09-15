@@ -10,25 +10,26 @@ import { useNavItems } from "../../hooks/useSidebarItems";
 const SIDEBAR_W = 280;
 const SIDEBAR_CW = 68;
 
-const sidebarSurfaceStyles = (isDark, width) => ({
+const sidebarSurfaceStyles = (theme, width) => ({
   position: "fixed",
   top: 0,
   left: 0,
   height: "100vh",
   width,
-  background: isDark
-    ? "linear-gradient(180deg, #021819 0%, #022C45 100%)"
-    : "#ffffff",
-  borderRight: isDark ? "1px solid rgba(45, 212, 191, 0.12)" : "1px solid #e2e8f0",
+  background: "#ffffff",
+  borderRight: "1px solid #e2e8f0",
   display: "flex",
   flexDirection: "column",
   zIndex: 1200,
   transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   overflow: "hidden",
-  boxShadow: isDark
-    ? "4px 0 30px rgba(0,0,0,0.45)"
-    : "1px 0 12px rgba(0,0,0,0.06)",
+  boxShadow: "1px 0 12px rgba(0,0,0,0.06)",
   fontFamily: "'Inter', sans-serif",
+  ...theme.applyStyles("dark", {
+    background: "linear-gradient(180deg, #021819 0%, #022C45 100%)",
+    borderRight: "1px solid rgba(45, 212, 191, 0.12)",
+    boxShadow: "4px 0 30px rgba(0,0,0,0.45)",
+  }),
 });
 
 const SidebarPanel = ({
@@ -46,7 +47,7 @@ const SidebarPanel = ({
   <>
     {/* Brand Header */}
     <Box
-      sx={{
+      sx={(theme) => ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -54,11 +55,14 @@ const SidebarPanel = ({
         height: 94,
         px: collapsed ? 1 : 2.5,
         borderBottom: "1px solid",
-        borderColor: isDark ? "rgba(45, 212, 191, 0.10)" : "rgba(0, 0, 0, 0.06)",
+        borderColor: "rgba(0, 0, 0, 0.06)",
         overflow: "hidden",
         flexShrink: 0,
         transition: "padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-      }}
+        ...theme.applyStyles("dark", {
+          borderColor: "rgba(45, 212, 191, 0.10)",
+        }),
+      })}
     >
       <Box
         sx={{
@@ -81,7 +85,7 @@ const SidebarPanel = ({
     </Box>
 
     <List
-      sx={{
+      sx={(theme) => ({
         flex: 1,
         overflowY: "auto",
         overflowX: "hidden",
@@ -90,13 +94,19 @@ const SidebarPanel = ({
           width: "4px",
         },
         "&::-webkit-scrollbar-thumb": {
-          backgroundColor: isDark ? "rgba(45, 212, 191, 0.16)" : "rgba(0, 0, 0, 0.08)",
+          backgroundColor: "rgba(0, 0, 0, 0.08)",
           borderRadius: "4px",
+          ...theme.applyStyles("dark", {
+            backgroundColor: "rgba(45, 212, 191, 0.16)",
+          }),
         },
         "&:hover::-webkit-scrollbar-thumb": {
-          backgroundColor: isDark ? "rgba(45, 212, 191, 0.30)" : "rgba(0, 0, 0, 0.16)",
+          backgroundColor: "rgba(0, 0, 0, 0.16)",
+          ...theme.applyStyles("dark", {
+            backgroundColor: "rgba(45, 212, 191, 0.30)",
+          }),
         },
-      }}
+      })}
     >
       {navItems.map((item) => {
         const itemKey = item.id || item.text;
@@ -221,17 +231,17 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
   }, [mode, setMode]);
 
   const desktopStyles = useMemo(
-    () => sidebarSurfaceStyles(isDark, collapsed ? SIDEBAR_CW : SIDEBAR_W),
-    [isDark, collapsed],
+    () => (theme) => sidebarSurfaceStyles(theme, collapsed ? SIDEBAR_CW : SIDEBAR_W),
+    [collapsed],
   );
 
   const mobileStyles = useMemo(
-    () => ({
-      ...sidebarSurfaceStyles(isDark, SIDEBAR_W),
+    () => (theme) => ({
+      ...sidebarSurfaceStyles(theme, SIDEBAR_W),
       position: "fixed",
       zIndex: 1300,
     }),
-    [isDark],
+    [],
   );
 
   if (!user) return null;

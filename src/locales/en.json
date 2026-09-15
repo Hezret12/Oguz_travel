@@ -811,7 +811,8 @@
     "exportExcelConfirmText": "Do you want to export to an Excel file?",
     "exportExcelConfirmAll": "Do you want to export data to an Excel file?",
     "exportExcelNoData": "No records to export.",
-    "exportExcelBtn": "Export to Excel"
+    "exportExcelBtn": "Export to Excel",
+    "offlineNotice": "No internet connection. Reconnecting automatically..."
   },
   "autocomplete": {
     "addClient": "Add Client",
