@@ -254,7 +254,10 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
   });
 
   const END_COL = START_COL + columnsConfig.length - 1;
-  const totalRowIndex = START_ROW + tickets.length + 1;
+  const lastDataRow = START_ROW + tickets.length;
+  // One blank row between data and total keeps the total row outside Excel's
+  // AutoFilter list range, so filtering the data doesn't hide the total too.
+  const totalRowIndex = lastDataRow + 2;
 
   // Header Row (Row 4) — Clean white background with prominent bold typography
   const headerRow = worksheet.getRow(START_ROW);
@@ -299,7 +302,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
   // Enable AutoFilter on row 4
   worksheet.autoFilter = {
     from: { row: START_ROW, column: START_COL },
-    to: { row: START_ROW, column: END_COL },
+    to: { row: lastDataRow, column: END_COL },
   };
 
   const parseExcelNumber = (val) => {
@@ -516,7 +519,6 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
   }
 
   const firstDataRow = START_ROW + 1; // 5
-  const lastDataRow = totalRowIndex - 1;
 
   if (tickets.length > 0) {
     // NET BAHA formula
@@ -524,7 +526,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
       const netColLetter = getExcelColName(START_COL + netColIdx);
       const cellNet = totalRow.getCell(START_COL + netColIdx);
       cellNet.value = {
-        formula: `SUM(${netColLetter}${firstDataRow}:${netColLetter}${lastDataRow})`,
+        formula: `SUBTOTAL(109,${netColLetter}${firstDataRow}:${netColLetter}${lastDataRow})`,
         result: sumNet,
       };
       cellNet.numFmt = currencyNumFmt;
@@ -541,7 +543,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
       const saleColLetter = getExcelColName(START_COL + saleColIdx);
       const cellSale = totalRow.getCell(START_COL + saleColIdx);
       cellSale.value = {
-        formula: `SUM(${saleColLetter}${firstDataRow}:${saleColLetter}${lastDataRow})`,
+        formula: `SUBTOTAL(109,${saleColLetter}${firstDataRow}:${saleColLetter}${lastDataRow})`,
         result: sumSale,
       };
       cellSale.numFmt = currencyNumFmt;
@@ -553,7 +555,7 @@ export const exportB2BExcel = async (tickets = [], options = {}) => {
       const profitColLetter = getExcelColName(START_COL + profitColIdx);
       const cellProfit = totalRow.getCell(START_COL + profitColIdx);
       cellProfit.value = {
-        formula: `SUM(${profitColLetter}${firstDataRow}:${profitColLetter}${lastDataRow})`,
+        formula: `SUBTOTAL(109,${profitColLetter}${firstDataRow}:${profitColLetter}${lastDataRow})`,
         result: sumProfit,
       };
       cellProfit.numFmt = currencyNumFmt;

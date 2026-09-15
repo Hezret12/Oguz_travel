@@ -207,7 +207,10 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
   });
 
   const END_COL = START_COL + columnsConfig.length - 1;
-  const totalRowIndex = START_ROW + tickets.length + 1;
+  const lastDataRow = START_ROW + tickets.length;
+  // One blank row between data and total keeps the total row outside Excel's
+  // AutoFilter list range, so filtering the data doesn't hide the total too.
+  const totalRowIndex = lastDataRow + 2;
 
   // Header Row (Row 4)
   const headerRow = worksheet.getRow(START_ROW);
@@ -254,7 +257,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
   // Enable AutoFilter on Row 4
   worksheet.autoFilter = {
     from: { row: START_ROW, column: START_COL },
-    to: { row: START_ROW, column: END_COL },
+    to: { row: lastDataRow, column: END_COL },
   };
 
   const parseExcelNumber = (val) => {
@@ -471,7 +474,6 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
   cellTotalLabel.alignment = { vertical: "middle", horizontal: "left" };
 
   const firstDataRow = START_ROW + 1;
-  const lastDataRow = totalRowIndex - 1;
 
   if (tickets.length > 0) {
     const sumCols = [
@@ -488,7 +490,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
         const colLetter = getExcelColName(START_COL + colIdx);
         const cell = totalRow.getCell(START_COL + colIdx);
         cell.value = {
-          formula: `SUM(${colLetter}${firstDataRow}:${colLetter}${lastDataRow})`,
+          formula: `SUBTOTAL(109,${colLetter}${firstDataRow}:${colLetter}${lastDataRow})`,
           result: sum,
         };
         cell.numFmt = currencyNumFmt;

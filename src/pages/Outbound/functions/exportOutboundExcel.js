@@ -253,7 +253,10 @@ const buildStyledSheet = ({
   const START_ROW = 4;
   const START_COL = 4; // Column D (matches TurkishAirlines & B2B standard)
   const END_COL = START_COL + columns.length - 1;
-  const totalRowIndex = START_ROW + data.length + 1;
+  const lastDataRow = START_ROW + data.length;
+  // One blank row between data and total keeps the total row outside Excel's
+  // AutoFilter list range, so filtering the data doesn't hide the total too.
+  const totalRowIndex = lastDataRow + 2;
 
   // Margin Columns A, B, C (width 4)
   worksheet.getColumn(1).width = 4;
@@ -360,7 +363,7 @@ const buildStyledSheet = ({
   // Enable AutoFilter on Row 4
   worksheet.autoFilter = {
     from: { row: START_ROW, column: START_COL },
-    to: { row: START_ROW, column: END_COL },
+    to: { row: lastDataRow, column: END_COL },
   };
 
   const colMaxLens = columns.map((c) => (c.header ? String(c.header).length : 10));
@@ -509,7 +512,6 @@ const buildStyledSheet = ({
   cellTotalLabel.alignment = { vertical: "middle", horizontal: "left" };
 
   const firstDataRow = START_ROW + 1;
-  const lastDataRow = totalRowIndex - 1;
 
   if (data.length > 0) {
     const sumCols = [
@@ -523,7 +525,7 @@ const buildStyledSheet = ({
         const colLetter = getExcelColName(START_COL + idx);
         const cell = totalRow.getCell(START_COL + idx);
         cell.value = {
-          formula: `SUM(${colLetter}${firstDataRow}:${colLetter}${lastDataRow})`,
+          formula: `SUBTOTAL(109,${colLetter}${firstDataRow}:${colLetter}${lastDataRow})`,
         };
         cell.numFmt = CURRENCY_FMT;
         cell.font = {
