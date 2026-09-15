@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, memo } from "react";
 import {
   Box,
   Grid,
@@ -32,7 +32,52 @@ import { addTranslatorApi } from "../../api/queries/post";
 import { updateTranslatorApi, updateTranslationApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
 
-const EditTranslateModal = ({ table, row }) => {
+const buildDefaultValues = (row) => ({
+  guid: row?.original?.guid || "",
+  received_day: row?.original?.received_day
+    ? dayjs(row.original.received_day).format("YYYY-MM-DD")
+    : dayjs().format("YYYY-MM-DD"),
+  received_time: row?.original?.received_time
+    ? row.original.received_time.slice(0, 5)
+    : dayjs().format("HH:mm"),
+  opr_guid:
+    row?.original?.opr_guid ||
+    row?.original?.operator?.guid ||
+    "",
+  page_count: row?.original?.page_count != null ? Number(row.original.page_count) : 1,
+  client_guid:
+    row?.original?.client_guid ||
+    row?.original?.client?.guid ||
+    "",
+  source_to_target: row?.original?.source_to_target || "",
+  completed_time: row?.original?.completed_time
+    ? row.original.completed_time.slice(0, 5)
+    : "",
+  status:
+    row?.original?.status !== undefined && row?.original?.status !== null
+      ? String(row.original.status)
+      : (row?.original?.status_guid ? String(row.original.status_guid) : "false"),
+  completed_page_count:
+    row?.original?.completed_page_count != null ? Number(row.original.completed_page_count) : 0,
+  completed_day: row?.original?.completed_day
+    ? dayjs(row.original.completed_day).format("YYYY-MM-DD")
+    : null,
+  translator_guid:
+    row?.original?.translator_guid ||
+    row?.original?.translator?.guid ||
+    "",
+  correction_status: row?.original?.correction_status || "",
+  price: row?.original?.price != null ? Number(row.original.price) : 0,
+  expense_price:
+    row?.original?.expense_price != null
+      ? Number(row.original.expense_price)
+      : 0,
+  note: row?.original?.note || "",
+  is_paid:
+    row?.original?.is_paid !== undefined ? row.original.is_paid : true,
+});
+
+const EditTranslateModal = ({ row, onClose }) => {
   const { t } = useLocale();
   const { addTranslation } = useValidShema();
   const queryClient = useQueryClient();
@@ -53,61 +98,32 @@ const EditTranslateModal = ({ table, row }) => {
     control,
     handleSubmit,
     setValue,
+    reset,
     formState: { isSubmitting },
   } = useForm({
     resolver: yupResolver(addTranslation),
-    defaultValues: {
-      guid: row?.original?.guid || "",
-      received_day: row?.original?.received_day
-        ? dayjs(row.original.received_day).format("YYYY-MM-DD")
-        : dayjs().format("YYYY-MM-DD"),
-      received_time: row?.original?.received_time
-        ? row.original.received_time.slice(0, 5)
-        : dayjs().format("HH:mm"),
-      opr_guid:
-        row?.original?.opr_guid ||
-        row?.original?.operator?.guid ||
-        "",
-      page_count: row?.original?.page_count != null ? Number(row.original.page_count) : 1,
-      client_guid:
-        row?.original?.client_guid ||
-        row?.original?.client?.guid ||
-        "",
-      source_to_target: row?.original?.source_to_target || "",
-      completed_time: row?.original?.completed_time
-        ? row.original.completed_time.slice(0, 5)
-        : "",
-      status:
-        row?.original?.status !== undefined && row?.original?.status !== null
-          ? String(row.original.status)
-          : (row?.original?.status_guid ? String(row.original.status_guid) : "false"),
-      completed_page_count:
-        row?.original?.completed_page_count != null ? Number(row.original.completed_page_count) : 0,
-      completed_day: row?.original?.completed_day
-        ? dayjs(row.original.completed_day).format("YYYY-MM-DD")
-        : null,
-      translator_guid:
-        row?.original?.translator_guid ||
-        row?.original?.translator?.guid ||
-        "",
-      correction_status: row?.original?.correction_status || "",
-      price: row?.original?.price != null ? Number(row.original.price) : 0,
-      expense_price:
-        row?.original?.expense_price != null
-          ? Number(row.original.expense_price)
-          : 0,
-      note: row?.original?.note || "",
-      is_paid:
-        row?.original?.is_paid !== undefined ? row.original.is_paid : true,
-    },
+    defaultValues: buildDefaultValues(row),
   });
+
+  // The dialog now stays mounted between opens (see keepMounted below) so the
+  // form only initializes its defaultValues once, on first mount — without
+  // this, editing a different row after the first one would keep showing the
+  // first row's data. Re-sync whenever the row being edited actually changes.
+  // Intentionally keyed on the row's guid, not the row object identity, which
+  // can change every table re-render without the underlying data changing.
+  useEffect(() => {
+    if (row) {
+      reset(buildDefaultValues(row));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [row?.original?.guid, reset]);
 
   const { mutate: updateTranslation, isPending: isUpdatingTranslation } = useUpdate({
     apiFn: updateTranslationApi,
     key: "translations",
     idKey: "guid",
     onSuccessUpdate: () => {
-      table.setEditingRow(null);
+      onClose();
     },
   });
 
@@ -223,9 +239,10 @@ const EditTranslateModal = ({ table, row }) => {
   return (
     <>
       <CustomDialog
-        open={true}
-        close={() => table.setEditingRow(null)}
+        open={Boolean(row)}
+        close={onClose}
         widthX={700}
+        keepMounted
       >
         <CustomDialogHeader
           variant="h5"
@@ -277,6 +294,7 @@ const EditTranslateModal = ({ table, row }) => {
                 control={control}
                 label={t("columns.operator") || "Operator"}
                 required
+                initialEmployee={row?.original?.operator}
               />
             </Grid>
 
@@ -454,7 +472,7 @@ const EditTranslateModal = ({ table, row }) => {
 
           <FooterButton
             loading={isSubmitting || isUpdatingTranslation}
-            onCancel={() => table.setEditingRow(null)}
+            onCancel={onClose}
             type="submit"
             sx={{ mt: 3 }}
           />
@@ -534,4 +552,8 @@ const EditTranslateModal = ({ table, row }) => {
   );
 };
 
-export default EditTranslateModal;
+// Kept permanently mounted by the parent (see keepMounted on CustomDialog),
+// so without memo it would fully re-render this entire heavy form (2
+// Autocompletes, several pickers) on every unrelated state change in
+// TranslatePage — e.g. opening the *add* dialog, or selecting a table row.
+export default memo(EditTranslateModal);

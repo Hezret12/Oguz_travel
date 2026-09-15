@@ -453,6 +453,11 @@ export const ApplicationsTable = forwardRef(
 
     const table = useMaterialReactTable({
       ...defaultMrtOptions,
+      // Avoids nesting MRT's own create/edit <Dialog> around the one this
+      // page's Add/Edit modal already renders — see Translate/index.jsx for
+      // the full rationale.
+      createDisplayMode: "custom",
+      editDisplayMode: "custom",
       memoMode: "rows",
       autoResetPageIndex: false,
       muiTablePaperProps: {
@@ -619,29 +624,33 @@ export const ApplicationsTable = forwardRef(
           />
         </Box>
       ),
-      renderCreateRowDialogContent: ({ table }) => (
-        <VisaIntakeModal
-          table={table}
-          onRefresh={refetch}
-          countryGuid={activeCountryGuid}
-        />
-      ),
-      renderEditRowDialogContent: ({ table, row }) => (
-        <VisaIntakeModal
-          table={table}
-          row={row}
-          onRefresh={refetch}
-          countryGuid={activeCountryGuid || row.original?.country_guid}
-        />
-      ),
     });
 
     useImperativeHandle(ref, () => ({
       openCreateModal: () => table.setCreatingRow(true),
     }));
 
+    const editingRow = table.getState().editingRow;
+
     return (
       <>
+        {Boolean(table.getState().creatingRow) && (
+          <VisaIntakeModal
+            table={table}
+            onRefresh={refetch}
+            countryGuid={activeCountryGuid}
+          />
+        )}
+
+        {Boolean(editingRow) && (
+          <VisaIntakeModal
+            table={table}
+            row={editingRow}
+            onRefresh={refetch}
+            countryGuid={activeCountryGuid || editingRow.original?.country_guid}
+          />
+        )}
+
         <MaterialReactTable table={table} />
 
         <DeleteDialog

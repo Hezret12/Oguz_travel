@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 /**
  * Generic hook that manages delete dialog state for any entity.
@@ -47,11 +47,18 @@ export function useDeleteDialog({ onConfirm } = {}) {
     close();
   }, [onConfirm, target, close]);
 
-  return {
-    isOpen,
-    target,
-    open,
-    close,
-    confirm,
-  };
+  // Callers frequently do `useCallback(fn, [deleteDialog])` — returning a new
+  // object here on every render (even when nothing in it actually changed)
+  // silently breaks that memoization everywhere it's used, cascading into
+  // things like `columns` being rebuilt on every unrelated re-render.
+  return useMemo(
+    () => ({
+      isOpen,
+      target,
+      open,
+      close,
+      confirm,
+    }),
+    [isOpen, target, open, close, confirm],
+  );
 }

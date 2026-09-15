@@ -489,6 +489,11 @@ const B2B = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddB2BTicketDialog/EditB2BDialog already render — see
+    // Translate/index.jsx for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     enableColumnPinning: true,
     initialState: {
       columnPinning: {
@@ -498,12 +503,6 @@ const B2B = () => {
     },
     columns,
     data: b2bData,
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddB2BTicketDialog table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditB2BDialog table={table} row={row} />
-    ),
     state: {
       rowSelection,
       isLoading: isLoading || isFetching,
@@ -652,6 +651,14 @@ const B2B = () => {
           }}
           row={paymentModalRow}
         />
+      )}
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddB2BTicketDialog table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditB2BDialog table={table} row={table.getState().editingRow} />
       )}
 
       <MaterialReactTable table={table} />

@@ -303,6 +303,11 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // CreateCustomFieldModal/EditCustomFieldModal already render — see
+    // Translate/index.jsx for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     memoMode: "rows",
     autoResetPageIndex: false,
     muiTablePaperProps: {
@@ -419,20 +424,6 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
         </FormControl>
       </Box>
     ),
-    renderCreateRowDialogContent: ({ table }) => (
-      <CreateCustomFieldModal
-        open={Boolean(table.getState().creatingRow)}
-        onClose={() => table.setCreatingRow(null)}
-        onSave={() => refetch()}
-      />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditCustomFieldModal
-        table={table}
-        row={row}
-        onRefresh={refetch}
-      />
-    ),
   });
 
   useImperativeHandle(ref, () => ({
@@ -441,6 +432,20 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
 
   return (
     <>
+      <CreateCustomFieldModal
+        open={Boolean(table.getState().creatingRow)}
+        onClose={() => table.setCreatingRow(null)}
+        onSave={() => refetch()}
+      />
+
+      {Boolean(table.getState().editingRow) && (
+        <EditCustomFieldModal
+          table={table}
+          row={table.getState().editingRow}
+          onRefresh={refetch}
+        />
+      )}
+
       <MaterialReactTable table={table} />
 
       <DeleteDialog

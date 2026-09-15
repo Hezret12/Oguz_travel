@@ -271,6 +271,13 @@ const Cafeteria = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // MRT's default "modal" display mode wraps renderCreateRowDialogContent /
+    // renderEditRowDialogContent in its own <Dialog>, on top of the <Dialog>
+    // AddCafeteriaModal/EditCafeteriaModal already render themselves — nesting
+    // two full Dialog/backdrop/focus-trap stacks. "custom" skips MRT's wrapper;
+    // we mount the modals ourselves below, gated on creatingRow/editingRow.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     columns,
     data: transactions || [],
     state: {
@@ -333,13 +340,6 @@ const Cafeteria = () => {
       if (isLoading || isFetching) return null;
       return <TableEmptyState onResetFilters={resetFilters} />;
     },
-
-    renderCreateRowDialogContent: ({ table: mrtTable }) => (
-      <AddCafeteriaModal table={mrtTable} />
-    ),
-    renderEditRowDialogContent: ({ table: mrtTable, row }) => (
-      <EditCafeteriaModal table={mrtTable} row={row} />
-    ),
 
     renderTopToolbarCustomActions: () => (
       <Box
@@ -439,6 +439,14 @@ const Cafeteria = () => {
         isLoading={isDeleting}
         description={t("deleteDialog.description")}
       />
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddCafeteriaModal table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditCafeteriaModal table={table} row={table.getState().editingRow} />
+      )}
 
       <MaterialReactTable table={table} />
     </Box>

@@ -443,18 +443,19 @@ const CashFlow = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // `renderCreateRowDialogContent` was dead code — the Add flow here never
+    // calls table.setCreatingRow (it uses its own isAddModalOpen state below),
+    // so it never fired. The edit flow's ColumnActionButtons DOES call
+    // table.setEditingRow though, so "custom" avoids MRT wrapping
+    // EditCashTransactionModal's own <Dialog> in a second one — see
+    // Translate/index.jsx for the full rationale.
+    editDisplayMode: "custom",
     columns,
     data: calculations,
     state: {
       isLoading,
       showProgressBars: isFetching,
     },
-    renderCreateRowDialogContent: ({ table: mrtTable }) => (
-      <AddCashTransactionModal table={mrtTable} />
-    ),
-    renderEditRowDialogContent: ({ table: mrtTable, row }) => (
-      <EditCashTransactionModal table={mrtTable} row={row} />
-    ),
     muiTableBodyRowProps: ({ row }) => {
       const profit = Number(row.original?.profit || 0);
       const isPos = profit >= 0;
@@ -549,6 +550,13 @@ const CashFlow = () => {
         openDrawer={openDrawer}
         hasFilter
       />
+
+      {Boolean(table.getState().editingRow) && (
+        <EditCashTransactionModal
+          table={table}
+          row={table.getState().editingRow}
+        />
+      )}
 
       <Box sx={{ width: "100%", overflow: "hidden" }}>
         <MaterialReactTable table={table} />

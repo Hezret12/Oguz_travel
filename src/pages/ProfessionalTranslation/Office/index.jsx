@@ -158,6 +158,11 @@ const OfficePage = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddOfficeModal/EditOfficeModal already render — see Translate/index.jsx
+    // for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     defaultColumn: {
       muiTableHeadCellProps: { align: "center" },
       muiTableBodyCellProps: { align: "center" },
@@ -168,12 +173,6 @@ const OfficePage = () => {
       isLoading: isLoading || isFetching,
     },
     getRowId: (row) => row.guid,
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddOfficeModal table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditOfficeModal table={table} row={row} />
-    ),
     renderTopToolbarCustomActions: () => (
       <Box sx={{ width: { xs: "100%", sm: 320 }, py: 0.5 }}>
         <GlobalSearchInput
@@ -196,6 +195,14 @@ const OfficePage = () => {
         addButtonText={t("professionalTranslation.office.addOffice")}
         onAddClick={() => table.setCreatingRow(true)}
       />
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddOfficeModal table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditOfficeModal table={table} row={table.getState().editingRow} />
+      )}
 
       {/* Clean Professional MaterialReactTable with Center-Aligned Columns */}
       <MaterialReactTable table={table} />

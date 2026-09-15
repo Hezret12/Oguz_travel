@@ -228,6 +228,11 @@ const Users = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddUserModal/EditUserModal already render — see Translate/index.jsx
+    // for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     columns,
     data: usersData,
     state: {
@@ -316,10 +321,6 @@ const Users = () => {
     muiTableBodyRowProps: ({ row }) => ({
       onClick: row.getToggleSelectedHandler(),
     }),
-    renderCreateRowDialogContent: ({ table }) => <AddUserModal table={table} />,
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditUserModal table={table} row={row} />
-    ),
   });
 
   return (
@@ -345,6 +346,14 @@ const Users = () => {
           close={() => setSelectedProfileUser(null)}
           user={selectedProfileUser}
         />
+      )}
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddUserModal table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditUserModal table={table} row={table.getState().editingRow} />
       )}
 
       <MaterialReactTable table={table} />

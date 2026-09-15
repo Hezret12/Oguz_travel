@@ -294,6 +294,12 @@ const RailwayTab = ({
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // The Add flow here is already driven by the parent's own isAddOpen state
+    // (below), not table.setCreatingRow — renderCreateRowDialogContent was
+    // dead code. Edit IS reached via ColumnActionButtons' table.setEditingRow,
+    // so "custom" avoids MRT wrapping EditRailwayModal's own <Dialog> in a
+    // second one — see Translate/index.jsx for the full rationale.
+    editDisplayMode: "custom",
     enableColumnPinning: true,
     columns,
     data: listData,
@@ -359,12 +365,6 @@ const RailwayTab = ({
         })}
       </Box>
     ),
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddRailwayModal open={true} onClose={onCloseAdd} table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditRailwayModal table={table} row={row} />
-    ),
   });
 
   return (
@@ -378,6 +378,9 @@ const RailwayTab = ({
       />
       {isAddOpen && (
         <AddRailwayModal open={isAddOpen} onClose={onCloseAdd} table={table} />
+      )}
+      {Boolean(table.getState().editingRow) && (
+        <EditRailwayModal table={table} row={table.getState().editingRow} />
       )}
       {Boolean(paymentModalRow) && (
         <PaymentManagementModal

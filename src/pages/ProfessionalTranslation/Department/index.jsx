@@ -121,6 +121,11 @@ const DepartmentPage = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddDepartmentModal/EditDepartmentModal already render — see
+    // Translate/index.jsx for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     defaultColumn: {
       muiTableHeadCellProps: { align: "center" },
       muiTableBodyCellProps: { align: "center" },
@@ -131,12 +136,6 @@ const DepartmentPage = () => {
       isLoading: isLoading || isFetching,
     },
     getRowId: (row) => row.guid,
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddDepartmentModal table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditDepartmentModal table={table} row={row} />
-    ),
     renderTopToolbarCustomActions: () => (
       <Box sx={{ width: { xs: "100%", sm: 320 }, py: 0.5 }}>
         <GlobalSearchInput
@@ -159,6 +158,14 @@ const DepartmentPage = () => {
         addButtonText={t("professionalTranslation.department.addDepartment")}
         onAddClick={() => table.setCreatingRow(true)}
       />
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddDepartmentModal table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditDepartmentModal table={table} row={table.getState().editingRow} />
+      )}
 
       {/* Clean Professional MaterialReactTable with 3-Language Columns */}
       <MaterialReactTable table={table} />

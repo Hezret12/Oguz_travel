@@ -521,6 +521,11 @@ const TurkishAirlines = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddTurkishAirlinesContent/EditTurkishAirlinesContent already render —
+    // see Translate/index.jsx for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     enableColumnPinning: true,
     initialState: {
       columnPinning: {
@@ -540,12 +545,6 @@ const TurkishAirlines = () => {
       },
     },
     onRowSelectionChange: setRowSelection,
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddTurkishAirlinesContent table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditTurkishAirlinesContent table={table} row={row} />
-    ),
     manualPagination: true,
     manualFiltering: true,
     manualSorting: true,
@@ -680,6 +679,17 @@ const TurkishAirlines = () => {
             }
           }}
           row={paymentModalRow}
+        />
+      )}
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddTurkishAirlinesContent table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditTurkishAirlinesContent
+          table={table}
+          row={table.getState().editingRow}
         />
       )}
 

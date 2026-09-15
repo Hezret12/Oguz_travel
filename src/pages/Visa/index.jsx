@@ -288,6 +288,11 @@ const Visa = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddVisaModal/EditVisaModal already render — see Translate/index.jsx
+    // for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     columns,
     data: visas || [],
     state: {
@@ -351,11 +356,6 @@ const Visa = () => {
       if (isLoading || isFetching) return null;
       return <TableEmptyState onResetFilters={resetFilters} />;
     },
-
-    renderCreateRowDialogContent: ({ table }) => <AddVisaModal table={table} />,
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditVisaModal table={table} row={row} />
-    ),
 
     renderTopToolbarCustomActions: () => (
       <Box
@@ -455,6 +455,14 @@ const Visa = () => {
         isLoading={isDeleting}
         description={t("deleteDialog.description")}
       />
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddVisaModal table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditVisaModal table={table} row={table.getState().editingRow} />
+      )}
 
       <MaterialReactTable table={table} />
     </>

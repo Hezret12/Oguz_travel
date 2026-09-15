@@ -1,7 +1,7 @@
 import { Box, Dialog, DialogContent, Divider, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-export const CustomDialog = ({ open, close, widthX, children }) => {
+export const CustomDialog = ({ open, close, widthX, children, keepMounted = false }) => {
   return (
     <Dialog
       fullScreen={false}
@@ -11,6 +11,17 @@ export const CustomDialog = ({ open, close, widthX, children }) => {
           close();
         }
       }}
+      // Avoids MUI's body scroll-lock measurement (scrollbar width + overflow
+      // toggle), which forces a synchronous reflow that's noticeably slower
+      // when a large table sits underneath — same fix already applied to FilterDrawer.
+      disableScrollLock
+      // Opt-in: for heavy forms (many Autocompletes/DatePickers), unmounting on
+      // every close means every open pays the full mount cost again (Popper
+      // setup, emotion style injection, react-hook-form Controller subscriptions,
+      // etc.) — keeping it mounted and just toggling visibility makes every open
+      // after the first nearly free. Left off by default so existing callers
+      // (which rely on a fresh mount per open) are unaffected.
+      keepMounted={keepMounted}
       aria-labelledby="responsive-dialog-title"
       slotProps={{
         paper: {
@@ -22,9 +33,14 @@ export const CustomDialog = ({ open, close, widthX, children }) => {
             backgroundImage: 'none',
             borderRadius: '16px',
             border: (theme) => theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)',
-            boxShadow: (theme) => theme.palette.mode === 'dark' 
-              ? '0 16px 48px rgba(0, 0, 0, 0.45)' 
+            boxShadow: (theme) => theme.palette.mode === 'dark'
+              ? '0 16px 48px rgba(0, 0, 0, 0.45)'
               : '0 16px 48px rgba(0, 0, 0, 0.08)',
+            // The large blurred box-shadow above is expensive to repaint every
+            // frame during the enter/exit transition — promote the Paper to
+            // its own GPU layer so only a cheap composite happens instead.
+            willChange: 'transform, opacity',
+            transform: 'translateZ(0)',
           },
         },
       }}

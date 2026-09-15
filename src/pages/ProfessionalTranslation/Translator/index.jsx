@@ -123,6 +123,11 @@ const TranslatorPage = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddTranslatorModal/EditTranslatorModal already render — see
+    // Translate/index.jsx for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     defaultColumn: {
       muiTableHeadCellProps: { align: "center" },
       muiTableBodyCellProps: { align: "center" },
@@ -133,12 +138,6 @@ const TranslatorPage = () => {
       isLoading: isLoading || isFetching,
     },
     getRowId: (row) => row.guid,
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddTranslatorModal table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditTranslatorModal table={table} row={row} />
-    ),
     renderTopToolbarCustomActions: () => (
       <Box sx={{ width: { xs: "100%", sm: 320 }, py: 0.5 }}>
         <GlobalSearchInput
@@ -161,6 +160,14 @@ const TranslatorPage = () => {
         addButtonText={t("professionalTranslation.translator.addTranslator")}
         onAddClick={() => table.setCreatingRow(true)}
       />
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddTranslatorModal table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditTranslatorModal table={table} row={table.getState().editingRow} />
+      )}
 
       {/* Clean Professional MaterialReactTable */}
       <MaterialReactTable table={table} />

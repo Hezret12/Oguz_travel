@@ -308,6 +308,11 @@ const Clients = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddClient/EditClient already render — see Translate/index.jsx for the
+    // full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     columns,
     data: clientsData,
 
@@ -415,10 +420,6 @@ const Clients = () => {
         </Box>
       );
     },
-    renderCreateRowDialogContent: ({ table }) => <AddClient table={table} />,
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditClient table={table} row={row} queryParams={queryParams} />
-    ),
   });
 
   return (
@@ -441,6 +442,16 @@ const Clients = () => {
         isLoading={isDeleting}
         description={t("clients.deleteConfirm")}
       />
+
+      {Boolean(table.getState().creatingRow) && <AddClient table={table} />}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditClient
+          table={table}
+          row={table.getState().editingRow}
+          queryParams={queryParams}
+        />
+      )}
 
       <MaterialReactTable table={table} />
 

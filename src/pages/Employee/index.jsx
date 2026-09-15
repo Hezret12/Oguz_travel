@@ -311,6 +311,10 @@ const Employee = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddEmployee/EditEmployee already render — see Translate/index.jsx.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     columns,
     data: employeesData,
 
@@ -425,10 +429,6 @@ const Employee = () => {
         </Box>
       );
     },
-    renderCreateRowDialogContent: ({ table }) => <AddEmployee table={table} />,
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditEmployee table={table} row={row} />
-    ),
   });
 
   return (
@@ -451,6 +451,14 @@ const Employee = () => {
         isLoading={isDeleting}
         description={t("employee.deleteConfirm")}
       />
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddEmployee table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditEmployee table={table} row={table.getState().editingRow} />
+      )}
 
       <MaterialReactTable table={table} />
     </>

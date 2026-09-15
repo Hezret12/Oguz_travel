@@ -286,6 +286,12 @@ const AirwayTab = ({
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // The Add flow here is already driven by the parent's own isAddOpen state
+    // (below), not table.setCreatingRow — renderCreateRowDialogContent was
+    // dead code. Edit IS reached via ColumnActionButtons' table.setEditingRow,
+    // so "custom" avoids MRT wrapping EditAirwayModal's own <Dialog> in a
+    // second one — see Translate/index.jsx for the full rationale.
+    editDisplayMode: "custom",
     enableColumnPinning: true,
     columns,
     data: listData,
@@ -351,12 +357,6 @@ const AirwayTab = ({
         })}
       </Box>
     ),
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddAirwayModal open={true} onClose={onCloseAdd} table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditAirwayModal table={table} row={row} />
-    ),
   });
 
   return (
@@ -370,6 +370,9 @@ const AirwayTab = ({
       />
       {isAddOpen && (
         <AddAirwayModal open={isAddOpen} onClose={onCloseAdd} table={table} />
+      )}
+      {Boolean(table.getState().editingRow) && (
+        <EditAirwayModal table={table} row={table.getState().editingRow} />
       )}
       {Boolean(paymentModalRow) && (
         <PaymentManagementModal

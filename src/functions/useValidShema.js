@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import * as yup from "yup";
 import { useTranslation } from "react-i18next";
 import { useValidShemaConst } from "./useValidShemaConst";
@@ -13,6 +14,11 @@ export const useValidShema = () => {
     guidRequiredValidSchema,
   } = useValidShemaConst();
 
+  // Every one of the ~20 schemas below used to get rebuilt on every render of
+  // every component that calls this hook (typing a single character in any
+  // Add/Edit form re-ran all of them) — memoize on `t`, the only thing they
+  // actually depend on.
+  return useMemo(() => {
   const loginValidSchema = yup.object({
     phone: phoneNumberRequiredValidSchema({
       requiredMessage: t("login.validation.phoneNumberRequired"),
@@ -361,6 +367,15 @@ export const useValidShema = () => {
     editPosition,
     editTranslator,
   };
+  }, [
+    t,
+    passwordRequiredValidSchema,
+    phoneNumberOptionalValidSchema,
+    phoneNumberRequiredValidSchema,
+    stringOptionalValidSchema,
+    stringRequiredValidSchema,
+    guidRequiredValidSchema,
+  ]);
 };
 
 

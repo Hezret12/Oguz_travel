@@ -254,6 +254,12 @@ const PackageTab = ({
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // The Add flow here is already driven by the parent's own isAddOpen state
+    // (below), not table.setCreatingRow — renderCreateRowDialogContent was
+    // dead code. Edit IS reached via ColumnActionButtons' table.setEditingRow,
+    // so "custom" avoids MRT wrapping EditPackageModal's own <Dialog> in a
+    // second one — see Translate/index.jsx for the full rationale.
+    editDisplayMode: "custom",
     enableColumnPinning: true,
     columns,
     data: listData,
@@ -319,12 +325,6 @@ const PackageTab = ({
         })}
       </Box>
     ),
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddPackageModal open={true} onClose={onCloseAdd} table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditPackageModal table={table} row={row} />
-    ),
   });
 
   return (
@@ -338,6 +338,9 @@ const PackageTab = ({
       />
       {isAddOpen && (
         <AddPackageModal open={isAddOpen} onClose={onCloseAdd} table={table} />
+      )}
+      {Boolean(table.getState().editingRow) && (
+        <EditPackageModal table={table} row={table.getState().editingRow} />
       )}
       {Boolean(paymentModalRow) && (
         <PaymentManagementModal

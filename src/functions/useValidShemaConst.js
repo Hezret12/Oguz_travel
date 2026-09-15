@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import * as yup from "yup";
 import { useTranslation } from "react-i18next";
 import { TURKMEN_MOBILE_DIGITS_REGEX } from "../utils/phone";
@@ -7,6 +8,7 @@ const PHONE_LENGTH = 8;
 export const useValidShemaConst = () => {
   const { t } = useTranslation();
 
+  return useMemo(() => {
   const stringRequiredValidSchema = (message = t("validation.required", "Required")) =>
     yup.string().required(message);
 
@@ -129,4 +131,5 @@ export const useValidShemaConst = () => {
     stringOptionalValidSchema,
     stringRequiredValidSchema,
   };
+  }, [t]);
 };

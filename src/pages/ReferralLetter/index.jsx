@@ -360,6 +360,11 @@ const ReferalLetter = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddReferralLetterModal/EditReferralLetterModal already render — see
+    // Translate/index.jsx for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     enableColumnPinning: true,
     initialState: {
       columnPinning: {
@@ -423,13 +428,6 @@ const ReferalLetter = () => {
       if (isLoading || isFetching) return null;
       return <TableEmptyState onResetFilters={resetFilters} />;
     },
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddReferralLetterModal table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditReferralLetterModal table={table} row={row} />
-    ),
-
     renderTopToolbarCustomActions: () => (
       <Box
         sx={{
@@ -552,6 +550,17 @@ const ReferalLetter = () => {
         isLoading={isDeleting}
         description={t("deleteDialog.description")}
       />
+
+      {Boolean(table.getState().creatingRow) && (
+        <AddReferralLetterModal table={table} />
+      )}
+
+      {Boolean(table.getState().editingRow) && (
+        <EditReferralLetterModal
+          table={table}
+          row={table.getState().editingRow}
+        />
+      )}
 
       <MaterialReactTable table={table} />
     </>

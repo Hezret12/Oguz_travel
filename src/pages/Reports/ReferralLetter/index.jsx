@@ -360,6 +360,11 @@ const ReferralLetterPage = () => {
   // Reports Table Instance
   const reportsTable = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddReferralReportModal/EditReferralReportModal already render — see
+    // Translate/index.jsx for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     columns: reportsColumns,
     data: reportList,
     enableColumnPinning: false,
@@ -443,17 +448,16 @@ const ReferralLetterPage = () => {
         </Box>
       );
     },
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddReferralReportModal table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditReferralReportModal table={table} row={row} />
-    ),
   });
 
   // Stock Table Instance
   const stockTable = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // AddLetterStockModal/EditLetterStockModal already render — see
+    // Translate/index.jsx for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     columns: stockColumns,
     data: stockList,
     enableColumnPinning: false,
@@ -537,12 +541,6 @@ const ReferralLetterPage = () => {
         </Box>
       );
     },
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddLetterStockModal table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditLetterStockModal table={table} row={row} />
-    ),
   });
 
   const tabsConfig = useMemo(
@@ -726,6 +724,25 @@ const ReferralLetterPage = () => {
           </Button>
         </Box>
       </Paper>
+
+      {Boolean(reportsTable.getState().creatingRow) && (
+        <AddReferralReportModal table={reportsTable} />
+      )}
+      {Boolean(reportsTable.getState().editingRow) && (
+        <EditReferralReportModal
+          table={reportsTable}
+          row={reportsTable.getState().editingRow}
+        />
+      )}
+      {Boolean(stockTable.getState().creatingRow) && (
+        <AddLetterStockModal table={stockTable} />
+      )}
+      {Boolean(stockTable.getState().editingRow) && (
+        <EditLetterStockModal
+          table={stockTable}
+          row={stockTable.getState().editingRow}
+        />
+      )}
 
       {activeTab === "reports" ? (
         <MaterialReactTable table={reportsTable} />

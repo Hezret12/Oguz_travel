@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, memo } from "react";
 import {
   Box,
   Grid,
@@ -29,7 +29,26 @@ import { getAllTranslatorsApi } from "../../api/queries/getters";
 import { addTranslationApi, addTranslatorApi } from "../../api/queries/post";
 import CustomDatePicker from "../../components/CustomDatePicker";
 
-const AddTranslateModal = ({ table }) => {
+const buildDefaultValues = () => ({
+  received_day: dayjs().format("YYYY-MM-DD"),
+  received_time: dayjs().format("HH:mm"),
+  opr_guid: null,
+  page_count: null,
+  client_guid: null,
+  source_to_target: null,
+  completed_time: null,
+  status: "false",
+  completed_page_count: null,
+  completed_day: null,
+  translator_guid: null,
+  correction_status: null,
+  price: null,
+  expense_price: null,
+  note: "",
+  is_paid: null,
+});
+
+const AddTranslateModal = ({ open: isOpen, onClose }) => {
   const { t } = useLocale();
   const { addTranslation } = useValidShema();
   const queryClient = useQueryClient();
@@ -45,27 +64,20 @@ const AddTranslateModal = ({ table }) => {
   });
 
   // react-hook-form setup
-  const { control, handleSubmit, setValue } = useForm({
+  const { control, handleSubmit, setValue, reset } = useForm({
     resolver: yupResolver(addTranslation),
-    defaultValues: {
-      received_day: dayjs().format("YYYY-MM-DD"),
-      received_time: dayjs().format("HH:mm"),
-      opr_guid: null,
-      page_count: null,
-      client_guid: null,
-      source_to_target: null,
-      completed_time: null,
-      status: "false",
-      completed_page_count: null,
-      completed_day: null,
-      translator_guid: null,
-      correction_status: null,
-      price: null,
-      expense_price: null,
-      note: "",
-      is_paid: null,
-    },
+    defaultValues: buildDefaultValues(),
   });
+
+  // The dialog now stays mounted between opens (see keepMounted below), so
+  // defaultValues (e.g. today's date/time) would otherwise go stale after
+  // the first open — refresh the whole form every time it's (re)opened.
+  useEffect(() => {
+    if (isOpen) {
+      reset(buildDefaultValues());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const { mutate: createTranslation, isPending: isCreatingTranslation } =
     useCreate({
@@ -74,7 +86,7 @@ const AddTranslateModal = ({ table }) => {
       isPaginated: true,
       invalidateQueries: ["translations"],
       onSuccess: () => {
-        table.setCreatingRow(null);
+        onClose();
       },
     });
 
@@ -158,9 +170,10 @@ const AddTranslateModal = ({ table }) => {
   return (
     <>
       <CustomDialog
-        open={true}
-        close={() => table.setCreatingRow(null)}
+        open={isOpen}
+        close={onClose}
         widthX={780}
+        keepMounted
       >
         <CustomDialogHeader variant="h5" title={t("addTranslation")} />
         <CustomForm onSubmit={handleSubmit(onSubmit)}>
@@ -355,7 +368,7 @@ const AddTranslateModal = ({ table }) => {
 
           <FooterButton
             loading={isCreatingTranslation}
-            onCancel={() => table.setCreatingRow(null)}
+            onCancel={onClose}
             type="submit"
             sx={{ mt: 3 }}
           />
@@ -431,4 +444,8 @@ const AddTranslateModal = ({ table }) => {
   );
 };
 
-export default AddTranslateModal;
+// Kept permanently mounted by the parent (see keepMounted on CustomDialog),
+// so without memo it would fully re-render this entire heavy form (2
+// Autocompletes, several pickers) on every unrelated state change in
+// TranslatePage — e.g. opening the *edit* dialog, or selecting a table row.
+export default memo(AddTranslateModal);

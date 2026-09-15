@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
@@ -55,6 +55,14 @@ const FILTER_LABEL_KEYS = {
   end_completed_day: "columns.endCompletedDay",
   completed_time: "columns.completedTime",
 };
+
+// Constructing Intl.NumberFormat is measurably expensive — reuse one instance
+// instead of building it fresh inside renderBottomToolbar on every render.
+const CURRENCY_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+const formatCurrency = (val) => `${CURRENCY_FORMATTER.format(Number(val) || 0)} TMT`;
 
 const TranslateFilterDrawer = () => {
   const {
@@ -197,8 +205,16 @@ const TranslatePage = () => {
     idKey: "guid",
   });
 
+  // Passing a fresh arrow function here every render would still defeat
+  // useDeleteDialog's own memoization (its `confirm` depends on `onConfirm`),
+  // which would in turn keep invalidating `handleDeleteClick` -> `columns` below.
+  const handleConfirmDelete = useCallback(
+    (item) => deleteTranslation(item.guid),
+    [deleteTranslation],
+  );
+
   const deleteDialog = useDeleteDialog({
-    onConfirm: (item) => deleteTranslation(item.guid),
+    onConfirm: handleConfirmDelete,
   });
 
   const handleDeleteClick = useCallback(
@@ -431,29 +447,25 @@ const TranslatePage = () => {
     [t, selectedLang, formatChange, handleDeleteClick],
   );
 
-  const table = useMaterialReactTable({
-    ...defaultMrtOptions,
-    enableColumnPinning: true,
-    columns,
-    data: translations || [],
-    initialState: {
-      columnPinning: {
-        left: ["index_number"],
-        right: ["actions"],
-      },
-    },
-    state: {
+  const paginationState = useMemo(
+    () => ({ pageIndex: page - 1, pageSize: limit }),
+    [page, limit],
+  );
+
+  const mrtState = useMemo(
+    () => ({
       rowSelection,
       isLoading: false,
       showLoadingOverlay: isLoading || isFetching,
       showSkeletons: false,
       showProgressBars: false,
-      pagination: {
-        pageIndex: page - 1,
-        pageSize: limit,
-      },
-    },
-    muiTableBodyProps: {
+      pagination: paginationState,
+    }),
+    [rowSelection, isLoading, isFetching, paginationState],
+  );
+
+  const muiTableBodyProps = useMemo(
+    () => ({
       sx: (theme) => ({
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.secondary,
@@ -461,51 +473,17 @@ const TranslatePage = () => {
         pointerEvents: isLoading || isFetching ? "none" : "auto",
         transition: "opacity 0.15s ease",
       }),
-    },
-    getRowId: (row) => row.guid,
-    onRowSelectionChange: setRowSelection,
+    }),
+    [isLoading, isFetching],
+  );
 
-    // Server-side options
-    manualPagination: true,
-    manualFiltering: true,
-    manualSorting: true,
-    pageCount,
-    rowCount: totalItems,
+  const renderEmptyRowsFallback = useCallback(() => {
+    if (isLoading || isFetching) return null;
+    return <TableEmptyState onResetFilters={resetFilters} />;
+  }, [isLoading, isFetching, resetFilters]);
 
-    onPaginationChange: (updater) => {
-      const next =
-        typeof updater === "function"
-          ? updater(table.getState().pagination)
-          : updater;
-      if (next.pageIndex !== undefined) setPage(next.pageIndex + 1);
-      if (next.pageSize !== undefined) setPageSize(next.pageSize);
-    },
-
-    onSortingChange: (updater) => {
-      const next =
-        typeof updater === "function"
-          ? updater(table.getState().sorting)
-          : updater;
-      if (next && next.length > 0) {
-        setSort(next[0].id, next[0].desc ? "desc" : "asc");
-      } else {
-        setSort("", "asc");
-      }
-    },
-
-    renderEmptyRowsFallback: () => {
-      if (isLoading || isFetching) return null;
-      return <TableEmptyState onResetFilters={resetFilters} />;
-    },
-
-    renderCreateRowDialogContent: ({ table }) => (
-      <AddTranslateModal table={table} />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditTranslateModal table={table} row={row} queryParams={queryParams} />
-    ),
-
-    renderTopToolbarCustomActions: () => (
+  const renderTopToolbarCustomActions = useCallback(
+    () => (
       <Box
         sx={{
           display: "flex",
@@ -545,6 +523,67 @@ const TranslatePage = () => {
         ))}
       </Box>
     ),
+    [
+      searchQuery,
+      setSearch,
+      t,
+      isLoading,
+      refetch,
+      isFetching,
+      activeFilters,
+      getFilterChipLabel,
+      setFilter,
+    ],
+  );
+
+  const table = useMaterialReactTable({
+    ...defaultMrtOptions,
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
+    enableColumnPinning: true,
+    columns,
+    data: translations || [],
+    initialState: {
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
+      },
+    },
+    state: mrtState,
+    muiTableBodyProps,
+    getRowId: (row) => row.guid,
+    onRowSelectionChange: setRowSelection,
+
+    // Server-side options
+    manualPagination: true,
+    manualFiltering: true,
+    manualSorting: true,
+    pageCount,
+    rowCount: totalItems,
+
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().pagination)
+          : updater;
+      if (next.pageIndex !== undefined) setPage(next.pageIndex + 1);
+      if (next.pageSize !== undefined) setPageSize(next.pageSize);
+    },
+
+    onSortingChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(table.getState().sorting)
+          : updater;
+      if (next && next.length > 0) {
+        setSort(next[0].id, next[0].desc ? "desc" : "asc");
+      } else {
+        setSort("", "asc");
+      }
+    },
+
+    renderEmptyRowsFallback,
+    renderTopToolbarCustomActions,
 
     renderBottomToolbar: ({ table: mrtTable }) => {
       const { pageIndex } = mrtTable.getState().pagination;
@@ -559,14 +598,6 @@ const TranslatePage = () => {
           ? Number(meta.totalProfit)
           : numPrice - numExpense;
       const isProfitPositive = numProfit >= 0;
-      const marginPercent =
-        numPrice > 0 ? ((numProfit / numPrice) * 100).toFixed(1) : null;
-
-      const formatCurrency = (val) =>
-        new Intl.NumberFormat("en-US", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }).format(Number(val) || 0) + " TMT";
 
       return (
         <Box
@@ -698,18 +729,6 @@ const TranslatePage = () => {
                   ? `+${formatCurrency(numProfit)}`
                   : `-${formatCurrency(Math.abs(numProfit))}`}
               </Typography>
-              {marginPercent !== null && (
-                <Typography
-                  component="span"
-                  sx={{
-                    fontSize: "0.75rem",
-                    color: "text.secondary",
-                    fontWeight: 500,
-                  }}
-                >
-                  ({marginPercent}%)
-                </Typography>
-              )}
             </Box>
           </Box>
 
@@ -724,6 +743,26 @@ const TranslatePage = () => {
       );
     },
   });
+
+  // `table` is a brand-new object every render (MRT rebuilds it internally),
+  // so AddTranslateModal/EditTranslateModal can't be memoized against it
+  // directly — a ref lets their close handlers stay referentially stable
+  // forever while still always operating on the current table instance.
+  const tableRef = useRef(table);
+  useEffect(() => {
+    tableRef.current = table;
+  });
+
+  const closeAddModal = useCallback(() => {
+    tableRef.current.setCreatingRow(null);
+  }, []);
+
+  const closeEditModal = useCallback(() => {
+    tableRef.current.setEditingRow(null);
+  }, []);
+
+  const isAddOpen = Boolean(table.getState().creatingRow);
+  const editingRow = table.getState().editingRow;
 
   return (
     <>
@@ -766,6 +805,15 @@ const TranslatePage = () => {
           row={paymentModalRow}
         />
       )}
+
+      {/* Kept permanently mounted so the heavy form tree — Autocompletes, date
+          pickers, ~15 controlled fields — only pays its mount cost once, not
+          on every open. Both are memoized and given stable `open`/`onClose`
+          (instead of the raw `table`, which is a new object every render) so
+          opening one doesn't force the other to re-render its whole form. */}
+      <AddTranslateModal open={isAddOpen} onClose={closeAddModal} />
+
+      <EditTranslateModal row={editingRow} onClose={closeEditModal} />
 
       <MaterialReactTable table={table} />
     </>

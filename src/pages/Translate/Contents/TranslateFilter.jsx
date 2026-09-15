@@ -287,20 +287,21 @@ const PresetChips = ({ presets }) => (
         size="small"
         clickable
         onClick={p.onClick}
-        variant={p.isActive ? "filled" : "outlined"}
+        variant="outlined"
         sx={(theme) => {
           const accent = getAccent(theme);
           return {
             borderRadius: "7px",
             fontSize: "11px",
-            fontWeight: p.isActive ? 650 : 500,
+            fontWeight: 600,
             height: "24px",
-            transition: "all 0.15s ease",
+            transition: "background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease",
             color: p.isActive ? accent.contrastText : "text.secondary",
             borderColor: p.isActive ? accent.main : "divider",
             backgroundColor: p.isActive
               ? accent.main
               : alpha(theme.palette.text.primary, 0.02),
+            "& .MuiChip-label": { px: "8px" },
             "&:hover": {
               borderColor: accent.main,
               backgroundColor: p.isActive
@@ -357,7 +358,7 @@ const DayGroup = ({
 
     <PresetChips presets={presets} />
 
-    <Stack direction="row" spacing={1}>
+    <Stack spacing={1.25}>
       <FilterDatePicker
         label={t("columns.startDate")}
         name={startKey}

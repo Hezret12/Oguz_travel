@@ -149,6 +149,11 @@ export const CountriesTable = forwardRef((props, ref) => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // Avoids nesting MRT's own create/edit <Dialog> around the one
+    // CreateCountryModal/EditCountryModal already render — see
+    // Translate/index.jsx for the full rationale.
+    createDisplayMode: "custom",
+    editDisplayMode: "custom",
     memoMode: "rows",
     autoResetPageIndex: false,
     muiTablePaperProps: {
@@ -214,20 +219,6 @@ export const CountriesTable = forwardRef((props, ref) => {
         />
       </Box>
     ),
-    renderCreateRowDialogContent: ({ table }) => (
-      <CreateCountryModal
-        open={Boolean(table.getState().creatingRow)}
-        onClose={() => table.setCreatingRow(null)}
-        onRefresh={refetch}
-      />
-    ),
-    renderEditRowDialogContent: ({ table, row }) => (
-      <EditCountryModal
-        table={table}
-        row={row}
-        onRefresh={refetch}
-      />
-    ),
   });
 
   useImperativeHandle(ref, () => ({
@@ -236,6 +227,20 @@ export const CountriesTable = forwardRef((props, ref) => {
 
   return (
     <>
+      <CreateCountryModal
+        open={Boolean(table.getState().creatingRow)}
+        onClose={() => table.setCreatingRow(null)}
+        onRefresh={refetch}
+      />
+
+      {Boolean(table.getState().editingRow) && (
+        <EditCountryModal
+          table={table}
+          row={table.getState().editingRow}
+          onRefresh={refetch}
+        />
+      )}
+
       <MaterialReactTable table={table} />
 
       <DeleteDialog
