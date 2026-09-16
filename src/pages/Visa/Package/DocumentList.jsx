@@ -1,16 +1,11 @@
 import { useState, useMemo, useCallback } from "react";
-import {
-  Box,
-  Typography,
-  Chip,
-  IconButton,
-  Tooltip,
-} from "@mui/material";
-import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
+import { Box, Typography, Chip, IconButton, Tooltip } from "@mui/material";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
-import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+} from "material-react-table";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import PageHeader from "../../../components/PageHeader";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
@@ -57,11 +52,15 @@ const DocumentList = ({
 
   const confirmDelete = () => {
     if (deleteTarget) {
-      onDeleteDocument(deleteTarget.guid || deleteTarget.id, deleteTarget.guid, {
-        onSuccess: () => {
-          setDeleteTarget(null);
+      onDeleteDocument(
+        deleteTarget.guid || deleteTarget.id,
+        deleteTarget.guid,
+        {
+          onSuccess: () => {
+            setDeleteTarget(null);
+          },
         },
-      });
+      );
     }
   };
 
@@ -93,38 +92,18 @@ const DocumentList = ({
         Cell: ({ row }) => {
           const title = row.original.title || t("visaDocument.title");
           return (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 36,
-                  height: 36,
-                  minWidth: 36,
-                  borderRadius: "10px",
-                  backgroundColor: "action.hover",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  color: "primary.main",
-                  flexShrink: 0,
-                }}
-              >
-                <ArticleRoundedIcon sx={{ fontSize: 20 }} />
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 600,
-                  color: "text.primary",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {title}
-              </Typography>
-            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                color: "text.primary",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {title}
+            </Typography>
           );
         },
       },
@@ -157,27 +136,15 @@ const DocumentList = ({
         id: "tableCount",
         header: t("visaDocument.tables"),
         size: 140,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
           const doc = row.original;
-          const count =
-            doc.tableCount !== undefined
-              ? doc.tableCount
-              : doc.tables?.length || doc.docDetails?.length || 0;
+          const count = doc.tableCount !== undefined ? doc.tableCount : 0;
           return (
-            <Chip
-              icon={<TableChartOutlinedIcon sx={{ fontSize: "14px !important" }} />}
-              label={`${count} ${t("visaDocument.tables")}`}
-              size="small"
-              variant="outlined"
-              sx={{
-                fontSize: "0.75rem",
-                height: 26,
-                borderRadius: "6px",
-                borderColor: "divider",
-                color: "text.secondary",
-                fontWeight: 500,
-              }}
-            />
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              {count}
+            </Typography>
           );
         },
       },
@@ -185,6 +152,8 @@ const DocumentList = ({
         accessorKey: "updatedAt",
         header: t("columns.updatedAt"),
         size: 150,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
           const dateVal = row.original.updatedAt || row.original.createdAt;
           if (!dateVal) return "";
@@ -210,7 +179,14 @@ const DocumentList = ({
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row, table }) => (
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 0.5,
+            }}
+          >
             <Tooltip title={t("visaDocument.preview")} arrow>
               <IconButton
                 size="small"
@@ -255,12 +231,12 @@ const DocumentList = ({
         ),
       },
     ],
-    [t, formatChange, page, limit, onSelectDocument]
+    [t, formatChange, page, limit, onSelectDocument],
   );
 
   const paginationState = useMemo(
     () => ({ pageIndex: page - 1, pageSize: limit }),
-    [page, limit]
+    [page, limit],
   );
 
   const mrtState = useMemo(
@@ -271,7 +247,7 @@ const DocumentList = ({
       showProgressBars: false,
       pagination: paginationState,
     }),
-    [isLoading, isFetching, paginationState]
+    [isLoading, isFetching, paginationState],
   );
 
   const muiTableBodyProps = useMemo(
@@ -284,7 +260,7 @@ const DocumentList = ({
         transition: "opacity 0.15s ease",
       }),
     }),
-    [isLoading, isFetching]
+    [isLoading, isFetching],
   );
 
   const renderEmptyRowsFallback = useCallback(() => {
@@ -335,7 +311,16 @@ const DocumentList = ({
         )}
       </Box>
     ),
-    [searchQuery, setSearchQuery, setPage, isLoading, onRefetch, isFetching, totalItems, t]
+    [
+      searchQuery,
+      setSearchQuery,
+      setPage,
+      isLoading,
+      onRefetch,
+      isFetching,
+      totalItems,
+      t,
+    ],
   );
 
   const table = useMaterialReactTable({
@@ -418,10 +403,16 @@ const DocumentList = ({
               sx={{ fontSize: "0.95rem", lineHeight: 1.65 }}
             >
               {t("visaDocument.deleteConfirmPrefix", "Siz hakykatdan hem")}{" "}
-              <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
+              <Box
+                component="span"
+                sx={{ fontWeight: 700, color: "text.primary" }}
+              >
                 "{displayDeleteTarget.title}"
               </Box>
-              {t("visaDocument.deleteConfirmSuffix", "wiza bukjasyny pozmak isleýärsiňizmi?").startsWith("?")
+              {t(
+                "visaDocument.deleteConfirmSuffix",
+                "wiza bukjasyny pozmak isleýärsiňizmi?",
+              ).startsWith("?")
                 ? t("visaDocument.deleteConfirmSuffix")
                 : ` ${t("visaDocument.deleteConfirmSuffix")}`}
             </Typography>

@@ -722,6 +722,7 @@
     "save": "Save",
     "basicInfo": "Basic Information",
     "docTitle": "Document Title",
+    "tables": "Tables",
     "docTitlePlaceholder": "e.g.: China Visa Package",
     "docTitleHelper": "Enter a clear title for the document package shown to clients",
     "country": "Country / Destination",
