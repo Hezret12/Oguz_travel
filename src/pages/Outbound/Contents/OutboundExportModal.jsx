@@ -5,23 +5,12 @@ import {
   Paper,
   Grid,
   Chip,
-  Checkbox,
   LinearProgress,
   Button,
-  alpha,
   useTheme,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import {
-  Building2,
-  PlaneTakeoff,
-  TrainFront,
-  Compass,
-  Car,
-  Package,
-  FileSpreadsheet,
-  Calendar,
-} from "lucide-react";
+import { FileSpreadsheet, Calendar } from "lucide-react";
 import toast from "react-hot-toast";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
@@ -30,16 +19,9 @@ import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeade
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import FooterButton from "../../../components/Dialog/FooterButton";
 import { ExcelIcon } from "../../../components/ExportExcelButton";
-import { exportOutboundExcel } from "../functions/exportOutboundExcel";
+import { exportOutboundExcel, OUTBOUND_SERVICE_MAP } from "../functions/exportOutboundExcel";
 
-const SERVICE_CONFIGS = [
-  { key: "hotel", labelKey: "outbound.hotel", icon: Building2, color: "#0E8584" },
-  { key: "airway", labelKey: "outbound.airway", icon: PlaneTakeoff, color: "#0284C7" },
-  { key: "railway", labelKey: "outbound.railway", icon: TrainFront, color: "#6366F1" },
-  { key: "tour", labelKey: "outbound.tour", icon: Compass, color: "#059669" },
-  { key: "transfer", labelKey: "outbound.transfer", icon: Car, color: "#D97706" },
-  { key: "package", labelKey: "outbound.package", icon: Package, color: "#8B5CF6" },
-];
+const ALL_SERVICE_KEYS = Object.keys(OUTBOUND_SERVICE_MAP);
 
 export const OutboundExportModal = ({
   open,
@@ -49,16 +31,6 @@ export const OutboundExportModal = ({
   const { t, selectedLang } = useLocale();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-
-  // Selected services state: all checked by default
-  const [selectedServices, setSelectedServices] = useState({
-    hotel: true,
-    airway: true,
-    railway: true,
-    tour: true,
-    transfer: true,
-    package: true,
-  });
 
   // Date range state (initialized with queryParams if provided)
   const [startDate, setStartDate] = useState(() =>
@@ -75,20 +47,6 @@ export const OutboundExportModal = ({
   const includeSummary = true;
   const [isExporting, setIsExporting] = useState(false);
   const [progressInfo, setProgressInfo] = useState(null);
-
-  // Selected keys array
-  const selectedKeys = useMemo(
-    () => Object.keys(selectedServices).filter((k) => selectedServices[k]),
-    [selectedServices]
-  );
-
-  const handleToggleService = (key) => {
-    setSelectedServices((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
 
   // Quick Date Presets
   const activePreset = useMemo(() => {
@@ -152,11 +110,6 @@ export const OutboundExportModal = ({
     e?.preventDefault?.();
     if (isExporting) return;
 
-    if (selectedKeys.length === 0) {
-      toast.error(t("outbound.noServicesSelected"));
-      return;
-    }
-
     setIsExporting(true);
     setProgressInfo({
       phase: "starting",
@@ -178,7 +131,7 @@ export const OutboundExportModal = ({
       };
 
       await exportOutboundExcel({
-        selectedServiceKeys: selectedKeys,
+        selectedServiceKeys: ALL_SERVICE_KEYS,
         queryParams: effectiveQueryParams,
         includeSummary,
         onProgress: (info) => setProgressInfo(info),
@@ -419,125 +372,6 @@ export const OutboundExportModal = ({
             </Grid>
           </Paper>
 
-          {/* Service Selection Scope */}
-          <Box>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                mb: 1.2,
-                flexWrap: "wrap",
-                gap: 1,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary", fontSize: "13.5px" }}>
-                  {t("outbound.exportScope")}
-                </Typography>
-                <Chip
-                  label={`${selectedKeys.length} / 6`}
-                  size="small"
-                  sx={{
-                    height: "20px",
-                    fontWeight: 700,
-                    fontSize: "11px",
-                    bgcolor: alpha(theme.palette.primary.main, 0.12),
-                    color: "primary.main",
-                  }}
-                />
-              </Box>
-            </Box>
-
-            {/* Service Cards Grid */}
-            <Grid container spacing={1.5}>
-              {SERVICE_CONFIGS.map((service) => {
-                const Icon = service.icon;
-                const isSelected = Boolean(selectedServices[service.key]);
-
-                return (
-                  <Grid key={service.key} size={{ xs: 12, sm: 6, md: 4 }}>
-                    <Paper
-                      elevation={0}
-                      onClick={() => !isExporting && handleToggleService(service.key)}
-                      sx={{
-                        p: 1.4,
-                        borderRadius: "11px",
-                        cursor: isExporting ? "default" : "pointer",
-                        border: "1.5px solid",
-                        borderColor: isSelected
-                          ? alpha(service.color, 0.85)
-                          : isDark
-                            ? "rgba(255,255,255,0.08)"
-                            : "rgba(0,0,0,0.08)",
-                        backgroundColor: isSelected
-                          ? alpha(service.color, isDark ? 0.16 : 0.07)
-                          : isDark
-                            ? "rgba(255,255,255,0.02)"
-                            : "#FFFFFF",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                        "&:hover": {
-                          borderColor: isSelected ? service.color : alpha(service.color, 0.4),
-                          transform: "translateY(-1px)",
-                          boxShadow: isDark
-                            ? "0 4px 12px rgba(0,0,0,0.3)"
-                            : "0 4px 12px rgba(0,0,0,0.05)",
-                        },
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                        <Box
-                          sx={{
-                            width: 34,
-                            height: 34,
-                            borderRadius: "9px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: isSelected ? "#FFFFFF" : service.color,
-                            backgroundColor: isSelected
-                              ? service.color
-                              : alpha(service.color, isDark ? 0.2 : 0.1),
-                            transition: "all 0.2s ease",
-                            boxShadow: isSelected ? `0 2px 8px ${alpha(service.color, 0.35)}` : "none",
-                          }}
-                        >
-                          <Icon size={18} />
-                        </Box>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: isSelected ? 700 : 500,
-                            color: isSelected ? "text.primary" : "text.secondary",
-                            fontSize: "13px",
-                          }}
-                        >
-                          {t(service.labelKey)}
-                        </Typography>
-                      </Box>
-
-                      <Checkbox
-                        size="small"
-                        checked={isSelected}
-                        disabled={isExporting}
-                        sx={{
-                          p: 0.2,
-                          color: alpha(service.color, 0.5),
-                          "&.Mui-checked": {
-                            color: service.color,
-                          },
-                        }}
-                      />
-                    </Paper>
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </Box>
-
           {/* Live Animated Progress Bar during fetch & export */}
           {isExporting && (
             <Paper
@@ -577,7 +411,7 @@ export const OutboundExportModal = ({
 
         <FooterButton
           loading={isExporting}
-          disabled={selectedKeys.length === 0 || isExporting}
+          disabled={isExporting}
           onCancel={handleClose}
           icon={<FileSpreadsheet size={18} />}
           saveButtonSx={{

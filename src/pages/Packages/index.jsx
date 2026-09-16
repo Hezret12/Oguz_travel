@@ -2,14 +2,11 @@ import { useMemo, useState, useCallback } from "react";
 import {
   Box,
   Typography,
-  Button,
   Chip,
+  IconButton,
   Tooltip,
 } from "@mui/material";
-import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
-import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
-import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
@@ -59,9 +56,10 @@ const PackagesPage = () => {
     () => [
       {
         accessorKey: "index",
-        header: "#",
+        header: "№",
         size: 60,
         enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
         Cell: ({ row }) => (
           <Typography
             variant="body2"
@@ -83,38 +81,18 @@ const PackagesPage = () => {
         Cell: ({ row }) => {
           const title = row.original.title || t("visaDocument.title");
           return (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 36,
-                  height: 36,
-                  minWidth: 36,
-                  borderRadius: "10px",
-                  backgroundColor: "action.hover",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  color: "primary.main",
-                  flexShrink: 0,
-                }}
-              >
-                <ArticleRoundedIcon sx={{ fontSize: 20 }} />
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 600,
-                  color: "text.primary",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {title}
-              </Typography>
-            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                color: "text.primary",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {title}
+            </Typography>
           );
         },
       },
@@ -153,68 +131,15 @@ const PackagesPage = () => {
         id: "tableCount",
         header: t("visaDocument.tables"),
         size: 140,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
           const doc = row.original;
-          const count =
-            doc.tableCount !== undefined
-              ? doc.tableCount
-              : doc.tables?.length || doc.docDetails?.length || 0;
+          const count = doc.tableCount !== undefined ? doc.tableCount : 0;
           return (
-            <Chip
-              icon={<TableChartOutlinedIcon sx={{ fontSize: "14px !important" }} />}
-              label={`${count} ${t("visaDocument.tables")}`}
-              size="small"
-              variant="outlined"
-              sx={{
-                fontSize: "0.75rem",
-                height: 26,
-                borderRadius: "6px",
-                borderColor: "divider",
-                color: "text.secondary",
-                fontWeight: 500,
-              }}
-            />
-          );
-        },
-      },
-      {
-        accessorKey: "generalNote",
-        header: t("visaDocument.generalNote"),
-        size: 260,
-        Cell: ({ row }) => {
-          const doc = row.original;
-          const note =
-            doc.generalNote?.trim() ||
-            doc.tables?.find((tb) => tb.note?.trim())?.note ||
-            doc.docDetails?.find((d) => d.note?.trim())?.note ||
-            "";
-          if (!note) {
-            return (
-              <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                —
-              </Typography>
-            );
-          }
-          return (
-            <Tooltip title={note} arrow placement="top-start">
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, maxWidth: 260 }}>
-                <StickyNote2OutlinedIcon
-                  sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }}
-                />
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    fontSize: "0.825rem",
-                  }}
-                >
-                  {note}
-                </Typography>
-              </Box>
-            </Tooltip>
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              {count}
+            </Typography>
           );
         },
       },
@@ -222,15 +147,11 @@ const PackagesPage = () => {
         accessorKey: "updatedAt",
         header: t("columns.updatedAt"),
         size: 150,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
           const dateVal = row.original.updatedAt || row.original.createdAt;
-          if (!dateVal) {
-            return (
-              <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                —
-              </Typography>
-            );
-          }
+          if (!dateVal) return "";
           return (
             <Typography
               variant="body2"
@@ -250,36 +171,41 @@ const PackagesPage = () => {
         header: t("columns.actions"),
         size: 110,
         enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => (
           <Tooltip title={t("visaDocument.preview")} arrow>
-            <Button
+            <IconButton
               size="small"
-              variant="outlined"
-              startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}
               onClick={(e) => {
                 e.stopPropagation();
                 setPreviewDocument(row.original);
               }}
-              sx={{
-                borderRadius: "8px",
-                textTransform: "none",
-                fontSize: "0.78rem",
-                fontWeight: 600,
-                py: 0.35,
-                px: 1.2,
-                borderColor: "divider",
-                color: "text.primary",
-                backgroundColor: "background.paper",
+              sx={(theme) => ({
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px",
+                border: `1px solid ${theme.palette.divider}`,
+                backgroundColor: "rgba(0, 0, 0, 0.03)",
+                color: theme.palette.text.secondary,
                 transition: "all 0.15s ease",
                 "&:hover": {
-                  borderColor: "primary.main",
-                  backgroundColor: "action.hover",
-                  color: "primary.main",
+                  backgroundColor: "rgba(0, 0, 0, 0.07)",
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
+                  transform: "translateY(-1px)",
                 },
-              }}
+                "&:active": { transform: "scale(0.95)" },
+                ...theme.applyStyles("dark", {
+                  backgroundColor: "rgba(255, 255, 255, 0.04)",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.08)",
+                  },
+                }),
+              })}
             >
-              {t("visaDocument.preview")}
-            </Button>
+              <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
+            </IconButton>
           </Tooltip>
         ),
       },
@@ -372,6 +298,11 @@ const PackagesPage = () => {
     columns,
     data: serverDocs,
     state: mrtState,
+    manualPagination: true,
+    manualFiltering: true,
+    manualSorting: true,
+    pageCount,
+    rowCount: totalItems,
     muiTableBodyProps,
     renderEmptyRowsFallback,
     renderTopToolbarCustomActions,
