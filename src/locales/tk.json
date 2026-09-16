@@ -171,12 +171,9 @@
   "visa": {
     "title": "Wiza",
     "status": "Wiza ýagdaýy",
-    "statusPending": "Garaşylýar",
-    "statusInProgress": "Işlenýär",
-    "statusApproved": "Kabul edildi",
-    "statusRejected": "Ret edildi",
-    "statusCancelled": "Ýatyryldy",
-    "statusCompleted": "Tamamlandy"
+    "statusProcess": "Işlenýär",
+    "statusDone": "Tamamlandy",
+    "statusFail": "Ýatyryldy"
   },
   "addTranslation": "Terjime goşmak",
   "addTranslator": "Täze terjimeçi goşmak",

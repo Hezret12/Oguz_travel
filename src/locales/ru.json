@@ -171,12 +171,9 @@
   "visa": {
     "title": "Виза",
     "status": "Статус визы",
-    "statusPending": "Ожидается",
-    "statusInProgress": "В процессе",
-    "statusApproved": "Одобрено",
-    "statusRejected": "Отклонено",
-    "statusCancelled": "Отменено",
-    "statusCompleted": "Завершено"
+    "statusProcess": "В процессе",
+    "statusDone": "Готово",
+    "statusFail": "Отменено"
   },
   "addTranslation": "Добавить перевод",
   "addTranslator": "Добавить переводчика",

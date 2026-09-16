@@ -69,13 +69,16 @@ export const REFERRAL_REPORT_STATUS_CONFIG = {
   "ÝATYRYLDY": { label: "Ýitirilen", color: "#dc2626" },
 };
 
+export const VISA_STATUS = Object.freeze({
+  PROCESS: "PROCESS",
+  DONE: "DONE",
+  FAIL: "FAIL",
+});
+
 export const VISA_STATUS_CONFIG = {
-  PENDING: { label: "Garaşylýar", color: "#d97706" },
-  IN_PROGRESS: { label: "Işlenýär", color: "#2563eb" },
-  APPROVED: { label: "Kabul edildi", color: "#16a34a" },
-  REJECTED: { label: "Ret edildi", color: "#dc2626" },
-  CANCELLED: { label: "Ýatyryldy", color: "#64748b" },
-  COMPLETED: { label: "Tamamlandy", color: "#0d9488" },
+  [VISA_STATUS.PROCESS]: { label: "Işlenýär", color: "#2563eb" },
+  [VISA_STATUS.DONE]: { label: "Tamamlandy", color: "#16a34a" },
+  [VISA_STATUS.FAIL]: { label: "Ýatyryldy", color: "#dc2626" },
 };
 
 export const CAFETERIA_TYPE_CONFIG = {

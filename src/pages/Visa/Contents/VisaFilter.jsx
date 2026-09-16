@@ -3,6 +3,7 @@ import { Box, FormControl, MenuItem, Select, Stack, Typography, TextField } from
 import { ChevronDown } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import { getBooleanPaymentFilterOptions } from "../../../functions/generalHelpers";
+import { VISA_STATUS } from "../constants";
 
 const selectSx = {
   borderRadius: "8px",
@@ -126,12 +127,9 @@ const VisaFilter = ({
 
   const statusOptions = useMemo(
     () => [
-      { value: "PENDING", label: t("visa.statusPending") },
-      { value: "IN_PROGRESS", label: t("visa.statusInProgress") },
-      { value: "APPROVED", label: t("visa.statusApproved") },
-      { value: "REJECTED", label: t("visa.statusRejected") },
-      { value: "CANCELLED", label: t("visa.statusCancelled") },
-      { value: "COMPLETED", label: t("visa.statusCompleted") },
+      { value: VISA_STATUS.PROCESS, label: t("visa.statusProcess") },
+      { value: VISA_STATUS.DONE, label: t("visa.statusDone") },
+      { value: VISA_STATUS.FAIL, label: t("visa.statusFail") },
     ],
     [t]
   );

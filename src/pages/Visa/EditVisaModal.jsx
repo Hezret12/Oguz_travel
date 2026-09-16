@@ -14,46 +14,21 @@ import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
 import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
-import { useGet } from "../../hooks/CRUD/useGet";
-import { getAllEmployeeApi } from "../../api/queries/getters";
+import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { updateVisaApi } from "../../api/queries/patch";
+import { VISA_STATUS } from "../../functions/statusChipConfigs";
 
 const EditVisaModal = ({ table, row }) => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const { addVisa } = useValidShema();
-
-  // Fetch employees list
-  const { data: employees = [] } = useGet({
-    apiFn: getAllEmployeeApi,
-    key: "employees",
-  });
-
-  const employeeOptions = useMemo(
-    () =>
-      (employees || []).map((emp) => {
-        const officeShort = emp.office?.shortName
-          ? selectedLang(emp.office.shortName) ||
-          selectedLang(emp.office.fullName) ||
-          ""
-          : "";
-        const label = officeShort
-          ? `${emp.fullName} (${officeShort})`
-          : emp.fullName;
-        return { label, value: emp.guid };
-      }),
-    [employees, selectedLang],
-  );
 
   const statusOptions = useMemo(
     () => [
-      { label: t("visa.statusPending"), value: "PENDING", color: "#d97706" },
-      { label: t("visa.statusInProgress"), value: "IN_PROGRESS", color: "#2563eb" },
-      { label: t("visa.statusApproved"), value: "APPROVED", color: "#16a34a" },
-      { label: t("visa.statusRejected"), value: "REJECTED", color: "#dc2626" },
-      { label: t("visa.statusCancelled"), value: "CANCELLED", color: "#64748b" },
-      { label: t("visa.statusCompleted"), value: "COMPLETED", color: "#0d9488" },
+      { label: t("visa.statusProcess"), value: VISA_STATUS.PROCESS, color: "#2563eb" },
+      { label: t("visa.statusDone"), value: VISA_STATUS.DONE, color: "#16a34a" },
+      { label: t("visa.statusFail"), value: VISA_STATUS.FAIL, color: "#dc2626" },
     ],
     [t],
   );
@@ -77,8 +52,11 @@ const EditVisaModal = ({ table, row }) => {
       index_number: row?.original?.index_number || "",
       datetime: row?.original?.datetime || dayjs().toISOString(),
       client_guid: row?.original?.client?.guid || null,
-      received_opr_guid: row?.original?.receiver_operator?.guid || null,
-      status: row?.original?.status || "PENDING",
+      received_opr_guid:
+        row?.original?.received_opr_guid ||
+        row?.original?.receiver_operator?.guid ||
+        null,
+      status: row?.original?.status || VISA_STATUS.PROCESS,
       is_paid:
         row?.original?.is_paid !== undefined
           ? Boolean(row.original.is_paid)
@@ -99,7 +77,7 @@ const EditVisaModal = ({ table, row }) => {
   const submitHandler = (values) => {
     const payload = {
       ...values,
-      status: values.status || "PENDING",
+      status: values.status || VISA_STATUS.PROCESS,
       is_paid: Boolean(values.is_paid),
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),
@@ -151,11 +129,11 @@ const EditVisaModal = ({ table, row }) => {
             required
           />
 
-          <CustomSelect
+          <GlobalEmployeeAutocomplete
             name="received_opr_guid"
             control={control}
             label={t("columns.operatorTwo")}
-            options={employeeOptions}
+            initialEmployee={row?.original?.receiver_operator}
             required
           />
 
@@ -208,6 +186,8 @@ const EditVisaModal = ({ table, row }) => {
               name="note"
               control={control}
               label={t("columns.note")}
+              multiline
+              rows={2}
             />
           </Box>
         </Box>

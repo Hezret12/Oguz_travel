@@ -171,12 +171,9 @@
   "visa": {
     "title": "Visa",
     "status": "Visa Status",
-    "statusPending": "Pending",
-    "statusInProgress": "In Progress",
-    "statusApproved": "Approved",
-    "statusRejected": "Rejected",
-    "statusCancelled": "Cancelled",
-    "statusCompleted": "Completed"
+    "statusProcess": "In Process",
+    "statusDone": "Done",
+    "statusFail": "Cancelled"
   },
   "addTranslation": "Add Translation",
   "addTranslator": "Add New Translator",
