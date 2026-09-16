@@ -90,9 +90,6 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
         },
       }}
     >
-      {/* Brand Accent Bar */}
-      <Box className="no-print" sx={{ height: 4, width: "100%", flexShrink: 0, backgroundColor: BRAND_COLOR }} />
-
       <DialogTitle
         className="no-print"
         sx={{
@@ -190,6 +187,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
           >
             {/* Letterhead — Official Header Bar */}
             <Box
+              className="letterhead-bleed"
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -225,29 +223,31 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
               </Box>
             </Box>
             {/* Letterhead double rule */}
-            <Box sx={{ mx: { xs: -3, sm: -5.5 }, height: "3px", backgroundColor: "#0E8584" }} />
-            <Box sx={{ mx: { xs: -3, sm: -5.5 }, height: "1px", backgroundColor: "#0E8584", opacity: 0.35, mb: 4.5 }} />
+            <Box className="letterhead-bleed" sx={{ mx: { xs: -3, sm: -5.5 }, height: "3px", backgroundColor: "#0E8584" }} />
+            <Box className="letterhead-bleed" sx={{ mx: { xs: -3, sm: -5.5 }, height: "1px", backgroundColor: "#0E8584", opacity: 0.35, mb: 4.5 }} />
 
-            {/* Main Document Title */}
-            <Box sx={{ mb: 4, textAlign: "center" }}>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 700,
-                  color: "#0f172a",
-                  fontFamily: "'Times New Roman', Times, serif",
-                  fontSize: { xs: "1.4rem", sm: "1.7rem" },
-                  letterSpacing: "0.2px",
-                  lineHeight: 1.3,
-                }}
-              >
-                {currentDoc?.title || t("visaDocument.title")}
-              </Typography>
-            </Box>
+            {/* Body content (title + tables) — gets its own reduced padding in print */}
+            <Box className="print-body-padding">
+              {/* Main Document Title */}
+              <Box sx={{ mb: 4, textAlign: "center" }}>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    color: "#0f172a",
+                    fontFamily: "'Times New Roman', Times, serif",
+                    fontSize: { xs: "1.4rem", sm: "1.7rem" },
+                    letterSpacing: "0.2px",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {currentDoc?.title || t("visaDocument.title")}
+                </Typography>
+              </Box>
 
-            {/* Tables */}
-            {(currentDoc?.tables || []).map((table, tIdx) => (
-              <Box key={table.id || tIdx} sx={{ mb: 4.5 }}>
+              {/* Tables */}
+              {(currentDoc?.tables || []).map((table, tIdx) => (
+                <Box key={table.id || tIdx} sx={{ mb: 4.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
                   <Box sx={{ flex: 1, height: "1px" }} />
                   <Typography
@@ -386,6 +386,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                 )}
               </Box>
             ))}
+            </Box>
           </Box>
         )}
       </DialogContent>

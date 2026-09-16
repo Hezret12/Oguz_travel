@@ -43,12 +43,23 @@ export const printElement = (element, docTitle = "") => {
       #printable-cv-sheet, #printable-word-document, #printable-doc-sheet {
         box-shadow: none !important;
         border: none !important;
-        padding: 14mm 16mm !important;
         margin: 0 auto !important;
         width: 100% !important;
         max-width: 100% !important;
         min-height: auto !important;
         background: #ffffff !important;
+      }
+      #printable-cv-sheet, #printable-doc-sheet {
+        padding: 14mm 16mm !important;
+      }
+      #printable-word-document {
+        padding: 0 !important;
+      }
+      #printable-word-document .letterhead-bleed {
+        margin: 0 !important;
+      }
+      #printable-word-document .print-body-padding {
+        padding: 0 10mm 10mm 10mm !important;
       }
       .no-print {
         display: none !important;
