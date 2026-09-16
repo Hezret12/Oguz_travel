@@ -38,8 +38,10 @@ import DeleteDialog from "../../../components/DeleteDialog";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 import StackedCell from "../../../components/inputs/StackCell";
+import StatusChip from "../../../components/StatusChip";
 import TableEmptyState from "../../../components/TableEmptyState";
 import { sortVisaFields, isNotesField } from "../../../functions/visaCountryFieldConfigs";
+import { VISA_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import VisaIntakeModal from "./VisaIntakeModal";
 
 const SelectCountryPrompt = ({ t }) => (
@@ -324,7 +326,18 @@ export const ApplicationsTable = forwardRef(
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       });
 
-      // 5. Dynamic Fields (All dynamic country-specific fields in order)
+      // 5. Status
+      cols.push({
+        id: "status",
+        header: t("columns.visaStatus"),
+        size: 130,
+        accessorFn: (row) => row.status,
+        Cell: ({ cell }) => (
+          <StatusChip status={cell.getValue()} config={VISA_STATUS_CONFIG} />
+        ),
+      });
+
+      // 6. Dynamic Fields (All dynamic country-specific fields in order)
       const standardKeys = new Set([
         "index_number",
         "client_guid",
@@ -335,6 +348,7 @@ export const ApplicationsTable = forwardRef(
         "operator_guid",
         "operator",
         "application_date",
+        "status",
         "note",
         "notes",
         "actions",
@@ -401,7 +415,7 @@ export const ApplicationsTable = forwardRef(
         });
       }
 
-      // 6. Note (ALWAYS after all dynamic fields, at the end before actions)
+      // 7. Note (ALWAYS after all dynamic fields, at the end before actions)
       const noteField = fieldMap.get("note") || sortedFields.find(isNotesField);
       const noteLabel =
         selectedLang(noteField?.label) || t("columns.note");

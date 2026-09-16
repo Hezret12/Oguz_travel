@@ -23,6 +23,7 @@ import {
   isOperatorField,
   isNotesField,
 } from "../../../functions/visaCountryFieldConfigs";
+import { VISA_STATUS } from "../../../functions/statusChipConfigs";
 
 const DynamicVisaField = ({
   field,
@@ -163,8 +164,17 @@ export const VisaIntakeModal = ({
     return sortVisaFields(rawFields);
   }, [rawFields]);
 
+  const statusOptions = useMemo(
+    () => [
+      { label: t("visa.statusProcess"), value: VISA_STATUS.PROCESS, color: "#2563eb" },
+      { label: t("visa.statusDone"), value: VISA_STATUS.DONE, color: "#16a34a" },
+      { label: t("visa.statusFail"), value: VISA_STATUS.FAIL, color: "#dc2626" },
+    ],
+    [t],
+  );
+
   const initialValues = useMemo(() => {
-    const defaults = {};
+    const defaults = { status: itemData?.status || VISA_STATUS.PROCESS };
 
     const customValues =
       typeof itemData?.custom_field_values === "string"
@@ -263,6 +273,7 @@ export const VisaIntakeModal = ({
     const custom_field_values = {};
     const payload = {
       country_guid: effectiveCountryGuid,
+      status: formData.status || VISA_STATUS.PROCESS,
     };
 
     if (isEditing && itemData?.guid) {
@@ -347,6 +358,16 @@ export const VisaIntakeModal = ({
             </Box>
           ) : (
             <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <CustomSelect
+                  name="status"
+                  control={control}
+                  label={t("columns.visaStatus")}
+                  options={statusOptions}
+                  required
+                />
+              </Grid>
+
               {sortedFields.map((field) => (
                 <DynamicVisaField
                   key={field.fieldKey}

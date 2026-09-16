@@ -3,7 +3,7 @@ import { Box, FormControl, MenuItem, Select, Stack, Typography, TextField } from
 import { ChevronDown } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import { getBooleanPaymentFilterOptions } from "../../../functions/generalHelpers";
-import { VISA_STATUS } from "../constants";
+import { VISA_STATUS } from "../../../functions/statusChipConfigs";
 
 const selectSx = {
   borderRadius: "8px",
