@@ -7,6 +7,7 @@ const ColumnActionButtons = ({
   row,
   table,
   onDelete,
+  onEdit,
   showPayment = false,
   onPaymentClick,
 }) => {
@@ -15,7 +16,11 @@ const ColumnActionButtons = ({
   const handleEdit = (e) => {
     e.stopPropagation();
     e.currentTarget.blur();
-    table.setEditingRow(row);
+    if (onEdit) {
+      onEdit(row.original);
+    } else {
+      table.setEditingRow(row);
+    }
   };
 
   const handleDelete = (e) => {

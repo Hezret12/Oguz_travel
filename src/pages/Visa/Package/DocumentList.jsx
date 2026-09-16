@@ -8,11 +8,7 @@ import {
 } from "@mui/material";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
-import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
-import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import PageHeader from "../../../components/PageHeader";
@@ -20,6 +16,7 @@ import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 import TableEmptyState from "../../../components/TableEmptyState";
 import DeleteDialog from "../../../components/DeleteDialog";
+import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import DocumentPreviewModal from "./DocumentPreviewModal";
 import { useLocale } from "../../../hooks/useLocale";
 import { useDateFormat } from "../../../functions/generalHelpers";
@@ -156,69 +153,6 @@ const DocumentList = ({
         },
       },
       {
-        id: "tableCount",
-        header: t("visaDocument.tables"),
-        size: 140,
-        Cell: ({ row }) => {
-          const doc = row.original;
-          const count =
-            doc.tableCount !== undefined
-              ? doc.tableCount
-              : doc.tables?.length || doc.docDetails?.length || 0;
-          return (
-            <Chip
-              icon={<TableChartOutlinedIcon sx={{ fontSize: "14px !important" }} />}
-              label={`${count} ${t("visaDocument.tables")}`}
-              size="small"
-              variant="outlined"
-              sx={{
-                fontSize: "0.75rem",
-                height: 26,
-                borderRadius: "6px",
-                borderColor: "divider",
-                color: "text.secondary",
-                fontWeight: 500,
-              }}
-            />
-          );
-        },
-      },
-      {
-        accessorKey: "generalNote",
-        header: t("visaDocument.generalNote"),
-        size: 260,
-        Cell: ({ row }) => {
-          const doc = row.original;
-          const note =
-            doc.generalNote?.trim() ||
-            doc.tables?.find((tb) => tb.note?.trim())?.note ||
-            doc.docDetails?.find((d) => d.note?.trim())?.note ||
-            "";
-          if (!note) return "";
-          return (
-            <Tooltip title={note} arrow placement="top-start">
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, maxWidth: 260 }}>
-                <StickyNote2OutlinedIcon
-                  sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }}
-                />
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    fontSize: "0.825rem",
-                  }}
-                >
-                  {note}
-                </Typography>
-              </Box>
-            </Tooltip>
-          );
-        },
-      },
-      {
         accessorKey: "updatedAt",
         header: t("columns.updatedAt"),
         size: 150,
@@ -244,8 +178,10 @@ const DocumentList = ({
         header: t("columns.actions"),
         size: 130,
         enableSorting: false,
-        Cell: ({ row }) => (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row, table }) => (
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}>
             <Tooltip title={t("visaDocument.preview")} arrow>
               <IconButton
                 size="small"
@@ -253,61 +189,39 @@ const DocumentList = ({
                   e.stopPropagation();
                   setPreviewTarget(row.original);
                 }}
-                sx={{
-                  color: "text.secondary",
-                  borderRadius: "8px",
-                  p: 0.75,
+                sx={(theme) => ({
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "6px",
+                  border: `1px solid ${theme.palette.divider}`,
+                  backgroundColor: "rgba(0, 0, 0, 0.03)",
+                  color: theme.palette.text.secondary,
+                  transition: "all 0.15s ease",
                   "&:hover": {
-                    color: "primary.main",
-                    backgroundColor: "action.hover",
+                    backgroundColor: "rgba(0, 0, 0, 0.07)",
+                    borderColor: theme.palette.primary.main,
+                    color: theme.palette.primary.main,
+                    transform: "translateY(-1px)",
                   },
-                }}
+                  "&:active": { transform: "scale(0.95)" },
+                  ...theme.applyStyles("dark", {
+                    backgroundColor: "rgba(255, 255, 255, 0.04)",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.08)",
+                    },
+                  }),
+                })}
               >
-                <VisibilityOutlinedIcon sx={{ fontSize: 18 }} />
+                <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
               </IconButton>
             </Tooltip>
 
-            <Tooltip title={t("edit")} arrow>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSelectDocument?.(row.original);
-                }}
-                sx={{
-                  color: "text.secondary",
-                  borderRadius: "8px",
-                  p: 0.75,
-                  "&:hover": {
-                    color: "primary.main",
-                    backgroundColor: "action.hover",
-                  },
-                }}
-              >
-                <EditOutlinedIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip title={t("delete")} arrow>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteTarget(row.original);
-                }}
-                sx={{
-                  color: "text.secondary",
-                  borderRadius: "8px",
-                  p: 0.75,
-                  "&:hover": {
-                    color: "error.main",
-                    backgroundColor: "action.hover",
-                  },
-                }}
-              >
-                <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
+            <ColumnActionButtons
+              row={row}
+              table={table}
+              onEdit={(doc) => onSelectDocument?.(doc)}
+              onDelete={(doc) => setDeleteTarget(doc)}
+            />
           </Box>
         ),
       },
