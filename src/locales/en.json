@@ -270,6 +270,8 @@
     "printCv": "Print Resume",
     "previewTitle": "Resume Preview",
     "previewSubtitle": "Standard A4 Print Format",
+    "cvDocumentTitle": "Curriculum Vitae",
+    "cvGeneratedOn": "Generated on",
     "saveSuccess": "Profile details saved successfully!",
     "downloadSuccess": "Resume file downloaded successfully!",
     "contact": "Contact",

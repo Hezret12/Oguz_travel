@@ -270,6 +270,8 @@
     "printCv": "Печать резюме",
     "previewTitle": "Предпросмотр резюме",
     "previewSubtitle": "Стандартный формат печати A4",
+    "cvDocumentTitle": "Резюме",
+    "cvGeneratedOn": "Дата составления",
     "saveSuccess": "Данные профиля успешно сохранены!",
     "downloadSuccess": "Файл резюме успешно загружен!",
     "contact": "Контакты",

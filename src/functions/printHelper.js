@@ -14,11 +14,17 @@ export const printElement = (element, docTitle = "") => {
 
   const doc = iframe.contentWindow.document;
 
-  // Collect all styles from the parent document
+  // Collect all styles from the parent document. Emotion injects rules via
+  // insertRule in production, leaving <style> tags empty, so read cssRules.
   let stylesHtml = "";
-  const styleNodes = document.querySelectorAll("style, link[rel='stylesheet']");
-  styleNodes.forEach((node) => {
-    stylesHtml += node.outerHTML;
+  Array.from(document.styleSheets).forEach((sheet) => {
+    try {
+      const cssText = Array.from(sheet.cssRules || [], (rule) => rule.cssText).join("\n");
+      stylesHtml += `<style>${cssText}</style>`;
+    } catch {
+      // Cross-origin stylesheet (e.g. Google Fonts) — rules are unreadable, link it instead
+      if (sheet.href) stylesHtml += `<link rel="stylesheet" href="${sheet.href}" />`;
+    }
   });
 
   const printStyles = `
@@ -49,8 +55,15 @@ export const printElement = (element, docTitle = "") => {
         min-height: auto !important;
         background: #ffffff !important;
       }
-      #printable-cv-sheet, #printable-doc-sheet {
+      #printable-doc-sheet {
         padding: 14mm 16mm !important;
+      }
+      #printable-cv-sheet {
+        padding: 0 !important;
+        border-radius: 0 !important;
+      }
+      #printable-cv-sheet .cv-print-body {
+        padding: 8mm 14mm 10mm 14mm !important;
       }
       #printable-word-document {
         padding: 0 !important;
