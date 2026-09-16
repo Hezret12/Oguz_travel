@@ -68,9 +68,10 @@ const DocumentList = ({
     () => [
       {
         accessorKey: "index",
-        header: "#",
+        header: "№",
         size: 60,
         enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
         Cell: ({ row }) => (
           <Typography
             variant="body2"
@@ -286,41 +287,14 @@ const DocumentList = ({
             setSearchQuery(val);
             setPage?.(1);
           }}
-          placeholder={t("search")}
           disabled={isLoading}
           onRefetch={onRefetch}
           isFetching={isFetching}
           sx={{ minWidth: { xs: "100%", sm: 300, md: 360 } }}
         />
-
-        {totalItems > 0 && (
-          <Chip
-            size="small"
-            label={`${totalItems} ${t("sidebar.packages")}`}
-            sx={{
-              fontWeight: 600,
-              fontSize: "0.78rem",
-              height: 30,
-              borderRadius: "8px",
-              backgroundColor: "action.hover",
-              border: "1px solid",
-              borderColor: "divider",
-              color: "primary.main",
-            }}
-          />
-        )}
       </Box>
     ),
-    [
-      searchQuery,
-      setSearchQuery,
-      setPage,
-      isLoading,
-      onRefetch,
-      isFetching,
-      totalItems,
-      t,
-    ],
+    [searchQuery, setSearchQuery, setPage, isLoading, onRefetch, isFetching],
   );
 
   const table = useMaterialReactTable({
@@ -328,6 +302,11 @@ const DocumentList = ({
     columns,
     data: documents,
     state: mrtState,
+    manualPagination: true,
+    manualFiltering: true,
+    manualSorting: true,
+    pageCount,
+    rowCount: totalItems,
     muiTableBodyProps,
     renderEmptyRowsFallback,
     renderTopToolbarCustomActions,
