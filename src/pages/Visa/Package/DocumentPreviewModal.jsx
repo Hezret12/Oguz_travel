@@ -321,7 +321,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                                   ? isHeaderRow
                                     ? "№"
                                     : dataRowNumber
-                                  : cell.text || "—";
+                                  : cell.text || "";
 
                                 const cellRowSpan = isOrderCol && isHeaderRow ? headerRowCount : cell.rowSpan || 1;
                                 const cellColSpan = isOrderCol ? 1 : cell.colSpan || 1;

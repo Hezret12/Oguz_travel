@@ -136,13 +136,7 @@ const DocumentList = ({
         size: 160,
         Cell: ({ cell }) => {
           const val = cell.getValue();
-          if (!val) {
-            return (
-              <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                —
-              </Typography>
-            );
-          }
+          if (!val) return "";
           return (
             <Chip
               icon={<PublicOutlinedIcon sx={{ fontSize: "14px !important" }} />}
@@ -200,13 +194,7 @@ const DocumentList = ({
             doc.tables?.find((tb) => tb.note?.trim())?.note ||
             doc.docDetails?.find((d) => d.note?.trim())?.note ||
             "";
-          if (!note) {
-            return (
-              <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                —
-              </Typography>
-            );
-          }
+          if (!note) return "";
           return (
             <Tooltip title={note} arrow placement="top-start">
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, maxWidth: 260 }}>
@@ -236,13 +224,7 @@ const DocumentList = ({
         size: 150,
         Cell: ({ row }) => {
           const dateVal = row.original.updatedAt || row.original.createdAt;
-          if (!dateVal) {
-            return (
-              <Typography variant="body2" sx={{ color: "text.disabled" }}>
-                —
-              </Typography>
-            );
-          }
+          if (!dateVal) return "";
           return (
             <Typography
               variant="body2"
