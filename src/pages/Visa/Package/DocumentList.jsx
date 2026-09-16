@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
+import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
@@ -147,6 +148,34 @@ const DocumentList = ({
                 border: "1px solid",
                 borderColor: "divider",
                 color: "text.primary",
+              }}
+            />
+          );
+        },
+      },
+      {
+        id: "tableCount",
+        header: t("visaDocument.tables"),
+        size: 140,
+        Cell: ({ row }) => {
+          const doc = row.original;
+          const count =
+            doc.tableCount !== undefined
+              ? doc.tableCount
+              : doc.tables?.length || doc.docDetails?.length || 0;
+          return (
+            <Chip
+              icon={<TableChartOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+              label={`${count} ${t("visaDocument.tables")}`}
+              size="small"
+              variant="outlined"
+              sx={{
+                fontSize: "0.75rem",
+                height: 26,
+                borderRadius: "6px",
+                borderColor: "divider",
+                color: "text.secondary",
+                fontWeight: 500,
               }}
             />
           );
