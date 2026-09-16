@@ -43,10 +43,6 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
     setDocData((prev) => ({ ...prev, country: e.target.value }));
   };
 
-  const handleGeneralNoteChange = (e) => {
-    setDocData((prev) => ({ ...prev, generalNote: e.target.value }));
-  };
-
   const handleUpdateTable = (updatedTable) => {
     setDocData((prev) => ({
       ...prev,
@@ -171,6 +167,7 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
           width: "100%",
           mx: "auto",
           px: { xs: 2, sm: 3 },
+          pb: 4,
           display: "flex",
           flexDirection: "column",
           gap: 3.5,
@@ -283,55 +280,6 @@ const DocumentEditor = ({ initialDocument, onBack, onSave, isSaving = false }) =
             onUpdate={handleUpdateTable}
           />
         ))}
-
-        {/* General Note Card */}
-        <Paper
-          elevation={0}
-          sx={{
-            borderRadius: "10px",
-            border: "1px solid",
-            borderColor: "divider",
-            backgroundColor: "background.paper",
-            p: { xs: 2.5, sm: 3.5 },
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mb: 1.25 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, fontSize: "1rem", color: "text.primary" }}>
-              {t("visaDocument.generalNote")}
-            </Typography>
-            <Tooltip title={t("visaDocument.generalNoteHelper")} placement="top" arrow>
-              <HelpOutlineRoundedIcon
-                sx={{
-                  fontSize: 15,
-                  color: "text.secondary",
-                  cursor: "pointer",
-                  opacity: 0.65,
-                  "&:hover": { opacity: 1, color: "primary.main" },
-                }}
-              />
-            </Tooltip>
-          </Box>
-
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            value={docData.generalNote || ""}
-            onChange={handleGeneralNoteChange}
-            placeholder={t("visaDocument.generalNotePlaceholder")}
-            slotProps={{
-              input: {
-                sx: {
-                  borderRadius: "8px",
-                  fontSize: "0.92rem",
-                  p: 1.5,
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "#ffffff",
-                },
-              },
-            }}
-          />
-        </Paper>
       </Box>
 
       {/* Preview Modal */}

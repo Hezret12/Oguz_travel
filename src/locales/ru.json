@@ -731,6 +731,7 @@
     "generalNoteDesc": "Дополнительные пояснения в конце документа (по желанию)",
     "generalNotePlaceholder": "Дополнительные общие примечания и условия...",
     "generalNoteHelper": "Укажите общие пояснения по срокам, требованиям к паспорту или условиям",
+    "notePreviewLabel": "Примечание",
     "tableTitle": "Название таблицы {{number}}",
     "tableTitlePlaceholder": "Название таблицы {{number}}",
     "tableTitleHelper": "Введите название раздела или темы данной таблицы",

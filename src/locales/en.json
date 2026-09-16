@@ -731,6 +731,7 @@
     "generalNoteDesc": "Additional notes at the end of the document (optional)",
     "generalNotePlaceholder": "Additional general notes and conditions...",
     "generalNoteHelper": "Enter general remarks regarding timeline, passport validity or terms",
+    "notePreviewLabel": "Note",
     "tableTitle": "Table {{number}} Title",
     "tableTitlePlaceholder": "Table {{number}} Title",
     "tableTitleHelper": "Enter the topic or section title for this table",

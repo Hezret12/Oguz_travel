@@ -68,7 +68,7 @@ const FilterDrawer = ({
         direction="row"
         sx={{
           px: 2.5,
-          py: 2,
+          py: 1,
           alignItems: "center",
           justifyContent: "space-between",
         }}
@@ -138,7 +138,7 @@ const FilterDrawer = ({
             }}
           >
             <Stack direction="row" spacing={1.5}>
-                {/* <Button
+              {/* <Button
                   variant="outlined"
                   color="info"
                   size="medium"
@@ -152,46 +152,64 @@ const FilterDrawer = ({
                 >
                   {t("cancel")}
                 </Button> */}
-                <Button
-                  variant="outlined"
-                  color="inherit"
-                  size="medium"
-                  fullWidth
-                  startIcon={<RestartAltIcon fontSize="small" />}
-                  onClick={onReset}
-                  sx={{
-                    borderRadius: "10px",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    width: 'full',
-                    px: 1.5,
-                    color: "text.secondary",
-                    borderColor: "divider",
-                    "&:hover": {
-                      borderColor: "text.secondary",
-                      backgroundColor: "action.hover",
-                    },
-                  }}
-                >
-                  {t("reset")}
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="medium"
-                  fullWidth
-                  startIcon={<CheckIcon fontSize="small" />}
-                  onClick={onApply}
-                  sx={{
-                    borderRadius: "10px",
-                    width: 'full',
-                    textTransform: "none",
-                    fontWeight: 600,
-                    px: 2,
-                  }}
-                >
-                  {t("apply")}
-                </Button>
+              <Button
+                variant="outlined"
+                color="inherit"
+                size="medium"
+                fullWidth
+                startIcon={<RestartAltIcon fontSize="small" />}
+                onClick={onReset}
+                sx={{
+                  borderRadius: "10px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  width: 'full',
+                  px: 1.5,
+                  color: "text.secondary",
+                  borderColor: "divider",
+                  "&:hover": {
+                    borderColor: "text.secondary",
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
+                {t("reset")}
+              </Button>
+              <Button
+                variant="contained"
+                size="medium"
+                fullWidth
+                disableElevation
+                startIcon={<CheckIcon fontSize="small" />}
+                onClick={onApply}
+                sx={{
+                  borderRadius: "10px",
+                  width: "full",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 2,
+                  background: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "linear-gradient(135deg, #0D9488 0%, #06B6D4 100%)"
+                      : "#0E8584",
+                  border: "0.5px solid #2CA7A6",
+                  color: "#ffffff",
+                  transition:
+                    "background-color 200ms ease, transform 200ms ease, box-shadow 200ms ease",
+                  "&:hover": {
+                    background: (theme) =>
+                      theme.palette.mode === "dark"
+                        ? "linear-gradient(135deg, #0B7F74 0%, #0891B2 100%)"
+                        : "#0C7776",
+                    transform: "translateY(-1px)",
+                  },
+                  "&:active": {
+                    transform: "scale(0.98)",
+                  },
+                }}
+              >
+                {t("apply")}
+              </Button>
             </Stack>
           </Box>
         </>

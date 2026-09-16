@@ -1,23 +1,28 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Box,
   Typography,
-  Button,
-  Paper,
+  Chip,
   IconButton,
   Tooltip,
-  CircularProgress,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
+import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
+import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
+import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
+import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import PageHeader from "../../../components/PageHeader";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
+import TableEmptyState from "../../../components/TableEmptyState";
 import DeleteDialog from "../../../components/DeleteDialog";
 import DocumentPreviewModal from "./DocumentPreviewModal";
 import { useLocale } from "../../../hooks/useLocale";
+import { useDateFormat } from "../../../functions/generalHelpers";
 
 const DocumentList = ({
   documents = [],
@@ -28,15 +33,20 @@ const DocumentList = ({
   searchQuery = "",
   setSearchQuery,
   page = 1,
-  limit = 40,
+  limit = 24,
   setPage,
+  // eslint-disable-next-line no-unused-vars
   setPageSize,
   totalItems = 0,
+  pageCount = 1,
   onSelectDocument,
   onCreateDocument,
   onDeleteDocument,
 }) => {
   const { t } = useLocale();
+  const { formatChange } = useDateFormat();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
+
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [previewTarget, setPreviewTarget] = useState(null);
 
@@ -47,18 +57,6 @@ const DocumentList = ({
   }
   const displayDeleteTarget = deleteTarget || cachedDeleteTarget;
 
-  const filteredDocuments = useMemo(() => {
-    if (!documents || !Array.isArray(documents)) return [];
-    if (!searchQuery.trim()) return documents;
-    const query = searchQuery.toLowerCase();
-    return documents.filter(
-      (doc) =>
-        doc.title?.toLowerCase().includes(query) ||
-        doc.country?.toLowerCase().includes(query) ||
-        doc.generalNote?.toLowerCase().includes(query)
-    );
-  }, [documents, searchQuery]);
-
   const confirmDelete = () => {
     if (deleteTarget) {
       onDeleteDocument(deleteTarget.guid || deleteTarget.id, deleteTarget.guid, {
@@ -68,6 +66,393 @@ const DocumentList = ({
       });
     }
   };
+
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "index",
+        header: "#",
+        size: 60,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              fontWeight: 600,
+              fontVariantNumeric: "tabular-nums",
+              textAlign: "center",
+            }}
+          >
+            {(page - 1) * limit + row.index + 1}
+          </Typography>
+        ),
+      },
+      {
+        accessorKey: "title",
+        header: t("visaDocument.docTitle"),
+        size: 280,
+        Cell: ({ row }) => {
+          const title = row.original.title || t("visaDocument.title");
+          return (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 36,
+                  height: 36,
+                  minWidth: 36,
+                  borderRadius: "10px",
+                  backgroundColor: "action.hover",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  color: "primary.main",
+                  flexShrink: 0,
+                }}
+              >
+                <ArticleRoundedIcon sx={{ fontSize: 20 }} />
+              </Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  color: "text.primary",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {title}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        accessorKey: "country",
+        header: t("visaDocument.country"),
+        size: 160,
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          if (!val) {
+            return (
+              <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                —
+              </Typography>
+            );
+          }
+          return (
+            <Chip
+              icon={<PublicOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+              label={val}
+              size="small"
+              sx={{
+                fontWeight: 600,
+                fontSize: "0.75rem",
+                borderRadius: "6px",
+                backgroundColor: "action.hover",
+                border: "1px solid",
+                borderColor: "divider",
+                color: "text.primary",
+              }}
+            />
+          );
+        },
+      },
+      {
+        id: "tableCount",
+        header: t("visaDocument.tables"),
+        size: 140,
+        Cell: ({ row }) => {
+          const doc = row.original;
+          const count =
+            doc.tableCount !== undefined
+              ? doc.tableCount
+              : doc.tables?.length || doc.docDetails?.length || 0;
+          return (
+            <Chip
+              icon={<TableChartOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+              label={`${count} ${t("visaDocument.tables")}`}
+              size="small"
+              variant="outlined"
+              sx={{
+                fontSize: "0.75rem",
+                height: 26,
+                borderRadius: "6px",
+                borderColor: "divider",
+                color: "text.secondary",
+                fontWeight: 500,
+              }}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "generalNote",
+        header: t("visaDocument.generalNote"),
+        size: 260,
+        Cell: ({ row }) => {
+          const doc = row.original;
+          const note =
+            doc.generalNote?.trim() ||
+            doc.tables?.find((tb) => tb.note?.trim())?.note ||
+            doc.docDetails?.find((d) => d.note?.trim())?.note ||
+            "";
+          if (!note) {
+            return (
+              <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                —
+              </Typography>
+            );
+          }
+          return (
+            <Tooltip title={note} arrow placement="top-start">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, maxWidth: 260 }}>
+                <StickyNote2OutlinedIcon
+                  sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    fontSize: "0.825rem",
+                  }}
+                >
+                  {note}
+                </Typography>
+              </Box>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        accessorKey: "updatedAt",
+        header: t("columns.updatedAt"),
+        size: 150,
+        Cell: ({ row }) => {
+          const dateVal = row.original.updatedAt || row.original.createdAt;
+          if (!dateVal) {
+            return (
+              <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                —
+              </Typography>
+            );
+          }
+          return (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontVariantNumeric: "tabular-nums",
+                fontSize: "0.825rem",
+              }}
+            >
+              {formatChange(dateVal, { dateOnly: true })}
+            </Typography>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: t("columns.actions"),
+        size: 130,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Tooltip title={t("visaDocument.preview")} arrow>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPreviewTarget(row.original);
+                }}
+                sx={{
+                  color: "text.secondary",
+                  borderRadius: "8px",
+                  p: 0.75,
+                  "&:hover": {
+                    color: "primary.main",
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
+                <VisibilityOutlinedIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title={t("edit")} arrow>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectDocument?.(row.original);
+                }}
+                sx={{
+                  color: "text.secondary",
+                  borderRadius: "8px",
+                  p: 0.75,
+                  "&:hover": {
+                    color: "primary.main",
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
+                <EditOutlinedIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title={t("delete")} arrow>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteTarget(row.original);
+                }}
+                sx={{
+                  color: "text.secondary",
+                  borderRadius: "8px",
+                  p: 0.75,
+                  "&:hover": {
+                    color: "error.main",
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
+                <DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        ),
+      },
+    ],
+    [t, formatChange, page, limit, onSelectDocument]
+  );
+
+  const paginationState = useMemo(
+    () => ({ pageIndex: page - 1, pageSize: limit }),
+    [page, limit]
+  );
+
+  const mrtState = useMemo(
+    () => ({
+      isLoading: false,
+      showLoadingOverlay: isLoading || isFetching,
+      showSkeletons: false,
+      showProgressBars: false,
+      pagination: paginationState,
+    }),
+    [isLoading, isFetching, paginationState]
+  );
+
+  const muiTableBodyProps = useMemo(
+    () => ({
+      sx: (theme) => ({
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.secondary,
+        opacity: isLoading || isFetching ? 0 : 1,
+        pointerEvents: isLoading || isFetching ? "none" : "auto",
+        transition: "opacity 0.15s ease",
+      }),
+    }),
+    [isLoading, isFetching]
+  );
+
+  const renderEmptyRowsFallback = useCallback(() => {
+    if (isLoading || isFetching) return null;
+    return <TableEmptyState />;
+  }, [isLoading, isFetching]);
+
+  const renderTopToolbarCustomActions = useCallback(
+    () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          width: "100%",
+          py: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={(val) => {
+            setSearchQuery(val);
+            setPage?.(1);
+          }}
+          placeholder={t("search")}
+          disabled={isLoading}
+          onRefetch={onRefetch}
+          isFetching={isFetching}
+          sx={{ minWidth: { xs: "100%", sm: 300, md: 360 } }}
+        />
+
+        {totalItems > 0 && (
+          <Chip
+            size="small"
+            label={`${totalItems} ${t("sidebar.packages")}`}
+            sx={{
+              fontWeight: 600,
+              fontSize: "0.78rem",
+              height: 30,
+              borderRadius: "8px",
+              backgroundColor: "action.hover",
+              border: "1px solid",
+              borderColor: "divider",
+              color: "primary.main",
+            }}
+          />
+        )}
+      </Box>
+    ),
+    [searchQuery, setSearchQuery, setPage, isLoading, onRefetch, isFetching, totalItems, t]
+  );
+
+  const table = useMaterialReactTable({
+    ...defaultMrtOptions,
+    columns,
+    data: documents,
+    state: mrtState,
+    muiTableBodyProps,
+    renderEmptyRowsFallback,
+    renderTopToolbarCustomActions,
+    renderBottomToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          width: "100%",
+          px: 2,
+          py: 1,
+        }}
+      >
+        <Pagination
+          pageIndex={page - 1}
+          pageCount={pageCount || Math.ceil(totalItems / limit) || 1}
+          pageSize={limit}
+          totalRows={totalItems}
+          onPageChange={(newIndex) => setPage?.(newIndex + 1)}
+        />
+      </Box>
+    ),
+    muiTableBodyRowProps: ({ row }) => ({
+      onClick: () => onSelectDocument?.(row.original),
+      sx: (theme) => ({
+        cursor: "pointer",
+        backgroundColor: theme.palette.background.paper,
+        transition: "background-color 0.15s ease",
+        "&:hover": {
+          backgroundColor: theme.palette.action.hover,
+        },
+      }),
+    }),
+  });
 
   return (
     <Box
@@ -83,270 +468,9 @@ const DocumentList = ({
         pageTitle={`${t("sidebar.visa.package")} | Oguz Travel`}
         addButtonText="Täze dokument"
         onAddClick={onCreateDocument}
-      >
-        <GlobalSearchInput
-          value={searchQuery}
-          onChange={setSearchQuery}
-          onRefetch={onRefetch}
-          isFetching={isFetching}
-          placeholder={t("search")}
-          sx={{ minWidth: { xs: 160, sm: 260 } }}
-        />
-      </PageHeader>
+      />
 
-      <Box sx={{ flexGrow: 1, overflowY: "auto", pb: 4, px: 0.5, pt: 1 }}>
-        {isLoading ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "260px",
-              gap: 2,
-            }}
-          >
-            <CircularProgress sx={{ color: "#0c8a7b" }} />
-          </Box>
-        ) : filteredDocuments.length === 0 ? (
-          <Paper
-            elevation={0}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "260px",
-              textAlign: "center",
-              borderRadius: "16px",
-              border: "1px dashed",
-              borderColor: "divider",
-              backgroundColor: "background.paper",
-              p: 4,
-              gap: 2,
-            }}
-          >
-            <DescriptionOutlinedIcon sx={{ fontSize: 44, color: "text.secondary", opacity: 0.6 }} />
-            <Typography variant="body1" sx={{ fontWeight: 600, color: "text.secondary" }}>
-              {searchQuery ? "Gözlegiňize gabat gelýän dokument tapylmady." : "Heniz hiç hili dokument ýok."}
-            </Typography>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={onCreateDocument}
-              startIcon={<AddRoundedIcon />}
-              sx={{ borderRadius: "8px", textTransform: "none", fontWeight: 600 }}
-            >
-              Täze döret
-            </Button>
-          </Paper>
-        ) : (
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(3, 1fr)",
-              },
-              gap: 2.5,
-            }}
-          >
-            {filteredDocuments.map((doc) => {
-              const docKey = doc.guid || doc.id;
-              const tableCount = doc.tableCount !== undefined ? doc.tableCount : (doc.tables?.length || 0);
-              const hasNote =
-                doc.hasNote !== undefined
-                  ? doc.hasNote
-                  : Boolean(doc.generalNote?.trim() || doc.tables?.some((t) => t.note?.trim()));
-
-              return (
-                <Paper
-                  key={docKey}
-                  elevation={0}
-                  onClick={() => onSelectDocument(doc)}
-                  sx={{
-                    borderRadius: "16px",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    backgroundColor: "background.paper",
-                    p: 2.5,
-                    cursor: "pointer",
-                    transition: "all 0.22s cubic-bezier(0.4, 0, 0.2, 1)",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    minHeight: "150px",
-                    position: "relative",
-                    "&:hover": {
-                      borderColor: "#0c8a7b",
-                      transform: "translateY(-3px)",
-                      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.06)",
-                      "& .doc-icon-badge": {
-                        transform: "scale(1.05)",
-                      },
-                    },
-                  }}
-                >
-                  {/* Top Bar: Icon + Action Buttons (Eye + Trash) */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 2,
-                    }}
-                  >
-                    <Box
-                      className="doc-icon-badge"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 38,
-                        height: 38,
-                        borderRadius: "10px",
-                        bgcolor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(24, 90, 189, 0.18)"
-                            : "rgba(24, 90, 189, 0.10)",
-                        color: "#185abd",
-                        transition: "transform 0.2s ease",
-                      }}
-                    >
-                      <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />
-                    </Box>
-
-                    {/* Quick Card Action Buttons */}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <Tooltip title="Word görnüşinde görmek (Önizleme)" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setPreviewTarget(doc);
-                          }}
-                          sx={{
-                            color: "text.secondary",
-                            opacity: 0.7,
-                            p: 0.6,
-                            borderRadius: "8px",
-                            "&:hover": {
-                              color: "primary.main",
-                              opacity: 1,
-                              backgroundColor: "rgba(12, 138, 123, 0.08)",
-                            },
-                          }}
-                        >
-                          <VisibilityOutlinedIcon sx={{ fontSize: 19 }} />
-                        </IconButton>
-                      </Tooltip>
-
-                      <Tooltip title="Pozmak" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setDeleteTarget(doc);
-                          }}
-                          sx={{
-                            color: "text.secondary",
-                            opacity: 0.7,
-                            p: 0.6,
-                            borderRadius: "8px",
-                            "&:hover": {
-                              color: "error.main",
-                              opacity: 1,
-                              backgroundColor: "rgba(239, 68, 68, 0.08)",
-                            },
-                          }}
-                        >
-                          <DeleteOutlineRoundedIcon sx={{ fontSize: 19 }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </Box>
-
-                  {/* Title & Details */}
-                  <Box sx={{ flexGrow: 1, mb: 1 }}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "0.95rem",
-                        color: "text.primary",
-                        lineHeight: 1.35,
-                        mb: 0.5,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {doc.title || "Täze wiza dokumenti"}
-                    </Typography>
-
-                    {doc.country && (
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: "text.secondary",
-                          fontWeight: 500,
-                          fontSize: "0.8rem",
-                          display: "block",
-                        }}
-                      >
-                        {doc.country}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  {/* Footer Meta: Table Count and Notes indicator */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      pt: 1,
-                      borderTop: "1px solid",
-                      borderColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.05)"
-                          : "rgba(0,0,0,0.04)",
-                    }}
-                  >
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        fontSize: "0.78rem",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {tableCount === 0
-                        ? "0 tablisa"
-                        : `${tableCount} tablisa${hasNote ? " • bellik bar" : ""}`}
-                    </Typography>
-                  </Box>
-                </Paper>
-              );
-            })}
-          </Box>
-        )}
-      </Box>
-
-      {/* Pagination if multiple pages */}
-      {totalItems > limit && setPage && (
-        <Box sx={{ mt: 2 }}>
-          <Pagination
-            totalItems={totalItems}
-            page={page}
-            limit={limit}
-            setPage={setPage}
-            setPageSize={setPageSize}
-          />
-        </Box>
-      )}
+      <MaterialReactTable table={table} />
 
       {/* Word / A4 Document Full Preview Modal */}
       <DocumentPreviewModal

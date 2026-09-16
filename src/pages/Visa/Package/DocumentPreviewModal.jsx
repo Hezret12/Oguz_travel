@@ -11,15 +11,20 @@ import {
 } from "@mui/material";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import { useQuery } from "@tanstack/react-query";
 import { getOneVisaDocApi } from "../../../api/queries/getters";
 import { deserializeBackendToDocument } from "./constants";
 import { useLocale } from "../../../hooks/useLocale";
 import { printElement } from "../../../functions/printHelper";
+import { useDateFormat } from "../../../functions/generalHelpers";
+import OguzLogo from "../../../assets/icons/OguzLogo";
+
+const BRAND_COLOR = "#0B6E6D";
+const BRAND_COLOR_DARK = "#095B5B";
 
 const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
   const { t } = useLocale();
+  const { formatChange } = useDateFormat();
   const docSheetRef = useRef(null);
 
   const docGuid = doc?.guid || doc?.id;
@@ -46,6 +51,13 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
     return doc;
   }, [fetchedDoc, doc, hasTables]);
 
+  const docRef = useMemo(() => {
+    const raw = currentDoc?.guid || currentDoc?.id || docGuid || "";
+    return raw.toString().slice(0, 8).toUpperCase();
+  }, [currentDoc, docGuid]);
+
+  const generatedOn = useMemo(() => formatChange(new Date(), { dateOnly: true }), [formatChange]);
+
   if (!open || !doc) return null;
 
   const loading = shouldFetch && isLoading;
@@ -65,10 +77,11 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
       slotProps={{
         paper: {
           sx: {
-            borderRadius: "16px",
+            borderRadius: "18px",
             maxHeight: "94vh",
-            backgroundColor: (theme) =>
-              theme.palette.mode === "dark" ? "#0f172a" : "#f8fafc",
+            backgroundColor: "background.default",
+            border: "1px solid",
+            borderColor: "divider",
             boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.3)",
             overflow: "hidden",
             display: "flex",
@@ -77,48 +90,24 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
         },
       }}
     >
+      {/* Brand Accent Bar */}
+      <Box className="no-print" sx={{ height: 4, width: "100%", flexShrink: 0, backgroundColor: BRAND_COLOR }} />
+
       <DialogTitle
         className="no-print"
         sx={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "flex-end",
           alignItems: "center",
           px: 3,
           py: 2,
           borderBottom: "1px solid",
           borderColor: "divider",
-          backgroundColor: (theme) =>
-            theme.palette.mode === "dark" ? "#1e293b" : "#ffffff",
+          backgroundColor: "background.paper",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 36,
-              height: 36,
-              borderRadius: "8px",
-              bgcolor: "rgba(24, 90, 189, 0.12)",
-              color: "#185abd",
-            }}
-          >
-            <DescriptionOutlinedIcon sx={{ fontSize: 20 }} />
-          </Box>
-          <Box>
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-              {doc.title || t("visaDocument.previewTitle")}
-            </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>
-              {t("visaDocument.previewSubtitle")}
-            </Typography>
-          </Box>
-        </Box>
-
         {/* Action Buttons on Toolbar */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, flexShrink: 0 }}>
           <Button
             size="small"
             variant="contained"
@@ -131,21 +120,13 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
               fontSize: "0.88rem",
               px: 2.5,
               py: 0.65,
-              background: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "linear-gradient(135deg, #0D9488 0%, #06B6D4 100%)"
-                  : "#0E8584",
-              border: "0.5px solid #2CA7A6",
+              backgroundColor: BRAND_COLOR,
               color: "#ffffff",
-              boxShadow: "0 2px 8px rgba(14, 133, 132, 0.28)",
-              transition: "all 0.2s ease",
+              boxShadow: "0 1px 4px rgba(11, 110, 109, 0.25)",
+              transition: "background-color 0.15s ease",
               "&:hover": {
-                background: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "linear-gradient(135deg, #0B7F74 0%, #0891B2 100%)"
-                    : "#0C7776",
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 14px rgba(14, 133, 132, 0.36)",
+                backgroundColor: BRAND_COLOR_DARK,
+                boxShadow: "0 1px 4px rgba(11, 110, 109, 0.25)",
               },
             }}
           >
@@ -171,8 +152,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
       <DialogContent
         sx={{
           p: { xs: 2, sm: 4 },
-          backgroundColor: (theme) =>
-            theme.palette.mode === "dark" ? "#0b0f19" : "#e2e8f0",
+          backgroundColor: "background.secondary",
           overflowY: "auto",
           display: "flex",
           justifyContent: "center",
@@ -198,24 +178,67 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
               minHeight: "980px",
               backgroundColor: "#ffffff",
               color: "#0f172a",
+              border: "1px solid #d8dfe5",
               p: { xs: 3, sm: 5.5 },
-              borderRadius: "2px",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05)",
-              fontFamily: "var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif)",
+              borderRadius: "4px",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+              fontFamily: "'Times New Roman', Times, serif",
               position: "relative",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
+            {/* Letterhead — Official Header Bar */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 2,
+                mx: { xs: -3, sm: -5.5 },
+                mt: { xs: -3, sm: -5.5 },
+                px: { xs: 3, sm: 5.5 },
+                backgroundColor: BRAND_COLOR,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
+                <OguzLogo
+                  sx={{
+                    width: 150,
+                    height: "auto",
+                    mx: 0,
+                    flexShrink: 0,
+                    "& path": { fill: "#FFFFFF !important" },
+                  }}
+                />
+              </Box>
+
+              <Box sx={{ textAlign: "right", flexShrink: 0 }}>
+                {docRef && (
+                  <Typography sx={{ fontSize: "0.7rem", fontWeight: 700, color: "#ffffff" }}>
+                    № {docRef}
+                  </Typography>
+                )}
+                <Typography sx={{ fontSize: "0.7rem", color: "rgba(255, 255, 255, 0.78)", mt: 0.25 }}>
+                  {t("visaDocument.dateLabel")}: {generatedOn}
+                </Typography>
+              </Box>
+            </Box>
+            {/* Letterhead double rule */}
+            <Box sx={{ mx: { xs: -3, sm: -5.5 }, height: "3px", backgroundColor: "#0E8584" }} />
+            <Box sx={{ mx: { xs: -3, sm: -5.5 }, height: "1px", backgroundColor: "#0E8584", opacity: 0.35, mb: 4.5 }} />
+
             {/* Main Document Title */}
             <Box sx={{ mb: 4, textAlign: "center" }}>
               <Typography
                 variant="h5"
                 sx={{
-                  fontWeight: 900,
+                  fontWeight: 700,
                   color: "#0f172a",
-                  fontSize: { xs: "1.35rem", sm: "1.65rem" },
-                  letterSpacing: "-0.3px",
+                  fontFamily: "'Times New Roman', Times, serif",
+                  fontSize: { xs: "1.4rem", sm: "1.7rem" },
+                  letterSpacing: "0.2px",
                   lineHeight: 1.3,
-                  mb: 0.75,
                 }}
               >
                 {currentDoc?.title || t("visaDocument.title")}
@@ -225,35 +248,31 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
             {/* Tables */}
             {(currentDoc?.tables || []).map((table, tIdx) => (
               <Box key={table.id || tIdx} sx={{ mb: 4.5 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    mb: 1.5,
-                  }}
-                >
-                  <Box sx={{ width: 3.5, height: 16, bgcolor: "#1e293b", borderRadius: "2px" }} />
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+                  <Box sx={{ flex: 1, height: "1px" }} />
                   <Typography
                     sx={{
-                      fontWeight: 800,
-                      fontSize: "0.9rem",
-                      letterSpacing: "0.5px",
+                      fontWeight: 700,
+                      fontSize: "0.88rem",
+                      letterSpacing: "1px",
                       color: "#0f172a",
                       textTransform: "uppercase",
+                      fontFamily: "'Times New Roman', Times, serif",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     {table.title || (tIdx === 0 ? "Gerekli resminamalar" : "Wizaň bahalary we möhletleri")}
                   </Typography>
+                  <Box sx={{ flex: 1, height: "1px" }} />
                 </Box>
 
                 {/* Table Grid */}
                 <Box
                   sx={{
                     width: "100%",
-                    overflowX: "auto",
-                    border: "1.5px solid #cbd5e1",
-                    borderRadius: "4px",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "8px",
+                    overflow: "hidden",
                     mb: 1.5,
                   }}
                 >
@@ -261,13 +280,16 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                     component="table"
                     sx={{
                       width: "100%",
+                      tableLayout: "fixed",
                       borderCollapse: "collapse",
                       "& td, & th": {
-                        border: "1px solid #cbd5e1",
-                        p: "11px 14px",
-                        fontSize: "0.88rem",
+                        border: "1px solid #e2e8f0",
+                        p: "9px 10px",
+                        fontSize: "0.8rem",
                         color: "#0f172a",
-                        lineHeight: 1.45,
+                        lineHeight: 1.4,
+                        wordBreak: "break-word",
+                        whiteSpace: "normal",
                       },
                     }}
                   >
@@ -310,15 +332,12 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                                     colSpan={cellColSpan}
                                     rowSpan={cellRowSpan}
                                     style={{
-                                      fontWeight: isHeaderRow ? 700 : isOrderCol ? 600 : 400,
-                                      backgroundColor: isHeaderRow
-                                        ? "#f1f5f9"
-                                        : isOrderCol
-                                          ? "#fafbfc"
-                                          : "#ffffff",
-                                      color: isHeaderRow ? "#0f172a" : "#334155",
+                                      fontWeight: isHeaderRow ? 700 : isOrderCol ? 700 : 400,
+                                      backgroundColor: isHeaderRow ? "#0E8584" : isOrderCol ? "#fafafa" : "#ffffff",
+                                      color: isHeaderRow ? "#ffffff" : "#000000",
                                       textAlign: isOrderCol ? "center" : "left",
-                                      width: isOrderCol ? "48px" : undefined,
+                                      width: isOrderCol ? "44px" : undefined,
+                                      letterSpacing: isHeaderRow ? "0.3px" : undefined,
                                     }}
                                   >
                                     {displayValue}
@@ -335,66 +354,38 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
 
                 {/* Table Note */}
                 {table.note && (
-                  <Box sx={{ mt: 1.5, px: 0.5 }}>
+                  <Box
+                    sx={{
+                      pt: 1,
+                      mt: 0.5,
+                      borderTop: "1px solid #e2e8f0",
+                    }}
+                  >
                     <Typography
+                      component="span"
                       sx={{
-                        fontSize: "0.875rem",
-                        color: "#0f172a",
+                        fontSize: "0.78rem",
+                        fontWeight: 600,
+                        letterSpacing: "0.2px",
+                      }}
+                    >
+                      Bellik:
+                    </Typography>
+                    <Typography
+                      component="span"
+                      sx={{
+                        fontSize: "0.82rem",
+                        color: "#475569",
                         lineHeight: 1.6,
                         whiteSpace: "pre-wrap",
                       }}
                     >
-                      <Box
-                        component="span"
-                        sx={{
-                          fontWeight: 700,
-                          color: "#0f172a",
-                          mr: 0.75,
-                        }}
-                      >
-                        Bellik:
-                      </Box>
                       {table.note}
                     </Typography>
                   </Box>
                 )}
               </Box>
             ))}
-
-            {/* Global General Note */}
-            {currentDoc?.generalNote && (
-              <Box
-                sx={{
-                  mt: 4,
-                  pt: 2.5,
-                  borderTop: "1px solid #cbd5e1",
-                }}
-              >
-                <Typography
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: "0.9rem",
-                    color: "#0f172a",
-                    mb: 1,
-                    letterSpacing: "0.3px",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {t("visaDocument.generalNote")}:
-                </Typography>
-                <Typography
-                  sx={{
-                    fontSize: "0.875rem",
-                    color: "#0f172a",
-                    whiteSpace: "pre-wrap",
-                    lineHeight: 1.65,
-                  }}
-                >
-                  {currentDoc.generalNote}
-                </Typography>
-              </Box>
-            )}
-
           </Box>
         )}
       </DialogContent>

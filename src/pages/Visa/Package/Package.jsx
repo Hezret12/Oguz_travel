@@ -25,6 +25,7 @@ const Package = () => {
   const {
     data: serverDocs = [],
     totalItems = 0,
+    pageCount = 1,
     isLoading,
     isFetching,
     refetch,
@@ -172,6 +173,7 @@ const Package = () => {
           setPage={setPage}
           setPageSize={setLimit}
           totalItems={totalItems || serverDocs.length}
+          pageCount={pageCount}
           onSelectDocument={handleSelectDocument}
           onCreateDocument={handleCreateDocument}
           onDeleteDocument={handleDeleteDocument}

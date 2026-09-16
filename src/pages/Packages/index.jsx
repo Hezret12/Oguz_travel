@@ -1,23 +1,22 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   Box,
   Typography,
   Button,
-  Paper,
   Chip,
-  CircularProgress,
-  Stack,
   Tooltip,
 } from "@mui/material";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
+import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
+import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
 import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
+import TableEmptyState from "../../components/TableEmptyState";
 import DocumentPreviewModal from "../Visa/Package/DocumentPreviewModal";
 import { useLocale } from "../../hooks/useLocale";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
@@ -27,28 +26,387 @@ import { useDateFormat } from "../../functions/generalHelpers";
 const PackagesPage = () => {
   const { t } = useLocale();
   const { formatChange } = useDateFormat();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(24);
+  const [limit] = useState(25);
   const [previewDocument, setPreviewDocument] = useState(null);
+
+  const queryParams = useMemo(
+    () => ({
+      page,
+      limit,
+      search: searchQuery.trim() || undefined,
+    }),
+    [page, limit, searchQuery]
+  );
 
   const {
     data: serverDocs = [],
     totalItems = 0,
+    pageCount = 1,
     isLoading,
     isFetching,
     refetch,
   } = usePagginationGet({
     apiFn: getAllVisaDocsApi,
     key: "publicPackagesView",
-    params: { page, limit, search: searchQuery },
+    params: queryParams,
   });
 
-  const documents = useMemo(() => {
-    if (!serverDocs || !Array.isArray(serverDocs)) return [];
-    return serverDocs;
-  }, [serverDocs]);
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "index",
+        header: "#",
+        size: 60,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              fontWeight: 600,
+              fontVariantNumeric: "tabular-nums",
+              textAlign: "center",
+            }}
+          >
+            {(page - 1) * limit + row.index + 1}
+          </Typography>
+        ),
+      },
+      {
+        accessorKey: "title",
+        header: t("visaDocument.docTitle"),
+        size: 280,
+        Cell: ({ row }) => {
+          const title = row.original.title || t("visaDocument.title");
+          return (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 36,
+                  height: 36,
+                  minWidth: 36,
+                  borderRadius: "10px",
+                  backgroundColor: "action.hover",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  color: "primary.main",
+                  flexShrink: 0,
+                }}
+              >
+                <ArticleRoundedIcon sx={{ fontSize: 20 }} />
+              </Box>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  color: "text.primary",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {title}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        accessorKey: "country",
+        header: t("visaDocument.country"),
+        size: 160,
+        Cell: ({ cell }) => {
+          const val = cell.getValue();
+          if (!val) {
+            return (
+              <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                —
+              </Typography>
+            );
+          }
+          return (
+            <Chip
+              icon={<PublicOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+              label={val}
+              size="small"
+              sx={{
+                fontWeight: 600,
+                fontSize: "0.75rem",
+                borderRadius: "6px",
+                backgroundColor: "action.hover",
+                border: "1px solid",
+                borderColor: "divider",
+                color: "text.primary",
+              }}
+            />
+          );
+        },
+      },
+      {
+        id: "tableCount",
+        header: t("visaDocument.tables"),
+        size: 140,
+        Cell: ({ row }) => {
+          const doc = row.original;
+          const count =
+            doc.tableCount !== undefined
+              ? doc.tableCount
+              : doc.tables?.length || doc.docDetails?.length || 0;
+          return (
+            <Chip
+              icon={<TableChartOutlinedIcon sx={{ fontSize: "14px !important" }} />}
+              label={`${count} ${t("visaDocument.tables")}`}
+              size="small"
+              variant="outlined"
+              sx={{
+                fontSize: "0.75rem",
+                height: 26,
+                borderRadius: "6px",
+                borderColor: "divider",
+                color: "text.secondary",
+                fontWeight: 500,
+              }}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "generalNote",
+        header: t("visaDocument.generalNote"),
+        size: 260,
+        Cell: ({ row }) => {
+          const doc = row.original;
+          const note =
+            doc.generalNote?.trim() ||
+            doc.tables?.find((tb) => tb.note?.trim())?.note ||
+            doc.docDetails?.find((d) => d.note?.trim())?.note ||
+            "";
+          if (!note) {
+            return (
+              <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                —
+              </Typography>
+            );
+          }
+          return (
+            <Tooltip title={note} arrow placement="top-start">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, maxWidth: 260 }}>
+                <StickyNote2OutlinedIcon
+                  sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    fontSize: "0.825rem",
+                  }}
+                >
+                  {note}
+                </Typography>
+              </Box>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        accessorKey: "updatedAt",
+        header: t("columns.updatedAt"),
+        size: 150,
+        Cell: ({ row }) => {
+          const dateVal = row.original.updatedAt || row.original.createdAt;
+          if (!dateVal) {
+            return (
+              <Typography variant="body2" sx={{ color: "text.disabled" }}>
+                —
+              </Typography>
+            );
+          }
+          return (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontVariantNumeric: "tabular-nums",
+                fontSize: "0.825rem",
+              }}
+            >
+              {formatChange(dateVal, { dateOnly: true })}
+            </Typography>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: t("columns.actions"),
+        size: 110,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <Tooltip title={t("visaDocument.preview")} arrow>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewDocument(row.original);
+              }}
+              sx={{
+                borderRadius: "8px",
+                textTransform: "none",
+                fontSize: "0.78rem",
+                fontWeight: 600,
+                py: 0.35,
+                px: 1.2,
+                borderColor: "divider",
+                color: "text.primary",
+                backgroundColor: "background.paper",
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  borderColor: "primary.main",
+                  backgroundColor: "action.hover",
+                  color: "primary.main",
+                },
+              }}
+            >
+              {t("visaDocument.preview")}
+            </Button>
+          </Tooltip>
+        ),
+      },
+    ],
+    [t, formatChange, page, limit]
+  );
+
+  const paginationState = useMemo(
+    () => ({ pageIndex: page - 1, pageSize: limit }),
+    [page, limit]
+  );
+
+  const mrtState = useMemo(
+    () => ({
+      isLoading: false,
+      showLoadingOverlay: isLoading || isFetching,
+      showSkeletons: false,
+      showProgressBars: false,
+      pagination: paginationState,
+    }),
+    [isLoading, isFetching, paginationState]
+  );
+
+  const muiTableBodyProps = useMemo(
+    () => ({
+      sx: (theme) => ({
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.secondary,
+        opacity: isLoading || isFetching ? 0 : 1,
+        pointerEvents: isLoading || isFetching ? "none" : "auto",
+        transition: "opacity 0.15s ease",
+      }),
+    }),
+    [isLoading, isFetching]
+  );
+
+  const renderEmptyRowsFallback = useCallback(() => {
+    if (isLoading || isFetching) return null;
+    return <TableEmptyState />;
+  }, [isLoading, isFetching]);
+
+  const renderTopToolbarCustomActions = useCallback(
+    () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+          width: "100%",
+          py: 0.5,
+        }}
+      >
+        <GlobalSearchInput
+          value={searchQuery}
+          onChange={(val) => {
+            setSearchQuery(val);
+            setPage(1);
+          }}
+          placeholder={t("search")}
+          disabled={isLoading}
+          onRefetch={refetch}
+          isFetching={isFetching}
+          sx={{ minWidth: { xs: "100%", sm: 300, md: 360 } }}
+        />
+
+        {totalItems > 0 && (
+          <Chip
+            size="small"
+            label={`${totalItems} ${t("sidebar.packages")}`}
+            sx={{
+              fontWeight: 600,
+              fontSize: "0.78rem",
+              height: 30,
+              borderRadius: "8px",
+              backgroundColor: "action.hover",
+              border: "1px solid",
+              borderColor: "divider",
+              color: "primary.main",
+            }}
+          />
+        )}
+      </Box>
+    ),
+    [searchQuery, isLoading, isFetching, refetch, totalItems, t]
+  );
+
+  const table = useMaterialReactTable({
+    ...defaultMrtOptions,
+    columns,
+    data: serverDocs,
+    state: mrtState,
+    muiTableBodyProps,
+    renderEmptyRowsFallback,
+    renderTopToolbarCustomActions,
+    renderBottomToolbarCustomActions: () => (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          width: "100%",
+          px: 2,
+          py: 1,
+        }}
+      >
+        <Pagination
+          pageIndex={page - 1}
+          pageCount={pageCount}
+          pageSize={limit}
+          totalRows={totalItems}
+          onPageChange={(newIndex) => setPage(newIndex + 1)}
+        />
+      </Box>
+    ),
+    muiTableBodyRowProps: ({ row }) => ({
+      onClick: () => setPreviewDocument(row.original),
+      sx: (theme) => ({
+        cursor: "pointer",
+        backgroundColor: theme.palette.background.paper,
+        transition: "background-color 0.15s ease",
+        "&:hover": {
+          backgroundColor: theme.palette.action.hover,
+        },
+      }),
+    }),
+  });
 
   return (
     <Box
@@ -64,332 +422,7 @@ const PackagesPage = () => {
         pageTitle={`${t("sidebar.packages")} | Oguz Travel`}
       />
 
-      <Paper
-        elevation={0}
-        sx={{
-          p: 1.5,
-          px: 2,
-          mb: 2,
-          borderRadius: "14px",
-          border: "1px solid",
-          borderColor: "divider",
-          backgroundColor: "background.paper",
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          alignItems: { xs: "stretch", sm: "center" },
-          justifyContent: "space-between",
-          gap: 1.5,
-        }}
-      >
-        <Box sx={{ flex: 1, maxWidth: { sm: 460, md: 520 } }}>
-          <GlobalSearchInput
-            value={searchQuery}
-            onChange={(val) => {
-              setSearchQuery(val);
-              setPage(1);
-            }}
-            onRefetch={refetch}
-            isFetching={isFetching}
-            placeholder={t("search", "Gözle...")}
-            sx={{ width: "100%", "& .MuiTextField-root": { width: "100%" } }}
-          />
-        </Box>
-
-        {totalItems > 0 && (
-          <Chip
-            size="small"
-            label={`${totalItems} ${t("sidebar.packages")}`}
-            sx={{
-              alignSelf: { xs: "flex-start", sm: "center" },
-              fontWeight: 600,
-              fontSize: "0.78rem",
-              height: 28,
-              borderRadius: "8px",
-              bgcolor: (th) =>
-                th.palette.mode === "dark"
-                  ? "rgba(20, 184, 166, 0.16)"
-                  : "rgba(14, 133, 132, 0.08)",
-              color: "primary.main",
-            }}
-          />
-        )}
-      </Paper>
-
-      <Box sx={{ flexGrow: 1, overflowY: "auto", pb: 4, px: 0.5, pt: 1 }}>
-        {isLoading ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "280px",
-              gap: 2,
-            }}
-          >
-            <CircularProgress sx={{ color: "primary.main" }} />
-            <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 500 }}>
-              {t("common.loading", "Ýüklenýär...")}
-            </Typography>
-          </Box>
-        ) : documents.length === 0 ? (
-          <Paper
-            elevation={0}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              minHeight: "280px",
-              textAlign: "center",
-              borderRadius: "16px",
-              border: "1px dashed",
-              borderColor: "divider",
-              backgroundColor: "background.paper",
-              p: 4,
-              gap: 2,
-            }}
-          >
-            <DescriptionOutlinedIcon
-              sx={{ fontSize: 48, color: "text.secondary", opacity: 0.5 }}
-            />
-            <Typography variant="body1" sx={{ fontWeight: 600, color: "text.secondary" }}>
-              {searchQuery
-                ? t("common.noSearchResults")
-                : t("common.noData")}
-            </Typography>
-          </Paper>
-        ) : (
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(3, 1fr)",
-                lg: "repeat(3, 1fr)",
-                xl: "repeat(4, 1fr)",
-              },
-              gap: 2.5,
-            }}
-          >
-            {documents.map((doc) => {
-              const docKey = doc.guid || doc.id;
-              const tableCount =
-                doc.tableCount !== undefined
-                  ? doc.tableCount
-                  : (doc.tables?.length || doc.docDetails?.length || 0);
-              const hasNote =
-                doc.hasNote !== undefined
-                  ? doc.hasNote
-                  : Boolean(
-                    doc.generalNote?.trim() ||
-                    doc.tables?.some((t) => t.note?.trim()) ||
-                    doc.docDetails?.some((d) => d.note?.trim()),
-                  );
-
-              return (
-                <Paper
-                  key={docKey}
-                  elevation={0}
-                  onClick={() => setPreviewDocument(doc)}
-                  sx={{
-                    borderRadius: "16px",
-                    border: "1px solid",
-                    borderColor: "divider",
-                    backgroundColor: "background.paper",
-                    p: 2.5,
-                    cursor: "pointer",
-                    transition: "all 0.22s cubic-bezier(0.4, 0, 0.2, 1)",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    minHeight: "180px",
-                    position: "relative",
-                    "&:hover": {
-                      borderColor: "primary.main",
-                      transform: "translateY(-3px)",
-                      boxShadow: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "0 10px 30px rgba(0, 0, 0, 0.5)"
-                          : "0 10px 25px rgba(0, 0, 0, 0.07)",
-                      "& .doc-icon-badge": {
-                        transform: "scale(1.06)",
-                      },
-                      "& .view-action-btn": {
-                        backgroundColor: "primary.main",
-                        color: "#ffffff",
-                      },
-                    },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 2,
-                    }}
-                  >
-                    <Box
-                      className="doc-icon-badge"
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 42,
-                        height: 42,
-                        borderRadius: "10px",
-                        background: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "linear-gradient(135deg, rgba(24, 90, 189, 0.26) 0%, rgba(13, 71, 161, 0.16) 100%)"
-                            : "linear-gradient(135deg, rgba(24, 90, 189, 0.12) 0%, rgba(27, 102, 201, 0.06) 100%)",
-                        border: "1px solid",
-                        borderColor: (theme) =>
-                          theme.palette.mode === "dark"
-                            ? "rgba(59, 130, 246, 0.28)"
-                            : "rgba(24, 90, 189, 0.18)",
-                        color: (theme) =>
-                          theme.palette.mode === "dark" ? "#60a5fa" : "#185abd",
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      <ArticleRoundedIcon sx={{ fontSize: 23 }} />
-                    </Box>
-
-                    {doc.country && (
-                      <Chip
-                        icon={<PublicOutlinedIcon sx={{ fontSize: "14px !important" }} />}
-                        label={doc.country}
-                        size="small"
-                        sx={{
-                          fontWeight: 600,
-                          fontSize: "0.75rem",
-                          borderRadius: "6px",
-                          backgroundColor: (theme) =>
-                            theme.palette.mode === "dark"
-                              ? "rgba(255, 255, 255, 0.08)"
-                              : "rgba(0, 0, 0, 0.05)",
-                          color: "text.primary",
-                        }}
-                      />
-                    )}
-                  </Box>
-
-                  <Box sx={{ mb: 2.5, flexGrow: 1 }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "1.02rem",
-                        lineHeight: 1.35,
-                        color: "text.primary",
-                        mb: 0.75,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {doc.title || t("visaDocument.title")}
-                    </Typography>
-
-                    <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", gap: 0.75 }}>
-                      <Chip
-                        icon={<TableChartOutlinedIcon sx={{ fontSize: "14px !important" }} />}
-                        label={`${tableCount} ${t("visaDocument.tables")}`}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          fontSize: "0.72rem",
-                          height: 24,
-                          borderRadius: "6px",
-                          borderColor: "divider",
-                          color: "text.secondary",
-                        }}
-                      />
-
-                      {hasNote && (
-                        <Tooltip title={doc.generalNote || t("visaDocument.generalNote")}>
-                          <Chip
-                            icon={<StickyNote2OutlinedIcon sx={{ fontSize: "14px !important" }} />}
-                            label={t("visaDocument.note", "Bellik")}
-                            size="small"
-                            variant="outlined"
-                            sx={{
-                              fontSize: "0.72rem",
-                              height: 24,
-                              borderRadius: "6px",
-                              borderColor: "divider",
-                              color: "text.secondary",
-                            }}
-                          />
-                        </Tooltip>
-                      )}
-                    </Stack>
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      pt: 1.5,
-                      borderTop: "1px solid",
-                      borderColor: "divider",
-                    }}
-                  >
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        fontSize: "0.75rem",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {doc.updatedAt || doc.createdAt
-                        ? formatChange(doc.updatedAt || doc.createdAt, { dateOnly: true })
-                        : ""}
-                    </Typography>
-
-                    <Button
-                      className="view-action-btn"
-                      size="small"
-                      variant="outlined"
-                      startIcon={<VisibilityOutlinedIcon sx={{ fontSize: 16 }} />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPreviewDocument(doc);
-                      }}
-                      sx={{
-                        borderRadius: "8px",
-                        textTransform: "none",
-                        fontSize: "0.8rem",
-                        fontWeight: 600,
-                        py: 0.4,
-                        px: 1.25,
-                        borderColor: "divider",
-                        color: "text.primary",
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      {t("visaDocument.preview")}
-                    </Button>
-                  </Box>
-                </Paper>
-              );
-            })}
-          </Box>
-        )}
-      </Box>
-
-      <Pagination
-        totalItems={totalItems || serverDocs.length}
-        page={page}
-        limit={limit}
-        setPage={setPage}
-        setPageSize={setLimit}
-      />
+      <MaterialReactTable table={table} />
 
       <DocumentPreviewModal
         open={Boolean(previewDocument)}
