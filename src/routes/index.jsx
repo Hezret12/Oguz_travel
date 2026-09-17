@@ -53,6 +53,7 @@ const ProfilePage = lazyRetry(() => import('../pages/Profile/index'));
 const CafeteriaPage = lazyRetry(() => import('../pages/Cafeteria'));
 const FinanceCashFlowPage = lazyRetry(() => import('../pages/Finance/CashFlow'));
 const FinanceOverviewPage = lazyRetry(() => import('../pages/Finance/Overview'));
+const FinanceSalaryPage = lazyRetry(() => import('../pages/Finance/Salary'));
 const ProfessionalTranslationPage = lazyRetry(() => import('../pages/ProfessionalTranslation'));
 const OfficePage = lazyRetry(() => import('../pages/ProfessionalTranslation/Office'));
 const DepartmentPage = lazyRetry(() => import('../pages/ProfessionalTranslation/Department'));
@@ -126,6 +127,7 @@ const Profile = Loadable(ProfilePage);
 const Cafeteria = Loadable(CafeteriaPage);
 const FinanceCashFlow = Loadable(FinanceCashFlowPage);
 const FinanceOverview = Loadable(FinanceOverviewPage);
+const FinanceSalary = Loadable(FinanceSalaryPage);
 const ProfessionalTranslation = Loadable(ProfessionalTranslationPage);
 const Office = Loadable(OfficePage);
 const Department = Loadable(DepartmentPage);
@@ -188,6 +190,7 @@ const router = createBrowserRouter([
               { path: 'finance', element: <Navigate to="/finance/cash-flow" replace /> },
               { path: 'finance/cash-flow', element: <FinanceCashFlow /> },
               { path: 'finance/overview', element: <FinanceOverview /> },
+              { path: 'finance/salary', element: <FinanceSalary /> },
               {
                 path: 'professional-translation',
                 element: <ProfessionalTranslation />,

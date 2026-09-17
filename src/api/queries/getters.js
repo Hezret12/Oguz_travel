@@ -228,3 +228,14 @@ export const getAllCategoriesApi = async (params = {}) => {
   return await api.getPrivate('/category/get-all-category', params);
 };
 
+export const getAllSalariesApi = async (params = {}) => {
+  return await api.getPrivate('/salary/get-all-salaries', params);
+};
+
+export const getSalarySummaryApi = async (params = {}) => {
+  return await api.getPrivate('/salary/get-salary-summary', params);
+};
+
+export const getSalaryMonthStatusApi = async (params = {}) => {
+  return await api.getPrivate('/salary/get-month-status', params);
+};

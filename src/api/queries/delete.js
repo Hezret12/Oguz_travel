@@ -170,3 +170,7 @@ export const deletePositionApi = async (guid) => {
   return await api.deletePrivate('/position/delete-postion', { guid: actualGuid });
 };
 
+export const deleteSalaryApi = async (guid) => {
+  const actualGuid = typeof guid === "object" && !Array.isArray(guid) ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/salary/delete-salary', { guid: actualGuid });
+};

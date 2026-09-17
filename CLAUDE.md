@@ -25,7 +25,7 @@ useCreate({ apiFn, key, onSuccess, invalidateQueries = [], isPaginated = false }
 
 ### `useUpdate` (`src/hooks/CRUD/useUpdate.js`)
 ```js
-useUpdate({ apiFn, key, idKey, onSuccessUpdate, invalidateQueries = [], isInfiniteQuery = false })
+useUpdate({ apiFn, key, idKey, onSuccessUpdate, invalidateQueries = [], isInfiniteQuery = false, showSuccessMessage = true })
 ```
 | Param | Type | Required | Notes |
 |---|---|---|---|
@@ -35,6 +35,7 @@ useUpdate({ apiFn, key, idKey, onSuccessUpdate, invalidateQueries = [], isInfini
 | `onSuccessUpdate` | function | optional | Called after mutation succeeds and cache is updated. **NOT** `onSuccess`. |
 | `invalidateQueries` | string[] | optional | Additional query keys to invalidate. |
 | `isInfiniteQuery` | boolean | optional | Set `true` for infinite scroll queries. |
+| `showSuccessMessage` | boolean | optional | `false` skips the success toast (e.g. inline cell saves). Errors always toast. |
 
 - **Cache behavior**: Automatically merges (`{ ...oldItem, ...updatedItem }`) matching items by `idKey` using `setQueriesData`. **Do NOT manually call `queryClient.setQueriesData` or `queryClient.invalidateQueries` in `onSuccessUpdate` unless you need to update a DIFFERENT query key.** The hook handles the primary key cache update internally.
 - **Success handler name**: `onSuccessUpdate` — NOT `onSuccess`.

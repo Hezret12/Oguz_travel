@@ -8,6 +8,8 @@ export const useUpdate = ({
   onSuccessUpdate,
   invalidateQueries = [],
   isInfiniteQuery = false,
+  // false for silent saves (e.g. inline cell edits); errors still toast.
+  showSuccessMessage = true,
 }) => {
   const queryClient = useQueryClient();
 
@@ -88,7 +90,7 @@ export const useUpdate = ({
         });
       });
 
-      hdlSuccessResMsg({ data: { message } });
+      if (showSuccessMessage) hdlSuccessResMsg({ data: { message } });
       onSuccessUpdate?.();
     },
 

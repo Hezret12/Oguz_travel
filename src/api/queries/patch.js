@@ -235,4 +235,10 @@ export const updatePositionApi = async (data) => {
   return await api.patchPrivate('/position/update-postion', data);
 };
 
+export const updateSalaryApi = async (data) => {
+  return await api.patchPrivate("/salary/update-salary", data);
+};
 
+export const lockSalaryMonthApi = async (data) => {
+  return await api.patchPrivate("/salary/lock-month", data);
+};

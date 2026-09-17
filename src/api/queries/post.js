@@ -265,3 +265,14 @@ export const addPositionApi = async (data) => {
   return await api.postPrivate('/position/add-position', data);
 };
 
+export const addSalaryApi = async (data) => {
+  return await api.postPrivate("/salary/add-salary", data);
+};
+
+export const generateSalaryMonthApi = async (data) => {
+  return await api.postPrivate("/salary/generate-month", data);
+};
+
+export const markSalaryPaidApi = async (data) => {
+  return await api.postPrivate("/salary/mark-paid", data);
+};

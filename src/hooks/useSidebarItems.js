@@ -25,6 +25,7 @@ import {
   Building,
   Award,
   Landmark,
+  Banknote,
 } from "lucide-react";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 import { PATHS } from "../routes/paths";
@@ -65,6 +66,12 @@ export const useSidebarItems = () => {
             path: PATHS.FINANCE.OVERVIEW,
             icon: createElement(PieChart, { size: 18, strokeWidth: 2.2 }),
             alwaysVisible: true,
+          },
+          {
+            id: "finance-salary",
+            text: t("sidebar.salary"),
+            path: PATHS.FINANCE.SALARY,
+            icon: createElement(Banknote, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "report-turkish-airlines",

@@ -280,6 +280,49 @@ export const useValidShema = () => {
     description: stringOptionalValidSchema(),
   });
 
+  // Money inputs arrive as strings; empty means 0.
+  const salaryMoney = () =>
+    yup
+      .number()
+      .transform((value, original) => (original === "" || original == null ? 0 : value))
+      .typeError(t("validation.invalidNumber"))
+      .min(0, t("salary.validation.notNegative"));
+
+  const salary = yup.object({
+    month: yup.string().nullable().required(t("salary.validation.monthRequired")),
+    employee_guid: yup.string().required(t("salary.validation.employeeRequired")),
+    base_salary: yup
+      .number()
+      .transform((value, original) => (original === "" ? undefined : value))
+      .typeError(t("validation.invalidNumber"))
+      .min(0, t("salary.validation.notNegative"))
+      .required(t("salary.validation.baseSalaryRequired")),
+    work_days: yup
+      .number()
+      .transform((value, original) => (original === "" ? undefined : value))
+      .typeError(t("validation.invalidNumber"))
+      .integer(t("salary.validation.wholeNumber"))
+      .min(1, t("salary.validation.workDaysRange"))
+      .max(31, t("salary.validation.workDaysRange"))
+      .required(t("validation.required")),
+    worked_days: yup
+      .number()
+      .transform((value, original) => (original === "" ? undefined : value))
+      .typeError(t("validation.invalidNumber"))
+      .integer(t("salary.validation.wholeNumber"))
+      .min(0, t("salary.validation.notNegative"))
+      .max(yup.ref("work_days"), t("salary.validation.workedDaysExceed"))
+      .required(t("validation.required")),
+    card_amount: salaryMoney(),
+    advance: salaryMoney(),
+    cafeteria_credit: salaryMoney(),
+    loan: salaryMoney(),
+    bonus: salaryMoney(),
+    paid_amount: salaryMoney(),
+    paid_date: yup.string().nullable(),
+    note: stringOptionalValidSchema(),
+  });
+
   const addOffice = yup.object({
     fullName_tk: yup
       .string()
@@ -359,6 +402,7 @@ export const useValidShema = () => {
     addOutbound,
     addNotification,
     addCafeteriaTransaction,
+    salary,
     addOffice,
     editOffice,
     addDepartment,
