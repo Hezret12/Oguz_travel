@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useId, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -62,14 +62,47 @@ const SectionTitle = ({ children, mb = 1.75 }) => (
         letterSpacing: "1.4px",
         color: INK,
         textTransform: "uppercase",
-        whiteSpace: "nowrap",
+        lineHeight: 1.3,
+        minWidth: 0,
       }}
     >
       {children}
     </Typography>
-    <Box sx={{ flexGrow: 1, height: "1px", bgcolor: RULE }} />
+    <Box sx={{ flexGrow: 1, minWidth: 16, height: "1px", bgcolor: RULE }} />
   </Box>
 );
+
+const CompanyStamp = ({ date, size = 118 }) => {
+  const ringId = `cv-stamp-ring-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+
+  return (
+    <Box
+      component="svg"
+      viewBox="0 0 120 120"
+      aria-hidden
+      sx={{ width: size, height: size, flexShrink: 0, transform: "rotate(-9deg)", opacity: 0.88 }}
+    >
+      <defs>
+        <path id={ringId} d="M 60,60 m -41,0 a 41,41 0 1,1 82,0 a 41,41 0 1,1 -82,0" />
+      </defs>
+      <circle cx="60" cy="60" r="57" fill="none" stroke={BRAND} strokeWidth="2.6" />
+      <circle cx="60" cy="60" r="52.5" fill="none" stroke={BRAND} strokeWidth="0.9" />
+      <circle cx="60" cy="60" r="31" fill="none" stroke={BRAND} strokeWidth="0.9" />
+      <text fill={BRAND} fontSize="10.5" fontWeight="800" letterSpacing="2.4" fontFamily="Arial, Helvetica, sans-serif">
+        <textPath href={`#${ringId}`} startOffset="0">
+          OGUZ TRAVEL ★ OGUZ TRAVEL ★
+        </textPath>
+      </text>
+      <text x="60" y="52" textAnchor="middle" fill={BRAND} fontSize="11" fontFamily="Arial, Helvetica, sans-serif">
+        ★
+      </text>
+      <line x1="38" y1="58" x2="82" y2="58" stroke={BRAND} strokeWidth="0.8" />
+      <text x="60" y="70" textAnchor="middle" fill={BRAND} fontSize="9" fontWeight="800" fontFamily="Arial, Helvetica, sans-serif">
+        {date}
+      </text>
+    </Box>
+  );
+};
 
 const CVPrintPreviewModal = ({ open, onClose, profile }) => {
   const { t } = useLocale();
@@ -222,7 +255,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
           justifyContent: "center",
         }}
       >
-        {/* Printable A4 Sheet — padding lives on the inner body so the letterhead can bleed edge to edge */}
+        {/* Printable A4 Sheet — spacing lives on the inner body (see .cv-print-body in printHelper) */}
         <Box
           ref={sheetRef}
           id="printable-cv-sheet"
@@ -246,50 +279,6 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
             WebkitPrintColorAdjust: "exact",
           }}
         >
-          {/* 1. Oguz Travel Letterhead */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
-              px: { xs: 3, sm: 6 },
-              py: 1.25,
-              background: `linear-gradient(120deg, ${BRAND_DARK} 0%, ${BRAND} 100%)`,
-            }}
-          >
-            <OguzLogo
-              forceLight
-              sx={{
-                width: { xs: 110, sm: 136 },
-                height: "auto",
-                mx: 0,
-                flexShrink: 0,
-                "& path": { fill: "#FFFFFF !important" },
-              }}
-            />
-
-            <Box sx={{ textAlign: "right", minWidth: 0 }}>
-              <Typography
-                sx={{
-                  color: "#ffffff",
-                  fontWeight: 800,
-                  fontSize: { xs: "0.8rem", sm: "0.95rem" },
-                  letterSpacing: "3px",
-                  textTransform: "uppercase",
-                  lineHeight: 1.2,
-                }}
-              >
-                {t("profile.cvDocumentTitle")}
-              </Typography>
-              <Typography sx={{ color: "rgba(255, 255, 255, 0.78)", fontSize: "0.72rem", fontWeight: 500, mt: 0.5 }}>
-                {t("profile.cvGeneratedOn")}: {generatedOn}
-              </Typography>
-            </Box>
-          </Box>
-          <Box sx={{ height: "3px", bgcolor: "#0E8584" }} />
-          <Box sx={{ height: "1px", bgcolor: BRAND, opacity: 0.35, mt: "2px" }} />
-
           {/* Document body */}
           <Box
             className="cv-print-body"
@@ -299,12 +288,22 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               flexDirection: "column",
               gap: 3.5,
               px: { xs: 3, sm: 6 },
-              pt: { xs: 3, sm: 4 },
+              pt: { xs: 3, sm: 5 },
               pb: { xs: 3, sm: 4 },
             }}
           >
-            {/* 2. Candidate Identity */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 3.5, breakInside: "avoid", pageBreakInside: "avoid" }}>
+            {/* 1. Candidate Identity */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 3.5,
+                pb: 3,
+                borderBottom: `2px solid ${BRAND}`,
+                breakInside: "avoid",
+                pageBreakInside: "avoid",
+              }}
+            >
               <Avatar
                 src={getFileUrl(avatarUrl)}
                 alt={fullName}
@@ -391,9 +390,21 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
                   </Box>
                 )}
               </Box>
+
+              <OguzLogo
+                forceLight
+                sx={{
+                  display: { xs: "none", sm: "block" },
+                  alignSelf: "flex-start",
+                  width: 118,
+                  height: "auto",
+                  mx: 0,
+                  flexShrink: 0,
+                }}
+              />
             </Box>
 
-            {/* 3. Professional Summary */}
+            {/* 2. Professional Summary */}
             {summary && (
               <Box sx={{ breakInside: "avoid", pageBreakInside: "avoid" }}>
                 <SectionTitle mb={1.25}>{t("profile.personalSummary")}</SectionTitle>
@@ -413,7 +424,7 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               </Box>
             )}
 
-            {/* 4. Two-Column Grid: Experience (65%) + Sidebar Credentials (35%) */}
+            {/* 3. Two-Column Grid: Experience (65%) + Sidebar Credentials (35%) */}
             <Box
               sx={{
                 display: "grid",
@@ -667,30 +678,18 @@ const CVPrintPreviewModal = ({ open, onClose, profile }) => {
               </Box>
             </Box>
 
-            {/* 5. Corporate Footer */}
+            {/* 4. Footer — company stamp only */}
             <Box
               sx={{
                 mt: "auto",
-                pt: 1.5,
-                borderTop: `1px solid ${RULE}`,
+                pt: 2,
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 2,
+                justifyContent: "flex-end",
                 breakInside: "avoid",
                 pageBreakInside: "avoid",
               }}
             >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <OguzLogo forceLight iconOnly sx={{ width: 22, height: "auto", mx: 0 }} />
-                <Typography sx={{ fontSize: "0.72rem", fontWeight: 800, color: BRAND_DARK, letterSpacing: "0.5px" }}>
-                  Oguz Travel
-                </Typography>
-              </Box>
-              <Typography sx={{ fontSize: "0.7rem", color: "#94a3b8", fontWeight: 500, textAlign: "right" }}>
-                {fullName ? `${fullName} · ` : ""}
-                {t("profile.cvDocumentTitle")}
-              </Typography>
+              <CompanyStamp date={generatedOn} />
             </Box>
           </Box>
         </Box>

@@ -61,6 +61,10 @@ export const printElement = (element, docTitle = "") => {
       #printable-cv-sheet {
         padding: 0 !important;
         border-radius: 0 !important;
+        /* Fill a full A4 page so the footer (margin-top: auto) sits at the bottom.
+           1mm under 297mm avoids rounding spilling onto a blank second page. */
+        min-height: 296mm !important;
+        overflow: visible !important;
       }
       #printable-cv-sheet .cv-print-body {
         padding: 8mm 14mm 10mm 14mm !important;
