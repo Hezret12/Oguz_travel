@@ -174,7 +174,7 @@ const AddSalaryModal = ({ table, open, close, defaultMonth }) => {
   };
 
   return (
-    <CustomDialog open={isModalOpen} close={handleClose} widthX={680}>
+    <CustomDialog open={isModalOpen} close={handleClose} widthX={840}>
       <CustomDialogHeader variant="h5" title={t("salary.add")} />
       <CustomForm handleSubmit={handleSave}>
         <SalaryFormFields control={control} employeeHint={employeeHint} />

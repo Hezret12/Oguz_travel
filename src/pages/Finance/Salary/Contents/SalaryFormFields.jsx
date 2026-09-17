@@ -15,7 +15,7 @@ import {
   toNumber,
 } from "../functions/salaryUtils";
 
-const FIELD_HEIGHT = 36;
+const FIELD_HEIGHT = 46;
 
 const CALC_FIELDS = [
   "base_salary",
@@ -35,21 +35,21 @@ const CALC_FIELDS = [
 const money = (v) => formatMoney(v, { dashZero: false });
 
 // Shrinks every input in the form (text, picker, autocomplete) from the
-// shared 44px to FIELD_HEIGHT. Three-class selectors + !important are needed
+// shared 44px default to FIELD_HEIGHT. Three-class selectors + !important are needed
 // to beat the !important heights CustomDatePicker sets on itself.
 const compactSx = {
   "& .MuiFormControl-root .MuiInputBase-root": {
     height: `${FIELD_HEIGHT}px !important`,
     minHeight: `${FIELD_HEIGHT}px !important`,
     maxHeight: `${FIELD_HEIGHT}px !important`,
-    fontSize: "0.85rem !important",
+    fontSize: "0.925rem !important",
   },
   "& .MuiFormControl-root .MuiInputBase-root input": {
     height: `${FIELD_HEIGHT}px !important`,
     maxHeight: `${FIELD_HEIGHT}px !important`,
     paddingTop: "0 !important",
     paddingBottom: "0 !important",
-    fontSize: "0.85rem !important",
+    fontSize: "0.925rem !important",
     boxSizing: "border-box",
   },
 };
@@ -71,7 +71,7 @@ const ResultBox = ({ label, value }) => (
         color: "primary.main",
       }}
     >
-      <Typography noWrap sx={{ fontSize: "0.9rem", fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>
+      <Typography noWrap sx={{ fontSize: "0.95rem", fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>
         {value}
       </Typography>
     </Box>
@@ -98,7 +98,7 @@ const BonusTypeField = ({ control }) => {
                 px: 0.75,
                 textTransform: "none",
                 fontWeight: 600,
-                fontSize: "0.78rem",
+                fontSize: "0.82rem",
                 whiteSpace: "nowrap",
               },
             }}
@@ -148,13 +148,13 @@ const BonusFields = ({ control, moneyField }) => {
 
 const SummaryItem = ({ label, value, strong = false }) => (
   <Box sx={{ minWidth: 0 }}>
-    <Typography noWrap sx={{ fontSize: "0.7rem", color: "text.secondary", fontWeight: 600 }}>
+    <Typography noWrap sx={{ fontSize: "0.78rem", color: "text.secondary", fontWeight: 600 }}>
       {label}
     </Typography>
     <Typography
       noWrap
       sx={{
-        fontSize: strong ? "1.05rem" : "0.88rem",
+        fontSize: strong ? "1.3rem" : "0.98rem",
         fontWeight: strong ? 800 : 700,
         fontVariantNumeric: "tabular-nums",
         color: strong ? "primary.main" : "text.primary",
@@ -196,7 +196,7 @@ const SalarySummaryBar = ({ control }) => {
         columnGap: 2,
         rowGap: 1,
         px: 1.5,
-        py: 0.75,
+        py: 1,
         borderRadius: "10px",
         backgroundColor: "action.hover",
       }}
@@ -215,7 +215,7 @@ const SalarySummaryBar = ({ control }) => {
         }
       >
         <Box sx={{ display: { xs: "none", sm: "flex" }, color: "text.secondary", cursor: "help" }}>
-          <Info size={16} />
+          <Info size={18} />
         </Box>
       </Tooltip>
     </Box>
