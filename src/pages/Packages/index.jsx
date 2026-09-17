@@ -271,26 +271,9 @@ const PackagesPage = () => {
           isFetching={isFetching}
           sx={{ minWidth: { xs: "100%", sm: 300, md: 360 } }}
         />
-
-        {totalItems > 0 && (
-          <Chip
-            size="small"
-            label={`${totalItems} ${t("sidebar.packages")}`}
-            sx={{
-              fontWeight: 600,
-              fontSize: "0.78rem",
-              height: 30,
-              borderRadius: "8px",
-              backgroundColor: "action.hover",
-              border: "1px solid",
-              borderColor: "divider",
-              color: "primary.main",
-            }}
-          />
-        )}
       </Box>
     ),
-    [searchQuery, isLoading, isFetching, refetch, totalItems, t]
+    [searchQuery, isLoading, isFetching, refetch, t]
   );
 
   const table = useMaterialReactTable({

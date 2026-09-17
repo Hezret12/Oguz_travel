@@ -192,7 +192,7 @@ export const useSidebarItems = () => {
       },
       {
         id: "packages",
-        text: t("sidebar.packages", "Bukjalar"),
+        text: t("sidebar.packages"),
         path: PATHS.PACKAGES,
         icon: createElement(Package, { size: 20, strokeWidth: 2.2 }),
         alwaysVisible: true,
