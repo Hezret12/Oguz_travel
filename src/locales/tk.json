@@ -438,7 +438,15 @@
     "remainingCount": "Galan",
     "noReports": "Bu topbada entek hasabat ýok",
     "deleteReportConfirm": "Bu hasabaty pozmak isleýärsiňizmi?",
-    "deleteStockConfirm": "Bu hat stokyny pozmak isleýärsiňizmi?"
+    "deleteStockConfirm": "Bu hat stokyny pozmak isleýärsiňizmi?",
+    "letterNo": "ÝH №",
+    "letterNoInvalid": "Dogry ÝH № giriziň",
+    "letterNoOutOfRange": "ÝH № {{start}} - {{end}} aralygynda bolmaly",
+    "letterNoUsed": "Bu ÝH № eýýäm ulanyldy",
+    "singleMode": "Ýeke hat",
+    "rangeMode": "Köp hat (aralyk)",
+    "rangeInvalid": "Soňky № başlangyç №-den kiçi bolmaly däl",
+    "rangeOverlap": "Aralyk öňki hasabat bilen gabat gelýär: {{start}} - {{end}}"
   },
   "sale": "Arzanladyş",
   "saleSettings": "Arzanladyş sazlamalary (Gerek bolsa)",

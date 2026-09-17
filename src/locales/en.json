@@ -438,7 +438,15 @@
     "remainingCount": "Remaining",
     "noReports": "No reports for this batch yet",
     "deleteReportConfirm": "Are you sure you want to delete this report?",
-    "deleteStockConfirm": "Are you sure you want to delete this letter stock?"
+    "deleteStockConfirm": "Are you sure you want to delete this letter stock?",
+    "letterNo": "YH No.",
+    "letterNoInvalid": "Enter a valid YH No.",
+    "letterNoOutOfRange": "YH No. must be between {{start}} and {{end}}",
+    "letterNoUsed": "This YH No. is already used",
+    "singleMode": "Single letter",
+    "rangeMode": "Multiple letters (range)",
+    "rangeInvalid": "End No. cannot be less than start No.",
+    "rangeOverlap": "Range overlaps an existing report: {{start}} - {{end}}"
   },
   "sale": "Sale",
   "saleSettings": "Sale / Discount Settings (Optional)",

@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { Box, Typography, IconButton, Tooltip, Button } from "@mui/material";
-import { PenLine, Trash2, Plus } from "lucide-react";
+import { Box, Typography, IconButton, Tooltip } from "@mui/material";
+import { PenLine, Trash2 } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { useGet } from "../../../hooks/CRUD/useGet";
+import AddButton from "../../../components/AddButton";
 import StatusChip from "../../../components/StatusChip";
 import DeleteDialog from "../../../components/DeleteDialog";
 import { REFERRAL_REPORT_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
@@ -19,6 +20,22 @@ const resolveStatusKey = (val) => {
   if (val === 2 || val === "2") return "ZYÝAN ÝETEN";
   if (val === 3 || val === "3") return "ÝITIRILEN";
   return val;
+};
+
+// First free gap in the batch range (`shares` must be sorted by start), so
+// gaps left by deleted shares get reused. `start` pre-fills the single-letter
+// tab of the add modal, `start`..`end` pre-fills its range tab.
+const findFirstFreeRange = (stock, shares) => {
+  const start = Number(stock?.start_yh_number);
+  const end = Number(stock?.end_yh_number);
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+  let candidate = start;
+  for (const s of shares) {
+    const sStart = Number(s.start_yh_number);
+    if (sStart > candidate) return { start: candidate, end: sStart - 1 };
+    candidate = Math.max(candidate, Number(s.end_yh_number) + 1);
+  }
+  return candidate <= end ? { start: candidate, end } : null;
 };
 
 // A stock batch (e.g. letters 1-100) and its report-shares (individual sales/
@@ -56,11 +73,10 @@ const StockSharesPanel = ({ stock }) => {
   const totalCount = Number(stock?.total_letter || 0);
   const remainingCount = Math.max(0, totalCount - usedCount);
 
-  const suggestedStartNo = useMemo(() => {
-    if (shares.length === 0) return stock?.start_yh_number ?? "";
-    const maxEnd = Math.max(...shares.map((s) => Number(s.end_yh_number) || 0));
-    return maxEnd + 1;
-  }, [shares, stock]);
+  const suggestedRange = useMemo(
+    () => findFirstFreeRange(stock, shares),
+    [shares, stock],
+  );
 
   const { mutate: deleteShare, isPending: isDeleting } = useDelete({
     deleteFn: deleteReportShareApi,
@@ -98,15 +114,13 @@ const StockSharesPanel = ({ stock }) => {
             ({t("referralLetter.remainingCount")}: {remainingCount})
           </Typography>
         </Typography>
-        <Button
+        <AddButton
           size="small"
-          variant="contained"
-          startIcon={<Plus size={15} />}
           onClick={() => setIsAddOpen(true)}
-          sx={{ borderRadius: "7px", textTransform: "none", fontWeight: 600 }}
+          disabled={remainingCount === 0}
         >
           {t("referralLetter.addReport")}
-        </Button>
+        </AddButton>
       </Box>
 
       {isLoading ? (
@@ -176,7 +190,9 @@ const StockSharesPanel = ({ stock }) => {
         <AddReferralReportModal
           open={isAddOpen}
           close={() => setIsAddOpen(false)}
-          defaultStartNo={suggestedStartNo}
+          stock={stock}
+          shares={shares}
+          defaultRange={suggestedRange}
         />
       )}
 

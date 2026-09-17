@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import { Box, Paper, Button, useTheme, Typography } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, Paper, useTheme, Typography } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
 import { Package } from "lucide-react";
+import AddButton from "../../../components/AddButton";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
@@ -326,14 +326,9 @@ const ReferralLetterPage = () => {
           )}
         </Box>
 
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddClick}
-          sx={{ borderRadius: "8px", fontWeight: 600, px: 2.5, height: "40px" }}
-        >
+        <AddButton onClick={handleAddClick}>
           {t("referralLetter.addStock")}
-        </Button>
+        </AddButton>
       </Paper>
 
       {Boolean(stockTable.getState().creatingRow) && (
