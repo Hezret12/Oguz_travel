@@ -1,17 +1,21 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { useLocale } from "../../../../hooks/useLocale";
-import SectionCard, { EmptyState, LegendRow, ViewToggle } from "./SectionCard";
+import SectionCard, { ChartGradients, EmptyState, LegendRow, ViewToggle } from "./SectionCard";
 import { DeltaBadge } from "./KpiGrid";
 import {
   changePercent,
   chartSx,
   formatAmount,
   formatCompactAmount,
+  tableSx,
   tickLabelStyle,
+  tooltipSlotProps,
   useSeriesColors,
+  xAxisBase,
+  yAxisBase,
 } from "../functions/analyticsFormat";
 
 const numCell = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
@@ -46,6 +50,7 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
   const { t } = useLocale();
   const colors = useSeriesColors();
   const [view, setView] = useState("chart");
+  const gradientId = `balance-${useId().replace(/:/g, "")}`;
 
   const cur = cashFlow.current[currency];
   const prev = cashFlow.previous[currency];
@@ -76,8 +81,13 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
           px: 2,
           py: 1.25,
           borderRadius: "10px",
-          backgroundColor: "action.hover",
-          "& > *:not(:first-of-type)": { md: { pl: 3, borderLeft: "1px solid", borderColor: "divider" } },
+          border: "1px solid",
+          borderColor: "divider",
+          "& > *:not(:first-of-type)": {
+            pl: { xs: 0, md: 3 },
+            borderLeft: { xs: "none", md: "1px solid" },
+            borderColor: "divider",
+          },
         }}
       >
         <Stat label={label("opening")} value={cur.opening} currency={currency} />
@@ -123,10 +133,10 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
               height={260}
               hideLegend
               skipAnimation
-              borderRadius={4}
+              borderRadius={2}
               grid={{ horizontal: true }}
-              xAxis={[{ scaleType: "band", data: labels, tickLabelStyle, categoryGapRatio: 0.35, barGapRatio: 0.15 }]}
-              yAxis={[{ width: 60, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
+              xAxis={[{ ...xAxisBase, scaleType: "band", data: labels, tickLabelStyle, categoryGapRatio: 0.55, barGapRatio: 0.15 }]}
+              yAxis={[{ ...yAxisBase, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
               series={[
                 {
                   id: "inflow",
@@ -143,42 +153,48 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
                   valueFormatter: (v) => formatAmount(v, currency),
                 },
               ]}
-              sx={chartSx}
+              sx={chartSx()}
+            slotProps={tooltipSlotProps}
             />
           </Box>
 
           {/* Different scale from the bars, so it gets its own chart. */}
           <Box>
-            <Typography sx={{ fontSize: "0.8rem", fontWeight: 700, color: "text.secondary" }}>
+            <Typography sx={{ fontSize: "0.8rem", fontWeight: 500, color: "text.secondary", mb: 0.5 }}>
               {label("balanceTitle")}
             </Typography>
             <Box sx={{ mx: -1 }}>
+              <ChartGradients gradients={[{ id: gradientId, color: colors.balance, opacity: 0.12 }]} />
               <LineChart
                 height={170}
                 hideLegend
                 skipAnimation
                 grid={{ horizontal: true }}
-                xAxis={[{ scaleType: "point", data: labels, tickLabelStyle }]}
-                yAxis={[{ width: 60, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
+                xAxis={[{ ...xAxisBase, scaleType: "point", data: labels, tickLabelStyle }]}
+                yAxis={[{ ...yAxisBase, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
                 series={[
                   {
                     id: "balance",
                     label: label("closing"),
                     data: series.map((p) => p[currency].balance),
                     color: colors.balance,
-                    curve: "monotoneX",
-                    showMark: series.length <= 14,
+                    curve: "linear",
+                    area: true,
+                    // Fill from the lowest point, not from zero.
+                    baseline: "min",
+                    showMark: false,
                     valueFormatter: (v) => formatAmount(v, currency),
                   },
                 ]}
-                sx={chartSx}
+                sx={chartSx({ balance: gradientId })}
+            slotProps={tooltipSlotProps}
               />
             </Box>
           </Box>
         </>
       ) : (
         <TableContainer sx={{ maxHeight: 440 }}>
-          <Table size="small" stickyHeader>
+          <Table size="small" sx={tableSx} stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell>{t("finance.analytics.trend.date")}</TableCell>

@@ -34,28 +34,102 @@ export const changePercent = (current, previous) => {
   return ((current - previous) / Math.abs(previous)) * 100;
 };
 
-// Categorical slots of the validated reference palette, stepped per mode.
-// Meaning is fixed across the page: money in / sales = blue, money out /
-// cost = orange, profit = aqua. The till balance (its own single-series
-// chart) uses violet.
+// One brand accent + a neutral, as finance dashboards do. Validated with the
+// dataviz palette checker (all pairs pass CVD and normal-vision separation in
+// both modes; the grey sits under 3:1, so every chart ships a legend, a table
+// view and a dashed line for the grey series).
+//   accent  = sales / money in / balance
+//   neutral = cost / money out
+//   ink     = profit
 export const useSeriesColors = () => {
   const { palette } = useTheme();
-  const base =
-    palette.mode === "dark"
-      ? { revenue: "#3987e5", cost: "#d95926", profit: "#199e70", balance: "#9085e9" }
-      : { revenue: "#2a78d6", cost: "#eb6834", profit: "#1baf7a", balance: "#4a3aa7" };
-  return { ...base, inflow: base.revenue, outflow: base.cost };
+  const dark = palette.mode === "dark";
+  const accent = dark ? "#13A89A" : "#0E8584";
+  const neutral = dark ? "#5B6678" : "#94A3B8";
+  const ink = dark ? "#CBD5E1" : "#334155";
+  return {
+    revenue: accent,
+    inflow: accent,
+    balance: accent,
+    highlight: accent,
+    cost: neutral,
+    outflow: neutral,
+    profit: ink,
+    spark: dark ? "#8A94A6" : "#94A3B8",
+  };
 };
 
-// Shared look for x-charts: recessive grid and axis text in text tokens.
-export const chartSx = (theme) => ({
-  "& .MuiLineElement-root": { strokeWidth: 2 },
-  "& .MuiChartsGrid-line": { stroke: theme.palette.divider, strokeDasharray: "3 3" },
-  "& .MuiChartsAxis-line, & .MuiChartsAxis-tick": { stroke: theme.palette.divider },
+// Shared look for x-charts (v9 class names): no axis lines or ticks, a
+// faint solid grid. `areas` maps a series id to a <ChartGradients> id ("*"
+// targets every area); `dashed` lists series ids drawn dashed.
+export const chartSx = (areas = {}, dashed = []) => (theme) => ({
+  "& .MuiLineChart-line": { strokeWidth: 1.75 },
+  // The theme divider is already a faint rgba; use it as is.
+  "& .MuiChartsGrid-line": { stroke: theme.palette.divider, strokeDasharray: "none" },
   "& .MuiChartsAxis-tickLabel": { fill: theme.palette.text.secondary },
+  ...Object.fromEntries(
+    Object.entries(areas).map(([seriesId, gradientId]) => [
+      seriesId === "*" ? "& .MuiLineChart-area" : `& .MuiLineChart-area[data-series="${seriesId}"]`,
+      { fill: `url(#${gradientId})` },
+    ]),
+  ),
+  ...Object.fromEntries(
+    dashed.map((seriesId) => [
+      `& .MuiLineChart-line[data-series="${seriesId}"]`,
+      { strokeDasharray: "5 4" },
+    ]),
+  ),
 });
 
 export const tickLabelStyle = { fontSize: 11 };
+
+export const xAxisBase = { disableLine: true, disableTicks: true, tickLabelStyle };
+export const yAxisBase = { disableLine: true, disableTicks: true, tickLabelStyle, width: 56 };
+
+// Floating, soft tooltip that matches the cards.
+export const tooltipSlotProps = {
+  tooltip: {
+    sx: (theme) => ({
+      "& .MuiChartsTooltip-paper": {
+        borderRadius: "10px",
+        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper,
+        boxShadow:
+          theme.palette.mode === "dark"
+            ? "0 8px 24px rgba(0,0,0,0.5)"
+            : "0 8px 24px rgba(15, 23, 42, 0.08)",
+        backgroundImage: "none",
+      },
+      "& .MuiChartsTooltip-cell": { fontSize: "0.78rem", py: 0.5 },
+      "& .MuiChartsTooltip-axisValueCell": { fontWeight: 700 },
+    }),
+  },
+};
+
+// Quiet table: light header, roomy rows, hairline separators.
+export const tableSx = (theme) => ({
+  "& .MuiTableCell-root": { borderColor: theme.palette.divider },
+  "& .MuiTableCell-head": {
+    fontSize: "0.72rem",
+    fontWeight: 600,
+    color: theme.palette.text.secondary,
+    backgroundColor: theme.palette.background.paper,
+    py: 1,
+    whiteSpace: "nowrap",
+  },
+  "& .MuiTableCell-body": { fontSize: "0.85rem", py: 1.25 },
+  "& .MuiTableBody-root .MuiTableRow-root:last-of-type .MuiTableCell-body": { borderBottom: 0 },
+  "& .MuiTableRow-hover:hover": { backgroundColor: theme.palette.action.hover },
+  "& .MuiTableCell-footer": {
+    fontSize: "0.85rem",
+    fontWeight: 700,
+    color: theme.palette.text.primary,
+    borderTop: `1px solid ${theme.palette.divider}`,
+    borderBottom: 0,
+  },
+  "& .MuiTableCell-root:first-of-type": { pl: 0 },
+  "& .MuiTableCell-root:last-of-type": { pr: 0 },
+});
 
 // Demo data today; replace the body with a useGet on
 // /total-calculations/get-office-analytics once the endpoint exists.

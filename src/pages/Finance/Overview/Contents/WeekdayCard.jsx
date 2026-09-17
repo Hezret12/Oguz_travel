@@ -7,8 +7,12 @@ import {
   chartSx,
   formatAmount,
   formatCompactAmount,
+  tableSx,
   tickLabelStyle,
+  tooltipSlotProps,
   useSeriesColors,
+  xAxisBase,
+  yAxisBase,
 } from "../functions/analyticsFormat";
 
 const numCell = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
@@ -59,20 +63,27 @@ const WeekdayCard = ({ weekdays, currency }) => {
           {view === "chart" ? (
             <Box sx={{ mx: -1 }}>
               <BarChart
-                height={250}
+                height={340}
                 hideLegend
                 skipAnimation
-                borderRadius={4}
+                borderRadius={2}
                 grid={{ horizontal: true }}
                 xAxis={[
                   {
+                    ...xAxisBase,
                     scaleType: "band",
                     data: weekdays.map((d) => dayName(d.day)),
-                    categoryGapRatio: 0.4,
+                    categoryGapRatio: 0.5,
+                    // Grey bars; only the busiest day carries the accent.
+                    colorMap: {
+                      type: "ordinal",
+                      values: weekdays.map((d) => dayName(d.day)),
+                      colors: weekdays.map((d) => (d.day === busiest.day ? colors.highlight : colors.cost)),
+                    },
                     tickLabelStyle,
                   },
                 ]}
-                yAxis={[{ width: 56, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
+                yAxis={[{ ...yAxisBase, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
                 series={[
                   {
                     id: "revenue",
@@ -83,12 +94,13 @@ const WeekdayCard = ({ weekdays, currency }) => {
                       `${formatAmount(v, currency)} · ${t("finance.analytics.salesCount", { count: weekdays[dataIndex]?.count ?? 0 })}`,
                   },
                 ]}
-                sx={chartSx}
+                sx={chartSx()}
+            slotProps={tooltipSlotProps}
               />
             </Box>
           ) : (
             <TableContainer>
-              <Table size="small">
+              <Table size="small" sx={tableSx}>
                 <TableHead>
                   <TableRow>
                     <TableCell>{t("finance.analytics.weekday.day")}</TableCell>

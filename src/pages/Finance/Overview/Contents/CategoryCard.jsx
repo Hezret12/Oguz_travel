@@ -9,8 +9,12 @@ import {
   formatCompactAmount,
   formatPercent,
   percentOf,
+  tableSx,
   tickLabelStyle,
+  tooltipSlotProps,
   useSeriesColors,
+  xAxisBase,
+  yAxisBase,
 } from "../functions/analyticsFormat";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
@@ -19,7 +23,7 @@ const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace
 const CategoryCard = ({ categories, currency }) => {
   const { t, selectedLang } = useLocale();
   const colors = useSeriesColors();
-  const [view, setView] = useState("chart");
+  const [view, setView] = useState("table");
 
   const rows = categories
     .filter((c) => c[currency].revenue > 0)
@@ -64,10 +68,11 @@ const CategoryCard = ({ categories, currency }) => {
               height={rows.length * 46 + 50}
               hideLegend
               skipAnimation
-              borderRadius={4}
+              borderRadius={2}
               grid={{ vertical: true }}
               yAxis={[
                 {
+                  ...yAxisBase,
                   scaleType: "band",
                   data: rows.map((c) => selectedLang(c.name)),
                   width: 130,
@@ -76,7 +81,7 @@ const CategoryCard = ({ categories, currency }) => {
                   tickLabelStyle: { ...tickLabelStyle, fontSize: 12 },
                 },
               ]}
-              xAxis={[{ valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
+              xAxis={[{ ...xAxisBase, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
               series={[
                 {
                   id: "revenue",
@@ -96,13 +101,14 @@ const CategoryCard = ({ categories, currency }) => {
                     )}`,
                 },
               ]}
-              sx={chartSx}
+              sx={chartSx()}
+            slotProps={tooltipSlotProps}
             />
           </Box>
         </>
       ) : (
         <TableContainer>
-          <Table size="small">
+          <Table size="small" sx={tableSx}>
             <TableHead>
               <TableRow>
                 <TableCell>{t("finance.analytics.categories.service")}</TableCell>

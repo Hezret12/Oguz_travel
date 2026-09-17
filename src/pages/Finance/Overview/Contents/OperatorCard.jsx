@@ -1,18 +1,15 @@
-import { Avatar, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { useLocale } from "../../../../hooks/useLocale";
 import SectionCard, { EmptyState, ShareBar } from "./SectionCard";
-import { formatAmount, formatPercent, percentOf, useSeriesColors } from "../functions/analyticsFormat";
+import {
+  formatAmount,
+  formatPercent,
+  percentOf,
+  tableSx,
+  useSeriesColors,
+} from "../functions/analyticsFormat";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
-
-const initials = (name = "") =>
-  name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
 
 // Operator ranking by sales in the selected currency.
 const OperatorCard = ({ operators, currency }) => {
@@ -33,7 +30,7 @@ const OperatorCard = ({ operators, currency }) => {
         <EmptyState>{t("finance.analytics.noData")}</EmptyState>
       ) : (
         <TableContainer>
-          <Table size="small">
+          <Table size="small" sx={tableSx}>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ width: 32 }}>№</TableCell>
@@ -48,15 +45,12 @@ const OperatorCard = ({ operators, currency }) => {
                 const share = percentOf(o[currency].revenue, totalRevenue);
                 return (
                   <TableRow key={o.guid} hover>
-                    <TableCell sx={{ color: "text.secondary", fontWeight: 700 }}>{index + 1}</TableCell>
+                    <TableCell sx={{ color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>{index + 1}</TableCell>
                     <TableCell sx={{ minWidth: 190 }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-                        <Avatar sx={{ width: 28, height: 28, fontSize: "0.7rem", fontWeight: 700, bgcolor: "action.selected", color: "text.primary" }}>
-                          {initials(o.fullName)}
-                        </Avatar>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, mb: 0.5 }}>
-                            <Typography noWrap sx={{ fontSize: "0.85rem", fontWeight: 600 }}>
+                            <Typography noWrap sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
                               {o.fullName}
                             </Typography>
                             <Typography sx={{ fontSize: "0.72rem", color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>

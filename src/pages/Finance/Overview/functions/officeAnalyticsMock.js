@@ -212,15 +212,33 @@ const toShares = (weights) => {
 };
 
 // Splits period totals across trend buckets.
+// Also carries the per-bucket series the summary sparklines need:
+// expenses, net profit and the running receivable.
 const buildTrend = (rand, buckets, totals) => {
   const shares = toShares(buckets.map((b) => b.weight));
+  // Expenses are steadier than sales.
+  const expenseShares = toShares(buckets.map((b) => Math.sqrt(b.weight) * jitter(rand, 0.1)));
+  const cumulative = { USD: 0, TMT: 0 };
   return buckets.map((b, i) => {
     const share = shares[i];
     const point = { date: b.date, label: b.label };
     ["USD", "TMT"].forEach((cur) => {
       const revenue = round(totals[cur].revenue * share);
       const cost = round(totals[cur].cost * share * jitter(rand, 0.04));
-      point[cur] = { revenue, cost, profit: revenue - cost };
+      const expenses = round(totals[cur].expenses * expenseShares[i]);
+      cumulative[cur] += revenue;
+      point[cur] = {
+        revenue,
+        cost,
+        profit: revenue - cost,
+        grossProfit: revenue - cost,
+        expenses,
+        netProfit: revenue - cost - expenses,
+        // Open balance grows with sales as the period goes on.
+        receivable: totals[cur].revenue
+          ? round((totals[cur].receivable * cumulative[cur]) / totals[cur].revenue)
+          : 0,
+      };
     });
     return point;
   });

@@ -9,10 +9,11 @@ const SectionCard = ({ title, subtitle, action, children, sx = {} }) => (
       height: "100%",
       display: "flex",
       flexDirection: "column",
-      borderRadius: "14px",
+      borderRadius: "12px",
       border: "1px solid",
       borderColor: "divider",
       backgroundColor: "background.paper",
+      boxShadow: "none",
       overflow: "hidden",
       ...sx,
     }}
@@ -24,17 +25,17 @@ const SectionCard = ({ title, subtitle, action, children, sx = {} }) => (
           alignItems: "center",
           justifyContent: "space-between",
           gap: 2,
-          px: 2.5,
-          pt: 2,
-          pb: 1.5,
+          px: 3,
+          pt: 2.5,
+          pb: 2,
         }}
       >
         <Box sx={{ minWidth: 0 }}>
-          <Typography noWrap sx={{ fontWeight: 700, fontSize: "0.95rem", color: "text.primary", lineHeight: 1.4 }}>
+          <Typography noWrap sx={{ fontWeight: 600, fontSize: "0.95rem", color: "text.primary", lineHeight: 1.4 }}>
             {title}
           </Typography>
           {subtitle && (
-            <Typography noWrap sx={{ fontSize: "0.78rem", color: "text.secondary", lineHeight: 1.4 }}>
+            <Typography noWrap sx={{ fontSize: "0.8rem", color: "text.secondary", lineHeight: 1.5, mt: 0.25 }}>
               {subtitle}
             </Typography>
           )}
@@ -42,7 +43,7 @@ const SectionCard = ({ title, subtitle, action, children, sx = {} }) => (
         {action && <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>{action}</Box>}
       </Box>
     )}
-    <Box sx={{ px: 2.5, pb: 2.5, display: "flex", flexDirection: "column", gap: 2, flex: 1, minWidth: 0 }}>
+    <Box sx={{ px: 3, pb: 3, display: "flex", flexDirection: "column", gap: 2.5, flex: 1, minWidth: 0 }}>
       {children}
     </Box>
   </Paper>
@@ -50,7 +51,7 @@ const SectionCard = ({ title, subtitle, action, children, sx = {} }) => (
 
 // Thin horizontal magnitude bar (one hue), used inside tables and lists.
 export const ShareBar = ({ value, color }) => (
-  <Box sx={{ height: 4, borderRadius: 2, backgroundColor: "action.hover", overflow: "hidden" }}>
+  <Box sx={{ height: 3, borderRadius: 2, backgroundColor: "action.hover", overflow: "hidden" }}>
     <Box
       sx={{
         width: `${Math.max(0, Math.min(100, value))}%`,
@@ -70,10 +71,12 @@ export const LegendRow = ({ items }) => (
       <Box key={item.label} sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
         <Box
           sx={{
-            width: item.shape === "bar" ? 8 : 12,
-            height: item.shape === "bar" ? 8 : 2,
-            borderRadius: item.shape === "bar" ? "2px" : 1,
-            backgroundColor: item.color,
+            width: item.shape === "bar" ? 8 : 14,
+            height: item.shape === "bar" ? 8 : 0,
+            borderRadius: item.shape === "bar" ? "2px" : 0,
+            backgroundColor: item.shape === "bar" ? item.color : "transparent",
+            // Line swatches mirror the series stroke, dashed included.
+            borderTop: item.shape === "bar" ? "none" : `2px ${item.dashed ? "dashed" : "solid"} ${item.color}`,
           }}
         />
         <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{item.label}</Typography>
@@ -118,14 +121,19 @@ export const ViewToggle = ({ value, onChange, chartLabel, tableLabel }) => (
   </ToggleButtonGroup>
 );
 
-// Small uppercase-free group heading with a hairline.
-export const GroupTitle = ({ children }) => (
-  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mt: 1.5 }}>
-    <Typography sx={{ fontSize: "0.85rem", fontWeight: 700, color: "text.primary", whiteSpace: "nowrap" }}>
-      {children}
-    </Typography>
-    <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
-  </Box>
+// Vertical gradients for area fills, referenced by id from chartSx(areas).
+// SVG url(#id) references resolve document-wide, so one hidden <svg> is enough.
+export const ChartGradients = ({ gradients }) => (
+  <svg width="0" height="0" style={{ position: "absolute" }} aria-hidden="true" focusable="false">
+    <defs>
+      {gradients.map(({ id, color, opacity = 0.22 }) => (
+        <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={opacity} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      ))}
+    </defs>
+  </svg>
 );
 
 export const EmptyState = ({ children }) => (

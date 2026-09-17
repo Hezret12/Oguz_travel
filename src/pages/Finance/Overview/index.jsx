@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Box, Chip, Grid, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
-import { Building2, CalendarDays, FlaskConical } from "lucide-react";
+import { Building2, CalendarDays } from "lucide-react";
 import dayjs from "dayjs";
 import PageHeader from "../../../components/PageHeader";
+import CustomTabs from "../../../components/CustomTabs";
 import { useLocale } from "../../../hooks/useLocale";
 import { useAuth } from "../../../context/useAuth";
 import KpiGrid from "./Contents/KpiGrid";
@@ -13,11 +14,11 @@ import FlowBreakdownCard from "./Contents/FlowBreakdownCard";
 import WeekdayCard from "./Contents/WeekdayCard";
 import OperatorCard from "./Contents/OperatorCard";
 import ReceivablesCard from "./Contents/ReceivablesCard";
-import { GroupTitle } from "./Contents/SectionCard";
 import { CURRENCIES, useOfficeAnalytics, useSeriesColors } from "./functions/analyticsFormat";
 import { PERIODS } from "./functions/officeAnalyticsMock";
 
 const STORAGE_KEY = "finance_overview_prefs";
+const TABS = ["cash", "sales", "people"];
 
 const readPrefs = () => {
   try {
@@ -81,10 +82,11 @@ const FinanceOverview = () => {
     const saved = readPrefs();
     return {
       period: PERIODS.includes(saved.period) ? saved.period : "thisMonth",
+      tab: TABS.includes(saved.tab) ? saved.tab : "cash",
       currency: CURRENCIES.includes(saved.currency) ? saved.currency : "USD",
     };
   });
-  const { period, currency } = prefs;
+  const { period, currency, tab } = prefs;
 
   const updatePrefs = (patch) => {
     const next = { ...prefs, ...patch };
@@ -101,15 +103,15 @@ const FinanceOverview = () => {
   const range = `${dayjs(data.period.start).format("DD.MM.YYYY")} – ${dayjs(data.period.end).format("DD.MM.YYYY")}`;
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pb: 4 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pb: 4 }}>
       <PageHeader title={t("finance.overviewTitle")} pageTitle={`${t("finance.overviewTitle")} | Oguz Travel`}>
         {isDemo && (
           <Tooltip title={t("finance.analytics.demoHint")} arrow>
             <Chip
-              icon={<FlaskConical size={13} />}
               label={t("finance.analytics.demo")}
               size="small"
-              sx={{ fontWeight: 600, color: "warning.main", backgroundColor: "action.hover", "& .MuiChip-icon": { color: "warning.main" } }}
+              variant="outlined"
+              sx={{ height: 24, fontSize: "0.72rem", fontWeight: 500, color: "text.secondary", borderColor: "divider" }}
             />
           </Tooltip>
         )}
@@ -161,51 +163,67 @@ const FinanceOverview = () => {
         </Box>
       </Box>
 
-      <KpiGrid totals={data.totals} currency={currency} />
+      <KpiGrid totals={data.totals} trend={data.trend} currency={currency} />
 
-      <GroupTitle>{t("finance.analytics.groups.cash")}</GroupTitle>
-      <CashFlowCard cashFlow={data.cashFlow} currency={currency} granularity={data.period.granularity} />
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, lg: 6 }}>
-          <FlowBreakdownCard
-            title={t("finance.analytics.flow.inTitle")}
-            subtitle={t("finance.analytics.flow.inSubtitle")}
-            items={data.cashFlow.inflow}
-            currency={currency}
-            color={colors.inflow}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, lg: 6 }}>
-          <FlowBreakdownCard
-            title={t("finance.analytics.flow.outTitle")}
-            subtitle={t("finance.analytics.flow.outSubtitle")}
-            items={data.cashFlow.outflow}
-            currency={currency}
-            color={colors.outflow}
-          />
-        </Grid>
-      </Grid>
+      <Box sx={{ borderBottom: "1px solid", borderColor: "divider", mt: 1 }}>
+        <CustomTabs
+          value={tab}
+          onChange={(_e, next) => updatePrefs({ tab: next })}
+          tabs={TABS.map((key) => ({ value: key, label: t(`finance.analytics.groups.${key}`) }))}
+          sx={{ mb: "-1px" }}
+        />
+      </Box>
 
-      <GroupTitle>{t("finance.analytics.groups.sales")}</GroupTitle>
-      <TrendCard trend={data.trend} currency={currency} granularity={data.period.granularity} />
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, lg: 7 }}>
-          <CategoryCard categories={data.categories} currency={currency} />
-        </Grid>
-        <Grid size={{ xs: 12, lg: 5 }}>
-          <WeekdayCard weekdays={data.weekdays} currency={currency} />
-        </Grid>
-      </Grid>
+      {tab === "cash" && (
+        <>
+          <CashFlowCard cashFlow={data.cashFlow} currency={currency} granularity={data.period.granularity} />
+          <Grid container spacing={2.5}>
+            <Grid size={{ xs: 12, lg: 6 }}>
+              <FlowBreakdownCard
+                title={t("finance.analytics.flow.inTitle")}
+                subtitle={t("finance.analytics.flow.inSubtitle")}
+                items={data.cashFlow.inflow}
+                currency={currency}
+                color={colors.inflow}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }}>
+              <FlowBreakdownCard
+                title={t("finance.analytics.flow.outTitle")}
+                subtitle={t("finance.analytics.flow.outSubtitle")}
+                items={data.cashFlow.outflow}
+                currency={currency}
+                color={colors.outflow}
+              />
+            </Grid>
+          </Grid>
+        </>
+      )}
 
-      <GroupTitle>{t("finance.analytics.groups.people")}</GroupTitle>
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, lg: 7 }}>
-          <OperatorCard operators={data.operators} currency={currency} />
+      {tab === "sales" && (
+        <>
+          <TrendCard trend={data.trend} currency={currency} granularity={data.period.granularity} />
+          <Grid container spacing={2.5}>
+            <Grid size={{ xs: 12, lg: 7 }}>
+              <CategoryCard categories={data.categories} currency={currency} />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 5 }}>
+              <WeekdayCard weekdays={data.weekdays} currency={currency} />
+            </Grid>
+          </Grid>
+        </>
+      )}
+
+      {tab === "people" && (
+        <Grid container spacing={2.5}>
+          <Grid size={{ xs: 12, lg: 7 }}>
+            <OperatorCard operators={data.operators} currency={currency} />
+          </Grid>
+          <Grid size={{ xs: 12, lg: 5 }}>
+            <ReceivablesCard receivables={data.receivables} currency={currency} />
+          </Grid>
         </Grid>
-        <Grid size={{ xs: 12, lg: 5 }}>
-          <ReceivablesCard receivables={data.receivables} currency={currency} />
-        </Grid>
-      </Grid>
+      )}
     </Box>
   );
 };

@@ -1,11 +1,14 @@
-import { Box, Grid, Paper, Tooltip, Typography, alpha } from "@mui/material";
-import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { Box, Tooltip, Typography } from "@mui/material";
+import { SparkLineChart } from "@mui/x-charts/SparkLineChart";
 import { useLocale } from "../../../../hooks/useLocale";
 import {
   changePercent,
+  chartSx,
   formatAmount,
   formatPercent,
   percentOf,
+  tooltipSlotProps,
+  useSeriesColors,
 } from "../functions/analyticsFormat";
 
 // `upIsGood: false` for costs, where growth is bad news.
@@ -18,74 +21,47 @@ const KPI_DEFS = [
   { key: "receivable", upIsGood: false },
 ];
 
-// Change vs the previous period as a soft pill (icon + number, never colour alone).
+// Change vs the previous period as plain text: arrow + number (never colour alone).
 export const DeltaBadge = ({ change, upIsGood }) => {
   const { t } = useLocale();
   if (change === null || !Number.isFinite(change)) return null;
 
   const flat = Math.abs(change) < 0.05;
   const up = change > 0;
-  const tone = flat ? "neutral" : up === upIsGood ? "good" : "bad";
-  const Icon = flat ? Minus : up ? ArrowUpRight : ArrowDownRight;
+  const color = flat ? "text.secondary" : up === upIsGood ? "success.main" : "error.main";
+  const arrow = flat ? "→" : up ? "↑" : "↓";
 
   return (
     <Tooltip title={t("finance.analytics.vsPrevious")} arrow placement="top">
-      <Box
-        sx={(theme) => {
-          const color =
-            tone === "good"
-              ? theme.palette.success.main
-              : tone === "bad"
-                ? theme.palette.error.main
-                : theme.palette.text.secondary;
-          return {
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.25,
-            px: 0.75,
-            py: 0.125,
-            borderRadius: "6px",
-            color,
-            backgroundColor: alpha(color, 0.1),
-            cursor: "default",
-            flexShrink: 0,
-          };
+      <Typography
+        component="span"
+        sx={{
+          color,
+          fontSize: "0.75rem",
+          fontWeight: 600,
+          fontVariantNumeric: "tabular-nums",
+          whiteSpace: "nowrap",
+          cursor: "default",
         }}
       >
-        <Icon size={13} strokeWidth={2.5} />
-        <Typography component="span" sx={{ fontSize: "0.72rem", fontWeight: 700, fontVariantNumeric: "tabular-nums" }}>
-          {formatPercent(Math.abs(change))}
-        </Typography>
-      </Box>
+        {arrow} {formatPercent(Math.abs(change))}
+      </Typography>
     </Tooltip>
   );
 };
 
-const KpiCard = ({ label, value, currency, hint, change, upIsGood, negative }) => (
-  <Paper
-    elevation={0}
-    sx={{
-      px: 2,
-      py: 1.75,
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      gap: 1,
-      borderRadius: "14px",
-      border: "1px solid",
-      borderColor: "divider",
-      backgroundColor: "background.paper",
-    }}
-  >
-    <Typography noWrap sx={{ fontSize: "0.78rem", fontWeight: 500, color: "text.secondary" }}>
+const KpiCell = ({ label, value, currency, hint, change, upIsGood, negative, points, labels, color }) => (
+  <Box sx={{ px: 2.5, pt: 2, pb: 1.5, display: "flex", flexDirection: "column", minWidth: 0, backgroundColor: "background.paper" }}>
+    <Typography noWrap sx={{ fontSize: "0.78rem", color: "text.secondary" }}>
       {label}
     </Typography>
     <Typography
       noWrap
       sx={{
+        mt: 0.75,
         fontSize: "1.45rem",
-        fontWeight: 700,
-        lineHeight: 1.15,
+        fontWeight: 600,
+        lineHeight: 1.2,
         letterSpacing: "-0.02em",
         fontVariantNumeric: "tabular-nums",
         color: negative ? "error.main" : "text.primary",
@@ -93,19 +69,37 @@ const KpiCard = ({ label, value, currency, hint, change, upIsGood, negative }) =
     >
       {formatAmount(value, currency)}
     </Typography>
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+    <Box sx={{ mt: 0.5, display: "flex", alignItems: "baseline", gap: 0.75, minWidth: 0, minHeight: 18 }}>
       <DeltaBadge change={change} upIsGood={upIsGood} />
       <Typography noWrap sx={{ fontSize: "0.72rem", color: "text.secondary", minWidth: 0 }}>
         {hint}
       </Typography>
     </Box>
-  </Paper>
+    <Box sx={{ mt: 1.25, mx: -0.25 }}>
+      <SparkLineChart
+        data={points}
+        height={28}
+        curve="linear"
+        color={color}
+        showTooltip
+        showHighlight
+        margin={{ top: 3, bottom: 3, left: 2, right: 2 }}
+        xAxis={{ scaleType: "point", data: labels }}
+        valueFormatter={(v) => formatAmount(v, currency)}
+        slotProps={tooltipSlotProps}
+        sx={chartSx()}
+      />
+    </Box>
+  </Box>
 );
 
-const KpiGrid = ({ totals, currency }) => {
+// Headline figures for the period, each with its in-period trend.
+const KpiGrid = ({ totals, trend, currency }) => {
   const { t } = useLocale();
+  const colors = useSeriesColors();
   const current = totals.current[currency];
   const previous = totals.previous[currency];
+  const labels = trend.map((p) => p.label);
 
   const hints = {
     revenue: t("finance.analytics.salesCount", { count: current.salesCount }),
@@ -121,21 +115,39 @@ const KpiGrid = ({ totals, currency }) => {
   };
 
   return (
-    <Grid container spacing={1.5}>
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "repeat(2, minmax(0, 1fr))",
+          md: "repeat(3, minmax(0, 1fr))",
+          lg: "repeat(6, minmax(0, 1fr))",
+        },
+        // 1px gaps over a divider-coloured background draw the hairlines.
+        gap: "1px",
+        backgroundColor: "divider",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: "12px",
+        overflow: "hidden",
+      }}
+    >
       {KPI_DEFS.map(({ key, upIsGood }) => (
-        <Grid key={key} size={{ xs: 6, md: 4, xl: 2 }}>
-          <KpiCard
-            label={t(`finance.analytics.kpi.${key}`)}
-            value={current[key]}
-            currency={currency}
-            hint={hints[key]}
-            change={changePercent(current[key], previous[key])}
-            upIsGood={upIsGood}
-            negative={key === "netProfit" && current[key] < 0}
-          />
-        </Grid>
+        <KpiCell
+          key={key}
+          label={t(`finance.analytics.kpi.${key}`)}
+          value={current[key]}
+          currency={currency}
+          hint={hints[key]}
+          change={changePercent(current[key], previous[key])}
+          upIsGood={upIsGood}
+          negative={key === "netProfit" && current[key] < 0}
+          points={trend.map((p) => p[currency][key] ?? 0)}
+          labels={labels}
+          color={colors.spark}
+        />
       ))}
-    </Grid>
+    </Box>
   );
 };
 

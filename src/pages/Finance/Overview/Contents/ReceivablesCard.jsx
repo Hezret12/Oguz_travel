@@ -34,7 +34,8 @@ const ReceivablesCard = ({ receivables, currency }) => {
           px: 2,
           py: 1.25,
           borderRadius: "10px",
-          backgroundColor: "action.hover",
+          border: "1px solid",
+          borderColor: "divider",
           "& > *:not(:first-of-type)": { pl: 2, borderLeft: "1px solid", borderColor: "divider" },
         }}
       >
@@ -50,7 +51,7 @@ const ReceivablesCard = ({ receivables, currency }) => {
                   {t(`finance.analytics.receivables.${b.key}`)}
                 </Typography>
               </Box>
-              <Typography noWrap sx={{ mt: 0.25, fontWeight: 700, fontSize: "1.05rem", fontVariantNumeric: "tabular-nums" }}>
+              <Typography noWrap sx={{ mt: 0.25, fontWeight: 600, fontSize: "1.05rem", fontVariantNumeric: "tabular-nums" }}>
                 {formatAmount(b[currency], currency)}
               </Typography>
               <Typography noWrap sx={{ fontSize: "0.72rem", color: "text.secondary" }}>
@@ -83,22 +84,23 @@ const ReceivablesCard = ({ receivables, currency }) => {
                   borderColor: "divider",
                 }}
               >
-                <Box sx={{ color, display: "flex" }}>
-                  <Icon size={16} />
-                </Box>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography noWrap sx={{ fontSize: "0.85rem", fontWeight: 600 }}>
+                  <Typography noWrap sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
                     {selectedLang(i.category)} · {i.operator}
                   </Typography>
                   <Typography noWrap sx={{ fontSize: "0.72rem", color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>
-                    {t("finance.analytics.receivables.daysOpen", { count: i.days })} ·{" "}
+                    <Box component="span" sx={{ color, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 0.5, verticalAlign: "middle" }}>
+                      <Icon size={11} />
+                      {t("finance.analytics.receivables.daysOpen", { count: i.days })}
+                    </Box>{" "}
+                    ·{" "}
                     {t("finance.analytics.receivables.paidOf", {
                       paid: formatAmount(i.paid, currency),
                       sale: formatAmount(i.sale, currency),
                     })}
                   </Typography>
                 </Box>
-                <Typography sx={{ fontWeight: 700, fontSize: "0.9rem", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                <Typography sx={{ fontWeight: 600, fontSize: "0.85rem", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
                   {formatAmount(i.due, currency)}
                 </Typography>
               </Box>

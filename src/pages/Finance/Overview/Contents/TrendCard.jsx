@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { useLocale } from "../../../../hooks/useLocale";
-import SectionCard, { EmptyState, LegendRow, ViewToggle } from "./SectionCard";
+import SectionCard, { ChartGradients, EmptyState, LegendRow, ViewToggle } from "./SectionCard";
 import {
   chartSx,
   formatAmount,
   formatCompactAmount,
+  tableSx,
   tickLabelStyle,
+  tooltipSlotProps,
   useSeriesColors,
+  xAxisBase,
+  yAxisBase,
 } from "../functions/analyticsFormat";
 
 const SERIES = ["revenue", "cost", "profit"];
@@ -20,6 +24,7 @@ const TrendCard = ({ trend, currency, granularity }) => {
   const { t } = useLocale();
   const colors = useSeriesColors();
   const [view, setView] = useState("chart");
+  const gradientId = `trend-${useId().replace(/:/g, "")}`;
 
   const hasData = trend.some((p) => p[currency].revenue || p[currency].cost);
   const seriesLabel = (key) => t(`finance.analytics.trend.${key}`);
@@ -37,34 +42,38 @@ const TrendCard = ({ trend, currency, granularity }) => {
         />
       }
     >
-      <LegendRow items={SERIES.map((key) => ({ label: seriesLabel(key), color: colors[key] }))} />
+      <LegendRow items={SERIES.map((key) => ({ label: seriesLabel(key), color: colors[key], dashed: key === "cost" }))} />
 
       {!hasData ? (
         <EmptyState>{t("finance.analytics.noData")}</EmptyState>
       ) : view === "chart" ? (
         <Box sx={{ mx: -1 }}>
+          <ChartGradients gradients={[{ id: gradientId, color: colors.revenue, opacity: 0.14 }]} />
           <LineChart
             height={300}
             hideLegend
             skipAnimation
             grid={{ horizontal: true }}
-            xAxis={[{ scaleType: "point", data: trend.map((p) => p.label), tickLabelStyle }]}
-            yAxis={[{ width: 60, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
+            xAxis={[{ ...xAxisBase, scaleType: "point", data: trend.map((p) => p.label), tickLabelStyle }]}
+            yAxis={[{ ...yAxisBase, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
             series={SERIES.map((key) => ({
               id: key,
               label: seriesLabel(key),
               data: trend.map((p) => p[currency][key]),
               color: colors[key],
-              curve: "monotoneX",
-              showMark: trend.length <= 14,
+              curve: "linear",
+              // Soft fill under sales only, so the lines stay readable.
+              area: key === "revenue",
+              showMark: false,
               valueFormatter: (v) => formatAmount(v, currency),
             }))}
-            sx={chartSx}
+            sx={chartSx({ revenue: gradientId }, ["cost"])}
+            slotProps={tooltipSlotProps}
           />
         </Box>
       ) : (
         <TableContainer sx={{ maxHeight: 316 }}>
-          <Table size="small" stickyHeader>
+          <Table size="small" sx={tableSx} stickyHeader>
             <TableHead>
               <TableRow>
                 <TableCell>{t("finance.analytics.trend.date")}</TableCell>
