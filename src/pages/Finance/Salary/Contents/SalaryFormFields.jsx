@@ -29,7 +29,6 @@ const CALC_FIELDS = [
   "bonus_type",
   "sales_amount",
   "bonus_percent",
-  "paid_amount",
 ];
 
 const money = (v) => formatMoney(v, { dashZero: false });
@@ -121,7 +120,14 @@ const BonusFields = ({ control, moneyField }) => {
   });
 
   if (bonusType !== BONUS_TYPE.PERCENT) {
-    return <Grid size={{ xs: 12, sm: 4 }}>{moneyField("bonus", t("salary.bonusResult"))}</Grid>;
+    // The spacer fills the columns the percent inputs use (4 + 2 + 3), so the
+    // fixed input keeps its row and the fields below never move up.
+    return (
+      <>
+        <Grid size={{ xs: 12, sm: 4 }}>{moneyField("bonus", t("salary.bonusResult"))}</Grid>
+        <Grid size={{ xs: 0, sm: 5 }} sx={{ display: { xs: "none", sm: "block" } }} />
+      </>
+    );
   }
 
   return (

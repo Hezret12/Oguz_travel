@@ -940,6 +940,120 @@
       "COMMUNICATION": "Internet & Telecom",
       "TRANSPORT": "Transport Expenses",
       "OTHER_EXPENSE": "Other Expenses"
+    },
+    "analytics": {
+      "demo": "Demo data",
+      "demoHint": "These numbers are sample data. Real office figures will appear once the API is connected.",
+      "noConversion": "USD and TMT are reported separately and never converted",
+      "vsPrevious": "Compared with the previous period of the same length",
+      "noData": "No data in this currency",
+      "total": "Total",
+      "periods": {
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "quarter": "Last 3 months",
+        "year": "This year"
+      },
+      "kpi": {
+        "revenue": "Sales",
+        "cost": "Cost of sales",
+        "grossProfit": "Gross profit",
+        "expenses": "Expenses",
+        "netProfit": "Net profit",
+        "receivable": "Receivable"
+      },
+      "salesCount": "{{count}} sales",
+      "costHint": "Paid to suppliers",
+      "margin": "Margin {{value}}",
+      "salariesIncluded": "Including salaries",
+      "afterExpenses": "After expenses",
+      "collectionRate": "Collected {{value}}",
+      "trend": {
+        "title": "Trend",
+        "chart": "Chart",
+        "table": "Table",
+        "date": "Date",
+        "revenue": "Sales",
+        "cost": "Cost",
+        "profit": "Profit",
+        "by": {
+          "day": "By day",
+          "week": "By week",
+          "month": "By month"
+        }
+      },
+      "categories": {
+        "title": "By service",
+        "subtitle": "Sales, profit and margin",
+        "service": "Service",
+        "count": "Count",
+        "profit": "Profit",
+        "margin": "Margin"
+      },
+      "operators": {
+        "title": "Operators",
+        "subtitle": "Ranked by sales",
+        "operator": "Operator"
+      },
+      "receivables": {
+        "title": "Receivables",
+        "subtitle": "Unpaid sales by age",
+        "d0_30": "0–30 days",
+        "d31_60": "31–60 days",
+        "d60_plus": "60+ days",
+        "salesCount": "{{count}} sales",
+        "largest": "Largest balances",
+        "empty": "No open balances",
+        "daysOpen": "{{count}} days",
+        "paidOf": "{{paid}} of {{sale}} paid"
+      },
+      "groups": {
+        "cash": "Cash flow",
+        "sales": "Sales",
+        "people": "Operators & receivables"
+      },
+      "cash": {
+        "title": "Money in and out",
+        "subtitle": "Actual payments and spending",
+        "opening": "Opening balance",
+        "inflow": "Money in",
+        "outflow": "Money out",
+        "net": "Net flow",
+        "closing": "Closing balance",
+        "balanceTitle": "Cash balance"
+      },
+      "flow": {
+        "inTitle": "Where money came from",
+        "inSubtitle": "Payments received by service",
+        "outTitle": "Where money went",
+        "outSubtitle": "Suppliers, expenses and salaries",
+        "item": "Item",
+        "group": "Type",
+        "amount": "Amount",
+        "groups": {
+          "sales": "Sales payment",
+          "supplier": "Supplier",
+          "expense": "Cash expense",
+          "salary": "Salary",
+          "exchange": "Currency exchange"
+        }
+      },
+      "weekday": {
+        "title": "Days of the week",
+        "subtitle": "Which days sell the most",
+        "busiest": "Busiest",
+        "quietest": "Quietest",
+        "day": "Day"
+      },
+      "weekdays": {
+        "0": "Sun",
+        "1": "Mon",
+        "2": "Tue",
+        "3": "Wed",
+        "4": "Thu",
+        "5": "Fri",
+        "6": "Sat"
+      }
     }
   },
   "professionalTranslation": {

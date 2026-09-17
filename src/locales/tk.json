@@ -926,7 +926,121 @@
     "totalSale": "Jemi Satyş",
     "totalCost": "Jemi Harajat",
     "netProfit": "Arassa Peýda",
-    "totalCredit": "Algy / Bergi"
+    "totalCredit": "Algy / Bergi",
+    "analytics": {
+      "demo": "Synag maglumaty",
+      "demoHint": "Görkezilýän sanlar synag üçin döredildi. API baglanandan soň ofisiň hakyky maglumatlary görkeziler.",
+      "noConversion": "USD we TMT aýratyn hasaplanýar, biri-birine öwrülmeýär",
+      "vsPrevious": "Öňki şeýle döwür bilen deňeşdirilende",
+      "noData": "Bu walýutada maglumat ýok",
+      "total": "Jemi",
+      "periods": {
+        "thisMonth": "Şu aý",
+        "lastMonth": "Geçen aý",
+        "quarter": "Soňky 3 aý",
+        "year": "Şu ýyl"
+      },
+      "kpi": {
+        "revenue": "Satyş",
+        "cost": "Özüne düşýän baha",
+        "grossProfit": "Brutto peýda",
+        "expenses": "Çykdajylar",
+        "netProfit": "Arassa peýda",
+        "receivable": "Alynmaly"
+      },
+      "salesCount": "{{count}} satyş",
+      "costHint": "Üpjün edijilere",
+      "margin": "Marža {{value}}",
+      "salariesIncluded": "Aýlyklar bilen",
+      "afterExpenses": "Çykdajylardan soň",
+      "collectionRate": "Ýygnalan {{value}}",
+      "trend": {
+        "title": "Dinamika",
+        "chart": "Grafik",
+        "table": "Tablisa",
+        "date": "Sene",
+        "revenue": "Satyş",
+        "cost": "Özüne düşýän",
+        "profit": "Peýda",
+        "by": {
+          "day": "Günler boýunça",
+          "week": "Hepdeler boýunça",
+          "month": "Aýlar boýunça"
+        }
+      },
+      "categories": {
+        "title": "Hyzmatlar boýunça",
+        "subtitle": "Satyş, peýda we marža",
+        "service": "Hyzmat",
+        "count": "Sany",
+        "profit": "Peýda",
+        "margin": "Marža"
+      },
+      "operators": {
+        "title": "Operatorlar",
+        "subtitle": "Satyş boýunça reýting",
+        "operator": "Operator"
+      },
+      "receivables": {
+        "title": "Alynmaly bergiler",
+        "subtitle": "Doly tölenmedik satyşlar möhleti boýunça",
+        "d0_30": "0–30 gün",
+        "d31_60": "31–60 gün",
+        "d60_plus": "60+ gün",
+        "salesCount": "{{count}} satyş",
+        "largest": "Iň uly bergiler",
+        "empty": "Açyk bergi ýok",
+        "daysOpen": "{{count}} gün",
+        "paidOf": "{{paid}} / {{sale}} tölendi"
+      },
+      "groups": {
+        "cash": "Pul akymy",
+        "sales": "Satyş",
+        "people": "Operatorlar we bergiler"
+      },
+      "cash": {
+        "title": "Girýän we çykýan pul",
+        "subtitle": "Hakyky tölegler we çykdajylar",
+        "opening": "Başlangyç galyndy",
+        "inflow": "Girdi",
+        "outflow": "Çykdy",
+        "net": "Arassa akym",
+        "closing": "Ahyrky galyndy",
+        "balanceTitle": "Kassa galyndysy"
+      },
+      "flow": {
+        "inTitle": "Pul nireden geldi",
+        "inSubtitle": "Hyzmatlar boýunça alnan tölegler",
+        "outTitle": "Pul nirä gitdi",
+        "outSubtitle": "Üpjün edijiler, çykdajylar we aýlyklar",
+        "item": "Madda",
+        "group": "Görnüşi",
+        "amount": "Mukdary",
+        "groups": {
+          "sales": "Satyş tölegi",
+          "supplier": "Üpjün ediji",
+          "expense": "Kassa çykdajysy",
+          "salary": "Aýlyk",
+          "exchange": "Walýuta çalşygy"
+        }
+      },
+      "weekday": {
+        "title": "Hepdäniň günleri",
+        "subtitle": "Satyş haýsy günlerde köp",
+        "busiest": "Iň köp",
+        "quietest": "Iň az",
+        "day": "Gün"
+      },
+      "weekdays": {
+        "0": "Ýek",
+        "1": "Duş",
+        "2": "Siş",
+        "3": "Çar",
+        "4": "Pen",
+        "5": "Ann",
+        "6": "Şen"
+      }
+    }
   },
   "professionalTranslation": {
     "title": "Professional terjime",

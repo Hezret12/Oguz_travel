@@ -15,7 +15,6 @@ import Pagination from "../../../components/Pagination";
 import TableEmptyState from "../../../components/TableEmptyState";
 import StackedCell from "../../../components/inputs/StackCell";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
-import PaymentStatusCell from "../../../components/PaymentStatusCell";
 import DeleteDialog from "../../../components/DeleteDialog";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import ExportExcelButton from "../../../components/ExportExcelButton";
@@ -487,35 +486,6 @@ const Salary = () => {
             : "-",
       },
       {
-        id: "paid_status",
-        header: t("salary.paidStatus"),
-        size: 110,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => {
-          const percent = getPaidPercent(row.original.paid_amount, row.original.payable_amount);
-          return (
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.75 }}>
-              <PaymentStatusCell percent={percent} />
-              {!isLocked && percent < 100 && (
-                <Tooltip title={t("salary.markPaid")} arrow>
-                  <span>
-                    <IconButton
-                      size="small"
-                      color="success"
-                      disabled={isMarkingPaid}
-                      onClick={() => handleMarkPaid([row.original.guid])}
-                    >
-                      <CheckCheck size={16} />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              )}
-            </Box>
-          );
-        },
-      },
-      {
         accessorKey: "note",
         id: "note",
         header: t("salary.note"),
@@ -529,19 +499,36 @@ const Salary = () => {
       {
         id: "actions",
         header: t("columns.actions"),
-        size: 100,
+        size: 140,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row, table: mrtTable }) =>
-          isLocked ? (
-            <Lock size={15} style={{ opacity: 0.4 }} />
-          ) : (
-            <ColumnActionButtons
-              row={row}
-              table={mrtTable}
-              onDelete={() => openDeleteDialog(row.original)}
-            />
-          ),
+        Cell: ({ row, table: mrtTable }) => {
+          if (isLocked) return <Lock size={15} style={{ opacity: 0.4 }} />;
+          const fullyPaid =
+            getPaidPercent(row.original.paid_amount, row.original.payable_amount) >= 100;
+          return (
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+              {/* Kept in the layout when hidden so the edit/delete buttons stay aligned */}
+              <Tooltip title={fullyPaid ? "" : t("salary.markPaid")} arrow>
+                <span style={{ visibility: fullyPaid ? "hidden" : "visible" }}>
+                  <IconButton
+                    size="small"
+                    color="success"
+                    disabled={fullyPaid || isMarkingPaid}
+                    onClick={() => handleMarkPaid([row.original.guid])}
+                  >
+                    <CheckCheck size={16} />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <ColumnActionButtons
+                row={row}
+                table={mrtTable}
+                onDelete={() => openDeleteDialog(row.original)}
+              />
+            </Box>
+          );
+        },
       },
     ],
     [
