@@ -360,6 +360,10 @@ export const GlobalEmployeeAutocomplete = ({
   error,
   helperText,
   sx = {},
+  // Alternative list endpoint with the same response shape (e.g. a module
+  // that only exposes its own scoped employees).
+  apiFn = getAllEmployeeApi,
+  queryKeyPrefix = "employees",
 }) => {
   const { t, selectedLang } = useLocale();
   const [searchQuery, setSearchQuery] = useState("");
@@ -367,9 +371,9 @@ export const GlobalEmployeeAutocomplete = ({
 
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["employees", "autocomplete", debouncedSearch],
+      queryKey: [queryKeyPrefix, "autocomplete", debouncedSearch],
       queryFn: ({ pageParam = 1 }) =>
-        getAllEmployeeApi({
+        apiFn({
           page: pageParam,
           limit: 40,
           ...(debouncedSearch.trim() ? { search: debouncedSearch.trim() } : {}),

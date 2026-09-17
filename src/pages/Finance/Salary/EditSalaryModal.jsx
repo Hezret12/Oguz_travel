@@ -54,11 +54,11 @@ const EditSalaryModal = ({ table, row, open, close }) => {
     updateSalary({ guid: original.guid, ...buildSalaryPayload(values) });
 
   return (
-    <CustomDialog open={isModalOpen} close={handleClose} widthX={760}>
+    <CustomDialog open={isModalOpen} close={handleClose} widthX={680}>
       <CustomDialogHeader variant="h5" title={t("salary.edit")} />
       <CustomForm handleSubmit={handleSubmit(onSubmit)}>
         <SalaryFormFields control={control} initialEmployee={original?.employee} />
-        <FooterButton loading={isPending} onCancel={handleClose} />
+        <FooterButton loading={isPending} onCancel={handleClose} sx={{ mt: 2 }} />
       </CustomForm>
     </CustomDialog>
   );

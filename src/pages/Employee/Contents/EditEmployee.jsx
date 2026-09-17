@@ -4,6 +4,7 @@ import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { FooterButton } from "../../../components/Dialog/FooterButton";
+import CustomCheckbox from "../../../components/CustomCheckbox";
 import { Grid } from "@mui/material";
 import { useValidShema } from "../../../functions/useValidShema";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -73,6 +74,7 @@ const EditEmployee = ({ table, row }) => {
       position_guids: Array.isArray(row?.original?.positions) ? row.original.positions.map((p) => p.guid) : [],
       office_guid: row?.original?.office?.guid || "",
       address: row?.original?.address || "",
+      is_active: row?.original?.is_active !== false,
     },
     resolver: yupResolver(editEmployee),
     mode: "onSubmit",
@@ -91,6 +93,7 @@ const EditEmployee = ({ table, row }) => {
         phone_number: formattedPhone,
         position_guids: data.position_guids,
         office_guid: data.office_guid,
+        is_active: Boolean(data.is_active),
       };
 
       if (data.department_guid) payload.department_guid = data.department_guid;
@@ -187,6 +190,14 @@ const EditEmployee = ({ table, row }) => {
               name="address"
               control={control}
               label={t("columns.address")}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }} sx={{ display: "flex", alignItems: "flex-end" }}>
+            <CustomCheckbox
+              name="is_active"
+              control={control}
+              label={t("employee.isActive")}
             />
           </Grid>
         </Grid>

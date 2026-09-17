@@ -239,3 +239,7 @@ export const getSalarySummaryApi = async (params = {}) => {
 export const getSalaryMonthStatusApi = async (params = {}) => {
   return await api.getPrivate('/salary/get-month-status', params);
 };
+
+export const getSalaryEmployeesApi = async (params = {}) => {
+  return await api.getPrivate('/salary/get-employees', params);
+};

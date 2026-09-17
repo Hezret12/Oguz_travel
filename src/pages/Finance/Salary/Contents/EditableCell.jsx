@@ -95,29 +95,33 @@ const EditableCell = ({
       {...{ [CELL_ATTR]: `${rowIndex}:${field}` }}
       tabIndex={readOnly || editing ? -1 : 0}
       onFocus={startEdit}
+      // Looks like an input (same 7px radius as CustomTextField) so it is
+      // obvious the value can be typed in; a locked month drops the frame.
       sx={(theme) => ({
         position: "relative",
-        mx: -1,
+        width: "100%",
+        minWidth: 0,
         px: 1,
-        height: 32,
+        height: 34,
         display: "flex",
         alignItems: "center",
         justifyContent: align === "right" ? "flex-end" : "center",
-        borderRadius: "6px",
+        borderRadius: "7px",
         border: "1px solid",
-        borderColor: editing ? "primary.main" : "transparent",
-        backgroundColor: editing
-          ? "background.paper"
-          : changed
-            ? alpha(theme.palette.info.main, 0.1)
-            : "transparent",
+        borderColor: readOnly ? "transparent" : editing ? "primary.main" : "divider",
+        backgroundColor: readOnly
+          ? "transparent"
+          : changed && !editing
+            ? alpha(theme.palette.info.main, 0.08)
+            : "background.paper",
+        boxShadow: editing ? `0 0 0 3px ${alpha(theme.palette.primary.main, 0.18)}` : "none",
         cursor: readOnly ? "default" : "text",
         outline: "none",
         fontVariantNumeric: "tabular-nums",
         whiteSpace: "nowrap",
-        transition: "background-color 0.15s ease, border-color 0.15s ease",
+        transition: "background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
         ...(!readOnly && {
-          "&:hover": { borderColor: editing ? "primary.main" : "divider" },
+          "&:hover": { borderColor: editing ? "primary.main" : "text.secondary" },
         }),
       })}
     >
@@ -140,7 +144,7 @@ const EditableCell = ({
         </Box>
       )}
       {pending !== null && (
-        <CircularProgress size={10} sx={{ position: "absolute", top: 3, right: 2 }} />
+        <CircularProgress size={10} sx={{ position: "absolute", top: 4, right: 4 }} />
       )}
     </Box>
   );

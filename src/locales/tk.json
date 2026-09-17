@@ -183,6 +183,9 @@
     "add": "Işgär goşmak",
     "edit": "Işgär üýtgetmek",
     "deleteConfirm": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaz.",
+    "active": "Işjeň",
+    "inactive": "Işjeň däl",
+    "isActive": "Işjeň işgär (aýlyk sanawynda görünýär)",
     "validation": {
       "fullNameRequired": "Doly ady zerurdyr"
     }
@@ -1005,7 +1008,7 @@
     "nextMonth": "Indiki aý",
     "prefilledFromLast": "Oklad we karta geçýäni öňki aýdan dolduryldy",
     "sectionEarnings": "Aýlyk we iş günleri",
-    "sectionDeductions": "Tutulýanlar we bonus",
+    "sectionDeductions": "Tutulýanlar",
     "sectionPayment": "Töleg",
     "deleteConfirm": "Bu aýlyk ýazgysyny pozmak isleýärsiňizmi?",
     "generateTitle": "{{month}} aýy entek başlanmady",
@@ -1023,6 +1026,20 @@
     "exportFailed": "Excel faýly döredilmedi",
     "inlineHint": "Öýjüge basyp üýtgediň: Enter — aşak, Tab — saga, Esc — ýatyr",
     "invalidDays": "Iş gün 1-den 31-e çenli bolmaly",
+    "bonusFixed": "Kesgitli",
+    "bonusPercent": "Satuwdan %",
+    "salesAmount": "Satuw mukdary",
+    "percent": "Göterim",
+    "bonusResult": "Bonus",
+    "breakdown": "Hasaplama",
+    "remaining": "Galan",
+    "saveAndAddAnother": "Ýatda sakla we täzesini goş",
+    "alreadyExistsHint": "Bu işgäriň {{month}} aýlygy eýýäm bar",
+    "lastMonthHint": "{{month}}: oklad {{base}}, karta {{card}}",
+    "noHistoryHint": "Öňki aýlyk ýok",
+    "checking": "Barlanýar…",
+    "percentOf": "{{sales}} × {{percent}}%",
+    "sectionBonus": "Bonus",
     "validation": {
       "monthRequired": "Aý saýlanmaly",
       "employeeRequired": "Işgär saýlanmaly",
@@ -1030,7 +1047,9 @@
       "notNegative": "Otrisatel bolup bilmez",
       "wholeNumber": "Bitin san bolmaly",
       "workDaysRange": "1-den 31-e çenli bolmaly",
-      "workedDaysExceed": "Işlän gün iş gününden köp bolup bilmez"
+      "workedDaysExceed": "Işlän gün iş gününden köp bolup bilmez",
+      "percentRequired": "Göterim girizilmeli",
+      "percentRange": "0-dan 100-e çenli bolmaly"
     }
   }
 }

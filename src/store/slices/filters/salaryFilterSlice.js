@@ -6,7 +6,6 @@ export const salaryFilterSlice = createFilterSlice({
   defaultFilters: {
     search: '',
     month: dayjs().format('YYYY-MM'),
-    office_guid: '',
   },
   defaultPageSize: 50,
 });

@@ -7,7 +7,19 @@ export const toNumber = (value) => {
   return Number.isFinite(num) ? num : 0;
 };
 
-// Mirrors SalaryService.calculate on the backend (the "Aýlyk" Excel sheet):
+export const BONUS_TYPE = { FIXED: "fixed", PERCENT: "percent" };
+
+// 1 000 sales at 10% → 100.
+export const calculatePercentBonus = (sales, percent) =>
+  round2((toNumber(sales) * toNumber(percent)) / 100);
+
+export const resolveBonus = (values = {}) =>
+  values.bonus_type === BONUS_TYPE.PERCENT
+    ? calculatePercentBonus(values.sales_amount, values.bonus_percent)
+    : toNumber(values.bonus);
+
+// Mirrors SalaryService.normalize/calculate on the backend (the "Aýlyk" sheet):
+//   BONUS   = SATUW × % / 100, or a fixed amount
 //   JEMI    = OKLAD × IŞLÄN / IŞ GÜN + BONUS
 //   BERMELI = JEMI − KART − AWANS − Kofe KREDIT − KARZ
 // The server recomputes these on save; this is only for the live preview.
@@ -17,14 +29,26 @@ export const calculateSalary = (values = {}) => {
   const workedDays = toNumber(values.worked_days);
   const ratio = workDays > 0 ? workedDays / workDays : 1;
   const earned = round2(baseSalary * ratio);
-  const total = round2(earned + toNumber(values.bonus));
+  const bonus = resolveBonus(values);
+  const total = round2(earned + bonus);
   const deductions = round2(
     toNumber(values.card_amount) +
       toNumber(values.advance) +
       toNumber(values.cafeteria_credit) +
       toNumber(values.loan),
   );
-  return { earned, total, deductions, payable: round2(total - deductions) };
+  const payable = round2(total - deductions);
+  return {
+    baseSalary,
+    workDays,
+    workedDays,
+    earned,
+    bonus,
+    total,
+    deductions,
+    payable,
+    remaining: round2(payable - toNumber(values.paid_amount)),
+  };
 };
 
 // Month form values are "YYYY-MM" or an ISO string from the date picker.
@@ -74,11 +98,20 @@ export const buildSalaryPayload = (values) => ({
   advance: toNumber(values.advance),
   cafeteria_credit: toNumber(values.cafeteria_credit),
   loan: toNumber(values.loan),
-  bonus: toNumber(values.bonus),
+  ...(values.bonus_type === BONUS_TYPE.PERCENT
+    ? {
+        sales_amount: toNumber(values.sales_amount),
+        bonus_percent: toNumber(values.bonus_percent),
+        bonus: calculatePercentBonus(values.sales_amount, values.bonus_percent),
+      }
+    : { sales_amount: null, bonus_percent: null, bonus: toNumber(values.bonus) }),
   paid_amount: toNumber(values.paid_amount),
   paid_date: values.paid_date ? dayjs(values.paid_date).format("YYYY-MM-DD") : null,
   note: values.note || "",
 });
+
+export const isPercentRow = (row) =>
+  row?.bonus_percent !== null && row?.bonus_percent !== undefined;
 
 const asInput = (value) =>
   value === null || value === undefined ? "" : String(Number(value));
@@ -95,6 +128,9 @@ export const salaryToFormValues = (row) => ({
   cafeteria_credit: asInput(row?.cafeteria_credit),
   loan: asInput(row?.loan),
   bonus: asInput(row?.bonus),
+  bonus_type: isPercentRow(row) ? BONUS_TYPE.PERCENT : BONUS_TYPE.FIXED,
+  sales_amount: asInput(row?.sales_amount),
+  bonus_percent: asInput(row?.bonus_percent),
   paid_amount: asInput(row?.paid_amount),
   paid_date: row?.paid_date || null,
   note: row?.note || "",

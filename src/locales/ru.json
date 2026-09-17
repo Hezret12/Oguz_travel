@@ -183,6 +183,9 @@
     "add": "Işgär goşmak",
     "edit": "Işgär üýtgetmek",
     "deleteConfirm": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaz.",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "isActive": "Активный сотрудник (виден в зарплате)",
     "validation": {
       "fullNameRequired": "Doly ady zerurdyr"
     }
@@ -1019,7 +1022,7 @@
     "nextMonth": "Следующий месяц",
     "prefilledFromLast": "Оклад и сумма на карту взяты из прошлого месяца",
     "sectionEarnings": "Оклад и рабочие дни",
-    "sectionDeductions": "Удержания и бонус",
+    "sectionDeductions": "Удержания",
     "sectionPayment": "Выплата",
     "deleteConfirm": "Вы уверены, что хотите удалить эту запись о зарплате?",
     "generateTitle": "Месяц {{month}} ещё не начат",
@@ -1037,6 +1040,20 @@
     "exportFailed": "Не удалось создать Excel файл",
     "inlineHint": "Нажмите на ячейку для изменения: Enter — вниз, Tab — вправо, Esc — отмена",
     "invalidDays": "Рабочих дней должно быть от 1 до 31",
+    "bonusFixed": "Фиксированный",
+    "bonusPercent": "% от продаж",
+    "salesAmount": "Сумма продаж",
+    "percent": "Процент",
+    "bonusResult": "Бонус",
+    "breakdown": "Расчёт",
+    "remaining": "Остаток",
+    "saveAndAddAnother": "Сохранить и добавить ещё",
+    "alreadyExistsHint": "У сотрудника уже есть зарплата за {{month}}",
+    "lastMonthHint": "{{month}}: оклад {{base}}, на карту {{card}}",
+    "noHistoryHint": "Прошлых зарплат нет",
+    "checking": "Проверка…",
+    "percentOf": "{{sales}} × {{percent}}%",
+    "sectionBonus": "Бонус",
     "validation": {
       "monthRequired": "Выберите месяц",
       "employeeRequired": "Выберите сотрудника",
@@ -1044,7 +1061,9 @@
       "notNegative": "Не может быть отрицательным",
       "wholeNumber": "Должно быть целым числом",
       "workDaysRange": "Должно быть от 1 до 31",
-      "workedDaysExceed": "Отработанные дни не могут превышать рабочие"
+      "workedDaysExceed": "Отработанные дни не могут превышать рабочие",
+      "percentRequired": "Введите процент",
+      "percentRange": "Должно быть от 0 до 100"
     }
   }
 }

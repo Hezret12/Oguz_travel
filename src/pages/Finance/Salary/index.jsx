@@ -4,7 +4,7 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { Box, Button, Checkbox, IconButton, Tooltip, Typography } from "@mui/material";
-import { CheckCheck, Lock, LockOpen, UserPlus } from "lucide-react";
+import { Building2, CheckCheck, Lock, LockOpen, UserPlus } from "lucide-react";
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
@@ -17,7 +17,6 @@ import StackedCell from "../../../components/inputs/StackCell";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import PaymentStatusCell from "../../../components/PaymentStatusCell";
 import DeleteDialog from "../../../components/DeleteDialog";
-import FilterDrawer from "../../../components/FilterDrawer";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import ExportExcelButton from "../../../components/ExportExcelButton";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
@@ -25,7 +24,8 @@ import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { useGet } from "../../../hooks/CRUD/useGet";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
-import { useTableFilters, useDrawerFilters } from "../../../hooks/usePageFilters";
+import { useTableFilters } from "../../../hooks/usePageFilters";
+import { useAuth } from "../../../context/useAuth";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import {
   getAllSalariesApi,
@@ -39,40 +39,18 @@ import {
   salaryFilterActions,
   salaryFilterSelectors,
 } from "../../../store/slices/filters/salaryFilterSlice";
-import SalaryFilter from "./Contents/SalaryFilter";
 import SalaryMonthPicker from "./Contents/SalaryMonthPicker";
 import SalaryGenerateState from "./Contents/SalaryGenerateState";
 import EditableCell from "./Contents/EditableCell";
 import AddSalaryModal from "./AddSalaryModal";
 import EditSalaryModal from "./EditSalaryModal";
-import { formatMoney, getPaidPercent, toNumber } from "./functions/salaryUtils";
+import {
+  formatMoney,
+  getPaidPercent,
+  isPercentRow,
+  toNumber,
+} from "./functions/salaryUtils";
 import { exportSalaryExcel } from "./functions/exportSalaryExcel";
-
-const SalaryFilterDrawer = () => {
-  const {
-    draft,
-    isDrawerOpen,
-    setDraftFilter,
-    applyFilters,
-    cancelFilters,
-    resetFilters,
-  } = useDrawerFilters({
-    actions: salaryFilterActions,
-    selectors: salaryFilterSelectors,
-  });
-
-  return (
-    <FilterDrawer
-      open={isDrawerOpen}
-      onClose={cancelFilters}
-      onApply={applyFilters}
-      onReset={resetFilters}
-      onCancel={cancelFilters}
-    >
-      <SalaryFilter filters={draft} onFilterChange={setDraftFilter} />
-    </FilterDrawer>
-  );
-};
 
 const RIGHT = {
   muiTableHeadCellProps: { align: "right" },
@@ -98,13 +76,16 @@ const FooterValue = ({ value }) => (
 const Salary = () => {
   const { t, selectedLang } = useLocale();
   const { formatChange } = useDateFormat();
+  const { user } = useAuth();
+  // normalizeUser keeps the office's multilingual fullName object.
+  const officeName =
+    typeof user?.office === "string" ? user.office : selectedLang(user?.office) || "";
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
   const [isExporting, setIsExporting] = useState(false);
 
   const {
     applied,
-    openDrawer,
     setFilter,
     resetFilters,
     searchQuery,
@@ -123,7 +104,7 @@ const Salary = () => {
   const monthLabel = dayjs(`${month}-01`).format("MM.YYYY");
 
   // Selection belongs to one month/page; drop it when either changes.
-  const selectionScope = `${month}|${applied.office_guid}|${page}`;
+  const selectionScope = `${month}|${page}`;
   const [prevSelectionScope, setPrevSelectionScope] = useState(selectionScope);
   if (selectionScope !== prevSelectionScope) {
     setPrevSelectionScope(selectionScope);
@@ -171,6 +152,8 @@ const Salary = () => {
     params: { month },
   });
   const isLocked = Boolean(monthStatus?.is_locked);
+  // An admin without an office sees every office but cannot lock one.
+  const canLock = monthStatus?.month === month && monthStatus?.can_lock !== false;
 
   // --- mutations -----------------------------------------------------------
   // useUpdate / useDelete wrap each invalidateQueries entry as [entry].
@@ -221,9 +204,10 @@ const Salary = () => {
     [setFilter],
   );
 
+  // The server limits generation to the caller's office and active employees.
   const handleGenerate = useCallback(() => {
-    generateMonth({ month, ...(applied.office_guid && { office_guid: applied.office_guid }) });
-  }, [generateMonth, month, applied.office_guid]);
+    generateMonth({ month });
+  }, [generateMonth, month]);
 
   const handleMarkPaid = useCallback(
     (guids) => markPaid({ guids }),
@@ -427,9 +411,29 @@ const Salary = () => {
       {
         id: "bonus",
         header: t("salary.bonus"),
-        size: 100,
+        size: 130,
         ...RIGHT,
-        ...editable("bonus"),
+        // A percent bonus is derived from sales × %, so it is edited in the
+        // modal; only fixed bonuses are edited inline.
+        Cell: (props) => {
+          const { row } = props;
+          if (!isPercentRow(row.original)) return editable("bonus").Cell(props);
+          return (
+            <Tooltip title={t("salary.bonusPercent")} arrow placement="top">
+              <Box sx={{ textAlign: "right", lineHeight: 1.2 }}>
+                <Box component="span" sx={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                  {formatMoney(row.original.bonus)}
+                </Box>
+                <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                  {t("salary.percentOf", {
+                    sales: formatMoney(row.original.sales_amount, { dashZero: false }),
+                    percent: toNumber(row.original.bonus_percent),
+                  })}
+                </Typography>
+              </Box>
+            </Tooltip>
+          );
+        },
         Footer: footerMoney("bonus"),
       },
       {
@@ -699,10 +703,30 @@ const Salary = () => {
         title={t("salary.title")}
         pageTitle={`${t("salary.title")} | Oguz Travel`}
         addButtonText={t("salary.add")}
-        filterButtonText={t("filter")}
         onAddClick={isLocked ? undefined : () => table.setCreatingRow(true)}
-        onFilterClick={openDrawer}
       >
+        {officeName && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.75,
+              height: 40,
+              px: 1.5,
+              borderRadius: "10px",
+              border: "1px solid",
+              borderColor: "divider",
+              color: "text.secondary",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <Building2 size={16} />
+            <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+              {officeName}
+            </Typography>
+          </Box>
+        )}
+
         <SalaryMonthPicker value={month} onChange={handleMonthChange} />
 
         <Tooltip title={isLocked ? t("salary.lockedHint") : ""} arrow>
@@ -710,7 +734,7 @@ const Salary = () => {
             variant={isLocked ? "contained" : "outlined"}
             color={isLocked ? "warning" : "inherit"}
             disableElevation
-            disabled={isLocking || monthStatus?.month !== month}
+            disabled={isLocking || !canLock}
             startIcon={isLocked ? <Lock size={16} /> : <LockOpen size={16} />}
             onClick={(e) => {
               e.currentTarget.blur();
@@ -735,8 +759,6 @@ const Salary = () => {
           label={t("salary.exportExcel")}
         />
       </PageHeader>
-
-      <SalaryFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}

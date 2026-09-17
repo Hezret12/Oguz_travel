@@ -318,6 +318,21 @@ export const useValidShema = () => {
     cafeteria_credit: salaryMoney(),
     loan: salaryMoney(),
     bonus: salaryMoney(),
+    bonus_type: yup.string().oneOf(["fixed", "percent"]),
+    sales_amount: salaryMoney(),
+    bonus_percent: yup
+      .number()
+      .transform((value, original) => (original === "" || original == null ? undefined : value))
+      .typeError(t("validation.invalidNumber"))
+      .when("bonus_type", {
+        is: "percent",
+        then: (schema) =>
+          schema
+            .required(t("salary.validation.percentRequired"))
+            .min(0, t("salary.validation.percentRange"))
+            .max(100, t("salary.validation.percentRange")),
+        otherwise: (schema) => schema.notRequired(),
+      }),
     paid_amount: salaryMoney(),
     paid_date: yup.string().nullable(),
     note: stringOptionalValidSchema(),

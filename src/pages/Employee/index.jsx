@@ -8,6 +8,8 @@ import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 import { Box, Chip, Tooltip } from "@mui/material";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
+import StatusChip from "../../components/StatusChip";
+import { EMPLOYEE_ACTIVE_CONFIG } from "../../functions/statusChipConfigs";
 import AddEmployee from "./Contents/AddEmployee";
 import EditEmployee from "./Contents/EditEmployee";
 import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
@@ -277,6 +279,18 @@ const Employee = () => {
         id: "office",
         header: t("columns.office"),
         size: 130,
+      },
+      {
+        accessorKey: "is_active",
+        id: "is_active",
+        header: t("columns.status"),
+        size: 110,
+        Cell: ({ row }) => (
+          <StatusChip
+            status={row.original.is_active === false ? "FALSE" : "TRUE"}
+            config={EMPLOYEE_ACTIVE_CONFIG}
+          />
+        ),
       },
       {
         id: "actions",

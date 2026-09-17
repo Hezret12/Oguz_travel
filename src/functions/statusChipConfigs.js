@@ -90,6 +90,11 @@ export const CAFETERIA_TYPE_CONFIG = {
   "0": { label: "Çykdajy", color: "#dc2626" },
 };
 
+export const EMPLOYEE_ACTIVE_CONFIG = {
+  TRUE: { label: "Işjeň", labelKey: "employee.active", color: "#16a34a" },
+  FALSE: { label: "Işjeň däl", labelKey: "employee.inactive", color: "#94a3b8" },
+};
+
 export const PURCHASE_LOT_STATUS_CONFIG = {
   ACTIVE: { label: "Işjeň", color: "#16a34a" },
   EXHAUSTED: { label: "Gutarýan / Gutardy", color: "#64748b" },
