@@ -36,14 +36,14 @@ const SalaryMonthPicker = ({ value, onChange }) => {
         }}
         views={["year", "month"]}
         openTo="month"
-        format="MM.YYYY"
+        format="MMMM YYYY"
         slotProps={{
           textField: {
             size: "small",
             variant: "standard",
             slotProps: { input: { disableUnderline: true } },
             sx: {
-              width: 128,
+              width: 150,
               "& .MuiPickersSectionList-root": {
                 justifyContent: "center",
                 fontWeight: 700,

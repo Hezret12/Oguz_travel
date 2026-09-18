@@ -1,9 +1,9 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, Checkbox, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { Building2, CheckCheck, Lock, LockOpen } from "lucide-react";
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
@@ -13,6 +13,8 @@ import { useDateFormat } from "../../../functions/generalHelpers";
 import PageHeader from "../../../components/PageHeader";
 import Pagination from "../../../components/Pagination";
 import TableEmptyState from "../../../components/TableEmptyState";
+import StatusChip from "../../../components/StatusChip";
+import { SALARY_PAID_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import DeleteDialog from "../../../components/DeleteDialog";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
@@ -43,6 +45,7 @@ import EditableCell from "./Contents/EditableCell";
 import EditSalaryModal from "./EditSalaryModal";
 import {
   formatMoney,
+  formatMonthTk,
   getPaidPercent,
   isPercentRow,
   toNumber,
@@ -80,8 +83,6 @@ const Salary = () => {
   const officeName =
     typeof user?.office === "string" ? user.office : selectedLang(user?.office) || "";
   const defaultMrtOptions = getDefaultMRTOptions();
-  const [rowSelection, setRowSelection] = useState({});
-  const [isExporting, setIsExporting] = useState(false);
 
   const {
     applied,
@@ -100,15 +101,7 @@ const Salary = () => {
   });
 
   const month = applied.month;
-  const monthLabel = dayjs(`${month}-01`).format("MM.YYYY");
-
-  // Selection belongs to one month/page; drop it when either changes.
-  const selectionScope = `${month}|${page}`;
-  const [prevSelectionScope, setPrevSelectionScope] = useState(selectionScope);
-  if (selectionScope !== prevSelectionScope) {
-    setPrevSelectionScope(selectionScope);
-    setRowSelection({});
-  }
+  const monthLabel = formatMonthTk(month);
 
   const listParams = useMemo(() => ({ ...queryParams, include_previous: true }), [queryParams]);
 
@@ -130,8 +123,8 @@ const Salary = () => {
     [salariesData],
   );
 
-  // Totals for the whole filtered month (not just the current page) — the
-  // Excel sheet's bottom row.
+  // Page filters without paging: the table footer totals cover the whole
+  // filtered month, and the Excel export loads every page with them.
   const summaryParams = useMemo(() => {
     const rest = { ...queryParams };
     delete rest.page;
@@ -184,13 +177,14 @@ const Salary = () => {
     key: "salaries",
     isPaginated: true,
     invalidateQueries: ["salarySummary"],
-    onSuccess: () => setRowSelection({}),
   });
 
+  // Locking also marks every unpaid row of the month as paid on the server.
   const { mutate: lockMonth, isPending: isLocking } = useCreate({
     apiFn: lockSalaryMonthApi,
     key: "salaryMonthStatus",
     isPaginated: true,
+    invalidateQueries: ["salaries", "salarySummary"],
   });
 
   const deleteDialog = useDeleteDialog({
@@ -213,17 +207,11 @@ const Salary = () => {
     [markPaid],
   );
 
-  const handleExport = async () => {
-    setIsExporting(true);
-    try {
-      await exportSalaryExcel({ params: summaryParams, monthLabel, selectedLang, t });
-    } catch (error) {
-      console.error(error);
-      toast.error(t("salary.exportFailed"));
-    } finally {
-      setIsExporting(false);
-    }
-  };
+  // GlobalExcelExportModal confirms, loads every page and hands the rows over.
+  const handleExport = useCallback(
+    (items) => exportSalaryExcel(items, { monthLabel, selectedLang, t }),
+    [monthLabel, selectedLang, t],
+  );
 
   // Inline edit → PATCH only the changed field; the server recomputes JEMI /
   // BERMELI and useUpdate merges the returned row into the cache.
@@ -270,55 +258,8 @@ const Salary = () => {
     [summary],
   );
 
-  const selectedGuids = Object.keys(rowSelection).filter((k) => rowSelection[k]);
-  const pageGuids = useMemo(() => salaries.map((r) => r.guid), [salaries]);
-  const allPageSelected = pageGuids.length > 0 && pageGuids.every((g) => rowSelection[g]);
-  const somePageSelected = !allPageSelected && pageGuids.some((g) => rowSelection[g]);
-
-  const toggleRow = useCallback(
-    (guid) => setRowSelection((prev) => ({ ...prev, [guid]: !prev[guid] })),
-    [],
-  );
-  const toggleAllRows = useCallback(
-    () =>
-      setRowSelection(
-        allPageSelected ? {} : Object.fromEntries(pageGuids.map((g) => [g, true])),
-      ),
-    [allPageSelected, pageGuids],
-  );
-
   const columns = useMemo(
     () => [
-      // Own selection column: MRT 3's built-in one passes the `inputProps`
-      // prop MUI 9 checkboxes no longer accept, which leaks onto the DOM.
-      ...(isLocked
-        ? []
-        : [
-            {
-              id: "select",
-              header: "",
-              size: 44,
-              muiTableHeadCellProps: { align: "center" },
-              muiTableBodyCellProps: { align: "center" },
-              Header: () => (
-                <Checkbox
-                  size="small"
-                  checked={allPageSelected}
-                  indeterminate={somePageSelected}
-                  onChange={toggleAllRows}
-                  slotProps={{ input: { "aria-label": t("all") } }}
-                />
-              ),
-              Cell: ({ row }) => (
-                <Checkbox
-                  size="small"
-                  checked={Boolean(rowSelection[row.original.guid])}
-                  onChange={() => toggleRow(row.original.guid)}
-                  slotProps={{ input: { "aria-label": row.original.employee?.fullName || "" } }}
-                />
-              ),
-            },
-          ]),
       {
         id: "index_number",
         header: "№",
@@ -485,6 +426,19 @@ const Salary = () => {
             : "-",
       },
       {
+        id: "paid_status",
+        header: t("salary.paidStatus"),
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => (
+          <StatusChip
+            status={getPaidPercent(row.original.paid_amount, row.original.payable_amount) >= 100}
+            config={SALARY_PAID_STATUS_CONFIG}
+          />
+        ),
+      },
+      {
         accessorKey: "note",
         id: "note",
         header: t("salary.note"),
@@ -564,11 +518,6 @@ const Salary = () => {
       isMarkingPaid,
       handleMarkPaid,
       openDeleteDialog,
-      rowSelection,
-      toggleRow,
-      allPageSelected,
-      somePageSelected,
-      toggleAllRows,
     ],
   );
 
@@ -595,7 +544,7 @@ const Salary = () => {
     initialState: {
       density: "compact",
       columnPinning: {
-        left: ["select", "index_number", "employee"],
+        left: ["index_number", "employee"],
         right: ["actions"],
       },
     },
@@ -644,20 +593,6 @@ const Salary = () => {
           onRefetch={refetch}
           isFetching={isFetching}
         />
-
-        {selectedGuids.length > 0 && !isLocked && (
-          <Button
-            variant="contained"
-            color="success"
-            disableElevation
-            startIcon={<CheckCheck size={16} />}
-            disabled={isMarkingPaid}
-            onClick={() => handleMarkPaid(selectedGuids)}
-            sx={{ height: 40, borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
-          >
-            {t("salary.markSelectedPaid", { count: selectedGuids.length })}
-          </Button>
-        )}
       </Box>
     ),
 
@@ -718,7 +653,7 @@ const Salary = () => {
 
         <SalaryMonthPicker value={month} onChange={handleMonthChange} />
 
-        <Tooltip title={isLocked ? t("salary.lockedHint") : ""} arrow>
+        <Tooltip title={isLocked ? t("salary.lockedHint") : t("salary.lockHint")} arrow>
           <Button
             variant={isLocked ? "contained" : "outlined"}
             color={isLocked ? "warning" : "inherit"}
@@ -743,8 +678,11 @@ const Salary = () => {
         </Tooltip>
 
         <ExportExcelButton
-          onClick={handleExport}
-          disabled={isExporting || salaries.length === 0}
+          apiFn={getAllSalariesApi}
+          queryParams={summaryParams}
+          totalItems={totalItems}
+          customExportFn={handleExport}
+          disabled={salaries.length === 0}
           label={t("salary.exportExcel")}
         />
       </PageHeader>

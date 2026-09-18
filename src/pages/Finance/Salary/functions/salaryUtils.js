@@ -51,6 +51,28 @@ export const calculateSalary = (values = {}) => {
   };
 };
 
+// Month names are always Turkmen, whatever the UI language.
+export const TK_MONTHS = [
+  "Ýanwar",
+  "Fewral",
+  "Mart",
+  "Aprel",
+  "Maý",
+  "Iýun",
+  "Iýul",
+  "Awgust",
+  "Sentýabr",
+  "Oktýabr",
+  "Noýabr",
+  "Dekabr",
+];
+
+// "2026-09" → "Sentýabr 2026".
+export const formatMonthTk = (month) => {
+  const d = dayjs(`${month}-01`);
+  return d.isValid() ? `${TK_MONTHS[d.month()]} ${d.year()}` : "";
+};
+
 // Month form values are "YYYY-MM" or an ISO string from the date picker.
 export const toMonthKey = (value) => {
   const d = dayjs(value);

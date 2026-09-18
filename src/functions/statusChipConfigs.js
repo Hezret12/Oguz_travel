@@ -95,6 +95,11 @@ export const EMPLOYEE_ACTIVE_CONFIG = {
   FALSE: { label: "Işjeň däl", labelKey: "employee.inactive", color: "#94a3b8" },
 };
 
+export const SALARY_PAID_STATUS_CONFIG = {
+  TRUE: { label: "Tölendi", labelKey: "salary.paid", color: "#16a34a" },
+  FALSE: { label: "Tölenmedi", labelKey: "salary.notPaid", color: "#dc2626" },
+};
+
 export const PURCHASE_LOT_STATUS_CONFIG = {
   ACTIVE: { label: "Işjeň", color: "#16a34a" },
   EXHAUSTED: { label: "Gutarýan / Gutardy", color: "#64748b" },
