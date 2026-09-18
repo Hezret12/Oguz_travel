@@ -32,7 +32,14 @@ import { AuthProvider } from './context/AuthProvider';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <HelmetProvider>
-      <ThemeProvider theme={themeConfig} defaultMode="light" modeStorageKey="theme">
+      {/* disableTransitionOnChange: no CSS transitions run while the colour
+          scheme flips, so large tables don't animate every cell at once. */}
+      <ThemeProvider
+        theme={themeConfig}
+        defaultMode="light"
+        modeStorageKey="theme"
+        disableTransitionOnChange
+      >
         <QueryClientProvider client={queryClient}>
           <I18nextProvider i18n={i18n}>
             <AuthProvider>

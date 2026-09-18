@@ -1,9 +1,13 @@
 import { memo, useRef, useState } from "react";
-import { Box, CircularProgress, InputBase, Tooltip, alpha } from "@mui/material";
+import { Box, CircularProgress, InputBase, Tooltip } from "@mui/material";
 import { useLocale } from "../../../../hooks/useLocale";
 import { formatMoney, toNumber } from "../functions/salaryUtils";
 
 const CELL_ATTR = "data-salary-cell";
+// Fixed tints that read on both themes (info blue, primary teal), so the
+// cell style needs no theme callback.
+const CHANGED_TINT = "rgba(41, 146, 209, 0.10)";
+const FOCUS_RING = "0 0 0 3px rgba(14, 133, 132, 0.22)";
 
 const focusCell = (rowIndex, field) => {
   document.querySelector(`[${CELL_ATTR}="${rowIndex}:${field}"]`)?.focus();
@@ -97,7 +101,9 @@ const EditableCell = ({
       onFocus={startEdit}
       // Looks like an input (same 7px radius as CustomTextField) so it is
       // obvious the value can be typed in; a locked month drops the frame.
-      sx={(theme) => ({
+      // Plain object, no theme callback and no colour transitions: ~270 of
+      // these render at once, and a theme switch must stay cheap.
+      sx={{
         position: "relative",
         width: "100%",
         minWidth: 0,
@@ -112,18 +118,18 @@ const EditableCell = ({
         backgroundColor: readOnly
           ? "transparent"
           : changed && !editing
-            ? alpha(theme.palette.info.main, 0.08)
+            ? CHANGED_TINT
             : "background.paper",
-        boxShadow: editing ? `0 0 0 3px ${alpha(theme.palette.primary.main, 0.18)}` : "none",
+        boxShadow: editing ? FOCUS_RING : "none",
         cursor: readOnly ? "default" : "text",
         outline: "none",
         fontVariantNumeric: "tabular-nums",
         whiteSpace: "nowrap",
-        transition: "background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease",
+        transition: "box-shadow 0.15s ease",
         ...(!readOnly && {
           "&:hover": { borderColor: editing ? "primary.main" : "text.secondary" },
         }),
-      })}
+      }}
     >
       {editing ? (
         <InputBase
@@ -149,11 +155,13 @@ const EditableCell = ({
     </Box>
   );
 
-  // Always wrapped (empty title hides it) so toggling edit mode never
-  // remounts the cell and drops focus.
+  // Only cells that differ from last month get a Tooltip. `changed` does not
+  // flip while editing, so entering/leaving edit mode never remounts the
+  // cell and drops focus.
+  if (!changed) return cell;
   return (
     <Tooltip
-      title={changed && !editing ? t("salary.previousValue", { value: format(previous) }) : ""}
+      title={editing ? "" : t("salary.previousValue", { value: format(previous) })}
       arrow
       placement="top"
     >
