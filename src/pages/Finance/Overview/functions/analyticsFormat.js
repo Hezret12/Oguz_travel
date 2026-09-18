@@ -133,7 +133,14 @@ export const tableSx = (theme) => ({
 
 // Demo data today; replace the body with a useGet on
 // /total-calculations/get-office-analytics once the endpoint exists.
-export const useOfficeAnalytics = (period) => {
-  const data = useMemo(() => getOfficeAnalyticsMock(period), [period]);
+// `customRange` ({ start, end } as "YYYY-MM-DD") applies when period is "custom";
+// the real request should send it as start_date / end_date.
+export const useOfficeAnalytics = (period, customRange) => {
+  const start = customRange?.start;
+  const end = customRange?.end;
+  const data = useMemo(
+    () => getOfficeAnalyticsMock(period, undefined, start && end ? { start, end } : null),
+    [period, start, end],
+  );
   return { data, isLoading: false, isDemo: true };
 };

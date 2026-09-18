@@ -15,6 +15,23 @@ import dayjs from "dayjs";
 
 export const PERIODS = ["thisMonth", "lastMonth", "quarter", "year"];
 
+// A user-picked { start, end } range ("YYYY-MM-DD", both inclusive).
+export const CUSTOM_PERIOD = "custom";
+export const MAX_RANGE_DAYS = 366;
+
+export const isValidCustomRange = (customRange, today = dayjs()) => {
+  if (!customRange?.start || !customRange?.end) return false;
+  const start = dayjs(customRange.start);
+  const end = dayjs(customRange.end);
+  return (
+    start.isValid() &&
+    end.isValid() &&
+    !start.isAfter(end, "day") &&
+    !end.isAfter(today, "day") &&
+    end.diff(start, "day") + 1 <= MAX_RANGE_DAYS
+  );
+};
+
 // Seeded PRNG (mulberry32) so a period always renders the same demo numbers.
 const createRandom = (seedText) => {
   let seed = [...seedText].reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, 7);
@@ -184,6 +201,8 @@ const buildExpenses = (rand, months) =>
 // wave; Sundays are quiet).
 const buildBuckets = (rand, range, granularity) => {
   const buckets = [];
+  // A custom range can cross months, where a bare "05" would be ambiguous.
+  const dayFormat = range.start.isSame(range.end, "month") ? "DD" : "DD.MM";
   let cursor = range.start;
   while (cursor.isBefore(range.end)) {
     const next = cursor.add(1, granularity);
@@ -191,7 +210,7 @@ const buildBuckets = (rand, range, granularity) => {
       date: cursor.format("YYYY-MM-DD"),
       label:
         granularity === "day"
-          ? cursor.format("DD")
+          ? cursor.format(dayFormat)
           : granularity === "week"
             ? cursor.format("DD.MM")
             : cursor.format("MM.YYYY"),
@@ -410,23 +429,45 @@ const buildPeriod = (period, seedSuffix, scale) => {
   return { rand, categories, expenses, totals };
 };
 
-export const getOfficeAnalyticsMock = (period = "thisMonth", today = dayjs()) => {
-  const { months, granularity } = PERIOD_CONFIG[period] || PERIOD_CONFIG.thisMonth;
-  const range = getRange(period, today);
+// Bucket size for a custom range: daily up to ~6 weeks, weekly up to ~6
+// months, monthly beyond (keeps every trend chart at a readable point count).
+const granularityForDays = (days) => (days <= 45 ? "day" : days <= 180 ? "week" : "month");
+
+// Resolves a period key (or "custom" + { start, end }) to its range and size.
+const resolvePeriod = (period, today, customRange) => {
+  if (period === CUSTOM_PERIOD && isValidCustomRange(customRange, today)) {
+    const start = dayjs(customRange.start).startOf("day");
+    const end = dayjs(customRange.end).endOf("day");
+    const days = end.diff(start, "day") + 1;
+    return {
+      range: { start, end },
+      granularity: granularityForDays(days),
+      scale: days / 30.44,
+      seed: `custom:${start.format("YYYY-MM-DD")}:${end.format("YYYY-MM-DD")}`,
+      key: CUSTOM_PERIOD,
+    };
+  }
+
+  const key = PERIOD_CONFIG[period] ? period : "thisMonth";
+  const { months, granularity } = PERIOD_CONFIG[key];
   // Running periods only count the elapsed part.
   const progress =
-    period === "thisMonth"
+    key === "thisMonth"
       ? Math.max(0.2, today.date() / today.daysInMonth())
-      : period === "year"
+      : key === "year"
         ? (today.diff(today.startOf("year"), "day") + 1) / (today.endOf("year").diff(today.startOf("year"), "day") + 1)
         : 1;
-  const scale = months * progress;
+  return { range: getRange(key, today), granularity, scale: months * progress, seed: key, key };
+};
+
+export const getOfficeAnalyticsMock = (period = "thisMonth", today = dayjs(), customRange = null) => {
+  const { range, granularity, scale, seed, key } = resolvePeriod(period, today, customRange);
 
   // Previous = the same span right before (slightly lower, seasonal noise).
-  const current = buildPeriod(period, "current", scale);
-  const previous = buildPeriod(period, "previous", scale * 0.93);
+  const current = buildPeriod(seed, "current", scale);
+  const previous = buildPeriod(seed, "previous", scale * 0.93);
 
-  const openingRand = createRandom(`${period}:opening`);
+  const openingRand = createRandom(`${seed}:opening`);
   const previousOpening = {
     USD: round(15000 + openingRand() * 6000),
     TMT: round(120000 + openingRand() * 30000),
@@ -442,7 +483,7 @@ export const getOfficeAnalyticsMock = (period = "thisMonth", today = dayjs()) =>
   return {
     office: { name: { tk: "Aşgabat — Baş ofis", ru: "Ашхабад — Главный офис", en: "Ashgabat — Head office" } },
     period: {
-      key: period,
+      key,
       start: range.start.format("YYYY-MM-DD"),
       end: range.end.format("YYYY-MM-DD"),
       granularity,

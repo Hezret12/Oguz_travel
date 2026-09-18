@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Chip, Grid, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
-import { CalendarDays, MapPinHouse } from "lucide-react";
+import { CalendarDays, CalendarRange, MapPinHouse } from "lucide-react";
 import dayjs from "dayjs";
 import PageHeader from "../../../components/PageHeader";
 import CustomTabs from "../../../components/CustomTabs";
@@ -15,7 +15,8 @@ import WeekdayCard from "./Contents/WeekdayCard";
 import OperatorCard from "./Contents/OperatorCard";
 import ReceivablesCard from "./Contents/ReceivablesCard";
 import { CURRENCIES, useOfficeAnalytics, useSeriesColors } from "./functions/analyticsFormat";
-import { PERIODS } from "./functions/officeAnalyticsMock";
+import { CUSTOM_PERIOD, PERIODS, isValidCustomRange } from "./functions/officeAnalyticsMock";
+import DateRangePopover from "./Contents/DateRangePopover";
 
 const STORAGE_KEY = "finance_overview_prefs";
 const TABS = ["cash", "sales", "people"];
@@ -80,13 +81,19 @@ const FinanceOverview = () => {
   const { user } = useAuth();
   const [prefs, setPrefs] = useState(() => {
     const saved = readPrefs();
+    const customRange = isValidCustomRange(saved.customRange) ? saved.customRange : null;
     return {
-      period: PERIODS.includes(saved.period) ? saved.period : "thisMonth",
+      period:
+        PERIODS.includes(saved.period) || (saved.period === CUSTOM_PERIOD && customRange)
+          ? saved.period
+          : "thisMonth",
+      customRange,
       tab: TABS.includes(saved.tab) ? saved.tab : "cash",
       currency: CURRENCIES.includes(saved.currency) ? saved.currency : "USD",
     };
   });
-  const { period, currency, tab } = prefs;
+  const { period, currency, tab, customRange } = prefs;
+  const [rangeAnchor, setRangeAnchor] = useState(null);
 
   const updatePrefs = (patch) => {
     const next = { ...prefs, ...patch };
@@ -94,7 +101,12 @@ const FinanceOverview = () => {
     writePrefs(next);
   };
 
-  const { data, isDemo } = useOfficeAnalytics(period);
+  const applyCustomRange = (nextRange) => {
+    updatePrefs({ period: CUSTOM_PERIOD, customRange: nextRange });
+    setRangeAnchor(null);
+  };
+
+  const { data, isDemo } = useOfficeAnalytics(period, customRange);
   const colors = useSeriesColors();
 
   const officeName =
@@ -144,7 +156,31 @@ const FinanceOverview = () => {
                 {t(`finance.analytics.periods.${p}`)}
               </ToggleButton>
             ))}
+            {/* Opens the picker instead of switching; the period only
+                becomes "custom" once a valid range is applied. */}
+            <ToggleButton
+              value={CUSTOM_PERIOD}
+              onClick={(e) => {
+                e.preventDefault();
+                setRangeAnchor(e.currentTarget);
+              }}
+              sx={{ gap: 0.75 }}
+            >
+              <CalendarRange size={15} />
+              {period === CUSTOM_PERIOD && customRange
+                ? `${dayjs(customRange.start).format("DD.MM")} – ${dayjs(customRange.end).format("DD.MM.YY")}`
+                : t("finance.analytics.periods.custom")}
+            </ToggleButton>
           </ToggleButtonGroup>
+
+          {rangeAnchor && (
+            <DateRangePopover
+              anchorEl={rangeAnchor}
+              value={customRange}
+              onApply={applyCustomRange}
+              onClose={() => setRangeAnchor(null)}
+            />
+          )}
 
           <Tooltip title={t("finance.analytics.noConversion")} arrow>
             <ToggleButtonGroup
@@ -168,7 +204,7 @@ const FinanceOverview = () => {
         trend={data.trend}
         cashFlow={data.cashFlow}
         currency={currency}
-        period={period}
+        period={data.period.key}
       />
 
       <Box sx={{ borderBottom: "1px solid", borderColor: "divider", mt: 1 }}>

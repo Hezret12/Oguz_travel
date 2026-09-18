@@ -939,7 +939,8 @@
         "thisMonth": "Şu aý",
         "lastMonth": "Geçen aý",
         "quarter": "Soňky 3 aý",
-        "year": "Şu ýyl"
+        "year": "Şu ýyl",
+        "custom": "Aralyk"
       },
       "kpi": {
         "revenue": "Satyş",
@@ -957,8 +958,11 @@
         "thisMonth": "geçen aýa görä",
         "lastMonth": "öňki aýa görä",
         "quarter": "öňki 3 aýa görä",
-        "year": "geçen ýyla görä"
+        "year": "geçen ýyla görä",
+        "custom": "öňki deň döwre görä"
       },
+      "rangeInvalid": "Başlangyç senesi ahyrky seneden soň bolup bilmez",
+      "rangeTooLong": "Iň köp {{days}} gün saýlap bolýar",
       "salesCount": "{{count}} satyş",
       "costHint": "Üpjün edijilere",
       "margin": "Marža {{value}}",

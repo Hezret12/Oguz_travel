@@ -953,7 +953,8 @@
         "thisMonth": "This month",
         "lastMonth": "Last month",
         "quarter": "Last 3 months",
-        "year": "This year"
+        "year": "This year",
+        "custom": "Custom"
       },
       "kpi": {
         "revenue": "Sales",
@@ -971,8 +972,11 @@
         "thisMonth": "vs last month",
         "lastMonth": "vs previous month",
         "quarter": "vs previous 3 months",
-        "year": "vs last year"
+        "year": "vs last year",
+        "custom": "vs previous period of same length"
       },
+      "rangeInvalid": "Start date can’t be after the end date",
+      "rangeTooLong": "You can pick at most {{days}} days",
       "salesCount": "{{count}} sales",
       "costHint": "Paid to suppliers",
       "margin": "Margin {{value}}",
