@@ -32,6 +32,8 @@ import CafeteriaHeaderStats from "./Contents/CafeteriaHeaderStats";
 import AddCafeteriaModal from "./AddCafeteriaModal";
 import EditCafeteriaModal from "./EditCafeteriaModal";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
+import ExportExcelButton from "../../components/ExportExcelButton";
+import CafeteriaExportModal from "./Contents/CafeteriaExportModal";
 
 const CafeteriaFilterDrawer = () => {
   const {
@@ -73,6 +75,7 @@ const Cafeteria = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
     applied,
@@ -181,7 +184,12 @@ const Cafeteria = () => {
         id: "date",
         header: t("cafeteria.date"),
         size: 110,
-        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+        // `date` has no time part, so the hour comes from when the record was created
+        Cell: ({ cell, row }) => {
+          const createdAt = row.original?.createdAt || row.original?.created_at;
+          const time = createdAt && dayjs(createdAt).isValid() ? dayjs(createdAt).format("HH:mm") : "";
+          return [formatChange(cell.getValue(), { dateOnly: true }), time].filter(Boolean).join(" ");
+        },
       },
       {
         accessorFn: (row) => row.type,
@@ -252,7 +260,7 @@ const Cafeteria = () => {
       {
         id: "actions",
         header: t("columns.actions"),
-        size: 100,
+        size: 90,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
@@ -271,11 +279,6 @@ const Cafeteria = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
-    // MRT's default "modal" display mode wraps renderCreateRowDialogContent /
-    // renderEditRowDialogContent in its own <Dialog>, on top of the <Dialog>
-    // AddCafeteriaModal/EditCafeteriaModal already render themselves — nesting
-    // two full Dialog/backdrop/focus-trap stacks. "custom" skips MRT's wrapper;
-    // we mount the modals ourselves below, gated on creatingRow/editingRow.
     createDisplayMode: "custom",
     editDisplayMode: "custom",
     columns,
@@ -428,7 +431,16 @@ const Cafeteria = () => {
         onFilterClick={openDrawer}
       >
         <CafeteriaHeaderStats queryParams={queryParams} />
+        <ExportExcelButton onClick={() => setIsExportOpen(true)} />
       </PageHeader>
+
+      {isExportOpen && (
+        <CafeteriaExportModal
+          open={isExportOpen}
+          close={() => setIsExportOpen(false)}
+          queryParams={queryParams}
+        />
+      )}
 
       <CafeteriaFilterDrawer />
 
