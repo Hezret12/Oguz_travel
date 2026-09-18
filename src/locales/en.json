@@ -1148,6 +1148,7 @@
     "generating": "Creating…",
     "lockedTitle": "{{month}} is locked",
     "markPaid": "Mark as paid",
+    "alreadyPaid": "Already fully paid",
     "markSelectedPaid": "Mark selected as paid ({{count}})",
     "lock": "Lock month",
     "unlock": "Unlock month",

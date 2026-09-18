@@ -1134,6 +1134,7 @@
     "generating": "Döredilýär…",
     "lockedTitle": "{{month}} aýy ýapyk",
     "markPaid": "Tölendi diýip belle",
+    "alreadyPaid": "Doly tölenen",
     "markSelectedPaid": "Saýlananlary tölenen et ({{count}})",
     "lock": "Aýy ýap",
     "unlock": "Aýy aç",

@@ -500,7 +500,7 @@ const Salary = () => {
       {
         id: "actions",
         header: t("columns.actions"),
-        size: 140,
+        size: 120,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row, table: mrtTable }) => {
@@ -509,16 +509,38 @@ const Salary = () => {
             getPaidPercent(row.original.paid_amount, row.original.payable_amount) >= 100;
           return (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-              {/* Kept in the layout when hidden so the edit/delete buttons stay aligned */}
-              <Tooltip title={fullyPaid ? "" : t("salary.markPaid")} arrow>
-                <span style={{ visibility: fullyPaid ? "hidden" : "visible" }}>
+              <Tooltip title={fullyPaid ? t("salary.alreadyPaid") : t("salary.markPaid")} arrow>
+                <span>
                   <IconButton
                     size="small"
-                    color="success"
                     disabled={fullyPaid || isMarkingPaid}
                     onClick={() => handleMarkPaid([row.original.guid])}
+                    sx={(theme) => ({
+                      width: "28px",
+                      height: "28px",
+                      borderRadius: "6px",
+                      border: "1px solid rgba(16, 185, 129, 0.25)",
+                      color: "#059669",
+                      transition: "all 0.15s ease",
+                      "&:hover": {
+                        borderColor: "#059669",
+                        transform: "translateY(-1px)",
+                      },
+                      "&:active": { transform: "scale(0.95)" },
+                      "&.Mui-disabled": {
+                        border: `1px solid ${theme.palette.divider}`,
+                        color: theme.palette.action.disabled,
+                      },
+                      ...theme.applyStyles("dark", {
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        color: "#34d399",
+                        "&:hover": {
+                          borderColor: "#34d399",
+                        },
+                      }),
+                    })}
                   >
-                    <CheckCheck size={16} />
+                    <CheckCheck size={15} strokeWidth={2} />
                   </IconButton>
                 </span>
               </Tooltip>

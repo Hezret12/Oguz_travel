@@ -1148,6 +1148,7 @@
     "generating": "Создаётся…",
     "lockedTitle": "Месяц {{month}} закрыт",
     "markPaid": "Отметить оплаченным",
+    "alreadyPaid": "Уже полностью оплачено",
     "markSelectedPaid": "Отметить оплаченными ({{count}})",
     "lock": "Закрыть месяц",
     "unlock": "Открыть месяц",
