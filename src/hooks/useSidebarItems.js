@@ -25,7 +25,7 @@ import {
   Building,
   Award,
   Landmark,
-  HandCoins,
+  WalletMinimal,
 } from "lucide-react";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 import { PATHS } from "../routes/paths";
@@ -71,7 +71,7 @@ export const useSidebarItems = () => {
             id: "finance-salary",
             text: t("sidebar.salary"),
             path: PATHS.FINANCE.SALARY,
-            icon: createElement(HandCoins, { size: 18, strokeWidth: 2.2 }),
+            icon: createElement(WalletMinimal, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "report-turkish-airlines",
