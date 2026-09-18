@@ -13,7 +13,6 @@ import { useDateFormat } from "../../../functions/generalHelpers";
 import PageHeader from "../../../components/PageHeader";
 import Pagination from "../../../components/Pagination";
 import TableEmptyState from "../../../components/TableEmptyState";
-import StackedCell from "../../../components/inputs/StackCell";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import DeleteDialog from "../../../components/DeleteDialog";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
@@ -333,10 +332,9 @@ const Salary = () => {
         size: 230,
         accessorFn: (row) => row.employee?.fullName,
         Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.employee?.fullName}
-            secondary={selectedLang(row.original.employee?.office?.shortName)}
-          />
+          <Typography variant="body2" noWrap title={row.original.employee?.fullName || ""}>
+            {row.original.employee?.fullName || "-"}
+          </Typography>
         ),
         Footer: () => (
           <Typography component="span" sx={{ fontWeight: 700, fontSize: "0.8rem", color: "text.secondary" }}>
@@ -556,7 +554,6 @@ const Salary = () => {
     ],
     [
       t,
-      selectedLang,
       formatChange,
       page,
       limit,
