@@ -26,7 +26,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
   const { mutate: createCountry, isLoading } = useCreate({
     apiFn: createCountryApi,
     key: "countries",
-    invalidateQueries: ["countryVisaFields", "receivings", "customFields"],
+    invalidateQueries: ["countryOptions", "countryVisaFields", "receivings", "customFields"],
     onSuccess: () => {
       onRefresh?.();
       onClose?.();

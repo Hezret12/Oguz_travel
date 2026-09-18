@@ -527,6 +527,7 @@
   "visaIntake": {
     "title": "Прием документов",
     "deleteApplicationTitle": "Удалить заявку",
+    "deleteApplicationDescription": "Вы действительно хотите удалить эту заявку? Это действие нельзя отменить.",
     "deleteCountryTitle": "Удалить страну",
     "addApplication": "Добавить заявку",
     "editApplication": "Редактировать заявку",

@@ -14,11 +14,8 @@ import {
   Button,
   Chip,
   Badge,
-  Autocomplete,
-  TextField,
-  Typography,
 } from "@mui/material";
-import { Funnel, ChevronDown, Globe } from "lucide-react";
+import { Funnel, Globe } from "lucide-react";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -28,7 +25,6 @@ import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import {
   getAllReceivingsApi,
-  getCountriesApi,
   getAllEmployeeApi,
   getCountryVisaFieldsApi,
 } from "../../../api/queries/getters";
@@ -43,48 +39,46 @@ import TableEmptyState from "../../../components/TableEmptyState";
 import { sortVisaFields, isNotesField } from "../../../functions/visaCountryFieldConfigs";
 import { VISA_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import VisaIntakeModal from "./VisaIntakeModal";
+import CountrySelect from "./Contents/CountrySelect";
 
-const SelectCountryPrompt = ({ t }) => (
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      py: 10,
-      px: 3,
-      gap: 2,
-    }}
-  >
-    <Box
-      sx={{
-        width: 72,
-        height: 72,
-        borderRadius: "50%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "primary.main",
-        color: "primary.contrastText",
-        opacity: 0.85,
-        boxShadow: "0 8px 24px rgba(21, 101, 192, 0.25)",
-      }}
-    >
-      <Globe size={38} />
-    </Box>
-    <Box sx={{ textAlign: "center", maxWidth: 440 }}>
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-        {t("visaIntake.selectCountryPrompt", "Ýurt saýlaň")}
-      </Typography>
-      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-        {t(
-          "visaIntake.selectCountryDescription",
-          "Arzalary görmek üçin ýokardan ýurt saýlaň",
-        )}
-      </Typography>
-    </Box>
-  </Box>
-);
+// Field keys that already have a dedicated column, so they're never rendered
+// again as a dynamic country field.
+const STANDARD_KEYS = new Set([
+  "index_number",
+  "client_guid",
+  "client",
+  "passport_number",
+  "dateOfBirth",
+  "accepted_opr_guid",
+  "operator_guid",
+  "operator",
+  "application_date",
+  "status",
+  "note",
+  "notes",
+  "actions",
+]);
+
+const parseCustomFieldValues = (raw) => {
+  if (!raw) return {};
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return typeof raw === "object" ? raw : {};
+};
+
+const isEmptyValue = (value) =>
+  value === undefined ||
+  value === null ||
+  (typeof value === "string" && value.trim() === "") ||
+  (Array.isArray(value) && value.length === 0);
+
+const firstFilled = (...values) => values.find((v) => !isEmptyValue(v));
 
 export const ApplicationsTable = forwardRef(
   (
@@ -93,13 +87,11 @@ export const ApplicationsTable = forwardRef(
       searchQuery = "",
       setSearch,
       openDrawer,
-      countryGuid,
+      country = null,
       onCountryChange,
       isFilterActive = false,
       page = 1,
-      limit = 20,
       setPage,
-      setPageSize,
     },
     ref,
   ) => {
@@ -107,56 +99,74 @@ export const ApplicationsTable = forwardRef(
     const { formatChange } = useDateFormat();
     const defaultMrtOptions = getDefaultMRTOptions();
 
-    const activeCountryGuid = countryGuid || "";
+    // The picker hands back the full country object, so its custom_fields are
+    // available even when it isn't in any cached list page.
+    const selectedCountry = country;
+    const activeCountryGuid = country?.guid || "";
 
-    const countryParams = useMemo(() => ({ page: 1, limit: 100 }), []);
-    const { data: countriesData = [] } = usePagginationGet({
-      apiFn: getCountriesApi,
-      key: "countries",
-      params: countryParams,
-    });
+    // Labels may arrive as a plain string (field_label / labelTm) or as a
+    // { tk, ru, en } object — selectedLang alone returns undefined for strings.
+    const resolveLabel = useCallback(
+      (label) => {
+        if (!label) return "";
+        if (typeof label === "string") return label;
+        if (typeof label === "object") {
+          return selectedLang(label) || label.tk || label.ru || label.en || "";
+        }
+        return String(label);
+      },
+      [selectedLang],
+    );
 
-    const countryOptions = useMemo(() => {
-      const list = Array.isArray(countriesData) ? countriesData : [];
-      return list.map((c) => {
-        const label =
-          (typeof c.name === "string" ? c.name : null) ||
-          selectedLang(c.name) ||
-          c.name?.tk ||
-          c.name?.ru ||
-          c.name?.en ||
-          c.nameTm ||
-          c.code ||
-          "";
-        return {
-          guid: c.guid,
-          code: c.code,
-          label: c.code ? `${label} (${c.code})` : label,
-        };
+    const resolveFieldLabel = useCallback(
+      (field) => resolveLabel(field?.field_label || field?.label),
+      [resolveLabel],
+    );
+
+    // Never hand a raw object/array to a cell — React throws on it.
+    const toDisplayText = useCallback(
+      (value) => {
+        if (isEmptyValue(value)) return "-";
+        if (Array.isArray(value)) {
+          return (
+            value
+              .filter((v) => !isEmptyValue(v))
+              .map((v) => (typeof v === "object" ? resolveLabel(v) : String(v)))
+              .join(", ") || "-"
+          );
+        }
+        if (typeof value === "boolean") return value ? "✓" : "-";
+        if (typeof value === "object") return resolveLabel(value) || "-";
+        return String(value);
+      },
+      [resolveLabel],
+    );
+
+    const getOfficeLabel = useCallback(
+      (office) =>
+        selectedLang(office?.shortName) || selectedLang(office?.fullName) || "",
+      [selectedLang],
+    );
+
+    const { data: rawCountryFields = [], isSuccess: countryFieldsLoaded } =
+      useGet({
+        apiFn: () =>
+          activeCountryGuid
+            ? getCountryVisaFieldsApi(activeCountryGuid)
+            : Promise.resolve([]),
+        key: ["countryVisaFields", activeCountryGuid],
+        options: { enabled: Boolean(activeCountryGuid) },
       });
-    }, [countriesData, selectedLang]);
 
-    const selectedCountry = useMemo(() => {
-      const list = Array.isArray(countriesData) ? countriesData : [];
-      return list.find((c) => c.guid === activeCountryGuid) || null;
-    }, [countriesData, activeCountryGuid]);
-
-    const { data: rawCountryFields = [] } = useGet({
-      apiFn: () =>
-        activeCountryGuid
-          ? getCountryVisaFieldsApi(activeCountryGuid)
-          : Promise.resolve([]),
-      key: ["countryVisaFields", activeCountryGuid],
-      options: { enabled: Boolean(activeCountryGuid) },
-    });
-
+    // The picker's copy of custom_fields is only a stand-in until the fresh
+    // (mutation-invalidated) field list arrives — an empty fresh list is a
+    // real answer, not a reason to fall back to a possibly stale one.
     const sortedFields = useMemo(() => {
-      const apiList =
-        Array.isArray(rawCountryFields) && rawCountryFields.length > 0
-          ? rawCountryFields
-          : selectedCountry?.custom_fields || [];
-      return sortVisaFields(apiList);
-    }, [rawCountryFields, selectedCountry]);
+      const apiList = countryFieldsLoaded
+        ? rawCountryFields
+        : selectedCountry?.custom_fields || [];
+      return sortVisaFields(Array.isArray(apiList) ? apiList : []);
+    }, [countryFieldsLoaded, rawCountryFields, selectedCountry]);
 
     const employeeParams = useMemo(() => ({ page: 1, limit: 100 }), []);
     const { data: employees = [] } = useGet({
@@ -170,21 +180,14 @@ export const ApplicationsTable = forwardRef(
       const list = Array.isArray(employees) ? employees : [];
       list.forEach((emp) => {
         if (emp.guid) {
-          const officeShort = emp.office?.shortName
-            ? selectedLang(emp.office.shortName) ||
-              selectedLang(emp.office.fullName) ||
-              ""
-            : emp.office?.fullName
-              ? selectedLang(emp.office.fullName)
-              : "";
           map.set(emp.guid, {
             fullName: emp.fullName,
-            office: officeShort,
+            office: getOfficeLabel(emp.office),
           });
         }
       });
       return map;
-    }, [employees, selectedLang]);
+    }, [employees, getOfficeLabel]);
 
     const params = useMemo(
       () => ({
@@ -205,19 +208,45 @@ export const ApplicationsTable = forwardRef(
       apiFn: getAllReceivingsApi,
       key: "receivings",
       params,
-      options: { enabled: Boolean(activeCountryGuid) },
+      options: {
+        enabled: Boolean(activeCountryGuid),
+        // Keep the previous page only while paging/filtering inside the same
+        // country. Across countries the old rows don't match the new columns
+        // (and could be opened for edit with the wrong field set), so show
+        // the loading skeleton instead.
+        placeholderData: (previousData, previousQuery) =>
+          previousQuery?.queryKey?.[1]?.country_guid === activeCountryGuid
+            ? previousData
+            : undefined,
+      },
     });
 
+    // Normalize once per data/lookup change so column accessors stay plain
+    // lookups, and so a new `data` reference re-renders rows whenever the
+    // employee lookup or language changes.
     const applicationsData = useMemo(() => {
-      if (!activeCountryGuid) return [];
-      return Array.isArray(rawApplicationsData) ? rawApplicationsData : [];
-    }, [activeCountryGuid, rawApplicationsData]);
+      if (!activeCountryGuid || !Array.isArray(rawApplicationsData)) return [];
+      return rawApplicationsData.map((row) => {
+        const oprGuid = row.accepted_opr_guid || row.operator_guid;
+        const operator = row.operator?.fullName
+          ? {
+              fullName: row.operator.fullName,
+              office: getOfficeLabel(row.operator.office),
+            }
+          : (oprGuid && employeeMap.get(oprGuid)) || null;
+
+        return {
+          ...row,
+          custom_field_values: parseCustomFieldValues(row.custom_field_values),
+          __operator: operator,
+        };
+      });
+    }, [activeCountryGuid, rawApplicationsData, employeeMap, getOfficeLabel]);
 
     const handleCountrySelect = useCallback(
-      (_, newValue) => {
-        const newGuid = newValue ? newValue.guid : "";
+      (newCountry) => {
         startTransition(() => {
-          onCountryChange?.(newGuid);
+          onCountryChange?.(newCountry);
           setPage?.(1);
         });
       },
@@ -263,7 +292,7 @@ export const ApplicationsTable = forwardRef(
       // 1. Client
       const clientField = fieldMap.get("client_guid");
       const clientLabel =
-        selectedLang(clientField?.label) || t("columns.client");
+        resolveFieldLabel(clientField) || t("columns.client");
 
       cols.push({
         id: "client",
@@ -294,18 +323,15 @@ export const ApplicationsTable = forwardRef(
       // 3. Operator
       const acceptedOprField = fieldMap.get("accepted_opr_guid");
       const acceptedOprLabel =
-        selectedLang(acceptedOprField?.label) ||
-        t("visaIntake.fields.operator", "Tabşyryjy (Operator)");
+        resolveFieldLabel(acceptedOprField) || t("visaIntake.fields.operator");
 
       cols.push({
         id: "accepted_opr_guid",
         header: acceptedOprLabel,
         size: 200,
-        accessorFn: (row) =>
-          employeeMap.get(row.accepted_opr_guid || row.operator_guid)?.fullName || "-",
+        accessorFn: (row) => row.__operator?.fullName || "-",
         Cell: ({ row }) => {
-          const oprGuid = row?.original?.accepted_opr_guid || row?.original?.operator_guid;
-          const emp = oprGuid ? employeeMap.get(oprGuid) : null;
+          const emp = row.original.__operator;
           if (!emp?.fullName) return "-";
           return <StackedCell primary={emp.fullName} secondary={emp.office} />;
         },
@@ -314,8 +340,7 @@ export const ApplicationsTable = forwardRef(
       // 4. Application Date
       const appDateField = fieldMap.get("application_date");
       const appDateLabel =
-        selectedLang(appDateField?.label) ||
-        t("visaIntake.fields.applicationDate");
+        resolveFieldLabel(appDateField) || t("visaIntake.fields.applicationDate");
 
       cols.push({
         id: "application_date",
@@ -338,98 +363,90 @@ export const ApplicationsTable = forwardRef(
       });
 
       // 6. Dynamic Fields (All dynamic country-specific fields in order)
-      const standardKeys = new Set([
-        "index_number",
-        "client_guid",
-        "client",
-        "passport_number",
-        "dateOfBirth",
-        "accepted_opr_guid",
-        "operator_guid",
-        "operator",
-        "application_date",
-        "status",
-        "note",
-        "notes",
-        "actions",
-      ]);
+      const usedKeys = new Set(STANDARD_KEYS);
 
-      if (sortedFields && sortedFields.length > 0) {
-        sortedFields.forEach((field, index) => {
-          const fieldKey =
-            field.fieldKey || field.field_key || field.guid || `col_${index}`;
-          if (!standardKeys.has(fieldKey) && !isNotesField(field)) {
-            const headerLabel = selectedLang(field.label) || fieldKey;
+      sortedFields.forEach((field, index) => {
+        const fieldKey =
+          field.fieldKey || field.field_key || field.guid || `col_${index}`;
+        // Skip standard keys and duplicates — a repeated column id breaks MRT.
+        if (usedKeys.has(fieldKey) || isNotesField(field)) return;
+        usedKeys.add(fieldKey);
 
-            const getCustomFieldValue = (row) => {
-              if (!row) return undefined;
-              let cfv = row.custom_field_values;
-              if (typeof cfv === "string") {
-                try {
-                  cfv = JSON.parse(cfv);
-                } catch {
-                  cfv = {};
-                }
-              }
-              return cfv?.[fieldKey];
-            };
+        const headerLabel = resolveFieldLabel(field) || fieldKey;
+        const getValue = (row) => row.custom_field_values?.[fieldKey];
 
-            if (field.fieldType === "date") {
-              cols.push({
-                id: fieldKey,
-                header: headerLabel,
-                size: 130,
-                accessorFn: (row) => getCustomFieldValue(row),
-                Cell: ({ cell }) =>
-                  formatChange(cell.getValue(), { dateOnly: true }),
-              });
-            } else if (field.fieldType === "select") {
-              cols.push({
-                id: fieldKey,
-                header: headerLabel,
-                size: 140,
-                accessorFn: (row) => getCustomFieldValue(row) ?? "-",
-                Cell: ({ cell }) => {
-                  const val = cell.getValue();
-                  if (!val || val === "-") return "-";
-                  return (
-                    <Chip
-                      label={val}
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                      sx={{ fontWeight: 600, borderRadius: "6px" }}
-                    />
-                  );
-                },
-              });
-            } else {
-              cols.push({
-                id: fieldKey,
-                header: headerLabel,
-                size: 150,
-                accessorFn: (row) => getCustomFieldValue(row) ?? "-",
-              });
-            }
-          }
-        });
-      }
+        if (field.fieldType === "date") {
+          cols.push({
+            id: fieldKey,
+            header: headerLabel,
+            size: 130,
+            accessorFn: getValue,
+            Cell: ({ cell }) =>
+              formatChange(cell.getValue(), { dateOnly: true }),
+          });
+        } else if (field.fieldType === "select") {
+          // The form stores the option *value*; show its label instead.
+          const optionLabels = new Map(
+            (Array.isArray(field.options) ? field.options : []).map((opt) =>
+              opt !== null && typeof opt === "object"
+                ? [String(opt.value), resolveLabel(opt.label) || String(opt.value)]
+                : [String(opt), String(opt)],
+            ),
+          );
+
+          cols.push({
+            id: fieldKey,
+            header: headerLabel,
+            size: 140,
+            accessorFn: (row) => {
+              const value = getValue(row);
+              if (isEmptyValue(value)) return "-";
+              const values = Array.isArray(value) ? value : [value];
+              return values
+                .map((v) => optionLabels.get(String(v)) ?? toDisplayText(v))
+                .join(", ");
+            },
+            Cell: ({ cell }) => {
+              const val = cell.getValue();
+              if (val === "-") return "-";
+              return (
+                <Chip
+                  label={val}
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                  sx={{ fontWeight: 600, borderRadius: "6px" }}
+                />
+              );
+            },
+          });
+        } else {
+          cols.push({
+            id: fieldKey,
+            header: headerLabel,
+            size: 150,
+            accessorFn: (row) => toDisplayText(getValue(row)),
+          });
+        }
+      });
 
       // 7. Note (ALWAYS after all dynamic fields, at the end before actions)
       const noteField = fieldMap.get("note") || sortedFields.find(isNotesField);
-      const noteLabel =
-        selectedLang(noteField?.label) || t("columns.note");
+      const noteLabel = resolveFieldLabel(noteField) || t("columns.note");
 
       cols.push({
         id: "note",
         header: noteLabel,
         size: 160,
         accessorFn: (row) =>
-          row.note ??
-          row.notes ??
-          row.custom_field_values?.note ??
-          row.custom_field_values?.notes ??
-          "-",
+          toDisplayText(
+            firstFilled(
+              row.note,
+              row.notes,
+              row.custom_field_values?.note,
+              row.custom_field_values?.notes,
+            ),
+          ),
       });
       cols.push({
         id: "actions",
@@ -458,12 +475,18 @@ export const ApplicationsTable = forwardRef(
       return cols;
     }, [
       sortedFields,
-      employeeMap,
-      selectedLang,
+      resolveLabel,
+      resolveFieldLabel,
+      toDisplayText,
       t,
       formatChange,
       handleDeleteClick,
     ]);
+
+    // MRT only recomputes column order when the column *count* changes, so
+    // switching between two countries with the same number of fields would
+    // append the new country's columns after "note". Drive it explicitly.
+    const columnOrder = useMemo(() => columns.map((c) => c.id), [columns]);
 
     const table = useMaterialReactTable({
       ...defaultMrtOptions,
@@ -472,7 +495,11 @@ export const ApplicationsTable = forwardRef(
       // the full rationale.
       createDisplayMode: "custom",
       editDisplayMode: "custom",
-      memoMode: "rows",
+      // No memoMode: "rows" — MRT's row memo only compares the row object, so
+      // rows kept stale cells whenever columns changed with the same data
+      // (country switch, late employee lookup). With 20 rows/page it bought
+      // nothing measurable.
+      getRowId: (row, index) => row.guid ?? String(index),
       autoResetPageIndex: false,
       muiTablePaperProps: {
         sx: (theme) => ({
@@ -498,6 +525,7 @@ export const ApplicationsTable = forwardRef(
       columns,
       data: applicationsData,
       state: {
+        columnOrder,
         isLoading: Boolean(activeCountryGuid && isLoading),
         showSkeletons: Boolean(activeCountryGuid && isLoading),
       },
@@ -505,7 +533,11 @@ export const ApplicationsTable = forwardRef(
       enableBottomToolbar: Boolean(activeCountryGuid),
       renderEmptyRowsFallback: () =>
         !activeCountryGuid ? (
-          <SelectCountryPrompt t={t} />
+          <TableEmptyState
+            icon={Globe}
+            title={t("visaIntake.selectCountryPrompt")}
+            description={t("visaIntake.selectCountryDescription")}
+          />
         ) : (
           <TableEmptyState />
         ),
@@ -524,10 +556,8 @@ export const ApplicationsTable = forwardRef(
           <Pagination
             pageIndex={page - 1}
             pageCount={pageCount}
-            pageSize={limit}
             totalRows={totalItems}
             onPageChange={(newIndex) => setPage?.(newIndex + 1)}
-            setPageSize={setPageSize}
           />
         </Box>
       ),
@@ -595,54 +625,21 @@ export const ApplicationsTable = forwardRef(
             </Button>
           </Badge>
 
-          <Autocomplete
-            size="small"
-            popupIcon={<ChevronDown size={18} />}
-            options={countryOptions}
-            getOptionLabel={(option) => option.label || ""}
-            value={
-              countryOptions.find((c) => c.guid === activeCountryGuid) || null
-            }
+          <CountrySelect
+            value={selectedCountry}
             onChange={handleCountrySelect}
-            isOptionEqualToValue={(option, val) =>
-              option.guid === (val?.guid ?? val)
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                placeholder={t(
-                  "visaIntake.selectCountryPlaceholder",
-                  "Ýurt saýlaň...",
-                )}
-                sx={{
-                  width: 220,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "10px",
-                    height: "40px",
-                    fontSize: "0.875rem",
-                    fontWeight: 600,
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? "rgba(255, 255, 255, 0.05)"
-                        : "#ffffff",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: (theme) =>
-                        theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.12)"
-                          : "#E2E8F0",
-                    },
-                  },
-                }}
-              />
-            )}
           />
         </Box>
       ),
     });
 
-    useImperativeHandle(ref, () => ({
-      openCreateModal: () => table.setCreatingRow(true),
-    }));
+    useImperativeHandle(
+      ref,
+      () => ({
+        openCreateModal: () => table.setCreatingRow(true),
+      }),
+      [table],
+    );
 
     const editingRow = table.getState().editingRow;
 
@@ -656,12 +653,14 @@ export const ApplicationsTable = forwardRef(
           />
         )}
 
+        {/* The record's own country wins — editing it with another country's
+            field set would rewrite its custom_field_values. */}
         {Boolean(editingRow) && (
           <VisaIntakeModal
             table={table}
             row={editingRow}
             onRefresh={refetch}
-            countryGuid={activeCountryGuid || editingRow.original?.country_guid}
+            countryGuid={editingRow.original?.country_guid || activeCountryGuid}
           />
         )}
 
@@ -673,7 +672,7 @@ export const ApplicationsTable = forwardRef(
           onConfirm={deleteDialog.confirm}
           loading={isDeleting}
           title={t("visaIntake.deleteApplicationTitle")}
-          description={t("deleteConfirm.employee")}
+          description={t("visaIntake.deleteApplicationDescription")}
         />
       </>
     );

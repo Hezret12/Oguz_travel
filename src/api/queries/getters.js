@@ -70,11 +70,28 @@ export const getAllVisaFieldsApi = async (params = {}) => {
 
 export const getCountryVisaFieldsApi = async (countryGuid) => {
   if (!countryGuid) return { data: [] };
-  const res = await getCountriesApi({ limit: 100 });
-  const raw = res?.data;
-  const countries = Array.isArray(raw?.data) ? raw.data : (Array.isArray(raw) ? raw : []);
-  const country = countries.find((c) => c.guid === countryGuid);
-  return { data: country?.custom_fields || [] };
+  // There's no get-by-guid endpoint, so walk the pages until the country turns
+  // up — the first page alone misses countries once the list grows past it.
+  const limit = 100;
+  const maxPages = 50;
+  for (let page = 1; page <= maxPages; page++) {
+    const res = await getCountriesApi({ page, limit });
+    const raw = res?.data;
+    const countries = Array.isArray(raw?.data?.data)
+      ? raw.data.data
+      : Array.isArray(raw?.data)
+        ? raw.data
+        : Array.isArray(raw)
+          ? raw
+          : [];
+    const country = countries.find((c) => c.guid === countryGuid);
+    if (country) return { data: country.custom_fields || [] };
+
+    const totalPages =
+      raw?.data?.totalPages ?? raw?.totalPages ?? raw?.meta?.totalPages ?? raw?.data?.meta?.totalPages;
+    if (countries.length < limit || (totalPages != null && page >= totalPages)) break;
+  }
+  return { data: [] };
 };
 
 export const getAllReceivingsApi = async (params = {}) => {

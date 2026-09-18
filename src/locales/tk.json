@@ -527,6 +527,7 @@
   "visaIntake": {
     "title": "Kabul ediji bölümi",
     "deleteApplicationTitle": "Arzany pozmak",
+    "deleteApplicationDescription": "Siz hakykatdan hem bu arzany pozmak isleýärsiňizmi?",
     "deleteCountryTitle": "Ýurdy pozmak",
     "addApplication": "Arza goşmak",
     "editApplication": "Arzany üýtgetmek",

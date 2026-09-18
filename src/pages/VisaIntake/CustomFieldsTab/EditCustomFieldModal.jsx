@@ -67,7 +67,7 @@ export const EditCustomFieldModal = ({
     apiFn: updateCustomFieldApi,
     key: "customFields",
     idKey: "guid",
-    invalidateQueries: ["countries", "countryVisaFields", "receivings"],
+    invalidateQueries: ["countries", "countryOptions", "countryVisaFields", "receivings"],
     onSuccessUpdate: () => {
       onRefresh?.();
       handleClose();

@@ -5,6 +5,7 @@ import { useLocale } from "../hooks/useLocale";
 
 const TableEmptyState = ({
   title,
+  description,
   icon: CustomIcon,
   sx = {},
 }) => {
@@ -33,9 +34,9 @@ const TableEmptyState = ({
       {/* Frosted Icon Badge */}
       <Box
         sx={{
-          width: 58,
-          height: 58,
-          borderRadius: "16px",
+          width: 64,
+          height: 64,
+          borderRadius: "18px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -56,7 +57,7 @@ const TableEmptyState = ({
               : "0 4px 16px rgba(15, 23, 42, 0.04)",
         }}
       >
-        <IconComponent size={26} strokeWidth={1.75} />
+        <IconComponent size={30} strokeWidth={1.75} />
       </Box>
 
       {/* Main Title */}
@@ -64,14 +65,28 @@ const TableEmptyState = ({
         variant="subtitle1"
         sx={{
           fontWeight: 650,
-          fontSize: "0.95rem",
+          fontSize: "1.125rem",
           color: "text.primary",
-          mb: 0.5,
+          mb: 0.75,
           letterSpacing: "-0.01em",
         }}
       >
         {displayTitle}
       </Typography>
+
+      {description && (
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            fontSize: "0.9375rem",
+            lineHeight: 1.6,
+            maxWidth: 420,
+          }}
+        >
+          {description}
+        </Typography>
+      )}
     </Box>
   );
 };

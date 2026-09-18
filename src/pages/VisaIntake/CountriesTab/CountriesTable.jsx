@@ -61,7 +61,7 @@ export const CountriesTable = forwardRef((props, ref) => {
     queryKey: "countries",
     idKey: "guid",
     isPaginated: true,
-    invalidateQueries: ["countryVisaFields", "receivings", "customFields"],
+    invalidateQueries: ["countryOptions", "countryVisaFields", "receivings", "customFields"],
   });
 
   const deleteDialog = useDeleteDialog({

@@ -527,6 +527,7 @@
   "visaIntake": {
     "title": "Visa Intake",
     "deleteApplicationTitle": "Delete Application",
+    "deleteApplicationDescription": "Are you sure you want to delete this application? This action cannot be undone.",
     "deleteCountryTitle": "Delete Country",
     "addApplication": "Add Application",
     "editApplication": "Edit Application",

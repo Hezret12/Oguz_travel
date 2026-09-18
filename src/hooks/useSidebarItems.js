@@ -9,7 +9,7 @@ import {
   UserCheck,
   Users,
   Ticket,
-  Building2,
+  TicketsPlane,
   Contact2,
   FileText,
   Package,
@@ -133,7 +133,7 @@ export const useSidebarItems = () => {
             id: "ticket-b2b",
             text: t("sidebar.ticketB2B"),
             path: PATHS.TICKET.B2B,
-            icon: createElement(Building2, { size: 18, strokeWidth: 2.2 }),
+            icon: createElement(TicketsPlane, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "ticket-turkish-airlines",

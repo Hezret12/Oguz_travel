@@ -52,7 +52,7 @@ export const EditCountryModal = ({ open, close, row, table, onRefresh }) => {
     apiFn: updateCountryApi,
     key: "countries",
     idKey: "guid",
-    invalidateQueries: ["countryVisaFields", "receivings", "customFields"],
+    invalidateQueries: ["countryOptions", "countryVisaFields", "receivings", "customFields"],
     onSuccessUpdate: () => {
       onRefresh?.();
       handleClose();

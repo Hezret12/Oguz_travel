@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from "react";
-import { Box, Paper, Button, Tooltip, useTheme } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, Paper, Tooltip, useTheme } from "@mui/material";
 import { useLocale } from "../../hooks/useLocale";
+import AddButton from "../../components/AddButton";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import CustomTabs from "../../components/CustomTabs";
 import FilterDrawer from "../../components/FilterDrawer";
@@ -64,9 +64,7 @@ export const VisaIntake = () => {
     searchQuery,
     setSearch,
     page,
-    limit,
     setPage,
-    setPageSize,
   } = useTableFilters({
     actions: visaIntakeFilterActions,
     selectors: visaIntakeFilterSelectors,
@@ -104,14 +102,16 @@ export const VisaIntake = () => {
     return t("visaIntake.addApplication");
   }, [activeTab, t]);
 
-  const [selectedCountryGuid, setSelectedCountryGuid] = useState("");
+  // Full country object (not just the guid): the searchable picker may not
+  // have the selected country in its currently loaded page.
+  const [selectedCountry, setSelectedCountry] = useState(null);
 
   const isAddDisabled = useMemo(() => {
     if (activeTab === "applications") {
-      return !selectedCountryGuid;
+      return !selectedCountry?.guid;
     }
     return false;
-  }, [activeTab, selectedCountryGuid]);
+  }, [activeTab, selectedCountry]);
 
   const handleAddClick = () => {
     activeTabRef.current?.openCreateModal?.();
@@ -156,23 +156,9 @@ export const VisaIntake = () => {
           disableHoverListener={!isAddDisabled}
         >
           <span>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleAddClick}
-              disabled={isAddDisabled}
-              sx={{
-                borderRadius: "8px",
-                fontWeight: 600,
-                px: 2.5,
-                height: "40px",
-                "&.Mui-disabled": {
-                  opacity: 0.6,
-                },
-              }}
-            >
+            <AddButton onClick={handleAddClick} disabled={isAddDisabled}>
               {addButtonText}
-            </Button>
+            </AddButton>
           </span>
         </Tooltip>
       </Paper>
@@ -180,17 +166,15 @@ export const VisaIntake = () => {
       {activeTab === "applications" && (
         <ApplicationsTable
           ref={activeTabRef}
-          countryGuid={selectedCountryGuid}
-          onCountryChange={setSelectedCountryGuid}
+          country={selectedCountry}
+          onCountryChange={setSelectedCountry}
           queryParams={queryParams}
           searchQuery={searchQuery}
           setSearch={setSearch}
           openDrawer={openDrawer}
           isFilterActive={isFilterActive}
           page={page}
-          limit={limit}
           setPage={setPage}
-          setPageSize={setPageSize}
         />
       )}
 

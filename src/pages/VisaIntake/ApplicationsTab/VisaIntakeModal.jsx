@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Grid, CircularProgress, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
@@ -40,7 +40,8 @@ const DynamicVisaField = ({
     field.optionsKey === "employees"
   ) {
     return (
-      <Grid size={{ xs: 12, sm: 6 }}>
+      // The default operator shares a row with application date + status.
+      <Grid size={{ xs: 12, sm: isOperatorField(fieldKey) ? 4 : 6 }}>
         <GlobalEmployeeAutocomplete
           name={fieldKey}
           control={control}
@@ -173,19 +174,22 @@ export const VisaIntakeModal = ({
     [t],
   );
 
+  const existingCustomValues = useMemo(() => {
+    const raw = itemData?.custom_field_values;
+    if (typeof raw === "string") {
+      try {
+        return JSON.parse(raw) || {};
+      } catch {
+        return {};
+      }
+    }
+    return raw || {};
+  }, [itemData]);
+
   const initialValues = useMemo(() => {
     const defaults = { status: itemData?.status || VISA_STATUS.PROCESS };
 
-    const customValues =
-      typeof itemData?.custom_field_values === "string"
-        ? (() => {
-            try {
-              return JSON.parse(itemData.custom_field_values);
-            } catch {
-              return {};
-            }
-          })()
-        : itemData?.custom_field_values || {};
+    const customValues = existingCustomValues;
 
     sortedFields.forEach((field) => {
       const key = field.fieldKey;
@@ -219,7 +223,7 @@ export const VisaIntakeModal = ({
     });
 
     return defaults;
-  }, [sortedFields, itemData]);
+  }, [sortedFields, itemData, existingCustomValues]);
 
   const isModalOpen =
     open !== undefined
@@ -270,7 +274,9 @@ export const VisaIntakeModal = ({
   };
 
   const submitHandler = async (formData) => {
-    const custom_field_values = {};
+    // On edit, start from the stored values so keys of fields that were since
+    // removed from the country config aren't silently wiped.
+    const custom_field_values = isEditing ? { ...existingCustomValues } : {};
     const payload = {
       country_guid: effectiveCountryGuid,
       status: formData.status || VISA_STATUS.PROCESS,
@@ -358,24 +364,28 @@ export const VisaIntakeModal = ({
             </Box>
           ) : (
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <CustomSelect
-                  name="status"
-                  control={control}
-                  label={t("columns.visaStatus")}
-                  options={statusOptions}
-                  required
-                />
-              </Grid>
-
               {sortedFields.map((field) => (
-                <DynamicVisaField
-                  key={field.fieldKey}
-                  field={field}
-                  control={control}
-                  selectedLang={selectedLang}
-                  initialClient={initialClient}
-                />
+                <Fragment key={field.fieldKey}>
+                  <DynamicVisaField
+                    field={field}
+                    control={control}
+                    selectedLang={selectedLang}
+                    initialClient={initialClient}
+                  />
+                  {/* Status completes the operator / application date row
+                      (sortVisaFields always includes application_date). */}
+                  {field.fieldKey === "application_date" && (
+                    <Grid size={{ xs: 12, sm: 4 }}>
+                      <CustomSelect
+                        name="status"
+                        control={control}
+                        label={t("columns.visaStatus")}
+                        options={statusOptions}
+                        required
+                      />
+                    </Grid>
+                  )}
+                </Fragment>
               ))}
             </Grid>
           )}
