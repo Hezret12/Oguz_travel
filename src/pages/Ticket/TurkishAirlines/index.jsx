@@ -45,6 +45,7 @@ import FilterDrawer from "../../../components/FilterDrawer";
 import TurkishAirlinesFilter from "./Contents/TurkishAirlinesFilter";
 import ExportExcelButton from "../../../components/ExportExcelButton";
 import { exportTurkishAirlinesExcel } from "./functions/exportTurkishAirlinesExcel";
+import DateRangeExcelExportModal from "../../../components/Dialog/DateRangeExcelExportModal";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -98,6 +99,7 @@ const TurkishAirlines = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
   const [paymentModalRow, setPaymentModalRow] = useState(null);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
     applied,
@@ -650,15 +652,20 @@ const TurkishAirlines = () => {
         }}
         onFilterClick={openDrawer}
       >
-        <ExportExcelButton
+        <ExportExcelButton onClick={() => setIsExportOpen(true)} />
+      </PageHeader>
+
+      {isExportOpen && (
+        <DateRangeExcelExportModal
+          open={isExportOpen}
+          close={() => setIsExportOpen(false)}
           apiFn={getAllTurkishAirlinesApi}
-          queryParams={queryParams}
-          totalItems={totalItems}
+          exportFn={exportTurkishAirlinesExcel}
+          title={`Turkish Airlines ${t("common.exportReportSuffix")}`}
           fileName="Turkish_Airlines_Hasabaty"
           sheetName="Turkish Airlines"
-          customExportFn={exportTurkishAirlinesExcel}
         />
-      </PageHeader>
+      )}
 
       <TurkishAirlinesFilterDrawer />
 

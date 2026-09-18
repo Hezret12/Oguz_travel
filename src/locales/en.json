@@ -828,7 +828,16 @@
     "exportExcelConfirmAll": "Do you want to export data to an Excel file?",
     "exportExcelNoData": "No records to export.",
     "exportExcelBtn": "Export to Excel",
-    "offlineNotice": "No internet connection. Reconnecting automatically..."
+    "offlineNotice": "No internet connection. Reconnecting automatically...",
+    "exportReportSuffix": "Excel report",
+    "exportPeriodDesc": "Choose the reporting period and download the Excel file.",
+    "exportDateRange": "Date range",
+    "exportStartDate": "Start date",
+    "exportEndDate": "End date",
+    "exportThisMonth": "This month",
+    "exportLastMonth": "Last month",
+    "exportThisYear": "This year",
+    "exportAllTime": "All time"
   },
   "autocomplete": {
     "addClient": "Add Client",

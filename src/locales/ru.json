@@ -828,7 +828,16 @@
     "exportExcelConfirmAll": "Экспортировать данные в файл Excel?",
     "exportExcelNoData": "Нет записей для экспорта.",
     "exportExcelBtn": "Экспортировать",
-    "offlineNotice": "Нет подключения к интернету. Переподключение выполняется автоматически..."
+    "offlineNotice": "Нет подключения к интернету. Переподключение выполняется автоматически...",
+    "exportReportSuffix": "Excel отчёт",
+    "exportPeriodDesc": "Выберите отчётный период и скачайте файл Excel.",
+    "exportDateRange": "Диапазон дат",
+    "exportStartDate": "Дата начала",
+    "exportEndDate": "Дата окончания",
+    "exportThisMonth": "Этот месяц",
+    "exportLastMonth": "Прошлый месяц",
+    "exportThisYear": "Этот год",
+    "exportAllTime": "Всё время"
   },
   "autocomplete": {
     "addClient": "Добавить клиента",

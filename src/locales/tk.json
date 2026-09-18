@@ -828,7 +828,16 @@
     "exportExcelConfirmAll": "Maglumatlary Excel faýlyna eksport etmek isleýärsiňizmi?",
     "exportExcelNoData": "Eksport etmek üçin ýazgy tapylmady.",
     "exportExcelBtn": "Excele geçir",
-    "offlineNotice": "Internet baglanyşygy ýok. Awtomatiki usulda gaýtadan baglanylýar..."
+    "offlineNotice": "Internet baglanyşygy ýok. Awtomatiki usulda gaýtadan baglanylýar...",
+    "exportReportSuffix": "Excel hasabaty",
+    "exportPeriodDesc": "Hasabat döwrüni saýlaň we Excel faýlyny ýükläň.",
+    "exportDateRange": "Seneler aralygy",
+    "exportStartDate": "Başlangyç senesi",
+    "exportEndDate": "Gutarýan senesi",
+    "exportThisMonth": "Şu aý",
+    "exportLastMonth": "Geçen aý",
+    "exportThisYear": "Şu ýyl",
+    "exportAllTime": "Ähli döwür"
   },
   "autocomplete": {
     "addClient": "Täze müşderi goşmak",

@@ -50,6 +50,7 @@ import { useDateFormat, formatDate } from "../../../functions/generalHelpers";
 import { PaymentManagementModal } from "../../../components/Dialog/PaymentManagementModal";
 import ExportExcelButton from "../../../components/ExportExcelButton";
 import { exportB2BExcel } from "./functions/exportB2BExcel";
+import DateRangeExcelExportModal from "../../../components/Dialog/DateRangeExcelExportModal";
 
 
 const CURRENCY_SYMBOLS = {
@@ -104,6 +105,7 @@ const B2B = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
   const [rowSelection, setRowSelection] = useState({});
   const [paymentModalRow, setPaymentModalRow] = useState(null);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
     applied,
@@ -621,15 +623,20 @@ const B2B = () => {
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}
       >
-        <ExportExcelButton
+        <ExportExcelButton onClick={() => setIsExportOpen(true)} />
+      </PageHeader>
+
+      {isExportOpen && (
+        <DateRangeExcelExportModal
+          open={isExportOpen}
+          close={() => setIsExportOpen(false)}
           apiFn={getAllB2BApi}
-          queryParams={queryParams}
-          totalItems={totalItems}
+          exportFn={exportB2BExcel}
+          title={`${t("b2b.title")} ${t("common.exportReportSuffix")}`}
           fileName="B2B_Hasabaty"
           sheetName="B2B"
-          customExportFn={exportB2BExcel}
         />
-      </PageHeader>
+      )}
 
       <B2BFilterDrawer />
 
