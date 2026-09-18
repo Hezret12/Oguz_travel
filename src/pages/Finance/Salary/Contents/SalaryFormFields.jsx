@@ -237,7 +237,7 @@ const SalarySummaryBar = ({ control }) => {
  *   Berlen · Senesi · Bellik
  * rowSpacing leaves room for CustomTextField's absolutely positioned errors.
  */
-const SalaryFormFields = ({ control, initialEmployee, onEmployeeChange, employeeHint }) => {
+const SalaryFormFields = ({ control, initialEmployee, onEmployeeChange }) => {
   const { t } = useLocale();
 
   const moneyField = (name, label, extra = {}) => (
@@ -269,8 +269,6 @@ const SalaryFormFields = ({ control, initialEmployee, onEmployeeChange, employee
             size="small"
             required
           />
-          {/* Fixed-height slot so the hint never shifts the layout */}
-          <Box sx={{ height: 16, mt: 0.25, overflow: "hidden", lineHeight: "16px" }}>{employeeHint}</Box>
         </Grid>
         <Grid size={{ xs: 12, sm: 4 }}>
           <CustomDatePicker

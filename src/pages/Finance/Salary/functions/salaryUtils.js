@@ -57,18 +57,6 @@ export const toMonthKey = (value) => {
   return d.isValid() ? d.format("YYYY-MM") : "";
 };
 
-// Working days in a month = calendar days minus Sundays (July 2026 → 27,
-// matching the sheet).
-export const getWorkDaysInMonth = (month) => {
-  const start = dayjs(toMonthKey(month)).startOf("month");
-  if (!start.isValid()) return 0;
-  let count = 0;
-  for (let d = 0; d < start.daysInMonth(); d += 1) {
-    if (start.add(d, "day").day() !== 0) count += 1;
-  }
-  return count;
-};
-
 const moneyFormatter = new Intl.NumberFormat("en-US", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,

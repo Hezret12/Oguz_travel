@@ -4,7 +4,7 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { Box, Button, Checkbox, IconButton, Tooltip, Typography } from "@mui/material";
-import { Building2, CheckCheck, Lock, LockOpen, UserPlus } from "lucide-react";
+import { Building2, CheckCheck, Lock, LockOpen } from "lucide-react";
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
@@ -41,7 +41,6 @@ import {
 import SalaryMonthPicker from "./Contents/SalaryMonthPicker";
 import SalaryGenerateState from "./Contents/SalaryGenerateState";
 import EditableCell from "./Contents/EditableCell";
-import AddSalaryModal from "./AddSalaryModal";
 import EditSalaryModal from "./EditSalaryModal";
 import {
   formatMoney,
@@ -51,8 +50,10 @@ import {
 } from "./functions/salaryUtils";
 import { exportSalaryExcel } from "./functions/exportSalaryExcel";
 
+// Headers are centred across the table; the numbers themselves stay
+// right-aligned so digits line up.
 const RIGHT = {
-  muiTableHeadCellProps: { align: "right" },
+  muiTableHeadCellProps: { align: "center" },
   muiTableBodyCellProps: { align: "right" },
   muiTableFooterCellProps: { align: "right" },
 };
@@ -593,6 +594,9 @@ const Salary = () => {
       if (next.pageSize !== undefined) setPageSize(next.pageSize);
     },
 
+    // Default for columns that set no head alignment of their own.
+    muiTableHeadCellProps: { align: "center" },
+
     muiTableFooterCellProps: {
       sx: { backgroundColor: "background.paper", py: 1 },
     },
@@ -604,6 +608,7 @@ const Salary = () => {
         <SalaryGenerateState
           monthLabel={monthLabel}
           locked={isLocked}
+          isCurrentMonth={month === dayjs().format("YYYY-MM")}
           isPending={isGenerating}
           onGenerate={handleGenerate}
         />
@@ -633,26 +638,6 @@ const Salary = () => {
           >
             {t("salary.markSelectedPaid", { count: selectedGuids.length })}
           </Button>
-        )}
-
-        {salaries.length > 0 && !isLocked && (
-          <Tooltip title={t("salary.generateMissing")} arrow>
-            <span>
-              <IconButton
-                onClick={handleGenerate}
-                disabled={isGenerating}
-                sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px", width: 40, height: 40 }}
-              >
-                <UserPlus size={18} />
-              </IconButton>
-            </span>
-          </Tooltip>
-        )}
-
-        {salaries.length > 0 && !isLocked && (
-          <Typography variant="caption" color="text.secondary" sx={{ display: { xs: "none", lg: "block" } }}>
-            {t("salary.inlineHint")}
-          </Typography>
         )}
       </Box>
     ),
@@ -689,8 +674,6 @@ const Salary = () => {
       <PageHeader
         title={t("salary.title")}
         pageTitle={`${t("salary.title")} | Oguz Travel`}
-        addButtonText={t("salary.add")}
-        onAddClick={isLocked ? undefined : () => table.setCreatingRow(true)}
       >
         {officeName && (
           <Box
@@ -754,10 +737,6 @@ const Salary = () => {
         isLoading={isDeleting}
         description={t("salary.deleteConfirm")}
       />
-
-      {Boolean(table.getState().creatingRow) && (
-        <AddSalaryModal table={table} defaultMonth={month} />
-      )}
 
       {Boolean(table.getState().editingRow) && (
         <EditSalaryModal table={table} row={table.getState().editingRow} />
