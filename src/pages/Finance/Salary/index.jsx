@@ -43,10 +43,11 @@ import SalaryMonthPicker from "./Contents/SalaryMonthPicker";
 import SalaryGenerateState from "./Contents/SalaryGenerateState";
 import EditableCell from "./Contents/EditableCell";
 import EditSalaryModal from "./EditSalaryModal";
+import AddSalaryModal from "./AddSalaryModal";
 import {
   formatMoney,
   formatMonthTk,
-  getPaidPercent,
+  isSalaryPaid,
   isPercentRow,
   toNumber,
 } from "./functions/salaryUtils";
@@ -144,6 +145,9 @@ const Salary = () => {
     params: { month },
   });
   const isLocked = Boolean(monthStatus?.is_locked);
+  // An unstarted month shows only the "start month" card — no empty table
+  // with headers, totals row and scrollbar.
+  const isMonthEmpty = !isLoading && !searchQuery && totalItems === 0;
   // An admin without an office sees every office but cannot lock one.
   const canLock = monthStatus?.month === month && monthStatus?.can_lock !== false;
 
@@ -154,7 +158,8 @@ const Salary = () => {
     queryKey: "salaries",
     idKey: "guid",
     isPaginated: true,
-    invalidateQueries: ["salarySummary"],
+    // A deleted row's employee becomes addable again.
+    invalidateQueries: ["salarySummary", "salaryMissingEmployees"],
   });
 
   const { mutateAsync: updateSalaryAsync } = useUpdate({
@@ -209,8 +214,8 @@ const Salary = () => {
 
   // GlobalExcelExportModal confirms, loads every page and hands the rows over.
   const handleExport = useCallback(
-    (items) => exportSalaryExcel(items, { monthLabel, selectedLang, t }),
-    [monthLabel, selectedLang, t],
+    (items) => exportSalaryExcel(items, { monthLabel, officeName, selectedLang, t }),
+    [monthLabel, officeName, selectedLang, t],
   );
 
   // Inline edit → PATCH only the changed field; the server recomputes JEMI /
@@ -433,7 +438,7 @@ const Salary = () => {
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => (
           <StatusChip
-            status={getPaidPercent(row.original.paid_amount, row.original.payable_amount) >= 100}
+            status={isSalaryPaid(row.original)}
             config={SALARY_PAID_STATUS_CONFIG}
           />
         ),
@@ -457,8 +462,7 @@ const Salary = () => {
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row, table: mrtTable }) => {
           if (isLocked) return <Lock size={15} style={{ opacity: 0.4 }} />;
-          const fullyPaid =
-            getPaidPercent(row.original.paid_amount, row.original.payable_amount) >= 100;
+          const fullyPaid = isSalaryPaid(row.original);
           return (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
               <Tooltip title={fullyPaid ? t("salary.alreadyPaid") : t("salary.markPaid")} arrow>
@@ -571,16 +575,7 @@ const Salary = () => {
 
     renderEmptyRowsFallback: () => {
       if (isLoading || isFetching) return null;
-      if (searchQuery) return <TableEmptyState onResetFilters={resetFilters} />;
-      return (
-        <SalaryGenerateState
-          monthLabel={monthLabel}
-          locked={isLocked}
-          isCurrentMonth={month === dayjs().format("YYYY-MM")}
-          isPending={isGenerating}
-          onGenerate={handleGenerate}
-        />
-      );
+      return <TableEmptyState onResetFilters={resetFilters} />;
     },
 
     renderTopToolbarCustomActions: () => (
@@ -628,6 +623,9 @@ const Salary = () => {
       <PageHeader
         title={t("salary.title")}
         pageTitle={`${t("salary.title")} | Oguz Travel`}
+        addButtonText={t("salary.add")}
+        // An unstarted month uses "start month" instead; a locked one is read-only.
+        onAddClick={isLocked || totalItems === 0 ? undefined : () => table.setCreatingRow(true)}
       >
         {officeName && (
           <Box
@@ -654,27 +652,30 @@ const Salary = () => {
         <SalaryMonthPicker value={month} onChange={handleMonthChange} />
 
         <Tooltip title={isLocked ? t("salary.lockedHint") : t("salary.lockHint")} arrow>
-          <Button
-            variant={isLocked ? "contained" : "outlined"}
-            color={isLocked ? "warning" : "inherit"}
-            disableElevation
-            disabled={isLocking || !canLock}
-            startIcon={isLocked ? <Lock size={16} /> : <LockOpen size={16} />}
-            onClick={(e) => {
-              e.currentTarget.blur();
-              lockMonth({ month, is_locked: !isLocked });
-            }}
-            sx={{
-              height: 40,
-              borderRadius: "10px",
-              textTransform: "none",
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-              ...(!isLocked && { borderColor: "divider" }),
-            }}
-          >
-            {isLocked ? `${t("salary.locked")} · ${t("salary.unlock")}` : t("salary.lock")}
-          </Button>
+          {/* span: a disabled button fires no events, so the tooltip needs a wrapper */}
+          <Box component="span" sx={{ display: "inline-flex" }}>
+            <Button
+              variant={isLocked ? "contained" : "outlined"}
+              color={isLocked ? "warning" : "inherit"}
+              disableElevation
+              disabled={isLocking || !canLock}
+              startIcon={isLocked ? <Lock size={16} /> : <LockOpen size={16} />}
+              onClick={(e) => {
+                e.currentTarget.blur();
+                lockMonth({ month, is_locked: !isLocked });
+              }}
+              sx={{
+                height: 40,
+                borderRadius: "10px",
+                textTransform: "none",
+                fontWeight: 600,
+                whiteSpace: "nowrap",
+                ...(!isLocked && { borderColor: "divider" }),
+              }}
+            >
+              {isLocked ? `${t("salary.locked")} · ${t("salary.unlock")}` : t("salary.lock")}
+            </Button>
+          </Box>
         </Tooltip>
 
         <ExportExcelButton
@@ -699,7 +700,35 @@ const Salary = () => {
         <EditSalaryModal table={table} row={table.getState().editingRow} />
       )}
 
-      <MaterialReactTable table={table} />
+      {Boolean(table.getState().creatingRow) && (
+        <AddSalaryModal table={table} month={month} monthLabel={monthLabel} />
+      )}
+
+      {isMonthEmpty ? (
+        <Box
+          sx={{
+            height: "calc(100vh - 190px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflowY: "auto",
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: "12px",
+            backgroundColor: "background.paper",
+          }}
+        >
+          <SalaryGenerateState
+            monthLabel={monthLabel}
+            locked={isLocked}
+            isCurrentMonth={month === dayjs().format("YYYY-MM")}
+            isPending={isGenerating}
+            onGenerate={handleGenerate}
+          />
+        </Box>
+      ) : (
+        <MaterialReactTable table={table} />
+      )}
     </Box>
   );
 };

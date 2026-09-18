@@ -1,18 +1,20 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { getPaidPercent, toNumber } from "./salaryUtils";
+import dayjs from "dayjs";
+import { isSalaryPaid, toNumber } from "./salaryUtils";
 
-// Same look as the B2B / Turkish Airlines exports: title banner on row 2,
-// table from D4 with a white bold header, zebra rows, medium outer frame and
+// Same look as the B2B / Turkish Airlines exports: title banner on rows 2-3,
+// table from D5 with a white bold header, zebra rows, medium outer frame and
 // a SUBTOTAL totals row.
-const START_ROW = 4;
+const START_ROW = 5;
 const START_COL = 4;
 const MONEY_FORMAT = '#,##0.00;-#,##0.00;"-"';
 const ACCENT_RED = "FFDC2626";
 const BLACK = "FF000000";
 const GRID = "FFD9D9D9";
-// Title banner colour, as in the Turkish Airlines report.
-const TITLE_COLOR = "FF0F766E";
+// Official-form green banner with a light green info line under it.
+const TITLE_COLOR = "FF166534";
+const TITLE_TINT = "FFF0FDF4";
 
 // Same column order as the paper "Aýlyk" sheet, plus the payment status.
 const getColumns = (t) => [
@@ -64,7 +66,7 @@ const cellBorder = (colNumber, endCol, { top, bottom }) => ({
 
 // `rows` is every salary matching the page filters, loaded by
 // GlobalExcelExportModal (not just the visible page).
-export const exportSalaryExcel = async (rows = [], { monthLabel, selectedLang, t }) => {
+export const exportSalaryExcel = async (rows = [], { monthLabel, officeName, selectedLang, t }) => {
   const columns = getColumns(t);
   const payableIdx = columns.findIndex((c) => c.key === "payable_amount");
   const statusIdx = columns.findIndex((c) => c.key === "paid_status");
@@ -86,22 +88,38 @@ export const exportSalaryExcel = async (rows = [], { monthLabel, selectedLang, t
   // A blank row keeps the totals outside the AutoFilter range.
   const totalRowIndex = lastDataRow + 2;
 
-  // --- title ---------------------------------------------------------------
+  // --- title: green banner + office / date line, like an official form ------
   const TITLE_ROW = 2;
+  const INFO_ROW = 3;
+  const titleBorder = { style: "medium", color: { argb: TITLE_COLOR } };
+
   sheet.mergeCells(TITLE_ROW, START_COL, TITLE_ROW, END_COL);
-  sheet.getRow(TITLE_ROW).height = 30;
+  sheet.getRow(TITLE_ROW).height = 34;
   const title = sheet.getCell(TITLE_ROW, START_COL);
-  title.value = t("salary.excelTitle", { month: monthLabel });
-  title.font = { name: "Calibri", size: 14, bold: true, color: { argb: TITLE_COLOR } };
+  title.value = t("salary.excelTitle", { month: monthLabel }).toLocaleUpperCase("tr-TR");
+  title.font = { name: "Calibri", size: 15, bold: true, color: { argb: "FFFFFFFF" } };
   title.alignment = { vertical: "middle", horizontal: "center" };
-  title.fill = solid("FFF0FDFA");
+  title.fill = solid(TITLE_COLOR);
+
+  const half = START_COL + Math.floor(columns.length / 2) - 1;
+  sheet.mergeCells(INFO_ROW, START_COL, INFO_ROW, half);
+  sheet.mergeCells(INFO_ROW, half + 1, INFO_ROW, END_COL);
+  sheet.getRow(INFO_ROW).height = 20;
+  const office = sheet.getCell(INFO_ROW, START_COL);
+  office.value = officeName ? `${t("salary.office")}: ${officeName}` : "";
+  const prepared = sheet.getCell(INFO_ROW, half + 1);
+  prepared.value = t("salary.excelPrepared", { date: dayjs().format("DD.MM.YYYY") });
+  [office, prepared].forEach((cell, i) => {
+    cell.font = { name: "Calibri", size: 10, italic: true, color: { argb: "FF374151" } };
+    cell.alignment = { vertical: "middle", horizontal: i === 0 ? "left" : "right", indent: 1 };
+    cell.fill = solid(TITLE_TINT);
+  });
+
   for (let c = START_COL; c <= END_COL; c += 1) {
-    sheet.getCell(TITLE_ROW, c).border = {
-      top: { style: "medium", color: { argb: TITLE_COLOR } },
-      bottom: { style: "medium", color: { argb: TITLE_COLOR } },
-      left: { style: "medium", color: { argb: TITLE_COLOR } },
-      right: { style: "medium", color: { argb: TITLE_COLOR } },
-    };
+    const left = c === START_COL ? titleBorder : undefined;
+    const right = c === END_COL ? titleBorder : undefined;
+    sheet.getCell(TITLE_ROW, c).border = { top: titleBorder, left, right };
+    sheet.getCell(INFO_ROW, c).border = { bottom: titleBorder, left, right };
   }
 
   // --- header --------------------------------------------------------------
@@ -136,7 +154,7 @@ export const exportSalaryExcel = async (rows = [], { monthLabel, selectedLang, t
 
   // --- data ----------------------------------------------------------------
   rows.forEach((r, offset) => {
-    const isPaid = getPaidPercent(r.paid_amount, r.payable_amount) >= 100;
+    const isPaid = isSalaryPaid(r);
     const values = {
       index: offset + 1,
       fullName: r.employee?.fullName || "",

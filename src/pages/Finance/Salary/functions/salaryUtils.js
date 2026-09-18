@@ -91,11 +91,9 @@ export const formatMoney = (value, { dashZero = true } = {}) => {
   return moneyFormatter.format(num);
 };
 
-export const getPaidPercent = (paid, payable) => {
-  const payableNum = toNumber(payable);
-  if (payableNum <= 0) return 100;
-  return Math.max(0, Math.min(100, Math.round((toNumber(paid) / payableNum) * 100)));
-};
+// Paid only once explicitly settled: "mark paid" and the month lock set
+// paid_date. Amounts alone never make a row paid.
+export const isSalaryPaid = (row) => Boolean(row?.paid_date);
 
 // Form values (strings from inputs) → API payload.
 export const buildSalaryPayload = (values) => ({

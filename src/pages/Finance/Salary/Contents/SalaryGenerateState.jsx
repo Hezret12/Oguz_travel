@@ -1,5 +1,4 @@
 import { Box, Button, CircularProgress, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import { CalendarDays, CalendarPlus, Copy, Lock, UserPlus, Users } from "lucide-react";
 import { useLocale } from "../../../../hooks/useLocale";
 
@@ -15,7 +14,6 @@ const STEPS = [
 // Empty-month placeholder: one click creates a row for every employee.
 const SalaryGenerateState = ({ monthLabel, locked, isCurrentMonth, isPending, onGenerate }) => {
   const { t } = useLocale();
-  const tone = locked ? "warning" : "primary";
   const steps = STEPS.filter((step) => isCurrentMonth || !step.currentMonthOnly);
 
   return (
@@ -38,9 +36,10 @@ const SalaryGenerateState = ({ monthLabel, locked, isCurrentMonth, isPending, on
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: `${tone}.main`,
-            backgroundColor: (theme) => alpha(theme.palette[tone].main, 0.1),
-            boxShadow: (theme) => `0 0 0 8px ${alpha(theme.palette[tone].main, 0.05)}`,
+            color: locked ? "warning.main" : "text.primary",
+            backgroundColor: "action.hover",
+            border: "1px solid",
+            borderColor: "divider",
             mb: 2.5,
           }}
         >
@@ -88,8 +87,8 @@ const SalaryGenerateState = ({ monthLabel, locked, isCurrentMonth, isPending, on
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "primary.main",
-                      backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                      color: "text.secondary",
+                      backgroundColor: "action.hover",
                     }}
                   >
                     <Icon size={16} />
@@ -115,6 +114,15 @@ const SalaryGenerateState = ({ monthLabel, locked, isCurrentMonth, isPending, on
                 borderRadius: "12px",
                 textTransform: "none",
                 fontWeight: 600,
+                // Monochrome: inverted text colour instead of the brand green.
+                color: "background.paper",
+                backgroundColor: "text.primary",
+                "&:hover": { backgroundColor: "text.primary", opacity: 0.88 },
+                "&.Mui-disabled": {
+                  color: "background.paper",
+                  backgroundColor: "text.primary",
+                  opacity: 0.6,
+                },
               }}
             >
               {isPending ? t("salary.generating") : t("salary.generateButton", { month: monthLabel })}
