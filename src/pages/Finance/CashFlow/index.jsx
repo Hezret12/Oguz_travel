@@ -23,9 +23,9 @@ import {
   cashFlowFilterSelectors,
 } from "../../../store/slices/filters/cashFlowFilterSlice";
 import FilterDrawer from "../../../components/FilterDrawer";
-import CashFlowFilter from "../Contents/CashFlowFilter";
-import AddCashTransactionModal from "../AddCashTransactionModal";
-import EditCashTransactionModal from "../EditCashTransactionModal";
+import CashFlowFilter from "./Contents/CashFlowFilter";
+import AddCashTransactionModal from "./AddCashTransactionModal";
+import EditCashTransactionModal from "./EditCashTransactionModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 
 const StatPill = ({ label, value, color, subtitle }) => (

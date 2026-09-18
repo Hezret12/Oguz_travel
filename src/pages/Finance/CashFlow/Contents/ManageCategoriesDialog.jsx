@@ -26,17 +26,17 @@ import {
   Globe,
   Tag,
 } from "lucide-react";
-import { useLocale } from "../../../hooks/useLocale";
-import { useGet } from "../../../hooks/CRUD/useGet";
-import { useCreate } from "../../../hooks/CRUD/useCreate";
-import { useUpdate } from "../../../hooks/CRUD/useUpdate";
-import { useDelete } from "../../../hooks/CRUD/useDelete";
-import { getAllCategoriesApi } from "../../../api/queries/getters";
-import { addCategoryApi } from "../../../api/queries/post";
-import { updateCategoryApi } from "../../../api/queries/patch";
-import { deleteCategoryApi } from "../../../api/queries/delete";
-import DeleteDialog from "../../../components/DeleteDialog";
-import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
+import { useLocale } from "../../../../hooks/useLocale";
+import { useGet } from "../../../../hooks/CRUD/useGet";
+import { useCreate } from "../../../../hooks/CRUD/useCreate";
+import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
+import { useDelete } from "../../../../hooks/CRUD/useDelete";
+import { getAllCategoriesApi } from "../../../../api/queries/getters";
+import { addCategoryApi } from "../../../../api/queries/post";
+import { updateCategoryApi } from "../../../../api/queries/patch";
+import { deleteCategoryApi } from "../../../../api/queries/delete";
+import DeleteDialog from "../../../../components/DeleteDialog";
+import { useDeleteDialog } from "../../../../hooks/useDeleteDialog";
 
 const ManageCategoriesDialog = ({ open, onClose, onSelectCategory }) => {
   const { t, selectedLang } = useLocale();

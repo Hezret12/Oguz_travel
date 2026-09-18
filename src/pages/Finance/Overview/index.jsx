@@ -3,23 +3,18 @@ import { Box, Chip, Grid, ToggleButton, ToggleButtonGroup, Tooltip, Typography }
 import { CalendarDays, CalendarRange, MapPinHouse } from "lucide-react";
 import dayjs from "dayjs";
 import PageHeader from "../../../components/PageHeader";
-import CustomTabs from "../../../components/CustomTabs";
 import { useLocale } from "../../../hooks/useLocale";
 import { useAuth } from "../../../context/useAuth";
 import KpiGrid from "./Contents/KpiGrid";
-import TrendCard from "./Contents/TrendCard";
 import CategoryCard from "./Contents/CategoryCard";
 import CashFlowCard from "./Contents/CashFlowCard";
 import FlowBreakdownCard from "./Contents/FlowBreakdownCard";
-import WeekdayCard from "./Contents/WeekdayCard";
 import OperatorCard from "./Contents/OperatorCard";
-import ReceivablesCard from "./Contents/ReceivablesCard";
-import { CURRENCIES, useOfficeAnalytics, useSeriesColors } from "./functions/analyticsFormat";
+import { CURRENCIES, segmentedSx, useOfficeAnalytics } from "./functions/analyticsFormat";
 import { CUSTOM_PERIOD, PERIODS, isValidCustomRange } from "./functions/officeAnalyticsMock";
 import DateRangePopover from "./Contents/DateRangePopover";
 
 const STORAGE_KEY = "finance_overview_prefs";
-const TABS = ["cash", "sales", "people"];
 
 const readPrefs = () => {
   try {
@@ -35,33 +30,6 @@ const writePrefs = (prefs) => {
   } catch {
     // Preferences are a convenience only.
   }
-};
-
-// Segmented control look shared by the period and currency switches.
-const segmentedSx = {
-  p: 0.375,
-  gap: 0.375,
-  borderRadius: "10px",
-  backgroundColor: "action.hover",
-  "& .MuiToggleButtonGroup-grouped": {
-    border: 0,
-    borderRadius: "8px !important",
-    m: 0,
-  },
-  "& .MuiToggleButton-root": {
-    height: 32,
-    px: 1.5,
-    textTransform: "none",
-    fontWeight: 600,
-    fontSize: "0.8rem",
-    whiteSpace: "nowrap",
-    color: "text.secondary",
-    "&.Mui-selected, &.Mui-selected:hover": {
-      color: "text.primary",
-      backgroundColor: "background.paper",
-      boxShadow: "0 1px 2px rgba(0,0,0,0.12)",
-    },
-  },
 };
 
 const MetaItem = ({ icon: Icon, children }) => (
@@ -88,11 +56,10 @@ const FinanceOverview = () => {
           ? saved.period
           : "thisMonth",
       customRange,
-      tab: TABS.includes(saved.tab) ? saved.tab : "cash",
       currency: CURRENCIES.includes(saved.currency) ? saved.currency : "USD",
     };
   });
-  const { period, currency, tab, customRange } = prefs;
+  const { period, currency, customRange } = prefs;
   const [rangeAnchor, setRangeAnchor] = useState(null);
 
   const updatePrefs = (patch) => {
@@ -107,7 +74,6 @@ const FinanceOverview = () => {
   };
 
   const { data, isDemo } = useOfficeAnalytics(period, customRange);
-  const colors = useSeriesColors();
 
   const officeName =
     (typeof user?.office === "string" ? user.office : selectedLang(user?.office)) ||
@@ -207,65 +173,25 @@ const FinanceOverview = () => {
         period={data.period.key}
       />
 
-      <Box sx={{ borderBottom: "1px solid", borderColor: "divider", mt: 1 }}>
-        <CustomTabs
-          value={tab}
-          onChange={(_e, next) => updatePrefs({ tab: next })}
-          tabs={TABS.map((key) => ({ value: key, label: t(`finance.analytics.groups.${key}`) }))}
-          sx={{ mb: "-1px" }}
-        />
-      </Box>
+      <CashFlowCard cashFlow={data.cashFlow} currency={currency} granularity={data.period.granularity} />
 
-      {tab === "cash" && (
-        <>
-          <CashFlowCard cashFlow={data.cashFlow} currency={currency} granularity={data.period.granularity} />
-          <Grid container spacing={2.5}>
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <FlowBreakdownCard
-                title={t("finance.analytics.flow.inTitle")}
-                subtitle={t("finance.analytics.flow.inSubtitle")}
-                items={data.cashFlow.inflow}
-                currency={currency}
-                color={colors.inflow}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, lg: 6 }}>
-              <FlowBreakdownCard
-                title={t("finance.analytics.flow.outTitle")}
-                subtitle={t("finance.analytics.flow.outSubtitle")}
-                items={data.cashFlow.outflow}
-                currency={currency}
-                color={colors.outflow}
-              />
-            </Grid>
-          </Grid>
-        </>
-      )}
-
-      {tab === "sales" && (
-        <>
-          <TrendCard trend={data.trend} currency={currency} granularity={data.period.granularity} />
-          <Grid container spacing={2.5}>
-            <Grid size={{ xs: 12, lg: 7 }}>
-              <CategoryCard categories={data.categories} currency={currency} />
-            </Grid>
-            <Grid size={{ xs: 12, lg: 5 }}>
-              <WeekdayCard weekdays={data.weekdays} currency={currency} />
-            </Grid>
-          </Grid>
-        </>
-      )}
-
-      {tab === "people" && (
-        <Grid container spacing={2.5}>
-          <Grid size={{ xs: 12, lg: 7 }}>
-            <OperatorCard operators={data.operators} currency={currency} />
-          </Grid>
-          <Grid size={{ xs: 12, lg: 5 }}>
-            <ReceivablesCard receivables={data.receivables} currency={currency} />
-          </Grid>
+      <Grid container spacing={2.5}>
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <FlowBreakdownCard direction="in" items={data.cashFlow.inflow} currency={currency} />
         </Grid>
-      )}
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <FlowBreakdownCard direction="out" items={data.cashFlow.outflow} currency={currency} />
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={2.5}>
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <CategoryCard categories={data.categories} currency={currency} />
+        </Grid>
+        <Grid size={{ xs: 12, lg: 6 }}>
+          <OperatorCard operators={data.operators} currency={currency} />
+        </Grid>
+      </Grid>
     </Box>
   );
 };

@@ -12,9 +12,9 @@ import {
   Divider,
 } from "@mui/material";
 import { Plus, Settings2, ChevronDown } from "lucide-react";
-import { useLocale } from "../../../hooks/useLocale";
-import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllCategoriesApi } from "../../../api/queries/getters";
+import { useLocale } from "../../../../hooks/useLocale";
+import { useGet } from "../../../../hooks/CRUD/useGet";
+import { getAllCategoriesApi } from "../../../../api/queries/getters";
 import ManageCategoriesDialog from "./ManageCategoriesDialog";
 
 const selectSx = {

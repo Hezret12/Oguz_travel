@@ -9,13 +9,13 @@ import {
   TextField,
 } from "@mui/material";
 import { ChevronDown } from "lucide-react";
-import { useLocale } from "../../../hooks/useLocale";
-import { useGet } from "../../../hooks/CRUD/useGet";
+import { useLocale } from "../../../../hooks/useLocale";
+import { useGet } from "../../../../hooks/CRUD/useGet";
 import {
   getAllEmployeeApi,
   getAllOfficeApi,
   getAllCategoriesApi,
-} from "../../../api/queries/getters";
+} from "../../../../api/queries/getters";
 
 const selectSx = {
   borderRadius: "8px",

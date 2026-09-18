@@ -1,12 +1,9 @@
-import { useId, useState } from "react";
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { useState } from "react";
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { LineChart } from "@mui/x-charts/LineChart";
 import { useLocale } from "../../../../hooks/useLocale";
-import SectionCard, { ChartGradients, EmptyState, LegendRow, ViewToggle } from "./SectionCard";
-import { DeltaBadge } from "./KpiGrid";
+import SectionCard, { EmptyState, LegendRow, ViewToggle } from "./SectionCard";
 import {
-  changePercent,
   chartSx,
   formatAmount,
   formatCompactAmount,
@@ -20,123 +17,69 @@ import {
 
 const numCell = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 
-// One figure in the summary strip. `danger`: a negative value is bad news
-// (net flow), so it turns red.
-const Stat = ({ label, value, currency, change, upIsGood, sign, strong, danger }) => (
-  <Box sx={{ minWidth: 0, py: 0.5 }}>
-    <Typography noWrap sx={{ fontSize: "0.75rem", color: "text.secondary" }}>
-      {label}
-    </Typography>
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.25 }}>
-      <Typography
-        noWrap
-        sx={{
-          fontSize: strong ? "1.2rem" : "1.05rem",
-          fontWeight: 700,
-          fontVariantNumeric: "tabular-nums",
-          color: danger && value < 0 ? "error.main" : "text.primary",
-        }}
-      >
-        {sign && value > 0 ? sign : ""}
-        {formatAmount(value, currency)}
-      </Typography>
-      {change !== undefined && <DeltaBadge change={change} upIsGood={upIsGood} />}
-    </Box>
-  </Box>
-);
+// The main chart on the page, so its axis labels read a step larger.
+const axisLabelStyle = { ...tickLabelStyle, fontSize: 12 };
 
 // Money actually received and paid out, and the till balance it leaves.
 const CashFlowCard = ({ cashFlow, currency, granularity }) => {
   const { t } = useLocale();
   const colors = useSeriesColors();
   const [view, setView] = useState("chart");
-  const gradientId = `balance-${useId().replace(/:/g, "")}`;
 
   const cur = cashFlow.current[currency];
-  const prev = cashFlow.previous[currency];
   const series = cashFlow.series;
   const labels = series.map((p) => p.label);
   const hasData = cur.inflow > 0 || cur.outflow > 0;
   const label = (key) => t(`finance.analytics.cash.${key}`);
+  const legendItems = [
+    { label: label("inflow"), color: colors.inflow, shape: "bar" },
+    { label: label("outflow"), color: colors.outflow, shape: "bar" },
+  ];
 
   return (
     <SectionCard
       title={label("title")}
       subtitle={`${label("subtitle")} · ${t(`finance.analytics.trend.by.${granularity}`)}`}
       action={
-        <ViewToggle
-          value={view}
-          onChange={setView}
-          chartLabel={t("finance.analytics.trend.chart")}
-          tableLabel={t("finance.analytics.trend.table")}
-        />
+        <>
+          {view === "chart" && hasData && (
+            <Box sx={{ display: { xs: "none", sm: "block" }, mr: 1.5 }}>
+              <LegendRow items={legendItems} />
+            </Box>
+          )}
+          <ViewToggle
+            value={view}
+            onChange={setView}
+            chartLabel={t("finance.analytics.trend.chart")}
+            tableLabel={t("finance.analytics.trend.table")}
+          />
+        </>
       }
     >
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr 1fr", md: "repeat(5, 1fr)" },
-          columnGap: 3,
-          rowGap: 1.5,
-          px: 2,
-          py: 1.25,
-          borderRadius: "10px",
-          border: "1px solid",
-          borderColor: "divider",
-          "& > *:not(:first-of-type)": {
-            pl: { xs: 0, md: 3 },
-            borderLeft: { xs: "none", md: "1px solid" },
-            borderColor: "divider",
-          },
-        }}
-      >
-        <Stat label={label("opening")} value={cur.opening} currency={currency} />
-        <Stat
-          label={label("inflow")}
-          value={cur.inflow}
-          currency={currency}
-          sign="+"
-          change={changePercent(cur.inflow, prev.inflow)}
-          upIsGood
-        />
-        <Stat
-          label={label("outflow")}
-          value={-cur.outflow}
-          currency={currency}
-          change={changePercent(cur.outflow, prev.outflow)}
-          upIsGood={false}
-        />
-        <Stat
-          label={label("net")}
-          value={cur.net}
-          currency={currency}
-          sign="+"
-          change={changePercent(cur.net, prev.net)}
-          upIsGood
-          danger
-        />
-        <Stat label={label("closing")} value={cur.closing} currency={currency} strong />
-      </Box>
-
       {!hasData ? (
         <EmptyState>{t("finance.analytics.noData")}</EmptyState>
       ) : view === "chart" ? (
         <>
-          <LegendRow
-            items={[
-              { label: label("inflow"), color: colors.inflow, shape: "bar" },
-              { label: label("outflow"), color: colors.outflow, shape: "bar" },
-            ]}
-          />
+          <Box sx={{ display: { xs: "block", sm: "none" } }}>
+            <LegendRow items={legendItems} />
+          </Box>
           <Box sx={{ mx: -1 }}>
             <BarChart
-              height={260}
+              height={380}
               hideLegend
               skipAnimation
-              borderRadius={2}
+              borderRadius={4}
+              margin={{ top: 8, right: 8, bottom: 4, left: 0 }}
               grid={{ horizontal: true }}
-              xAxis={[{ ...xAxisBase, scaleType: "band", data: labels, tickLabelStyle, categoryGapRatio: 0.55, barGapRatio: 0.15 }]}
-              yAxis={[{ ...yAxisBase, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
+              xAxis={[{ ...xAxisBase, scaleType: "band", data: labels, tickLabelStyle: axisLabelStyle, categoryGapRatio: 0.4, barGapRatio: 0.12 }]}
+              yAxis={[
+                {
+                  ...yAxisBase,
+                  tickNumber: 6,
+                  valueFormatter: (v) => formatCompactAmount(v, currency),
+                  tickLabelStyle: axisLabelStyle,
+                },
+              ]}
               series={[
                 {
                   id: "inflow",
@@ -154,42 +97,8 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
                 },
               ]}
               sx={chartSx()}
-            slotProps={tooltipSlotProps}
+              slotProps={tooltipSlotProps}
             />
-          </Box>
-
-          {/* Different scale from the bars, so it gets its own chart. */}
-          <Box>
-            <Typography sx={{ fontSize: "0.8rem", fontWeight: 500, color: "text.secondary", mb: 0.5 }}>
-              {label("balanceTitle")}
-            </Typography>
-            <Box sx={{ mx: -1 }}>
-              <ChartGradients gradients={[{ id: gradientId, color: colors.balance, opacity: 0.12 }]} />
-              <LineChart
-                height={170}
-                hideLegend
-                skipAnimation
-                grid={{ horizontal: true }}
-                xAxis={[{ ...xAxisBase, scaleType: "point", data: labels, tickLabelStyle }]}
-                yAxis={[{ ...yAxisBase, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
-                series={[
-                  {
-                    id: "balance",
-                    label: label("closing"),
-                    data: series.map((p) => p[currency].balance),
-                    color: colors.balance,
-                    curve: "linear",
-                    area: true,
-                    // Fill from the lowest point, not from zero.
-                    baseline: "min",
-                    showMark: false,
-                    valueFormatter: (v) => formatAmount(v, currency),
-                  },
-                ]}
-                sx={chartSx({ balance: gradientId })}
-            slotProps={tooltipSlotProps}
-              />
-            </Box>
           </Box>
         </>
       ) : (

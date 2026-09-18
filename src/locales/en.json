@@ -373,6 +373,7 @@
     "finance": "Finance",
     "cashFlow": "Cash Flow",
     "financeOverview": "Financial Report",
+    "financeOffices": "Offices report",
     "salary": "Salary",
     "taskFlow": "Tasks",
     "general": "General",
@@ -1010,32 +1011,13 @@
         "subtitle": "Ranked by sales",
         "operator": "Operator"
       },
-      "receivables": {
-        "title": "Receivables",
-        "subtitle": "Unpaid sales by age",
-        "d0_30": "0–30 days",
-        "d31_60": "31–60 days",
-        "d60_plus": "60+ days",
-        "salesCount": "{{count}} sales",
-        "largest": "Largest balances",
-        "empty": "No open balances",
-        "daysOpen": "{{count}} days",
-        "paidOf": "{{paid}} of {{sale}} paid"
-      },
-      "groups": {
-        "cash": "Cash flow",
-        "sales": "Sales",
-        "people": "Operators & receivables"
-      },
       "cash": {
         "title": "Money in and out",
         "subtitle": "Actual payments and spending",
-        "opening": "Opening balance",
         "inflow": "Money in",
         "outflow": "Money out",
         "net": "Net flow",
-        "closing": "Closing balance",
-        "balanceTitle": "Cash balance"
+        "closing": "Closing balance"
       },
       "flow": {
         "inTitle": "Where money came from",
@@ -1052,23 +1034,18 @@
           "salary": "Salary",
           "exchange": "Currency exchange"
         }
-      },
-      "weekday": {
-        "title": "Days of the week",
-        "subtitle": "Which days sell the most",
-        "busiest": "Busiest",
-        "quietest": "Quietest",
-        "day": "Day"
-      },
-      "weekdays": {
-        "0": "Sun",
-        "1": "Mon",
-        "2": "Tue",
-        "3": "Wed",
-        "4": "Thu",
-        "5": "Fri",
-        "6": "Sat"
       }
+    },
+    "offices": {
+      "title": "Offices report",
+      "officeCount": "Offices: {{count}}",
+      "office": "Office",
+      "profitHint": "Money in − money out",
+      "topOffice": "Most profitable office",
+      "chartTitle": "Office comparison",
+      "chartSubtitle": "Money in, money out and profit per office",
+      "tableTitle": "Totals by office",
+      "tableSubtitle": "One row per office · USD and TMT kept separate"
     }
   },
   "professionalTranslation": {

@@ -35,6 +35,7 @@ export const PATHS = {
     ROOT: '/finance',
     CASH_FLOW: '/finance/cash-flow',
     OVERVIEW: '/finance/overview',
+    OFFICES: '/finance/offices',
     SALARY: '/finance/salary',
   },
   PROFILE: '/profile',

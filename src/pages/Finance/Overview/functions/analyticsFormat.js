@@ -38,8 +38,8 @@ export const changePercent = (current, previous) => {
 // dataviz palette checker (all pairs pass CVD and normal-vision separation in
 // both modes; the grey sits under 3:1, so every chart ships a legend, a table
 // view and a dashed line for the grey series).
-//   accent  = sales / money in / balance
-//   neutral = cost / money out
+//   accent  = sales / money in
+//   neutral = money out
 //   ink     = profit
 export const useSeriesColors = () => {
   const { palette } = useTheme();
@@ -50,13 +50,21 @@ export const useSeriesColors = () => {
   return {
     revenue: accent,
     inflow: accent,
-    balance: accent,
-    highlight: accent,
-    cost: neutral,
     outflow: neutral,
     profit: ink,
-    spark: dark ? "#8A94A6" : "#94A3B8",
   };
+};
+
+// One hue per card (each card is a single series, named by its label, so hue
+// is never the only cue). Green/red stay reserved for the good/bad change
+// pill. Validated in card order with the dataviz palette checker on the
+// theme's paper surfaces #ffffff / #12131A: adjacent CVD, normal-vision and
+// 3:1 contrast all pass; the light teal is the brand accent, kept as is.
+export const KPI_TONES = {
+  outflow: { light: "#EB6834", dark: "#D95926" }, // orange
+  inflow: { light: "#0E8584", dark: "#13A89A" }, // brand teal
+  credit: { light: "#B7791F", dark: "#C98500" }, // amber — money still owed
+  profit: { light: "#2A78D6", dark: "#3987E5" }, // blue
 };
 
 // Shared look for x-charts (v9 class names): no axis lines or ticks, a
@@ -67,6 +75,11 @@ export const chartSx = (areas = {}, dashed = []) => (theme) => ({
   // The theme divider is already a faint rgba; use it as is.
   "& .MuiChartsGrid-line": { stroke: theme.palette.divider, strokeDasharray: "none" },
   "& .MuiChartsAxis-tickLabel": { fill: theme.palette.text.secondary },
+  // Soft hover band instead of the default flat grey.
+  "& .MuiChartsAxisHighlight-root": {
+    fill: theme.palette.text.primary,
+    fillOpacity: theme.palette.mode === "dark" ? 0.06 : 0.035,
+  },
   ...Object.fromEntries(
     Object.entries(areas).map(([seriesId, gradientId]) => [
       seriesId === "*" ? "& .MuiLineChart-area" : `& .MuiLineChart-area[data-series="${seriesId}"]`,
@@ -103,6 +116,33 @@ export const tooltipSlotProps = {
       "& .MuiChartsTooltip-cell": { fontSize: "0.78rem", py: 0.5 },
       "& .MuiChartsTooltip-axisValueCell": { fontWeight: 700 },
     }),
+  },
+};
+
+// Segmented control look shared by the period and currency switches.
+export const segmentedSx = {
+  p: 0.375,
+  gap: 0.375,
+  borderRadius: "10px",
+  backgroundColor: "action.hover",
+  "& .MuiToggleButtonGroup-grouped": {
+    border: 0,
+    borderRadius: "8px !important",
+    m: 0,
+  },
+  "& .MuiToggleButton-root": {
+    height: 32,
+    px: 1.5,
+    textTransform: "none",
+    fontWeight: 600,
+    fontSize: "0.8rem",
+    whiteSpace: "nowrap",
+    color: "text.secondary",
+    "&.Mui-selected, &.Mui-selected:hover": {
+      color: "text.primary",
+      backgroundColor: "background.paper",
+      boxShadow: "0 1px 2px rgba(0,0,0,0.12)",
+    },
   },
 };
 

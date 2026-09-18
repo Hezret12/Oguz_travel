@@ -16,21 +16,10 @@ import {
   chartSx,
   formatAmount,
   formatPercent,
+  KPI_TONES,
   tooltipSlotProps,
 } from "../functions/analyticsFormat";
 import { ChartGradients } from "./SectionCard";
-
-// One hue per card (each card is a single series, named by its label, so hue
-// is never the only cue). Green/red stay reserved for the good/bad change
-// pill. Validated in card order with the dataviz palette checker on the
-// theme's paper surfaces #ffffff / #12131A: adjacent CVD, normal-vision and
-// 3:1 contrast all pass; the light teal is the brand accent, kept as is.
-const KPI_TONES = {
-  outflow: { light: "#EB6834", dark: "#D95926" }, // orange
-  inflow: { light: "#0E8584", dark: "#13A89A" }, // brand teal
-  credit: { light: "#B7791F", dark: "#C98500" }, // amber — money still owed
-  profit: { light: "#2A78D6", dark: "#3987E5" }, // blue
-};
 
 // `upIsGood: false` where growth is bad news (spending, unpaid credit).
 const KPI_DEFS = [
@@ -141,7 +130,21 @@ const ChangePill = ({ change, upIsGood }) => {
   );
 };
 
-const KpiCard = ({ id, label, icon: Icon, color, value, previous, points, labels, upIsGood, currency, compareLabel }) => {
+const KpiCard = ({
+  id,
+  label,
+  icon: Icon,
+  color,
+  value,
+  previous,
+  points,
+  labels,
+  upIsGood,
+  currency,
+  otherValue,
+  otherCurrency,
+  compareLabel,
+}) => {
   const { t } = useLocale();
   const change = changePercent(value, previous);
   const diff = value - previous;
@@ -185,20 +188,33 @@ const KpiCard = ({ id, label, icon: Icon, color, value, previous, points, labels
         </Typography>
       </Box>
 
-      <Typography
-        noWrap
-        sx={{
-          mt: 1.75,
-          fontSize: "1.75rem",
-          fontWeight: 700,
-          lineHeight: 1.15,
-          letterSpacing: "-0.02em",
-          fontVariantNumeric: "tabular-nums",
-          color: value < 0 ? "error.main" : "text.primary",
-        }}
-      >
-        {formatAmount(value, currency)}
-      </Typography>
+      {/* The other currency sits beside the main figure; the two are never added. */}
+      <Box sx={{ mt: 1.75, display: "flex", alignItems: "baseline", columnGap: 1.25, flexWrap: "wrap", minWidth: 0 }}>
+        <Typography
+          noWrap
+          sx={{
+            fontSize: "1.75rem",
+            fontWeight: 700,
+            lineHeight: 1.15,
+            letterSpacing: "-0.02em",
+            fontVariantNumeric: "tabular-nums",
+            color: value < 0 ? "error.main" : "text.primary",
+          }}
+        >
+          {formatAmount(value, currency)}
+        </Typography>
+        <Typography
+          noWrap
+          sx={{
+            fontSize: "1rem",
+            fontWeight: 600,
+            fontVariantNumeric: "tabular-nums",
+            color: otherValue < 0 ? "error.main" : "text.secondary",
+          }}
+        >
+          {formatAmount(otherValue, otherCurrency)}
+        </Typography>
+      </Box>
 
       <Tooltip
         title={`${t("finance.analytics.vsPrevious")}: ${formatAmount(previous, currency)}`}
@@ -249,6 +265,7 @@ const KpiGrid = ({ totals, trend, cashFlow, currency, period }) => {
   const { t } = useLocale();
   const mode = useTheme().palette.mode === "dark" ? "dark" : "light";
   const compareLabel = t(`finance.analytics.vsPeriod.${period}`);
+  const otherCurrency = currency === "USD" ? "TMT" : "USD";
 
   return (
     <Box
@@ -272,6 +289,8 @@ const KpiGrid = ({ totals, trend, cashFlow, currency, period }) => {
           upIsGood={upIsGood}
           currency={currency}
           compareLabel={compareLabel}
+          otherCurrency={otherCurrency}
+          otherValue={getKpiData(key, { totals, trend, cashFlow }, otherCurrency).value}
           {...getKpiData(key, { totals, trend, cashFlow }, currency)}
         />
       ))}
