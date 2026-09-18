@@ -3,15 +3,28 @@ import { useLocale } from "../../../../hooks/useLocale";
 import SectionCard, { EmptyState, ShareBar } from "./SectionCard";
 import { formatAmount, formatPercent, percentOf } from "../functions/analyticsFormat";
 
+const amountSx = {
+  fontVariantNumeric: "tabular-nums",
+  whiteSpace: "nowrap",
+  textAlign: "right",
+};
+
 // Where money came from / went to, as a ranked list with share bars in one
 // hue (magnitude, not identity). `items`: [{ key, name, group, USD, TMT }].
+//
+// Many items move money in both currencies (e.g. visa sold for $ and TMT).
+// The two are never added or converted: ranking, share bar and % use the
+// selected currency, and the other currency's amount is listed under it so
+// nothing is hidden — including items that only moved the other currency.
 const FlowBreakdownCard = ({ title, subtitle, items, currency, color }) => {
   const { t, selectedLang } = useLocale();
+  const other = currency === "USD" ? "TMT" : "USD";
 
   const rows = items
-    .filter((i) => i[currency] > 0)
-    .sort((a, b) => b[currency] - a[currency]);
-  const total = rows.reduce((sum, i) => sum + i[currency], 0);
+    .filter((i) => i[currency] > 0 || i[other] > 0)
+    .sort((a, b) => b[currency] - a[currency] || b[other] - a[other]);
+  const total = rows.reduce((sum, i) => sum + (i[currency] || 0), 0);
+  const otherTotal = rows.reduce((sum, i) => sum + (i[other] || 0), 0);
   const max = rows[0]?.[currency] || 1;
 
   return (
@@ -23,9 +36,14 @@ const FlowBreakdownCard = ({ title, subtitle, items, currency, color }) => {
           <Typography sx={{ fontSize: "0.72rem", color: "text.secondary" }}>
             {t("finance.analytics.total")}
           </Typography>
-          <Typography sx={{ fontSize: "1rem", fontWeight: 600, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+          <Typography sx={{ ...amountSx, fontSize: "1rem", fontWeight: 600 }}>
             {formatAmount(total, currency)}
           </Typography>
+          {otherTotal > 0 && (
+            <Typography sx={{ ...amountSx, fontSize: "0.72rem", color: "text.secondary" }}>
+              {formatAmount(otherTotal, other)}
+            </Typography>
+          )}
         </Box>
       }
     >
@@ -55,13 +73,27 @@ const FlowBreakdownCard = ({ title, subtitle, items, currency, color }) => {
                     </Typography>
                   )}
                 </Box>
-                <Typography sx={{ fontSize: "0.85rem", fontWeight: 600, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
-                  {formatAmount(r[currency], currency)}
-                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+                  <Typography
+                    sx={{
+                      ...amountSx,
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                      color: r[currency] > 0 ? "text.primary" : "text.disabled",
+                    }}
+                  >
+                    {r[currency] > 0 ? formatAmount(r[currency], currency) : "—"}
+                  </Typography>
+                  {r[other] > 0 && (
+                    <Typography sx={{ ...amountSx, fontSize: "0.72rem", color: "text.secondary", mt: 0.25 }}>
+                      {formatAmount(r[other], other)}
+                    </Typography>
+                  )}
+                </Box>
                 <Typography
-                  sx={{ width: 40, textAlign: "right", fontSize: "0.75rem", color: "text.secondary", fontVariantNumeric: "tabular-nums" }}
+                  sx={{ ...amountSx, width: 40, fontSize: "0.75rem", color: "text.secondary" }}
                 >
-                  {formatPercent(percentOf(r[currency], total), 0)}
+                  {r[currency] > 0 ? formatPercent(percentOf(r[currency], total), 0) : "—"}
                 </Typography>
               </Box>
               {/* Scaled to the largest item so the ranking reads at a glance. */}
