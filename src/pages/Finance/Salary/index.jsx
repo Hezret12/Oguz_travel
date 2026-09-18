@@ -4,7 +4,7 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
-import { Building2, CheckCheck, Lock, LockOpen } from "lucide-react";
+import { CheckCheck, Lock, LockOpen, MapPinHouse } from "lucide-react";
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
@@ -642,7 +642,7 @@ const Salary = () => {
               whiteSpace: "nowrap",
             }}
           >
-            <Building2 size={16} />
+            <MapPinHouse size={16} />
             <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
               {officeName}
             </Typography>

@@ -13,7 +13,7 @@ import {
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 import ShowChartRoundedIcon from "@mui/icons-material/ShowChartRounded";
-import ApartmentIcon from "@mui/icons-material/Apartment";
+import { MapPinHouse } from "lucide-react";
 import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
 import { useLocale } from "../../../../hooks/useLocale";
 import QuarterReportCard from "./QuarterReportCard";
@@ -455,7 +455,7 @@ const ReportCharts = ({
             }}
           >
             <SectionTitle
-              icon={<ApartmentIcon sx={{ fontSize: 20 }} />}
+              icon={<MapPinHouse size={20} />}
               title={t("report.turkishAirlines.officeBreakdown") || "Ofisler boýunça paýy"}
               subtitle={t("report.turkishAirlines.officeBreakdownSubtitle") || "Toplam ciroya katkı oranları"}
               color={accent}
@@ -541,7 +541,11 @@ const ReportCharts = ({
               </Box>
             ) : (
               <EmptyState
-                icon={<ApartmentIcon sx={{ fontSize: 40, color: "text.secondary", opacity: 0.3, mb: 1 }} />}
+                icon={
+                  <Box sx={{ display: "flex", color: "text.secondary", opacity: 0.3, mb: 1 }}>
+                    <MapPinHouse size={40} />
+                  </Box>
+                }
                 text={noDataText}
                 borderCol={borderCol}
               />

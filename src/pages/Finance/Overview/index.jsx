@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Chip, Grid, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
-import { Building2, CalendarDays } from "lucide-react";
+import { CalendarDays, MapPinHouse } from "lucide-react";
 import dayjs from "dayjs";
 import PageHeader from "../../../components/PageHeader";
 import CustomTabs from "../../../components/CustomTabs";
@@ -128,7 +128,7 @@ const FinanceOverview = () => {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, minWidth: 0, flexWrap: "wrap" }}>
-          <MetaItem icon={Building2}>{officeName}</MetaItem>
+          <MetaItem icon={MapPinHouse}>{officeName}</MetaItem>
           <MetaItem icon={CalendarDays}>{range}</MetaItem>
         </Box>
 

@@ -24,8 +24,8 @@ import {
   LayoutGrid,
   Building,
   Award,
-  Landmark,
   WalletMinimal,
+  MapPinHouse,
 } from "lucide-react";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 import { PATHS } from "../routes/paths";
@@ -163,7 +163,7 @@ export const useSidebarItems = () => {
             id: "pt-office",
             text: t("sidebar.office"),
             path: PATHS.PROFESSIONAL_TRANSLATION.OFFICE,
-            icon: createElement(Landmark, { size: 18, strokeWidth: 2.2 }),
+            icon: createElement(MapPinHouse, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "pt-department",
