@@ -163,7 +163,13 @@ const FinanceOverview = () => {
         </Box>
       </Box>
 
-      <KpiGrid totals={data.totals} trend={data.trend} currency={currency} />
+      <KpiGrid
+        totals={data.totals}
+        trend={data.trend}
+        cashFlow={data.cashFlow}
+        currency={currency}
+        period={period}
+      />
 
       <Box sx={{ borderBottom: "1px solid", borderColor: "divider", mt: 1 }}>
         <CustomTabs

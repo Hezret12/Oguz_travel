@@ -961,7 +961,17 @@
         "grossProfit": "Валовая прибыль",
         "expenses": "Расходы",
         "netProfit": "Чистая прибыль",
-        "receivable": "К получению"
+        "receivable": "К получению",
+        "moneyOut": "Расход",
+        "moneyIn": "Приход",
+        "credit": "Кредит",
+        "profit": "Прибыль"
+      },
+      "vsPeriod": {
+        "thisMonth": "к прошлому месяцу",
+        "lastMonth": "к предыдущему месяцу",
+        "quarter": "к предыдущим 3 месяцам",
+        "year": "к прошлому году"
       },
       "salesCount": "{{count}} продаж",
       "costHint": "Поставщикам",

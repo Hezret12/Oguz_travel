@@ -947,7 +947,17 @@
         "grossProfit": "Brutto peýda",
         "expenses": "Çykdajylar",
         "netProfit": "Arassa peýda",
-        "receivable": "Alynmaly"
+        "receivable": "Alynmaly",
+        "moneyOut": "Pul çykdy",
+        "moneyIn": "Pul girdi",
+        "credit": "Kredit",
+        "profit": "Peýda"
+      },
+      "vsPeriod": {
+        "thisMonth": "geçen aýa görä",
+        "lastMonth": "öňki aýa görä",
+        "quarter": "öňki 3 aýa görä",
+        "year": "geçen ýyla görä"
       },
       "salesCount": "{{count}} satyş",
       "costHint": "Üpjün edijilere",
