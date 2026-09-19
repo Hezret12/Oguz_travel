@@ -48,6 +48,10 @@ export const toFormValues = (row = {}) => ({
 export const toPayload = (form) => ({
   type: form.type,
   amount: Number(form.amount),
+  // Older API builds only know `net_price` (an expense) and require it;
+  // newer ones use amount + type and ignore this. Keeps saves working
+  // whichever backend version is deployed. Income has no legacy field.
+  ...(form.type === "EXPENSE" ? { net_price: Number(form.amount) } : {}),
   currency: form.currency || "USD",
   category_guid: form.category_guid || null,
   receiver_opr_guid: form.receiver_opr_guid || null,

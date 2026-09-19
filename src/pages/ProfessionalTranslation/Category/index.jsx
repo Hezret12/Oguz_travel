@@ -18,6 +18,11 @@ import { deleteCategoryApi } from "../../../api/queries/delete";
 import AddCategoryModal from "./AddCategoryModal";
 import EditCategoryModal from "./EditCategoryModal";
 
+// Categories the DB triggers write every synced sale into (B2B, visa, …).
+// The backend refuses to delete them; the page doesn't offer it either.
+const SYSTEM_CATEGORY_PREFIX = "e1000000-0000-0000-0000-";
+const isSystemCategory = (guid) => String(guid || "").startsWith(SYSTEM_CATEGORY_PREFIX);
+
 const CategoryPage = () => {
   const { t } = useLocale();
   const defaultMrtOptions = getDefaultMRTOptions();
@@ -112,6 +117,7 @@ const CategoryPage = () => {
             row={row}
             table={table}
             onDelete={handleDeleteClick}
+            showDelete={!isSystemCategory(row.original.guid)}
           />
         ),
       },

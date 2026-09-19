@@ -10,6 +10,7 @@ const ColumnActionButtons = ({
   onEdit,
   showPayment = false,
   onPaymentClick,
+  showDelete = true,
 }) => {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
@@ -114,37 +115,39 @@ const ColumnActionButtons = ({
         </IconButton>
 
         {/* Delete button */}
-        <IconButton
-          onClick={handleDelete}
-          size="small"
-          title="Pozmak"
-          sx={(theme) => ({
-            width: "28px",
-            height: "28px",
-            borderRadius: "6px",
-            border: "1px solid rgba(239, 68, 68, 0.25)",
-            backgroundColor: "rgba(239, 68, 68, 0.06)",
-            color: "#dc2626",
-            transition: "all 0.15s ease",
-            "&:hover": {
-              backgroundColor: "rgba(239, 68, 68, 0.14)",
-              borderColor: "#dc2626",
-              transform: "translateY(-1px)",
-            },
-            "&:active": { transform: "scale(0.95)" },
-            ...theme.applyStyles("dark", {
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-              backgroundColor: "rgba(239, 68, 68, 0.1)",
-              color: "#f87171",
+        {showDelete && (
+          <IconButton
+            onClick={handleDelete}
+            size="small"
+            title="Pozmak"
+            sx={(theme) => ({
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              border: "1px solid rgba(239, 68, 68, 0.25)",
+              backgroundColor: "rgba(239, 68, 68, 0.06)",
+              color: "#dc2626",
+              transition: "all 0.15s ease",
               "&:hover": {
-                backgroundColor: "rgba(239, 68, 68, 0.2)",
-                borderColor: "#f87171",
+                backgroundColor: "rgba(239, 68, 68, 0.14)",
+                borderColor: "#dc2626",
+                transform: "translateY(-1px)",
               },
-            }),
-          })}
-        >
-          <Trash2 size={15} />
-        </IconButton>
+              "&:active": { transform: "scale(0.95)" },
+              ...theme.applyStyles("dark", {
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                color: "#f87171",
+                "&:hover": {
+                  backgroundColor: "rgba(239, 68, 68, 0.2)",
+                  borderColor: "#f87171",
+                },
+              }),
+            })}
+          >
+            <Trash2 size={15} />
+          </IconButton>
+        )}
       </Box>
 
       {/* Payment Management Modal */}
