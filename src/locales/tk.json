@@ -1,4 +1,7 @@
 {
+  "category": "Kategoriýa",
+  "currency": "Walýuta",
+  "operator": "Operator",
   "edit": "Üýtgetmek",
   "delete": "Pozmak",
   "apply": "Ulanmak",
@@ -381,7 +384,8 @@
     "office": "Ofis",
     "department": "Bölüm",
     "position": "Wezipe",
-    "translator": "Terjimeçi"
+    "translator": "Terjimeçi",
+    "category": "Kategoriýa"
   },
   "turkish": {
     "addTicket": "Türk howa ýollary bilet goşmak",
@@ -1072,6 +1076,52 @@
       "chartSubtitle": "Her ofisiň girdisi, çykdysy we peýdasy",
       "tableTitle": "Ofisler boýunça jemi",
       "tableSubtitle": "Her ofis bir setir · USD we TMT aýratyn"
+    },
+    "cashBook": {
+      "date": "Sene",
+      "dateFrom": "Senesinden",
+      "dateTo": "Senesine çenli",
+      "direction": "Görnüşi",
+      "description": "Açyklama",
+      "giver": "Tabşyran",
+      "receiver": "Kabul eden",
+      "company": "Kärhana",
+      "parties": "Tabşyran → Kabul eden",
+      "officeCompany": "Ofis / Kärhana",
+      "balance": "Galyndy",
+      "close": "Ýapmak",
+      "operations": "{{count}} amal",
+      "projectSale": "Satyş",
+      "projectLocked": "Proýektden awtomatik gelýär — üýtgetmek üçin öz bölüminde düzediň",
+      "allTabNote": "«Hemmesi» proýekt satyşlaryny we kassa hereketlerini bile görkezýär. Kassa girdejisi ofislerden tabşyrylan satyş pullaryny hem öz içine alýar — jemleri deňeşdirmek üçin «Kassa» ýa-da «Proýekt» bölümini saýlaň.",
+      "tabs": {
+        "all": "Hemmesi",
+        "kassa": "Kassa",
+        "project": "Proýekt amallary"
+      },
+      "source": {
+        "PROJECT": "Proýekt",
+        "MANUAL": "Elde goşulan",
+        "EXCEL": "Excel"
+      },
+      "importButton": "Excel import",
+      "importTitle": "Günlük kassa — Excel import",
+      "importPick": "Excel faýly saýlaň ýa-da şu ýere taşlaň",
+      "importHint": "GIRDEJI we ÇYKDAJY sahypalary okalýar (.xlsx)",
+      "importRowCount": "{{count}} ýazgy",
+      "importNewCategories": "Täze döredilýän kategoriýalar ({{count}})",
+      "importSkippedRows": "{{count}} setir geçildi",
+      "skipReason": {
+        "noDate": "senesi ýok",
+        "noAmount": "mukdary ýok",
+        "negative": "otrisatel mukdar"
+      },
+      "importDedupeNote": "Öň import edilen ýazgylar gaýtadan goşulmaýar — şol bir faýly ýa-da täzelenen faýly gaýtadan ýükläp bilersiňiz.",
+      "importStart": "Import et",
+      "importDone": "Import tamamlandy: {{inserted}} täze ýazgy goşuldy, {{skipped}} ýazgy eýýäm bardy, {{categories}} täze kategoriýa döredildi.",
+      "importNoRows": "Faýlda GIRDEJI / ÇYKDAJY ýazgylary tapylmady",
+      "importParseError": "Faýly okap bolmady. Dogry Excel faýlymy?",
+      "importFailed": "Import wagtynda ýalňyşlyk ýüze çykdy. Gaýtadan synanyşyň — eýýäm goşulan ýazgylar gaýtalanmaz."
     }
   },
   "professionalTranslation": {
@@ -1114,6 +1164,16 @@
       "nameRu": "Wezipe ady, Ru",
       "nameEn": "Wezipe ady, En",
       "deleteConfirm": "Bu wezipäni pozmak isleýändigiňize ynanýarsyňyzmy?"
+    },
+    "category": {
+      "title": "Kategoriýalar",
+      "addCategory": "Kategoriýa goşmak",
+      "editCategory": "Kategoriýany üýtgetmek",
+      "name": "Kategoriýa ady",
+      "nameTk": "Kategoriýa ady, Tk",
+      "nameRu": "Kategoriýa ady, Ru",
+      "nameEn": "Kategoriýa ady, En",
+      "deleteConfirm": "Bu kategoriýany pozmak isleýändigiňize ynanýarsyňyzmy?"
     },
     "translator": {
       "title": "Terjimeçiler",

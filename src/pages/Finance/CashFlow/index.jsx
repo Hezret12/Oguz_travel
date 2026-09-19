@@ -3,7 +3,8 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Typography, Chip, alpha } from "@mui/material";
+import { Box, Button, Chip, Tab, Tabs, Tooltip, Typography, alpha } from "@mui/material";
+import { ArrowDownLeft, ArrowUpRight, FileSpreadsheet, Lock, Zap } from "lucide-react";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
@@ -23,61 +24,37 @@ import {
   cashFlowFilterSelectors,
 } from "../../../store/slices/filters/cashFlowFilterSlice";
 import FilterDrawer from "../../../components/FilterDrawer";
+import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import CashFlowFilter from "./Contents/CashFlowFilter";
+import CashFlowSummary from "./Contents/CashFlowSummary";
+import ImportKassaExcelModal from "./Contents/ImportKassaExcelModal";
 import AddCashTransactionModal from "./AddCashTransactionModal";
 import EditCashTransactionModal from "./EditCashTransactionModal";
-import GlobalSearchInput from "../../../components/GlobalSearchInput";
+import { cashAmount, fmtMoney, isCashRow } from "./functions/cashFlowHelpers";
 
-const StatPill = ({ label, value, color, subtitle }) => (
-  <Box
-    sx={{
-      display: "flex",
-      alignItems: "baseline",
-      gap: 0.8,
-      px: 1.8,
-      py: 0.8,
-      borderRadius: "10px",
-      border: "1px solid",
-      borderColor: "divider",
-      bgcolor: "background.paper",
-      whiteSpace: "nowrap",
-    }}
-  >
-    <Typography
-      component="span"
-      sx={{ fontSize: "12px", fontWeight: 600, color: "text.secondary" }}
-    >
-      {label}:
-    </Typography>
-    <Typography
-      component="span"
-      sx={{
-        fontSize: "14.5px",
-        fontWeight: 750,
-        color,
-        fontFamily: "'Inter', sans-serif",
-      }}
-    >
-      {value}
-    </Typography>
-    {subtitle && (
-      <Typography
-        component="span"
-        sx={{ fontSize: "11px", color: "text.secondary", ml: 0.2 }}
-      >
-        ({subtitle})
-      </Typography>
-    )}
-  </Box>
-);
+const GREEN = "#16a34a";
+const RED = "#dc2626";
+const BLUE = "#2563eb";
 
-const fmtMoney = (val, currency = "$") => {
-  const num = Number(val || 0);
-  return `${num.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })} ${currency}`;
+// Tab value → `source` query param
+const SOURCE_TABS = [
+  { value: "", labelKey: "finance.cashBook.tabs.all" },
+  { value: "MANUAL,EXCEL", labelKey: "finance.cashBook.tabs.kassa" },
+  { value: "PROJECT", labelKey: "finance.cashBook.tabs.project" },
+];
+
+const rowKind = (row) => {
+  if (!isCashRow(row)) return { color: BLUE, Icon: Zap, labelKey: "finance.cashBook.projectSale" };
+  return row.type === "INCOME"
+    ? { color: GREEN, Icon: ArrowDownLeft, labelKey: "finance.income" }
+    : { color: RED, Icon: ArrowUpRight, labelKey: "finance.expense" };
 };
+
+const Muted = ({ children }) => (
+  <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "13px" }}>
+    {children}
+  </Typography>
+);
 
 const CashFlowFilterDrawer = () => {
   const {
@@ -101,6 +78,7 @@ const CashFlowFilterDrawer = () => {
       onClose={closeDrawer}
       onApply={applyFilters}
       onReset={resetFilters}
+      showFooter
     >
       <CashFlowFilter
         draft={draft}
@@ -118,15 +96,17 @@ const CashFlow = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   const {
+    applied,
     openDrawer,
+    setFilter,
     searchQuery,
     setSearch,
     page,
     setPage,
     limit,
-    setPageSize,
     queryParams,
   } = useTableFilters({
     actions: cashFlowFilterActions,
@@ -134,7 +114,8 @@ const CashFlow = () => {
   });
 
   const {
-    data: calculationsResponse,
+    data: rows,
+    meta,
     isLoading,
     isFetching,
     refetch,
@@ -146,397 +127,266 @@ const CashFlow = () => {
     params: queryParams,
   });
 
-  const calculations = useMemo(() => {
-    const raw =
-      calculationsResponse?.data?.data ??
-      calculationsResponse?.data ??
-      calculationsResponse ??
-      [];
-    return Array.isArray(raw) ? raw : [];
-  }, [calculationsResponse]);
+  const serverTotals = meta?.totals;
+  const totals = useMemo(() => (Array.isArray(serverTotals) ? serverTotals : []), [serverTotals]);
+  const activeSource = applied?.source ?? "";
 
-  // Aggregate totals from backend meta or calculate from current dataset
-  const serverTotals = calculationsResponse?.meta?.totals || calculationsResponse?.data?.meta?.totals;
-
-  const { totalSale, totalNet, totalProfit, totalCredit } = useMemo(() => {
-    if (serverTotals) {
-      return {
-        totalSale: Number(serverTotals.totalSalePrice || 0),
-        totalNet: Number(serverTotals.totalNetPrice || 0),
-        totalProfit: Number(serverTotals.totalProfit || 0),
-        totalCredit: Number(serverTotals.totalCreditPrice || 0),
-      };
-    }
-    let sale = 0;
-    let net = 0;
-    let profit = 0;
-    let credit = 0;
-    calculations.forEach((item) => {
-      sale += Number(item.sale_price || 0);
-      net += Number(item.net_price || 0);
-      profit += Number(item.profit || 0);
-      credit += Number(item.credit_price || 0);
-    });
-    return {
-      totalSale: sale,
-      totalNet: net,
-      totalProfit: profit,
-      credit,
-    };
-  }, [serverTotals, calculations]);
-
-  const { mutate: deleteTransaction } = useDelete({
+  const { mutate: deleteTransaction, isPending: isDeleting } = useDelete({
     deleteFn: deleteTotalCalculationApi,
-    queryKey: ["totalCalculations", queryParams],
+    queryKey: "totalCalculations",
     idKey: "guid",
     isPaginated: true,
   });
 
   const deleteDialog = useDeleteDialog({
-    onConfirm: (item) => deleteTransaction(item.guid || item.id),
+    onConfirm: (item) => deleteTransaction(item.guid),
   });
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: "index_number",
-        header: "№",
-        size: 70,
-        Cell: ({ cell, row }) => (
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 600, color: "text.secondary", fontSize: "13px" }}
-          >
-            {cell.getValue() || row.index + 1}
-          </Typography>
-        ),
-      },
-      {
         accessorKey: "datetime",
-        header: t("date", "Senesi"),
-        size: 135,
-        Cell: ({ cell }) => (
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 500, color: "text.primary", fontSize: "13px" }}
-          >
-            {formatChange(cell.getValue())}
-          </Typography>
-        ),
+        header: t("finance.cashBook.date"),
+        size: 120,
+        Cell: ({ cell }) => {
+          const [date, time] = String(formatChange(cell.getValue()) || "").split(" ");
+          return (
+            <Box sx={{ lineHeight: 1.25 }}>
+              <Typography sx={{ fontSize: "13px", fontWeight: 600 }}>{date || "—"}</Typography>
+              {time && <Typography sx={{ fontSize: "11.5px", color: "text.secondary" }}>{time}</Typography>}
+            </Box>
+          );
+        },
       },
       {
-        accessorKey: "category",
-        header: t("category", "Kategoriýa"),
-        size: 170,
-        Cell: ({ cell }) => {
-          const val = cell.getValue();
-          if (!val) return "—";
-          const label =
-            typeof val === "object"
-              ? (selectedLang(val.name) || val.name?.tk || val.name?.ru || val.name?.en || "")
-              : String(val);
-          if (!label) return "—";
+        id: "kind",
+        header: t("finance.cashBook.direction"),
+        size: 130,
+        Cell: ({ row }) => {
+          const { color, Icon, labelKey } = rowKind(row.original);
+          const source = row.original.source;
+          return (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Box
+                sx={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "8px",
+                  display: "grid",
+                  placeItems: "center",
+                  flexShrink: 0,
+                  color,
+                  bgcolor: alpha(color, 0.12),
+                }}
+              >
+                <Icon size={16} />
+              </Box>
+              <Box sx={{ lineHeight: 1.2, minWidth: 0 }}>
+                <Typography sx={{ fontSize: "13px", fontWeight: 600, color }}>{t(labelKey)}</Typography>
+                <Typography sx={{ fontSize: "11px", color: "text.secondary" }}>
+                  {t(`finance.cashBook.source.${source || "PROJECT"}`)}
+                </Typography>
+              </Box>
+            </Box>
+          );
+        },
+      },
+      {
+        id: "category",
+        header: t("category"),
+        size: 150,
+        Cell: ({ row }) => {
+          const cat = row.original.category;
+          const label = cat ? selectedLang(cat.name) || cat.name?.tk || cat.name?.en || "" : "";
+          if (!label) return <Muted>—</Muted>;
           return (
             <Chip
               label={label}
               size="small"
               variant="outlined"
-              sx={{
-                fontWeight: 600,
-                fontSize: "12px",
-                borderRadius: "6px",
-                borderColor: "divider",
-                bgcolor: "action.hover",
-              }}
+              sx={{ fontWeight: 600, fontSize: "12px", borderRadius: "6px", borderColor: "divider", bgcolor: "action.hover" }}
             />
           );
         },
       },
       {
-        id: "receiver_operator",
-        header: t("operator", "Jogapkär / Operator"),
-        size: 160,
-        Cell: ({ row }) => (
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 500, color: "text.primary", fontSize: "13px" }}
-          >
-            {row.original.receiver_operator?.fullName || "—"}
-          </Typography>
-        ),
+        accessorKey: "description",
+        header: t("finance.cashBook.description"),
+        size: 260,
+        muiTableBodyCellProps: { align: "left" },
+        Cell: ({ cell }) => {
+          const text = cell.getValue();
+          if (!text) return <Muted>—</Muted>;
+          return (
+            <Tooltip title={text} placement="top-start" enterDelay={400}>
+              <Typography
+                sx={{
+                  fontSize: "13px",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  maxWidth: 320,
+                }}
+              >
+                {text}
+              </Typography>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        id: "parties",
+        header: t("finance.cashBook.parties"),
+        size: 190,
+        Cell: ({ row }) => {
+          const { giver, receiver, receiver_operator: opr } = row.original;
+          if (!giver && !receiver) return opr?.fullName ? <Typography sx={{ fontSize: "13px" }}>{opr.fullName}</Typography> : <Muted>—</Muted>;
+          return (
+            <Box sx={{ lineHeight: 1.3 }}>
+              <Typography sx={{ fontSize: "13px" }}>
+                {giver || "—"}
+                <Box component="span" sx={{ color: "text.secondary", mx: 0.75 }}>→</Box>
+                {receiver || "—"}
+              </Typography>
+              {opr?.fullName && (
+                <Typography sx={{ fontSize: "11.5px", color: "text.secondary" }}>{opr.fullName}</Typography>
+              )}
+            </Box>
+          );
+        },
       },
       {
         id: "office",
-        header: t("office", "Ofis"),
+        header: t("finance.cashBook.officeCompany"),
         size: 140,
         Cell: ({ row }) => {
           const off = row.original.office;
-          const name = off ? (selectedLang(off.shortName) || selectedLang(off.fullName) || off.name) : "—";
-          return (
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: 500, color: "text.secondary", fontSize: "13px" }}
-            >
-              {name || "—"}
-            </Typography>
-          );
+          const name = off ? selectedLang(off.shortName) || selectedLang(off.fullName) : row.original.company;
+          return name ? <Typography sx={{ fontSize: "13px" }}>{name}</Typography> : <Muted>—</Muted>;
         },
       },
       {
-        accessorKey: "sale_price",
-        header: t("finance.salePrice", "Satyş bahasy"),
-        size: 130,
-        Cell: ({ cell, row }) => {
-          const val = Number(cell.getValue() || 0);
-          const curr = row.original.currency || "USD";
-          if (val <= 0) {
+        id: "amount",
+        header: t("finance.amount"),
+        size: 150,
+        muiTableHeadCellProps: { align: "right" },
+        muiTableBodyCellProps: { align: "right" },
+        Cell: ({ row }) => {
+          const r = row.original;
+          const cur = r.currency || "USD";
+          const numSx = { fontSize: "13.5px", fontWeight: 700, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
+
+          if (isCashRow(r)) {
+            const income = r.type === "INCOME";
             return (
-              <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "13px" }}>
-                —
+              <Typography sx={{ ...numSx, color: income ? GREEN : RED }}>
+                {income ? "+" : "-"}
+                {fmtMoney(cashAmount(r), cur)}
               </Typography>
             );
           }
+
+          // Project row: sale, cost and profit in one cell
+          const sale = Number(r.sale_price || 0);
+          const net = Number(r.net_price || 0);
+          const profit = Number(r.profit || 0);
           return (
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 700,
-                fontSize: "13px",
-                color: "#16a34a",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              +{fmtMoney(val, curr)}
-            </Typography>
-          );
-        },
-      },
-      {
-        accessorKey: "net_price",
-        header: t("finance.netPrice", "Özüne düşýän / Harajat"),
-        size: 140,
-        Cell: ({ cell, row }) => {
-          const val = Number(cell.getValue() || 0);
-          const curr = row.original.currency || "USD";
-          if (val <= 0) {
-            return (
-              <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "13px" }}>
-                —
+            <Box sx={{ lineHeight: 1.25 }}>
+              <Typography sx={{ ...numSx, color: GREEN }}>+{fmtMoney(sale, cur)}</Typography>
+              <Typography sx={{ fontSize: "11.5px", color: "text.secondary", whiteSpace: "nowrap" }}>
+                -{fmtMoney(net, cur)} ·{" "}
+                <Box component="span" sx={{ color: profit >= 0 ? GREEN : RED, fontWeight: 600 }}>
+                  {profit >= 0 ? "+" : "-"}
+                  {fmtMoney(Math.abs(profit), cur)}
+                </Box>
               </Typography>
-            );
-          }
-          return (
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 700,
-                fontSize: "13px",
-                color: "#DC2626",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              -{fmtMoney(val, curr)}
-            </Typography>
-          );
-        },
-      },
-      {
-        accessorKey: "profit",
-        header: t("finance.profit", "Peýda"),
-        size: 130,
-        Cell: ({ cell, row }) => {
-          const val = Number(cell.getValue() || 0);
-          const curr = row.original.currency || "USD";
-          if (val === 0) {
-            return (
-              <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "13px" }}>
-                —
-              </Typography>
-            );
-          }
-          const isPos = val > 0;
-          return (
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 700,
-                fontSize: "13px",
-                color: isPos ? "#16a34a" : "#DC2626",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              {isPos ? `+${fmtMoney(val, curr)}` : `-${fmtMoney(Math.abs(val), curr)}`}
-            </Typography>
-          );
-        },
-      },
-      {
-        accessorKey: "credit_price",
-        header: t("finance.creditPrice", "Algy / Bergi"),
-        size: 120,
-        Cell: ({ cell, row }) => {
-          const val = Number(cell.getValue() || 0);
-          const curr = row.original.currency || "USD";
-          if (val <= 0) {
-            return (
-              <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "13px" }}>
-                —
-              </Typography>
-            );
-          }
-          return (
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 600,
-                fontSize: "13px",
-                color: "#2563EB",
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              {fmtMoney(val, curr)}
-            </Typography>
-          );
-        },
-      },
-      {
-        accessorKey: "is_manual",
-        header: t("finance.type", "Görnüşi"),
-        size: 110,
-        Cell: ({ cell }) => {
-          const isManual = Boolean(cell.getValue());
-          return (
-            <Chip
-              label={isManual ? "Manual" : "Auto"}
-              size="small"
-              sx={{
-                fontWeight: 600,
-                fontSize: "11px",
-                height: "22px",
-                bgcolor: (th) =>
-                  isManual
-                    ? alpha(th.palette.primary.main, 0.12)
-                    : alpha(th.palette.text.secondary, 0.1),
-                color: (th) =>
-                  isManual ? th.palette.primary.main : th.palette.text.secondary,
-              }}
-            />
+            </Box>
           );
         },
       },
       {
         id: "actions",
-        header: t("actions"),
-        size: 80,
-        Cell: ({ row, table: mrtTable }) => (
-          <ColumnActionButtons
-            row={row}
-            table={mrtTable}
-            onDelete={(item) => deleteDialog.open(item)}
-            showPayment={false}
-          />
-        ),
+        header: t("columns.actions"),
+        size: 90,
+        Cell: ({ row, table: mrtTable }) =>
+          row.original.is_manual ? (
+            <ColumnActionButtons row={row} table={mrtTable} onDelete={deleteDialog.open} />
+          ) : (
+            <Tooltip title={t("finance.cashBook.projectLocked")}>
+              <Box sx={{ display: "inline-flex", color: "text.disabled" }}>
+                <Lock size={16} />
+              </Box>
+            </Tooltip>
+          ),
       },
     ],
-    [t, selectedLang, formatChange, deleteDialog]
+    [t, selectedLang, formatChange, deleteDialog.open],
   );
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
-    // `renderCreateRowDialogContent` was dead code — the Add flow here never
-    // calls table.setCreatingRow (it uses its own isAddModalOpen state below),
-    // so it never fired. The edit flow's ColumnActionButtons DOES call
-    // table.setEditingRow though, so "custom" avoids MRT wrapping
-    // EditCashTransactionModal's own <Dialog> in a second one — see
-    // Translate/index.jsx for the full rationale.
+    // Add uses its own modal state; edit goes through table.setEditingRow via
+    // ColumnActionButtons — "custom" stops MRT from wrapping our own <Dialog>.
     editDisplayMode: "custom",
     columns,
-    data: calculations,
+    data: rows,
+    getRowId: (row) => row.guid,
+    manualPagination: true,
+    manualFiltering: true,
+    pageCount,
+    rowCount: totalItems,
     state: {
       isLoading,
       showProgressBars: isFetching,
+      pagination: { pageIndex: page - 1, pageSize: limit },
     },
-    muiTableBodyRowProps: ({ row }) => {
-      const profit = Number(row.original?.profit || 0);
-      const isPos = profit >= 0;
-      const indicatorColor = isPos ? "#16a34a" : "#dc2626";
-
-      return {
-        sx: (theme) => ({
-          cursor: "pointer",
-          borderLeft: `3.5px solid ${indicatorColor}`,
-          transition: "background-color 0.15s ease",
-          "&:hover": {
-            backgroundColor:
-              theme.palette.mode === "dark"
-                ? "rgba(255, 255, 255, 0.05)"
-                : "rgba(0, 0, 0, 0.03) !important",
-          },
-        }),
-      };
+    defaultColumn: {
+      muiTableHeadCellProps: { align: "left" },
+      muiTableBodyCellProps: { align: "left" },
     },
+    muiTableBodyRowProps: ({ row }) => ({
+      sx: {
+        boxShadow: `inset 3px 0 0 ${rowKind(row.original).color}`,
+        "&:hover td": { bgcolor: "action.hover" },
+      },
+    }),
     renderTopToolbarCustomActions: () => (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          py: 0.5,
-          flexWrap: "wrap",
-        }}
-      >
-        <GlobalSearchInput
-          value={searchQuery}
-          onChange={setSearch}
-          placeholder={t("search", "Gözleg...")}
-          onRefetch={refetch}
-          isFetching={isFetching}
-        />
-
-        {/* Live Database Grand Total Pills */}
-        <Box
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, py: 0.5, flexWrap: "wrap", width: "100%" }}>
+        <Tabs
+          value={activeSource}
+          onChange={(_, v) => setFilter("source", v)}
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            flexWrap: "wrap",
+            minHeight: 36,
+            "& .MuiTab-root": { minHeight: 36, textTransform: "none", fontWeight: 600, px: 1.5 },
           }}
         >
-          <StatPill
-            label={t("finance.totalSale", "Jemi Satyş")}
-            value={`+${fmtMoney(totalSale)}`}
-            color="#16a34a"
+          {SOURCE_TABS.map((tab) => (
+            <Tab key={tab.value || "all"} value={tab.value} label={t(tab.labelKey)} />
+          ))}
+        </Tabs>
+        <Box sx={{ width: { xs: "100%", sm: 300 }, ml: { sm: "auto" } }}>
+          <GlobalSearchInput
+            value={searchQuery}
+            onChange={setSearch}
+            placeholder={t("search")}
+            onRefetch={refetch}
+            isFetching={isFetching}
           />
-
-          <StatPill
-            label={t("finance.totalCost", "Jemi Harajat")}
-            value={`-${fmtMoney(totalNet)}`}
-            color="#DC2626"
-          />
-
-          <StatPill
-            label={t("finance.netProfit", "Arassa Peýda")}
-            value={
-              totalProfit >= 0
-                ? `+${fmtMoney(totalProfit)}`
-                : `-${fmtMoney(Math.abs(totalProfit))}`
-            }
-            color={totalProfit >= 0 ? "#16a34a" : "#DC2626"}
-            subtitle={
-              totalSale > 0
-                ? `${((totalProfit / totalSale) * 100).toFixed(1)}%`
-                : null
-            }
-          />
-
-          {totalCredit > 0 && (
-            <StatPill
-              label={t("finance.totalCredit", "Algy / Bergi")}
-              value={fmtMoney(totalCredit)}
-              color="#2563EB"
-            />
-          )}
         </Box>
+      </Box>
+    ),
+    renderBottomToolbar: () => (
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, py: 1, gap: 2 }}>
+        <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>
+          {t("finance.cashBook.operations", { count: totalItems })}
+        </Typography>
+        <Pagination
+          pageIndex={page - 1}
+          pageCount={pageCount}
+          totalRows={totalItems}
+          onPageChange={(i) => setPage(i + 1)}
+        />
       </Box>
     ),
   });
@@ -544,50 +394,49 @@ const CashFlow = () => {
   return (
     <>
       <PageHeader
-        title={t("sidebar.cashFlow", "Pul Akymy (Total Calculations)")}
-        addButtonText={t("finance.addTransaction", "+ Pul amaly goşmak")}
+        title={t("sidebar.cashFlow")}
+        pageTitle={`${t("sidebar.cashFlow")} | Oguz Travel`}
+        addButtonText={t("finance.addTransaction")}
         onAddClick={() => setIsAddModalOpen(true)}
-        openDrawer={openDrawer}
-        hasFilter
-      />
+        filterButtonText={t("filter")}
+        onFilterClick={openDrawer}
+      >
+        <Button
+          variant="outlined"
+          startIcon={<FileSpreadsheet size={16} />}
+          onClick={() => setIsImportOpen(true)}
+          sx={{ height: 40, px: 2.5, borderRadius: "10px", textTransform: "none", fontWeight: 600, borderColor: "divider", color: "text.primary" }}
+        >
+          {t("finance.cashBook.importButton")}
+        </Button>
+      </PageHeader>
 
-      {Boolean(table.getState().editingRow) && (
-        <EditCashTransactionModal
-          table={table}
-          row={table.getState().editingRow}
-        />
+      <CashFlowSummary totals={totals} isLoading={isLoading} isProjectTab={activeSource === "PROJECT"} />
+
+      {activeSource === "" && totals.length > 0 && (
+        <Typography sx={{ fontSize: "12px", color: "text.secondary", mt: -1, mb: 1.5 }}>
+          {t("finance.cashBook.allTabNote")}
+        </Typography>
       )}
 
-      <Box sx={{ width: "100%", overflow: "hidden" }}>
-        <MaterialReactTable table={table} />
-        <Pagination
-          totalItems={totalItems}
-          page={page}
-          limit={limit}
-          setPage={setPage}
-          setPageSize={setPageSize}
-          pageCount={pageCount}
-        />
-      </Box>
+      <MaterialReactTable table={table} />
 
-      {/* Manual Transaction Dialogs */}
-      <AddCashTransactionModal
-        open={isAddModalOpen}
-        close={() => setIsAddModalOpen(false)}
-      />
+      {Boolean(table.getState().editingRow) && (
+        <EditCashTransactionModal table={table} row={table.getState().editingRow} />
+      )}
 
-      {/* Filter Drawer */}
+      <AddCashTransactionModal open={isAddModalOpen} close={() => setIsAddModalOpen(false)} />
+      <ImportKassaExcelModal open={isImportOpen} close={() => setIsImportOpen(false)} />
+
       <CashFlowFilterDrawer />
 
       <DeleteDialog
         open={deleteDialog.isOpen}
+        isLoading={isDeleting}
         onClose={deleteDialog.close}
         onConfirm={deleteDialog.confirm}
-        title={t("finance.deleteTransaction", "Pul amalyny pozmak")}
-        description={t(
-          "finance.deleteConfirm",
-          "Bu pul amalyny pozmak isleýändigiňize ynanýarsyňyzmy? Bu amaly yzyna gaýtaryp bolmaýar."
-        )}
+        title={t("finance.deleteTransaction")}
+        description={t("finance.deleteConfirm")}
       />
     </>
   );

@@ -1,4 +1,7 @@
 {
+  "category": "Category",
+  "currency": "Currency",
+  "operator": "Operator",
   "edit": "Edit",
   "delete": "Delete",
   "apply": "Apply",
@@ -381,7 +384,8 @@
     "office": "Office",
     "department": "Department",
     "position": "Position",
-    "translator": "Translator"
+    "translator": "Translator",
+    "category": "Category"
   },
   "turkish": {
     "addTicket": "Add Turkish Airlines Ticket",
@@ -1086,6 +1090,52 @@
       "chartSubtitle": "Money in, money out and profit per office",
       "tableTitle": "Totals by office",
       "tableSubtitle": "One row per office · USD and TMT kept separate"
+    },
+    "cashBook": {
+      "date": "Date",
+      "dateFrom": "From date",
+      "dateTo": "To date",
+      "direction": "Type",
+      "description": "Description",
+      "giver": "Handed over by",
+      "receiver": "Received by",
+      "company": "Company",
+      "parties": "From → To",
+      "officeCompany": "Office / Company",
+      "balance": "Balance",
+      "close": "Close",
+      "operations": "{{count}} operations",
+      "projectSale": "Sale",
+      "projectLocked": "Created automatically from the project — edit it in its own section",
+      "allTabNote": "“All” shows project sales and cash-book movements together. Cash income also includes sales money handed in by offices — pick “Cash book” or “Project” to compare totals.",
+      "tabs": {
+        "all": "All",
+        "kassa": "Cash book",
+        "project": "Project operations"
+      },
+      "source": {
+        "PROJECT": "Project",
+        "MANUAL": "Manual",
+        "EXCEL": "Excel"
+      },
+      "importButton": "Excel import",
+      "importTitle": "Daily cash book — Excel import",
+      "importPick": "Choose an Excel file or drop it here",
+      "importHint": "Reads the GIRDEJI and ÇYKDAJY sheets (.xlsx)",
+      "importRowCount": "{{count}} records",
+      "importNewCategories": "New categories to be created ({{count}})",
+      "importSkippedRows": "{{count}} rows skipped",
+      "skipReason": {
+        "noDate": "no date",
+        "noAmount": "no amount",
+        "negative": "negative amount"
+      },
+      "importDedupeNote": "Records imported before are never added twice — you can re-upload the same or an updated file.",
+      "importStart": "Import",
+      "importDone": "Import finished: {{inserted}} new records, {{skipped}} already existed, {{categories}} categories created.",
+      "importNoRows": "No GIRDEJI / ÇYKDAJY records found in the file",
+      "importParseError": "Couldn’t read the file. Is it a valid Excel file?",
+      "importFailed": "Import failed. Try again — records already added won’t be duplicated."
     }
   },
   "professionalTranslation": {
@@ -1128,6 +1178,16 @@
       "nameRu": "Position Name, Ru",
       "nameEn": "Position Name, En",
       "deleteConfirm": "Are you sure you want to delete this position?"
+    },
+    "category": {
+      "title": "Categories",
+      "addCategory": "Add Category",
+      "editCategory": "Edit Category",
+      "name": "Category Name",
+      "nameTk": "Category Name, Tk",
+      "nameRu": "Category Name, Ru",
+      "nameEn": "Category Name, En",
+      "deleteConfirm": "Are you sure you want to delete this category?"
     },
     "translator": {
       "title": "Translators",

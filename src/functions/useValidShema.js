@@ -401,6 +401,43 @@ export const useValidShema = () => {
     name_en: stringOptionalValidSchema(),
   });
 
+  const cashTransaction = yup.object({
+    type: yup.string().oneOf(["INCOME", "EXPENSE"]).required(t("validation.required")),
+    amount: yup
+      .number()
+      .transform((value, original) => (original === "" ? undefined : value))
+      .typeError(t("validation.invalidNumber"))
+      .moreThan(0, t("validation.invalidNumber"))
+      .required(t("validation.required")),
+    currency: yup.string().required(t("validation.required")),
+    datetime: yup.string().nullable().required(t("validation.dateRequired")),
+    category_guid: yup.string().nullable(),
+    receiver_opr_guid: yup.string().nullable(),
+    description: yup.string().nullable(),
+    giver: yup.string().nullable().max(255),
+    receiver: yup.string().nullable().max(255),
+    company: yup.string().nullable().max(255),
+  });
+
+  const addCategory = yup.object({
+    name_tk: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
+    name_ru: stringOptionalValidSchema(),
+    name_en: stringOptionalValidSchema(),
+  });
+
+  const editCategory = yup.object({
+    guid: guidRequiredValidSchema(),
+    name_tk: yup
+      .string()
+      .trim()
+      .required(t("validation.required") || "Hökman girizilmeli"),
+    name_ru: stringOptionalValidSchema(),
+    name_en: stringOptionalValidSchema(),
+  });
+
   return {
     addB2BTicket,
     addTurkishAirlinesTicket,
@@ -424,6 +461,9 @@ export const useValidShema = () => {
     editDepartment,
     addPosition,
     editPosition,
+    addCategory,
+    editCategory,
+    cashTransaction,
     editTranslator,
   };
   }, [

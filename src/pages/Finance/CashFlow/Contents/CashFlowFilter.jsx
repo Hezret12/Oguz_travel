@@ -187,20 +187,48 @@ const CashFlowFilter = ({
     () => [
       { label: "TMT", value: "TMT" },
       { label: "USD", value: "USD" },
+      { label: "EUR", value: "EUR" },
     ],
     []
   );
 
-  const isManualOptions = useMemo(
+  const typeOptions = useMemo(
     () => [
-      { label: "El bilen goşulan (Manual)", value: "true" },
-      { label: "Awto-sinkronlaşan (Auto-Sync)", value: "false" },
+      { label: t("finance.income"), value: "INCOME" },
+      { label: t("finance.expense"), value: "EXPENSE" },
     ],
-    []
+    [t]
   );
 
   return (
     <Stack spacing={2.5}>
+      <FilterSelect
+        label={t("finance.cashBook.direction")}
+        name="type"
+        value={draft.type}
+        options={typeOptions}
+        isOpen={selectsOpen.type}
+        allText={t("all")}
+        onChange={setDraftFilter}
+        onOpen={openSelect}
+        onClose={closeSelect}
+      />
+
+      <Stack direction="row" spacing={1.5}>
+        <FilterDate
+          label={t("finance.cashBook.dateFrom")}
+          name="date_from"
+          value={draft.date_from}
+          onChange={setDraftFilter}
+        />
+        <FilterDate
+          label={t("finance.cashBook.dateTo")}
+          name="date_to"
+          value={draft.date_to}
+          onChange={setDraftFilter}
+        />
+      </Stack>
+
       <FilterSelect
         label={t("category", "Kategoriýa")}
         name="category_guid"
@@ -226,7 +254,7 @@ const CashFlowFilter = ({
       />
 
       <FilterSelect
-        label={t("office", "Ofis")}
+        label={t("sidebar.office")}
         name="office_guid"
         value={draft.office_guid}
         options={officeOptions}
@@ -247,25 +275,6 @@ const CashFlowFilter = ({
         onChange={setDraftFilter}
         onOpen={openSelect}
         onClose={closeSelect}
-      />
-
-      <FilterSelect
-        label={t("finance.type", "Goşulyş görnüşi")}
-        name="is_manual"
-        value={draft.is_manual}
-        options={isManualOptions}
-        isOpen={selectsOpen.is_manual}
-        allText={t("all")}
-        onChange={setDraftFilter}
-        onOpen={openSelect}
-        onClose={closeSelect}
-      />
-
-      <FilterDate
-        label={t("date", "Sene")}
-        name="datetime"
-        value={draft.datetime}
-        onChange={setDraftFilter}
       />
     </Stack>
   );

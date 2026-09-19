@@ -4,12 +4,14 @@ export const cashFlowFilterSlice = createFilterSlice({
   name: 'cashFlowFilters',
   defaultFilters: {
     search: '',
+    source: '',
+    type: '',
     category_guid: '',
-    datetime: '',
+    date_from: '',
+    date_to: '',
     receiver_opr_guid: '',
     office_guid: '',
     currency: '',
-    is_manual: '',
   },
   defaultPageSize: 40,
 });
