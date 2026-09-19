@@ -8,7 +8,7 @@ import { useAuth } from "../../../context/useAuth";
 import KpiGrid from "./Contents/KpiGrid";
 import CategoryCard from "./Contents/CategoryCard";
 import CashFlowCard from "./Contents/CashFlowCard";
-import FlowBreakdownCard from "./Contents/FlowBreakdownCard";
+import MoneyFlowCard from "./Contents/MoneyFlowCard";
 import OperatorCard from "./Contents/OperatorCard";
 import { CURRENCIES, segmentedSx, useOfficeAnalytics } from "./functions/analyticsFormat";
 import { CUSTOM_PERIOD, PERIODS, isValidCustomRange } from "./functions/officeAnalyticsMock";
@@ -175,20 +175,13 @@ const FinanceOverview = () => {
 
       <CashFlowCard cashFlow={data.cashFlow} currency={currency} granularity={data.period.granularity} />
 
-      <Grid container spacing={2.5}>
-        <Grid size={{ xs: 12, lg: 6 }}>
-          <FlowBreakdownCard direction="in" items={data.cashFlow.inflow} currency={currency} />
-        </Grid>
-        <Grid size={{ xs: 12, lg: 6 }}>
-          <FlowBreakdownCard direction="out" items={data.cashFlow.outflow} currency={currency} />
-        </Grid>
-      </Grid>
+      <MoneyFlowCard cashFlow={data.cashFlow} currency={currency} />
 
       <Grid container spacing={2.5}>
-        <Grid size={{ xs: 12, lg: 6 }}>
+        <Grid size={{ xs: 12, lg: 6 }} sx={{ display: "flex", flexDirection: "column" }}>
           <CategoryCard categories={data.categories} currency={currency} />
         </Grid>
-        <Grid size={{ xs: 12, lg: 6 }}>
+        <Grid size={{ xs: 12, lg: 6 }} sx={{ display: "flex", flexDirection: "column" }}>
           <OperatorCard operators={data.operators} currency={currency} />
         </Grid>
       </Grid>

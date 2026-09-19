@@ -1077,7 +1077,12 @@
           "expense": "Cash expense",
           "salary": "Salary",
           "exchange": "Currency exchange"
-        }
+        },
+        "other": "Other",
+        "leftover": "Left in the till",
+        "drawdown": "Drawn from the till",
+        "cardTitle": "Where the money came from and went",
+        "cardSubtitle": "Largest sources and expenses · selected currency"
       }
     },
     "offices": {
@@ -1089,7 +1094,10 @@
       "chartTitle": "Office comparison",
       "chartSubtitle": "Money in, money out and profit per office",
       "tableTitle": "Totals by office",
-      "tableSubtitle": "One row per office · USD and TMT kept separate"
+      "tableSubtitle": "One row per office · USD and TMT kept separate",
+      "cardsTitle": "Office results",
+      "cardsSubtitle": "Each office’s profit · bar: how much of money in went out and how much stayed",
+      "shareOfIncome": "Share of total money in"
     },
     "cashBook": {
       "date": "Date",

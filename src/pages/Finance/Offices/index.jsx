@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import PageHeader from "../../../components/PageHeader";
 import { useLocale } from "../../../hooks/useLocale";
 import DateRangePopover from "../Overview/Contents/DateRangePopover";
-import { segmentedSx } from "../Overview/functions/analyticsFormat";
+import { CURRENCIES, segmentedSx } from "../Overview/functions/analyticsFormat";
 import { CUSTOM_PERIOD, PERIODS, isValidCustomRange } from "../Overview/functions/officeAnalyticsMock";
 import OfficesSummary from "./Contents/OfficesSummary";
 import OfficesChart from "./Contents/OfficesChart";
@@ -52,9 +52,10 @@ const FinanceOffices = () => {
           ? saved.period
           : "thisMonth",
       customRange,
+      currency: CURRENCIES.includes(saved.currency) ? saved.currency : "USD",
     };
   });
-  const { period, customRange } = prefs;
+  const { period, customRange, currency } = prefs;
   const [rangeAnchor, setRangeAnchor] = useState(null);
 
   const updatePrefs = (patch) => {
@@ -96,45 +97,63 @@ const FinanceOffices = () => {
           <MetaItem icon={CalendarDays}>{range}</MetaItem>
         </Box>
 
-        <ToggleButtonGroup
-          exclusive
-          value={period}
-          onChange={(_e, next) => next && updatePrefs({ period: next })}
-          sx={segmentedSx}
-        >
-          {PERIODS.map((p) => (
-            <ToggleButton key={p} value={p}>
-              {t(`finance.analytics.periods.${p}`)}
-            </ToggleButton>
-          ))}
-          {/* Opens the picker instead of switching; the period only
-              becomes "custom" once a valid range is applied. */}
-          <ToggleButton
-            value={CUSTOM_PERIOD}
-            onClick={(e) => {
-              e.preventDefault();
-              setRangeAnchor(e.currentTarget);
-            }}
-            sx={{ gap: 0.75 }}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+          <ToggleButtonGroup
+            exclusive
+            value={period}
+            onChange={(_e, next) => next && updatePrefs({ period: next })}
+            sx={segmentedSx}
           >
-            <CalendarRange size={15} />
-            {period === CUSTOM_PERIOD && customRange
-              ? `${dayjs(customRange.start).format("DD.MM")} – ${dayjs(customRange.end).format("DD.MM.YY")}`
-              : t("finance.analytics.periods.custom")}
-          </ToggleButton>
-        </ToggleButtonGroup>
+            {PERIODS.map((p) => (
+              <ToggleButton key={p} value={p}>
+                {t(`finance.analytics.periods.${p}`)}
+              </ToggleButton>
+            ))}
+            {/* Opens the picker instead of switching; the period only
+                becomes "custom" once a valid range is applied. */}
+            <ToggleButton
+              value={CUSTOM_PERIOD}
+              onClick={(e) => {
+                e.preventDefault();
+                setRangeAnchor(e.currentTarget);
+              }}
+              sx={{ gap: 0.75 }}
+            >
+              <CalendarRange size={15} />
+              {period === CUSTOM_PERIOD && customRange
+                ? `${dayjs(customRange.start).format("DD.MM")} – ${dayjs(customRange.end).format("DD.MM.YY")}`
+                : t("finance.analytics.periods.custom")}
+            </ToggleButton>
+          </ToggleButtonGroup>
 
-        {rangeAnchor && (
-          <DateRangePopover
-            anchorEl={rangeAnchor}
-            value={customRange}
-            onApply={(nextRange) => {
-              updatePrefs({ period: CUSTOM_PERIOD, customRange: nextRange });
-              setRangeAnchor(null);
-            }}
-            onClose={() => setRangeAnchor(null)}
-          />
-        )}
+          {rangeAnchor && (
+            <DateRangePopover
+              anchorEl={rangeAnchor}
+              value={customRange}
+              onApply={(nextRange) => {
+                updatePrefs({ period: CUSTOM_PERIOD, customRange: nextRange });
+                setRangeAnchor(null);
+              }}
+              onClose={() => setRangeAnchor(null)}
+            />
+          )}
+
+          {/* Currency for the chart; the summary and table show both */}
+          <Tooltip title={t("finance.analytics.noConversion")} arrow>
+            <ToggleButtonGroup
+              exclusive
+              value={currency}
+              onChange={(_e, next) => next && updatePrefs({ currency: next })}
+              sx={segmentedSx}
+            >
+              {CURRENCIES.map((c) => (
+                <ToggleButton key={c} value={c}>
+                  {c}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          </Tooltip>
+        </Box>
       </Box>
 
       {isLoading ? (
@@ -144,7 +163,7 @@ const FinanceOffices = () => {
       ) : (
         <>
           <OfficesSummary rows={data.rows} totals={data.totals} />
-          <OfficesChart rows={data.rows} />
+          <OfficesChart rows={data.rows} currency={currency} />
           <OfficesTable rows={data.rows} totals={data.totals} />
         </>
       )}

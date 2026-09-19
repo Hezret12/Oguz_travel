@@ -55,11 +55,11 @@ export const useSeriesColors = () => {
   };
 };
 
-// Two-sided money charts (Sankey, dumbbell, mirrored bars): teal = money in,
-// orange = money out, neutral ink = the till and what is left. Validated with
-// the dataviz checker on #ffffff / #12131A: teal↔orange passes CVD in both
-// modes. Blue was rejected here — teal↔blue fails the normal-vision floor in
-// light mode — so the till is neutral, never a third hue.
+// Money in vs. money out charts: teal = in, orange = out (same tones as the
+// KPI cards), neutral ink for anything else. Validated with the dataviz
+// checker on #ffffff / #12131A: teal↔orange passes CVD in both modes. Blue
+// was rejected as a third hue — teal↔blue fails the normal-vision floor in
+// light mode.
 export const useFlowColors = () => {
   const { palette } = useTheme();
   const dark = palette.mode === "dark";
@@ -69,6 +69,21 @@ export const useFlowColors = () => {
     neutral: dark ? "#CBD5E1" : "#334155",
     surface: palette.background.paper,
   };
+};
+
+// Slice colours for part-to-whole donuts, in fixed order (never cycled):
+// the dataviz reference categorical slots 1–5, plus a neutral for "Other".
+// Validated adjacent-pair on #ffffff / #12131A — all hard gates pass; in light
+// mode aqua/yellow/magenta sit under 3:1, so every donut ships a visible
+// legend with names and amounts.
+const SLICE_COLORS = {
+  light: ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"],
+  dark: ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"],
+};
+export const useSliceColors = () => {
+  const { palette } = useTheme();
+  const dark = palette.mode === "dark";
+  return { slots: dark ? SLICE_COLORS.dark : SLICE_COLORS.light, other: dark ? "#5B6678" : "#94A3B8" };
 };
 
 // One hue per card (each card is a single series, named by its label, so hue

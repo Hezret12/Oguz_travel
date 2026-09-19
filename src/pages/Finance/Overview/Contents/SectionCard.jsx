@@ -6,7 +6,10 @@ const SectionCard = ({ title, subtitle, action, children, sx = {} }) => (
   <Paper
     elevation={0}
     sx={{
-      height: "100%",
+      // Grow to fill a flex parent (equal heights inside a flex Grid item),
+      // never shrink: `height: 100%` resolved against the page's fixed-height
+      // scroll area and, with overflow hidden, clipped the card's bottom rows.
+      flex: "1 0 auto",
       display: "flex",
       flexDirection: "column",
       borderRadius: "12px",

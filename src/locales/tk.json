@@ -1063,7 +1063,12 @@
           "expense": "Kassa çykdajysy",
           "salary": "Aýlyk",
           "exchange": "Walýuta çalşygy"
-        }
+        },
+        "other": "Beýlekiler",
+        "leftover": "Kassada galdy",
+        "drawdown": "Kassadan alyndy",
+        "cardTitle": "Pul nireden geldi we nirä gitdi",
+        "cardSubtitle": "Iň uly çeşmeler we çykdajylar · saýlanan walýutada"
       }
     },
     "offices": {
@@ -1075,7 +1080,10 @@
       "chartTitle": "Ofisleri deňeşdirmek",
       "chartSubtitle": "Her ofisiň girdisi, çykdysy we peýdasy",
       "tableTitle": "Ofisler boýunça jemi",
-      "tableSubtitle": "Her ofis bir setir · USD we TMT aýratyn"
+      "tableSubtitle": "Her ofis bir setir · USD we TMT aýratyn",
+      "cardsTitle": "Ofisleriň netijesi",
+      "cardsSubtitle": "Her ofisiň peýdasy · zolak: girdiniň näçesi çykdy, näçesi galdy",
+      "shareOfIncome": "Jemi girdideki paýy"
     },
     "cashBook": {
       "date": "Sene",
