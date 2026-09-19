@@ -187,7 +187,6 @@ const CashFlowFilter = ({
     () => [
       { label: "TMT", value: "TMT" },
       { label: "USD", value: "USD" },
-      { label: "EUR", value: "EUR" },
     ],
     []
   );

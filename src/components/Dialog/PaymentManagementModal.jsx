@@ -42,7 +42,6 @@ const MODAL_BODY_HEIGHT = 600;
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
-  EUR: "€",
   TRY: "₺",
   TMT: "m",
   RUB: "₽",

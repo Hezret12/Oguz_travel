@@ -27,7 +27,6 @@ import { getBooleanPaymentOptions } from "../../../../functions/generalHelpers";
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
-  EUR: "€",
   TMT: "m",
   RUB: "₽",
 };

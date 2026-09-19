@@ -249,11 +249,6 @@ export const addTotalCalculationApi = async (data) => {
   return await api.postPrivate('/total-calculations/add-total-calculation', data);
 };
 
-// Bulk kassa-book import; body: { rows: [...] } (max 1000 rows per call)
-export const importTotalCalculationsApi = async (rows) => {
-  return await api.postPrivate('/total-calculations/import-total-calculations', { rows });
-};
-
 export const addCategoryApi = async (data) => {
   return await api.postPrivate('/category/add-category', data);
 };

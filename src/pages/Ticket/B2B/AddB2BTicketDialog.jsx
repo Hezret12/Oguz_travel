@@ -26,7 +26,6 @@ import {
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
-  EUR: "€",
   TMT: "m",
   RUB: "₽",
 };

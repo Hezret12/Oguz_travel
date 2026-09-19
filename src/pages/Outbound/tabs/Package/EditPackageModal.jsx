@@ -106,7 +106,6 @@ const EditPackageModal = ({ table, row }) => {
   const currencySymbol =
     {
       USD: "$",
-      EUR: "€",
       TMT: "m",
       RUB: "₽",
     }[currency] || currency;

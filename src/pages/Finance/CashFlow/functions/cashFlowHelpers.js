@@ -1,10 +1,9 @@
 export const CURRENCY_OPTIONS = [
   { label: "TMT", value: "TMT" },
   { label: "USD", value: "USD" },
-  { label: "EUR", value: "EUR" },
 ];
 
-const CURRENCY_SYMBOL = { USD: "$", EUR: "€" };
+const CURRENCY_SYMBOL = { USD: "$" };
 
 export const fmtMoney = (val, currency = "USD") => {
   const num = Number(val || 0).toLocaleString("en-US", {

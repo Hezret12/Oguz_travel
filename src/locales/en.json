@@ -1118,24 +1118,21 @@
         "MANUAL": "Manual",
         "EXCEL": "Excel"
       },
-      "importButton": "Excel import",
-      "importTitle": "Daily cash book — Excel import",
-      "importPick": "Choose an Excel file or drop it here",
-      "importHint": "Reads the GIRDEJI and ÇYKDAJY sheets (.xlsx)",
-      "importRowCount": "{{count}} records",
-      "importNewCategories": "New categories to be created ({{count}})",
-      "importSkippedRows": "{{count}} rows skipped",
-      "skipReason": {
-        "noDate": "no date",
-        "noAmount": "no amount",
-        "negative": "negative amount"
-      },
-      "importDedupeNote": "Records imported before are never added twice — you can re-upload the same or an updated file.",
-      "importStart": "Import",
-      "importDone": "Import finished: {{inserted}} new records, {{skipped}} already existed, {{categories}} categories created.",
-      "importNoRows": "No GIRDEJI / ÇYKDAJY records found in the file",
-      "importParseError": "Couldn’t read the file. Is it a valid Excel file?",
-      "importFailed": "Import failed. Try again — records already added won’t be duplicated."
+      "export": {
+        "title": "Cash flow — Excel report",
+        "desc": "Pick a period. The current tab and page filters are applied to the file too.",
+        "period": "Report period",
+        "preview": "What goes into the file",
+        "records": "Records",
+        "filtersApplied": "{{count}} filters applied",
+        "fetching": "Fetching data...",
+        "generating": "Building the Excel file...",
+        "success": "Excel file downloaded",
+        "reportTitle": "Cash flow report",
+        "fileName": "Cash_flow",
+        "time": "Time",
+        "total": "TOTAL"
+      }
     }
   },
   "professionalTranslation": {

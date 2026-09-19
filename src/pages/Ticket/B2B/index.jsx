@@ -55,7 +55,6 @@ import DateRangeExcelExportModal from "../../../components/Dialog/DateRangeExcel
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
-  EUR: "€",
   TMT: "m",
   RUB: "₽",
 };

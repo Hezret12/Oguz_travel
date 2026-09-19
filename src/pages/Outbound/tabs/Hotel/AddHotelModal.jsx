@@ -100,7 +100,6 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
   const currencySymbol =
     {
       USD: "$",
-      EUR: "€",
       TMT: "m",
       RUB: "₽",
     }[currency] || currency;

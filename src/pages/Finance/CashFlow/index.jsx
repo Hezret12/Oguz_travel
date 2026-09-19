@@ -3,8 +3,8 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, Chip, Tab, Tabs, Tooltip, Typography, alpha } from "@mui/material";
-import { ArrowDownLeft, ArrowUpRight, FileSpreadsheet, Lock, Zap } from "lucide-react";
+import { Box, Chip, Divider, Tab, Tabs, Tooltip, Typography, alpha } from "@mui/material";
+import { ArrowDownLeft, ArrowUpRight, Lock, Zap } from "lucide-react";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
@@ -27,7 +27,8 @@ import FilterDrawer from "../../../components/FilterDrawer";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import CashFlowFilter from "./Contents/CashFlowFilter";
 import CashFlowSummary from "./Contents/CashFlowSummary";
-import ImportKassaExcelModal from "./Contents/ImportKassaExcelModal";
+import CashFlowExportModal from "./Contents/CashFlowExportModal";
+import ExportExcelButton from "../../../components/ExportExcelButton";
 import AddCashTransactionModal from "./AddCashTransactionModal";
 import EditCashTransactionModal from "./EditCashTransactionModal";
 import { cashAmount, fmtMoney, isCashRow } from "./functions/cashFlowHelpers";
@@ -96,7 +97,7 @@ const CashFlow = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
     applied,
@@ -377,10 +378,31 @@ const CashFlow = () => {
       </Box>
     ),
     renderBottomToolbar: () => (
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, py: 1, gap: 2 }}>
-        <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>
-          {t("finance.cashBook.operations", { count: totalItems })}
-        </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 2,
+          py: 1,
+          gap: 2,
+          flexWrap: "wrap",
+          borderTop: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", columnGap: 2, rowGap: 0.75, flexWrap: "wrap", minWidth: 0 }}>
+          <Typography sx={{ fontSize: "13px", color: "text.secondary", whiteSpace: "nowrap" }}>
+            {t("finance.cashBook.operations", { count: totalItems })}
+          </Typography>
+          <Divider orientation="vertical" flexItem sx={{ my: 0.25 }} />
+          <CashFlowSummary
+            totals={totals}
+            isLoading={isLoading}
+            isProjectTab={activeSource === "PROJECT"}
+            note={activeSource === "" ? t("finance.cashBook.allTabNote") : undefined}
+          />
+        </Box>
         <Pagination
           pageIndex={page - 1}
           pageCount={pageCount}
@@ -401,23 +423,8 @@ const CashFlow = () => {
         filterButtonText={t("filter")}
         onFilterClick={openDrawer}
       >
-        <Button
-          variant="outlined"
-          startIcon={<FileSpreadsheet size={16} />}
-          onClick={() => setIsImportOpen(true)}
-          sx={{ height: 40, px: 2.5, borderRadius: "10px", textTransform: "none", fontWeight: 600, borderColor: "divider", color: "text.primary" }}
-        >
-          {t("finance.cashBook.importButton")}
-        </Button>
+        <ExportExcelButton onClick={() => setIsExportOpen(true)} />
       </PageHeader>
-
-      <CashFlowSummary totals={totals} isLoading={isLoading} isProjectTab={activeSource === "PROJECT"} />
-
-      {activeSource === "" && totals.length > 0 && (
-        <Typography sx={{ fontSize: "12px", color: "text.secondary", mt: -1, mb: 1.5 }}>
-          {t("finance.cashBook.allTabNote")}
-        </Typography>
-      )}
 
       <MaterialReactTable table={table} />
 
@@ -426,7 +433,16 @@ const CashFlow = () => {
       )}
 
       <AddCashTransactionModal open={isAddModalOpen} close={() => setIsAddModalOpen(false)} />
-      <ImportKassaExcelModal open={isImportOpen} close={() => setIsImportOpen(false)} />
+      {isExportOpen && (
+        <CashFlowExportModal
+          open={isExportOpen}
+          close={() => setIsExportOpen(false)}
+          apiFn={getAllTotalCalculationsApi}
+          queryParams={queryParams}
+          isProjectTab={activeSource === "PROJECT"}
+          sourceLabel={activeSource ? t(SOURCE_TABS.find((tab) => tab.value === activeSource)?.labelKey) : ""}
+        />
+      )}
 
       <CashFlowFilterDrawer />
 

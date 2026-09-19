@@ -72,7 +72,6 @@ const exportReferralLetterWithRange = (items, options) =>
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
-  EUR: "€",
   TMT: "m",
   RUB: "₽",
 };

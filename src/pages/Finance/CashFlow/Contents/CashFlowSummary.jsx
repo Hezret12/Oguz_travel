@@ -1,109 +1,133 @@
-import { memo } from "react";
-import { Box, Skeleton, Tooltip, Typography } from "@mui/material";
+import { Fragment, memo } from "react";
+import { Box, Divider, Skeleton, Tooltip, Typography, alpha } from "@mui/material";
+import { ArrowDownLeft, ArrowUpRight, Info } from "lucide-react";
 import { useLocale } from "../../../../hooks/useLocale";
-import { fmtCompact, fmtMoney } from "../functions/cashFlowHelpers";
+import { fmtMoney } from "../functions/cashFlowHelpers";
 
-const CURRENCY_ORDER = ["USD", "TMT", "EUR"];
-const GREEN = "#16a34a";
-const RED = "#dc2626";
+const CURRENCIES = ["TMT", "USD"];
 
-const Stat = ({ label, value, currency, color, sign = "" }) => (
-  <Box sx={{ minWidth: 0 }}>
-    <Typography sx={{ fontSize: "12px", fontWeight: 600, color: "text.secondary", mb: 0.25 }}>
-      {label}
-    </Typography>
-    <Tooltip title={`${sign}${fmtMoney(Math.abs(value), currency)}`} placement="bottom-start">
-      <Typography
-        sx={{
-          fontSize: { xs: "16px", md: "19px" },
-          fontWeight: 750,
-          color,
-          fontVariantNumeric: "tabular-nums",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {sign}
-        {fmtCompact(Math.abs(value), currency)}
-      </Typography>
-    </Tooltip>
-  </Box>
-);
+const fmtNumber = (val) =>
+  Math.abs(Number(val || 0)).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
-// One card per currency. USD / TMT / EUR are never converted into each other.
-const CashFlowSummary = ({ totals = [], isLoading, isProjectTab }) => {
+// "↙ Girdeji  TMT 81,600.00 · USD 12,400.00" — TMT and USD are never added together.
+const TotalGroup = ({ label, icon: Icon, tone, items }) => {
   const { t } = useLocale();
 
-  const sorted = [...totals].sort(
-    (a, b) =>
-      (CURRENCY_ORDER.indexOf(a.currency) + 1 || 99) - (CURRENCY_ORDER.indexOf(b.currency) + 1 || 99),
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+      <Box
+        aria-hidden
+        sx={(theme) => ({
+          flexShrink: 0,
+          width: 22,
+          height: 22,
+          borderRadius: "6px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: theme.palette[tone].main,
+          bgcolor: alpha(theme.palette[tone].main, theme.palette.mode === "dark" ? 0.16 : 0.1),
+        })}
+      >
+        <Icon size={13} strokeWidth={2.25} />
+      </Box>
+      <Typography sx={{ fontSize: "13px", fontWeight: 600, color: "text.secondary", whiteSpace: "nowrap" }}>
+        {label}
+      </Typography>
+      {items.map((it, i) => (
+        <Fragment key={it.currency}>
+          {i > 0 && (
+            <Typography component="span" sx={{ color: "text.disabled", fontSize: "13px" }}>
+              ·
+            </Typography>
+          )}
+          <Tooltip
+            title={`${fmtMoney(it.value, it.currency)} · ${t("finance.cashBook.operations", { count: it.count })}`}
+            placement="top"
+          >
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "13px",
+                fontWeight: 700,
+                fontVariantNumeric: "tabular-nums",
+                whiteSpace: "nowrap",
+                color: "text.primary",
+                cursor: "default",
+              }}
+            >
+              <Box component="span" sx={{ mr: 0.5, fontSize: "11px", fontWeight: 700, color: "text.secondary" }}>
+                {it.currency}
+              </Box>
+              {fmtNumber(it.value)}
+            </Typography>
+          </Tooltip>
+        </Fragment>
+      ))}
+    </Box>
   );
+};
 
-  const labels = isProjectTab
-    ? { income: t("finance.totalSale"), expense: t("finance.totalCost"), balance: t("finance.netProfit") }
-    : { income: t("finance.income"), expense: t("finance.expense"), balance: t("finance.cashBook.balance") };
+// Inline totals for the table's bottom bar, so they take no extra page height.
+const CashFlowSummary = ({ totals = [], isLoading, isProjectTab, note }) => {
+  const { t } = useLocale();
 
   if (isLoading && !totals.length) {
-    return (
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2, mb: 2 }}>
-        {[0, 1].map((i) => (
-          <Skeleton key={i} variant="rounded" height={98} sx={{ borderRadius: "12px" }} />
-        ))}
-      </Box>
-    );
+    return <Skeleton variant="rounded" width={420} height={22} sx={{ borderRadius: "6px" }} />;
   }
 
-  if (!sorted.length) return null;
+  const byCurrency = CURRENCIES.map((currency) =>
+    totals
+      .filter((c) => c.currency === currency)
+      .reduce(
+        (acc, c) => ({
+          currency,
+          income: acc.income + Number(c.income || 0),
+          expense: acc.expense + Number(c.expense || 0),
+          count: acc.count + Number(c.count || 0),
+        }),
+        { currency, income: 0, expense: 0, count: 0 },
+      ),
+  );
+
+  const metrics = [
+    {
+      key: "income",
+      label: isProjectTab ? t("finance.totalSale") : t("finance.income"),
+      icon: ArrowDownLeft,
+      tone: "success",
+    },
+    {
+      key: "expense",
+      label: isProjectTab ? t("finance.totalCost") : t("finance.expense"),
+      icon: ArrowUpRight,
+      tone: "error",
+    },
+  ];
 
   return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          md: sorted.length > 1 ? "1fr 1fr" : "1fr",
-          xl: `repeat(${Math.min(sorted.length, 3)}, 1fr)`,
-        },
-        gap: 2,
-        mb: 2,
-      }}
-    >
-      {sorted.map((c) => {
-        const balance = Number(c.income) - Number(c.expense);
-        return (
-          <Box
-            key={c.currency}
-            sx={{
-              p: 2,
-              borderRadius: "12px",
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", mb: 1.25 }}>
-              <Typography sx={{ fontWeight: 800, fontSize: "15px", letterSpacing: "0.3px" }}>
-                {c.currency}
-              </Typography>
-              <Typography sx={{ fontSize: "12px", color: "text.secondary" }}>
-                {t("finance.cashBook.operations", { count: c.count })}
-              </Typography>
-            </Box>
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 1.5 }}>
-              <Stat label={labels.income} value={c.income} currency={c.currency} color={GREEN} sign="+" />
-              <Stat label={labels.expense} value={c.expense} currency={c.currency} color={RED} sign="-" />
-              <Stat
-                label={labels.balance}
-                value={balance}
-                currency={c.currency}
-                color={balance >= 0 ? GREEN : RED}
-                sign={balance >= 0 ? "+" : "-"}
-              />
-            </Box>
+    <Box sx={{ display: "flex", alignItems: "center", columnGap: 2, rowGap: 0.75, flexWrap: "wrap", minWidth: 0 }}>
+      {metrics.map((m, i) => (
+        <Fragment key={m.key}>
+          {i > 0 && <Divider orientation="vertical" flexItem sx={{ my: 0.25 }} />}
+          <TotalGroup
+            label={m.label}
+            icon={m.icon}
+            tone={m.tone}
+            items={byCurrency.map((c) => ({ currency: c.currency, value: c[m.key], count: c.count }))}
+          />
+        </Fragment>
+      ))}
+      {note && (
+        <Tooltip title={note} placement="top" arrow>
+          <Box sx={{ display: "inline-flex", color: "text.secondary", cursor: "help" }}>
+            <Info size={15} />
           </Box>
-        );
-      })}
+        </Tooltip>
+      )}
     </Box>
   );
 };

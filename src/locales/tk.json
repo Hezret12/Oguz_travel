@@ -1104,24 +1104,21 @@
         "MANUAL": "Elde goşulan",
         "EXCEL": "Excel"
       },
-      "importButton": "Excel import",
-      "importTitle": "Günlük kassa — Excel import",
-      "importPick": "Excel faýly saýlaň ýa-da şu ýere taşlaň",
-      "importHint": "GIRDEJI we ÇYKDAJY sahypalary okalýar (.xlsx)",
-      "importRowCount": "{{count}} ýazgy",
-      "importNewCategories": "Täze döredilýän kategoriýalar ({{count}})",
-      "importSkippedRows": "{{count}} setir geçildi",
-      "skipReason": {
-        "noDate": "senesi ýok",
-        "noAmount": "mukdary ýok",
-        "negative": "otrisatel mukdar"
-      },
-      "importDedupeNote": "Öň import edilen ýazgylar gaýtadan goşulmaýar — şol bir faýly ýa-da täzelenen faýly gaýtadan ýükläp bilersiňiz.",
-      "importStart": "Import et",
-      "importDone": "Import tamamlandy: {{inserted}} täze ýazgy goşuldy, {{skipped}} ýazgy eýýäm bardy, {{categories}} täze kategoriýa döredildi.",
-      "importNoRows": "Faýlda GIRDEJI / ÇYKDAJY ýazgylary tapylmady",
-      "importParseError": "Faýly okap bolmady. Dogry Excel faýlymy?",
-      "importFailed": "Import wagtynda ýalňyşlyk ýüze çykdy. Gaýtadan synanyşyň — eýýäm goşulan ýazgylar gaýtalanmaz."
+      "export": {
+        "title": "Pul akymy — Excel hasabaty",
+        "desc": "Döwri saýlaň. Sahypadaky bölüm we süzgüçler hem faýla ulanylýar.",
+        "period": "Hasabat döwri",
+        "preview": "Faýla düşjek maglumat",
+        "records": "Ýazgy",
+        "filtersApplied": "{{count}} süzgüç ulanylýar",
+        "fetching": "Maglumatlar alynýar...",
+        "generating": "Excel faýly taýýarlanýar...",
+        "success": "Excel faýly ýüklendi",
+        "reportTitle": "Pul akymy hasabaty",
+        "fileName": "Pul_akymy",
+        "time": "Wagty",
+        "total": "JEMI"
+      }
     }
   },
   "professionalTranslation": {

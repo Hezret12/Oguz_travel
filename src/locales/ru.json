@@ -1118,24 +1118,21 @@
         "MANUAL": "Вручную",
         "EXCEL": "Excel"
       },
-      "importButton": "Импорт Excel",
-      "importTitle": "Дневная касса — импорт Excel",
-      "importPick": "Выберите Excel-файл или перетащите сюда",
-      "importHint": "Читаются листы GIRDEJI и ÇYKDAJY (.xlsx)",
-      "importRowCount": "{{count}} записей",
-      "importNewCategories": "Будут созданы новые категории ({{count}})",
-      "importSkippedRows": "Пропущено строк: {{count}}",
-      "skipReason": {
-        "noDate": "нет даты",
-        "noAmount": "нет суммы",
-        "negative": "отрицательная сумма"
-      },
-      "importDedupeNote": "Ранее импортированные записи повторно не добавляются — можно загрузить тот же или обновлённый файл ещё раз.",
-      "importStart": "Импортировать",
-      "importDone": "Импорт завершён: добавлено {{inserted}}, уже существовало {{skipped}}, создано категорий: {{categories}}.",
-      "importNoRows": "В файле не найдены записи GIRDEJI / ÇYKDAJY",
-      "importParseError": "Не удалось прочитать файл. Это корректный Excel-файл?",
-      "importFailed": "Ошибка при импорте. Попробуйте ещё раз — уже добавленные записи не продублируются."
+      "export": {
+        "title": "Движение денег — отчёт Excel",
+        "desc": "Выберите период. Текущая вкладка и фильтры страницы тоже применяются к файлу.",
+        "period": "Период отчёта",
+        "preview": "Что попадёт в файл",
+        "records": "Записей",
+        "filtersApplied": "Применено фильтров: {{count}}",
+        "fetching": "Загрузка данных...",
+        "generating": "Формирование файла Excel...",
+        "success": "Файл Excel загружен",
+        "reportTitle": "Отчёт о движении денег",
+        "fileName": "Dvizhenie_deneg",
+        "time": "Время",
+        "total": "ИТОГО"
+      }
     }
   },
   "professionalTranslation": {
