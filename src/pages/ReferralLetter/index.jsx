@@ -35,7 +35,40 @@ import AddReferralLetterModal from "./AddReferralLetterModal";
 import EditReferralLetterModal from "./EditReferralLetterModal";
 import ExportExcelButton from "../../components/ExportExcelButton";
 import { exportReferralLetterExcel } from "./functions/exportReferralLetterExcel";
+import DateRangeExcelExportModal from "../../components/Dialog/DateRangeExcelExportModal";
 import { useDateFormat } from "../../functions/generalHelpers";
+
+// Excel export date ranges (same three dates as the filter drawer). Departure
+// starts on this month; the others start unset ("Ähli döwür") so they don't
+// narrow the export unless chosen.
+const REFERRAL_LETTER_EXPORT_RANGES = [
+  {
+    key: "departure",
+    titleKey: "columns.departureDate",
+    startParamKey: "start_departure_date",
+    endParamKey: "end_departure_date",
+    defaultPreset: "thisMonth",
+  },
+  {
+    key: "return",
+    titleKey: "columns.returnDate",
+    startParamKey: "start_return_date",
+    endParamKey: "end_return_date",
+    defaultPreset: "all",
+  },
+  {
+    key: "contract",
+    titleKey: "columns.contractDate",
+    startParamKey: "start_contract_date",
+    endParamKey: "end_contract_date",
+    defaultPreset: "all",
+  },
+];
+
+// The Excel title's year text is resolved from `queryParams`; feed it the
+// modal's selected dates instead of the page filters.
+const exportReferralLetterWithRange = (items, options) =>
+  exportReferralLetterExcel(items, { ...options, queryParams: options.params });
 
 const CURRENCY_SYMBOLS = {
   USD: "$",
@@ -88,6 +121,7 @@ const ReferalLetter = () => {
   const defaultMrtOptions = getDefaultMRTOptions();
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
     applied,
@@ -515,12 +549,6 @@ const ReferalLetter = () => {
     }),
   });
 
-  const handleExportExcel = useCallback(
-    (items, options) =>
-      exportReferralLetterExcel(items, { ...options, queryParams }),
-    [queryParams]
-  );
-
   return (
     <>
       <PageHeader
@@ -531,15 +559,21 @@ const ReferalLetter = () => {
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}
       >
-        <ExportExcelButton
+        <ExportExcelButton onClick={() => setIsExportOpen(true)} />
+      </PageHeader>
+
+      {isExportOpen && (
+        <DateRangeExcelExportModal
+          open={isExportOpen}
+          close={() => setIsExportOpen(false)}
           apiFn={getAllReferralLettersApi}
-          queryParams={queryParams}
-          totalItems={totalItems}
+          exportFn={exportReferralLetterWithRange}
+          title={`${t("referralLetter.title")} ${t("common.exportReportSuffix")}`}
           fileName="Yollanma_Hatlary_Hasabaty"
           sheetName="Ýollanma Hatlary"
-          customExportFn={handleExportExcel}
+          ranges={REFERRAL_LETTER_EXPORT_RANGES}
         />
-      </PageHeader>
+      )}
 
       <ReferralLetterFilterDrawer />
 

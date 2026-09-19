@@ -1,11 +1,13 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import {
   Box,
+  Chip,
   FormControl,
   IconButton,
   Stack,
   Tooltip,
   Typography,
+  alpha,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import FlightTakeoffRoundedIcon from "@mui/icons-material/FlightTakeoffRounded";
@@ -79,6 +81,75 @@ const CompactDatePicker = ({ label, value, onChange, minDate, maxDate }) => (
     />
   </FormControl>
 );
+
+const DATE_PRESETS = [
+  { id: "thisMonth", labelKey: "outbound.thisMonth" },
+  { id: "lastMonth", labelKey: "outbound.lastMonth" },
+  { id: "thisYear", labelKey: "outbound.thisYear" },
+  { id: "allTime", labelKey: "outbound.allTime" },
+];
+
+const getPresetRange = (id) => {
+  const fmt = (d) => d.format("YYYY-MM-DD");
+  const lastMonth = dayjs().subtract(1, "month");
+  switch (id) {
+    case "thisMonth":
+      return [fmt(dayjs().startOf("month")), fmt(dayjs().endOf("month"))];
+    case "lastMonth":
+      return [fmt(lastMonth.startOf("month")), fmt(lastMonth.endOf("month"))];
+    case "thisYear":
+      return [fmt(dayjs().startOf("year")), fmt(dayjs().endOf("year"))];
+    default:
+      return ["", ""];
+  }
+};
+
+// Quick range chips (Şu aý / Geçen aý / Şu ýyl / Ähli döwür) — same look as the Translate filter
+const DatePresetChips = ({ startValue, endValue, onSelect }) => {
+  const { t } = useLocale();
+  const ranges = useMemo(
+    () => Object.fromEntries(DATE_PRESETS.map((p) => [p.id, getPresetRange(p.id)])),
+    []
+  );
+
+  return (
+    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1.25 }}>
+      {DATE_PRESETS.map((p) => {
+        const [start, end] = ranges[p.id];
+        const isActive = (startValue || "") === start && (endValue || "") === end;
+        return (
+          <Chip
+            key={p.id}
+            label={t(p.labelKey)}
+            size="small"
+            clickable
+            onClick={() => onSelect(start, end)}
+            variant="outlined"
+            sx={(theme) => ({
+              borderRadius: "7px",
+              fontSize: "11px",
+              fontWeight: 600,
+              height: "24px",
+              transition: "background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+              color: isActive ? theme.palette.primary.contrastText : "text.secondary",
+              borderColor: isActive ? theme.palette.primary.main : "divider",
+              backgroundColor: isActive
+                ? theme.palette.primary.main
+                : alpha(theme.palette.text.primary, 0.02),
+              "& .MuiChip-label": { px: "8px" },
+              "&:hover": {
+                borderColor: theme.palette.primary.main,
+                backgroundColor: isActive
+                  ? theme.palette.primary.dark
+                  : alpha(theme.palette.primary.main, 0.08),
+              },
+            })}
+          />
+        );
+      })}
+    </Box>
+  );
+};
 
 const DateRangeCard = ({
   icon: Icon,
@@ -180,6 +251,15 @@ const DateRangeCard = ({
           </Tooltip>
         )}
       </Stack>
+
+      <DatePresetChips
+        startValue={startValue}
+        endValue={endValue}
+        onSelect={(start, end) => {
+          onChange(startName, start);
+          onChange(endName, end);
+        }}
+      />
 
       {/* Side-by-Side Date Pickers */}
       <Stack direction="row" spacing={1.25} alignItems="flex-end">

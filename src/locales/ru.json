@@ -837,7 +837,8 @@
     "exportThisMonth": "Этот месяц",
     "exportLastMonth": "Прошлый месяц",
     "exportThisYear": "Этот год",
-    "exportAllTime": "Всё время"
+    "exportAllTime": "Всё время",
+    "exportRecordCount": "Количество записей для экспорта"
   },
   "autocomplete": {
     "addClient": "Добавить клиента",

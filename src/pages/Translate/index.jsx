@@ -43,7 +43,27 @@ import { deleteTranslationApi } from "../../api/queries/delete";
 import { PaymentManagementModal } from "../../components/Dialog/PaymentManagementModal";
 import ExportExcelButton from "../../components/ExportExcelButton";
 import { exportTranslateExcel } from "./functions/exportTranslateExcel";
+import DateRangeExcelExportModal from "../../components/Dialog/DateRangeExcelExportModal";
 import dayjs from "dayjs";
+
+// Excel export date ranges. Received day starts on this month; completed day
+// starts unset ("Ähli döwür") so it doesn't narrow the export unless chosen.
+const TRANSLATE_EXPORT_RANGES = [
+  {
+    key: "received",
+    titleKey: "columns.receivedDay",
+    startParamKey: "start_received_day",
+    endParamKey: "end_received_day",
+    defaultPreset: "thisMonth",
+  },
+  {
+    key: "completed",
+    titleKey: "columns.completedDay",
+    startParamKey: "start_completed_day",
+    endParamKey: "end_completed_day",
+    defaultPreset: "all",
+  },
+];
 
 const FILTER_LABEL_KEYS = {
   opr_guid: "columns.operator",
@@ -105,6 +125,7 @@ const TranslatePage = () => {
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
   const [paymentModalRow, setPaymentModalRow] = useState(null);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
     applied,
@@ -774,15 +795,21 @@ const TranslatePage = () => {
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}
       >
-        <ExportExcelButton
+        <ExportExcelButton onClick={() => setIsExportOpen(true)} />
+      </PageHeader>
+
+      {isExportOpen && (
+        <DateRangeExcelExportModal
+          open={isExportOpen}
+          close={() => setIsExportOpen(false)}
           apiFn={getAllTranslationsApi}
-          queryParams={queryParams}
-          totalItems={totalItems}
+          exportFn={exportTranslateExcel}
+          title={`${t("sidebar.translation")} ${t("common.exportReportSuffix")}`}
           fileName="Terjime_Hasabaty"
           sheetName="Terjime"
-          customExportFn={exportTranslateExcel}
+          ranges={TRANSLATE_EXPORT_RANGES}
         />
-      </PageHeader>
+      )}
 
       <TranslateFilterDrawer />
 

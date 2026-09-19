@@ -837,7 +837,8 @@
     "exportThisMonth": "This month",
     "exportLastMonth": "Last month",
     "exportThisYear": "This year",
-    "exportAllTime": "All time"
+    "exportAllTime": "All time",
+    "exportRecordCount": "Records to export"
   },
   "autocomplete": {
     "addClient": "Add Client",

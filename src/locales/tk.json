@@ -837,7 +837,8 @@
     "exportThisMonth": "Şu aý",
     "exportLastMonth": "Geçen aý",
     "exportThisYear": "Şu ýyl",
-    "exportAllTime": "Ähli döwür"
+    "exportAllTime": "Ähli döwür",
+    "exportRecordCount": "Eksport ediljek ýazgy sany"
   },
   "autocomplete": {
     "addClient": "Täze müşderi goşmak",

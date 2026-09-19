@@ -162,16 +162,21 @@ export const CafeteriaExportModal = ({ open, close, queryParams = {} }) => {
     return params;
   }, [startDate, endDate, type, search]);
 
-  // Live preview of what will land in the file
+  // Live preview of what will land in the file. Never served from cache: the
+  // global staleTime is 30 min and add/edit/delete don't invalidate these keys,
+  // so a deleted row would otherwise still be counted.
+  const previewQueryOptions = { staleTime: 0, gcTime: 0 };
   const { data: summary, isFetching: isSummaryFetching } = useGet({
     apiFn: getCafeteriaSummaryApi,
-    key: ["cafeteria-summary", exportParams],
+    key: ["cafeteria-summary", "export", exportParams],
     params: exportParams,
+    options: previewQueryOptions,
   });
   const { totalItems, isFetching: isCountFetching } = usePagginationGet({
     apiFn: getAllCafeteriaTransactionsApi,
     key: "cafeteriaExportCount",
     params: { ...exportParams, page: 1, limit: 1 },
+    options: previewQueryOptions,
   });
 
   const isPreviewLoading = isSummaryFetching || isCountFetching;
