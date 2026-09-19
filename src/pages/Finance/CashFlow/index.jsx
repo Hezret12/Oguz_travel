@@ -3,8 +3,8 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Chip, Divider, Tab, Tabs, Tooltip, Typography, alpha } from "@mui/material";
-import { ArrowDownLeft, ArrowUpRight, Lock, Zap } from "lucide-react";
+import { Box, Chip, Divider, ToggleButton, ToggleButtonGroup, Tooltip, Typography, alpha } from "@mui/material";
+import { ArrowDownLeft, ArrowUpRight, Layers, Lock, Wallet, Zap } from "lucide-react";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
@@ -32,6 +32,7 @@ import ExportExcelButton from "../../../components/ExportExcelButton";
 import AddCashTransactionModal from "./AddCashTransactionModal";
 import EditCashTransactionModal from "./EditCashTransactionModal";
 import { cashAmount, fmtMoney, isCashRow } from "./functions/cashFlowHelpers";
+import { segmentedSx } from "../Overview/functions/analyticsFormat";
 
 const GREEN = "#16a34a";
 const RED = "#dc2626";
@@ -39,9 +40,9 @@ const BLUE = "#2563eb";
 
 // Tab value → `source` query param
 const SOURCE_TABS = [
-  { value: "", labelKey: "finance.cashBook.tabs.all" },
-  { value: "MANUAL,EXCEL", labelKey: "finance.cashBook.tabs.kassa" },
-  { value: "PROJECT", labelKey: "finance.cashBook.tabs.project" },
+  { value: "", labelKey: "finance.cashBook.tabs.all", Icon: Layers },
+  { value: "MANUAL,EXCEL", labelKey: "finance.cashBook.tabs.kassa", Icon: Wallet },
+  { value: "PROJECT", labelKey: "finance.cashBook.tabs.project", Icon: Zap },
 ];
 
 const rowKind = (row) => {
@@ -354,18 +355,31 @@ const CashFlow = () => {
     }),
     renderTopToolbarCustomActions: () => (
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, py: 0.5, flexWrap: "wrap", width: "100%" }}>
-        <Tabs
+        {/* Same segmented control as the Finance overview period/currency switches */}
+        <ToggleButtonGroup
+          exclusive
           value={activeSource}
-          onChange={(_, v) => setFilter("source", v)}
-          sx={{
-            minHeight: 36,
-            "& .MuiTab-root": { minHeight: 36, textTransform: "none", fontWeight: 600, px: 1.5 },
-          }}
+          onChange={(_, v) => v !== null && setFilter("source", v)}
+          sx={[
+            segmentedSx,
+            {
+              "& .MuiToggleButton-root": { height: 34, px: 1.75, gap: 0.75, fontSize: "13px" },
+              "& .MuiToggleButton-root.Mui-selected, & .MuiToggleButton-root.Mui-selected:hover": {
+                color: "#fff",
+                backgroundColor: BLUE,
+                boxShadow: `0 1px 3px ${alpha(BLUE, 0.4)}`,
+              },
+              "& .MuiToggleButton-root.Mui-selected:hover": { backgroundColor: "#1d4ed8" },
+            },
+          ]}
         >
-          {SOURCE_TABS.map((tab) => (
-            <Tab key={tab.value || "all"} value={tab.value} label={t(tab.labelKey)} />
+          {SOURCE_TABS.map(({ value, labelKey, Icon }) => (
+            <ToggleButton key={value || "all"} value={value}>
+              <Icon size={15} strokeWidth={2.2} />
+              {t(labelKey)}
+            </ToggleButton>
           ))}
-        </Tabs>
+        </ToggleButtonGroup>
         <Box sx={{ width: { xs: "100%", sm: 300 }, ml: { sm: "auto" } }}>
           <GlobalSearchInput
             value={searchQuery}
