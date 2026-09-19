@@ -1096,8 +1096,9 @@
       "tableTitle": "Totals by office",
       "tableSubtitle": "One row per office · USD and TMT kept separate",
       "cardsTitle": "Office results",
-      "cardsSubtitle": "Each office’s profit · bar: how much of money in went out and how much stayed",
-      "shareOfIncome": "Share of total money in"
+      "cardsSubtitle": "Each office’s money in, money out and profit",
+      "shareOfIncome": "Share of total money in",
+      "cardsView": "Cards"
     },
     "cashBook": {
       "date": "Date",

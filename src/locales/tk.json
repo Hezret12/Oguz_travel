@@ -1082,8 +1082,9 @@
       "tableTitle": "Ofisler boýunça jemi",
       "tableSubtitle": "Her ofis bir setir · USD we TMT aýratyn",
       "cardsTitle": "Ofisleriň netijesi",
-      "cardsSubtitle": "Her ofisiň peýdasy · zolak: girdiniň näçesi çykdy, näçesi galdy",
-      "shareOfIncome": "Jemi girdideki paýy"
+      "cardsSubtitle": "Her ofisiň girdisi, çykdysy we peýdasy",
+      "shareOfIncome": "Jemi girdideki paýy",
+      "cardsView": "Kartlar"
     },
     "cashBook": {
       "date": "Sene",
