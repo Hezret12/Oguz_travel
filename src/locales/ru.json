@@ -1284,5 +1284,27 @@
       "percentRequired": "Введите процент",
       "percentRange": "Должно быть от 0 до 100"
     }
+  },
+  "dashboard": {
+    "sales": "Продажи",
+    "profit": "Прибыль",
+    "salesCount": "Кол-во продаж",
+    "receivable": "К получению",
+    "trendTitle": "Продажи и прибыль",
+    "paymentTitle": "Статус оплаты",
+    "paymentSubtitle": "Продажи за период по оплате",
+    "noStatus": "Без статуса",
+    "salesN": "{{count}} продаж",
+    "allOffices": "Все офисы",
+    "updatedAt": "Обновлено {{time}}",
+    "refresh": "Обновить",
+    "loadError": "Не удалось загрузить данные. Попробуйте обновить.",
+    "modulesTitle": "По разделам",
+    "modulesSubtitle": "Выберите раздел: продажи, прибыль и сравнение с прошлым периодом",
+    "noSalesInCurrency": "Нет продаж в {{currency}}",
+    "previousPeriod": "Прошлый период",
+    "avgSale": "Средний чек",
+    "topOperators": "Лучшие операторы",
+    "openModuleNamed": "Открыть «{{name}}»"
   }
 }

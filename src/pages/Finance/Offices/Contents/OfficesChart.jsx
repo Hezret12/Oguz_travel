@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from "react";
-import { Box, Tooltip, Typography } from "@mui/material";
+import { Box, Tooltip, Typography, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { BarChart } from "@mui/x-charts/BarChart";
@@ -19,13 +19,18 @@ import {
 } from "../../Overview/functions/analyticsFormat";
 
 const Y_WIDTH = 64;
-const BAR_W = 28; // target column thickness, whatever the office count
+const BAR_W = 26; // target thickness of each of the three columns
 
-// Column chart: money in and money out side by side for every office; the
-// profit is written under each office name (▲ gain / ▼ loss), so the one
-// number that matters needs no hovering.
+// Three columns per office — money in, money out, profit — each with its
+// value written on top. A loss drops below the zero line with a ▼ label.
 const OfficesColumns = ({ offices, currency, colors }) => {
   const { t } = useLocale();
+  const names = {
+    inflow: t("finance.analytics.cash.inflow"),
+    outflow: t("finance.analytics.cash.outflow"),
+    profit: t("finance.analytics.kpi.profit"),
+  };
+  const theme = useTheme();
   const [el, setEl] = useState(null);
   const [width, setWidth] = useState(900);
 
@@ -36,20 +41,30 @@ const OfficesColumns = ({ offices, currency, colors }) => {
     return () => observer.disconnect();
   }, [el]);
 
-  // Keep columns slim: the band's leftover is air, not a fatter bar.
+  // Slim columns: the band's leftover is air, not fatter bars.
   const band = Math.max(1, (width - Y_WIDTH - 24) / offices.length);
-  const categoryGapRatio = Math.min(0.85, Math.max(0.3, 1 - (BAR_W * 2 + 4) / band));
+  const categoryGapRatio = Math.min(0.8, Math.max(0.25, 1 - (BAR_W * 3 + 8) / band));
+  // Too many offices for readable labels → values move to the tooltip only.
+  const showLabels = band >= 120;
   const money = (v) => formatAmount(v, currency);
-  const profitByName = Object.fromEntries(offices.map((o) => [o.name, o.profit[currency]]));
+  const compact = (v) => formatCompactAmount(v, currency);
+
+  const inflow = offices.map((o) => o.inflow[currency]);
+  const outflow = offices.map((o) => o.outflow[currency]);
+  const profit = offices.map((o) => o.profit[currency]);
+  const max = Math.max(...inflow, ...outflow, 1);
+  const min = Math.min(0, ...profit);
+
+  const label = (fmt) => (showLabels ? (item) => (item.value == null ? null : fmt(item.value)) : undefined);
 
   return (
     <Box ref={setEl} sx={{ mx: -1 }}>
       <BarChart
-        height={360}
+        height={380}
         hideLegend
         skipAnimation
         borderRadius={4}
-        margin={{ top: 12, right: 12, bottom: 8, left: 0 }}
+        margin={{ top: 24, right: 12, bottom: 8, left: 0 }}
         grid={{ horizontal: true }}
         xAxis={[
           {
@@ -57,44 +72,57 @@ const OfficesColumns = ({ offices, currency, colors }) => {
             scaleType: "band",
             data: offices.map((o) => o.name),
             categoryGapRatio,
-            barGapRatio: 0.12,
-            height: 48,
-            tickLabelStyle: { ...tickLabelStyle, fontSize: 12.5, fontWeight: 600, lineHeight: 1.6 },
-            // Name on the first line, profit on the second
-            valueFormatter: (name, ctx) => {
-              if (ctx.location !== "tick") return name;
-              const p = profitByName[name] ?? 0;
-              return `${name}
-${p >= 0 ? "▲" : "▼"} ${formatCompactAmount(p, currency)}`;
-            },
+            barGapRatio: 0.1,
+            tickLabelStyle: { ...tickLabelStyle, fontSize: 12.5, fontWeight: 600 },
           },
         ]}
         yAxis={[
           {
             ...yAxisBase,
             width: Y_WIDTH,
-            tickNumber: 5,
-            valueFormatter: (v) => formatCompactAmount(v, currency),
+            tickNumber: 6,
+            // Headroom above the tallest column (and below a loss) for labels
+            max: max * 1.12,
+            min: min < 0 ? min - max * 0.08 : 0,
+            valueFormatter: compact,
             tickLabelStyle: { ...tickLabelStyle, fontSize: 12 },
           },
         ]}
         series={[
           {
             id: "inflow",
-            label: t("finance.analytics.cash.inflow"),
-            data: offices.map((o) => o.inflow[currency]),
+            label: names.inflow,
+            data: inflow,
             color: colors.inflow,
             valueFormatter: money,
+            barLabel: label(compact),
+            barLabelPlacement: "outside",
           },
           {
             id: "outflow",
-            label: t("finance.analytics.cash.outflow"),
-            data: offices.map((o) => o.outflow[currency]),
+            label: names.outflow,
+            data: outflow,
             color: colors.outflow,
             valueFormatter: money,
+            barLabel: label(compact),
+            barLabelPlacement: "outside",
+          },
+          {
+            id: "profit",
+            label: names.profit,
+            data: profit,
+            color: colors.neutral,
+            valueFormatter: money,
+            barLabel: label((v) => `${v >= 0 ? "▲" : "▼"} ${compact(v)}`),
+            barLabelPlacement: "outside",
           },
         ]}
-        sx={chartSx()}
+        sx={[
+          chartSx(),
+          { "& .MuiBarLabel-root": { fill: theme.palette.text.secondary, fontSize: 11.5, fontWeight: 600 } },
+          // The profit value is the headline: darker and bolder
+          { '& [data-series="profit"] .MuiBarLabel-root': { fill: theme.palette.text.primary, fontWeight: 700 } },
+        ]}
         slotProps={tooltipSlotProps}
       />
     </Box>
@@ -232,6 +260,7 @@ const OfficesChart = ({ rows, currency }) => {
                   ? [
                       { label: t("finance.analytics.cash.inflow"), color: colors.inflow, shape: "bar" },
                       { label: t("finance.analytics.cash.outflow"), color: colors.outflow, shape: "bar" },
+                      { label: t("finance.analytics.kpi.profit"), color: colors.neutral, shape: "bar" },
                     ]
                   : [
                       { label: t("finance.analytics.cash.outflow"), color: colors.outflow, shape: "bar" },

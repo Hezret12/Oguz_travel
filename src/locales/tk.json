@@ -1270,5 +1270,27 @@
       "percentRequired": "Göterim girizilmeli",
       "percentRange": "0-dan 100-e çenli bolmaly"
     }
+  },
+  "dashboard": {
+    "sales": "Satyş",
+    "profit": "Peýda",
+    "salesCount": "Satyş sany",
+    "receivable": "Alynmaly",
+    "trendTitle": "Satyş we peýda",
+    "paymentTitle": "Töleg ýagdaýy",
+    "paymentSubtitle": "Döwürdäki satyşlar töleg boýunça",
+    "noStatus": "Ýagdaý ýok",
+    "salesN": "{{count}} satyş",
+    "allOffices": "Ähli ofisler",
+    "updatedAt": "Täzelendi {{time}}",
+    "refresh": "Täzele",
+    "loadError": "Maglumatlary ýükläp bolmady. Täzeläp görüň.",
+    "modulesTitle": "Bölümler boýunça",
+    "modulesSubtitle": "Bölüm saýlaň: satyş, peýda we öňki döwür bilen deňeşdirme",
+    "noSalesInCurrency": "{{currency}} bilen satyş ýok",
+    "previousPeriod": "Öňki döwür",
+    "avgSale": "Ortaça satyş",
+    "topOperators": "Iň köp satan operatorlar",
+    "openModuleNamed": "{{name}} bölümini aç"
   }
 }

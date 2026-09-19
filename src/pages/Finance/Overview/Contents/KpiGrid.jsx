@@ -130,7 +130,9 @@ const ChangePill = ({ change, upIsGood }) => {
   );
 };
 
-const KpiCard = ({
+// Stat tile: value, change vs the previous period and an in-period sparkline.
+// `format` renders the value (money by default); the other currency is optional.
+export const KpiCard = ({
   id,
   label,
   icon: Icon,
@@ -144,8 +146,10 @@ const KpiCard = ({
   otherValue,
   otherCurrency,
   compareLabel,
+  format,
 }) => {
   const { t } = useLocale();
+  const fmt = format || ((v) => formatAmount(v, currency));
   const change = changePercent(value, previous);
   const diff = value - previous;
   const gradientId = `kpi-spark-${id}`;
@@ -201,23 +205,25 @@ const KpiCard = ({
             color: value < 0 ? "error.main" : "text.primary",
           }}
         >
-          {formatAmount(value, currency)}
+          {fmt(value)}
         </Typography>
-        <Typography
-          noWrap
-          sx={{
-            fontSize: "1rem",
-            fontWeight: 600,
-            fontVariantNumeric: "tabular-nums",
-            color: otherValue < 0 ? "error.main" : "text.secondary",
-          }}
-        >
-          {formatAmount(otherValue, otherCurrency)}
-        </Typography>
+        {otherCurrency && otherValue != null && (
+          <Typography
+            noWrap
+            sx={{
+              fontSize: "1rem",
+              fontWeight: 600,
+              fontVariantNumeric: "tabular-nums",
+              color: otherValue < 0 ? "error.main" : "text.secondary",
+            }}
+          >
+            {formatAmount(otherValue, otherCurrency)}
+          </Typography>
+        )}
       </Box>
 
       <Tooltip
-        title={`${t("finance.analytics.vsPrevious")}: ${formatAmount(previous, currency)}`}
+        title={`${t("finance.analytics.vsPrevious")}: ${fmt(previous)}`}
         arrow
         placement="top-start"
       >
@@ -229,7 +235,7 @@ const KpiCard = ({
               sx={{ flexShrink: 0, fontSize: "0.75rem", fontWeight: 600, color: "text.primary", fontVariantNumeric: "tabular-nums" }}
             >
               {diff > 0 ? "+" : ""}
-              {formatAmount(diff, currency)}
+              {fmt(diff)}
             </Typography>
           )}
           <Typography noWrap sx={{ fontSize: "0.75rem", color: "text.secondary", minWidth: 0 }}>
@@ -250,7 +256,7 @@ const KpiCard = ({
           showHighlight
           margin={{ top: 4, bottom: 2, left: 4, right: 4 }}
           xAxis={{ scaleType: "point", data: labels }}
-          valueFormatter={(v) => formatAmount(v, currency)}
+          valueFormatter={(v) => fmt(v)}
           slotProps={tooltipSlotProps}
           sx={chartSx({ "*": gradientId })}
         />

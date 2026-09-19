@@ -14,6 +14,13 @@ export const PAYMENT_STATUS_CONFIG = {
   0: { label: "Kredit", labelKey: "paymentCredit", color: "#dc2626" },
 };
 
+// `status` of a synced sale in tbl_total_calculations (paid / notpaid / REFUND).
+export const SALES_PAYMENT_STATUS_CONFIG = {
+  PAID: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
+  NOTPAID: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },
+  REFUND: { label: "Gaýtaryldy", labelKey: "paymentRefunded", color: "#dc2626" },
+};
+
 export const OUTBOUND_PAYMENT_STATUS_CONFIG = {
   1: { label: "Tölendi", labelKey: "paymentPaid", color: "#16a34a" },
   2: { label: "Kredit", labelKey: "paymentCredit", color: "#d97706" },

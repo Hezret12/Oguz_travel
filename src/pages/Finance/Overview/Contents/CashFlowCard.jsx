@@ -75,7 +75,7 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
               height={340}
               hideLegend
               skipAnimation
-              margin={{ top: 12, right: 12, bottom: 4, left: 0 }}
+              margin={{ top: 12, right: 24, bottom: 4, left: 0 }}
               grid={{ horizontal: true }}
               xAxis={[{ ...xAxisBase, scaleType: "point", data: series.map((p) => p.label), tickLabelStyle: axisLabelStyle }]}
               yAxis={[

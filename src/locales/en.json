@@ -1284,5 +1284,27 @@
       "percentRequired": "Enter the percent",
       "percentRange": "Must be between 0 and 100"
     }
+  },
+  "dashboard": {
+    "sales": "Sales",
+    "profit": "Profit",
+    "salesCount": "Number of sales",
+    "receivable": "Receivable",
+    "trendTitle": "Sales and profit",
+    "paymentTitle": "Payment status",
+    "paymentSubtitle": "Sales in the period by payment",
+    "noStatus": "No status",
+    "salesN": "{{count}} sales",
+    "allOffices": "All offices",
+    "updatedAt": "Updated {{time}}",
+    "refresh": "Refresh",
+    "loadError": "Couldn’t load the data. Try refreshing.",
+    "modulesTitle": "By module",
+    "modulesSubtitle": "Pick a module: sales, profit and comparison with the previous period",
+    "noSalesInCurrency": "No sales in {{currency}}",
+    "previousPeriod": "Previous period",
+    "avgSale": "Average sale",
+    "topOperators": "Top operators",
+    "openModuleNamed": "Open {{name}}"
   }
 }
