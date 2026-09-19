@@ -55,6 +55,22 @@ export const useSeriesColors = () => {
   };
 };
 
+// Two-sided money charts (Sankey, dumbbell, mirrored bars): teal = money in,
+// orange = money out, neutral ink = the till and what is left. Validated with
+// the dataviz checker on #ffffff / #12131A: teal↔orange passes CVD in both
+// modes. Blue was rejected here — teal↔blue fails the normal-vision floor in
+// light mode — so the till is neutral, never a third hue.
+export const useFlowColors = () => {
+  const { palette } = useTheme();
+  const dark = palette.mode === "dark";
+  return {
+    inflow: dark ? KPI_TONES.inflow.dark : KPI_TONES.inflow.light,
+    outflow: dark ? KPI_TONES.outflow.dark : KPI_TONES.outflow.light,
+    neutral: dark ? "#CBD5E1" : "#334155",
+    surface: palette.background.paper,
+  };
+};
+
 // One hue per card (each card is a single series, named by its label, so hue
 // is never the only cue). Green/red stay reserved for the good/bad change
 // pill. Validated in card order with the dataviz palette checker on the
