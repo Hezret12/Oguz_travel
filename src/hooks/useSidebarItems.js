@@ -23,7 +23,7 @@ import {
   PieChart,
   LayoutGrid,
   Building,
-  Building2,
+  ChartNoAxesCombined,
   Award,
   WalletMinimal,
   MapPinHouse,
@@ -73,7 +73,7 @@ export const useSidebarItems = () => {
             id: "finance-offices",
             text: t("sidebar.financeOffices"),
             path: PATHS.FINANCE.OFFICES,
-            icon: createElement(Building2, { size: 18, strokeWidth: 2.2 }),
+            icon: createElement(ChartNoAxesCombined, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "finance-salary",
