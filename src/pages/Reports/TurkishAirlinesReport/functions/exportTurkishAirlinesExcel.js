@@ -90,19 +90,19 @@ export const exportTurkishAirlinesExcel = async ({
     { key: "total_base", header: "JEMI BF", width: 16, align: "right", isBf: true, isTotal: true },
   ];
 
-  offices.forEach(({ short }) => {
+  offices.forEach(({ key: officeKey, short }) => {
     const upper = String(short || "").toUpperCase();
     columns.push({
-      key: `${short}_quoted`,
-      officeShort: short,
+      key: `${officeKey}_quoted`,
+      officeShort: officeKey,
       header: upper,
       width: 15,
       align: "right",
       isQuoted: true,
     });
     columns.push({
-      key: `${short}_base`,
-      officeShort: short,
+      key: `${officeKey}_base`,
+      officeShort: officeKey,
       header: `${upper} BF`,
       width: 15,
       align: "right",

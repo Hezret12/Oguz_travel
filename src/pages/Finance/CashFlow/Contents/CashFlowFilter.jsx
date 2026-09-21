@@ -141,7 +141,6 @@ const CashFlowFilter = ({
   const { data: officesData } = useGet({
     apiFn: getAllOfficeApi,
     key: "all-offices-filter",
-    params: { limit: 100 },
   });
 
   const { data: categoriesData } = useGet({

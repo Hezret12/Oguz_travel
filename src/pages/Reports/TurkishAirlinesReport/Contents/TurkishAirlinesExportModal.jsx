@@ -179,7 +179,7 @@ const TurkishAirlinesExportModal = ({
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.8 }}>
               {offices.map((off) => (
                 <Chip
-                  key={off.short}
+                  key={off.key}
                   size="small"
                   label={off.full || off.short}
                   sx={{

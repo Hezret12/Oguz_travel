@@ -85,7 +85,6 @@ export const useOfficesFinance = (period, customRange) => {
   const { data: officesData, isLoading } = useGet({
     apiFn: getAllOfficeApi,
     key: "all-offices-filter",
-    params: { limit: 100 },
   });
 
   const offices = useMemo(() => {

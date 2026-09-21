@@ -28,12 +28,15 @@ const getOfficeKey = (obj) => {
   return obj.tk || obj.ru || obj.en || "";
 };
 
-const getRecordOfficeKey = (f) =>
+const getRecordOfficeNameKey = (f) =>
   getOfficeKey(f.shortname) ||
   getOfficeKey(f.shortName) ||
   getOfficeKey(f.office) ||
   getOfficeKey(f.full_name) ||
   getOfficeKey(f.fullName);
+
+// Report rows carry `office_guid`, office list rows carry `guid`; fall back to the tk name for older responses.
+const getRecordOfficeKey = (f) => f.office_guid || f.guid || getRecordOfficeNameKey(f);
 
 const selectReport = (res) => {
   const payload = res?.data ?? res ?? {};
@@ -86,7 +89,7 @@ const useReportData = (selectedDate) => {
 
   const { data: dbOffices = [] } = useQuery({
     queryKey: ["allOffices"],
-    queryFn: getAllOfficeApi,
+    queryFn: () => getAllOfficeApi(),
     select: (res) =>
       Array.isArray(res?.data?.data)
         ? res.data.data
@@ -100,12 +103,7 @@ const useReportData = (selectedDate) => {
     (obj) => {
       if (!obj) return "";
       if (typeof obj === "string") return obj;
-      const localized = selectedLang(obj);
-      if (localized && localized !== "string") return localized;
-      if (obj.tk && obj.tk !== "string") return obj.tk;
-      if (obj.ru && obj.ru !== "string") return obj.ru;
-      if (obj.en && obj.en !== "string") return obj.en;
-      return obj.tk || obj.ru || obj.en || "";
+      return selectedLang(obj) || obj.tk || obj.ru || obj.en || "";
     },
     [selectedLang]
   );
@@ -113,9 +111,11 @@ const useReportData = (selectedDate) => {
   const offices = useMemo(() => {
     const list = [];
     const seen = new Set();
+    const guidlessNames = new Set();
 
     const addOffice = (f) => {
       const key = getRecordOfficeKey(f);
+      const nameKey = getRecordOfficeNameKey(f);
       const short =
         getOfficeLabel(f.shortname) ||
         getOfficeLabel(f.shortName) ||
@@ -124,8 +124,10 @@ const useReportData = (selectedDate) => {
         getOfficeLabel(f.full_name) ||
         getOfficeLabel(f.fullName) ||
         short;
-      if (key && key !== "string" && short && short !== "string" && !seen.has(key)) {
+      // A guid-less (older) report row claims its name, so the office-list row for the same office isn't added twice.
+      if (key && short && !seen.has(key) && !guidlessNames.has(nameKey)) {
         seen.add(key);
+        if (key === nameKey) guidlessNames.add(nameKey);
         list.push({
           key,
           short,
@@ -194,16 +196,10 @@ const useReportData = (selectedDate) => {
       const paddedDay = rawDay.padStart(2, "0");
       const unpaddedDay = String(parseInt(rawDay, 10) || rawDay);
       
-      const short = getOfficeLabel(d.shortname) || getOfficeLabel(d.office);
-      const tkShort = typeof d.shortname === "object" ? d.shortname?.tk : "";
-      const enShort = typeof d.shortname === "object" ? d.shortname?.en : "";
-      const ruShort = typeof d.shortname === "object" ? d.shortname?.ru : "";
-
-      const keys = new Set([short, tkShort, enShort, ruShort].filter(Boolean));
-      keys.forEach((s) => {
-        rIdx.set(`${paddedDay}-${s}`, d);
-        rIdx.set(`${unpaddedDay}-${s}`, d);
-      });
+      const key = getRecordOfficeKey(d);
+      if (!key) return;
+      rIdx.set(`${paddedDay}-${key}`, d);
+      rIdx.set(`${unpaddedDay}-${key}`, d);
     });
 
     const tIdx = new Map();
@@ -216,7 +212,7 @@ const useReportData = (selectedDate) => {
     });
 
     return { reportIndex: rIdx, totalsIndex: tIdx };
-  }, [reportData, dailyTotals, getOfficeLabel]);
+  }, [reportData, dailyTotals]);
 
   const { rows, barChartData } = useMemo(() => {
     const tableRows = [];
@@ -228,19 +224,11 @@ const useReportData = (selectedDate) => {
       const dayRaw = String(dayNum);
       const row = { day: dayNum };
 
-      offices.forEach(({ short, rawShort }) => {
-        const tkShort = typeof rawShort === "object" ? rawShort?.tk : "";
-        const enShort = typeof rawShort === "object" ? rawShort?.en : "";
-        const ruShort = typeof rawShort === "object" ? rawShort?.ru : "";
-
+      offices.forEach(({ key }) => {
         const match =
-          reportIndex.get(`${dayStr}-${short}`) ||
-          reportIndex.get(`${dayRaw}-${short}`) ||
-          (tkShort && (reportIndex.get(`${dayStr}-${tkShort}`) || reportIndex.get(`${dayRaw}-${tkShort}`))) ||
-          (enShort && (reportIndex.get(`${dayStr}-${enShort}`) || reportIndex.get(`${dayRaw}-${enShort}`))) ||
-          (ruShort && (reportIndex.get(`${dayStr}-${ruShort}`) || reportIndex.get(`${dayRaw}-${ruShort}`)));
+          reportIndex.get(`${dayStr}-${key}`) || reportIndex.get(`${dayRaw}-${key}`);
 
-        row[short] = match
+        row[key] = match
           ? {
               quoted: Number(match.quoted_price_sum ?? match.quoted_price ?? match.total_quoted) || 0,
               base: Number(match.base_fare_sum ?? match.base_fare ?? match.total_base) || 0,
@@ -298,13 +286,14 @@ const useReportData = (selectedDate) => {
   const officeBreakdown = useMemo(() => {
     const validFooter = footer.filter((f) => {
       const short = getOfficeLabel(f.shortname) || getOfficeLabel(f.office);
-      return short && short !== "string";
+      return Boolean(short);
     });
     const maxQuoted = Math.max(...validFooter.map((f) => Number(f.total_quoted ?? f.quoted_price_sum) || 0), 1);
 
     return validFooter.map((f, i) => {
       const totalQuoted = Number(f.total_quoted ?? f.quoted_price_sum) || 0;
       return {
+        key: getRecordOfficeKey(f),
         office: getOfficeLabel(f.full_name) || getOfficeLabel(f.shortname) || "—",
         totalQuoted,
         totalBase: Number(f.total_base ?? f.base_fare_sum) || 0,
@@ -317,18 +306,8 @@ const useReportData = (selectedDate) => {
   }, [footer, getOfficeLabel]);
 
   const findFooter = useCallback(
-    (officeShort) =>
-      footer.find((f) => {
-        const short = getOfficeLabel(f.shortname) || getOfficeLabel(f.office);
-        return (
-          short === officeShort ||
-          f.shortname?.tk === officeShort ||
-          f.shortname?.ru === officeShort ||
-          f.shortname?.en === officeShort ||
-          f.shortname === officeShort
-        );
-      }),
-    [footer, getOfficeLabel]
+    (officeKey) => footer.find((f) => getRecordOfficeKey(f) === officeKey),
+    [footer]
   );
 
   return {

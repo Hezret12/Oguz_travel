@@ -470,7 +470,7 @@ const ReportCharts = ({
             ) : officeBreakdown && officeBreakdown.length > 0 ? (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
                 {officeBreakdown.map((item) => (
-                  <Box key={item.office}>
+                  <Box key={item.key || item.office}>
                     <Box
                       sx={{
                         display: "flex",

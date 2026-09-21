@@ -131,9 +131,9 @@ const ReportTable = ({
                 >
                   {t("report.turkishAirlines.day")}
                 </TableCell>
-                {offices.map(({ short, full }) => (
+                {offices.map(({ key, short, full }) => (
                   <TableCell
-                    key={short}
+                    key={key}
                     align="center"
                     sx={{ ...headerCellSx, minWidth: 95 }}
                   >
@@ -217,11 +217,11 @@ const ReportTable = ({
                       >
                         {row.day}
                       </TableCell>
-                      {offices.map(({ short }) => {
-                        const cellVal = row[short];
+                      {offices.map(({ key }) => {
+                        const cellVal = row[key];
                         if (!cellVal) {
                           return (
-                            <TableCell key={short} align="center" sx={bodyCellSx}>
+                            <TableCell key={key} align="center" sx={bodyCellSx}>
                               <Typography
                                 component="span"
                                 sx={{
@@ -242,7 +242,7 @@ const ReportTable = ({
                           typeof cellVal === "object" ? cellVal.base : 0;
 
                         return (
-                          <TableCell key={short} align="center" sx={bodyCellSx}>
+                          <TableCell key={key} align="center" sx={bodyCellSx}>
                             <Box
                               sx={{
                                 display: "flex",
@@ -358,11 +358,11 @@ const ReportTable = ({
                     >
                       {t("report.turkishAirlines.baseFare")}
                     </TableCell>
-                    {offices.map(({ short }) => {
-                      const f = findFooter(short);
+                    {offices.map(({ key }) => {
+                      const f = findFooter(key);
                       return (
                         <TableCell
-                          key={short}
+                          key={key}
                           align="center"
                           sx={{ ...footerCellSx, color: isDark ? "#F87171" : "#DC2626" }}
                         >
@@ -401,11 +401,11 @@ const ReportTable = ({
                     >
                       {t("report.turkishAirlines.quotedPrice")}
                     </TableCell>
-                    {offices.map(({ short }) => {
-                      const f = findFooter(short);
+                    {offices.map(({ key }) => {
+                      const f = findFooter(key);
                       return (
                         <TableCell
-                          key={short}
+                          key={key}
                           align="center"
                           sx={{ ...footerCellSx, borderTop: "none" }}
                         >
@@ -445,11 +445,11 @@ const ReportTable = ({
                     >
                       {t("report.turkishAirlines.percentage")}
                     </TableCell>
-                    {offices.map(({ short }) => {
-                      const f = findFooter(short);
+                    {offices.map(({ key }) => {
+                      const f = findFooter(key);
                       return (
                         <TableCell
-                          key={short}
+                          key={key}
                           align="center"
                           sx={{
                             ...footerCellSx,

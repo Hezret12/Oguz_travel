@@ -85,7 +85,7 @@ const AdminDashboard = () => {
 
   const { rows, isLoading, isFetching, isError, refetch, updatedAt, isDemo } = useSalesRows(range);
 
-  const { data: officesData } = useGet({ apiFn: getAllOfficeApi, key: "all-offices-filter", params: { limit: 100 } });
+  const { data: officesData } = useGet({ apiFn: getAllOfficeApi, key: "all-offices-filter" });
   const officeOptions = useMemo(
     () =>
       (isDemo ? MOCK_OFFICES : Array.isArray(officesData) ? officesData : []).map((o) => ({
