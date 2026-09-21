@@ -253,7 +253,7 @@ const ReportHeader = ({
                     {t(`report.turkishAirlines.quarterMonths.q${val}`)}
                   </Typography>
                 </Box>
-              </Box>
+              </Box>  
             )}
             IconComponent={SelectChevron}
             sx={{

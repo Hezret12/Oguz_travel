@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Alert, Box, Button, Paper, useTheme, Typography } from "@mui/material";
 import {
   MaterialReactTable,
@@ -6,6 +6,8 @@ import {
 } from "material-react-table";
 import { Package, RotateCw } from "lucide-react";
 import AddButton from "../../../components/AddButton";
+import ExportExcelButton from "../../../components/ExportExcelButton";
+import LetterStockExportModal from "./Contents/LetterStockExportModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
@@ -33,6 +35,7 @@ const ReferralLetterPage = () => {
   const isDark = theme.palette.mode === "dark";
   const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
     queryParams,
@@ -378,10 +381,27 @@ const ReferralLetterPage = () => {
           )}
         </Box>
 
-        <AddButton onClick={handleAddClick}>
-          {t("referralLetter.addStock")}
-        </AddButton>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          <ExportExcelButton
+            onClick={() => setIsExportOpen(true)}
+            disabled={isStockLoading || stockTotal === 0}
+          />
+          <AddButton onClick={handleAddClick}>
+            {t("referralLetter.addStock")}
+          </AddButton>
+        </Box>
       </Paper>
+
+      {isExportOpen && (
+        <LetterStockExportModal
+          open={isExportOpen}
+          close={() => setIsExportOpen(false)}
+          queryParams={queryParams}
+          stockCount={stockTotal}
+          // `total_report_count` is for all batches, so it only previews an unfiltered export.
+          letterCount={queryParams?.search ? null : totalStockCount}
+        />
+      )}
 
       {Boolean(stockTable.getState().creatingRow) && (
         <AddLetterStockModal table={stockTable} />
