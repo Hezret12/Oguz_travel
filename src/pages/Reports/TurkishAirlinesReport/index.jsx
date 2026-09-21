@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import dayjs from "dayjs";
 
@@ -8,7 +8,7 @@ import { useDocumentTitle } from "../../../hooks/useDocumentTitle";
 import { formatNumber, formatCompact } from "../../../functions/generalHelpers";
 import { useQuery } from "@tanstack/react-query";
 import { getTurkishQuarterApi } from "../../../api/queries/getters";
-import { getQuarterOfDate } from "./functions/quarter";
+import { getQuarterOfDate, buildQuarterComparison } from "./functions/quarter";
 
 import ReportHeader from "./Contents/ReportHeader";
 import ReportSummaryCards from "./Contents/ReportSummaryCards";
@@ -27,8 +27,10 @@ const TurkishAirlinesReport = () => {
     queryFn: () => getTurkishQuarterApi({ quarter: selectedQuarter }),
   });
 
-  const quarterData = quarterRes?.data || {};
-  const achievementPercentage = quarterData?.achievement_percentage || "0%";
+  const quarterComparison = useMemo(
+    () => (quarterRes ? buildQuarterComparison(quarterRes.data) : null),
+    [quarterRes]
+  );
 
   const {
     isLoading,
@@ -78,7 +80,7 @@ const TurkishAirlinesReport = () => {
 
       <ReportSummaryCards
         stats={stats}
-        achievementPercentage={achievementPercentage}
+        quarterComparison={quarterComparison}
         formatCompact={formatCompact}
         paperSx={paperSx}
         teal={colors.teal}
@@ -94,7 +96,8 @@ const TurkishAirlinesReport = () => {
         officeBreakdown={officeBreakdown}
         statusChartData={statusChartData}
         formatNumber={formatNumber}
-        monthQuoted={stats.monthQuoted}
+        stats={stats}
+        formatCompact={formatCompact}
         selectedQuarter={selectedQuarter}
         onQuarterChange={setSelectedQuarter}
         teal={colors.teal}

@@ -629,9 +629,7 @@
       "dailyAvg": "Среднее в день",
       "bestDay": "Лучший день",
       "dayN": "{{day}}-й день",
-      "margin": "Маржа",
-      "unpaidShare": "{{value}} продаж не оплачено",
-      "workingDays": "Рабочих дней: {{count}}"
+      "margin": "Маржа"
     }
   },
   "task": {

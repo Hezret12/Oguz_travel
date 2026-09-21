@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   Paper,
-  Chip,
   Skeleton,
   LinearProgress,
   Grid,
@@ -97,7 +96,8 @@ const ReportCharts = ({
   officeBreakdown = [],
   statusChartData = [],
   formatNumber,
-  monthQuoted,
+  formatCompact,
+  stats = {},
   selectedQuarter,
   onQuarterChange,
   teal,
@@ -107,7 +107,6 @@ const ReportCharts = ({
 }) => {
   const { t } = useLocale();
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
 
   const noDataText = t("noData");
   const [highlightedItem, setHighlightedItem] = useState(null);
@@ -135,59 +134,79 @@ const ReportCharts = ({
               title={t("report.turkishAirlines.dailyTurnoverChart")}
               subtitle={t("report.turkishAirlines.dailyTurnoverSubtitle")}
               color={teal}
-              action={
-                <Chip
-                  label={`${t("report.turkishAirlines.total")}: ${formatNumber(monthQuoted)}`}
-                  size="small"
-                  sx={{
-                    backgroundColor: alpha(teal, 0.12),
-                    color: teal,
-                    fontWeight: 700,
-                    fontSize: 12,
-                    height: 26,
-                  }}
-                />
-              }
             />
 
+            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 1, mb: 2 }}>
+              {[
+                { label: t("report.turkishAirlines.total"), value: formatNumber(stats.monthQuoted), color: teal },
+                { label: t("report.turkishAirlines.dailyAvg"), value: formatNumber(stats.dailyAvg), color: "text.primary" },
+                {
+                  label: t("report.turkishAirlines.bestDay"),
+                  value: stats.bestDay > 0 ? formatNumber(stats.bestDay) : "—",
+                  hint: stats.bestDay > 0 ? t("report.turkishAirlines.dayN", { day: stats.bestDayNum }) : null,
+                  color: "text.primary",
+                },
+              ].map((item) => (
+                <Box
+                  key={item.label}
+                  sx={{ px: 1.5, py: 1, borderRadius: 2, bgcolor: "action.hover", minWidth: 0 }}
+                >
+                  <Typography noWrap sx={{ fontSize: 11, fontWeight: 600, color: "text.secondary" }}>
+                    {item.label}
+                  </Typography>
+                  <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75, minWidth: 0 }}>
+                    <Typography noWrap sx={{ fontSize: 16, fontWeight: 800, color: item.color, letterSpacing: "-0.01em" }}>
+                      {item.value}
+                    </Typography>
+                    {item.hint && (
+                      <Typography noWrap sx={{ fontSize: 11, fontWeight: 600, color: "text.secondary" }}>
+                        {item.hint}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+
             {isLoading ? (
-              <Skeleton variant="rectangular" height={260} sx={{ borderRadius: 2 }} />
+              <Skeleton variant="rectangular" height={240} sx={{ borderRadius: 2 }} />
             ) : barChartData && barChartData.length > 0 && barChartData.some((d) => Number(d.value) > 0) ? (
-              <Box sx={{ width: "100%", height: 260 }}>
+              <Box sx={{ width: "100%", height: 240 }}>
                 <BarChart
                   dataset={barChartData}
+                  hideLegend
+                  grid={{ horizontal: true }}
+                  borderRadius={4}
                   xAxis={[
                     {
                       scaleType: "band",
                       dataKey: "day",
-                      tickLabelStyle: {
-                        fill: theme.palette.text.secondary,
-                        fontSize: 11,
-                      },
+                      disableLine: true,
+                      disableTicks: true,
+                      categoryGapRatio: 0.35,
+                      tickLabelStyle: { fill: theme.palette.text.secondary, fontSize: 10.5 },
                     },
                   ]}
                   yAxis={[
                     {
-                      tickLabelStyle: {
-                        fill: theme.palette.text.secondary,
-                        fontSize: 11,
-                      },
+                      disableLine: true,
+                      disableTicks: true,
+                      valueFormatter: (v) => formatCompact(v),
+                      tickLabelStyle: { fill: theme.palette.text.secondary, fontSize: 11 },
                     },
                   ]}
                   series={[
                     {
                       dataKey: "value",
                       color: teal,
-                      label: t("report.turkishAirlines.total") || "Ciro",
+                      label: t("report.turkishAirlines.total"),
                       valueFormatter: (v) => formatNumber(v),
                     },
                   ]}
-                  height={260}
-                  margin={{ top: 15, bottom: 25, left: 55, right: 15 }}
-                  slotProps={{ bar: { rx: 4, ry: 4 } }}
+                  height={240}
+                  margin={{ top: 10, bottom: 5, left: 5, right: 10 }}
                   sx={{
-                    "& .MuiChartsAxis-line": { stroke: borderCol },
-                    "& .MuiChartsAxis-tick": { stroke: borderCol },
+                    "& .MuiChartsGrid-line": { stroke: borderCol, strokeDasharray: "4 4" },
                   }}
                 />
               </Box>
@@ -256,7 +275,7 @@ const ReportCharts = ({
                         {
                           data: (statusChartData.filter((d) => d.value > 0).length > 0
                             ? statusChartData.filter((d) => d.value > 0)
-                            : [{ id: "empty", value: 1, color: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0" }]
+                            : [{ id: "empty", value: 1, color: theme.palette.divider }]
                           ).map((item) => ({
                             id: item.id,
                             value: item.value,
@@ -336,23 +355,24 @@ const ReportCharts = ({
                     }}
                   >
                     {statusChartData.map((item) => {
-                      const pctNum = parseFloat(String(item.percentage || "0").replace("%", "")) || 0;
+                      const pctNum = parseFloat(String(item.percentage ?? "0").replace("%", "")) || 0;
+                      const isHighlighted = highlightedSlice?.id === item.id;
                       return (
                         <Box
                           key={item.id}
                           sx={{
                             display: "flex",
                             flexDirection: "column",
-                            gap: 0.6,
-                            p: 1.2,
+                            gap: 0.75,
+                            px: 1.5,
+                            py: 1.1,
                             borderRadius: "10px",
-                            backgroundColor: isDark ? "rgba(255,255,255,0.02)" : "#F8FAFC",
-                            border: (th) => `1px solid ${th.palette.divider}`,
-                            transition: "all 0.15s ease",
-                            "&:hover": {
-                              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#F1F5F9",
-                              transform: "translateX(2px)",
-                            },
+                            border: 1,
+                            borderColor: isHighlighted ? alpha(item.color, 0.5) : "divider",
+                            backgroundColor: isHighlighted ? alpha(item.color, 0.08) : "transparent",
+                            opacity: item.value > 0 ? 1 : 0.6,
+                            transition: "background-color 0.15s ease, border-color 0.15s ease",
+                            "&:hover": { backgroundColor: "action.hover" },
                           }}
                         >
                           <Box
@@ -410,7 +430,7 @@ const ReportCharts = ({
                               width: "100%",
                               height: 4,
                               borderRadius: 2,
-                              backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
+                              backgroundColor: "action.hover",
                               overflow: "hidden",
                             }}
                           >
@@ -528,7 +548,7 @@ const ReportCharts = ({
                       sx={{
                         height: 7,
                         borderRadius: 4,
-                        backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F1F5F9",
+                        backgroundColor: "action.hover",
                         "& .MuiLinearProgress-bar": {
                           borderRadius: 4,
                           backgroundColor: item.color,

@@ -629,9 +629,7 @@
       "dailyAvg": "Günlük ortaça",
       "bestDay": "Iň gowy gün",
       "dayN": "{{day}}-nji gün",
-      "margin": "Peýda paýy",
-      "unpaidShare": "Satuwlaryň {{value}}-y tölenmedik",
-      "workingDays": "{{count}} iş güni"
+      "margin": "Peýda paýy"
     }
   },
   "task": {

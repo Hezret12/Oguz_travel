@@ -629,9 +629,7 @@
       "dailyAvg": "Daily average",
       "bestDay": "Best day",
       "dayN": "Day {{day}}",
-      "margin": "Margin",
-      "unpaidShare": "{{value}} of sales unpaid",
-      "workingDays": "{{count}} working days"
+      "margin": "Margin"
     }
   },
   "task": {
