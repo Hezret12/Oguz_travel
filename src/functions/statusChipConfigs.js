@@ -55,9 +55,15 @@ export const PROCESSED_STATUS_CONFIG = {
 };
 
 export const TASK_STATUS_CONFIG = {
-  1: { label: "To Do", color: "#64748b" },
-  2: { label: "In Progress", color: "#2563eb" },
-  3: { label: "Completed", color: "#16a34a" },
+  1: { label: "To Do", labelKey: "task.statusToDo", color: "#64748b" },
+  2: { label: "In Progress", labelKey: "task.statusInProgress", color: "#2563eb" },
+  3: { label: "Completed", labelKey: "task.statusCompleted", color: "#16a34a" },
+};
+
+export const TASK_PRIORITY_CONFIG = {
+  URGENT: { label: "Urgent", labelKey: "task.priorityUrgent", color: "#dc2626" },
+  MEDIUM: { label: "Medium", labelKey: "task.priorityMedium", color: "#2563eb" },
+  LOW: { label: "Low", labelKey: "task.priorityLow", color: "#059669" },
 };
 
 export const NOTIFICATION_STATUS_CONFIG = {

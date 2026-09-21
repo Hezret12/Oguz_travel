@@ -652,7 +652,13 @@
     "overdue": "Просрочено",
     "noTasksFound": "Задачи не найдены",
     "noTasksDesc": "В данный момент нет задач.",
-    "changeStatus": "Изменить статус"
+    "changeStatus": "Изменить статус",
+    "noTasksInColumn": "В этой колонке нет задач",
+    "dropHere": "Перетащите сюда",
+    "addFirstTask": "Добавить первую задачу",
+    "validation": {
+      "dueDateInPast": "Срок исполнения не может быть в прошлом"
+    }
   },
   "notifications": {
     "title": "Уведомления",

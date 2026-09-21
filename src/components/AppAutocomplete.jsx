@@ -27,14 +27,14 @@ const AppAutocomplete = ({
   multiple = false,
   maxChips,
   popupIcon = <ChevronDown size={18} />,
-  renderTags: customRenderTags,
+  renderValue: customRenderValue,
+  renderTags: legacyRenderTags,
   onValueChange,
   sx = {},
   ...restProps
 }) => {
-  // Strip any accidental renderTags, ownerState, or PaperProps from restProps
+  // Strip any accidental ownerState or PaperProps from restProps
   const cleanProps = { ...restProps };
-  delete cleanProps.renderTags;
   delete cleanProps.ownerState;
   delete cleanProps.PaperProps;
 
@@ -57,10 +57,14 @@ const AppAutocomplete = ({
               ? cleanProps.limitTags
               : null;
 
-        const renderTagsProp = customRenderTags
-          ? customRenderTags
+        // MUI v9 renamed `renderTags` to `renderValue`; callers may still pass
+        // the old name, and both take the same (value, getItemProps) shape.
+        const customRender = customRenderValue || legacyRenderTags;
+
+        const renderValueProp = customRender
+          ? customRender
           : multiple
-            ? (selectedOptions, getTagProps) => {
+            ? (selectedOptions, getItemProps) => {
               const total = selectedOptions.length;
               const limit = chipLimit && chipLimit > 0 ? chipLimit : total;
               const visible = selectedOptions.slice(0, limit);
@@ -68,10 +72,9 @@ const AppAutocomplete = ({
 
               return [
                 ...visible.map((opt, idx) => {
-                  const tagProps = { ...getTagProps({ index: idx }) };
+                  const tagProps = { ...getItemProps({ index: idx }) };
                   const tagKey = tagProps.key;
                   delete tagProps.key;
-                  delete tagProps.renderTags;
                   delete tagProps.ownerState;
 
                   return (
@@ -153,10 +156,9 @@ const AppAutocomplete = ({
                 option?.value ?? option?.id ?? option?.userGuid ?? option?.label ?? index
               }
               getOptionLabel={(option) => option.label || ""}
-              {...(renderTagsProp ? { renderTags: renderTagsProp } : {})}
+              {...(renderValueProp ? { renderValue: renderValueProp } : {})}
               renderOption={(optionProps, option, { selected, index }) => {
                 const { key, ...cleanOptionProps } = optionProps;
-                delete cleanOptionProps.renderTags;
                 delete cleanOptionProps.ownerState;
                 const optionKey =
                   option?.value ?? option?.id ?? key ?? `${option?.label || "opt"}-${index}`;
@@ -208,7 +210,6 @@ const AppAutocomplete = ({
               }}
               renderInput={(params) => {
                 const { ...textFieldProps } = params;
-                delete textFieldProps.renderTags;
                 delete textFieldProps.ownerState;
                 return (
                   <TextField

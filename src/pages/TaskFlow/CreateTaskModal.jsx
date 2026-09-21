@@ -1,10 +1,12 @@
 import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Grid } from "@mui/material";
 
 import { useLocale } from "../../hooks/useLocale";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
+import { CustomForm } from "../../components/Dialog/CustomForm";
 import FooterButton from "../../components/Dialog/FooterButton";
 import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
@@ -13,14 +15,33 @@ import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addTaskApi } from "../../api/queries/post";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload, { TaskFileList } from "../../components/inputs/TaskFileUpload";
+import { useValidShema } from "../../functions/useValidShema";
+import {
+  TASK_STATUS_ITEMS,
+  TASK_PRIORITY_ITEMS,
+  DEFAULT_TASK_PRIORITY,
+} from "./functions/taskMeta";
+
+const datePickerSx = {
+  "& .MuiPickersOutlinedInput-root, & .MuiOutlinedInput-root, & .MuiInputBase-root": {
+    minHeight: "44px !important",
+    height: "44px !important",
+  },
+  "& .MuiPickersInputBase-sectionsContainer, & .MuiInputBase-input": {
+    paddingTop: "10px !important",
+    paddingBottom: "10px !important",
+  },
+};
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const { t } = useLocale();
+  const { addTask } = useValidShema();
 
   const createMutation = useCreate({
     apiFn: addTaskApi,
     key: "tasks",
     invalidateQueries: ["tasks-board"],
+    isPaginated: true,
     onSuccess: () => {
       onCreateTask?.();
       handleCloseDialog();
@@ -28,30 +49,32 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   });
 
   const { control, handleSubmit, reset } = useForm({
+    resolver: yupResolver(addTask),
     defaultValues: {
       title: "",
       description: "",
       assignee_guid: [],
-      priority: "medium",
-      status: 1,
+      priority: DEFAULT_TASK_PRIORITY,
+      status: TASK_STATUS_ITEMS[0].id,
       dueDate: "",
     },
   });
 
   const priorityOptions = useMemo(
-    () => [
-      { value: "urgent", label: t("task.priorityUrgent") },
-      { value: "medium", label: t("task.priorityMedium") },
-    ],
+    () =>
+      TASK_PRIORITY_ITEMS.map((item) => ({
+        value: item.value,
+        label: t(item.labelKey),
+      })),
     [t],
   );
 
   const statusOptions = useMemo(
-    () => [
-      { value: 1, label: t("task.statusToDo"), color: "#64748B" },
-      { value: 2, label: t("task.statusInProgress"), color: "#2563EB" },
-      { value: 3, label: t("task.statusCompleted"), color: "#16A34A" },
-    ],
+    () =>
+      TASK_STATUS_ITEMS.map((item) => ({
+        value: item.id,
+        label: t(item.labelKey),
+      })),
     [t],
   );
 
@@ -75,11 +98,10 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       assignee_guids: selectedGuids,
       title: data.title?.trim() || "",
       description: data.description?.trim() || "",
-      priority: data.priority || "medium",
-      status: Number(data.status) || 1,
-      due_date: data.dueDate
-        ? new Date(data.dueDate).toISOString()
-        : new Date().toISOString(),
+      priority: data.priority || DEFAULT_TASK_PRIORITY,
+      status: Number(data.status) || TASK_STATUS_ITEMS[0].id,
+      // An empty due date means "no deadline" — never silently stamp today.
+      due_date: data.dueDate ? new Date(data.dueDate).toISOString() : null,
       images: attachments,
     };
 
@@ -96,12 +118,10 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
         variant={"h6"}
       />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Box
           sx={{ display: "flex", flexDirection: "column", gap: 1.8, pt: 0.5 }}
         >
-  
-          {/* Title */}
           <CustomTextField
             name="title"
             control={control}
@@ -126,6 +146,7 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
                 control={control}
                 label={t("task.assignEmployee")}
                 multiple
+                required
                 disabled={isSubmitting}
               />
             </Grid>
@@ -154,18 +175,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               <CustomDatePicker
                 name="dueDate"
                 control={control}
-                label={t("notifications.endDate")}
+                label={t("task.dueDate")}
                 disabled={isSubmitting}
-                inputSx={{
-                  "& .MuiPickersOutlinedInput-root, & .MuiOutlinedInput-root, & .MuiInputBase-root": {
-                    minHeight: "44px !important",
-                    height: "44px !important",
-                  },
-                  "& .MuiPickersInputBase-sectionsContainer, & .MuiInputBase-input": {
-                    paddingTop: "10px !important",
-                    paddingBottom: "10px !important",
-                  },
-                }}
+                inputSx={datePickerSx}
               />
             </Grid>
 
@@ -191,14 +203,13 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
             )}
           </Grid>
 
-          {/* Dialog Action Buttons */}
           <FooterButton
             onCancel={handleCloseDialog}
             type="submit"
             loading={isSubmitting}
           />
         </Box>
-      </form>
+      </CustomForm>
     </CustomDialog>
   );
 }

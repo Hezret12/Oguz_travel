@@ -1,10 +1,12 @@
 import { useMemo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Grid } from "@mui/material";
 
 import { useLocale } from "../../hooks/useLocale";
 import { CustomDialog } from "../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../components/Dialog/CustomDialogHeader";
+import { CustomForm } from "../../components/Dialog/CustomForm";
 import FooterButton from "../../components/Dialog/FooterButton";
 import CustomTextField from "../../components/CustomTextField";
 import CustomSelect from "../../components/CustomSelect";
@@ -13,29 +15,45 @@ import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { updateTaskApi } from "../../api/queries/patch";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload, { TaskFileList } from "../../components/inputs/TaskFileUpload";
+import { useValidShema } from "../../functions/useValidShema";
+import {
+  TASK_STATUS_ITEMS,
+  TASK_PRIORITY_ITEMS,
+  DEFAULT_TASK_PRIORITY,
+  getTaskAssignees,
+  getTaskAssigneeGuids,
+  getTaskAttachments,
+} from "./functions/taskMeta";
+
+const datePickerSx = {
+  "& .MuiPickersOutlinedInput-root, & .MuiOutlinedInput-root, & .MuiInputBase-root": {
+    minHeight: "44px !important",
+    height: "44px !important",
+  },
+  "& .MuiPickersInputBase-sectionsContainer, & .MuiInputBase-input": {
+    paddingTop: "10px !important",
+    paddingBottom: "10px !important",
+  },
+};
 
 export default function EditTaskModal({ open, onClose, task }) {
   const { t } = useLocale();
+  const { editTask } = useValidShema();
 
   const updateMutation = useUpdate({
     apiFn: updateTaskApi,
     key: "tasks",
     idKey: "guid",
-    invalidateQueries: ["tasks", "tasks-board"],
+    invalidateQueries: ["tasks-board"],
     onSuccessUpdate: () => {
       handleCloseModal();
-    }
+    },
   });
 
   const initialUserOptions = useMemo(() => {
     if (!task) return [];
-    const raw = Array.isArray(task.assignees)
-      ? task.assignees
-      : Array.isArray(task.empltaskAssignee)
-      ? task.empltaskAssignee
-      : [];
 
-    return raw
+    return getTaskAssignees(task)
       .map((a) => {
         const usr = a?.user || a;
         const emp = usr?.employee || a?.employee;
@@ -46,7 +64,7 @@ export default function EditTaskModal({ open, onClose, task }) {
           usr?.username ||
           usr?.phone_number ||
           a?.name ||
-          "User";
+          "";
 
         return {
           value: userGuid,
@@ -59,12 +77,13 @@ export default function EditTaskModal({ open, onClose, task }) {
   }, [task]);
 
   const { control, handleSubmit, reset } = useForm({
+    resolver: yupResolver(editTask),
     defaultValues: {
       title: "",
       description: "",
       assignee_guid: [],
-      priority: "medium",
-      status: 1,
+      priority: DEFAULT_TASK_PRIORITY,
+      status: TASK_STATUS_ITEMS[0].id,
       dueDate: "",
     },
   });
@@ -75,12 +94,7 @@ export default function EditTaskModal({ open, onClose, task }) {
   const currentTaskKey = open && task ? task.guid : null;
   if (currentTaskKey !== prevTaskKey) {
     setPrevTaskKey(currentTaskKey);
-    const existingImages = Array.isArray(task?.images)
-      ? task.images
-      : Array.isArray(task?.attachments)
-      ? task.attachments
-      : [];
-    setAttachments(existingImages);
+    setAttachments(getTaskAttachments(task));
   }
 
   const handleCloseModal = () => {
@@ -91,42 +105,33 @@ export default function EditTaskModal({ open, onClose, task }) {
 
   useEffect(() => {
     if (task && open) {
-      const rawAssignees = Array.isArray(task.assignees)
-        ? task.assignees
-        : Array.isArray(task.empltaskAssignee)
-        ? task.empltaskAssignee
-        : [];
-
-      const currentAssignees = rawAssignees
-        .map((a) => a?.guid || a?.user?.guid || a?.assignee_guid || a)
-        .filter(Boolean);
-
       reset({
         title: task.title || "",
         description: task.description || "",
-        assignee_guid: currentAssignees,
-        priority: task.priority || "medium",
-        status: Number(task.status) || 1,
+        assignee_guid: getTaskAssigneeGuids(task),
+        priority: task.priority || DEFAULT_TASK_PRIORITY,
+        status: Number(task.status) || TASK_STATUS_ITEMS[0].id,
         dueDate: task.due_date || task.dueDate || "",
       });
     }
   }, [task, open, reset]);
 
   const priorityOptions = useMemo(
-    () => [
-      { value: "urgent", label: t("task.priorityUrgent") },
-      { value: "medium", label: t("task.priorityMedium") },
-    ],
-    [t]
+    () =>
+      TASK_PRIORITY_ITEMS.map((item) => ({
+        value: item.value,
+        label: t(item.labelKey),
+      })),
+    [t],
   );
 
   const statusOptions = useMemo(
-    () => [
-      { value: 1, label: t("task.statusToDo"), color: "#64748B" },
-      { value: 2, label: t("task.statusInProgress"), color: "#2563EB" },
-      { value: 3, label: t("task.statusCompleted"), color: "#16A34A" },
-    ],
-    [t]
+    () =>
+      TASK_STATUS_ITEMS.map((item) => ({
+        value: item.id,
+        label: t(item.labelKey),
+      })),
+    [t],
   );
 
   const onSubmit = (formData) => {
@@ -141,11 +146,12 @@ export default function EditTaskModal({ open, onClose, task }) {
       assignee_guids: selectedGuids,
       title: formData.title?.trim() || "",
       description: formData.description?.trim() || "",
-      priority: formData.priority || "medium",
-      status: Number(formData.status) || 1,
+      priority: formData.priority || DEFAULT_TASK_PRIORITY,
+      status: Number(formData.status) || TASK_STATUS_ITEMS[0].id,
+      // Clearing the field clears the deadline — it must not fall back to today.
       due_date: formData.dueDate
         ? new Date(formData.dueDate).toISOString()
-        : new Date().toISOString(),
+        : null,
       images: attachments,
     };
 
@@ -157,13 +163,12 @@ export default function EditTaskModal({ open, onClose, task }) {
   return (
     <CustomDialog open={open} close={handleCloseModal} widthX={650}>
       <CustomDialogHeader
-        title={t("task.editTask", "Edit Task")}
+        title={t("task.editTask")}
         onClose={handleCloseModal}
       />
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.8, pt: 0.5 }}>
-      
           <CustomTextField
             name="title"
             control={control}
@@ -189,6 +194,7 @@ export default function EditTaskModal({ open, onClose, task }) {
                 label={t("task.assignEmployee")}
                 initialOptions={initialUserOptions}
                 multiple
+                required
                 disabled={isSubmitting}
               />
             </Grid>
@@ -219,16 +225,7 @@ export default function EditTaskModal({ open, onClose, task }) {
                 control={control}
                 label={t("task.dueDate")}
                 disabled={isSubmitting}
-                inputSx={{
-                  "& .MuiPickersOutlinedInput-root, & .MuiOutlinedInput-root, & .MuiInputBase-root": {
-                    minHeight: "44px !important",
-                    height: "44px !important",
-                  },
-                  "& .MuiPickersInputBase-sectionsContainer, & .MuiInputBase-input": {
-                    paddingTop: "10px !important",
-                    paddingBottom: "10px !important",
-                  },
-                }}
+                inputSx={datePickerSx}
               />
             </Grid>
 
@@ -260,7 +257,7 @@ export default function EditTaskModal({ open, onClose, task }) {
             loading={isSubmitting}
           />
         </Box>
-      </form>
+      </CustomForm>
     </CustomDialog>
   );
 }

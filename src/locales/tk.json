@@ -652,7 +652,13 @@
     "overdue": "Möhleti geçen",
     "noTasksFound": "Ýumuş tapylmady",
     "noTasksDesc": "Häzirki wagtda hiç hili ýumuş ýok.",
-    "changeStatus": "Ýagdaýy üýtgetmek"
+    "changeStatus": "Ýagdaýy üýtgetmek",
+    "noTasksInColumn": "Bu sütünde ýumuş ýok",
+    "dropHere": "Şu ýere goýberiň",
+    "addFirstTask": "Ilkinji ýumşy goş",
+    "validation": {
+      "dueDateInPast": "Iş möhleti geçen sene bolup bilmez"
+    }
   },
   "notifications": {
     "title": "Bildirişler",

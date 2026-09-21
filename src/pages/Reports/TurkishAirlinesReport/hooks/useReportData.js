@@ -21,6 +21,20 @@ const OFFICE_COLORS = [
   "#FB923C", "#34D399", "#60A5FA", "#E879F9", "#F87171",
 ];
 
+// Language-independent office identifier, so columns/rows/footer stay aligned when the UI language changes.
+const getOfficeKey = (obj) => {
+  if (!obj) return "";
+  if (typeof obj === "string") return obj;
+  return obj.tk || obj.ru || obj.en || "";
+};
+
+const getRecordOfficeKey = (f) =>
+  getOfficeKey(f.shortname) ||
+  getOfficeKey(f.shortName) ||
+  getOfficeKey(f.office) ||
+  getOfficeKey(f.full_name) ||
+  getOfficeKey(f.fullName);
+
 const selectReport = (res) => {
   const payload = res?.data ?? res ?? {};
   return {
@@ -101,6 +115,7 @@ const useReportData = (selectedDate) => {
     const seen = new Set();
 
     const addOffice = (f) => {
+      const key = getRecordOfficeKey(f);
       const short =
         getOfficeLabel(f.shortname) ||
         getOfficeLabel(f.shortName) ||
@@ -109,9 +124,10 @@ const useReportData = (selectedDate) => {
         getOfficeLabel(f.full_name) ||
         getOfficeLabel(f.fullName) ||
         short;
-      if (short && short !== "string" && !seen.has(short)) {
-        seen.add(short);
+      if (key && key !== "string" && short && short !== "string" && !seen.has(key)) {
+        seen.add(key);
         list.push({
+          key,
           short,
           full,
           rawShort: f.shortname || f.shortName,

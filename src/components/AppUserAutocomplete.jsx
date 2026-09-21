@@ -199,10 +199,9 @@ export default function AppUserAutocomplete({
           }}
           {...(multiple
             ? {
-                renderTags: (selectedOptions, getTagProps) => {
+                renderValue: (selectedOptions, getItemProps) => {
                   return selectedOptions.map((opt, idx) => {
-                    const { key: tagKey, ...tagProps } = getTagProps({ index: idx });
-                    delete tagProps.renderTags;
+                    const { key: tagKey, ...tagProps } = getItemProps({ index: idx });
                     delete tagProps.ownerState;
 
                     return (
@@ -228,7 +227,6 @@ export default function AppUserAutocomplete({
             : {})}
           renderOption={(optionProps, option, { selected, index }) => {
             const { key, ...cleanOptionProps } = optionProps;
-            delete cleanOptionProps.renderTags;
             delete cleanOptionProps.ownerState;
             const optionKey =
               key ||
@@ -260,7 +258,6 @@ export default function AppUserAutocomplete({
           }}
           renderInput={(params) => {
             const { InputProps, slotProps: paramsSlotProps, ...otherParams } = params;
-            delete otherParams.renderTags;
             delete otherParams.ownerState;
 
             return (

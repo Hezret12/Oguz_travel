@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
 import AppUserAutocomplete from "../../../components/AppUserAutocomplete";
+import { TASK_STATUS_ITEMS, TASK_PRIORITY_ITEMS } from "../functions/taskMeta";
 
 const selectSx = {
   borderRadius: "8px",
@@ -20,10 +21,7 @@ const menuPaperProps = {
     sx: {
       borderRadius: "12px",
       marginTop: "4px",
-      boxShadow: (theme) =>
-        theme.palette.mode === "dark"
-          ? "0 8px 24px rgba(0,0,0,0.5)"
-          : "0 4px 20px rgba(0,0,0,0.08)",
+      boxShadow: 3,
     },
   },
 };
@@ -34,7 +32,7 @@ const FilterSelect = ({
   value,
   options = [],
   isOpen,
-  allText = "Hemmesi",
+  allText,
   onChange,
   onOpen,
   onClose,
@@ -145,19 +143,12 @@ function TaskFilter({
   const handleSelectOpen = onSelectOpen || openSelect;
   const handleSelectClose = onSelectClose || closeSelect;
   const statusOptions = useMemo(
-    () => [
-      { label: t("task.statusToDo", "TO DO"), value: 1 },
-      { label: t("task.statusInProgress", "IN PROGRESS"), value: 2 },
-      { label: t("task.statusCompleted", "COMPLETED"), value: 3 },
-    ],
+    () => TASK_STATUS_ITEMS.map((item) => ({ label: t(item.labelKey), value: item.id })),
     [t]
   );
 
   const priorityOptions = useMemo(
-    () => [
-      { label: t("task.priorityUrgent", "Gyssagly"), value: "urgent" },
-      { label: t("task.priorityMedium", "Medium"), value: "medium" },
-    ],
+    () => TASK_PRIORITY_ITEMS.map((item) => ({ label: t(item.labelKey), value: item.value })),
     [t]
   );
 
@@ -169,7 +160,7 @@ function TaskFilter({
         value={currentFilters.status}
         options={statusOptions}
         isOpen={Boolean(selectsOpen.status)}
-        allText={t("all", "Hemmesi")}
+        allText={t("all")}
         onChange={handleFilterChange}
         onOpen={handleSelectOpen}
         onClose={handleSelectClose}
@@ -180,7 +171,7 @@ function TaskFilter({
         value={currentFilters.priority}
         options={priorityOptions}
         isOpen={Boolean(selectsOpen.priority)}
-        allText={t("all", "Hemmesi")}
+        allText={t("all")}
         onChange={handleFilterChange}
         onOpen={handleSelectOpen}
         onClose={handleSelectClose}

@@ -64,7 +64,7 @@ const TaskFilterDrawer = () => {
 
 export default function TaskFlow() {
   const { t } = useLocale();
-  useDocumentTitle(t("sidebar.taskFlow") || "Task Flow");
+  useDocumentTitle(t("sidebar.taskFlow"));
 
   const [viewMode, setViewMode] = useState("board");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,19 +77,23 @@ export default function TaskFlow() {
     searchQuery,
     setSearch,
     page,
-    limit,
     setPage,
-    setPageSize,
+    sortBy,
+    sortOrder,
+    setSort,
     queryParams,
   } = useTableFilters({
     actions: taskFilterActions,
     selectors: taskFilterSelectors,
   });
 
-  const handleViewModeChange = useCallback((mode) => {
-    setViewMode(mode);
-    setPage(1);
-  }, [setPage]);
+  const handleViewModeChange = useCallback(
+    (mode) => {
+      setViewMode(mode);
+      setPage(1);
+    },
+    [setPage],
+  );
 
   const handleOpenCreateModal = useCallback(() => {
     setIsModalOpen(true);
@@ -104,21 +108,20 @@ export default function TaskFlow() {
     setEditingTask(null);
   }, []);
 
-  // Build params for API filtering matching Swagger MessagesController_getAll
-  const finalQueryParams = useMemo(() => {
-    const params = {
-      ...queryParams,
-      type: viewMode === "board" ? false : true,
-    };
+  // The list view asks for a flat, paginated result set; the board view issues
+  // its own per-column queries, so this one stays disabled there.
+  const listQueryParams = useMemo(() => {
+    const params = { ...queryParams, type: true };
     if (params.status && params.status !== "all") {
       params.status = Number(params.status) || params.status;
     }
     return params;
-  }, [queryParams, viewMode]);
+  }, [queryParams]);
 
   const {
-    data: apiTasksResponse,
+    data: tasksList,
     totalItems,
+    pageCount,
     refetch,
     isLoading,
     isFetching,
@@ -126,7 +129,7 @@ export default function TaskFlow() {
   } = usePagginationGet({
     apiFn: getAllTasksApi,
     key: "tasks",
-    params: finalQueryParams,
+    params: listQueryParams,
     options: {
       enabled: viewMode === "list",
     },
@@ -136,71 +139,17 @@ export default function TaskFlow() {
     apiFn: updateTaskApi,
     key: "tasks",
     idKey: "guid",
-    invalidateQueries: ["tasks", "tasks-board"],
+    invalidateQueries: ["tasks-board"],
+    showSuccessMessage: false,
   });
 
   const deleteTaskMutation = useDelete({
     deleteFn: deleteTaskApi,
     queryKey: "tasks",
     idKey: "guid",
-    invalidateQueries: ["tasks", "tasks-board"],
+    invalidateQueries: ["tasks-board"],
+    isPaginated: true,
   });
-
-  const columns = useMemo(
-    () => [
-      {
-        id: 1,
-        title: t("task.statusToDo"),
-        color: "#64748B",
-        bgLight: "#F8FAFC",
-        borderLight: "#E2E8F0",
-      },
-      {
-        id: 2,
-        title: t("task.statusInProgress"),
-        color: "#2563EB",
-        bgLight: "#EFF6FF",
-        borderLight: "#BFDBFE",
-      },
-      {
-        id: 3,
-        title: t("task.statusCompleted"),
-        color: "#16A34A",
-        bgLight: "#F0FDF4",
-        borderLight: "#BBF7D0",
-      },
-    ],
-    [t],
-  );
-
-  const tasksList = useMemo(() => {
-    let rawData = apiTasksResponse;
-
-    if (!Array.isArray(rawData)) {
-      if (Array.isArray(rawData?.data)) {
-        rawData = rawData.data;
-      } else if (Array.isArray(rawData?.data?.data)) {
-        rawData = rawData.data.data;
-      } else {
-        return [];
-      }
-    }
-
-    if (!Array.isArray(rawData) || rawData.length === 0) return [];
-
-    if (Array.isArray(rawData[0])) {
-      return rawData.flatMap((statusGroup, index) => {
-        if (!Array.isArray(statusGroup)) return [];
-        const expectedStatus = index + 1;
-        return statusGroup.map((task) => ({
-          ...task,
-          status: task.status ?? expectedStatus,
-        }));
-      });
-    }
-
-    return rawData;
-  }, [apiTasksResponse]);
 
   const handleCreateTask = useCallback(() => {
     refetch();
@@ -212,15 +161,11 @@ export default function TaskFlow() {
   }, []);
 
   const handleMoveTaskStatus = useCallback(
-    async (taskId, newStatus) => {
-      try {
-        await updateTaskMutation.mutateAsync({
-          guid: taskId,
-          status: Number(newStatus) || newStatus,
-        });
-      } catch (err) {
-        console.log(err);
-      }
+    (taskId, newStatus) => {
+      updateTaskMutation.mutate({
+        guid: taskId,
+        status: Number(newStatus) || newStatus,
+      });
     },
     [updateTaskMutation],
   );
@@ -252,11 +197,13 @@ export default function TaskFlow() {
 
   const isCurrentFetching = viewMode === "board" ? isBoardFetching : isFetching;
 
-  const hasActiveFilters = useMemo(() => {
-    return Boolean(
-      applied.status || applied.priority || applied.due_date || applied.opr_guid
-    );
-  }, [applied]);
+  const hasActiveFilters = useMemo(
+    () =>
+      Boolean(
+        applied.status || applied.priority || applied.due_date || applied.opr_guid,
+      ),
+    [applied],
+  );
 
   return (
     <Box
@@ -295,7 +242,6 @@ export default function TaskFlow() {
       >
         {viewMode === "board" ? (
           <TaskBoardView
-            columns={columns}
             searchQuery={queryParams.search || ""}
             filterStatus={applied.status}
             filterPriority={applied.priority}
@@ -312,6 +258,9 @@ export default function TaskFlow() {
             isLoading={isLoading}
             isFetching={isFetching}
             isError={isError}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSortChange={setSort}
             onMoveTaskStatus={handleMoveTaskStatus}
             onEditTask={handleEditTask}
             onDeleteTask={handleDeleteTask}
@@ -319,8 +268,7 @@ export default function TaskFlow() {
         )}
       </Box>
 
-      {/* Shared App Pagination for Table View */}
-      {viewMode === "list" && totalItems > 0 && (
+      {viewMode === "list" && (
         <Box
           sx={{
             pt: 1.5,
@@ -331,30 +279,26 @@ export default function TaskFlow() {
           }}
         >
           <Pagination
-            totalItems={totalItems}
-            page={page}
-            limit={limit}
-            setPage={setPage}
-            setPageSize={setPageSize}
+            pageIndex={page - 1}
+            pageCount={pageCount}
+            totalRows={totalItems}
+            onPageChange={(newIndex) => setPage(newIndex + 1)}
           />
         </Box>
       )}
 
-      {/* Create Task Modal */}
       <CreateTaskModal
         open={isModalOpen}
         onClose={handleCloseCreateModal}
         onCreateTask={handleCreateTask}
       />
 
-      {/* Edit Task Modal */}
       <EditTaskModal
         open={isEditModalOpen}
         onClose={handleCloseEditModal}
         task={editingTask}
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeleteDialog
         open={deleteDialog.isOpen}
         isLoading={deleteTaskMutation.isPending}

@@ -402,7 +402,7 @@ export const CountryFieldSelector = ({ control, name = "fields" }) => {
               value={value}
               onChange={handleChange}
               /* Hide tags completely — selected items shown in list below */
-              renderTags={() => null}
+              renderValue={() => null}
               renderOption={(props, option, { selected }) => {
                 const { key: optionKey, ...otherProps } = props;
                 delete otherProps.renderTags;

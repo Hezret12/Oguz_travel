@@ -652,7 +652,13 @@
     "overdue": "Overdue",
     "noTasksFound": "No tasks found",
     "noTasksDesc": "There are no tasks at the moment.",
-    "changeStatus": "Change status"
+    "changeStatus": "Change status",
+    "noTasksInColumn": "No tasks in this column",
+    "dropHere": "Drop here",
+    "addFirstTask": "Add the first task",
+    "validation": {
+      "dueDateInPast": "The due date cannot be in the past"
+    }
   },
   "notifications": {
     "title": "Notifications",

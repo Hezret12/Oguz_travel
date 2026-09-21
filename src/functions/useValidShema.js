@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import * as yup from "yup";
+import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { useValidShemaConst } from "./useValidShemaConst";
 
@@ -266,6 +267,41 @@ export const useValidShema = () => {
       }),
   });
 
+  // Shared by the create and edit task forms. `dueDate` differs between them:
+  // a new task may not be created already overdue, but an existing overdue task
+  // still has to be editable (that is how it gets moved to "completed").
+  const taskBaseFields = {
+    title: stringRequiredValidSchema(t("validation.required")),
+    description: stringOptionalValidSchema(),
+    assignee_guid: yup
+      .mixed()
+      .test("task-assignee-required", t("validation.required"), (val) =>
+        Array.isArray(val) ? val.length > 0 : Boolean(val),
+      ),
+    priority: stringRequiredValidSchema(t("validation.required")),
+    status: yup
+      .number()
+      .typeError(t("validation.required"))
+      .required(t("validation.required")),
+  };
+
+  const addTask = yup.object({
+    ...taskBaseFields,
+    dueDate: yup
+      .mixed()
+      .nullable()
+      .test("task-due-not-past", t("task.validation.dueDateInPast"), (val) => {
+        if (!val) return true;
+        const parsed = dayjs(val);
+        return !parsed.isValid() || !parsed.isBefore(dayjs(), "day");
+      }),
+  });
+
+  const editTask = yup.object({
+    ...taskBaseFields,
+    dueDate: yup.mixed().nullable(),
+  });
+
   const addCafeteriaTransaction = yup.object({
     type: yup
       .boolean()
@@ -465,6 +501,8 @@ export const useValidShema = () => {
     editCategory,
     cashTransaction,
     editTranslator,
+    addTask,
+    editTask,
   };
   }, [
     t,
