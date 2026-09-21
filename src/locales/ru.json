@@ -451,6 +451,8 @@
     "letterNo": "№ ИХ",
     "letterNoInvalid": "Введите корректный № ИХ",
     "letterNoOutOfRange": "№ ИХ должен быть в диапазоне {{start}} - {{end}}",
+    "outsideStock": "Запись выходит за пределы партии {{start}} - {{end}}; в партии учитывается только {{count}} шт.",
+    "stockMustContainUsed": "В партии уже используются № {{start}} - {{end}}; диапазон должен их включать.",
     "letterNoUsed": "Этот № ИХ уже использован",
     "singleMode": "Одно письмо",
     "rangeMode": "Несколько писем (диапазон)",

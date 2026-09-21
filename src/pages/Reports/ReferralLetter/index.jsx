@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import { Box, Paper, useTheme, Typography } from "@mui/material";
+import { Alert, Box, Button, Paper, useTheme, Typography } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Package } from "lucide-react";
+import { Package, RotateCw } from "lucide-react";
 import AddButton from "../../../components/AddButton";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
@@ -52,6 +52,7 @@ const ReferralLetterPage = () => {
     pageCount: stockPageCount = 1,
     isLoading: isStockLoading,
     isFetching: isStockFetching,
+    isError: isStockError,
     refetch: refetchStock,
     responseBody: stockResponseBody,
   } = usePagginationGet({
@@ -168,6 +169,31 @@ const ReferralLetterPage = () => {
     enableColumnPinning: false,
     enableExpanding: true,
     renderDetailPanel: ({ row }) => <StockSharesPanel stock={row.original} />,
+    // The detail row gets the body row props too; keep it free of the row hover tint and let
+    // StockSharesPanel set its own spacing instead of MRT's 1rem cell padding.
+    // An expanded stock row is tinted so it reads as the header of the panel below it.
+    muiTableBodyRowProps: (props) => {
+      if (props.isDetailPanel) {
+        return {
+          sx: {
+            backgroundColor: "background.paper",
+            "&:hover": { backgroundColor: "transparent !important" },
+          },
+        };
+      }
+      const base = defaultMrtOptions.muiTableBodyRowProps(props);
+      if (!props.row.getIsExpanded()) return base;
+      return {
+        ...base,
+        sx: (tTheme) => ({
+          ...base.sx(tTheme),
+          "& > td": { backgroundColor: tTheme.palette.action.selected },
+        }),
+      };
+    },
+    muiDetailPanelProps: {
+      sx: { px: 0, py: 0, backgroundColor: "background.paper" },
+    },
     muiTablePaperProps: {
       sx: (tTheme) => ({
         display: "flex",
@@ -189,8 +215,11 @@ const ReferralLetterPage = () => {
         pageSize: limit,
       },
     },
+    // Only the first load uses `isLoading`: MRT drops every detail panel while it is set,
+    // which would collapse the expanded stocks on each search/refetch.
     state: {
-      isLoading: isStockLoading || isStockFetching,
+      isLoading: isStockLoading,
+      showProgressBars: isStockFetching && !isStockLoading,
       pagination: {
         pageIndex: page - 1,
         pageSize: limit,
@@ -199,6 +228,29 @@ const ReferralLetterPage = () => {
     manualPagination: true,
     pageCount: stockPageCount,
     rowCount: stockTotal,
+    renderEmptyRowsFallback: () =>
+      isStockError ? (
+        <Box sx={{ p: 2 }}>
+          <Alert
+            severity="error"
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                onClick={() => refetchStock()}
+                disabled={isStockFetching}
+                startIcon={<RotateCw size={14} />}
+              >
+                {t("errorBoundary.retry")}
+              </Button>
+            }
+          >
+            {t("errorOccurred")}
+          </Alert>
+        </Box>
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     renderTopToolbarCustomActions: () => (
       <Box
         sx={{

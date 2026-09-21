@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Box, Typography, IconButton, Tooltip, Chip } from "@mui/material";
-import { PenLine, Trash2 } from "lucide-react";
+import { Alert, Box, Button, Typography, IconButton, Tooltip, Chip } from "@mui/material";
+import { PenLine, RotateCw, Trash2, TriangleAlert } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
@@ -16,15 +16,19 @@ import AddButton from "../../../components/AddButton";
 import StatusChip from "../../../components/StatusChip";
 import DeleteDialog from "../../../components/DeleteDialog";
 import { REFERRAL_REPORT_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
-import { getAllEmployeeApi, getLettersByDocumentRangeApi } from "../../../api/queries/getters";
+import { getLettersByDocumentRangeApi } from "../../../api/queries/getters";
 import { deleteOtherLetterApi } from "../../../api/queries/delete";
 import AddReferralReportModal from "./AddReferralReportModal";
 import EditReferralReportModal from "./EditReferralReportModal";
 import {
   STOCK_LETTERS_KEY,
   findFirstFreeRange,
+  getCountInStock,
   getLetterCount,
   getLetterRange,
+  getStockLettersParams,
+  getStockRange,
+  isOutsideStock,
   resolveLetterStatus,
 } from "./functions/stockLetters";
 
@@ -37,47 +41,42 @@ const StockSharesPanel = ({ stock }) => {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingLetter, setEditingLetter] = useState(null);
 
-  const stockStart = Number(stock?.start_yh_number);
-  const stockEnd = Number(stock?.end_yh_number);
-  const hasRange = Number.isFinite(stockStart) && Number.isFinite(stockEnd);
+  const stockRange = useMemo(() => getStockRange(stock), [stock]);
+  const hasRange = Boolean(stockRange);
   const totalCount = Number(stock?.total_letter || 0);
+  const params = useMemo(() => getStockLettersParams(stock) ?? {}, [stock]);
 
-  // Every row covers at least one number, so the batch size bounds the row count.
-  const params = useMemo(
-    () => ({
-      start_number: stockStart,
-      end_number: stockEnd,
-      page: 1,
-      limit: Math.max(10, totalCount || stockEnd - stockStart + 1),
-    }),
-    [stockStart, stockEnd, totalCount],
-  );
-
-  const { data: letters = [], isLoading, isError } = useGet({
+  const {
+    data: letters = [],
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useGet({
     apiFn: getLettersByDocumentRangeApi,
     key: STOCK_LETTERS_KEY,
     params,
-    options: { enabled: hasRange },
+    // Re-expanding a batch reuses the cached list; mutations invalidate it anyway.
+    options: { enabled: hasRange, staleTime: 30_000 },
   });
-
-  const { data: employees = [] } = useGet({ apiFn: getAllEmployeeApi, key: "employees" });
-  const employeeNames = useMemo(
-    () => new Map((Array.isArray(employees) ? employees : []).map((e) => [e.guid, e.fullName])),
-    [employees],
-  );
+  // Counts and the suggested free range are derived from `letters`; until they are loaded
+  // an empty list would make the whole batch look free.
+  const isLettersReady = hasRange && !isLoading && !isError;
 
   const rows = useMemo(
     () =>
       (Array.isArray(letters) ? letters : [])
         .map((letter) => ({ letter, guid: letter.guid, ...getLetterRange(letter) }))
-        .filter((row) => Number.isFinite(row.start))
+        .filter((row) => Number.isFinite(row.start) && Number.isFinite(row.end))
         .sort((a, b) => a.start - b.start || a.end - b.end),
     [letters],
   );
 
+  // Only numbers inside the batch count: a letter overhanging it (e.g. 202-300 in a 201-210
+  // batch, after the batch was shrunk) must not push "used" past the batch size.
   const usedCount = useMemo(
-    () => rows.reduce((sum, row) => sum + getLetterCount(row.letter), 0),
-    [rows],
+    () => rows.reduce((sum, row) => sum + getCountInStock(row, stockRange), 0),
+    [rows, stockRange],
   );
   const remainingCount = Math.max(0, totalCount - usedCount);
 
@@ -120,7 +119,28 @@ const StockSharesPanel = ({ stock }) => {
         size: 100,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => getLetterCount(row.original.letter),
+        Cell: ({ row }) => {
+          const count = getLetterCount(row.original.letter);
+          if (!isOutsideStock(row.original, stockRange)) return count;
+          return (
+            <Tooltip
+              arrow
+              title={t("referralLetter.outsideStock", {
+                count: getCountInStock(row.original, stockRange),
+                start: stockRange.start,
+                end: stockRange.end,
+              })}
+            >
+              <Box
+                component="span"
+                sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, color: "warning.main" }}
+              >
+                {count}
+                <TriangleAlert size={14} />
+              </Box>
+            </Tooltip>
+          );
+        },
       },
       {
         id: "status",
@@ -158,7 +178,7 @@ const StockSharesPanel = ({ stock }) => {
         id: "submittedBy",
         header: t("referralLetter.submittedBy"),
         size: 170,
-        Cell: ({ row }) => employeeNames.get(row.original.letter.received_opr_guid) || "—",
+        Cell: ({ row }) => row.original.letter.refferaloperator?.fullName || "—",
       },
       {
         id: "receivedBy",
@@ -209,7 +229,7 @@ const StockSharesPanel = ({ stock }) => {
         },
       },
     ],
-    [t, formatChange, employeeNames, deleteDialog],
+    [t, formatChange, stockRange, deleteDialog],
   );
 
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
@@ -225,9 +245,11 @@ const StockSharesPanel = ({ stock }) => {
     enableSorting: false,
     enableCreatingRow: false,
     enableClickToRowSelect: false,
+    // No `isLoading`: MRT would draw a page-size worth of skeleton rows, so the panel would open
+    // tall and then shrink to the real row count. A progress bar plus a short placeholder
+    // keeps the height stable.
     state: {
-      isLoading,
-      showAlertBanner: isError,
+      showProgressBars: isFetching,
     },
     // Nested inside the stock row: sized by its rows (scrolling past ~8) instead of the
     // page tables' fixed viewport height.
@@ -243,16 +265,28 @@ const StockSharesPanel = ({ stock }) => {
         maxHeight: 360,
       }),
     },
-    renderEmptyRowsFallback: () => (
-      <TableEmptyState
-        title={t("referralLetter.noReports")}
-        sx={{ minHeight: 0, py: 3 }}
-      />
-    ),
+    renderEmptyRowsFallback: () =>
+      isLoading ? (
+        <Box sx={{ height: 48 }} />
+      ) : (
+        <TableEmptyState
+          title={t("referralLetter.noReports")}
+          sx={{ minHeight: 0, py: 3 }}
+        />
+      ),
   });
 
   return (
-    <Box sx={{ p: 2, backgroundColor: "action.hover" }}>
+    // Set apart from the parent rows: tinted background and an accent bar on the left.
+    <Box
+      sx={{
+        px: 2,
+        py: 1.5,
+        backgroundColor: "action.hover",
+        borderLeft: "3px solid",
+        borderLeftColor: "primary.main",
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -264,29 +298,50 @@ const StockSharesPanel = ({ stock }) => {
         }}
       >
         <Typography variant="body2" sx={{ fontWeight: 700 }}>
-          {t("referralLetter.usedCount")}: {usedCount} / {totalCount}
+          {t("referralLetter.usedCount")}: {isLettersReady ? usedCount : "—"} / {totalCount}
           {"  "}
-          <Typography
-            component="span"
-            variant="body2"
-            sx={{
-              color: remainingCount > 0 ? "success.main" : "text.secondary",
-              fontWeight: 700,
-            }}
-          >
-            ({t("referralLetter.remainingCount")}: {remainingCount})
-          </Typography>
+          {isLettersReady && (
+            <Typography
+              component="span"
+              variant="body2"
+              sx={{
+                color: remainingCount > 0 ? "success.main" : "text.secondary",
+                fontWeight: 700,
+              }}
+            >
+              ({t("referralLetter.remainingCount")}: {remainingCount})
+            </Typography>
+          )}
         </Typography>
         <AddButton
           size="small"
           onClick={() => setIsAddOpen(true)}
-          disabled={remainingCount === 0 || !suggestedRange}
+          disabled={!isLettersReady || remainingCount === 0 || !suggestedRange}
         >
           {t("referralLetter.addReport")}
         </AddButton>
       </Box>
 
-      <MaterialReactTable table={table} />
+      {isError ? (
+        <Alert
+          severity="error"
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              startIcon={<RotateCw size={14} />}
+            >
+              {t("errorBoundary.retry")}
+            </Button>
+          }
+        >
+          {t("errorOccurred")}
+        </Alert>
+      ) : (
+        <MaterialReactTable table={table} />
+      )}
 
       {isAddOpen && (
         <AddReferralReportModal

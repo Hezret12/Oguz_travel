@@ -451,6 +451,8 @@
     "letterNo": "YH No.",
     "letterNoInvalid": "Enter a valid YH No.",
     "letterNoOutOfRange": "YH No. must be between {{start}} and {{end}}",
+    "outsideStock": "This entry goes beyond the batch {{start}} - {{end}}; only {{count}} count toward this batch.",
+    "stockMustContainUsed": "Numbers {{start}} - {{end}} are already used in this batch; the range must include them.",
     "letterNoUsed": "This YH No. is already used",
     "singleMode": "Single letter",
     "rangeMode": "Multiple letters (range)",

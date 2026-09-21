@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react";
-import { Box, Grid, Typography } from "@mui/material";
+import { Alert, Box, Grid, Typography } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import CustomTextField from "../../../components/CustomTextField";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
@@ -9,6 +9,14 @@ import { FooterButton } from "../../../components/Dialog/FooterButton";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { useLocale } from "../../../hooks/useLocale";
 import { updateReportApi } from "../../../api/queries/patch";
+import { useGet } from "../../../hooks/CRUD/useGet";
+import { getLettersByDocumentRangeApi } from "../../../api/queries/getters";
+import {
+  STOCK_LETTERS_KEY,
+  getLetterRange,
+  getStockLettersParams,
+  getStockRange,
+} from "./functions/stockLetters";
 
 const EditLetterStockModal = ({ table, row }) => {
   const { t } = useLocale();
@@ -33,6 +41,56 @@ const EditLetterStockModal = ({ table, row }) => {
       });
     }
   }, [row, reset]);
+
+  // Letters already recorded in this batch (same cache entry as its expanded panel). The new
+  // range must still contain them, or they would be left outside every batch.
+  const lettersParams = useMemo(() => getStockLettersParams(row?.original), [row]);
+  const {
+    data: letters = [],
+    isLoading: isLettersLoading,
+    isError: isLettersError,
+  } = useGet({
+    apiFn: getLettersByDocumentRangeApi,
+    key: STOCK_LETTERS_KEY,
+    params: lettersParams ?? {},
+    options: { enabled: isModalOpen && Boolean(lettersParams), staleTime: 30_000 },
+  });
+
+  const usedBounds = useMemo(() => {
+    const stockRange = getStockRange(row?.original);
+    if (!stockRange || !Array.isArray(letters)) return null;
+    let min = Infinity;
+    let max = -Infinity;
+    for (const letter of letters) {
+      const { start, end } = getLetterRange(letter);
+      const from = Math.max(start, stockRange.start);
+      const to = Math.min(end, stockRange.end);
+      if (!Number.isFinite(from) || !Number.isFinite(to) || to < from) continue;
+      min = Math.min(min, from);
+      max = Math.max(max, to);
+    }
+    return Number.isFinite(min) ? { start: min, end: max } : null;
+  }, [letters, row]);
+
+  const validateStartNo = (value) => {
+    const start = parseInt(value, 10);
+    if (Number.isNaN(start) || start <= 0) return t("referralLetter.letterNoInvalid");
+    if (usedBounds && start > usedBounds.start) {
+      return t("referralLetter.stockMustContainUsed", usedBounds);
+    }
+    return true;
+  };
+
+  const validateEndNo = (value, formValues) => {
+    const end = parseInt(value, 10);
+    if (Number.isNaN(end) || end <= 0) return t("referralLetter.letterNoInvalid");
+    const start = parseInt(formValues.startNo, 10);
+    if (!Number.isNaN(start) && end < start) return t("referralLetter.rangeInvalid");
+    if (usedBounds && end < usedBounds.end) {
+      return t("referralLetter.stockMustContainUsed", usedBounds);
+    }
+    return true;
+  };
 
   const [watchStartNo, watchEndNo] = useWatch({
     control,
@@ -96,6 +154,11 @@ const EditLetterStockModal = ({ table, row }) => {
                 label={t("referralLetter.startNo")}
                 placeholder="0000001"
                 required
+                rules={{
+                  required: t("validation.required"),
+                  validate: validateStartNo,
+                  deps: ["endNo"],
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -105,6 +168,10 @@ const EditLetterStockModal = ({ table, row }) => {
                 label={t("referralLetter.endNo")}
                 placeholder="0090000"
                 required
+                rules={{
+                  required: t("validation.required"),
+                  validate: validateEndNo,
+                }}
               />
             </Grid>
           </Grid>
@@ -146,7 +213,18 @@ const EditLetterStockModal = ({ table, row }) => {
           </Box>
         </Box>
 
-        <FooterButton loading={isPending} onCancel={handleClose} />
+        {isLettersError && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {t("errorOccurred")}
+          </Alert>
+        )}
+
+        {/* Saving waits for the batch's letters, so the new range can be checked against them. */}
+        <FooterButton
+          loading={isPending}
+          onCancel={handleClose}
+          disabled={isLettersLoading || isLettersError}
+        />
       </CustomForm>
     </CustomDialog>
   );

@@ -451,6 +451,8 @@
     "letterNo": "ÝH №",
     "letterNoInvalid": "Dogry ÝH № giriziň",
     "letterNoOutOfRange": "ÝH № {{start}} - {{end}} aralygynda bolmaly",
+    "outsideStock": "Bu ýazgy {{start}} - {{end}} partiýasynyň çäginden çykýar; partiýa diňe {{count}} sany hasaplanýar.",
+    "stockMustContainUsed": "Partiýada ulanylan ÝH № {{start}} - {{end}} bar; aralyk olary öz içine almaly.",
     "letterNoUsed": "Bu ÝH № eýýäm ulanyldy",
     "singleMode": "Ýeke hat",
     "rangeMode": "Köp hat (aralyk)",

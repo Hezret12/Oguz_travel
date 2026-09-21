@@ -26,7 +26,53 @@ export const getLetterStatusOptions = (t) => [
 // Records saved by the removed report-share API used 1/2/3.
 const LEGACY_STATUS = { 1: LETTER_STATUS.SOLD, 2: LETTER_STATUS.DAMAGED, 3: LETTER_STATUS.LOST };
 
-export const resolveLetterStatus = (value) => LEGACY_STATUS[value] ?? value ?? LETTER_STATUS.SOLD;
+// Accent-insensitive key, so values typed without Turkmen letters ("Zyyan yeten") still match.
+const foldStatus = (value) =>
+  String(value)
+    .toUpperCase()
+    .replace(/Ý/g, "Y")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const STATUS_BY_FOLDED = new Map(Object.values(LETTER_STATUS).map((s) => [foldStatus(s), s]));
+
+export const resolveLetterStatus = (value) => {
+  if (value == null || value === "") return LETTER_STATUS.SOLD;
+  if (LEGACY_STATUS[value]) return LEGACY_STATUS[value];
+  return STATUS_BY_FOLDED.get(foldStatus(value)) ?? value;
+};
+
+/** The batch's ÝH number bounds, or null when either end is not a number. */
+export const getStockRange = (stock) => {
+  const start = Number(stock?.start_yh_number);
+  const end = Number(stock?.end_yh_number);
+  return Number.isFinite(start) && Number.isFinite(end) ? { start, end } : null;
+};
+
+/**
+ * Query params for a batch's letters. Shared by the panel and the stock edit modal so both
+ * read the same cache entry. Every row covers at least one number, so the batch size bounds
+ * the row count.
+ */
+export const getStockLettersParams = (stock) => {
+  const range = getStockRange(stock);
+  if (!range) return null;
+  const size = Number(stock?.total_letter) || range.end - range.start + 1;
+  return { start_number: range.start, end_number: range.end, page: 1, limit: Math.max(10, size) };
+};
+
+/** Numbers of `row` ({ start, end }) that fall inside the batch; letters may overhang it. */
+export const getCountInStock = (row, stockRange) => {
+  if (!stockRange) return 0;
+  const from = Math.max(row.start, stockRange.start);
+  const to = Math.min(row.end, stockRange.end);
+  return to >= from ? to - from + 1 : 0;
+};
+
+export const isOutsideStock = (row, stockRange) =>
+  Boolean(stockRange) && (row.start < stockRange.start || row.end > stockRange.end);
 
 /** Inclusive ÝH number range a letter occupies. */
 export const getLetterRange = (letter) => {
