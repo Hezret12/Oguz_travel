@@ -1,6 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import dayjs from "dayjs";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useQueryClient } from "@tanstack/react-query";
 import { Box, Grid } from "@mui/material";
 
 import { useLocale } from "../../hooks/useLocale";
@@ -13,42 +15,36 @@ import CustomSelect from "../../components/CustomSelect";
 import AppUserAutocomplete from "../../components/AppUserAutocomplete";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addTaskApi } from "../../api/queries/post";
-import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload, { TaskFileList } from "../../components/inputs/TaskFileUpload";
 import { useValidShema } from "../../functions/useValidShema";
+import TaskWindowFields from "./Contents/TaskWindowFields";
 import {
   TASK_STATUS_ITEMS,
   TASK_PRIORITY_ITEMS,
   DEFAULT_TASK_PRIORITY,
+  toIsoOrNull,
 } from "./functions/taskMeta";
-
-const datePickerSx = {
-  "& .MuiPickersOutlinedInput-root, & .MuiOutlinedInput-root, & .MuiInputBase-root": {
-    minHeight: "44px !important",
-    height: "44px !important",
-  },
-  "& .MuiPickersInputBase-sectionsContainer, & .MuiInputBase-input": {
-    paddingTop: "10px !important",
-    paddingBottom: "10px !important",
-  },
-};
+import { resetTaskBoard } from "./functions/taskBoardCache";
 
 export default function CreateTaskModal({ open, onClose, onCreateTask }) {
   const { t } = useLocale();
   const { addTask } = useValidShema();
+  const queryClient = useQueryClient();
 
   const createMutation = useCreate({
     apiFn: addTaskApi,
     key: "tasks",
-    invalidateQueries: ["tasks-board"],
     isPaginated: true,
     onSuccess: () => {
+      // Whether and where the new card shows depends on server-side filters, so the
+      // board reloads — trimmed to one page per column first.
+      resetTaskBoard(queryClient);
       onCreateTask?.();
       handleCloseDialog();
     },
   });
 
-  const { control, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset, setValue } = useForm({
     resolver: yupResolver(addTask),
     defaultValues: {
       title: "",
@@ -56,9 +52,16 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       assignee_guid: [],
       priority: DEFAULT_TASK_PRIORITY,
       status: TASK_STATUS_ITEMS[0].id,
-      dueDate: "",
+      startDate: null,
+      endDate: null,
     },
   });
+
+  // The modal stays mounted between openings, so the start defaults to "now" (to the
+  // minute) each time it opens rather than once at mount.
+  useEffect(() => {
+    if (open) setValue("startDate", dayjs().second(0).millisecond(0).toISOString());
+  }, [open, setValue]);
 
   const priorityOptions = useMemo(
     () =>
@@ -100,8 +103,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
       description: data.description?.trim() || "",
       priority: data.priority || DEFAULT_TASK_PRIORITY,
       status: Number(data.status) || TASK_STATUS_ITEMS[0].id,
-      // An empty due date means "no deadline" — never silently stamp today.
-      due_date: data.dueDate ? new Date(data.dueDate).toISOString() : null,
+      // Empty sides stay empty — never silently stamp today.
+      start_date: toIsoOrNull(data.startDate),
+      end_date: toIsoOrNull(data.endDate),
       images: attachments,
     };
 
@@ -171,17 +175,9 @@ export default function CreateTaskModal({ open, onClose, onCreateTask }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomDatePicker
-                name="dueDate"
-                control={control}
-                label={t("task.dueDate")}
-                disabled={isSubmitting}
-                inputSx={datePickerSx}
-              />
-            </Grid>
+            <TaskWindowFields control={control} disabled={isSubmitting} />
 
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12 }}>
               <TaskFileUpload
                 files={attachments}
                 onChange={setAttachments}

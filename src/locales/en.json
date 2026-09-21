@@ -638,7 +638,10 @@
     "editTask": "Edit Task",
     "assignEmployee": "Assignee",
     "priority": "Priority Level",
-    "dueDate": "Due Date",
+    "startDate": "Start time",
+    "endDate": "End time",
+    "periodFrom": "Period from",
+    "periodTo": "Period to",
     "createTask": "Create Task",
     "board": "Board View",
     "list": "List View",
@@ -670,10 +673,10 @@
     "noTasksDesc": "There are no tasks at the moment.",
     "changeStatus": "Change status",
     "noTasksInColumn": "No tasks in this column",
-    "dropHere": "Drop here",
     "addFirstTask": "Add the first task",
     "validation": {
-      "dueDateInPast": "The due date cannot be in the past"
+      "endBeforeStart": "The end time cannot be before the start time",
+      "endDateInPast": "The end time cannot be in the past"
     }
   },
   "notifications": {

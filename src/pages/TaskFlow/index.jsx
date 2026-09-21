@@ -11,7 +11,6 @@ import TaskBoardView from "./Contents/TaskBoardView";
 import TaskListTable from "./Contents/TaskListTable";
 import TaskFilter from "./Contents/TaskFilter";
 import FilterDrawer from "../../components/FilterDrawer";
-import Pagination from "../../components/Pagination";
 import DeleteDialog from "../../components/DeleteDialog";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 
@@ -27,6 +26,12 @@ import { getAllTasksApi } from "../../api/queries/getters";
 import { updateTaskApi } from "../../api/queries/patch";
 import { deleteTaskApi } from "../../api/queries/delete";
 import { toTaskApiParams, TASK_STATUS_ITEMS } from "./functions/taskMeta";
+import {
+  TASK_BOARD_KEY,
+  patchTaskInBoardCache,
+  removeTaskFromBoardCache,
+  resetTaskBoard,
+} from "./functions/taskBoardCache";
 
 const TaskFilterDrawer = () => {
   const {
@@ -78,6 +83,7 @@ export default function TaskFlow() {
     searchQuery,
     setSearch,
     page,
+    limit,
     setPage,
     sortBy,
     sortOrder,
@@ -132,7 +138,7 @@ export default function TaskFlow() {
   });
 
   // No board invalidation here: a status move is applied to the board cache directly
-  // (see `moveTaskInBoardCache`), so a successful move costs zero refetches.
+  // (see `patchTaskInBoardCache`), so a successful move costs zero refetches.
   const updateTaskMutation = useUpdate({
     apiFn: updateTaskApi,
     key: "tasks",
@@ -144,7 +150,6 @@ export default function TaskFlow() {
     deleteFn: deleteTaskApi,
     queryKey: "tasks",
     idKey: "guid",
-    invalidateQueries: ["tasks-board"],
     isPaginated: true,
   });
 
@@ -155,55 +160,13 @@ export default function TaskFlow() {
 
   const queryClient = useQueryClient();
 
-  // Moves a card between the board's per-column infinite queries (key
-  // `["tasks-board", statusId, params]`) and shifts each column's `meta.totalItems`
-  // badge by one, so a drop needs no refetch. No-op when the card isn't loaded on the board.
-  const moveTaskInBoardCache = useCallback(
-    (guid, targetStatus, patch = {}) => {
-      const entries = queryClient.getQueriesData({ queryKey: ["tasks-board"] });
-      const task = entries
-        .flatMap(([, data]) => data?.pages ?? [])
-        .flatMap((page) => (Array.isArray(page?.data) ? page.data : []))
-        .find((item) => item?.guid === guid);
-      if (!task) return;
-
-      const sourceStatus = Number(task.status);
-      const movedTask = { ...task, ...patch, status: targetStatus };
-      entries.forEach(([queryKey, data]) => {
-        if (!data?.pages) return;
-        const columnStatus = Number(queryKey[1]);
-        const isTarget = columnStatus === targetStatus;
-        const countDelta =
-          sourceStatus === targetStatus ? 0 : isTarget ? 1 : columnStatus === sourceStatus ? -1 : 0;
-
-        queryClient.setQueryData(queryKey, {
-          ...data,
-          pages: data.pages.map((page, index) => {
-            const items = (Array.isArray(page?.data) ? page.data : []).filter(
-              (item) => item?.guid !== guid,
-            );
-            const totalItems = Number(page?.meta?.totalItems);
-            return {
-              ...page,
-              data: isTarget && index === 0 ? [movedTask, ...items] : items,
-              ...(page?.meta && Number.isFinite(totalItems) && {
-                meta: { ...page.meta, totalItems: Math.max(0, totalItems + countDelta) },
-              }),
-            };
-          }),
-        });
-      });
-    },
-    [queryClient],
-  );
-
   const handleMoveTaskStatus = useCallback(
     (taskId, newStatus) => {
       const status = Number(newStatus);
       if (!taskId || !TASK_STATUS_ITEMS.some((item) => item.id === status)) return;
 
-      queryClient.cancelQueries({ queryKey: ["tasks-board"] });
-      moveTaskInBoardCache(taskId, status);
+      queryClient.cancelQueries({ queryKey: [TASK_BOARD_KEY] });
+      patchTaskInBoardCache(queryClient, taskId, { status });
 
       updateTaskMutation.mutate(
         { guid: taskId, status },
@@ -211,24 +174,29 @@ export default function TaskFlow() {
           onSuccess: ({ updatedItem }) => {
             // Put the server's copy (fresh assignees, updatedAt) into the card. The board
             // pages by keyset cursor, so moving a card never shifts other pages — no refetch.
-            if (updatedItem?.guid) moveTaskInBoardCache(taskId, status, updatedItem);
+            if (updatedItem?.guid) {
+              patchTaskInBoardCache(queryClient, taskId, { ...updatedItem, status });
+            }
             // A status-filtered list must drop the row that no longer matches.
             if (viewMode === "list" && applied.status) {
               queryClient.invalidateQueries({ queryKey: ["tasks"] });
             }
           },
           // Roll the optimistic move back to the server's truth.
-          onError: () => queryClient.invalidateQueries({ queryKey: ["tasks-board"] }),
+          onError: () => resetTaskBoard(queryClient),
         },
       );
     },
-    [updateTaskMutation, moveTaskInBoardCache, queryClient, viewMode, applied.status],
+    [updateTaskMutation, queryClient, viewMode, applied.status],
   );
 
   const deleteDialog = useDeleteDialog({
     onConfirm: (target) => {
       const guid = typeof target === "string" ? target : target?.guid;
-      if (guid) deleteTaskMutation.mutate(guid);
+      if (!guid) return;
+      deleteTaskMutation.mutate(guid, {
+        onSuccess: () => removeTaskFromBoardCache(queryClient, guid),
+      });
     },
   });
 
@@ -239,11 +207,11 @@ export default function TaskFlow() {
     [deleteDialog],
   );
 
-  const isBoardFetching = useIsFetching({ queryKey: ["tasks-board"] }) > 0;
+  const isBoardFetching = useIsFetching({ queryKey: [TASK_BOARD_KEY] }) > 0;
 
   const handleRefetch = useCallback(() => {
     if (viewMode === "board") {
-      queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
+      resetTaskBoard(queryClient);
     } else {
       refetch();
     }
@@ -254,7 +222,11 @@ export default function TaskFlow() {
   const hasActiveFilters = useMemo(
     () =>
       Boolean(
-        applied.status || applied.priority || applied.due_date || applied.opr_guid,
+        applied.status ||
+          applied.priority ||
+          applied.date_from ||
+          applied.date_to ||
+          applied.opr_guid,
       ),
     [applied],
   );
@@ -299,7 +271,8 @@ export default function TaskFlow() {
             searchQuery={queryParams.search || ""}
             filterStatus={applied.status}
             filterPriority={applied.priority}
-            dueDate={applied.due_date}
+            dateFrom={applied.date_from}
+            dateTo={applied.date_to}
             oprGuid={applied.opr_guid}
             onMoveTaskStatus={handleMoveTaskStatus}
             onEditTask={handleEditTask}
@@ -312,6 +285,11 @@ export default function TaskFlow() {
             isLoading={isLoading}
             isFetching={isFetching}
             isError={isError}
+            page={page}
+            limit={limit}
+            pageCount={pageCount}
+            totalItems={totalItems}
+            onPageChange={setPage}
             sortBy={sortBy}
             sortOrder={sortOrder}
             onSortChange={setSort}
@@ -321,25 +299,6 @@ export default function TaskFlow() {
           />
         )}
       </Box>
-
-      {viewMode === "list" && (
-        <Box
-          sx={{
-            pt: 1.5,
-            flexShrink: 0,
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-          }}
-        >
-          <Pagination
-            pageIndex={page - 1}
-            pageCount={pageCount}
-            totalRows={totalItems}
-            onPageChange={(newIndex) => setPage(newIndex + 1)}
-          />
-        </Box>
-      )}
 
       <CreateTaskModal
         open={isModalOpen}

@@ -89,7 +89,7 @@ const FilterSelect = ({
   </FormControl>
 );
 
-const FilterDatePicker = ({ label, name, value, onChange }) => (
+const FilterDatePicker = ({ label, name, value, onChange, minDate, maxDate }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -99,6 +99,8 @@ const FilterDatePicker = ({ label, name, value, onChange }) => (
     </Typography>
     <DatePicker
       value={value ? dayjs(value) : null}
+      minDate={minDate ? dayjs(minDate) : undefined}
+      maxDate={maxDate ? dayjs(maxDate) : undefined}
       onChange={(newValue) => {
         onChange(
           name,
@@ -169,12 +171,23 @@ function TaskFilter({
         onOpen={onSelectOpen}
         onClose={onSelectClose}
       />
-      <FilterDatePicker
-        label={t("task.dueDate")}
-        name="due_date"
-        value={filters.due_date}
-        onChange={onFilterChange}
-      />
+      {/* Period: shows tasks whose start → end window overlaps these days */}
+      <Stack direction="row" spacing={1.5}>
+        <FilterDatePicker
+          label={t("task.periodFrom")}
+          name="date_from"
+          value={filters.date_from}
+          maxDate={filters.date_to}
+          onChange={onFilterChange}
+        />
+        <FilterDatePicker
+          label={t("task.periodTo")}
+          name="date_to"
+          value={filters.date_to}
+          minDate={filters.date_from}
+          onChange={onFilterChange}
+        />
+      </Stack>
       <AppUserAutocomplete
         label={t("task.assignees")}
         value={filters.opr_guid}

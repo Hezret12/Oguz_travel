@@ -13,7 +13,14 @@ import { CustomForm } from "../../../components/Dialog/CustomForm";
 import { FooterButton } from "../../../components/Dialog/FooterButton";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { useLocale } from "../../../hooks/useLocale";
-import { addReportShareApi } from "../../../api/queries/post";
+import { addOtherLetterApi } from "../../../api/queries/post";
+import {
+  LETTER_STATUS,
+  STOCK_LETTERS_KEY,
+  findOverlap,
+  getLetterStatusOptions,
+  toOtherLetterPayload,
+} from "./functions/stockLetters";
 
 const MODE_SINGLE = "single";
 const MODE_RANGE = "range";
@@ -23,16 +30,17 @@ const toInt = (value) => {
   return Number(value);
 };
 
-// The backend stores every report-share as a number range. "single" mode is
-// just a range of one letter (start === end, total_count 1); "range" mode
-// covers start..end inclusive. Only the fields of the active tab are mounted,
-// and react-hook-form skips validation for unmounted fields.
+// Records an "other letter" (sold / damaged / lost) inside a stock batch. "single" mode is
+// one ÝH number (`isOne`); "range" mode covers start..end inclusive. `occupied` holds the
+// ranges already used in the batch (referral letters and other letters) so nothing overlaps.
+// Only the fields of the active tab are mounted, and react-hook-form skips validation for
+// unmounted fields.
 const AddReferralReportModal = ({
   open,
   close,
   table,
   stock,
-  shares = [],
+  occupied = [],
   defaultRange,
 }) => {
   const { t } = useLocale();
@@ -44,14 +52,7 @@ const AddReferralReportModal = ({
   const stockStart = Number(stock?.start_yh_number);
   const stockEnd = Number(stock?.end_yh_number);
 
-  const statusOptions = useMemo(
-    () => [
-      { label: t("referralLetter.statusSold"), value: 1, color: "#16a34a" },
-      { label: t("referralLetter.statusDamaged"), value: 2, color: "#ea580c" },
-      { label: t("referralLetter.statusLost"), value: 3, color: "#dc2626" },
-    ],
-    [t],
-  );
+  const statusOptions = useMemo(() => getLetterStatusOptions(t), [t]);
 
   const modeTabs = useMemo(
     () => [
@@ -71,7 +72,7 @@ const AddReferralReportModal = ({
       letterNo: start != null ? String(start) : "",
       startNo: start != null ? String(start) : "",
       endNo: end != null ? String(end) : "",
-      status: 1,
+      status: LETTER_STATUS.SOLD,
       note: "",
     };
   };
@@ -100,9 +101,11 @@ const AddReferralReportModal = ({
     clearErrors();
   };
 
-  const { mutate: createReportShare, isPending } = useCreate({
-    apiFn: addReportShareApi,
-    key: "reportShares",
+  // Invalidated (not prepended): the batch's letters come from a range query.
+  const { mutate: createOtherLetter, isPending } = useCreate({
+    apiFn: addOtherLetterApi,
+    key: STOCK_LETTERS_KEY,
+    isPaginated: true,
     onSuccess: () => {
       handleClose();
     },
@@ -122,17 +125,11 @@ const AddReferralReportModal = ({
     return null;
   };
 
-  const findOverlap = (from, to) =>
-    shares.find(
-      (s) =>
-        Number(s.start_yh_number) <= to && Number(s.end_yh_number) >= from,
-    );
-
   const validateLetterNo = (value) => {
     const num = toInt(value);
     const error = checkNumber(num);
     if (error) return error;
-    if (findOverlap(num, num)) return t("referralLetter.letterNoUsed");
+    if (findOverlap(occupied, num, num)) return t("referralLetter.letterNoUsed");
     return true;
   };
 
@@ -145,12 +142,9 @@ const AddReferralReportModal = ({
     const start = toInt(formValues.startNo);
     if (!Number.isInteger(start)) return true;
     if (end < start) return t("referralLetter.rangeInvalid");
-    const overlap = findOverlap(start, end);
+    const overlap = findOverlap(occupied, start, end);
     if (overlap) {
-      return t("referralLetter.rangeOverlap", {
-        start: overlap.start_yh_number,
-        end: overlap.end_yh_number,
-      });
+      return t("referralLetter.rangeOverlap", { start: overlap.start, end: overlap.end });
     }
     return true;
   };
@@ -159,18 +153,17 @@ const AddReferralReportModal = ({
     const isRange = mode === MODE_RANGE;
     const start = isRange ? toInt(data.startNo) : toInt(data.letterNo);
     const end = isRange ? toInt(data.endNo) : start;
-    createReportShare({
-      datetime: data.date
-        ? new Date(data.date).toISOString()
-        : new Date().toISOString(),
-      assignment_opr_guid: data.assignment_opr_guid,
-      received_by: data.received_by,
-      start_yh_number: start,
-      end_yh_number: end,
-      total_count: end - start + 1,
-      status: Number(data.status || 1),
-      note: data.note || "",
-    });
+    createOtherLetter(
+      toOtherLetterPayload({
+        start,
+        end,
+        date: data.date,
+        status: data.status,
+        operatorGuid: data.assignment_opr_guid,
+        receivedBy: data.received_by,
+        note: data.note,
+      }),
+    );
   };
 
   return (

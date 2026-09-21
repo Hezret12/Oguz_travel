@@ -171,8 +171,8 @@ export const updateReportApi = async (data) => {
   return await api.patchPrivate('/report/update-report', data);
 };
 
-export const updateReportShareApi = async (data) => {
-  return await api.patchPrivate('/report-share/update-report-share', data);
+export const updateOtherLetterApi = async (data) => {
+  return await api.patchPrivate('/refferal-letter/update-other-letter', data);
 };
 
 export const updateCountryApi = async (data) => {

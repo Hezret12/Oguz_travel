@@ -6,30 +6,34 @@ import {
 import {
   Box,
   Typography,
-  Chip,
   Menu,
   MenuItem,
-  Tooltip,
   ButtonBase,
   alpha,
 } from "@mui/material";
-import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import AttachFileOutlinedIcon from "@mui/icons-material/AttachFileOutlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
-import dayjs from "dayjs";
 
 import AppAvatarGroup from "../../../components/AppAvatarGroup";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
+import Pagination from "../../../components/Pagination";
+import StatusChip from "../../../components/StatusChip";
+import StackedCell from "../../../components/inputs/StackCell";
+import TableEmptyState from "../../../components/TableEmptyState";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import {
+  TASK_STATUS_CONFIG,
+  TASK_PRIORITY_CONFIG,
+} from "../../../functions/statusChipConfigs";
+import {
   TASK_STATUS_ITEMS,
-  getTaskStatus,
-  getTaskPriority,
   getTaskAssignees,
   getTaskAttachments,
+  getTaskStart,
+  getTaskEnd,
+  isTaskOverdue,
 } from "../functions/taskMeta";
 
 function TaskListTable({
@@ -37,6 +41,11 @@ function TaskListTable({
   isLoading = false,
   isFetching = false,
   isError = false,
+  page = 1,
+  limit = 10,
+  pageCount = 0,
+  totalItems = 0,
+  onPageChange,
   sortBy = "",
   sortOrder = "asc",
   onSortChange,
@@ -46,6 +55,7 @@ function TaskListTable({
 }) {
   const { t } = useLocale();
   const { formatChange } = useDateFormat();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
   const [statusTask, setStatusTask] = useState(null);
 
@@ -57,152 +67,65 @@ function TaskListTable({
   const columns = useMemo(
     () => [
       {
+        id: "index_number",
+        header: "#",
+        size: 50,
+        enableSorting: false,
+        Cell: ({ row }) =>
+          row.original.index_number ?? (page - 1) * limit + row.index + 1,
+      },
+      {
         accessorKey: "title",
         header: t("task.title"),
-        size: 300,
-        Cell: ({ row }) => {
-          const task = row.original;
-          const attachmentsCount = getTaskAttachments(task).length;
-
-          return (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 0.5,
-                py: 0.5,
-                cursor: "pointer",
-              }}
-              onClick={() => onEditTask?.(task)}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 650,
-                    fontSize: "0.875rem",
-                    color: "text.primary",
-                    "&:hover": { color: "primary.main" },
-                    transition: "color 0.15s ease",
-                  }}
-                >
-                  {task.title || task.description}
-                </Typography>
-
-                {attachmentsCount > 0 && (
-                  <Tooltip
-                    title={`${attachmentsCount} ${t("task.attachments")}`}
-                  >
-                    <Chip
-                      icon={
-                        <AttachFileOutlinedIcon
-                          style={{ fontSize: 13, marginRight: -4 }}
-                        />
-                      }
-                      label={attachmentsCount}
-                      size="small"
-                      sx={{
-                        height: 20,
-                        fontSize: "0.7rem",
-                        fontWeight: 600,
-                        borderRadius: "6px",
-                        bgcolor: "action.hover",
-                        "& .MuiChip-label": { px: 0.75 },
-                      }}
-                    />
-                  </Tooltip>
-                )}
-              </Box>
-
-              {task.description && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                    fontSize: "0.75rem",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 1,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    maxWidth: "90%",
-                  }}
-                >
-                  {task.description}
-                </Typography>
-              )}
-            </Box>
-          );
-        },
+        size: 280,
+        Cell: ({ row }) => (
+          <StackedCell
+            primary={row.original.title || row.original.description}
+            secondary={row.original.title ? row.original.description : null}
+          />
+        ),
       },
       {
         accessorKey: "status",
         header: t("columns.status"),
-        size: 170,
-        Cell: ({ row }) => {
-          const task = row.original;
-          const statusInfo = getTaskStatus(task.status);
-          const StatusIcon = statusInfo.Icon;
-
-          return (
-            <ButtonBase
-              onClick={(e) => {
-                e.stopPropagation();
-                setStatusMenuAnchor(e.currentTarget);
-                setStatusTask(task);
-              }}
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 0.75,
-                px: 1.25,
-                py: 0.5,
-                borderRadius: "8px",
-                border: "1px solid",
-                borderColor: alpha(statusInfo.color, 0.25),
-                bgcolor: alpha(statusInfo.color, 0.08),
-                color: statusInfo.color,
-                fontSize: "0.775rem",
-                fontWeight: 650,
-                transition: "all 0.15s ease",
-                "&:hover": {
-                  bgcolor: alpha(statusInfo.color, 0.14),
-                  transform: "translateY(-1px)",
-                },
-              }}
-            >
-              <StatusIcon sx={{ fontSize: 15 }} />
-              <span>{t(statusInfo.labelKey)}</span>
-              <KeyboardArrowDownIcon
-                sx={{ fontSize: 14, opacity: 0.7, ml: -0.25 }}
-              />
-            </ButtonBase>
-          );
-        },
+        size: 140,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        // Clickable so the status can be switched without opening the edit modal.
+        Cell: ({ row }) => (
+          <ButtonBase
+            onClick={(e) => {
+              e.stopPropagation();
+              setStatusMenuAnchor(e.currentTarget);
+              setStatusTask(row.original);
+            }}
+            sx={{
+              gap: 0.25,
+              px: 1,
+              py: 0.25,
+              borderRadius: "6px",
+              "&:hover": { bgcolor: "action.hover" },
+            }}
+          >
+            <StatusChip
+              status={Number(row.original.status) || 1}
+              config={TASK_STATUS_CONFIG}
+            />
+            <KeyboardArrowDownIcon
+              sx={{ fontSize: 16, color: "text.secondary" }}
+            />
+          </ButtonBase>
+        ),
       },
       {
         accessorKey: "priority",
         header: t("task.priority"),
-        size: 130,
-        Cell: ({ cell }) => {
-          const priority = getTaskPriority(cell.getValue());
-
-          return (
-            <Chip
-              label={t(priority.labelKey)}
-              size="small"
-              sx={{
-                fontWeight: 650,
-                fontSize: "0.75rem",
-                height: 24,
-                bgcolor: alpha(priority.color, 0.1),
-                color: priority.color,
-                border: "1px solid",
-                borderColor: alpha(priority.color, 0.25),
-                borderRadius: "6px",
-              }}
-            />
-          );
-        },
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ cell }) => (
+          <StatusChip status={cell.getValue()} config={TASK_PRIORITY_CONFIG} />
+        ),
       },
       {
         id: "assignees",
@@ -210,77 +133,77 @@ function TaskListTable({
         size: 185,
         minSize: 175,
         enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
           const assigneesList = getTaskAssignees(row.original);
-
-          if (assigneesList.length === 0) {
-            return (
-              <Typography
-                variant="caption"
-                sx={{ color: "text.secondary", fontSize: "0.8rem" }}
-              >
-                —
-              </Typography>
-            );
-          }
-
+          if (assigneesList.length === 0) return "—";
           return <AppAvatarGroup items={assigneesList} max={6} size={26} />;
         },
       },
       {
-        accessorKey: "due_date",
-        header: t("task.dueDate"),
-        size: 140,
+        accessorKey: "start_date",
+        header: t("task.startDate"),
+        size: 130,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => formatChange(getTaskStart(row.original)) || "—",
+      },
+      {
+        accessorKey: "end_date",
+        header: t("task.endDate"),
+        size: 130,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => {
-          const task = row.original;
-          const rawDate = task.due_date || task.dueDate;
-          const formatted = formatChange(rawDate, { dateOnly: true });
+          const formatted = formatChange(getTaskEnd(row.original));
+          if (!formatted) return "—";
 
-          if (!formatted) {
-            return (
-              <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                —
-              </Typography>
-            );
-          }
-
-          const parsed = dayjs(rawDate);
-          const isDone = Number(task.status) === 3;
-          const isOverdue = !isDone && parsed.isBefore(dayjs(), "day");
-          const isToday = !isDone && parsed.isSame(dayjs(), "day");
+          const isOverdue = isTaskOverdue(row.original);
 
           return (
-            <Box
-              sx={{ display: "inline-flex", alignItems: "center", gap: 0.75 }}
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "inherit",
+                fontWeight: isOverdue ? 650 : "inherit",
+                color: isOverdue ? "error.main" : "inherit",
+              }}
             >
-              <CalendarTodayOutlinedIcon sx={{ fontSize: 14 }} />
-              <Typography
-                variant="body2"
-                sx={{
-                  fontSize: "0.8125rem",
-                  fontWeight: isOverdue || isToday ? 650 : 500,
-                }}
-              >
-                {formatted}
-              </Typography>
-              {isOverdue && (
-                <Chip
-                  label={t("task.overdue")}
-                  size="small"
-                  sx={{
-                    height: 18,
-                    fontSize: "0.65rem",
-                    fontWeight: 700,
-                    borderRadius: "4px",
-                    bgcolor: (theme) => alpha(theme.palette.error.main, 0.12),
-                    color: "error.main",
-                    "& .MuiChip-label": { px: 0.5 },
-                  }}
-                />
-              )}
+              {formatted}
+            </Typography>
+          );
+        },
+      },
+      {
+        id: "attachments",
+        header: t("task.attachments"),
+        size: 90,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => {
+          const count = getTaskAttachments(row.original).length;
+          if (count === 0) return "—";
+          return (
+            <Box
+              sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
+            >
+              <AttachFileOutlinedIcon
+                sx={{ fontSize: 15, color: "text.secondary" }}
+              />
+              {count}
             </Box>
           );
         },
+      },
+      {
+        accessorKey: "createdAt",
+        header: t("columns.createdAt"),
+        size: 130,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ cell }) => formatChange(cell.getValue()),
       },
       {
         id: "actions",
@@ -299,36 +222,83 @@ function TaskListTable({
         ),
       },
     ],
-    [t, formatChange, onEditTask, onDeleteTask],
+    [t, formatChange, page, limit, onEditTask, onDeleteTask],
   );
-
-  const defaultMrtOptions = getDefaultMRTOptions();
 
   const sorting = useMemo(
     () => (sortBy ? [{ id: sortBy, desc: sortOrder === "desc" }] : []),
     [sortBy, sortOrder],
   );
 
+  const mrtState = useMemo(
+    () => ({
+      isLoading: false,
+      showLoadingOverlay: isLoading || isFetching,
+      showSkeletons: false,
+      showProgressBars: false,
+      showAlertBanner: isError,
+      pagination: { pageIndex: page - 1, pageSize: limit },
+      sorting,
+    }),
+    [isLoading, isFetching, isError, page, limit, sorting],
+  );
+
+  const muiTableBodyProps = useMemo(
+    () => ({
+      sx: (theme) => ({
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.secondary,
+        opacity: isLoading || isFetching ? 0 : 1,
+        pointerEvents: isLoading || isFetching ? "none" : "auto",
+        transition: "opacity 0.15s ease",
+      }),
+    }),
+    [isLoading, isFetching],
+  );
+
+  // The page sits inside the TaskFlow layout (own header + board toggle), so the
+  // paper fills its flex parent instead of the default fixed viewport height.
+  const muiTablePaperProps = useMemo(
+    () => ({
+      sx: (theme) => ({
+        ...defaultMrtOptions.muiTablePaperProps.sx(theme),
+        height: "100%",
+      }),
+    }),
+    [defaultMrtOptions],
+  );
+
+  const renderEmptyRowsFallback = useCallback(() => {
+    if (isLoading || isFetching) return null;
+    return <TableEmptyState title={t("task.noTasksFound")} />;
+  }, [isLoading, isFetching, t]);
+
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
-    columns,
-    data: tasks,
-    getRowId: (row) => row.guid,
-    enablePagination: false,
-    enableStickyHeader: true,
+    enableColumnPinning: true,
     enableTopToolbar: false,
-    enableBottomToolbar: false,
-    enableRowHover: true,
-    enableSorting: true,
-    manualSorting: true,
-    manualFiltering: true,
-    state: {
-      isLoading,
-      showSkeletons: isLoading,
-      showAlertBanner: isError,
-      showProgressBars: isFetching,
-      sorting,
+    columns,
+    data: tasks || [],
+    initialState: {
+      ...defaultMrtOptions.initialState,
+      columnPinning: {
+        left: ["index_number"],
+        right: ["actions"],
+      },
     },
+    state: mrtState,
+    muiTableBodyProps,
+    muiTablePaperProps,
+    getRowId: (row) => row.guid,
+
+    // Server-side options
+    manualPagination: true,
+    manualFiltering: true,
+    manualSorting: true,
+    enableSorting: true,
+    pageCount,
+    rowCount: totalItems,
+
     onSortingChange: (updater) => {
       const next =
         typeof updater === "function" ? updater(sorting) : updater;
@@ -338,71 +308,34 @@ function TaskListTable({
         onSortChange?.("", "asc");
       }
     },
-    muiTableContainerProps: {
-      sx: {
-        flexGrow: 1,
-        minHeight: 0,
-        overflowY: "auto",
-      },
-    },
-    muiTablePaperProps: {
-      elevation: 0,
-      sx: {
-        borderRadius: "14px",
-        border: "1px solid",
-        borderColor: "divider",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        bgcolor: "background.paper",
-      },
-    },
-    renderEmptyRowsFallback: () => (
+
+    renderEmptyRowsFallback,
+
+    renderBottomToolbar: () => (
       <Box
-        sx={{
-          py: 8,
-          px: 2,
+        sx={(theme) => ({
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          gap: 1.5,
-          textAlign: "center",
-        }}
+          justifyContent: "space-between",
+          px: 2,
+          py: 0.75,
+          minHeight: "52px",
+          borderTop: `1px solid ${theme.palette.divider}`,
+        })}
       >
-        <Box
-          sx={{
-            width: 52,
-            height: 52,
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            bgcolor: "action.hover",
-            color: "text.secondary",
-          }}
-        >
-          <AssignmentOutlinedIcon sx={{ fontSize: 26 }} />
-        </Box>
-        <Typography
-          variant="subtitle1"
-          sx={{ fontWeight: 650, color: "text.primary" }}
-        >
-          {t("task.noTasksFound")}
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{ color: "text.secondary", maxWidth: 360 }}
-        >
-          {t("task.noTasksDesc")}
-        </Typography>
+        <Box />
+        <Pagination
+          pageIndex={page - 1}
+          pageCount={pageCount}
+          totalRows={totalItems}
+          onPageChange={(newIndex) => onPageChange?.(newIndex + 1)}
+        />
       </Box>
     ),
   });
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <>
       <MaterialReactTable table={table} />
 
       {/* Quick status switcher, opened from the status cell */}
@@ -477,7 +410,7 @@ function TaskListTable({
           );
         })}
       </Menu>
-    </Box>
+    </>
   );
 }
 

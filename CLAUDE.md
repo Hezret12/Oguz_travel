@@ -32,7 +32,7 @@ useUpdate({ apiFn, key, idKey, onSuccessUpdate, invalidateQueries = [], isInfini
 | `apiFn` | function | **YES** | The API function (e.g., `updateTranslationApi`). |
 | `key` | string \| string[] | **YES** | React Query cache key. |
 | `idKey` | string | **YES** | The unique identifier field name (e.g., `"guid"`). |
-| `onSuccessUpdate` | function | optional | Called after mutation succeeds and cache is updated. **NOT** `onSuccess`. |
+| `onSuccessUpdate` | function | optional | Called after mutation succeeds and cache is updated, with the merged item (`{ ...variables, ...updatedItem }`). **NOT** `onSuccess`. |
 | `invalidateQueries` | string[] | optional | Additional query keys to invalidate. |
 | `isInfiniteQuery` | boolean | optional | Set `true` for infinite scroll queries. |
 | `showSuccessMessage` | boolean | optional | `false` skips the success toast (e.g. inline cell saves). Errors always toast. |

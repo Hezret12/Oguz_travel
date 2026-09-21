@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useQueryClient } from "@tanstack/react-query";
 import { Box, Grid } from "@mui/material";
 
 import { useLocale } from "../../hooks/useLocale";
@@ -13,40 +14,37 @@ import CustomSelect from "../../components/CustomSelect";
 import AppUserAutocomplete from "../../components/AppUserAutocomplete";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { updateTaskApi } from "../../api/queries/patch";
-import CustomDatePicker from "../../components/CustomDatePicker";
 import TaskFileUpload, { TaskFileList } from "../../components/inputs/TaskFileUpload";
 import { useValidShema } from "../../functions/useValidShema";
+import TaskWindowFields from "./Contents/TaskWindowFields";
 import {
   TASK_STATUS_ITEMS,
   TASK_PRIORITY_ITEMS,
   DEFAULT_TASK_PRIORITY,
+  toSelectablePriority,
   getTaskAssignees,
   getAssigneeUserGuid,
   getTaskAssigneeGuids,
   getTaskAttachments,
+  getTaskStart,
+  getTaskEnd,
+  toIsoOrNull,
 } from "./functions/taskMeta";
-
-const datePickerSx = {
-  "& .MuiPickersOutlinedInput-root, & .MuiOutlinedInput-root, & .MuiInputBase-root": {
-    minHeight: "44px !important",
-    height: "44px !important",
-  },
-  "& .MuiPickersInputBase-sectionsContainer, & .MuiInputBase-input": {
-    paddingTop: "10px !important",
-    paddingBottom: "10px !important",
-  },
-};
+import { patchTaskInBoardCache } from "./functions/taskBoardCache";
 
 export default function EditTaskModal({ open, onClose, task }) {
   const { t } = useLocale();
   const { editTask } = useValidShema();
+  const queryClient = useQueryClient();
 
   const updateMutation = useUpdate({
     apiFn: updateTaskApi,
     key: "tasks",
     idKey: "guid",
-    invalidateQueries: ["tasks-board"],
-    onSuccessUpdate: () => {
+    // The board card is patched (or moved, if the status changed) in place instead of
+    // refetching every loaded board page.
+    onSuccessUpdate: (updatedTask) => {
+      if (updatedTask?.guid) patchTaskInBoardCache(queryClient, updatedTask.guid, updatedTask);
       handleCloseModal();
     },
   });
@@ -85,7 +83,8 @@ export default function EditTaskModal({ open, onClose, task }) {
       assignee_guid: [],
       priority: DEFAULT_TASK_PRIORITY,
       status: TASK_STATUS_ITEMS[0].id,
-      dueDate: "",
+      startDate: null,
+      endDate: null,
     },
   });
 
@@ -110,9 +109,10 @@ export default function EditTaskModal({ open, onClose, task }) {
         title: task.title || "",
         description: task.description || "",
         assignee_guid: getTaskAssigneeGuids(task),
-        priority: task.priority || DEFAULT_TASK_PRIORITY,
+        priority: toSelectablePriority(task.priority),
         status: Number(task.status) || TASK_STATUS_ITEMS[0].id,
-        dueDate: task.due_date || task.dueDate || "",
+        startDate: getTaskStart(task),
+        endDate: getTaskEnd(task),
       });
     }
   }, [task, open, reset]);
@@ -149,10 +149,9 @@ export default function EditTaskModal({ open, onClose, task }) {
       description: formData.description?.trim() || "",
       priority: formData.priority || DEFAULT_TASK_PRIORITY,
       status: Number(formData.status) || TASK_STATUS_ITEMS[0].id,
-      // Clearing the field clears the deadline — it must not fall back to today.
-      due_date: formData.dueDate
-        ? new Date(formData.dueDate).toISOString()
-        : null,
+      // A cleared field clears that side of the window; the backend mirrors end_date into due_date.
+      start_date: toIsoOrNull(formData.startDate),
+      end_date: toIsoOrNull(formData.endDate),
       images: attachments,
     };
 
@@ -220,17 +219,9 @@ export default function EditTaskModal({ open, onClose, task }) {
               />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomDatePicker
-                name="dueDate"
-                control={control}
-                label={t("task.dueDate")}
-                disabled={isSubmitting}
-                inputSx={datePickerSx}
-              />
-            </Grid>
+            <TaskWindowFields control={control} disabled={isSubmitting} />
 
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12 }}>
               <TaskFileUpload
                 files={attachments}
                 onChange={setAttachments}

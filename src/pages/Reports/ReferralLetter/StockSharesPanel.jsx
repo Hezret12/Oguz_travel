@@ -1,91 +1,254 @@
 import { useMemo, useState } from "react";
-import { Box, Typography, IconButton, Tooltip } from "@mui/material";
+import { Box, Typography, IconButton, Tooltip, Chip } from "@mui/material";
 import { PenLine, Trash2 } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { useGet } from "../../../hooks/CRUD/useGet";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+} from "material-react-table";
+import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
+import TableEmptyState from "../../../components/TableEmptyState";
 import AddButton from "../../../components/AddButton";
 import StatusChip from "../../../components/StatusChip";
 import DeleteDialog from "../../../components/DeleteDialog";
 import { REFERRAL_REPORT_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
-import { getAllReportSharesApi } from "../../../api/queries/getters";
-import { deleteReportShareApi } from "../../../api/queries/delete";
+import { getAllEmployeeApi, getLettersByDocumentRangeApi } from "../../../api/queries/getters";
+import { deleteOtherLetterApi } from "../../../api/queries/delete";
 import AddReferralReportModal from "./AddReferralReportModal";
 import EditReferralReportModal from "./EditReferralReportModal";
+import {
+  STOCK_LETTERS_KEY,
+  findFirstFreeRange,
+  getLetterCount,
+  getLetterRange,
+  resolveLetterStatus,
+} from "./functions/stockLetters";
 
-const resolveStatusKey = (val) => {
-  if (val === 1 || val === "1") return "SATYLDY";
-  if (val === 2 || val === "2") return "ZYÝAN ÝETEN";
-  if (val === 3 || val === "3") return "ÝITIRILEN";
-  return val;
-};
+const formatRange = ({ start, end }) => (start === end ? `${start}` : `${start} - ${end}`);
 
-// First free gap in the batch range (`shares` must be sorted by start), so
-// gaps left by deleted shares get reused. `start` pre-fills the single-letter
-// tab of the add modal, `start`..`end` pre-fills its range tab.
-const findFirstFreeRange = (stock, shares) => {
-  const start = Number(stock?.start_yh_number);
-  const end = Number(stock?.end_yh_number);
-  if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
-  let candidate = start;
-  for (const s of shares) {
-    const sStart = Number(s.start_yh_number);
-    if (sStart > candidate) return { start: candidate, end: sStart - 1 };
-    candidate = Math.max(candidate, Number(s.end_yh_number) + 1);
-  }
-  return candidate <= end ? { start: candidate, end } : null;
-};
-
-// A stock batch (e.g. letters 1-100) and its report-shares (individual sales/
-// usages carved out of that range) aren't linked by a foreign key in this
-// API — the relationship is purely the share's number range falling inside
-// the batch's range, so grouping has to happen client-side.
+/** The letters of one stock batch: referral letters (read-only here) and other letters. */
 const StockSharesPanel = ({ stock }) => {
   const { t } = useLocale();
   const { formatChange } = useDateFormat();
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [editingShare, setEditingShare] = useState(null);
+  const [editingLetter, setEditingLetter] = useState(null);
 
-  const { data: allShares = [], isLoading } = useGet({
-    apiFn: getAllReportSharesApi,
-    key: "reportShares",
-    params: { limit: 9999, page: 1 },
+  const stockStart = Number(stock?.start_yh_number);
+  const stockEnd = Number(stock?.end_yh_number);
+  const hasRange = Number.isFinite(stockStart) && Number.isFinite(stockEnd);
+  const totalCount = Number(stock?.total_letter || 0);
+
+  // Every row covers at least one number, so the batch size bounds the row count.
+  const params = useMemo(
+    () => ({
+      start_number: stockStart,
+      end_number: stockEnd,
+      page: 1,
+      limit: Math.max(10, totalCount || stockEnd - stockStart + 1),
+    }),
+    [stockStart, stockEnd, totalCount],
+  );
+
+  const { data: letters = [], isLoading, isError } = useGet({
+    apiFn: getLettersByDocumentRangeApi,
+    key: STOCK_LETTERS_KEY,
+    params,
+    options: { enabled: hasRange },
   });
 
-  const shares = useMemo(() => {
-    const start = Number(stock?.start_yh_number);
-    const end = Number(stock?.end_yh_number);
-    return (allShares || [])
-      .filter((s) => {
-        const sStart = Number(s.start_yh_number);
-        const sEnd = Number(s.end_yh_number);
-        return sStart >= start && sEnd <= end;
-      })
-      .sort((a, b) => Number(a.start_yh_number) - Number(b.start_yh_number));
-  }, [allShares, stock]);
+  const { data: employees = [] } = useGet({ apiFn: getAllEmployeeApi, key: "employees" });
+  const employeeNames = useMemo(
+    () => new Map((Array.isArray(employees) ? employees : []).map((e) => [e.guid, e.fullName])),
+    [employees],
+  );
+
+  const rows = useMemo(
+    () =>
+      (Array.isArray(letters) ? letters : [])
+        .map((letter) => ({ letter, guid: letter.guid, ...getLetterRange(letter) }))
+        .filter((row) => Number.isFinite(row.start))
+        .sort((a, b) => a.start - b.start || a.end - b.end),
+    [letters],
+  );
 
   const usedCount = useMemo(
-    () => shares.reduce((sum, s) => sum + Number(s.total_count || 0), 0),
-    [shares],
+    () => rows.reduce((sum, row) => sum + getLetterCount(row.letter), 0),
+    [rows],
   );
-  const totalCount = Number(stock?.total_letter || 0);
   const remainingCount = Math.max(0, totalCount - usedCount);
 
-  const suggestedRange = useMemo(
-    () => findFirstFreeRange(stock, shares),
-    [shares, stock],
-  );
+  const suggestedRange = useMemo(() => findFirstFreeRange(stock, rows), [rows, stock]);
 
-  const { mutate: deleteShare, isPending: isDeleting } = useDelete({
-    deleteFn: deleteReportShareApi,
-    queryKey: "reportShares",
+  const { mutate: deleteLetter, isPending: isDeleting } = useDelete({
+    deleteFn: deleteOtherLetterApi,
+    queryKey: STOCK_LETTERS_KEY,
     idKey: "guid",
+    isPaginated: true,
   });
 
   const deleteDialog = useDeleteDialog({
-    onConfirm: (item) => deleteShare(item.guid || item.id),
+    onConfirm: (letter) => deleteLetter(letter.guid),
+  });
+
+  const columns = useMemo(
+    () => [
+      {
+        id: "index",
+        header: "#",
+        size: 50,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => row.index + 1,
+      },
+      {
+        id: "range",
+        header: t("referralLetter.letterNo"),
+        size: 140,
+        Cell: ({ row }) => (
+          <Box component="span" sx={{ fontWeight: 650, fontVariantNumeric: "tabular-nums" }}>
+            {formatRange(row.original)}
+          </Box>
+        ),
+      },
+      {
+        id: "count",
+        header: t("referralLetter.quantity"),
+        size: 100,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => getLetterCount(row.original.letter),
+      },
+      {
+        id: "status",
+        header: t("columns.status"),
+        size: 150,
+        Cell: ({ row }) =>
+          row.original.letter.isRefferal ? (
+            <Chip
+              label={t("sidebar.referalLetters")}
+              size="small"
+              variant="outlined"
+              sx={{ height: 22, fontSize: "0.72rem", borderRadius: "6px" }}
+            />
+          ) : (
+            <StatusChip
+              status={resolveLetterStatus(row.original.letter.status)}
+              config={REFERRAL_REPORT_STATUS_CONFIG}
+            />
+          ),
+      },
+      {
+        id: "date",
+        header: t("columns.date"),
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        Cell: ({ row }) => {
+          const { letter } = row.original;
+          return formatChange(letter.isRefferal ? letter.createdAt : letter.date_time, {
+            dateOnly: true,
+          });
+        },
+      },
+      {
+        id: "submittedBy",
+        header: t("referralLetter.submittedBy"),
+        size: 170,
+        Cell: ({ row }) => employeeNames.get(row.original.letter.received_opr_guid) || "—",
+      },
+      {
+        id: "receivedBy",
+        header: t("referralLetter.receivedBy"),
+        size: 150,
+        Cell: ({ row }) => row.original.letter.accepted_by || "—",
+      },
+      {
+        id: "note",
+        header: t("columns.note"),
+        size: 220,
+        // Referral letters have no note of their own here; their destination and departure
+        // day identify them instead.
+        Cell: ({ row }) => {
+          const { letter } = row.original;
+          const text = letter.isRefferal
+            ? [letter.destination_country, formatChange(letter.departure_date, { dateOnly: true })]
+                .filter(Boolean)
+                .join(" • ")
+            : letter.note;
+          return text || "—";
+        },
+      },
+      {
+        id: "actions",
+        header: t("columns.actions"),
+        size: 90,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        // Referral letters are edited on the referral letter page, not here.
+        Cell: ({ row }) => {
+          const { letter } = row.original;
+          if (letter.isRefferal) return null;
+          return (
+            <Box sx={{ display: "inline-flex", gap: 0.5 }}>
+              <Tooltip title={t("edit")} arrow>
+                <IconButton size="small" onClick={() => setEditingLetter(letter)}>
+                  <PenLine size={14} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title={t("delete")} arrow>
+                <IconButton size="small" onClick={() => deleteDialog.open(letter)}>
+                  <Trash2 size={14} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          );
+        },
+      },
+    ],
+    [t, formatChange, employeeNames, deleteDialog],
+  );
+
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
+
+  const table = useMaterialReactTable({
+    ...defaultMrtOptions,
+    columns,
+    data: rows,
+    getRowId: (row) => row.guid,
+    enablePagination: false,
+    enableTopToolbar: false,
+    enableBottomToolbar: false,
+    enableSorting: false,
+    enableCreatingRow: false,
+    enableClickToRowSelect: false,
+    state: {
+      isLoading,
+      showAlertBanner: isError,
+    },
+    // Nested inside the stock row: sized by its rows (scrolling past ~8) instead of the
+    // page tables' fixed viewport height.
+    muiTablePaperProps: {
+      sx: (theme) => ({
+        ...defaultMrtOptions.muiTablePaperProps.sx(theme),
+        height: "auto",
+      }),
+    },
+    muiTableContainerProps: {
+      sx: (theme) => ({
+        ...defaultMrtOptions.muiTableContainerProps.sx(theme),
+        maxHeight: 360,
+      }),
+    },
+    renderEmptyRowsFallback: () => (
+      <TableEmptyState
+        title={t("referralLetter.noReports")}
+        sx={{ minHeight: 0, py: 3 }}
+      />
+    ),
   });
 
   return (
@@ -117,90 +280,31 @@ const StockSharesPanel = ({ stock }) => {
         <AddButton
           size="small"
           onClick={() => setIsAddOpen(true)}
-          disabled={remainingCount === 0}
+          disabled={remainingCount === 0 || !suggestedRange}
         >
           {t("referralLetter.addReport")}
         </AddButton>
       </Box>
 
-      {isLoading ? (
-        <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
-          {t("loading")}
-        </Typography>
-      ) : shares.length === 0 ? (
-        <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
-          {t("referralLetter.noReports")}
-        </Typography>
-      ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          {shares.map((s) => (
-            <Box
-              key={s.guid || s.id}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 2,
-                py: 1,
-                px: 1.5,
-                borderRadius: "8px",
-                backgroundColor: "background.paper",
-                border: "1px solid",
-                borderColor: "divider",
-              }}
-            >
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25, flex: 1, minWidth: 0 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    {s.start_yh_number} - {s.end_yh_number}
-                  </Typography>
-                  <StatusChip
-                    status={resolveStatusKey(s.status)}
-                    config={REFERRAL_REPORT_STATUS_CONFIG}
-                    size="small"
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    {formatChange(s.datetime, { dateOnly: true })}
-                  </Typography>
-                </Box>
-                <Typography variant="caption" color="text.secondary" noWrap>
-                  {s.reportAS_operator?.fullName || ""}
-                  {s.received_by ? ` → ${s.received_by}` : ""}
-                  {s.note ? ` • ${s.note}` : ""}
-                </Typography>
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
-                <Tooltip title={t("edit")} arrow>
-                  <IconButton size="small" onClick={() => setEditingShare(s)}>
-                    <PenLine size={14} />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title={t("delete")} arrow>
-                  <IconButton size="small" onClick={() => deleteDialog.open(s)}>
-                    <Trash2 size={14} />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </Box>
-          ))}
-        </Box>
-      )}
+      <MaterialReactTable table={table} />
 
       {isAddOpen && (
         <AddReferralReportModal
           open={isAddOpen}
           close={() => setIsAddOpen(false)}
           stock={stock}
-          shares={shares}
+          occupied={rows}
           defaultRange={suggestedRange}
         />
       )}
 
-      {editingShare && (
+      {editingLetter && (
         <EditReferralReportModal
-          open={Boolean(editingShare)}
-          close={() => setEditingShare(null)}
-          row={{ original: editingShare }}
+          open={Boolean(editingLetter)}
+          close={() => setEditingLetter(null)}
+          stock={stock}
+          occupied={rows}
+          row={{ original: editingLetter }}
         />
       )}
 

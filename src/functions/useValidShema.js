@@ -267,7 +267,7 @@ export const useValidShema = () => {
       }),
   });
 
-  // Shared by the create and edit task forms. `dueDate` differs between them:
+  // Shared by the create and edit task forms. `endDate` differs between them:
   // a new task may not be created already overdue, but an existing overdue task
   // still has to be editable (that is how it gets moved to "completed").
   const taskBaseFields = {
@@ -285,21 +285,31 @@ export const useValidShema = () => {
       .required(t("validation.required")),
   };
 
-  const addTask = yup.object({
-    ...taskBaseFields,
-    dueDate: yup
+  // Task window: both sides optional, but the end may not come before the start.
+  const taskEndDate = () =>
+    yup
       .mixed()
       .nullable()
-      .test("task-due-not-past", t("task.validation.dueDateInPast"), (val) => {
-        if (!val) return true;
-        const parsed = dayjs(val);
-        return !parsed.isValid() || !parsed.isBefore(dayjs(), "day");
-      }),
+      .test("task-end-after-start", t("task.validation.endBeforeStart"), function (val) {
+        const { startDate } = this.parent;
+        if (!val || !startDate) return true;
+        return !dayjs(val).isBefore(dayjs(startDate));
+      });
+
+  const addTask = yup.object({
+    ...taskBaseFields,
+    startDate: yup.mixed().nullable(),
+    endDate: taskEndDate().test(
+      "task-end-not-past",
+      t("task.validation.endDateInPast"),
+      (val) => !val || !dayjs(val).isBefore(dayjs()),
+    ),
   });
 
   const editTask = yup.object({
     ...taskBaseFields,
-    dueDate: yup.mixed().nullable(),
+    startDate: yup.mixed().nullable(),
+    endDate: taskEndDate(),
   });
 
   const addCafeteriaTransaction = yup.object({

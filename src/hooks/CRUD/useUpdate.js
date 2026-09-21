@@ -91,7 +91,7 @@ export const useUpdate = ({
       });
 
       if (showSuccessMessage) hdlSuccessResMsg({ data: { message } });
-      onSuccessUpdate?.();
+      onSuccessUpdate?.(itemPayload);
     },
 
     onError: (err) => hdlErrResMsg(err),

@@ -208,8 +208,10 @@ export const getAllReportsApi = async (params = {}) => {
   return await api.getPrivate('/report/get-all-report', params);
 };
 
-export const getAllReportSharesApi = async (params = {}) => {
-  return await api.getPrivate('/report-share/get-all-report-shares', params);
+// Every letter (referral letters and "other" letters) whose ÝH number falls in
+// [start_number, end_number]; a stock batch's letters are fetched with its range.
+export const getLettersByDocumentRangeApi = async (params = {}) => {
+  return await api.getPrivate('/refferal-letter/get-by-document-number-range', params);
 };
 
 export const getUserProfileApi = async () => {

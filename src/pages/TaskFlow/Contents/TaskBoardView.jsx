@@ -17,7 +17,8 @@ import {
   Skeleton,
   alpha,
 } from "@mui/material";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -26,7 +27,6 @@ import AddIcon from "@mui/icons-material/Add";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useLocale } from "../../../hooks/useLocale";
-import { useDateFormat } from "../../../functions/generalHelpers";
 import { getAllTasksApi } from "../../../api/queries/getters";
 import AppAvatarGroup from "../../../components/AppAvatarGroup";
 import {
@@ -34,10 +34,14 @@ import {
   getTaskPriority,
   getTaskAssignees,
   getTaskAttachments,
+  getTaskWindowParts,
+  isTaskOverdue,
   toTaskApiParams,
 } from "../functions/taskMeta";
+import { TASK_BOARD_KEY } from "../functions/taskBoardCache";
 
 const COLUMN_PAGE_SIZE = 10;
+const CARD_HEIGHT = 160;
 
 /**
  * `/messages/get-all-tasks` keyset body: `{ data: Task[], meta: { nextCursor, totalItems? } }`.
@@ -46,22 +50,230 @@ const COLUMN_PAGE_SIZE = 10;
 const extractItems = (responseBody) =>
   Array.isArray(responseBody?.data) ? responseBody.data : [];
 
+const windowTextSx = {
+  fontSize: "0.75rem",
+  fontWeight: 600,
+  lineHeight: 1,
+  fontVariantNumeric: "tabular-nums",
+  whiteSpace: "nowrap",
+};
+
+/** `start → end` row; the end turns red once an unfinished task is past it. */
+const TaskWindow = ({ timeWindow, isOverdue, t }) => (
+  <Box
+    sx={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 0.6,
+      alignSelf: "flex-start",
+      px: 0.75,
+      py: 0.4,
+      borderRadius: "6px",
+      bgcolor: "action.hover",
+      color: "text.secondary",
+      maxWidth: "100%",
+      overflow: "hidden",
+    }}
+  >
+    <ScheduleIcon sx={{ fontSize: 14 }} />
+    {timeWindow.start && (
+      <Typography component="span" sx={{ ...windowTextSx, color: "text.primary" }}>
+        {timeWindow.start}
+      </Typography>
+    )}
+    <ArrowForwardIcon sx={{ fontSize: 12, opacity: 0.7 }} />
+    {timeWindow.end ? (
+      <Typography
+        component="span"
+        sx={{ ...windowTextSx, color: isOverdue ? "error.main" : "text.primary" }}
+      >
+        {timeWindow.end}
+      </Typography>
+    ) : (
+      <Typography component="span" sx={windowTextSx}>
+        —
+      </Typography>
+    )}
+    {isOverdue && (
+      <Typography
+        component="span"
+        sx={{ ...windowTextSx, fontSize: "0.68rem", color: "error.main", ml: 0.25 }}
+      >
+        · {t("task.overdue")}
+      </Typography>
+    )}
+  </Box>
+);
+
+/**
+ * Memoized so a card only re-renders when its own task object changes: the cache
+ * helpers replace just the patched card, and the other callbacks are stable.
+ */
+const TaskCard = memo(function TaskCard({ task, color, t, onEditTask, onOpenMenu }) {
+  const priority = getTaskPriority(task.priority);
+  const timeWindow = getTaskWindowParts(task);
+  const isOverdue = isTaskOverdue(task);
+  const assigneesList = getTaskAssignees(task);
+  const attachmentCount = getTaskAttachments(task).length;
+
+  return (
+    <Card
+      elevation={0}
+      sx={{
+        borderRadius: "10px",
+        border: "1px solid",
+        borderColor: "divider",
+        borderLeft: `3.5px solid ${color}`,
+        bgcolor: "background.paper",
+        height: CARD_HEIGHT,
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column",
+        // Off-screen cards skip layout and paint, so long scrolled columns stay cheap.
+        contentVisibility: "auto",
+        containIntrinsicSize: `auto ${CARD_HEIGHT}px`,
+        transition: "box-shadow 0.15s ease, border-color 0.15s ease",
+        "&:hover": {
+          boxShadow: 2,
+          borderColor: "primary.main",
+        },
+      }}
+    >
+      <CardContent
+        sx={{
+          p: 1.5,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          boxSizing: "border-box",
+          "&:last-child": { pb: 1.5 },
+        }}
+      >
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              mb: 0.5,
+            }}
+          >
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 650,
+                fontSize: "0.85rem",
+                color: "text.primary",
+                lineHeight: 1.3,
+                cursor: "pointer",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                "&:hover": { color: "primary.main" },
+              }}
+              onClick={() => onEditTask?.(task)}
+            >
+              {task.title || task.description}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={(e) => onOpenMenu(e.currentTarget, task)}
+              sx={{ color: "text.secondary", p: 0.1, ml: 0.5 }}
+            >
+              <MoreVertIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Box>
+
+          {task.description && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontSize: "0.775rem",
+                display: "-webkit-box",
+                WebkitLineClamp: 1,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                lineHeight: 1.35,
+              }}
+            >
+              {task.description}
+            </Typography>
+          )}
+        </Box>
+
+        {timeWindow && <TaskWindow timeWindow={timeWindow} isOverdue={isOverdue} t={t} />}
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            pt: 0.5,
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Chip
+              label={t(priority.labelKey)}
+              size="small"
+              sx={{
+                height: 20,
+                fontSize: "0.7rem",
+                fontWeight: 600,
+                bgcolor: alpha(priority.color, 0.12),
+                color: priority.color,
+                borderRadius: "5px",
+                px: 0.5,
+              }}
+            />
+            {attachmentCount > 0 && (
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.35,
+                  color: "text.secondary",
+                }}
+              >
+                <AttachFileIcon sx={{ fontSize: 17, color: "primary.main" }} />
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    lineHeight: 1,
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {attachmentCount}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          <AppAvatarGroup items={assigneesList} max={6} size={22} />
+        </Box>
+      </CardContent>
+    </Card>
+  );
+});
+
 const TaskBoardColumn = memo(function TaskBoardColumn({
   col,
   filterParams,
-  draggingTask,
   onEditTask,
-  onDragStartTask,
-  onDragEndTask,
-  onDropTask,
   onOpenCreateModal,
-  setTaskMenuAnchor,
-  setActiveTask,
+  onOpenMenu,
 }) {
   const { t } = useLocale();
-  const { formatChange } = useDateFormat();
   const scrollContainerRef = useRef(null);
-  const [isDropTarget, setIsDropTarget] = useState(false);
 
   // Each column pages independently: asking the server for this status only is
   // what keeps a busy "To Do" column from starving the other two.
@@ -79,7 +291,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     isLoading,
     isFetching,
   } = useInfiniteQuery({
-    queryKey: ["tasks-board", col.id, columnParams],
+    queryKey: [TASK_BOARD_KEY, col.id, columnParams],
     // Keyset pagination: "" asks for the first page, then each page hands back the
     // cursor for the next. Moving cards never shifts pages, and deep scrolling stays O(page).
     queryFn: async ({ pageParam }) => {
@@ -114,29 +326,6 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const canAcceptDrop =
-    Boolean(draggingTask) && Number(draggingTask.status) !== col.id;
-
-  const handleDragOver = (e) => {
-    if (!canAcceptDrop) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    if (!isDropTarget) setIsDropTarget(true);
-  };
-
-  const handleDragLeave = (e) => {
-    // Ignore moves between children of this column.
-    if (e.currentTarget.contains(e.relatedTarget)) return;
-    setIsDropTarget(false);
-  };
-
-  const handleDrop = (e) => {
-    if (!canAcceptDrop) return;
-    e.preventDefault();
-    setIsDropTarget(false);
-    onDropTask(col.id);
-  };
-
   const showSkeletons = isLoading && tasks.length === 0;
   const showEmptyState = !isLoading && tasks.length === 0;
 
@@ -151,17 +340,12 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
       }}
     >
       <Box
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
         sx={(theme) => ({
-          bgcolor: isDropTarget
-            ? alpha(col.color, 0.12)
-            : alpha(theme.palette.text.primary, 0.025),
-          border: isDropTarget ? "2px dashed" : "1px solid",
-          borderColor: isDropTarget ? col.color : "divider",
+          bgcolor: alpha(theme.palette.text.primary, 0.025),
+          border: "1px solid",
+          borderColor: "divider",
           borderRadius: "12px",
-          p: isDropTarget ? "11px" : 1.5,
+          p: 1.5,
           height: "100%",
           maxHeight: "100%",
           minHeight: 0,
@@ -169,7 +353,6 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
           flexDirection: "column",
           boxSizing: "border-box",
           overflow: "hidden",
-          transition: "background-color 0.15s ease, border-color 0.15s ease",
         })}
       >
         {/* Column header with counter */}
@@ -251,8 +434,8 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
         >
           {showSkeletons && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-              <Skeleton variant="rounded" height={145} sx={{ borderRadius: "10px" }} />
-              <Skeleton variant="rounded" height={145} sx={{ borderRadius: "10px" }} />
+              <Skeleton variant="rounded" height={CARD_HEIGHT} sx={{ borderRadius: "10px" }} />
+              <Skeleton variant="rounded" height={CARD_HEIGHT} sx={{ borderRadius: "10px" }} />
             </Box>
           )}
 
@@ -274,9 +457,9 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
                 variant="body2"
                 sx={{ color: "text.secondary", fontSize: "0.8rem" }}
               >
-                {canAcceptDrop ? t("task.dropHere") : t("task.noTasksInColumn")}
+                {t("task.noTasksInColumn")}
               </Typography>
-              {!canAcceptDrop && onOpenCreateModal && (
+              {onOpenCreateModal && (
                 <Button
                   size="small"
                   startIcon={<AddIcon sx={{ fontSize: 16 }} />}
@@ -294,198 +477,16 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
             </Box>
           )}
 
-          {tasks.map((task) => {
-            const priority = getTaskPriority(task.priority);
-            const formattedDate = formatChange(task.due_date || task.dueDate, {
-              dateOnly: true,
-            });
-            const assigneesList = getTaskAssignees(task);
-            const attachmentCount = getTaskAttachments(task).length;
-            const isDragging = draggingTask?.guid === task.guid;
-
-            return (
-              <Card
-                key={task.guid}
-                elevation={0}
-                draggable
-                onDragStart={(e) => {
-                  e.dataTransfer.effectAllowed = "move";
-                  e.dataTransfer.setData("text/plain", task.guid);
-                  onDragStartTask(task);
-                }}
-                onDragEnd={onDragEndTask}
-                sx={{
-                  borderRadius: "10px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderLeft: `3.5px solid ${col.color}`,
-                  bgcolor: "background.paper",
-                  height: 145,
-                  flexShrink: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  cursor: "grab",
-                  opacity: isDragging ? 0.45 : 1,
-                  transition: "all 0.15s ease-in-out",
-                  "&:active": { cursor: "grabbing" },
-                  "&:hover": {
-                    boxShadow: 2,
-                    borderColor: "primary.main",
-                  },
-                }}
-              >
-                <CardContent
-                  sx={{
-                    p: 1.5,
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    boxSizing: "border-box",
-                    "&:last-child": { pb: 1.5 },
-                  }}
-                >
-                  <Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        mb: 0.5,
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontWeight: 650,
-                          fontSize: "0.85rem",
-                          color: "text.primary",
-                          lineHeight: 1.3,
-                          cursor: "pointer",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          wordBreak: "break-word",
-                          overflowWrap: "break-word",
-                          "&:hover": { color: "primary.main" },
-                        }}
-                        onClick={() => onEditTask?.(task)}
-                      >
-                        {task.title || task.description}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          setTaskMenuAnchor(e.currentTarget);
-                          setActiveTask(task);
-                        }}
-                        sx={{ color: "text.secondary", p: 0.1, ml: 0.5 }}
-                      >
-                        <MoreVertIcon sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-
-                    {task.description && (
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                          fontSize: "0.775rem",
-                          display: "-webkit-box",
-                          WebkitLineClamp: 1,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                          wordBreak: "break-word",
-                          overflowWrap: "break-word",
-                          lineHeight: 1.35,
-                        }}
-                      >
-                        {task.description}
-                      </Typography>
-                    )}
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      pt: 0.5,
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Chip
-                        label={t(priority.labelKey)}
-                        size="small"
-                        sx={{
-                          height: 20,
-                          fontSize: "0.7rem",
-                          fontWeight: 600,
-                          bgcolor: alpha(priority.color, 0.12),
-                          color: priority.color,
-                          borderRadius: "5px",
-                          px: 0.5,
-                        }}
-                      />
-                      {formattedDate && (
-                        <Box
-                          sx={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 0.4,
-                            color: "text.secondary",
-                          }}
-                        >
-                          <CalendarTodayIcon sx={{ fontSize: 15 }} />
-                          <Typography
-                            component="span"
-                            sx={{
-                              fontSize: "0.75rem",
-                              fontWeight: 500,
-                              lineHeight: 1,
-                              display: "inline-flex",
-                              alignItems: "center",
-                            }}
-                          >
-                            {formattedDate}
-                          </Typography>
-                        </Box>
-                      )}
-                      {attachmentCount > 0 && (
-                        <Box
-                          sx={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 0.35,
-                            color: "text.secondary",
-                          }}
-                        >
-                          <AttachFileIcon
-                            sx={{ fontSize: 17, color: "primary.main" }}
-                          />
-                          <Typography
-                            component="span"
-                            sx={{
-                              fontSize: "0.75rem",
-                              fontWeight: 600,
-                              lineHeight: 1,
-                              display: "inline-flex",
-                              alignItems: "center",
-                            }}
-                          >
-                            {attachmentCount}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-
-                    <AppAvatarGroup items={assigneesList} max={6} size={22} />
-                  </Box>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {tasks.map((task) => (
+            <TaskCard
+              key={task.guid}
+              task={task}
+              color={col.color}
+              t={t}
+              onEditTask={onEditTask}
+              onOpenMenu={onOpenMenu}
+            />
+          ))}
 
           {isFetchingNextPage && (
             <Box
@@ -509,7 +510,8 @@ function TaskBoardView({
   searchQuery = "",
   filterStatus = "",
   filterPriority = "",
-  dueDate = "",
+  dateFrom = "",
+  dateTo = "",
   oprGuid = "",
   onMoveTaskStatus,
   onEditTask,
@@ -520,12 +522,16 @@ function TaskBoardView({
 
   const [activeTask, setActiveTask] = useState(null);
   const [taskMenuAnchor, setTaskMenuAnchor] = useState(null);
-  const [draggingTask, setDraggingTask] = useState(null);
 
   const handleMenuClose = () => {
     setTaskMenuAnchor(null);
     setActiveTask(null);
   };
+
+  const handleOpenMenu = useCallback((anchor, task) => {
+    setTaskMenuAnchor(anchor);
+    setActiveTask(task);
+  }, []);
 
   // `status` is intentionally left out: each column pins its own.
   const filterParams = useMemo(() => {
@@ -534,9 +540,13 @@ function TaskBoardView({
     if (filterPriority && filterPriority !== "all") {
       params.priority = filterPriority;
     }
-    if (dueDate) params.due_date = dueDate;
-    return toTaskApiParams({ ...params, opr_guid: oprGuid });
-  }, [searchQuery, filterPriority, dueDate, oprGuid]);
+    return toTaskApiParams({
+      ...params,
+      date_from: dateFrom,
+      date_to: dateTo,
+      opr_guid: oprGuid,
+    });
+  }, [searchQuery, filterPriority, dateFrom, dateTo, oprGuid]);
 
   const visibleColumns = useMemo(() => {
     if (!filterStatus || filterStatus === "all") return TASK_STATUS_ITEMS;
@@ -544,25 +554,6 @@ function TaskBoardView({
       (col) => Number(filterStatus) === Number(col.id),
     );
   }, [filterStatus]);
-
-  const handleDragStartTask = useCallback((task) => {
-    setDraggingTask({ guid: task.guid, status: Number(task.status) || 1 });
-  }, []);
-
-  const handleDragEndTask = useCallback(() => {
-    setDraggingTask(null);
-  }, []);
-
-  const handleDropTask = useCallback(
-    (targetStatus) => {
-      if (!draggingTask) return;
-      if (Number(draggingTask.status) !== Number(targetStatus)) {
-        onMoveTaskStatus?.(draggingTask.guid, targetStatus);
-      }
-      setDraggingTask(null);
-    },
-    [draggingTask, onMoveTaskStatus],
-  );
 
   return (
     <Box
@@ -592,19 +583,14 @@ function TaskBoardView({
             key={col.id}
             col={col}
             filterParams={filterParams}
-            draggingTask={draggingTask}
             onEditTask={onEditTask}
-            onDragStartTask={handleDragStartTask}
-            onDragEndTask={handleDragEndTask}
-            onDropTask={handleDropTask}
             onOpenCreateModal={onOpenCreateModal}
-            setTaskMenuAnchor={setTaskMenuAnchor}
-            setActiveTask={setActiveTask}
+            onOpenMenu={handleOpenMenu}
           />
         ))}
       </Grid>
 
-      {/* Card context menu — the keyboard/touch path for what dragging does */}
+      {/* Card context menu: edit, status change and delete */}
       <Menu
         anchorEl={taskMenuAnchor}
         open={Boolean(taskMenuAnchor)}

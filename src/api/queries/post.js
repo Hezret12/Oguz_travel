@@ -221,8 +221,8 @@ export const addReportApi = async (data) => {
   return await api.postPrivate("/report/add-report", data);
 };
 
-export const addReportShareApi = async (data) => {
-  return await api.postPrivate("/report-share/add-report-share", data);
+export const addOtherLetterApi = async (data) => {
+  return await api.postPrivate("/refferal-letter/add-other-letter", data);
 };
 
 export const createCountryApi = async (data) => {
