@@ -613,7 +613,25 @@
       "exportFileFormat": "Faýl Formatı",
       "exportFileName": "Faýl Ady",
       "exportButton": "Excel Ýüklemek",
-      "exportSuccess": "Hasabat üstünlikli ýüklendi"
+      "exportSuccess": "Hasabat üstünlikli ýüklendi",
+      "quarterMonths": {
+        "q1": "Ýan – Mar",
+        "q2": "Apr – Iýun",
+        "q3": "Iýul – Sen",
+        "q4": "Okt – Dek"
+      },
+      "selectQuarter": "Çärýegi saýlaň",
+      "currentQuarter": "Häzirki",
+      "growth": "Ösüş",
+      "vsYear": "{{year}} ýyla görä",
+      "noBaseline": "Deňeşdirmek üçin {{year}} ýylyň maglumaty ýok",
+      "goalReached": "Maksada ýetildi",
+      "dailyAvg": "Günlük ortaça",
+      "bestDay": "Iň gowy gün",
+      "dayN": "{{day}}-nji gün",
+      "margin": "Peýda paýy",
+      "unpaidShare": "Satuwlaryň {{value}}-y tölenmedik",
+      "workingDays": "{{count}} iş güni"
     }
   },
   "task": {

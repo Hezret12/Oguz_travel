@@ -613,7 +613,25 @@
       "exportFileFormat": "Формат файла",
       "exportFileName": "Имя файла",
       "exportButton": "Скачать Excel",
-      "exportSuccess": "Отчет успешно скачан"
+      "exportSuccess": "Отчет успешно скачан",
+      "quarterMonths": {
+        "q1": "Янв – Мар",
+        "q2": "Апр – Июн",
+        "q3": "Июл – Сен",
+        "q4": "Окт – Дек"
+      },
+      "selectQuarter": "Выберите квартал",
+      "currentQuarter": "Текущий",
+      "growth": "Рост",
+      "vsYear": "к {{year}}",
+      "noBaseline": "Нет данных за {{year}} для сравнения",
+      "goalReached": "Цель достигнута",
+      "dailyAvg": "Среднее в день",
+      "bestDay": "Лучший день",
+      "dayN": "{{day}}-й день",
+      "margin": "Маржа",
+      "unpaidShare": "{{value}} продаж не оплачено",
+      "workingDays": "Рабочих дней: {{count}}"
     }
   },
   "task": {

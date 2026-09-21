@@ -8,6 +8,7 @@ import { useDocumentTitle } from "../../../hooks/useDocumentTitle";
 import { formatNumber, formatCompact } from "../../../functions/generalHelpers";
 import { useQuery } from "@tanstack/react-query";
 import { getTurkishQuarterApi } from "../../../api/queries/getters";
+import { getQuarterOfDate } from "./functions/quarter";
 
 import ReportHeader from "./Contents/ReportHeader";
 import ReportSummaryCards from "./Contents/ReportSummaryCards";
@@ -15,12 +16,10 @@ import ReportCharts from "./Contents/ReportCharts";
 import ReportTable from "./Contents/ReportTable";
 import TurkishAirlinesExportModal from "./Contents/TurkishAirlinesExportModal";
 
-const getCurrentQuarter = () => Math.floor(new Date().getMonth() / 3) + 1;
-
 const TurkishAirlinesReport = () => {
   useDocumentTitle("Turkish Airlines - Oguz Travel");
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [selectedQuarter, setSelectedQuarter] = useState(getCurrentQuarter());
+  const [selectedQuarter, setSelectedQuarter] = useState(() => getQuarterOfDate(dayjs()));
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const { data: quarterRes } = useQuery({

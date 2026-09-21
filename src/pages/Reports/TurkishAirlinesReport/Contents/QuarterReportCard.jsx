@@ -5,62 +5,108 @@ import {
   Paper,
   alpha,
   Skeleton,
-  Chip,
-  useTheme,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material";
 import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
-import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import EmojiEventsRoundedIcon from "@mui/icons-material/EmojiEventsRounded";
 
 import { useLocale } from "../../../../hooks/useLocale";
 import { useQuery } from "@tanstack/react-query";
 import { getTurkishQuarterApi } from "../../../../api/queries/getters";
 import { formatNumber } from "../../../../functions/generalHelpers";
+import {
+  QUARTERS,
+  normalizeQuarter,
+  formatUsd,
+  buildQuarterComparison,
+} from "../functions/quarter";
+
+const formatPercent = (value) => `${Math.round(value)}%`;
+
+const YearTile = ({ year, profit, revenue, highlighted, badge, revenueLabel, profitLabel }) => (
+  <Box
+    sx={{
+      flex: 1,
+      minWidth: 0,
+      p: 1.75,
+      borderRadius: 2,
+      border: 1,
+      borderColor: highlighted ? (th) => alpha(th.palette.primary.main, 0.35) : "divider",
+      bgcolor: highlighted ? (th) => alpha(th.palette.primary.main, 0.06) : "action.hover",
+      display: "flex",
+      flexDirection: "column",
+      gap: 0.75,
+    }}
+  >
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+      <Typography sx={{ fontSize: 12, fontWeight: 700, color: highlighted ? "primary.main" : "text.secondary" }}>
+        {year}
+      </Typography>
+      {badge}
+    </Box>
+    <Box>
+      <Typography sx={{ fontSize: 11, color: "text.secondary", fontWeight: 600 }}>{profitLabel}</Typography>
+      <Typography
+        noWrap
+        sx={{
+          fontSize: 22,
+          fontWeight: 800,
+          letterSpacing: "-0.02em",
+          color: highlighted ? "primary.main" : "text.primary",
+        }}
+      >
+        {formatUsd(profit, formatNumber)}
+      </Typography>
+    </Box>
+    <Typography noWrap sx={{ fontSize: 11.5, color: "text.secondary", fontWeight: 500 }}>
+      {revenueLabel}: <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>{formatUsd(revenue, formatNumber)}</Box>
+    </Typography>
+  </Box>
+);
 
 export default function QuarterReportCard({ selectedQuarter, onQuarterChange, paperSx }) {
   const { t } = useLocale();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-
-  const quarter = selectedQuarter || Math.floor(new Date().getMonth() / 3) + 1;
+  const quarter = normalizeQuarter(selectedQuarter);
 
   const { data: quarterRes, isLoading } = useQuery({
     queryKey: ["turkish-quarter", quarter],
     queryFn: () => getTurkishQuarterApi({ quarter }),
   });
 
-  const qi = useMemo(() => {
-    if (!quarterRes) return null;
-    const rd = quarterRes?.data || {};
-    const list = Array.isArray(rd?.data) ? rd.data : Array.isArray(rd) ? rd : [];
+  const qi = useMemo(() => buildQuarterComparison(quarterRes?.data), [quarterRes]);
 
-    const achStr = rd?.achievement_percentage || "0%";
-    const achNum = parseFloat(achStr.replace("%", "")) || 0;
+  const trendColor = qi.isUp ? "success.main" : "error.main";
+  const TrendIcon = qi.isUp ? TrendingUpRoundedIcon : TrendingDownRoundedIcon;
+  const progress = qi.achievement === null ? 0 : Math.min(100, Math.max(0, qi.achievement));
 
-    const sorted = [...list].sort((a, b) => Number(a.year) - Number(b.year));
-    const prev = sorted.length > 1 ? sorted[0] : null;
-    const curr = sorted.length > 0 ? sorted[sorted.length - 1] || sorted[0] : null;
+  const growthBadge = (qi.current.hasData || qi.previous.hasData) && (
+    <Box
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 0.3,
+        px: 0.75,
+        py: 0.2,
+        borderRadius: 1,
+        color: trendColor,
+        bgcolor: (th) => alpha(qi.isUp ? th.palette.success.main : th.palette.error.main, 0.12),
+      }}
+    >
+      <TrendIcon sx={{ fontSize: 14 }} />
+      <Typography sx={{ fontSize: 11, fontWeight: 700, whiteSpace: "nowrap" }}>
+        {qi.growth !== null
+          ? `${qi.growth >= 0 ? "+" : ""}${formatPercent(qi.growth)}`
+          : `${qi.diff >= 0 ? "+" : ""}${formatUsd(qi.diff, formatNumber)}`}
+      </Typography>
+    </Box>
+  );
 
-    const prevProfit = Number(prev?.profit) || 0;
-    const currProfit = Number(curr?.profit) || 0;
-    const diff = currProfit - prevProfit;
-    const isUp = diff >= 0;
-
-    return {
-      achNum,
-      achStr,
-      prevYear: prev?.year || null,
-      currYear: curr?.year || null,
-      prevProfit,
-      currProfit,
-      diff,
-      isUp,
-      isDone: achNum >= 100,
-    };
-  }, [quarterRes]);
-
-  const trendColor = qi?.isUp ? (isDark ? "#34D399" : "#10B981") : (isDark ? "#F87171" : "#EF4444");
+  const handleQuarterChange = (_, value) => {
+    if (value !== null) onQuarterChange?.(value);
+  };
 
   return (
     <Paper
@@ -74,11 +120,12 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
     >
       {/* Header */}
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, mb: 2.5 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0 }}>
           <Box
             sx={{
               width: 40,
               height: 40,
+              flexShrink: 0,
               borderRadius: 2,
               bgcolor: (th) => alpha(th.palette.primary.main, 0.12),
               color: "primary.main",
@@ -90,214 +137,134 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
           >
             <PieChartRoundedIcon sx={{ fontSize: 22 }} />
           </Box>
-          <Box>
-            <Typography
-              sx={{
-                fontWeight: 700,
-                fontSize: "0.9rem",
-                lineHeight: 1.2,
-                color: "text.primary",
-              }}
-            >
+          <Box sx={{ minWidth: 0 }}>
+            <Typography noWrap sx={{ fontWeight: 700, fontSize: "0.9rem", lineHeight: 1.2, color: "text.primary" }}>
               {t("report.turkishAirlines.quarterReport")}
             </Typography>
-            <Typography sx={{ fontSize: 12, color: "text.secondary", fontWeight: 600, mt: 0.2 }}>
-              {t(`report.turkishAirlines.q${quarter}`)}
+            <Typography noWrap sx={{ fontSize: 12, color: "text.secondary", fontWeight: 600, mt: 0.2 }}>
+              Q{quarter} · {t(`report.turkishAirlines.quarterMonths.q${quarter}`)} · {qi.previous.year} → {qi.current.year}
             </Typography>
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          {[1, 2, 3, 4].map((q) => {
-            const isActive = quarter === q;
-            return (
-              <Chip
-                key={q}
-                label={`Q${q}`}
-                size="small"
-                onClick={() => onQuarterChange?.(q)}
-                sx={{
-                  fontWeight: 800,
-                  fontSize: 11.5,
-                  cursor: "pointer",
-                  backgroundColor: isActive
-                    ? "primary.main"
-                    : (th) =>
-                        th.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.06)"
-                          : "#F1F5F9",
-                  color: isActive ? "#FFF" : "text.secondary",
-                  border: (th) =>
-                    `1px solid ${
-                      isActive
-                        ? th.palette.primary.main
-                        : th.palette.mode === "dark"
-                        ? "rgba(255,255,255,0.08)"
-                        : "#E2E8F0"
-                    }`,
-                  "&:hover": {
-                    backgroundColor: isActive
-                      ? "primary.main"
-                      : (th) => alpha(th.palette.primary.main, 0.12),
-                    color: isActive ? "#FFF" : "primary.main",
-                  },
-                }}
-              />
-            );
-          })}
-        </Box>
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={quarter}
+          onChange={handleQuarterChange}
+          aria-label={t("report.turkishAirlines.selectQuarter")}
+          sx={{
+            bgcolor: "action.hover",
+            borderRadius: 2,
+            p: 0.4,
+            gap: 0.4,
+            "& .MuiToggleButton-root": {
+              border: 0,
+              borderRadius: "6px !important",
+              px: 1.25,
+              py: 0.35,
+              fontSize: 11.5,
+              fontWeight: 800,
+              color: "text.secondary",
+              "&.Mui-selected, &.Mui-selected:hover": {
+                bgcolor: "primary.main",
+                color: "primary.contrastText",
+              },
+            },
+          }}
+        >
+          {QUARTERS.map((q) => (
+            <ToggleButton key={q} value={q}>
+              Q{q}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
       </Box>
 
       {isLoading ? (
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
           <Skeleton variant="rectangular" height={64} sx={{ borderRadius: 2 }} />
-          <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 2 }} />
+          <Box sx={{ display: "flex", gap: 1.5 }}>
+            <Skeleton variant="rectangular" height={110} sx={{ borderRadius: 2, flex: 1 }} />
+            <Skeleton variant="rectangular" height={110} sx={{ borderRadius: 2, flex: 1 }} />
+          </Box>
         </Box>
       ) : (
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2.5 }}>
-          {/* Achievement Progress */}
+          {/* Goal achievement: current-year profit against previous-year profit */}
           <Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "baseline",
-                mb: 1,
-              }}
-            >
-              <Typography sx={{ fontSize: 12, fontWeight: 600, color: "text.secondary" }}>
-                {t("report.turkishAirlines.achievementRate")}
-              </Typography>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 1, mb: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                <Typography sx={{ fontSize: 12, fontWeight: 600, color: "text.secondary" }}>
+                  {t("report.turkishAirlines.achievementRate")}
+                </Typography>
+                {qi.isGoalReached && (
+                  <Box
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.3,
+                      px: 0.75,
+                      py: 0.1,
+                      borderRadius: 1,
+                      color: "success.main",
+                      bgcolor: (th) => alpha(th.palette.success.main, 0.12),
+                    }}
+                  >
+                    <EmojiEventsRoundedIcon sx={{ fontSize: 13 }} />
+                    <Typography sx={{ fontSize: 10.5, fontWeight: 700 }}>
+                      {t("report.turkishAirlines.goalReached")}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
               <Typography
                 sx={{
                   fontSize: 20,
                   fontWeight: 800,
-                  color: qi?.isDone ? (isDark ? "#34D399" : "#10B981") : "primary.main",
                   letterSpacing: "-0.02em",
+                  color: qi.isGoalReached ? "success.main" : qi.hasBaseline ? "primary.main" : "text.secondary",
                 }}
               >
-                {qi?.achStr || "0%"}
+                {qi.achievement === null ? "—" : formatPercent(qi.achievement)}
               </Typography>
             </Box>
-            <Box
-              sx={{
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: (th) =>
-                  th.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.08)"
-                    : "#E2E8F0",
-                overflow: "hidden",
-              }}
-            >
+            <Box sx={{ height: 8, borderRadius: 4, bgcolor: "action.hover", overflow: "hidden" }}>
               <Box
                 sx={{
                   height: "100%",
-                  width: `${Math.min(100, qi?.achNum || 0)}%`,
+                  width: `${progress}%`,
                   borderRadius: 4,
-                  backgroundColor: qi?.isDone ? (isDark ? "#34D399" : "#10B981") : theme.palette.primary.main,
+                  bgcolor: qi.isGoalReached ? "success.main" : "primary.main",
                   transition: "width 0.5s ease",
                 }}
               />
             </Box>
+            <Typography sx={{ mt: 0.75, fontSize: 11.5, color: "text.secondary", fontWeight: 500 }}>
+              {qi.hasBaseline
+                ? `${formatUsd(qi.current.profit, formatNumber)} / ${formatUsd(qi.previous.profit, formatNumber)}`
+                : t("report.turkishAirlines.noBaseline", { year: qi.previous.year })}
+            </Typography>
           </Box>
 
-          {/* Year-over-Year Profit Comparison */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 1,
-              p: 2,
-              borderRadius: 2,
-              backgroundColor: (th) =>
-                th.palette.mode === "dark"
-                  ? "rgba(255,255,255,0.03)"
-                  : "#F8FAFC",
-              border: (th) =>
-                `1px solid ${
-                  th.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.06)"
-                    : "#E2E8F0"
-                }`,
-            }}
-          >
-            {/* Previous Year */}
-            <Box sx={{ textAlign: "center", flex: 1 }}>
-              <Typography sx={{ fontSize: 11, color: "text.secondary", fontWeight: 600, mb: 0.5 }}>
-                {qi?.prevYear || "—"}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: "text.primary",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                ${formatNumber(qi?.prevProfit)}
-              </Typography>
-            </Box>
-
-            {/* Arrow + Trend */}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 0.5,
-                px: 1,
-              }}
-            >
-              <ArrowForwardRoundedIcon
-                sx={{ fontSize: 18, color: "text.secondary", transform: "rotate(-30deg)" }}
-              />
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.3,
-                  px: 0.8,
-                  py: 0.2,
-                  borderRadius: 1,
-                  backgroundColor: alpha(trendColor, 0.1),
-                }}
-              >
-                {qi?.isUp ? (
-                  <TrendingUpRoundedIcon sx={{ fontSize: 14, color: trendColor }} />
-                ) : (
-                  <TrendingDownRoundedIcon sx={{ fontSize: 14, color: trendColor }} />
-                )}
-                <Typography
-                  sx={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: trendColor,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {qi?.isUp ? "+" : "-"}${formatNumber(Math.abs(qi?.diff || 0))}
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Current Year */}
-            <Box sx={{ textAlign: "center", flex: 1 }}>
-              <Typography sx={{ fontSize: 11, color: "text.secondary", fontWeight: 600, mb: 0.5 }}>
-                {qi?.currYear || "—"}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: 18,
-                  fontWeight: 800,
-                  color: "primary.main",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                ${formatNumber(qi?.currProfit)}
-              </Typography>
-            </Box>
+          {/* Year-over-year profit comparison */}
+          <Box sx={{ display: "flex", gap: 1.5, flexDirection: { xs: "column", sm: "row" } }}>
+            <YearTile
+              year={qi.previous.year}
+              profit={qi.previous.profit}
+              revenue={qi.previous.revenue}
+              profitLabel={t("report.turkishAirlines.profit")}
+              revenueLabel={t("report.turkishAirlines.quotedPrice")}
+            />
+            <YearTile
+              highlighted
+              year={qi.current.year}
+              profit={qi.current.profit}
+              revenue={qi.current.revenue}
+              profitLabel={t("report.turkishAirlines.profit")}
+              revenueLabel={t("report.turkishAirlines.quotedPrice")}
+              badge={growthBadge}
+            />
           </Box>
         </Box>
       )}

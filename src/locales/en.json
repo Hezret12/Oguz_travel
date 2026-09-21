@@ -613,7 +613,25 @@
       "exportFileFormat": "File Format",
       "exportFileName": "File Name",
       "exportButton": "Download Excel",
-      "exportSuccess": "Report downloaded successfully"
+      "exportSuccess": "Report downloaded successfully",
+      "quarterMonths": {
+        "q1": "Jan – Mar",
+        "q2": "Apr – Jun",
+        "q3": "Jul – Sep",
+        "q4": "Oct – Dec"
+      },
+      "selectQuarter": "Select quarter",
+      "currentQuarter": "Current",
+      "growth": "Growth",
+      "vsYear": "vs {{year}}",
+      "noBaseline": "No {{year}} data to compare",
+      "goalReached": "Goal reached",
+      "dailyAvg": "Daily average",
+      "bestDay": "Best day",
+      "dayN": "Day {{day}}",
+      "margin": "Margin",
+      "unpaidShare": "{{value}} of sales unpaid",
+      "workingDays": "{{count}} working days"
     }
   },
   "task": {

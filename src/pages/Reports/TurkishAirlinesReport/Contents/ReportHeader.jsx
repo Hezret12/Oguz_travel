@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -12,18 +12,52 @@ import {
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 import ExportExcelButton from "../../../../components/ExportExcelButton";
+import { QUARTERS, getQuarterOfDate, normalizeQuarter } from "../functions/quarter";
 
-const QUARTERS = [
-  { value: 1, key: "report.turkishAirlines.q1" },
-  { value: 2, key: "report.turkishAirlines.q2" },
-  { value: 3, key: "report.turkishAirlines.q3" },
-  { value: 4, key: "report.turkishAirlines.q4" },
-];
+// Module-level so MUI doesn't remount it every render; MUI adds `MuiSelect-iconOpen` while the menu is open.
+const SelectChevron = ({ className }) => (
+  <Box
+    component="span"
+    className={className}
+    sx={{
+      display: "inline-flex",
+      position: "absolute",
+      right: 12,
+      top: "calc(50% - 9px)",
+      color: "text.secondary",
+      pointerEvents: "none",
+      transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+      "&.MuiSelect-iconOpen": { transform: "rotate(180deg)" },
+    }}
+  >
+    <ChevronDown size={18} />
+  </Box>
+);
+
+const QuarterBadge = ({ value, active, teal }) => (
+  <Box
+    sx={{
+      width: 32,
+      height: 30,
+      flexShrink: 0,
+      borderRadius: "8px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 12,
+      fontWeight: 800,
+      color: active ? "#FFFFFF" : teal,
+      backgroundColor: active ? teal : alpha(teal, 0.12),
+    }}
+  >
+    Q{value}
+  </Box>
+);
 
 const ReportHeader = ({
   selectedDate,
@@ -38,48 +72,39 @@ const ReportHeader = ({
   const d = dayjs.isDayjs(selectedDate) ? selectedDate : dayjs(selectedDate);
   const validDate = d.isValid() ? d : dayjs();
 
-  const handlePrevMonth = useCallback(() => {
-    const prev = validDate.subtract(1, "month");
-    onDateChange(prev);
-    if (onQuarterChange) {
-      const q = Math.floor(prev.month() / 3) + 1;
-      onQuarterChange(q);
-    }
-  }, [validDate, onDateChange, onQuarterChange]);
+  const quarter = normalizeQuarter(selectedQuarter);
+  const currentQuarter = getQuarterOfDate(dayjs());
 
-  const handleNextMonth = useCallback(() => {
-    const next = validDate.add(1, "month");
-    onDateChange(next);
-    if (onQuarterChange) {
-      const q = Math.floor(next.month() / 3) + 1;
-      onQuarterChange(q);
-    }
-  }, [validDate, onDateChange, onQuarterChange]);
-
-  const handleDateSelect = useCallback(
-    (newDate) => {
-      if (newDate && dayjs.isDayjs(newDate) && newDate.isValid()) {
-        onDateChange(newDate);
-        if (onQuarterChange) {
-          const q = Math.floor(newDate.month() / 3) + 1;
-          onQuarterChange(q);
-        }
-      }
+  // Month navigation keeps the quarter card in sync with the selected month.
+  const changeMonth = useCallback(
+    (date) => {
+      onDateChange(date);
+      onQuarterChange?.(getQuarterOfDate(date));
     },
     [onDateChange, onQuarterChange]
   );
 
-  const quarterOptions = useMemo(
-    () =>
-      QUARTERS.map((q) => ({
-        value: q.value,
-        label: t(q.key),
-      })),
-    [t]
+  const handlePrevMonth = useCallback(
+    () => changeMonth(validDate.subtract(1, "month")),
+    [changeMonth, validDate]
   );
 
+  const handleNextMonth = useCallback(
+    () => changeMonth(validDate.add(1, "month")),
+    [changeMonth, validDate]
+  );
 
-  const [isQuarterOpen, setIsQuarterOpen] = useState(false);
+  const handleDateSelect = useCallback(
+    (newDate) => {
+      if (newDate && dayjs.isDayjs(newDate) && newDate.isValid()) changeMonth(newDate);
+    },
+    [changeMonth]
+  );
+
+  const handleQuarterSelect = useCallback(
+    (e) => onQuarterChange?.(normalizeQuarter(e.target.value)),
+    [onQuarterChange]
+  );
 
   return (
     <Box
@@ -216,44 +241,25 @@ const ReportHeader = ({
         </Box>
 
         {/* Quarter Select Dropdown */}
-        <FormControl size="small" sx={{ minWidth: 165 }}>
+        <FormControl size="small" sx={{ minWidth: 190 }}>
           <Select
-            value={selectedQuarter ?? 1}
-            onChange={(e) => onQuarterChange?.(Number(e.target.value))}
-            open={isQuarterOpen}
-            onOpen={() => setIsQuarterOpen(true)}
-            onClose={() => setIsQuarterOpen(false)}
-            displayEmpty
-            renderValue={(val) => {
-              const opt = quarterOptions.find((o) => o.value === val);
-              return (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <PieChartRoundedIcon sx={{ fontSize: 18, color: teal }} />
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: "text.primary" }}>
-                    {opt?.label ?? `Q${val}`}
+            value={quarter}
+            onChange={handleQuarterSelect}
+            inputProps={{ "aria-label": t("report.turkishAirlines.selectQuarter") }}
+            renderValue={(val) => (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+                <QuarterBadge value={val} active teal={teal} />
+                <Box sx={{ minWidth: 0, lineHeight: 1.15 }}>
+                  <Typography noWrap sx={{ fontSize: 10.5, fontWeight: 600, color: "text.secondary", lineHeight: 1.2 }}>
+                    {t("report.turkishAirlines.selectQuarter")}
+                  </Typography>
+                  <Typography noWrap sx={{ fontSize: 13, fontWeight: 700, color: "text.primary", lineHeight: 1.25 }}>
+                    {t(`report.turkishAirlines.quarterMonths.q${val}`)}
                   </Typography>
                 </Box>
-              );
-            }}
-            IconComponent={() => (
-              <Box
-                component="span"
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  position: "absolute",
-                  right: 12,
-                  top: "calc(50% - 9px)",
-                  color: "text.secondary",
-                  pointerEvents: "none",
-                  transform: isQuarterOpen ? "rotate(180deg)" : "none",
-                  transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease",
-                }}
-              >
-                <ChevronDown size={18} />
               </Box>
             )}
+            IconComponent={SelectChevron}
             sx={{
               height: 42,
               borderRadius: "10px",
@@ -263,50 +269,75 @@ const ReportHeader = ({
                 theme.palette.mode === "dark"
                   ? "0 2px 8px rgba(0,0,0,0.3)"
                   : "0 1px 4px rgba(0,0,0,0.06)",
+              transition: "border-color 0.15s ease",
+              "&:hover": { borderColor: alpha(teal, 0.5) },
+              "&.Mui-focused": { borderColor: teal },
               "& .MuiOutlinedInput-notchedOutline": { border: "none" },
               "& .MuiSelect-select": {
-                py: 1,
-                pl: 1.5,
-                pr: 4,
+                py: 0.5,
+                pl: 0.75,
+                pr: "36px !important",
                 display: "flex",
                 alignItems: "center",
               },
             }}
-            slotProps={{
-              paper: {
-                sx: {
-                  borderRadius: "12px",
-                  mt: 0.5,
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+            MenuProps={{
+              anchorOrigin: { vertical: "bottom", horizontal: "right" },
+              transformOrigin: { vertical: "top", horizontal: "right" },
+              slotProps: {
+                paper: {
+                  sx: {
+                    mt: 0.75,
+                    minWidth: 240,
+                    borderRadius: "12px",
+                    border: (theme) => `1px solid ${theme.palette.divider}`,
+                    boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
+                  },
                 },
+                list: { sx: { p: 0.75 } },
               },
             }}
           >
-            {quarterOptions.map((opt) => (
-              <MenuItem key={opt.value} value={opt.value}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, py: 0.3 }}>
-                  <Box
-                    sx={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 1.5,
-                      backgroundColor: alpha(teal, 0.12),
-                      color: teal,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 12,
-                      fontWeight: 800,
-                    }}
-                  >
-                    {opt.value}
+            {QUARTERS.map((q) => {
+              const isSelected = q === quarter;
+              return (
+                <MenuItem
+                  key={q}
+                  value={q}
+                  sx={{
+                    borderRadius: "8px",
+                    py: 0.9,
+                    px: 1,
+                    mb: 0.25,
+                    "&.Mui-selected, &.Mui-selected:hover": { backgroundColor: alpha(teal, 0.1) },
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, width: "100%" }}>
+                    <QuarterBadge value={q} active={isSelected} teal={teal} />
+                    <Typography sx={{ fontSize: 13.5, fontWeight: isSelected ? 700 : 600, flex: 1 }}>
+                      {t(`report.turkishAirlines.quarterMonths.q${q}`)}
+                    </Typography>
+                    {q === currentQuarter && (
+                      <Typography
+                        component="span"
+                        sx={{
+                          fontSize: 10.5,
+                          fontWeight: 700,
+                          color: teal,
+                          px: 0.75,
+                          py: 0.15,
+                          borderRadius: "6px",
+                          border: `1px solid ${alpha(teal, 0.35)}`,
+                        }}
+                      >
+                        {t("report.turkishAirlines.currentQuarter")}
+                      </Typography>
+                    )}
+                    <CheckRoundedIcon sx={{ fontSize: 18, color: teal, visibility: isSelected ? "visible" : "hidden" }} />
                   </Box>
-                  <Typography sx={{ fontSize: 13.5, fontWeight: 600 }}>
-                    {opt.label}
-                  </Typography>
-                </Box>
-              </MenuItem>
-            ))}
+                </MenuItem>
+              );
+            })}
           </Select>
         </FormControl>
 
