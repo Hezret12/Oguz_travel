@@ -1,26 +1,26 @@
 import { useMemo, useState } from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
-import CustomTextField from "../../../components/CustomTextField";
-import CustomDatePicker from "../../../components/CustomDatePicker";
-import CustomSelect from "../../../components/CustomSelect";
-import CustomTabs from "../../../components/CustomTabs";
-import OverflowTooltipLabel from "../../../components/OverflowTooltipLabel";
-import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
-import { CustomDialog } from "../../../components/Dialog/CustomDialog";
-import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
-import { CustomForm } from "../../../components/Dialog/CustomForm";
-import { FooterButton } from "../../../components/Dialog/FooterButton";
-import { useCreate } from "../../../hooks/CRUD/useCreate";
-import { useLocale } from "../../../hooks/useLocale";
-import { addOtherLetterApi } from "../../../api/queries/post";
+import CustomTextField from "../../../../components/CustomTextField";
+import CustomDatePicker from "../../../../components/CustomDatePicker";
+import CustomSelect from "../../../../components/CustomSelect";
+import CustomTabs from "../../../../components/CustomTabs";
+import OverflowTooltipLabel from "../../../../components/OverflowTooltipLabel";
+import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
+import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
+import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
+import { CustomForm } from "../../../../components/Dialog/CustomForm";
+import { FooterButton } from "../../../../components/Dialog/FooterButton";
+import { useCreate } from "../../../../hooks/CRUD/useCreate";
+import { useLocale } from "../../../../hooks/useLocale";
+import { addOtherLetterApi } from "../../../../api/queries/post";
 import {
   LETTER_STATUS,
   STOCK_LETTERS_KEY,
   findOverlap,
   getLetterStatusOptions,
   toOtherLetterPayload,
-} from "./functions/stockLetters";
+} from "../functions/stockLetters";
 
 const MODE_SINGLE = "single";
 const MODE_RANGE = "range";
@@ -176,6 +176,7 @@ const AddReferralReportModal = ({
             onChange={handleModeChange}
             tabs={modeTabs}
             variant="pills"
+            color="blue"
             size="small"
             fullWidth
           />

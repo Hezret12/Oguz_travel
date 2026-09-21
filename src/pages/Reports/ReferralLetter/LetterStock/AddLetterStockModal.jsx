@@ -1,14 +1,18 @@
 import { useMemo } from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
-import CustomTextField from "../../../components/CustomTextField";
-import { CustomDialog } from "../../../components/Dialog/CustomDialog";
-import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
-import { CustomForm } from "../../../components/Dialog/CustomForm";
-import { FooterButton } from "../../../components/Dialog/FooterButton";
-import { useCreate } from "../../../hooks/CRUD/useCreate";
-import { useLocale } from "../../../hooks/useLocale";
-import { addReportApi } from "../../../api/queries/post";
+import CustomTextField from "../../../../components/CustomTextField";
+import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
+import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
+import { CustomForm } from "../../../../components/Dialog/CustomForm";
+import { FooterButton } from "../../../../components/Dialog/FooterButton";
+import { useCreate } from "../../../../hooks/CRUD/useCreate";
+import { useLocale } from "../../../../hooks/useLocale";
+import { addReportApi } from "../../../../api/queries/post";
+import { isYhNumber, YH_NUMBER_MAX_LENGTH } from "../functions/stockLetters";
+
+// ÝH serials are typed as text so leading zeros ("0000001") are kept.
+const yhInputProps = { inputProps: { maxLength: YH_NUMBER_MAX_LENGTH, inputMode: "numeric" } };
 
 const AddLetterStockModal = ({ open, close, table }) => {
   const { t } = useLocale();
@@ -17,8 +21,8 @@ const AddLetterStockModal = ({ open, close, table }) => {
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       batchName: "",
-      startNo: "0000001",
-      endNo: "0090000",
+      startNo: "",
+      endNo: "",
       note: "",
     },
   });
@@ -51,11 +55,22 @@ const AddLetterStockModal = ({ open, close, table }) => {
     },
   });
 
+  const validateStartNo = (value) =>
+    isYhNumber(value) && parseInt(value, 10) > 0 ? true : t("referralLetter.letterNoInvalid");
+
+  const validateEndNo = (value, formValues) => {
+    const error = validateStartNo(value);
+    if (error !== true) return error;
+    const start = parseInt(formValues.startNo, 10);
+    if (!Number.isNaN(start) && parseInt(value, 10) < start) return t("referralLetter.rangeInvalid");
+    return true;
+  };
+
   const handleFormSubmit = (data) => {
     createReport({
       name: data.batchName,
-      start_yh_number: Number(data.startNo || 0),
-      end_yh_number: Number(data.endNo || 0),
+      start_yh_number: data.startNo.trim(),
+      end_yh_number: data.endNo.trim(),
       total_letter: calculatedCount,
       note: data.note || "",
     });
@@ -81,7 +96,13 @@ const AddLetterStockModal = ({ open, close, table }) => {
                 control={control}
                 label={t("referralLetter.startNo")}
                 placeholder="0000001"
+                InputProps={yhInputProps}
                 required
+                rules={{
+                  required: t("validation.required"),
+                  validate: validateStartNo,
+                  deps: ["endNo"],
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -90,7 +111,12 @@ const AddLetterStockModal = ({ open, close, table }) => {
                 control={control}
                 label={t("referralLetter.endNo")}
                 placeholder="0090000"
+                InputProps={yhInputProps}
                 required
+                rules={{
+                  required: t("validation.required"),
+                  validate: validateEndNo,
+                }}
               />
             </Grid>
           </Grid>
@@ -124,7 +150,7 @@ const AddLetterStockModal = ({ open, close, table }) => {
               }}
             >
               {t("referralLetter.totalQuantity")}:{" "}
-              <strong style={{ color: "text.primary", fontWeight: 700 }}>
+              <strong style={{ color: "text.primary", fontWeight: 800 }}>
                 {calculatedCount}
               </strong>{" "}
               {t("referralLetter.letterUnit")}

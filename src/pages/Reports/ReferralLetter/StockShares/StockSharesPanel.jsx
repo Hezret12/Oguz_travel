@@ -1,23 +1,24 @@
 import { useMemo, useState } from "react";
-import { Alert, Box, Button, Typography, IconButton, Tooltip, Chip } from "@mui/material";
-import { PenLine, RotateCw, Trash2, TriangleAlert } from "lucide-react";
-import { useLocale } from "../../../hooks/useLocale";
-import { useDateFormat } from "../../../functions/generalHelpers";
-import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
-import { useDelete } from "../../../hooks/CRUD/useDelete";
-import { useGet } from "../../../hooks/CRUD/useGet";
+import { Alert, Box, Button, Typography, Tooltip, Chip } from "@mui/material";
+import { RotateCw, TriangleAlert } from "lucide-react";
+import { useLocale } from "../../../../hooks/useLocale";
+import { useDateFormat } from "../../../../functions/generalHelpers";
+import { useDeleteDialog } from "../../../../hooks/useDeleteDialog";
+import { useDelete } from "../../../../hooks/CRUD/useDelete";
+import { useGet } from "../../../../hooks/CRUD/useGet";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
-import TableEmptyState from "../../../components/TableEmptyState";
-import AddButton from "../../../components/AddButton";
-import StatusChip from "../../../components/StatusChip";
-import DeleteDialog from "../../../components/DeleteDialog";
-import { REFERRAL_REPORT_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
-import { getLettersByDocumentRangeApi } from "../../../api/queries/getters";
-import { deleteOtherLetterApi } from "../../../api/queries/delete";
+import { getDefaultMRTOptions } from "../../../../hooks/getDefaultMRTOptions";
+import TableEmptyState from "../../../../components/TableEmptyState";
+import AddButton from "../../../../components/AddButton";
+import StatusChip from "../../../../components/StatusChip";
+import DeleteDialog from "../../../../components/DeleteDialog";
+import ColumnActionButtons from "../../../../components/ColumnActionButtons";
+import { REFERRAL_REPORT_STATUS_CONFIG } from "../../../../functions/statusChipConfigs";
+import { getLettersByDocumentRangeApi } from "../../../../api/queries/getters";
+import { deleteOtherLetterApi } from "../../../../api/queries/delete";
 import AddReferralReportModal from "./AddReferralReportModal";
 import EditReferralReportModal from "./EditReferralReportModal";
 import {
@@ -30,7 +31,7 @@ import {
   getStockRange,
   isOutsideStock,
   resolveLetterStatus,
-} from "./functions/stockLetters";
+} from "../functions/stockLetters";
 
 const formatRange = ({ start, end }) => (start === end ? `${start}` : `${start} - ${end}`);
 
@@ -210,21 +211,13 @@ const StockSharesPanel = ({ stock }) => {
         muiTableBodyCellProps: { align: "center" },
         // Referral letters are edited on the referral letter page, not here.
         Cell: ({ row }) => {
-          const { letter } = row.original;
-          if (letter.isRefferal) return null;
+          if (row.original.letter.isRefferal) return null;
           return (
-            <Box sx={{ display: "inline-flex", gap: 0.5 }}>
-              <Tooltip title={t("edit")} arrow>
-                <IconButton size="small" onClick={() => setEditingLetter(letter)}>
-                  <PenLine size={14} />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={t("delete")} arrow>
-                <IconButton size="small" onClick={() => deleteDialog.open(letter)}>
-                  <Trash2 size={14} />
-                </IconButton>
-              </Tooltip>
-            </Box>
+            <ColumnActionButtons
+              row={row}
+              onEdit={({ letter }) => setEditingLetter(letter)}
+              onDelete={({ letter }) => deleteDialog.open(letter)}
+            />
           );
         },
       },

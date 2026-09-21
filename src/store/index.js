@@ -15,6 +15,7 @@ import cafeteriaFiltersReducer from './slices/filters/cafeteriaFilterSlice';
 import financeLotFiltersReducer from './slices/filters/financeLotFilterSlice';
 import cashFlowFiltersReducer from './slices/filters/cashFlowFilterSlice';
 import salaryFiltersReducer from './slices/filters/salaryFilterSlice';
+import letterStockFiltersReducer from './slices/filters/letterStockFilterSlice';
 import notificationsReducer from './slices/notificationSlice';
 
 const store = configureStore({
@@ -37,6 +38,7 @@ const store = configureStore({
     financeLotFilters: financeLotFiltersReducer,
     cashFlowFilters:   cashFlowFiltersReducer,
     salaryFilters:     salaryFiltersReducer,
+    letterStockFilters: letterStockFiltersReducer,
     // paymentFilters: paymentFiltersReducer,
   },
   middleware: (getDefaultMiddleware) =>

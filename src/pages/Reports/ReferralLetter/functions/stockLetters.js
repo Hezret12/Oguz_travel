@@ -44,6 +44,14 @@ export const resolveLetterStatus = (value) => {
   return STATUS_BY_FOLDED.get(foldStatus(value)) ?? value;
 };
 
+/**
+ * A batch's ÝH serial as typed: digits only, up to 20. It is kept (and sent) as a string, so
+ * leading zeros ("0000001") survive; the width varies between batches.
+ */
+export const YH_NUMBER_MAX_LENGTH = 20;
+export const isYhNumber = (value) =>
+  new RegExp(`^[0-9]{1,${YH_NUMBER_MAX_LENGTH}}$`).test(String(value ?? "").trim());
+
 /** The batch's ÝH number bounds, or null when either end is not a number. */
 export const getStockRange = (stock) => {
   const start = Number(stock?.start_yh_number);

@@ -1,18 +1,18 @@
 import { useMemo, useState } from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
-import CustomTextField from "../../../components/CustomTextField";
-import CustomDatePicker from "../../../components/CustomDatePicker";
-import CustomSelect from "../../../components/CustomSelect";
-import OverflowTooltipLabel from "../../../components/OverflowTooltipLabel";
-import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
-import { CustomDialog } from "../../../components/Dialog/CustomDialog";
-import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
-import { CustomForm } from "../../../components/Dialog/CustomForm";
-import { FooterButton } from "../../../components/Dialog/FooterButton";
-import { useUpdate } from "../../../hooks/CRUD/useUpdate";
-import { useLocale } from "../../../hooks/useLocale";
-import { updateOtherLetterApi } from "../../../api/queries/patch";
+import CustomTextField from "../../../../components/CustomTextField";
+import CustomDatePicker from "../../../../components/CustomDatePicker";
+import CustomSelect from "../../../../components/CustomSelect";
+import OverflowTooltipLabel from "../../../../components/OverflowTooltipLabel";
+import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
+import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
+import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
+import { CustomForm } from "../../../../components/Dialog/CustomForm";
+import { FooterButton } from "../../../../components/Dialog/FooterButton";
+import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
+import { useLocale } from "../../../../hooks/useLocale";
+import { updateOtherLetterApi } from "../../../../api/queries/patch";
 import {
   STOCK_LETTERS_KEY,
   findOverlap,
@@ -20,7 +20,7 @@ import {
   getLetterStatusOptions,
   resolveLetterStatus,
   toOtherLetterPayload,
-} from "./functions/stockLetters";
+} from "../functions/stockLetters";
 
 const toInt = (value) => {
   if (value === "" || value == null) return NaN;

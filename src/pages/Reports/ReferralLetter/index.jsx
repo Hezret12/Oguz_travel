@@ -1,13 +1,14 @@
 import { useMemo, useState } from "react";
-import { Alert, Box, Button, Paper, useTheme, Typography } from "@mui/material";
+import { Alert, Badge, Box, Button, Chip, Paper, useTheme, Typography } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Package, RotateCw } from "lucide-react";
+import { Funnel, Package, RotateCw } from "lucide-react";
+import dayjs from "dayjs";
 import AddButton from "../../../components/AddButton";
 import ExportExcelButton from "../../../components/ExportExcelButton";
-import LetterStockExportModal from "./Contents/LetterStockExportModal";
+import LetterStockExportModal from "./LetterStock/LetterStockExportModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
@@ -16,18 +17,43 @@ import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useLocale } from "../../../hooks/useLocale";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useDateFormat } from "../../../functions/generalHelpers";
-import AddLetterStockModal from "./AddLetterStockModal";
-import EditLetterStockModal from "./EditLetterStockModal";
-import StockSharesPanel from "./StockSharesPanel";
+import AddLetterStockModal from "./LetterStock/AddLetterStockModal";
+import EditLetterStockModal from "./LetterStock/EditLetterStockModal";
+import StockSharesPanel from "./StockShares/StockSharesPanel";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
-import { useTableFilters } from "../../../hooks/usePageFilters";
+import { useTableFilters, useDrawerFilters } from "../../../hooks/usePageFilters";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import {
-  referralLetterFilterActions,
-  referralLetterFilterSelectors,
-} from "../../../store/slices/filters/referralLetterFilterSlice";
+  letterStockFilterActions,
+  letterStockFilterSelectors,
+} from "../../../store/slices/filters/letterStockFilterSlice";
+import FilterDrawer from "../../../components/FilterDrawer";
+import LetterStockFilter from "./Contents/LetterStockFilter";
 import { getAllReportsApi } from "../../../api/queries/getters";
 import { deleteReportApi } from "../../../api/queries/delete";
+
+const DATE_FILTER_KEYS = ["start_date", "end_date"];
+
+// Own component so drawer draft edits don't re-render the table.
+const LetterStockFilterDrawer = () => {
+  const { isDrawerOpen, draft, setDraftFilter, applyFilters, cancelFilters, resetFilters } =
+    useDrawerFilters({
+      actions: letterStockFilterActions,
+      selectors: letterStockFilterSelectors,
+    });
+
+  return (
+    <FilterDrawer
+      open={isDrawerOpen}
+      onClose={cancelFilters}
+      onApply={applyFilters}
+      onReset={resetFilters}
+      onCancel={cancelFilters}
+    >
+      <LetterStockFilter filters={draft} onFilterChange={setDraftFilter} />
+    </FilterDrawer>
+  );
+};
 
 const ReferralLetterPage = () => {
   const { t } = useLocale();
@@ -38,16 +64,22 @@ const ReferralLetterPage = () => {
   const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
+    applied,
     queryParams,
     searchQuery,
     setSearch,
+    setFilter,
+    openDrawer,
     page,
     limit,
     setPage,
   } = useTableFilters({
-    actions: referralLetterFilterActions,
-    selectors: referralLetterFilterSelectors,
+    actions: letterStockFilterActions,
+    selectors: letterStockFilterSelectors,
   });
+
+  const activeDateFilters = DATE_FILTER_KEYS.filter((key) => applied?.[key]);
+  const isFilterActive = activeDateFilters.length > 0;
 
   const {
     data: stockList = [],
@@ -275,6 +307,42 @@ const ReferralLetterPage = () => {
           onRefetch={refetchStock}
           isFetching={isStockFetching}
         />
+        <Badge color="primary" variant="dot" invisible={!isFilterActive}>
+          <Button
+            variant="outlined"
+            startIcon={<Funnel size={16} style={{ opacity: 0.8 }} />}
+            onClick={(e) => {
+              e.currentTarget.blur();
+              openDrawer();
+            }}
+            sx={{
+              height: "40px",
+              px: 2.5,
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "14px",
+              whiteSpace: "nowrap",
+              borderColor: isFilterActive ? "primary.main" : "divider",
+              color: isFilterActive ? "primary.main" : "text.primary",
+              backgroundColor: "action.hover",
+              "&:hover": { borderColor: "primary.main", backgroundColor: "action.selected" },
+            }}
+          >
+            {t("filter")}
+          </Button>
+        </Badge>
+        {activeDateFilters.map((key) => (
+          <Chip
+            key={key}
+            label={`${t(key === "start_date" ? "columns.startDate" : "columns.endDate")}: ${dayjs(applied[key]).format("DD.MM.YYYY")}`}
+            onDelete={() => setFilter(key, "")}
+            color="primary"
+            variant="outlined"
+            size="small"
+            sx={{ borderRadius: "8px", height: "32px", fontWeight: 500 }}
+          />
+        ))}
       </Box>
     ),
     renderBottomToolbar: ({ table }) => {
@@ -399,9 +467,11 @@ const ReferralLetterPage = () => {
           queryParams={queryParams}
           stockCount={stockTotal}
           // `total_report_count` is for all batches, so it only previews an unfiltered export.
-          letterCount={queryParams?.search ? null : totalStockCount}
+          letterCount={queryParams?.search || isFilterActive ? null : totalStockCount}
         />
       )}
+
+      <LetterStockFilterDrawer />
 
       {Boolean(stockTable.getState().creatingRow) && (
         <AddLetterStockModal table={stockTable} />

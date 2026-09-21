@@ -1,22 +1,24 @@
 import { useMemo, useEffect } from "react";
 import { Alert, Box, Grid, Typography } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
-import CustomTextField from "../../../components/CustomTextField";
-import { CustomDialog } from "../../../components/Dialog/CustomDialog";
-import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
-import { CustomForm } from "../../../components/Dialog/CustomForm";
-import { FooterButton } from "../../../components/Dialog/FooterButton";
-import { useUpdate } from "../../../hooks/CRUD/useUpdate";
-import { useLocale } from "../../../hooks/useLocale";
-import { updateReportApi } from "../../../api/queries/patch";
-import { useGet } from "../../../hooks/CRUD/useGet";
-import { getLettersByDocumentRangeApi } from "../../../api/queries/getters";
+import CustomTextField from "../../../../components/CustomTextField";
+import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
+import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
+import { CustomForm } from "../../../../components/Dialog/CustomForm";
+import { FooterButton } from "../../../../components/Dialog/FooterButton";
+import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
+import { useLocale } from "../../../../hooks/useLocale";
+import { updateReportApi } from "../../../../api/queries/patch";
+import { useGet } from "../../../../hooks/CRUD/useGet";
+import { getLettersByDocumentRangeApi } from "../../../../api/queries/getters";
 import {
   STOCK_LETTERS_KEY,
   getLetterRange,
   getStockLettersParams,
   getStockRange,
-} from "./functions/stockLetters";
+  isYhNumber,
+  YH_NUMBER_MAX_LENGTH,
+} from "../functions/stockLetters";
 
 const EditLetterStockModal = ({ table, row }) => {
   const { t } = useLocale();
@@ -74,7 +76,7 @@ const EditLetterStockModal = ({ table, row }) => {
 
   const validateStartNo = (value) => {
     const start = parseInt(value, 10);
-    if (Number.isNaN(start) || start <= 0) return t("referralLetter.letterNoInvalid");
+    if (!isYhNumber(value) || start <= 0) return t("referralLetter.letterNoInvalid");
     if (usedBounds && start > usedBounds.start) {
       return t("referralLetter.stockMustContainUsed", usedBounds);
     }
@@ -83,7 +85,7 @@ const EditLetterStockModal = ({ table, row }) => {
 
   const validateEndNo = (value, formValues) => {
     const end = parseInt(value, 10);
-    if (Number.isNaN(end) || end <= 0) return t("referralLetter.letterNoInvalid");
+    if (!isYhNumber(value) || end <= 0) return t("referralLetter.letterNoInvalid");
     const start = parseInt(formValues.startNo, 10);
     if (!Number.isNaN(start) && end < start) return t("referralLetter.rangeInvalid");
     if (usedBounds && end < usedBounds.end) {
@@ -119,8 +121,8 @@ const EditLetterStockModal = ({ table, row }) => {
     updateReport({
       guid: row.original.guid || row.original.id,
       name: data.batchName,
-      start_yh_number: Number(data.startNo || 0),
-      end_yh_number: Number(data.endNo || 0),
+      start_yh_number: String(data.startNo).trim(),
+      end_yh_number: String(data.endNo).trim(),
       total_letter: calculatedCount,
       note: data.note || "",
     });
@@ -153,6 +155,7 @@ const EditLetterStockModal = ({ table, row }) => {
                 control={control}
                 label={t("referralLetter.startNo")}
                 placeholder="0000001"
+                InputProps={{ inputProps: { maxLength: YH_NUMBER_MAX_LENGTH, inputMode: "numeric" } }}
                 required
                 rules={{
                   required: t("validation.required"),
@@ -167,6 +170,7 @@ const EditLetterStockModal = ({ table, row }) => {
                 control={control}
                 label={t("referralLetter.endNo")}
                 placeholder="0090000"
+                InputProps={{ inputProps: { maxLength: YH_NUMBER_MAX_LENGTH, inputMode: "numeric" } }}
                 required
                 rules={{
                   required: t("validation.required"),

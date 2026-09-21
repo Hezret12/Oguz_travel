@@ -63,7 +63,12 @@ export const LetterStockExportModal = ({ open, close, queryParams = {}, stockCou
     setProgress({ message: t("referralLetter.export.fetchingStocks"), percent: 2 });
     try {
       await exportLetterStockExcel({
-        params: search ? { search } : {},
+        // The page's date range filter carries over; search is editable here.
+        params: {
+          ...(search ? { search } : {}),
+          ...(queryParams?.start_date ? { start_date: queryParams.start_date } : {}),
+          ...(queryParams?.end_date ? { end_date: queryParams.end_date } : {}),
+        },
         onProgress: setProgress,
         t,
       });
