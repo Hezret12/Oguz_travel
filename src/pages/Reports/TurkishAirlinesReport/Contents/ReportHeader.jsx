@@ -73,7 +73,6 @@ const ReportHeader = ({
   const validDate = d.isValid() ? d : dayjs();
 
   const quarter = normalizeQuarter(selectedQuarter);
-  const currentQuarter = getQuarterOfDate(dayjs());
 
   // Month navigation keeps the quarter card in sync with the selected month.
   const changeMonth = useCallback(
@@ -250,9 +249,6 @@ const ReportHeader = ({
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
                 <QuarterBadge value={val} active teal={teal} />
                 <Box sx={{ minWidth: 0, lineHeight: 1.15 }}>
-                  <Typography noWrap sx={{ fontSize: 10.5, fontWeight: 600, color: "text.secondary", lineHeight: 1.2 }}>
-                    {t("report.turkishAirlines.selectQuarter")}
-                  </Typography>
                   <Typography noWrap sx={{ fontSize: 13, fontWeight: 700, color: "text.primary", lineHeight: 1.25 }}>
                     {t(`report.turkishAirlines.quarterMonths.q${val}`)}
                   </Typography>
@@ -317,22 +313,6 @@ const ReportHeader = ({
                     <Typography sx={{ fontSize: 13.5, fontWeight: isSelected ? 700 : 600, flex: 1 }}>
                       {t(`report.turkishAirlines.quarterMonths.q${q}`)}
                     </Typography>
-                    {q === currentQuarter && (
-                      <Typography
-                        component="span"
-                        sx={{
-                          fontSize: 10.5,
-                          fontWeight: 700,
-                          color: teal,
-                          px: 0.75,
-                          py: 0.15,
-                          borderRadius: "6px",
-                          border: `1px solid ${alpha(teal, 0.35)}`,
-                        }}
-                      >
-                        {t("report.turkishAirlines.currentQuarter")}
-                      </Typography>
-                    )}
                     <CheckRoundedIcon sx={{ fontSize: 18, color: teal, visibility: isSelected ? "visible" : "hidden" }} />
                   </Box>
                 </MenuItem>
