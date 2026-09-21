@@ -21,6 +21,7 @@ import {
   TASK_PRIORITY_ITEMS,
   DEFAULT_TASK_PRIORITY,
   getTaskAssignees,
+  getAssigneeUserGuid,
   getTaskAssigneeGuids,
   getTaskAttachments,
 } from "./functions/taskMeta";
@@ -57,7 +58,7 @@ export default function EditTaskModal({ open, onClose, task }) {
       .map((a) => {
         const usr = a?.user || a;
         const emp = usr?.employee || a?.employee;
-        const userGuid = a?.guid || usr?.guid || a?.assignee_guid;
+        const userGuid = getAssigneeUserGuid(a);
         const fullName =
           emp?.fullName ||
           usr?.fullName ||

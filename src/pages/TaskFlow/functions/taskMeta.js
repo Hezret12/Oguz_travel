@@ -89,8 +89,16 @@ export const getTaskAttachments = (task) => {
   return [];
 };
 
+/**
+ * The user GUID (`tbl_users.guid`) behind an assignee entry. In
+ * `empltaskAssignee` rows `guid` is the assignment record's own id, so
+ * `assignee_guid` / `user.guid` must win; flat `assignees` rows only have `guid`.
+ */
+export const getAssigneeUserGuid = (a) =>
+  typeof a === "string" ? a : a?.assignee_guid || a?.user?.guid || a?.guid;
+
 /** Resolves the assignee GUIDs a task form should start from. */
 export const getTaskAssigneeGuids = (task) =>
   getTaskAssignees(task)
-    .map((a) => a?.guid || a?.user?.guid || a?.assignee_guid || a)
+    .map(getAssigneeUserGuid)
     .filter((guid) => typeof guid === "string" && guid.length > 0);
