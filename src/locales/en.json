@@ -478,7 +478,35 @@
       "outsideStock": "The entry goes beyond the batch",
       "unused": "Unused",
       "duplicate": "This number appears in more than one entry",
-      "numberRange": "Number range"
+      "headerNotes": {
+        "summary": {
+          "index": "Batch sequence number.",
+          "name": "Batch name (given when the letter stock was added).",
+          "startNo": "First YH number in the batch. Leading zeros are kept.",
+          "endNo": "Last YH number in the batch. The start and end numbers are both part of the batch.",
+          "total": "Total YH letters in the batch: end number − start number + 1.",
+          "sold": "Number of letters sold.",
+          "damaged": "Number of damaged (unusable) letters.",
+          "lost": "Number of lost letters. Shown in red when above zero.",
+          "referral": "Number of YH numbers given to referral letters.",
+          "used": "Total used: sold + damaged + lost + referral letters.",
+          "remaining": "Letters left (not used yet): total − used. Shown in grey when the batch is used up.",
+          "date": "Date the batch was added to the system.",
+          "note": "Note written when the batch was added."
+        },
+        "details": {
+          "index": "Row sequence number.",
+          "batch": "The batch the numbers belong to: name and number range. Use the filter to see a single batch.",
+          "from": "First YH number of the row. Red number: this number also appears in another entry. Orange number: the entry goes beyond the batch (details in the cell's note).",
+          "to": "Last YH number of the row. Equal to the start number when the row is a single letter.",
+          "count": "Letters in the row. Numbers shared with another entry are counted once.",
+          "status": "State of the numbers: sold, damaged, lost, referral letter or unused.",
+          "date": "Date of the entry. For referral letters, the date the letter was created.",
+          "submittedBy": "Employee who handed the letters over.",
+          "receivedBy": "Person who received the letters.",
+          "note": "Note on the entry. For referral letters, the destination country and departure date."
+        }
+      }
     }
   },
   "sale": "Sale",

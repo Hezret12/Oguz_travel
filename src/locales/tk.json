@@ -478,7 +478,35 @@
       "outsideStock": "Hasabat ýazgysy partiýanyň çäginden çykýar",
       "unused": "Ulanylmadyk",
       "duplicate": "Bu ÝH belgisi birnäçe ýazgyda bar",
-      "numberRange": "ÝH № aralygy"
+      "headerNotes": {
+        "summary": {
+          "index": "Partiýanyň tertip belgisi.",
+          "name": "Partiýanyň ady (hat stoky goşulanda berlen at).",
+          "startNo": "Partiýadaky ilkinji ÝH belgisi. Belginiň başyndaky nollar saklanýar.",
+          "endNo": "Partiýadaky iň soňky ÝH belgisi. Başlangyç we soňky belgi hem partiýa girýär.",
+          "total": "Partiýadaky ÝH hatlarynyň jemi sany: soňky belgi − başlangyç belgi + 1.",
+          "sold": "Satylan hatlaryň sany.",
+          "damaged": "Zyýan ýeten (ulanyp bolmaýan) hatlaryň sany.",
+          "lost": "Ýitirilen hatlaryň sany. Noldan köp bolsa, gyzyl reňkde görkezilýär.",
+          "referral": "Ýollanma hatlaryna berlen ÝH belgileriniň sany.",
+          "used": "Ulanylan hatlaryň jemi: satylan + zyýan ýeten + ýitirilen + ýollanma hatlary.",
+          "remaining": "Galan (heniz ulanylmadyk) hatlaryň sany: jemi sany − ulanylan. Partiýa doly ulanylan bolsa, çal reňkde görkezilýär.",
+          "date": "Partiýanyň ulgama goşulan senesi.",
+          "note": "Partiýa goşulanda ýazylan bellik."
+        },
+        "details": {
+          "index": "Setiriň tertip belgisi.",
+          "batch": "ÝH belgileriniň degişli partiýasy: ady we belgi aralygy. Diňe bir partiýany görmek üçin süzgüji (filtri) ulanyň.",
+          "from": "Setirdäki ÝH belgileriniň başlangyjy. Gyzyl belgi: bu belgi başga ýazgyda hem bar. Mämişi belgi: ýazgy partiýanyň çäginden çykýar (jikme-jiklik öýjügiň belliginde).",
+          "to": "Setirdäki ÝH belgileriniň soňy. Setirde bir hat bolsa, başlangyç belgi bilen deňdir.",
+          "count": "Setirdäki hatlaryň sany. Başga ýazgy bilen gabat gelýän belgiler diňe bir gezek sanalýar.",
+          "status": "Belgileriň ýagdaýy: satyldy, zyýan ýeten, ýitirilen, ýollanma haty ýa-da ulanylmadyk.",
+          "date": "Ýazgynyň senesi. Ýollanma hatlary üçin hatyň döredilen senesi.",
+          "submittedBy": "Hatlary tabşyran işgär.",
+          "receivedBy": "Hatlary kabul eden adam.",
+          "note": "Ýazga ýazylan bellik. Ýollanma hatlary üçin barjak ýurdy we gidiş senesi."
+        }
+      }
     }
   },
   "sale": "Arzanladyş",

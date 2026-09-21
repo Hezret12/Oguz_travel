@@ -10,10 +10,13 @@ import { LETTER_STATUS, getLetterRange, getStockRange, resolveLetterStatus } fro
  * company banner on row 2, one flat table per sheet from D4 with zebra rows, status pills,
  * AutoFilter and a SUBTOTAL total row.
  *
- * - Sheet 1 (summary): one row per batch — its number range and how many were sold, damaged,
- *   lost, used by referral letters, and are left.
+ * - Sheet 1 (summary): one row per batch — its start and end numbers and how many were sold,
+ *   damaged, lost, used by referral letters, and are left.
  * - Sheet 2 (details): every batch walked from its first number to its last, each run of
- *   numbers with what happened to it, unused runs included.
+ *   numbers (start and end in their own columns) with what happened to it, unused runs included.
+ *
+ * Header cells carry a note explaining their column (`referralLetter.export.headerNotes`), and
+ * the header row is frozen.
  *
  * Only numbers inside a batch are counted, like the page, so an entry overhanging its batch
  * never pushes "used" past the batch size.
@@ -76,18 +79,26 @@ const getStatusLabels = (t) => ({
   [UNUSED]: t("referralLetter.export.unused"),
 });
 
-// Keeps leading zeros ("0000201") when the entry's own number was written with them.
+const hasLeadingZero = (raw) => /^0\d+$/.test(String(raw ?? "").trim());
+
+// Keeps leading zeros ("0000201") when the number `raw` was written with them.
 const padLike = (n, raw) => {
   const text = String(raw ?? "").trim();
-  return /^0\d+$/.test(text) ? String(n).padStart(text.length, "0") : String(n);
+  return hasLeadingZero(text) ? String(n).padStart(text.length, "0") : String(n);
 };
 
 const formatRun = (from, to, raw) =>
   from === to ? padLike(from, raw) : `${padLike(from, raw)} – ${padLike(to, raw)}`;
 
+// The batch's serial sets the width of every number in it; batches saved before the serials
+// kept their zeros fall back to the entry's own number.
+const widthSource = (stock, letter) =>
+  hasLeadingZero(stock?.start_yh_number) ? stock.start_yh_number : letter?.travel_document_number;
+
 const createSheet = (workbook, name) => {
   const sheet = workbook.addWorksheet(name.substring(0, 31), {
-    views: [{ showGridLines: true }],
+    // Header row stays visible while scrolling.
+    views: [{ state: "frozen", ySplit: START_ROW, showGridLines: true }],
   });
   [1, 2, 3].forEach((c) => {
     sheet.getColumn(c).width = 4;
@@ -114,7 +125,9 @@ const writeBanner = (sheet, endCol, title, asOf) => {
   cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
 };
 
-const writeHeader = (sheet, columns) => {
+// Each header cell carries a note (Excel comment) explaining its column; `notesKey` is the
+// locale namespace holding one entry per column key.
+const writeHeader = (sheet, columns, t, notesKey) => {
   const endCol = START_COL + columns.length - 1;
   const row = sheet.getRow(START_ROW);
   row.height = 30;
@@ -122,6 +135,13 @@ const writeHeader = (sheet, columns) => {
     const colNumber = START_COL + idx;
     const cell = row.getCell(colNumber);
     cell.value = col.header;
+    cell.note = {
+      texts: [
+        { font: { bold: true, size: 9 }, text: `${col.header}\n` },
+        { font: { size: 9 }, text: t(`${notesKey}.${col.key}`) },
+      ],
+      margins: { insetmode: "custom", inset: [0.12, 0.12, 0.12, 0.12] },
+    };
     cell.font = font({ size: 11, bold: true, color: { argb: col.headerColor || BLACK } });
     cell.fill = solid("FFFFFFFF");
     cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
@@ -232,7 +252,8 @@ const writeSummarySheet = (workbook, batches, t, asOf) => {
   const columns = [
     { header: "T/B", key: "index", width: 6, align: "center" },
     { header: t("referralLetter.batchName"), key: "name", width: 20, align: "left" },
-    { header: t("referralLetter.export.numberRange"), key: "range", width: 18, align: "center" },
+    { header: t("referralLetter.startNo"), key: "startNo", width: 14, align: "center" },
+    { header: t("referralLetter.endNo"), key: "endNo", width: 14, align: "center" },
     { header: t("referralLetter.totalCount"), key: "total", width: 11, align: "right", sum: true },
     { header: t("referralLetter.statusSold"), key: "sold", width: 11, align: "right", sum: true },
     { header: t("referralLetter.statusDamaged"), key: "damaged", width: 12, align: "right", sum: true },
@@ -255,12 +276,14 @@ const writeSummarySheet = (workbook, batches, t, asOf) => {
   const sheet = createSheet(workbook, t("referralLetter.export.sheetStocks"));
 
   writeBanner(sheet, endCol, t("referralLetter.export.reportTitle"), asOf);
-  writeHeader(sheet, columns);
+  writeHeader(sheet, columns, t, "referralLetter.export.headerNotes.summary");
 
+  // The serials as saved (text), so their leading zeros show.
   const rowValues = batches.map((batch, offset) => ({
     index: batch.stock.index_number ?? offset + 1,
     name: batch.stock.name ? String(batch.stock.name).trim() : "",
-    range: batch.range ? formatRun(batch.range.start, batch.range.end) : "",
+    startNo: String(batch.stock.start_yh_number ?? "").trim(),
+    endNo: String(batch.stock.end_yh_number ?? "").trim(),
     total: batch.total,
     sold: batch.counts[LETTER_STATUS.SOLD],
     damaged: batch.counts[LETTER_STATUS.DAMAGED],
@@ -292,6 +315,8 @@ const writeSummarySheet = (workbook, batches, t, asOf) => {
       trackLength(maxLens, idx, values[c.key]);
     });
     row.getCell(col.name).font = font({ bold: true });
+    row.getCell(col.startNo).font = font({ bold: true });
+    row.getCell(col.endNo).font = font({ bold: true });
     row.getCell(col.used).font = font({ bold: true });
     // Letters left are the number to act on; a used-up batch is greyed out.
     row.getCell(col.remaining).font = font({
@@ -319,7 +344,8 @@ const writeDetailsSheet = (workbook, batches, t, asOf) => {
   const columns = [
     { header: "T/B", key: "index", width: 6, align: "center" },
     { header: t("referralLetter.export.batch"), key: "batch", width: 22, align: "left" },
-    { header: t("referralLetter.letterNo"), key: "numbers", width: 16, align: "center" },
+    { header: t("referralLetter.startNoFrom"), key: "from", width: 14, align: "center" },
+    { header: t("referralLetter.endNoTo"), key: "to", width: 14, align: "center" },
     { header: t("referralLetter.quantity"), key: "count", width: 10, align: "right", sum: true },
     { header: t("columns.status"), key: "status", width: 16, align: "center" },
     { header: t("columns.date"), key: "date", width: 12, align: "center" },
@@ -333,20 +359,23 @@ const writeDetailsSheet = (workbook, batches, t, asOf) => {
   const statusLabel = getStatusLabels(t);
 
   writeBanner(sheet, endCol, t("referralLetter.export.reportTitle"), asOf);
-  writeHeader(sheet, columns);
+  writeHeader(sheet, columns, t, "referralLetter.export.headerNotes.details");
 
   const rows = batches.flatMap(({ stock, range, runs }) => {
     const name = stock.name ? String(stock.name).trim() : "";
-    const batch = range ? `${name} (${formatRun(range.start, range.end)})`.trim() : name;
-    return runs.map((run) => ({ batch, run }));
+    const batch = range
+      ? `${name} (${formatRun(range.start, range.end, stock.start_yh_number)})`.trim()
+      : name;
+    return runs.map((run) => ({ batch, run, stock }));
   });
 
   const firstDataRow = START_ROW + 1;
   const lastDataRow = START_ROW + rows.length;
   const maxLens = columns.map((c) => String(c.header).length);
 
-  const rowValues = rows.map(({ batch, run }, offset) => {
+  const rowValues = rows.map(({ batch, run, stock }, offset) => {
     const { letter } = run;
+    const raw = widthSource(stock, letter);
     const note = !letter
       ? ""
       : letter.isRefferal
@@ -355,7 +384,8 @@ const writeDetailsSheet = (workbook, batches, t, asOf) => {
     return {
       index: offset + 1,
       batch,
-      numbers: formatRun(run.from, run.to, letter?.travel_document_number),
+      from: padLike(run.from, raw),
+      to: padLike(run.to, raw),
       // A run starting inside numbers an earlier entry covers only adds the new ones, so the
       // total equals the batch sizes.
       count: run.added,
@@ -384,13 +414,14 @@ const writeDetailsSheet = (workbook, batches, t, asOf) => {
       trackLength(maxLens, idx, values[c.key]);
     });
 
-    row.getCell(col.numbers).font = font({ bold: true });
+    row.getCell(col.from).font = font({ bold: true });
+    row.getCell(col.to).font = font({ bold: true });
     const style = STATUS_STYLE[run.status];
     const statusCell = row.getCell(col.status);
     statusCell.fill = solid(style.bg);
     statusCell.font = font({ bold: true, color: { argb: style.fg } });
 
-    // Explain anything unusual on the numbers cell itself.
+    // Explain anything unusual on the start number cell itself.
     const notes = [];
     if (run.overhangs) {
       const full = getLetterRange(run.letter);
@@ -400,9 +431,11 @@ const writeDetailsSheet = (workbook, batches, t, asOf) => {
     }
     if (run.overlaps) notes.push(t("referralLetter.export.duplicate"));
     if (notes.length) {
-      const numbersCell = row.getCell(col.numbers);
-      numbersCell.note = notes.join("\n");
-      numbersCell.font = font({ bold: true, color: { argb: run.overlaps ? RED : "FFB45309" } });
+      const warnFont = font({ bold: true, color: { argb: run.overlaps ? RED : "FFB45309" } });
+      const fromCell = row.getCell(col.from);
+      fromCell.note = notes.join("\n");
+      fromCell.font = warnFont;
+      row.getCell(col.to).font = warnFont;
     }
   });
 
