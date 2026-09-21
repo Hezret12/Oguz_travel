@@ -142,17 +142,6 @@ const useReportData = (selectedDate) => {
     reportData.forEach(addOffice);
     dbOffices.forEach(addOffice);
 
-    if (list.length === 0) {
-      [
-        { short: "Ag", full: "Asgabat" },
-        { short: "Ah", full: "Ahal" },
-        { short: "Mr", full: "Mary" },
-        { short: "Lb", full: "Lebap" },
-        { short: "Bl", full: "Balkan" },
-        { short: "Dz", full: "Dasoguz" },
-      ].forEach(addOffice);
-    }
-
     return list;
   }, [footer, reportData, dbOffices, getOfficeLabel]);
 
@@ -305,10 +294,12 @@ const useReportData = (selectedDate) => {
     });
   }, [footer, getOfficeLabel]);
 
-  const findFooter = useCallback(
-    (officeKey) => footer.find((f) => getRecordOfficeKey(f) === officeKey),
+  const footerIndex = useMemo(
+    () => new Map(footer.map((f) => [getRecordOfficeKey(f), f])),
     [footer]
   );
+
+  const findFooter = useCallback((officeKey) => footerIndex.get(officeKey), [footerIndex]);
 
   return {
     isLoading,
