@@ -26,6 +26,26 @@ const menuPaperProps = {
   },
 };
 
+// Module-level so MUI doesn't remount it every render; MUI adds `MuiSelect-iconOpen` while open.
+const SelectChevron = ({ className }) => (
+  <Box
+    component="span"
+    className={className}
+    sx={{
+      display: "inline-flex",
+      position: "absolute",
+      right: 12,
+      top: "calc(50% - 9px)",
+      color: "text.secondary",
+      pointerEvents: "none",
+      transition: "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+      "&.MuiSelect-iconOpen": { transform: "rotate(180deg)" },
+    }}
+  >
+    <ChevronDown size={18} />
+  </Box>
+);
+
 const FilterSelect = ({
   label,
   name,
@@ -53,26 +73,7 @@ const FilterSelect = ({
       displayEmpty
       sx={selectSx}
       MenuProps={{ slotProps: menuPaperProps }}
-      IconComponent={() => (
-        <Box
-          component="span"
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "absolute",
-            right: 12,
-            top: "calc(50% - 9px)",
-            color: "text.secondary",
-            pointerEvents: "none",
-            transform: isOpen ? "rotate(180deg)" : "none",
-            transition:
-              "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.15s ease",
-          }}
-        >
-          <ChevronDown size={18} />
-        </Box>
-      )}
+      IconComponent={SelectChevron}
     >
       <MenuItem value="">
         <Typography sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
@@ -126,22 +127,14 @@ const FilterDatePicker = ({ label, name, value, onChange }) => (
 );
 
 function TaskFilter({
-  filters,
-  draft,
+  filters = {},
   onFilterChange,
-  setFilter,
   selectsOpen = {},
   onSelectOpen,
   onSelectClose,
-  openSelect,
-  closeSelect,
 }) {
   const { t } = useLocale();
 
-  const currentFilters = filters || draft || {};
-  const handleFilterChange = onFilterChange || setFilter;
-  const handleSelectOpen = onSelectOpen || openSelect;
-  const handleSelectClose = onSelectClose || closeSelect;
   const statusOptions = useMemo(
     () => TASK_STATUS_ITEMS.map((item) => ({ label: t(item.labelKey), value: item.id })),
     [t]
@@ -157,35 +150,35 @@ function TaskFilter({
       <FilterSelect
         label={t("columns.status")}
         name="status"
-        value={currentFilters.status}
+        value={filters.status}
         options={statusOptions}
         isOpen={Boolean(selectsOpen.status)}
         allText={t("all")}
-        onChange={handleFilterChange}
-        onOpen={handleSelectOpen}
-        onClose={handleSelectClose}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
       />
       <FilterSelect
         label={t("task.priority")}
         name="priority"
-        value={currentFilters.priority}
+        value={filters.priority}
         options={priorityOptions}
         isOpen={Boolean(selectsOpen.priority)}
         allText={t("all")}
-        onChange={handleFilterChange}
-        onOpen={handleSelectOpen}
-        onClose={handleSelectClose}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
       />
       <FilterDatePicker
         label={t("task.dueDate")}
         name="due_date"
-        value={currentFilters.due_date}
-        onChange={handleFilterChange}
+        value={filters.due_date}
+        onChange={onFilterChange}
       />
       <AppUserAutocomplete
         label={t("task.assignees")}
-        value={currentFilters.opr_guid}
-        onChange={(val) => handleFilterChange("opr_guid", val)}
+        value={filters.opr_guid}
+        onChange={(val) => onFilterChange("opr_guid", val)}
         multiple={false}
       />
     </Stack>

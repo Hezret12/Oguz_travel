@@ -34,30 +34,17 @@ import {
   getTaskPriority,
   getTaskAssignees,
   getTaskAttachments,
+  toTaskApiParams,
 } from "../functions/taskMeta";
 
 const COLUMN_PAGE_SIZE = 10;
 
-/** The tasks endpoint has returned a few different envelopes over time. */
-const extractItems = (responseBody) => {
-  if (Array.isArray(responseBody?.data?.data)) return responseBody.data.data;
-  if (Array.isArray(responseBody?.data)) return responseBody.data;
-  if (Array.isArray(responseBody?.items)) return responseBody.items;
-  if (Array.isArray(responseBody)) return responseBody;
-  return [];
-};
-
-const extractTotalPages = (responseBody) =>
-  responseBody?.data?.totalPages ??
-  responseBody?.totalPages ??
-  responseBody?.meta?.totalPages ??
-  responseBody?.data?.meta?.totalPages;
-
-const extractTotalItems = (responseBody) =>
-  responseBody?.data?.totalItems ??
-  responseBody?.totalItems ??
-  responseBody?.meta?.totalItems ??
-  responseBody?.data?.meta?.totalItems;
+/**
+ * `/messages/get-all-tasks` keyset body: `{ data: Task[], meta: { nextCursor, totalItems? } }`.
+ * `totalItems` only comes with the first page (the column badge).
+ */
+const extractItems = (responseBody) =>
+  Array.isArray(responseBody?.data) ? responseBody.data : [];
 
 const TaskBoardColumn = memo(function TaskBoardColumn({
   col,
@@ -78,8 +65,9 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
 
   // Each column pages independently: asking the server for this status only is
   // what keeps a busy "To Do" column from starving the other two.
+  // No `type`: `type=true` makes the backend return unpaginated status groups instead of tasks.
   const columnParams = useMemo(
-    () => ({ ...filterParams, type: true, status: col.id, limit: COLUMN_PAGE_SIZE }),
+    () => ({ ...filterParams, status: col.id, limit: COLUMN_PAGE_SIZE }),
     [filterParams, col.id],
   );
 
@@ -92,20 +80,14 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     isFetching,
   } = useInfiniteQuery({
     queryKey: ["tasks-board", col.id, columnParams],
-    queryFn: async ({ pageParam = 1 }) => {
-      const res = await getAllTasksApi({ ...columnParams, page: pageParam });
+    // Keyset pagination: "" asks for the first page, then each page hands back the
+    // cursor for the next. Moving cards never shifts pages, and deep scrolling stays O(page).
+    queryFn: async ({ pageParam }) => {
+      const res = await getAllTasksApi({ ...columnParams, cursor: pageParam });
       return res?.data;
     },
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) => {
-      const totalPages = extractTotalPages(lastPage);
-      if (totalPages !== undefined) {
-        return allPages.length < totalPages ? allPages.length + 1 : undefined;
-      }
-      return extractItems(lastPage).length >= COLUMN_PAGE_SIZE
-        ? allPages.length + 1
-        : undefined;
-    },
+    initialPageParam: "",
+    getNextPageParam: (lastPage) => lastPage?.meta?.nextCursor ?? undefined,
   });
 
   const tasks = useMemo(() => {
@@ -120,12 +102,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
   }, [data]);
 
   // Prefer the server's count so the badge does not only reflect what is loaded.
-  const totalCount = useMemo(() => {
-    const fromServer = data?.pages?.length
-      ? extractTotalItems(data.pages[data.pages.length - 1])
-      : undefined;
-    return fromServer ?? tasks.length;
-  }, [data, tasks.length]);
+  const totalCount = data?.pages?.[0]?.meta?.totalItems ?? tasks.length;
 
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
@@ -558,8 +535,7 @@ function TaskBoardView({
       params.priority = filterPriority;
     }
     if (dueDate) params.due_date = dueDate;
-    if (oprGuid) params.opr_guid = oprGuid;
-    return params;
+    return toTaskApiParams({ ...params, opr_guid: oprGuid });
   }, [searchQuery, filterPriority, dueDate, oprGuid]);
 
   const visibleColumns = useMemo(() => {

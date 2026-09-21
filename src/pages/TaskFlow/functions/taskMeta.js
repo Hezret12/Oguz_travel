@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
@@ -49,26 +50,37 @@ export const getTaskPriority = (priority) => {
 };
 
 /**
- * Assignees arrive under different keys depending on the endpoint
- * (`empltaskAssignee` from the tasks list, `assignees` from some detail
- * responses), so every view resolves them through this one helper.
+ * Assignees arrive under different keys depending on the endpoint:
+ * `assignees` (flat `{ guid, fullName }`) from `get-all-tasks`, and
+ * `empltaskAssignee` (`{ user: { employee } }`) from add/update responses,
+ * which `useUpdate` merges into the cached list row. The first key that is
+ * present wins even when empty, so clearing assignees never falls back to a
+ * stale list. `admuser` is the task's creator, not an assignee.
  */
 export const getTaskAssignees = (task) => {
   if (!task) return [];
 
-  const lists = [
-    task.empltaskAssignee,
-    task.emplTaskAssignee,
-    task.assignees,
-    task.users,
-  ];
+  const list = [task.empltaskAssignee, task.assignees].find(Array.isArray);
+  return list ? list.filter(Boolean) : [];
+};
 
-  for (const list of lists) {
-    if (Array.isArray(list) && list.length > 0) return list;
+/**
+ * Maps the TaskFlow filter slice onto the `/messages/get-all-tasks` query:
+ * - the slice stores the assignee as `opr_guid`, the backend reads `assignee_guid`;
+ * - `due_date` (a local `YYYY-MM-DD`) becomes the exact `[due_from, due_to)` instants of
+ *   that local day, because due dates are saved as the UTC instant of local midnight.
+ */
+export const toTaskApiParams = ({ opr_guid, status, due_date, ...rest } = {}) => {
+  const params = { ...rest };
+  if (opr_guid) params.assignee_guid = opr_guid;
+  const statusId = Number(status);
+  if (TASK_STATUS_ITEMS.some((item) => item.id === statusId)) params.status = statusId;
+  const day = due_date ? dayjs(due_date) : null;
+  if (day?.isValid()) {
+    params.due_from = day.startOf("day").toISOString();
+    params.due_to = day.startOf("day").add(1, "day").toISOString();
   }
-
-  const single = task.employee || task.empluser || task.admuser;
-  return single ? [single] : [];
+  return params;
 };
 
 export const getTaskAttachments = (task) => {

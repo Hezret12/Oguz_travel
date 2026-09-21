@@ -26,6 +26,7 @@ import { useDelete } from "../../hooks/CRUD/useDelete";
 import { getAllTasksApi } from "../../api/queries/getters";
 import { updateTaskApi } from "../../api/queries/patch";
 import { deleteTaskApi } from "../../api/queries/delete";
+import { toTaskApiParams, TASK_STATUS_ITEMS } from "./functions/taskMeta";
 
 const TaskFilterDrawer = () => {
   const {
@@ -110,13 +111,8 @@ export default function TaskFlow() {
 
   // The list view asks for a flat, paginated result set; the board view issues
   // its own per-column queries, so this one stays disabled there.
-  const listQueryParams = useMemo(() => {
-    const params = { ...queryParams, type: true };
-    if (params.status && params.status !== "all") {
-      params.status = Number(params.status) || params.status;
-    }
-    return params;
-  }, [queryParams]);
+  // `type` is never sent: `type=true` makes the backend return unpaginated status groups.
+  const listQueryParams = useMemo(() => toTaskApiParams(queryParams), [queryParams]);
 
   const {
     data: tasksList,
@@ -135,11 +131,12 @@ export default function TaskFlow() {
     },
   });
 
+  // No board invalidation here: a status move is applied to the board cache directly
+  // (see `moveTaskInBoardCache`), so a successful move costs zero refetches.
   const updateTaskMutation = useUpdate({
     apiFn: updateTaskApi,
     key: "tasks",
     idKey: "guid",
-    invalidateQueries: ["tasks-board"],
     showSuccessMessage: false,
   });
 
@@ -151,23 +148,81 @@ export default function TaskFlow() {
     isPaginated: true,
   });
 
-  const handleCreateTask = useCallback(() => {
-    refetch();
-  }, [refetch]);
-
   const handleEditTask = useCallback((task) => {
     setEditingTask(task);
     setIsEditModalOpen(true);
   }, []);
 
-  const handleMoveTaskStatus = useCallback(
-    (taskId, newStatus) => {
-      updateTaskMutation.mutate({
-        guid: taskId,
-        status: Number(newStatus) || newStatus,
+  const queryClient = useQueryClient();
+
+  // Moves a card between the board's per-column infinite queries (key
+  // `["tasks-board", statusId, params]`) and shifts each column's `meta.totalItems`
+  // badge by one, so a drop needs no refetch. No-op when the card isn't loaded on the board.
+  const moveTaskInBoardCache = useCallback(
+    (guid, targetStatus, patch = {}) => {
+      const entries = queryClient.getQueriesData({ queryKey: ["tasks-board"] });
+      const task = entries
+        .flatMap(([, data]) => data?.pages ?? [])
+        .flatMap((page) => (Array.isArray(page?.data) ? page.data : []))
+        .find((item) => item?.guid === guid);
+      if (!task) return;
+
+      const sourceStatus = Number(task.status);
+      const movedTask = { ...task, ...patch, status: targetStatus };
+      entries.forEach(([queryKey, data]) => {
+        if (!data?.pages) return;
+        const columnStatus = Number(queryKey[1]);
+        const isTarget = columnStatus === targetStatus;
+        const countDelta =
+          sourceStatus === targetStatus ? 0 : isTarget ? 1 : columnStatus === sourceStatus ? -1 : 0;
+
+        queryClient.setQueryData(queryKey, {
+          ...data,
+          pages: data.pages.map((page, index) => {
+            const items = (Array.isArray(page?.data) ? page.data : []).filter(
+              (item) => item?.guid !== guid,
+            );
+            const totalItems = Number(page?.meta?.totalItems);
+            return {
+              ...page,
+              data: isTarget && index === 0 ? [movedTask, ...items] : items,
+              ...(page?.meta && Number.isFinite(totalItems) && {
+                meta: { ...page.meta, totalItems: Math.max(0, totalItems + countDelta) },
+              }),
+            };
+          }),
+        });
       });
     },
-    [updateTaskMutation],
+    [queryClient],
+  );
+
+  const handleMoveTaskStatus = useCallback(
+    (taskId, newStatus) => {
+      const status = Number(newStatus);
+      if (!taskId || !TASK_STATUS_ITEMS.some((item) => item.id === status)) return;
+
+      queryClient.cancelQueries({ queryKey: ["tasks-board"] });
+      moveTaskInBoardCache(taskId, status);
+
+      updateTaskMutation.mutate(
+        { guid: taskId, status },
+        {
+          onSuccess: ({ updatedItem }) => {
+            // Put the server's copy (fresh assignees, updatedAt) into the card. The board
+            // pages by keyset cursor, so moving a card never shifts other pages — no refetch.
+            if (updatedItem?.guid) moveTaskInBoardCache(taskId, status, updatedItem);
+            // A status-filtered list must drop the row that no longer matches.
+            if (viewMode === "list" && applied.status) {
+              queryClient.invalidateQueries({ queryKey: ["tasks"] });
+            }
+          },
+          // Roll the optimistic move back to the server's truth.
+          onError: () => queryClient.invalidateQueries({ queryKey: ["tasks-board"] }),
+        },
+      );
+    },
+    [updateTaskMutation, moveTaskInBoardCache, queryClient, viewMode, applied.status],
   );
 
   const deleteDialog = useDeleteDialog({
@@ -184,7 +239,6 @@ export default function TaskFlow() {
     [deleteDialog],
   );
 
-  const queryClient = useQueryClient();
   const isBoardFetching = useIsFetching({ queryKey: ["tasks-board"] }) > 0;
 
   const handleRefetch = useCallback(() => {
@@ -290,7 +344,6 @@ export default function TaskFlow() {
       <CreateTaskModal
         open={isModalOpen}
         onClose={handleCloseCreateModal}
-        onCreateTask={handleCreateTask}
       />
 
       <EditTaskModal

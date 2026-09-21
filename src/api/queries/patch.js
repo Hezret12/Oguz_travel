@@ -117,39 +117,46 @@ export const updateTurkishPaymentApi = async (data) => {
   return await api.patchPrivate('/turkish-payment/update-turkish-payment', data);
 };
 
+/**
+ * `images`/`attachments` may mix already-saved paths (strings) and new `File`s.
+ * Strings go out as `keep_images` (the backend keeps those and deletes only the dropped
+ * ones), Files as multipart `images` uploads. Omitting `images` leaves them untouched,
+ * which is what partial updates such as a board status change rely on.
+ */
 export const updateTaskApi = async (data) => {
   if (data instanceof FormData) {
     return await api.patchFormDataPrivate("/messages/update-task", data);
   }
 
-  const rawFiles = data.images || data.attachments || [];
-  const fileList = Array.isArray(rawFiles)
-    ? rawFiles.filter((f) => f instanceof File)
-    : [];
-
-  if (fileList.length > 0) {
-    const formData = new FormData();
-    // Append files ONCE under field name 'images' for NestJS FilesInterceptor('images')
-    fileList.forEach((file) => {
-      formData.append("images", file);
-    });
-
-    Object.keys(data).forEach((key) => {
-      // Skip file array keys (already appended above) to prevent duplicate uploads!
-      if (key === "images" || key === "attachments") return;
-
-      if (key === "assignee_guids" && Array.isArray(data.assignee_guids)) {
-        data.assignee_guids.forEach((guid) => formData.append("assignee_guids", guid));
-      } else if (Array.isArray(data[key])) {
-        data[key].forEach((val) => formData.append(key, val));
-      } else if (data[key] !== undefined && data[key] !== null) {
-        formData.append(key, data[key]);
-      }
-    });
-    return await api.patchFormDataPrivate("/messages/update-task", formData);
+  const { images, attachments, ...fields } = data;
+  const rawImages = images ?? attachments;
+  const payload = { ...fields };
+  let files = [];
+  if (Array.isArray(rawImages)) {
+    files = rawImages.filter((item) => item instanceof File);
+    payload.keep_images = rawImages.filter((item) => typeof item === "string" && item);
   }
 
-  return await api.patchPrivate("/messages/update-task", data);
+  if (files.length === 0) {
+    return await api.patchPrivate("/messages/update-task", payload);
+  }
+
+  const formData = new FormData();
+  // Files go ONCE under 'images' for NestJS FilesInterceptor('images').
+  files.forEach((file) => formData.append("images", file));
+  Object.entries(payload).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      // An empty list still has to reach the backend ("" → []), or it keeps the old values.
+      if (value.length === 0) formData.append(key, "");
+      value.forEach((item) => formData.append(key, item));
+    } else if (value === null) {
+      // Multipart has no null; the backend reads "" as a cleared value (e.g. due_date).
+      formData.append(key, "");
+    } else if (value !== undefined) {
+      formData.append(key, value);
+    }
+  });
+  return await api.patchFormDataPrivate("/messages/update-task", formData);
 };
 
 export const updateNotificationApi = async (data) => {
