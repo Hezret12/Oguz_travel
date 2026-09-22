@@ -36,7 +36,6 @@ import { formatYhNumber } from "../../../functions/yhNumber";
 
 const DATE_FILTER_KEYS = ["start_date", "end_date"];
 
-// Own component so drawer draft edits don't re-render the table.
 const LetterStockFilterDrawer = () => {
   const { isDrawerOpen, draft, setDraftFilter, applyFilters, cancelFilters, resetFilters } =
     useDrawerFilters({
@@ -194,12 +193,8 @@ const ReferralLetterPage = () => {
     [formatChange, t, stockDeleteDialog],
   );
 
-  // Stock Table Instance
   const stockTable = useMaterialReactTable({
     ...defaultMrtOptions,
-    // Avoids nesting MRT's own create/edit <Dialog> around the one
-    // AddLetterStockModal/EditLetterStockModal already render — see
-    // Translate/index.jsx for the full rationale.
     createDisplayMode: "custom",
     editDisplayMode: "custom",
     columns: stockColumns,
@@ -207,9 +202,6 @@ const ReferralLetterPage = () => {
     enableColumnPinning: false,
     enableExpanding: true,
     renderDetailPanel: ({ row }) => <StockSharesPanel stock={row.original} />,
-    // The detail row gets the body row props too; keep it free of the row hover tint and let
-    // StockSharesPanel set its own spacing instead of MRT's 1rem cell padding.
-    // An expanded stock row is tinted so it reads as the header of the panel below it.
     muiTableBodyRowProps: (props) => {
       if (props.isDetailPanel) {
         return {
@@ -253,8 +245,6 @@ const ReferralLetterPage = () => {
         pageSize: limit,
       },
     },
-    // Only the first load uses `isLoading`: MRT drops every detail panel while it is set,
-    // which would collapse the expanded stocks on each search/refetch.
     state: {
       isLoading: isStockLoading,
       showProgressBars: isStockFetching && !isStockLoading,
