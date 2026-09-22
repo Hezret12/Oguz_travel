@@ -13,24 +13,19 @@ import {
 
 /**
  * Letter stock report, in the layout of the other report exports (see exportCafeteriaExcel):
- * company banner on row 2, one flat table per sheet from D4 with zebra rows, status pills,
- * AutoFilter and a SUBTOTAL total row.
+ * company banner on row 2 and one table from D4 with zebra rows, AutoFilter, a frozen header
+ * and a SUBTOTAL total row.
  *
- * - Sheet 1 (summary): one row per batch — its start and end numbers and how many were sold,
- *   damaged, lost, used by referral letters, and are left.
- * - Sheet 2 (details): every batch walked from its first number to its last, each run of
- *   numbers (start and end in their own columns) with what happened to it, unused runs included.
+ * One row per batch: its number range, size, and how many of its letters were sold, damaged,
+ * lost and are left, each status in its own column. Referral letters count as sold: they use
+ * their number up like a sale. Header cells carry a note explaining their column
+ * (`referralLetter.export.headerNotes`).
  *
- * Header cells carry a note explaining their column (`referralLetter.export.headerNotes`), and
- * the header row is frozen.
- *
- * Only numbers inside a batch are counted, like the page, so an entry overhanging its batch
- * never pushes "used" past the batch size.
+ * Only numbers inside a batch are counted, like the page, and a number several entries cover
+ * is counted once, so the statuses always add up to the batch size.
  */
 
 const TEAL = "FF0E8584";
-const TEAL_DARK = "FF0F5F5E";
-const TEAL_LIGHT = "FFE0F2F1";
 const RED = "FFDC2626";
 const BLACK = "FF000000";
 const GREY_TEXT = "FF6B7280";
@@ -41,20 +36,24 @@ const COUNT_FMT = '#,##0;-#,##0;"-"';
 const START_ROW = 4;
 const START_COL = 4; // Column D, as in the other exports
 
-const REFERRAL = "REFERRAL";
-const UNUSED = "UNUSED";
-
-const STATUS_STYLE = {
-  [LETTER_STATUS.SOLD]: { bg: "FFDCFCE7", fg: "FF166534" },
-  [LETTER_STATUS.DAMAGED]: { bg: "FFFFEDD5", fg: "FF9A3412" },
-  [LETTER_STATUS.LOST]: { bg: "FFFEE2E2", fg: "FF991B1B" },
-  [REFERRAL]: { bg: TEAL_LIGHT, fg: TEAL_DARK },
-  [UNUSED]: { bg: "FFE5E7EB", fg: "FF4B5563" },
+const STATUS_COLOR = {
+  [LETTER_STATUS.SOLD]: "FF166534",
+  [LETTER_STATUS.DAMAGED]: "FF9A3412",
+  [LETTER_STATUS.LOST]: "FF991B1B",
 };
+const USED_STATUSES = Object.keys(STATUS_COLOR);
 
 const font = (extra = {}) => ({ name: "Calibri", size: 10, color: { argb: BLACK }, ...extra });
 const solid = (argb) => ({ type: "pattern", pattern: "solid", fgColor: { argb } });
 const line = (style, argb) => ({ style, color: { argb } });
+
+// Thin grey inner grid inside a medium black frame.
+const frameBorder = (col, endCol, { top, bottom } = {}) => ({
+  top: top ?? line("thin", GRID),
+  bottom: bottom ?? line("thin", GRID),
+  left: col === START_COL ? line("medium", BLACK) : line("thin", GRID),
+  right: col === endCol ? line("medium", BLACK) : line("thin", GRID),
+});
 
 const getColName = (colNum) => {
   let name = "";
@@ -67,37 +66,58 @@ const getColName = (colNum) => {
   return name;
 };
 
-// Thin grey inner grid inside a medium black frame.
-const frameBorder = (col, endCol, { top, bottom } = {}) => ({
-  top: top ?? line("thin", GRID),
-  bottom: bottom ?? line("thin", GRID),
-  left: col === START_COL ? line("medium", BLACK) : line("thin", GRID),
-  right: col === endCol ? line("medium", BLACK) : line("thin", GRID),
-});
+// A referral letter used its number up like a sale, so it is counted as one. `status` is free
+// text in the backend; an unknown one is counted as a sale too.
+const getStatusKey = (letter) => {
+  if (letter.isRefferal) return LETTER_STATUS.SOLD;
+  const status = resolveLetterStatus(letter.status);
+  return STATUS_COLOR[status] ? status : LETTER_STATUS.SOLD;
+};
 
-const getStatusKey = (letter) => (letter.isRefferal ? REFERRAL : resolveLetterStatus(letter.status));
+/**
+ * Counts each batch's numbers by status. Numbers outside the batch are ignored, and numbers an
+ * earlier entry already covers are counted once.
+ */
+const buildBatches = (stocks, letters) => {
+  const rows = letters
+    .map((letter) => ({ letter, ...getLetterRange(letter) }))
+    .filter((row) => Number.isFinite(row.start) && Number.isFinite(row.end))
+    .sort((a, b) => a.start - b.start || a.end - b.end);
+  // Entries are sorted by start, so a batch only looks from the first entry that can still
+  // reach it (starting at most the longest entry's length before it) instead of all of them.
+  const longest = rows.reduce((max, row) => Math.max(max, row.end - row.start), 0);
+  const firstStartingFrom = (value) => {
+    let lo = 0;
+    let hi = rows.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (rows[mid].start < value) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
+  };
 
-const getStatusLabels = (t) => ({
-  [LETTER_STATUS.SOLD]: t("referralLetter.statusSold"),
-  [LETTER_STATUS.DAMAGED]: t("referralLetter.statusDamaged"),
-  [LETTER_STATUS.LOST]: t("referralLetter.statusLost"),
-  [REFERRAL]: t("sidebar.referalLetters"),
-  [UNUSED]: t("referralLetter.export.unused"),
-});
+  return stocks.map((stock) => {
+    const range = getStockRange(stock);
+    const counts = Object.fromEntries(USED_STATUSES.map((status) => [status, 0]));
 
-// Every number in its printed 7-digit form ("0369420").
-const formatRun = (from, to) =>
-  from === to ? formatYhNumber(from) : `${formatYhNumber(from)} – ${formatYhNumber(to)}`;
+    if (range) {
+      let cursor = range.start;
+      for (let i = firstStartingFrom(range.start - longest); i < rows.length; i += 1) {
+        const row = rows[i];
+        if (row.start > range.end) break;
+        const from = Math.max(row.start, range.start, cursor);
+        const to = Math.min(row.end, range.end);
+        if (to < from) continue;
+        counts[getStatusKey(row.letter)] += to - from + 1;
+        cursor = to + 1;
+      }
+    }
 
-const createSheet = (workbook, name) => {
-  const sheet = workbook.addWorksheet(name.substring(0, 31), {
-    // Header row stays visible while scrolling.
-    views: [{ state: "frozen", ySplit: START_ROW, showGridLines: true }],
+    const total = Number(stock.total_letter) || (range ? range.end - range.start + 1 : 0);
+    const used = USED_STATUSES.reduce((sum, status) => sum + counts[status], 0);
+    return { stock, total, counts, remaining: Math.max(0, total - used) };
   });
-  [1, 2, 3].forEach((c) => {
-    sheet.getColumn(c).width = 4;
-  });
-  return sheet;
 };
 
 const writeBanner = (sheet, endCol, title, asOf) => {
@@ -119,9 +139,8 @@ const writeBanner = (sheet, endCol, title, asOf) => {
   cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
 };
 
-// Each header cell carries a note (Excel comment) explaining its column; `notesKey` is the
-// locale namespace holding one entry per column key.
-const writeHeader = (sheet, columns, t, notesKey) => {
+// Each header cell carries a note (Excel comment) explaining its column.
+const writeHeader = (sheet, columns, t) => {
   const endCol = START_COL + columns.length - 1;
   const row = sheet.getRow(START_ROW);
   row.height = 30;
@@ -132,11 +151,11 @@ const writeHeader = (sheet, columns, t, notesKey) => {
     cell.note = {
       texts: [
         { font: { bold: true, size: 9 }, text: `${col.header}\n` },
-        { font: { size: 9 }, text: t(`${notesKey}.${col.key}`) },
+        { font: { size: 9 }, text: t(`referralLetter.export.headerNotes.${col.key}`) },
       ],
       margins: { insetmode: "custom", inset: [0.12, 0.12, 0.12, 0.12] },
     };
-    cell.font = font({ size: 11, bold: true, color: { argb: col.headerColor || BLACK } });
+    cell.font = font({ size: 11, bold: true, color: { argb: col.color || BLACK } });
     cell.fill = solid("FFFFFFFF");
     cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
     cell.border = {
@@ -148,145 +167,55 @@ const writeHeader = (sheet, columns, t, notesKey) => {
   });
 };
 
-// Total row under the table, outside the AutoFilter range, with SUBTOTAL per `sum` column so
-// the totals follow the filter.
-const writeTotalRow = (sheet, columns, firstDataRow, lastDataRow, rowValues, label) => {
-  const endCol = START_COL + columns.length - 1;
-  const totalRow = sheet.getRow(lastDataRow + 2);
-  totalRow.height = 24;
-  columns.forEach((c, idx) => {
-    const colNumber = START_COL + idx;
-    const cell = totalRow.getCell(colNumber);
-    cell.font = font({ bold: true, color: { argb: c.headerColor || BLACK } });
-    cell.alignment = { vertical: "middle", horizontal: c.align };
-    cell.border = frameBorder(colNumber, endCol, {
-      top: line("thin", BLACK),
-      bottom: line("medium", BLACK),
-    });
-    if (c.sum) {
-      const letter = getColName(colNumber);
-      cell.value = {
-        formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
-        result: rowValues.reduce((sum, values) => sum + Number(values[c.key] || 0), 0),
-      };
-      cell.numFmt = COUNT_FMT;
-      cell.font = font({ size: 10.5, bold: true, color: { argb: c.headerColor || BLACK } });
-    }
-  });
-  totalRow.getCell(START_COL).value = label;
-  totalRow.getCell(START_COL).alignment = { vertical: "middle", horizontal: "left" };
-};
+const countColumn = (key, header, color, width = 11) => ({
+  header,
+  key,
+  width,
+  align: "right",
+  sum: true,
+  color,
+});
 
-// Widths follow the longest value, within [col.width, 48].
-const fitColumns = (sheet, columns, maxLens) => {
-  columns.forEach((col, idx) => {
-    sheet.getColumn(START_COL + idx).width = Math.min(Math.max(col.width, maxLens[idx] + 3), 48);
-  });
-};
-
-const trackLength = (maxLens, idx, value) => {
-  if (value === null || value === undefined || value === "") return;
-  const len = String(value).length;
-  if (len > maxLens[idx]) maxLens[idx] = len;
-};
-
-/**
- * Splits each batch into consecutive runs from its first to its last number: one run per
- * entry (clipped to the batch) and one per stretch of unused numbers. Also counts the
- * batch's numbers by status.
- */
-const buildBatches = (stocks, letters) => {
-  const rows = letters
-    .map((letter) => ({ letter, ...getLetterRange(letter) }))
-    .filter((row) => Number.isFinite(row.start) && Number.isFinite(row.end))
-    .sort((a, b) => a.start - b.start || a.end - b.end);
-
-  return stocks.map((stock) => {
-    const range = getStockRange(stock);
-    const counts = { [LETTER_STATUS.SOLD]: 0, [LETTER_STATUS.DAMAGED]: 0, [LETTER_STATUS.LOST]: 0, [REFERRAL]: 0 };
-    const runs = [];
-
-    if (range) {
-      let cursor = range.start;
-      rows.forEach((row) => {
-        const from = Math.max(row.start, range.start);
-        const to = Math.min(row.end, range.end);
-        if (to < from) return;
-        if (from > cursor) {
-          runs.push({ from: cursor, to: from - 1, status: UNUSED, added: from - cursor });
-        }
-        const status = getStatusKey(row.letter);
-        // Numbers an earlier entry already covers are counted once.
-        const added = Math.max(0, to - Math.max(from, cursor) + 1);
-        runs.push({
-          from,
-          to,
-          status,
-          added,
-          letter: row.letter,
-          overhangs: row.start < range.start || row.end > range.end,
-          // Starts inside numbers an earlier entry already covers.
-          overlaps: from < cursor,
-        });
-        counts[status in counts ? status : LETTER_STATUS.SOLD] += added;
-        cursor = Math.max(cursor, to + 1);
-      });
-      if (cursor <= range.end) {
-        runs.push({ from: cursor, to: range.end, status: UNUSED, added: range.end - cursor + 1 });
-      }
-    }
-
-    const total = Number(stock.total_letter) || (range ? range.end - range.start + 1 : 0);
-    const used = Object.values(counts).reduce((sum, n) => sum + n, 0);
-    return { stock, range, total, used, remaining: Math.max(0, total - used), counts, runs };
-  });
-};
-
-const writeSummarySheet = (workbook, batches, t, asOf) => {
+const writeSheet = (workbook, batches, t, asOf) => {
   const columns = [
     { header: "T/B", key: "index", width: 6, align: "center" },
-    { header: t("referralLetter.batchName"), key: "name", width: 20, align: "left" },
-    { header: t("referralLetter.startNo"), key: "startNo", width: 14, align: "center" },
-    { header: t("referralLetter.endNo"), key: "endNo", width: 14, align: "center" },
-    { header: t("referralLetter.totalCount"), key: "total", width: 11, align: "right", sum: true },
-    { header: t("referralLetter.statusSold"), key: "sold", width: 11, align: "right", sum: true },
-    { header: t("referralLetter.statusDamaged"), key: "damaged", width: 12, align: "right", sum: true },
-    { header: t("referralLetter.statusLost"), key: "lost", width: 11, align: "right", sum: true },
-    { header: t("sidebar.referalLetters"), key: "referral", width: 13, align: "right", sum: true },
-    { header: t("referralLetter.usedCount"), key: "used", width: 11, align: "right", sum: true },
-    {
-      header: t("referralLetter.remainingCount"),
-      key: "remaining",
-      width: 11,
-      align: "right",
-      sum: true,
-      headerColor: TEAL,
-    },
+    { header: t("referralLetter.batchName"), key: "name", width: 22, align: "left" },
+    { header: t("referralLetter.startNo"), key: "startNo", width: 13, align: "center" },
+    { header: t("referralLetter.endNo"), key: "endNo", width: 13, align: "center" },
+    countColumn("total", t("referralLetter.totalCount")),
+    countColumn("sold", t("referralLetter.statusSold"), STATUS_COLOR[LETTER_STATUS.SOLD]),
+    countColumn("damaged", t("referralLetter.statusDamaged"), STATUS_COLOR[LETTER_STATUS.DAMAGED], 12),
+    countColumn("lost", t("referralLetter.statusLost"), STATUS_COLOR[LETTER_STATUS.LOST]),
+    countColumn("remaining", t("referralLetter.remainingCount"), TEAL),
     { header: t("columns.date"), key: "date", width: 12, align: "center" },
     { header: t("columns.note"), key: "note", width: 24, align: "left" },
   ];
-  const col = Object.fromEntries(columns.map((c, idx) => [c.key, START_COL + idx]));
   const endCol = START_COL + columns.length - 1;
-  const sheet = createSheet(workbook, t("referralLetter.export.sheetStocks"));
+  const remainingCol = START_COL + columns.findIndex((c) => c.key === "remaining");
+  const sheet = workbook.addWorksheet(t("referralLetter.export.sheetName").substring(0, 31), {
+    // Header row stays visible while scrolling.
+    views: [{ state: "frozen", ySplit: START_ROW, showGridLines: true }],
+  });
+  [1, 2, 3].forEach((c) => {
+    sheet.getColumn(c).width = 4;
+  });
 
   writeBanner(sheet, endCol, t("referralLetter.export.reportTitle"), asOf);
-  writeHeader(sheet, columns, t, "referralLetter.export.headerNotes.summary");
+  writeHeader(sheet, columns, t);
 
-  // Text cells, so the leading zeros show.
-  const rowValues = batches.map((batch, offset) => ({
-    index: batch.stock.index_number ?? offset + 1,
-    name: batch.stock.name ? String(batch.stock.name).trim() : "",
-    startNo: formatYhNumber(batch.stock.start_yh_number),
-    endNo: formatYhNumber(batch.stock.end_yh_number),
-    total: batch.total,
-    sold: batch.counts[LETTER_STATUS.SOLD],
-    damaged: batch.counts[LETTER_STATUS.DAMAGED],
-    lost: batch.counts[LETTER_STATUS.LOST],
-    referral: batch.counts[REFERRAL],
-    used: batch.used,
-    remaining: batch.remaining,
-    date: formatExcelDate(batch.stock.createdAt),
-    note: batch.stock.note ? String(batch.stock.note).trim() : "",
+  // Text cells, so the leading zeros of the ÝH numbers show.
+  const rowValues = batches.map(({ stock, total, counts, remaining }, offset) => ({
+    index: stock.index_number ?? offset + 1,
+    name: stock.name ? String(stock.name).trim() : "",
+    startNo: formatYhNumber(stock.start_yh_number),
+    endNo: formatYhNumber(stock.end_yh_number),
+    total,
+    sold: counts[LETTER_STATUS.SOLD],
+    damaged: counts[LETTER_STATUS.DAMAGED],
+    lost: counts[LETTER_STATUS.LOST],
+    remaining,
+    date: formatExcelDate(stock.createdAt),
+    note: stock.note ? String(stock.note).trim() : "",
   }));
 
   const firstDataRow = START_ROW + 1;
@@ -300,135 +229,20 @@ const writeSummarySheet = (workbook, batches, t, asOf) => {
     columns.forEach((c, idx) => {
       const colNumber = START_COL + idx;
       const cell = row.getCell(colNumber);
-      cell.value = values[c.key];
-      cell.font = font();
+      const value = values[c.key];
+      cell.value = value;
+      // Status counts in their colour; zero prints as "-", so empty statuses read at a glance.
+      cell.font = font({ bold: Boolean(c.color) || c.key === "name", color: { argb: c.color || BLACK } });
       cell.fill = solid(bg);
       cell.alignment = { vertical: "middle", horizontal: c.align, wrapText: c.key === "note" };
       cell.border = frameBorder(colNumber, endCol);
       if (c.sum) cell.numFmt = COUNT_FMT;
-      trackLength(maxLens, idx, values[c.key]);
+      const len = (typeof value === "number" ? value.toLocaleString("en-US") : String(value ?? "")).length;
+      if (len > maxLens[idx]) maxLens[idx] = len;
     });
-    row.getCell(col.name).font = font({ bold: true });
-    row.getCell(col.startNo).font = font({ bold: true });
-    row.getCell(col.endNo).font = font({ bold: true });
-    row.getCell(col.used).font = font({ bold: true });
-    // Letters left are the number to act on; a used-up batch is greyed out.
-    row.getCell(col.remaining).font = font({
-      bold: true,
-      color: { argb: values.remaining > 0 ? TEAL : GREY_TEXT },
-    });
-    if (values.lost > 0) row.getCell(col.lost).font = font({ bold: true, color: { argb: RED } });
-  });
-
-  sheet.autoFilter = {
-    from: { row: START_ROW, column: START_COL },
-    to: { row: lastDataRow, column: endCol },
-  };
-
-  writeTotalRow(sheet, columns, firstDataRow, lastDataRow, rowValues, t("referralLetter.export.total"));
-  fitColumns(sheet, columns, maxLens);
-};
-
-/**
- * Every batch walked from its first number to its last as one flat table: each row is a run of
- * numbers with what happened to it, unused runs included. The batch column lets the AutoFilter
- * narrow it to one batch.
- */
-const writeDetailsSheet = (workbook, batches, t, asOf) => {
-  const columns = [
-    { header: "T/B", key: "index", width: 6, align: "center" },
-    { header: t("referralLetter.export.batch"), key: "batch", width: 22, align: "left" },
-    { header: t("referralLetter.startNoFrom"), key: "from", width: 14, align: "center" },
-    { header: t("referralLetter.endNoTo"), key: "to", width: 14, align: "center" },
-    { header: t("referralLetter.quantity"), key: "count", width: 10, align: "right", sum: true },
-    { header: t("columns.status"), key: "status", width: 16, align: "center" },
-    { header: t("columns.date"), key: "date", width: 12, align: "center" },
-    { header: t("referralLetter.submittedBy"), key: "submittedBy", width: 22, align: "left" },
-    { header: t("referralLetter.receivedBy"), key: "receivedBy", width: 18, align: "left" },
-    { header: t("columns.note"), key: "note", width: 30, align: "left" },
-  ];
-  const col = Object.fromEntries(columns.map((c, idx) => [c.key, START_COL + idx]));
-  const endCol = START_COL + columns.length - 1;
-  const sheet = createSheet(workbook, t("referralLetter.export.sheetLetters"));
-  const statusLabel = getStatusLabels(t);
-
-  writeBanner(sheet, endCol, t("referralLetter.export.reportTitle"), asOf);
-  writeHeader(sheet, columns, t, "referralLetter.export.headerNotes.details");
-
-  const rows = batches.flatMap(({ stock, range, runs }) => {
-    const name = stock.name ? String(stock.name).trim() : "";
-    const batch = range
-      ? `${name} (${formatRun(range.start, range.end)})`.trim()
-      : name;
-    return runs.map((run) => ({ batch, run }));
-  });
-
-  const firstDataRow = START_ROW + 1;
-  const lastDataRow = START_ROW + rows.length;
-  const maxLens = columns.map((c) => String(c.header).length);
-
-  const rowValues = rows.map(({ batch, run }, offset) => {
-    const { letter } = run;
-    const note = !letter
-      ? ""
-      : letter.isRefferal
-        ? [letter.destination_country, formatExcelDate(letter.departure_date)].filter(Boolean).join(" • ")
-        : letter.note || "";
-    return {
-      index: offset + 1,
-      batch,
-      from: formatYhNumber(run.from),
-      to: formatYhNumber(run.to),
-      // A run starting inside numbers an earlier entry covers only adds the new ones, so the
-      // total equals the batch sizes.
-      count: run.added,
-      status: statusLabel[run.status] || String(letter?.status ?? ""),
-      date: letter ? formatExcelDate(letter.isRefferal ? letter.createdAt : letter.date_time) : "",
-      submittedBy: letter?.refferaloperator?.fullName || "",
-      receivedBy: letter?.accepted_by || "",
-      note: String(note).trim(),
-    };
-  });
-
-  rowValues.forEach((values, offset) => {
-    const { run } = rows[offset];
-    const row = sheet.getRow(firstDataRow + offset);
-    row.height = 20;
-    const bg = offset % 2 === 1 ? ZEBRA : "FFFFFFFF";
-    columns.forEach((c, idx) => {
-      const colNumber = START_COL + idx;
-      const cell = row.getCell(colNumber);
-      cell.value = values[c.key];
-      cell.font = font();
-      cell.fill = solid(bg);
-      cell.alignment = { vertical: "middle", horizontal: c.align, wrapText: c.key === "note" };
-      cell.border = frameBorder(colNumber, endCol);
-      if (c.sum) cell.numFmt = COUNT_FMT;
-      trackLength(maxLens, idx, values[c.key]);
-    });
-
-    row.getCell(col.from).font = font({ bold: true });
-    row.getCell(col.to).font = font({ bold: true });
-    const style = STATUS_STYLE[run.status];
-    const statusCell = row.getCell(col.status);
-    statusCell.fill = solid(style.bg);
-    statusCell.font = font({ bold: true, color: { argb: style.fg } });
-
-    // Explain anything unusual on the start number cell itself.
-    const notes = [];
-    if (run.overhangs) {
-      const full = getLetterRange(run.letter);
-      notes.push(
-        `${t("referralLetter.export.outsideStock")}: ${formatRun(full.start, full.end)}`,
-      );
-    }
-    if (run.overlaps) notes.push(t("referralLetter.export.duplicate"));
-    if (notes.length) {
-      const warnFont = font({ bold: true, color: { argb: run.overlaps ? RED : "FFB45309" } });
-      const fromCell = row.getCell(col.from);
-      fromCell.note = notes.join("\n");
-      fromCell.font = warnFont;
-      row.getCell(col.to).font = warnFont;
+    // A used-up batch has nothing left: greyed out.
+    if (values.remaining === 0) {
+      row.getCell(remainingCol).font = font({ bold: true, color: { argb: GREY_TEXT } });
     }
   });
 
@@ -437,8 +251,35 @@ const writeDetailsSheet = (workbook, batches, t, asOf) => {
     to: { row: lastDataRow, column: endCol },
   };
 
-  writeTotalRow(sheet, columns, firstDataRow, lastDataRow, rowValues, t("referralLetter.export.total"));
-  fitColumns(sheet, columns, maxLens);
+  // Total row under the table, outside the AutoFilter range, with SUBTOTAL per count column
+  // so the totals follow the filter.
+  const totalRow = sheet.getRow(lastDataRow + 2);
+  totalRow.height = 24;
+  columns.forEach((c, idx) => {
+    const colNumber = START_COL + idx;
+    const cell = totalRow.getCell(colNumber);
+    cell.font = font({ size: 10.5, bold: true, color: { argb: c.color || BLACK } });
+    cell.alignment = { vertical: "middle", horizontal: c.align };
+    cell.border = frameBorder(colNumber, endCol, {
+      top: line("medium", BLACK),
+      bottom: line("medium", BLACK),
+    });
+    if (c.sum) {
+      const letter = getColName(colNumber);
+      cell.value = {
+        formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
+        result: rowValues.reduce((sum, values) => sum + Number(values[c.key] || 0), 0),
+      };
+      cell.numFmt = COUNT_FMT;
+    }
+  });
+  totalRow.getCell(START_COL).value = t("referralLetter.export.total");
+  totalRow.getCell(START_COL).alignment = { vertical: "middle", horizontal: "left" };
+
+  // Widths follow the longest value, within [col.width, 48].
+  columns.forEach((col, idx) => {
+    sheet.getColumn(START_COL + idx).width = Math.min(Math.max(col.width, maxLens[idx] + 3), 48);
+  });
 };
 
 export const exportLetterStockExcel = async ({ params = {}, onProgress = null, t }) => {
@@ -471,8 +312,8 @@ export const exportLetterStockExcel = async ({ params = {}, onProgress = null, t
     letters = await fetchAllPaginatedData(
       getLettersByDocumentRangeApi,
       {
-        start_number: Math.min(...ranges.map((r) => r.start)),
-        end_number: Math.max(...ranges.map((r) => r.end)),
+        start_number: ranges.reduce((min, r) => Math.min(min, r.start), Infinity),
+        end_number: ranges.reduce((max, r) => Math.max(max, r.end), -Infinity),
       },
       (loaded, total) =>
         onProgress?.({
@@ -484,45 +325,26 @@ export const exportLetterStockExcel = async ({ params = {}, onProgress = null, t
   }
 
   onProgress?.({ message: t("referralLetter.export.generating"), percent: 90 });
-
   const sortedStocks = [...stocks].sort(
-    (a, b) => Number(a.start_yh_number) - Number(b.start_yh_number) || Number(a.index_number) - Number(b.index_number),
+    (a, b) =>
+      Number(a.start_yh_number) - Number(b.start_yh_number) ||
+      Number(a.index_number) - Number(b.index_number),
   );
   const batches = buildBatches(sortedStocks, Array.isArray(letters) ? letters : []);
-  await saveWorkbook(batches, t, t("referralLetter.export.fileName"));
-
-  onProgress?.({ message: t("referralLetter.export.success"), percent: 100 });
-  return batches.length;
-};
-
-// Both sheets for `batches`, downloaded as `<baseName>_<date>.xlsx`.
-const saveWorkbook = async (batches, t, baseName) => {
-  const asOf = t("referralLetter.export.asOf", { date: dayjs().format("DD.MM.YYYY") });
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "OGUZTRAVEL";
   workbook.created = new Date();
-  writeSummarySheet(workbook, batches, t, asOf);
-  writeDetailsSheet(workbook, batches, t, asOf);
+  writeSheet(workbook, batches, t, t("referralLetter.export.asOf", { date: dayjs().format("DD.MM.YYYY") }));
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  saveAs(blob, `${baseName}_${dayjs().format("YYYY-MM-DD")}.xlsx`);
-};
+  saveAs(blob, `${t("referralLetter.export.fileName")}_${dayjs().format("YYYY-MM-DD")}.xlsx`);
 
-/**
- * One batch's report, from the letters its panel already loaded (the whole batch range):
- * the same two sheets as the full export, limited to this batch.
- */
-export const exportStockBatchExcel = async ({ stock, letters = [], t }) => {
-  const batches = buildBatches([stock], Array.isArray(letters) ? letters : []);
-  // Characters Windows does not allow in file names.
-  const name = String(stock?.name ?? "").trim().replace(/[\\/:*?"<>|]+/g, "-");
-  const range = getStockRange(stock);
-  const label = name || (range ? formatRun(range.start, range.end).replace(/\s/g, "") : "");
-  await saveWorkbook(batches, t, [t("referralLetter.export.fileName"), label].filter(Boolean).join("_"));
+  onProgress?.({ message: t("referralLetter.export.success"), percent: 100 });
+  return batches.length;
 };
 
 export default exportLetterStockExcel;
