@@ -101,7 +101,7 @@ const RangeDatePicker = ({ label, value, onChange, disabled, minDate, maxDate })
 
 // One date range block (title + presets + start/end pickers). Memoized so
 // editing one range doesn't re-render the others.
-const DateRangeSection = memo(({ rangeKey, title, start, end, disabled, onChange }) => {
+export const DateRangeSection = memo(({ rangeKey, title, start, end, disabled, onChange }) => {
   const { t } = useLocale();
 
   const isPresetActive = (presetKey) => {

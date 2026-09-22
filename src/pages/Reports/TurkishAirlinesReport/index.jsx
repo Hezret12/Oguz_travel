@@ -96,7 +96,6 @@ const TurkishAirlinesReport = () => {
         officeBreakdown={officeBreakdown}
         statusChartData={statusChartData}
         formatNumber={formatNumber}
-        stats={stats}
         formatCompact={formatCompact}
         selectedQuarter={selectedQuarter}
         onQuarterChange={setSelectedQuarter}

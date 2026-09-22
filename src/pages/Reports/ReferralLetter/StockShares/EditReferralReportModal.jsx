@@ -15,6 +15,10 @@ import { useLocale } from "../../../../hooks/useLocale";
 import { updateOtherLetterApi } from "../../../../api/queries/patch";
 import {
   STOCK_LETTERS_KEY,
+  YH_INPUT_PROPS,
+  formatYhNumber,
+  isYhNumber,
+  normalizeYhNumber,
   findOverlap,
   getLetterRange,
   getLetterStatusOptions,
@@ -23,8 +27,8 @@ import {
 } from "../functions/stockLetters";
 
 const toInt = (value) => {
-  if (value === "" || value == null) return NaN;
-  return Number(value);
+  const text = normalizeYhNumber(value);
+  return text === "" ? NaN : Number(text);
 };
 
 /** Edits an "other letter" of a stock batch; the quantity follows from its ÝH range. */
@@ -47,8 +51,8 @@ const EditReferralReportModal = ({ open, close, table, row, stock, occupied = []
       date: letter?.date_time || null,
       assignment_opr_guid: letter?.received_opr_guid || "",
       received_by: letter?.accepted_by || "",
-      startNo: Number.isFinite(start) ? String(start) : "",
-      endNo: Number.isFinite(end) ? String(end) : "",
+      startNo: Number.isFinite(start) ? formatYhNumber(start) : "",
+      endNo: Number.isFinite(end) ? formatYhNumber(end) : "",
       status: resolveLetterStatus(letter?.status),
       note: letter?.note || "",
     };
@@ -83,26 +87,33 @@ const EditReferralReportModal = ({ open, close, table, row, stock, occupied = []
   });
 
   // Returns an error message for a single number, or null when it is valid.
-  const checkNumber = (num) => {
-    if (!Number.isInteger(num) || num <= 0) return t("referralLetter.letterNoInvalid");
+  const checkNumber = (value) => {
+    if (!isYhNumber(value)) return t("referralLetter.letterNoInvalid");
+    const num = toInt(value);
     if (stock && (num < stockStart || num > stockEnd)) {
-      return t("referralLetter.letterNoOutOfRange", { start: stockStart, end: stockEnd });
+      return t("referralLetter.letterNoOutOfRange", {
+        start: formatYhNumber(stockStart),
+        end: formatYhNumber(stockEnd),
+      });
     }
     return null;
   };
 
-  const validateStartNo = (value) => checkNumber(toInt(value)) ?? true;
+  const validateStartNo = (value) => checkNumber(value) ?? true;
 
   const validateEndNo = (value, formValues) => {
-    const end = toInt(value);
-    const error = checkNumber(end);
+    const error = checkNumber(value);
     if (error) return error;
+    const end = toInt(value);
     const start = toInt(formValues.startNo);
     if (!Number.isInteger(start)) return true;
     if (end < start) return t("referralLetter.rangeInvalid");
     const overlap = findOverlap(occupied, start, end, letter?.guid);
     if (overlap) {
-      return t("referralLetter.rangeOverlap", { start: overlap.start, end: overlap.end });
+      return t("referralLetter.rangeOverlap", {
+        start: formatYhNumber(overlap.start),
+        end: formatYhNumber(overlap.end),
+      });
     }
     return true;
   };
@@ -137,8 +148,7 @@ const EditReferralReportModal = ({ open, close, table, row, stock, occupied = []
               name="startNo"
               control={control}
               label={t("referralLetter.startNoFrom")}
-              type="number"
-              allowNegative={false}
+              InputProps={YH_INPUT_PROPS}
               required
               rules={{
                 required: t("validation.required"),
@@ -152,8 +162,7 @@ const EditReferralReportModal = ({ open, close, table, row, stock, occupied = []
               name="endNo"
               control={control}
               label={t("referralLetter.endNoTo")}
-              type="number"
-              allowNegative={false}
+              InputProps={YH_INPUT_PROPS}
               required
               rules={{
                 required: t("validation.required"),

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Alert, Box, Button, Typography, Tooltip, Chip } from "@mui/material";
 import { RotateCw, TriangleAlert } from "lucide-react";
+import toast from "react-hot-toast";
 import { useLocale } from "../../../../hooks/useLocale";
 import { useDateFormat } from "../../../../functions/generalHelpers";
 import { useDeleteDialog } from "../../../../hooks/useDeleteDialog";
@@ -13,6 +14,7 @@ import {
 import { getDefaultMRTOptions } from "../../../../hooks/getDefaultMRTOptions";
 import TableEmptyState from "../../../../components/TableEmptyState";
 import AddButton from "../../../../components/AddButton";
+import ExportExcelButton from "../../../../components/ExportExcelButton";
 import StatusChip from "../../../../components/StatusChip";
 import DeleteDialog from "../../../../components/DeleteDialog";
 import ColumnActionButtons from "../../../../components/ColumnActionButtons";
@@ -24,6 +26,7 @@ import EditReferralReportModal from "./EditReferralReportModal";
 import {
   STOCK_LETTERS_KEY,
   findFirstFreeRange,
+  formatYhNumber,
   getCountInStock,
   getLetterCount,
   getLetterRange,
@@ -32,8 +35,10 @@ import {
   isOutsideStock,
   resolveLetterStatus,
 } from "../functions/stockLetters";
+import { exportStockBatchExcel } from "../functions/exportLetterStockExcel";
 
-const formatRange = ({ start, end }) => (start === end ? `${start}` : `${start} - ${end}`);
+const formatRange = ({ start, end }) =>
+  start === end ? formatYhNumber(start) : `${formatYhNumber(start)} - ${formatYhNumber(end)}`;
 
 /** The letters of one stock batch: referral letters (read-only here) and other letters. */
 const StockSharesPanel = ({ stock }) => {
@@ -41,6 +46,7 @@ const StockSharesPanel = ({ stock }) => {
   const { formatChange } = useDateFormat();
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingLetter, setEditingLetter] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const stockRange = useMemo(() => getStockRange(stock), [stock]);
   const hasRange = Boolean(stockRange);
@@ -82,6 +88,19 @@ const StockSharesPanel = ({ stock }) => {
   const remainingCount = Math.max(0, totalCount - usedCount);
 
   const suggestedRange = useMemo(() => findFirstFreeRange(stock, rows), [rows, stock]);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await exportStockBatchExcel({ stock, letters, t });
+      toast.success(t("referralLetter.export.success"));
+    } catch (err) {
+      console.error("Stock batch Excel export error:", err);
+      toast.error(err?.message || t("common.exportError"));
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const { mutate: deleteLetter, isPending: isDeleting } = useDelete({
     deleteFn: deleteOtherLetterApi,
@@ -128,8 +147,8 @@ const StockSharesPanel = ({ stock }) => {
               arrow
               title={t("referralLetter.outsideStock", {
                 count: getCountInStock(row.original, stockRange),
-                start: stockRange.start,
-                end: stockRange.end,
+                start: formatYhNumber(stockRange.start),
+                end: formatYhNumber(stockRange.end),
               })}
             >
               <Box
@@ -200,7 +219,7 @@ const StockSharesPanel = ({ stock }) => {
                 .filter(Boolean)
                 .join(" • ")
             : letter.note;
-          return text || "—";
+          return text || "";
         },
       },
       {
@@ -306,13 +325,20 @@ const StockSharesPanel = ({ stock }) => {
             </Typography>
           )}
         </Typography>
-        <AddButton
-          size="small"
-          onClick={() => setIsAddOpen(true)}
-          disabled={!isLettersReady || remainingCount === 0 || !suggestedRange}
-        >
-          {t("referralLetter.addReport")}
-        </AddButton>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <ExportExcelButton
+            size="small"
+            onClick={handleExport}
+            disabled={!isLettersReady || isExporting}
+          />
+          <AddButton
+            size="small"
+            onClick={() => setIsAddOpen(true)}
+            disabled={!isLettersReady || remainingCount === 0 || !suggestedRange}
+          >
+            {t("referralLetter.addReport")}
+          </AddButton>
+        </Box>
       </Box>
 
       {isError ? (

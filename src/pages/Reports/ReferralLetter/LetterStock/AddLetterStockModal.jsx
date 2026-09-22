@@ -9,10 +9,9 @@ import { FooterButton } from "../../../../components/Dialog/FooterButton";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { useLocale } from "../../../../hooks/useLocale";
 import { addReportApi } from "../../../../api/queries/post";
-import { isYhNumber, YH_NUMBER_MAX_LENGTH } from "../functions/stockLetters";
+import { isYhNumber, normalizeYhNumber, YH_INPUT_PROPS } from "../functions/stockLetters";
 
-// ÝH serials are typed as text so leading zeros ("0000001") are kept.
-const yhInputProps = { inputProps: { maxLength: YH_NUMBER_MAX_LENGTH, inputMode: "numeric" } };
+// ÝH serials are typed as text so leading zeros ("0369420") are kept.
 
 const AddLetterStockModal = ({ open, close, table }) => {
   const { t } = useLocale();
@@ -56,7 +55,7 @@ const AddLetterStockModal = ({ open, close, table }) => {
   });
 
   const validateStartNo = (value) =>
-    isYhNumber(value) && parseInt(value, 10) > 0 ? true : t("referralLetter.letterNoInvalid");
+    isYhNumber(value) ? true : t("referralLetter.letterNoInvalid");
 
   const validateEndNo = (value, formValues) => {
     const error = validateStartNo(value);
@@ -69,8 +68,8 @@ const AddLetterStockModal = ({ open, close, table }) => {
   const handleFormSubmit = (data) => {
     createReport({
       name: data.batchName,
-      start_yh_number: data.startNo.trim(),
-      end_yh_number: data.endNo.trim(),
+      start_yh_number: normalizeYhNumber(data.startNo),
+      end_yh_number: normalizeYhNumber(data.endNo),
       total_letter: calculatedCount,
       note: data.note || "",
     });
@@ -95,8 +94,8 @@ const AddLetterStockModal = ({ open, close, table }) => {
                 name="startNo"
                 control={control}
                 label={t("referralLetter.startNo")}
-                placeholder="0000001"
-                InputProps={yhInputProps}
+                placeholder="0369420"
+                InputProps={YH_INPUT_PROPS}
                 required
                 rules={{
                   required: t("validation.required"),
@@ -110,8 +109,8 @@ const AddLetterStockModal = ({ open, close, table }) => {
                 name="endNo"
                 control={control}
                 label={t("referralLetter.endNo")}
-                placeholder="0090000"
-                InputProps={yhInputProps}
+                placeholder="0369569"
+                InputProps={YH_INPUT_PROPS}
                 required
                 rules={{
                   required: t("validation.required"),

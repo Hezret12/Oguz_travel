@@ -37,6 +37,7 @@ import ExportExcelButton from "../../components/ExportExcelButton";
 import { exportReferralLetterExcel } from "./functions/exportReferralLetterExcel";
 import DateRangeExcelExportModal from "../../components/Dialog/DateRangeExcelExportModal";
 import { useDateFormat } from "../../functions/generalHelpers";
+import { formatYhNumber } from "../../functions/yhNumber";
 
 // Excel export date ranges (same three dates as the filter drawer). Departure
 // starts on this month; the others start unset ("Ähli döwür") so they don't
@@ -301,6 +302,7 @@ const ReferalLetter = () => {
         id: "travel_document_number",
         header: t("columns.syhNo"),
         size: 100,
+        Cell: ({ cell }) => formatYhNumber(cell.getValue()),
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
       },

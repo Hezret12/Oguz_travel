@@ -8,6 +8,13 @@
  *   one number (`isOne`) or `travel_document_number`..`travel_document_number1` (`total_letter`).
  */
 
+import {
+  YH_INPUT_PROPS,
+  formatYhNumber,
+  isYhNumber,
+  normalizeYhNumber,
+} from "../../../../functions/yhNumber";
+
 export const STOCK_LETTERS_KEY = "stockLetters";
 
 // `status` is a free string in the backend; these are the `REFERRAL_REPORT_STATUS_CONFIG` keys.
@@ -44,13 +51,7 @@ export const resolveLetterStatus = (value) => {
   return STATUS_BY_FOLDED.get(foldStatus(value)) ?? value;
 };
 
-/**
- * A batch's ÝH serial as typed: digits only, up to 20. It is kept (and sent) as a string, so
- * leading zeros ("0000001") survive; the width varies between batches.
- */
-export const YH_NUMBER_MAX_LENGTH = 20;
-export const isYhNumber = (value) =>
-  new RegExp(`^[0-9]{1,${YH_NUMBER_MAX_LENGTH}}$`).test(String(value ?? "").trim());
+export { YH_INPUT_PROPS, formatYhNumber, isYhNumber, normalizeYhNumber };
 
 /** The batch's ÝH number bounds, or null when either end is not a number. */
 export const getStockRange = (stock) => {
@@ -117,9 +118,9 @@ export const toOtherLetterPayload = ({ start, end, date, status, operatorGuid, r
   const isOne = start === end;
   return {
     isOne,
-    travel_document_number: String(start),
+    travel_document_number: formatYhNumber(start),
     // Single letters store no end number; an empty string clears a previous one.
-    travel_document_number1: isOne ? "" : String(end),
+    travel_document_number1: isOne ? "" : formatYhNumber(end),
     total_letter: end - start + 1,
     date_time: date ? new Date(date).toISOString() : new Date().toISOString(),
     status: status || LETTER_STATUS.SOLD,

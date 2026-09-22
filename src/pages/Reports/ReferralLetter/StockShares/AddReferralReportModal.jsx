@@ -17,6 +17,10 @@ import { addOtherLetterApi } from "../../../../api/queries/post";
 import {
   LETTER_STATUS,
   STOCK_LETTERS_KEY,
+  YH_INPUT_PROPS,
+  formatYhNumber,
+  isYhNumber,
+  normalizeYhNumber,
   findOverlap,
   getLetterStatusOptions,
   toOtherLetterPayload,
@@ -26,8 +30,8 @@ const MODE_SINGLE = "single";
 const MODE_RANGE = "range";
 
 const toInt = (value) => {
-  if (value === "" || value == null) return NaN;
-  return Number(value);
+  const text = normalizeYhNumber(value);
+  return text === "" ? NaN : Number(text);
 };
 
 // Records an "other letter" (sold / damaged / lost) inside a stock batch. "single" mode is
@@ -69,9 +73,9 @@ const AddReferralReportModal = ({
       date: new Date().toISOString(),
       assignment_opr_guid: "",
       received_by: "",
-      letterNo: start != null ? String(start) : "",
-      startNo: start != null ? String(start) : "",
-      endNo: end != null ? String(end) : "",
+      letterNo: start != null ? formatYhNumber(start) : "",
+      startNo: start != null ? formatYhNumber(start) : "",
+      endNo: end != null ? formatYhNumber(end) : "",
       status: LETTER_STATUS.SOLD,
       note: "",
     };
@@ -112,39 +116,41 @@ const AddReferralReportModal = ({
   });
 
   // Returns an error message for a single number, or null when it is valid.
-  const checkNumber = (num) => {
-    if (!Number.isInteger(num) || num <= 0) {
-      return t("referralLetter.letterNoInvalid");
-    }
+  const checkNumber = (value) => {
+    if (!isYhNumber(value)) return t("referralLetter.letterNoInvalid");
+    const num = toInt(value);
     if (stock && (num < stockStart || num > stockEnd)) {
       return t("referralLetter.letterNoOutOfRange", {
-        start: stockStart,
-        end: stockEnd,
+        start: formatYhNumber(stockStart),
+        end: formatYhNumber(stockEnd),
       });
     }
     return null;
   };
 
   const validateLetterNo = (value) => {
-    const num = toInt(value);
-    const error = checkNumber(num);
+    const error = checkNumber(value);
     if (error) return error;
+    const num = toInt(value);
     if (findOverlap(occupied, num, num)) return t("referralLetter.letterNoUsed");
     return true;
   };
 
-  const validateStartNo = (value) => checkNumber(toInt(value)) ?? true;
+  const validateStartNo = (value) => checkNumber(value) ?? true;
 
   const validateEndNo = (value, formValues) => {
-    const end = toInt(value);
-    const error = checkNumber(end);
+    const error = checkNumber(value);
     if (error) return error;
+    const end = toInt(value);
     const start = toInt(formValues.startNo);
     if (!Number.isInteger(start)) return true;
     if (end < start) return t("referralLetter.rangeInvalid");
     const overlap = findOverlap(occupied, start, end);
     if (overlap) {
-      return t("referralLetter.rangeOverlap", { start: overlap.start, end: overlap.end });
+      return t("referralLetter.rangeOverlap", {
+        start: formatYhNumber(overlap.start),
+        end: formatYhNumber(overlap.end),
+      });
     }
     return true;
   };
@@ -190,8 +196,7 @@ const AddReferralReportModal = ({
                 name="letterNo"
                 control={control}
                 label={t("referralLetter.letterNo")}
-                type="number"
-                allowNegative={false}
+                InputProps={YH_INPUT_PROPS}
                 required
                 rules={{
                   required: t("validation.required"),
@@ -206,8 +211,7 @@ const AddReferralReportModal = ({
                   name="startNo"
                   control={control}
                   label={t("referralLetter.startNoFrom")}
-                  type="number"
-                  allowNegative={false}
+                  InputProps={YH_INPUT_PROPS}
                   required
                   rules={{
                     required: t("validation.required"),
@@ -221,8 +225,7 @@ const AddReferralReportModal = ({
                   name="endNo"
                   control={control}
                   label={t("referralLetter.endNoTo")}
-                  type="number"
-                  allowNegative={false}
+                  InputProps={YH_INPUT_PROPS}
                   required
                   rules={{
                     required: t("validation.required"),

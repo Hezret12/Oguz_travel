@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Box, Chip, Grid, LinearProgress, Stack, Typography, alpha } from "@mui/material";
 import { FileSpreadsheet, Layers, Package, Search } from "lucide-react";
 import toast from "react-hot-toast";
+import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
+import { usePagginationGet } from "../../../../hooks/usePagginationGet";
 import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../../../components/Dialog/CustomForm";
 import FooterButton from "../../../../components/Dialog/FooterButton";
+import { DateRangeSection } from "../../../../components/Dialog/DateRangeExcelExportModal";
 import { ExcelIcon } from "../../../../components/ExportExcelButton";
+import { getAllReportsApi } from "../../../../api/queries/getters";
 import { exportLetterStockExcel } from "../functions/exportLetterStockExcel";
+
+const DATE_FORMAT = "YYYY-MM-DD";
+const RANGE_KEY = "date";
+
+const toDay = (value) => (value && dayjs(value).isValid() ? dayjs(value) : null);
 
 const EXCEL_GREEN = "#107C41";
 
@@ -36,19 +45,51 @@ const PreviewStat = ({ icon, label, value }) => (
 );
 
 /**
- * Letter stock report export. Uses the page's search, and shows the page's own totals as a
- * preview, so it needs no extra request before the user confirms.
+ * Letter stock report export for the batches created between the picked `start_date` and
+ * `end_date` (seeded from the page's date filter; empty = all time), narrowed by the page's
+ * search. The batch count is fetched live for the chosen range.
  */
-export const LetterStockExportModal = ({ open, close, queryParams = {}, stockCount = 0, letterCount = null }) => {
+export const LetterStockExportModal = ({ open, close, queryParams = {} }) => {
   const { t } = useLocale();
   const [search, setSearch] = useState(() => String(queryParams?.search ?? "").trim());
+  // Modal is mounted only while open, so the page's filter seeds the range once.
+  const [range, setRange] = useState(() => ({
+    start: toDay(queryParams?.start_date),
+    end: toDay(queryParams?.end_date),
+  }));
   const [isExporting, setIsExporting] = useState(false);
   const [progress, setProgress] = useState(null);
 
+  const handleRangeChange = useCallback((_key, value) => setRange(value), []);
+
+  const params = useMemo(
+    () => ({
+      ...(search ? { search } : {}),
+      ...(range.start?.isValid() ? { start_date: range.start.format(DATE_FORMAT) } : {}),
+      ...(range.end?.isValid() ? { end_date: range.end.format(DATE_FORMAT) } : {}),
+    }),
+    [search, range],
+  );
+  const isFiltered = Object.keys(params).length > 0;
+
+  // limit=1: only the totals are needed. Never cached, so the count matches what is exported.
+  const {
+    totalItems,
+    responseBody,
+    isFetching: isCountFetching,
+    isError: isCountError,
+  } = usePagginationGet({
+    apiFn: getAllReportsApi,
+    key: ["letterStockExportCount"],
+    params: { ...params, page: 1, limit: 1 },
+    options: { staleTime: 0, gcTime: 0 },
+  });
+  const stockCount = Number(totalItems) || 0;
+  // `total_report_count` covers every batch, so it only previews an unfiltered export.
+  const letterCount = isFiltered ? null : (responseBody?.total_report_count ?? null);
+
   const formatCount = (value) => new Intl.NumberFormat("en-US").format(Number(value || 0));
-  // The page totals are for the page's search; once it is cleared here they no longer apply.
-  const isPreviewForSearch = search === String(queryParams?.search ?? "").trim();
-  const hasNoData = isPreviewForSearch && Number(stockCount) === 0;
+  const hasNoData = !isCountFetching && !isCountError && stockCount === 0;
 
   const handleClose = () => {
     if (isExporting) return;
@@ -63,12 +104,7 @@ export const LetterStockExportModal = ({ open, close, queryParams = {}, stockCou
     setProgress({ message: t("referralLetter.export.fetchingStocks"), percent: 2 });
     try {
       await exportLetterStockExcel({
-        // The page's date range filter carries over; search is editable here.
-        params: {
-          ...(search ? { search } : {}),
-          ...(queryParams?.start_date ? { start_date: queryParams.start_date } : {}),
-          ...(queryParams?.end_date ? { end_date: queryParams.end_date } : {}),
-        },
+        params,
         onProgress: setProgress,
         t,
       });
@@ -143,6 +179,15 @@ export const LetterStockExportModal = ({ open, close, queryParams = {}, stockCou
             </Box>
           </Stack>
 
+          <DateRangeSection
+            rangeKey={RANGE_KEY}
+            title={t("common.exportDateRange")}
+            start={range.start}
+            end={range.end}
+            disabled={isExporting}
+            onChange={handleRangeChange}
+          />
+
           {search && (
             <Box>
               <Chip
@@ -157,13 +202,17 @@ export const LetterStockExportModal = ({ open, close, queryParams = {}, stockCou
             </Box>
           )}
 
-          {isPreviewForSearch && (
-            <Grid container spacing={1}>
+          {hasNoData ? (
+            <Typography sx={{ color: "warning.main", fontSize: "13px", fontWeight: 600 }}>
+              {t("common.exportExcelNoData")}
+            </Typography>
+          ) : (
+            <Grid container spacing={1} sx={{ opacity: isCountFetching ? 0.5 : 1, transition: "opacity 0.2s ease" }}>
               <Grid size={{ xs: 6 }}>
                 <PreviewStat
                   icon={<Layers size={13} />}
                   label={t("referralLetter.export.stocks")}
-                  value={formatCount(stockCount)}
+                  value={isCountError ? "—" : formatCount(stockCount)}
                 />
               </Grid>
               {letterCount !== null && (

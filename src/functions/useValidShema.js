@@ -3,6 +3,7 @@ import * as yup from "yup";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { useValidShemaConst } from "./useValidShemaConst";
+import { formatYhNumber, isYhNumber } from "./yhNumber";
 
 export const useValidShema = () => {
   const { t } = useTranslation();
@@ -62,6 +63,13 @@ export const useValidShema = () => {
   });
 
   const addReferralLetter = yup.object({
+    // Sent in its 7-digit form; old records missing their leading zeros are padded back.
+    travel_document_number: yup
+      .string()
+      .nullable()
+      .transform((value) => (value == null ? value : formatYhNumber(value)))
+      .required(t("validation.required"))
+      .test("yh-number", t("referralLetter.letterNoInvalid"), isYhNumber),
     bgn_departure: stringOptionalValidSchema(),
     note: stringOptionalValidSchema(),
   });

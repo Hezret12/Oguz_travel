@@ -4,7 +4,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Funnel, Package, RotateCw } from "lucide-react";
+import { Funnel, Package, RotateCw, ScanSearch } from "lucide-react";
 import dayjs from "dayjs";
 import AddButton from "../../../components/AddButton";
 import ExportExcelButton from "../../../components/ExportExcelButton";
@@ -20,6 +20,7 @@ import { useDateFormat } from "../../../functions/generalHelpers";
 import AddLetterStockModal from "./LetterStock/AddLetterStockModal";
 import EditLetterStockModal from "./LetterStock/EditLetterStockModal";
 import StockSharesPanel from "./StockShares/StockSharesPanel";
+import SerialLookupModal from "./SerialLookup/SerialLookupModal";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useTableFilters, useDrawerFilters } from "../../../hooks/usePageFilters";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
@@ -31,6 +32,7 @@ import FilterDrawer from "../../../components/FilterDrawer";
 import LetterStockFilter from "./Contents/LetterStockFilter";
 import { getAllReportsApi } from "../../../api/queries/getters";
 import { deleteReportApi } from "../../../api/queries/delete";
+import { formatYhNumber } from "../../../functions/yhNumber";
 
 const DATE_FILTER_KEYS = ["start_date", "end_date"];
 
@@ -62,6 +64,7 @@ const ReferralLetterPage = () => {
   const { formatChange } = useDateFormat();
   const defaultMrtOptions = getDefaultMRTOptions();
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isLookupOpen, setIsLookupOpen] = useState(false);
 
   const {
     applied,
@@ -134,7 +137,7 @@ const ReferralLetterPage = () => {
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => row.original?.start_yh_number || "",
+        Cell: ({ row }) => formatYhNumber(row.original?.start_yh_number),
       },
       {
         accessorKey: "end_yh_number",
@@ -143,7 +146,7 @@ const ReferralLetterPage = () => {
         size: 150,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ row }) => row.original?.end_yh_number || "",
+        Cell: ({ row }) => formatYhNumber(row.original?.end_yh_number),
       },
       {
         accessorKey: "total_letter",
@@ -450,6 +453,21 @@ const ReferralLetterPage = () => {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          <Button
+            variant="outlined"
+            startIcon={<ScanSearch size={16} />}
+            onClick={() => setIsLookupOpen(true)}
+            sx={{
+              height: "40px",
+              px: 2,
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {t("referralLetter.lookup.button")}
+          </Button>
           <ExportExcelButton
             onClick={() => setIsExportOpen(true)}
             disabled={isStockLoading || stockTotal === 0}
@@ -465,9 +483,13 @@ const ReferralLetterPage = () => {
           open={isExportOpen}
           close={() => setIsExportOpen(false)}
           queryParams={queryParams}
-          stockCount={stockTotal}
-          // `total_report_count` is for all batches, so it only previews an unfiltered export.
-          letterCount={queryParams?.search || isFilterActive ? null : totalStockCount}
+        />
+      )}
+
+      {isLookupOpen && (
+        <SerialLookupModal
+          open={isLookupOpen}
+          close={() => setIsLookupOpen(false)}
         />
       )}
 

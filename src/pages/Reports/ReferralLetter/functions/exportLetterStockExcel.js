@@ -3,7 +3,13 @@ import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 import { fetchAllPaginatedData, formatExcelDate } from "../../../../functions/excelExportHelper";
 import { getAllReportsApi, getLettersByDocumentRangeApi } from "../../../../api/queries/getters";
-import { LETTER_STATUS, getLetterRange, getStockRange, resolveLetterStatus } from "./stockLetters";
+import {
+  LETTER_STATUS,
+  formatYhNumber,
+  getLetterRange,
+  getStockRange,
+  resolveLetterStatus,
+} from "./stockLetters";
 
 /**
  * Letter stock report, in the layout of the other report exports (see exportCafeteriaExcel):
@@ -79,21 +85,9 @@ const getStatusLabels = (t) => ({
   [UNUSED]: t("referralLetter.export.unused"),
 });
 
-const hasLeadingZero = (raw) => /^0\d+$/.test(String(raw ?? "").trim());
-
-// Keeps leading zeros ("0000201") when the number `raw` was written with them.
-const padLike = (n, raw) => {
-  const text = String(raw ?? "").trim();
-  return hasLeadingZero(text) ? String(n).padStart(text.length, "0") : String(n);
-};
-
-const formatRun = (from, to, raw) =>
-  from === to ? padLike(from, raw) : `${padLike(from, raw)} – ${padLike(to, raw)}`;
-
-// The batch's serial sets the width of every number in it; batches saved before the serials
-// kept their zeros fall back to the entry's own number.
-const widthSource = (stock, letter) =>
-  hasLeadingZero(stock?.start_yh_number) ? stock.start_yh_number : letter?.travel_document_number;
+// Every number in its printed 7-digit form ("0369420").
+const formatRun = (from, to) =>
+  from === to ? formatYhNumber(from) : `${formatYhNumber(from)} – ${formatYhNumber(to)}`;
 
 const createSheet = (workbook, name) => {
   const sheet = workbook.addWorksheet(name.substring(0, 31), {
@@ -278,12 +272,12 @@ const writeSummarySheet = (workbook, batches, t, asOf) => {
   writeBanner(sheet, endCol, t("referralLetter.export.reportTitle"), asOf);
   writeHeader(sheet, columns, t, "referralLetter.export.headerNotes.summary");
 
-  // The serials as saved (text), so their leading zeros show.
+  // Text cells, so the leading zeros show.
   const rowValues = batches.map((batch, offset) => ({
     index: batch.stock.index_number ?? offset + 1,
     name: batch.stock.name ? String(batch.stock.name).trim() : "",
-    startNo: String(batch.stock.start_yh_number ?? "").trim(),
-    endNo: String(batch.stock.end_yh_number ?? "").trim(),
+    startNo: formatYhNumber(batch.stock.start_yh_number),
+    endNo: formatYhNumber(batch.stock.end_yh_number),
     total: batch.total,
     sold: batch.counts[LETTER_STATUS.SOLD],
     damaged: batch.counts[LETTER_STATUS.DAMAGED],
@@ -364,18 +358,17 @@ const writeDetailsSheet = (workbook, batches, t, asOf) => {
   const rows = batches.flatMap(({ stock, range, runs }) => {
     const name = stock.name ? String(stock.name).trim() : "";
     const batch = range
-      ? `${name} (${formatRun(range.start, range.end, stock.start_yh_number)})`.trim()
+      ? `${name} (${formatRun(range.start, range.end)})`.trim()
       : name;
-    return runs.map((run) => ({ batch, run, stock }));
+    return runs.map((run) => ({ batch, run }));
   });
 
   const firstDataRow = START_ROW + 1;
   const lastDataRow = START_ROW + rows.length;
   const maxLens = columns.map((c) => String(c.header).length);
 
-  const rowValues = rows.map(({ batch, run, stock }, offset) => {
+  const rowValues = rows.map(({ batch, run }, offset) => {
     const { letter } = run;
-    const raw = widthSource(stock, letter);
     const note = !letter
       ? ""
       : letter.isRefferal
@@ -384,8 +377,8 @@ const writeDetailsSheet = (workbook, batches, t, asOf) => {
     return {
       index: offset + 1,
       batch,
-      from: padLike(run.from, raw),
-      to: padLike(run.to, raw),
+      from: formatYhNumber(run.from),
+      to: formatYhNumber(run.to),
       // A run starting inside numbers an earlier entry covers only adds the new ones, so the
       // total equals the batch sizes.
       count: run.added,
@@ -426,7 +419,7 @@ const writeDetailsSheet = (workbook, batches, t, asOf) => {
     if (run.overhangs) {
       const full = getLetterRange(run.letter);
       notes.push(
-        `${t("referralLetter.export.outsideStock")}: ${formatRun(full.start, full.end, run.letter.travel_document_number)}`,
+        `${t("referralLetter.export.outsideStock")}: ${formatRun(full.start, full.end)}`,
       );
     }
     if (run.overlaps) notes.push(t("referralLetter.export.duplicate"));
@@ -496,6 +489,14 @@ export const exportLetterStockExcel = async ({ params = {}, onProgress = null, t
     (a, b) => Number(a.start_yh_number) - Number(b.start_yh_number) || Number(a.index_number) - Number(b.index_number),
   );
   const batches = buildBatches(sortedStocks, Array.isArray(letters) ? letters : []);
+  await saveWorkbook(batches, t, t("referralLetter.export.fileName"));
+
+  onProgress?.({ message: t("referralLetter.export.success"), percent: 100 });
+  return batches.length;
+};
+
+// Both sheets for `batches`, downloaded as `<baseName>_<date>.xlsx`.
+const saveWorkbook = async (batches, t, baseName) => {
   const asOf = t("referralLetter.export.asOf", { date: dayjs().format("DD.MM.YYYY") });
 
   const workbook = new ExcelJS.Workbook();
@@ -508,10 +509,20 @@ export const exportLetterStockExcel = async ({ params = {}, onProgress = null, t
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  saveAs(blob, `${t("referralLetter.export.fileName")}_${dayjs().format("YYYY-MM-DD")}.xlsx`);
+  saveAs(blob, `${baseName}_${dayjs().format("YYYY-MM-DD")}.xlsx`);
+};
 
-  onProgress?.({ message: t("referralLetter.export.success"), percent: 100 });
-  return batches.length;
+/**
+ * One batch's report, from the letters its panel already loaded (the whole batch range):
+ * the same two sheets as the full export, limited to this batch.
+ */
+export const exportStockBatchExcel = async ({ stock, letters = [], t }) => {
+  const batches = buildBatches([stock], Array.isArray(letters) ? letters : []);
+  // Characters Windows does not allow in file names.
+  const name = String(stock?.name ?? "").trim().replace(/[\\/:*?"<>|]+/g, "-");
+  const range = getStockRange(stock);
+  const label = name || (range ? formatRun(range.start, range.end).replace(/\s/g, "") : "");
+  await saveWorkbook(batches, t, [t("referralLetter.export.fileName"), label].filter(Boolean).join("_"));
 };
 
 export default exportLetterStockExcel;

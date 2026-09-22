@@ -97,7 +97,6 @@ const ReportCharts = ({
   statusChartData = [],
   formatNumber,
   formatCompact,
-  stats = {},
   selectedQuarter,
   onQuarterChange,
   teal,
@@ -135,38 +134,6 @@ const ReportCharts = ({
               subtitle={t("report.turkishAirlines.dailyTurnoverSubtitle")}
               color={teal}
             />
-
-            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 1, mb: 2 }}>
-              {[
-                { label: t("report.turkishAirlines.total"), value: formatNumber(stats.monthQuoted), color: teal },
-                { label: t("report.turkishAirlines.dailyAvg"), value: formatNumber(stats.dailyAvg), color: "text.primary" },
-                {
-                  label: t("report.turkishAirlines.bestDay"),
-                  value: stats.bestDay > 0 ? formatNumber(stats.bestDay) : "—",
-                  hint: stats.bestDay > 0 ? t("report.turkishAirlines.dayN", { day: stats.bestDayNum }) : null,
-                  color: "text.primary",
-                },
-              ].map((item) => (
-                <Box
-                  key={item.label}
-                  sx={{ px: 1.5, py: 1, borderRadius: 2, bgcolor: "action.hover", minWidth: 0 }}
-                >
-                  <Typography noWrap sx={{ fontSize: 11, fontWeight: 600, color: "text.secondary" }}>
-                    {item.label}
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75, minWidth: 0 }}>
-                    <Typography noWrap sx={{ fontSize: 16, fontWeight: 800, color: item.color, letterSpacing: "-0.01em" }}>
-                      {item.value}
-                    </Typography>
-                    {item.hint && (
-                      <Typography noWrap sx={{ fontSize: 11, fontWeight: 600, color: "text.secondary" }}>
-                        {item.hint}
-                      </Typography>
-                    )}
-                  </Box>
-                </Box>
-              ))}
-            </Box>
 
             {isLoading ? (
               <Skeleton variant="rectangular" height={240} sx={{ borderRadius: 2 }} />

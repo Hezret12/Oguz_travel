@@ -33,7 +33,7 @@ const MetaPill = ({ color, children }) => (
   </Box>
 );
 
-const SummaryCard = memo(({ icon, value, label, meta, sublabel, color, paperSx }) => (
+const SummaryCard = memo(({ icon, value, label, color, paperSx }) => (
   <Paper
     sx={{
       ...paperSx,
@@ -89,13 +89,6 @@ const SummaryCard = memo(({ icon, value, label, meta, sublabel, color, paperSx }
     >
       {value}
     </Typography>
-
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap", mt: "auto", minHeight: 22 }}>
-      {meta}
-      <Typography noWrap sx={{ fontSize: 11.5, color: "text.secondary", fontWeight: 500, minWidth: 0 }}>
-        {sublabel}
-      </Typography>
-    </Box>
   </Paper>
 ));
 

@@ -16,8 +16,10 @@ import {
   getLetterRange,
   getStockLettersParams,
   getStockRange,
+  formatYhNumber,
   isYhNumber,
-  YH_NUMBER_MAX_LENGTH,
+  normalizeYhNumber,
+  YH_INPUT_PROPS,
 } from "../functions/stockLetters";
 
 const EditLetterStockModal = ({ table, row }) => {
@@ -27,8 +29,8 @@ const EditLetterStockModal = ({ table, row }) => {
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       batchName: row?.original?.name || row?.original?.batchName || "",
-      startNo: row?.original?.start_yh_number || row?.original?.startNo || "",
-      endNo: row?.original?.end_yh_number || row?.original?.endNo || "",
+      startNo: formatYhNumber(row?.original?.start_yh_number ?? row?.original?.startNo),
+      endNo: formatYhNumber(row?.original?.end_yh_number ?? row?.original?.endNo),
       note: row?.original?.note || "",
     },
   });
@@ -37,8 +39,8 @@ const EditLetterStockModal = ({ table, row }) => {
     if (row?.original) {
       reset({
         batchName: row.original.name || row.original.batchName || "",
-        startNo: String(row.original.start_yh_number ?? row.original.startNo ?? ""),
-        endNo: String(row.original.end_yh_number ?? row.original.endNo ?? ""),
+        startNo: formatYhNumber(row.original.start_yh_number ?? row.original.startNo),
+        endNo: formatYhNumber(row.original.end_yh_number ?? row.original.endNo),
         note: row.original.note || "",
       });
     }
@@ -74,22 +76,27 @@ const EditLetterStockModal = ({ table, row }) => {
     return Number.isFinite(min) ? { start: min, end: max } : null;
   }, [letters, row]);
 
+  const usedBoundsLabel = usedBounds && {
+    start: formatYhNumber(usedBounds.start),
+    end: formatYhNumber(usedBounds.end),
+  };
+
   const validateStartNo = (value) => {
     const start = parseInt(value, 10);
-    if (!isYhNumber(value) || start <= 0) return t("referralLetter.letterNoInvalid");
+    if (!isYhNumber(value)) return t("referralLetter.letterNoInvalid");
     if (usedBounds && start > usedBounds.start) {
-      return t("referralLetter.stockMustContainUsed", usedBounds);
+      return t("referralLetter.stockMustContainUsed", usedBoundsLabel);
     }
     return true;
   };
 
   const validateEndNo = (value, formValues) => {
     const end = parseInt(value, 10);
-    if (!isYhNumber(value) || end <= 0) return t("referralLetter.letterNoInvalid");
+    if (!isYhNumber(value)) return t("referralLetter.letterNoInvalid");
     const start = parseInt(formValues.startNo, 10);
     if (!Number.isNaN(start) && end < start) return t("referralLetter.rangeInvalid");
     if (usedBounds && end < usedBounds.end) {
-      return t("referralLetter.stockMustContainUsed", usedBounds);
+      return t("referralLetter.stockMustContainUsed", usedBoundsLabel);
     }
     return true;
   };
@@ -121,8 +128,8 @@ const EditLetterStockModal = ({ table, row }) => {
     updateReport({
       guid: row.original.guid || row.original.id,
       name: data.batchName,
-      start_yh_number: String(data.startNo).trim(),
-      end_yh_number: String(data.endNo).trim(),
+      start_yh_number: normalizeYhNumber(data.startNo),
+      end_yh_number: normalizeYhNumber(data.endNo),
       total_letter: calculatedCount,
       note: data.note || "",
     });
@@ -154,8 +161,8 @@ const EditLetterStockModal = ({ table, row }) => {
                 name="startNo"
                 control={control}
                 label={t("referralLetter.startNo")}
-                placeholder="0000001"
-                InputProps={{ inputProps: { maxLength: YH_NUMBER_MAX_LENGTH, inputMode: "numeric" } }}
+                placeholder="0369420"
+                InputProps={YH_INPUT_PROPS}
                 required
                 rules={{
                   required: t("validation.required"),
@@ -169,8 +176,8 @@ const EditLetterStockModal = ({ table, row }) => {
                 name="endNo"
                 control={control}
                 label={t("referralLetter.endNo")}
-                placeholder="0090000"
-                InputProps={{ inputProps: { maxLength: YH_NUMBER_MAX_LENGTH, inputMode: "numeric" } }}
+                placeholder="0369569"
+                InputProps={YH_INPUT_PROPS}
                 required
                 rules={{
                   required: t("validation.required"),

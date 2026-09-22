@@ -3,6 +3,7 @@ import CustomDatePicker from "../../components/CustomDatePicker";
 import CustomTextField from "../../components/CustomTextField";
 import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { formatExcelDate } from "../../functions/excelExportHelper";
+import { formatYhNumber } from "../../functions/yhNumber";
 export { exportReferralLetterExcel } from "./functions/exportReferralLetterExcel";
 
 export const REFERRAL_LETTER_EXCEL_BANNER =
@@ -134,7 +135,7 @@ export const REFERRAL_LETTER_EXCEL_COLUMNS = [
     header: "S-ÝH №",
     width: 13,
     align: "center",
-    accessor: (row) => row.travel_document_number || "",
+    accessor: (row) => formatYhNumber(row.travel_document_number),
   },
   {
     header: "Gidiş wagty",

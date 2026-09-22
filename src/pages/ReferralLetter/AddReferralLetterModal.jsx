@@ -17,6 +17,7 @@ import CurrencyAmount from "../../components/inputs/CurrencyAmount";
 import PhoneNumberField from "../../components/inputs/PhoneNumber";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import LabelWithTooltip from "../../components/LabelWithTooltip";
+import { YH_INPUT_PROPS } from "../../functions/yhNumber";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addReferralLetterApi } from "../../api/queries/post";
 
@@ -147,6 +148,8 @@ const AddReferralLetterModal = ({ table }) => {
           <CustomTextField
             name="travel_document_number"
             control={control}
+            placeholder="0369420"
+            InputProps={YH_INPUT_PROPS}
             label={
               <LabelWithTooltip
                 label={t("columns.syhNo", "S-ÝH №")}

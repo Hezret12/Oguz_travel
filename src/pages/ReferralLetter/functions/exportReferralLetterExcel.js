@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import dayjs from "dayjs";
+import { formatYhNumber } from "../../../functions/yhNumber";
 
 const formatDate = (val) => {
   if (!val) return "";
@@ -336,7 +337,7 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       row.client?.passport_number ? String(row.client.passport_number).toUpperCase() : "",
       row.destination_country ? String(row.destination_country).trim() : "",
       row.bgn_departure ? String(row.bgn_departure).trim() : (row.tranzit ? String(row.tranzit).trim() : ""),
-      row.travel_document_number ? String(row.travel_document_number).trim() : "",
+      formatYhNumber(row.travel_document_number),
       formatDate(row.departure_date),
       formatDate(row.return_date),
       price,
