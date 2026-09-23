@@ -53,7 +53,14 @@ const STATUS_LABEL_KEY = {
   [LETTER_STATUS.LOST]: "referralLetter.statusLost",
 };
 
-const font = (extra = {}) => ({ name: "Calibri", size: 10, color: { argb: BLACK }, ...extra });
+// One place for the type scale of the sheet; the row heights below follow it.
+const BODY_SIZE = 12;
+const HEADER_SIZE = 13;
+const TITLE_SIZE = 14;
+const TOTAL_SIZE = 12.5;
+const NOTE_SIZE = 10;
+
+const font = (extra = {}) => ({ name: "Calibri", size: BODY_SIZE, color: { argb: BLACK }, ...extra });
 const solid = (argb) => ({ type: "pattern", pattern: "solid", fgColor: { argb } });
 const line = (style, argb) => ({ style, color: { argb } });
 
@@ -145,7 +152,7 @@ const buildBatches = (stocks, letters) => {
 
 const writeBanner = (sheet, endCol, title, asOf) => {
   sheet.getRow(1).height = 12;
-  sheet.getRow(2).height = 30;
+  sheet.getRow(2).height = 34;
   sheet.getRow(3).height = 10;
   sheet.mergeCells(2, START_COL, 2, endCol);
   const cell = sheet.getCell(2, START_COL);
@@ -153,10 +160,10 @@ const writeBanner = (sheet, endCol, title, asOf) => {
     richText: [
       {
         text: 'OGUZABAT Hojalyk Jemgyýetiniň "OGUZTRAVEL" syýahatçylyk bölümi | ',
-        font: font({ size: 11, bold: true }),
+        font: font({ size: TITLE_SIZE, bold: true }),
       },
-      { text: title, font: font({ size: 11, bold: true, color: { argb: TEAL } }) },
-      { text: ` (${asOf})`, font: font({ size: 11, bold: true, color: { argb: RED } }) },
+      { text: title, font: font({ size: TITLE_SIZE, bold: true, color: { argb: TEAL } }) },
+      { text: ` (${asOf})`, font: font({ size: TITLE_SIZE, bold: true, color: { argb: RED } }) },
     ],
   };
   cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
@@ -166,19 +173,19 @@ const writeBanner = (sheet, endCol, title, asOf) => {
 const writeHeader = (sheet, columns, t) => {
   const endCol = START_COL + columns.length - 1;
   const row = sheet.getRow(START_ROW);
-  row.height = 30;
+  row.height = 34;
   columns.forEach((col, idx) => {
     const colNumber = START_COL + idx;
     const cell = row.getCell(colNumber);
     cell.value = col.header;
     cell.note = {
       texts: [
-        { font: { bold: true, size: 9 }, text: `${col.header}\n` },
-        { font: { size: 9 }, text: t(`referralLetter.export.headerNotes.${col.key}`) },
+        { font: { bold: true, size: NOTE_SIZE }, text: `${col.header}\n` },
+        { font: { size: NOTE_SIZE }, text: t(`referralLetter.export.headerNotes.${col.key}`) },
       ],
       margins: { insetmode: "custom", inset: [0.12, 0.12, 0.12, 0.12] },
     };
-    cell.font = font({ size: 11, bold: true, color: { argb: col.color || BLACK } });
+    cell.font = font({ size: HEADER_SIZE, bold: true, color: { argb: col.color || BLACK } });
     cell.fill = solid(WHITE);
     cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
     cell.border = {
@@ -310,7 +317,7 @@ const writeSheet = (workbook, batches, t, asOf) => {
   entries.forEach(({ isBatch, child, range, values }, offset) => {
     const rowNumber = firstDataRow + offset;
     const row = sheet.getRow(rowNumber);
-    row.height = isBatch ? 20 : 18;
+    row.height = isBatch ? 23 : 21;
     // Letter rows fold away under their batch.
     if (!isBatch) row.outlineLevel = 1;
     const bg = isBatch ? BATCH_FILL : WHITE;
@@ -354,7 +361,7 @@ const writeSheet = (workbook, batches, t, asOf) => {
       cell.note = {
         texts: [
           {
-            font: { size: 9 },
+            font: { size: NOTE_SIZE },
             text: t("referralLetter.outsideStock", {
               count: child.count,
               start: formatYhNumber(range.start),
@@ -377,11 +384,11 @@ const writeSheet = (workbook, batches, t, asOf) => {
   const remainingRef = getColName(remainingCol);
   const batchRowsTest = `($${remainingRef}$${firstDataRow}:$${remainingRef}$${lastDataRow}<>"")`;
   const totalRow = sheet.getRow(lastDataRow + 2);
-  totalRow.height = 24;
+  totalRow.height = 27;
   columns.forEach((c, idx) => {
     const colNumber = START_COL + idx;
     const cell = totalRow.getCell(colNumber);
-    cell.font = font({ size: 10.5, bold: true, color: { argb: c.color || BLACK } });
+    cell.font = font({ size: TOTAL_SIZE, bold: true, color: { argb: c.color || BLACK } });
     cell.alignment = { vertical: "middle", horizontal: c.align };
     cell.border = frameBorder(colNumber, endCol, {
       top: line("medium", BLACK),
@@ -399,9 +406,12 @@ const writeSheet = (workbook, batches, t, asOf) => {
   totalRow.getCell(START_COL).value = t("referralLetter.export.total");
   totalRow.getCell(START_COL).alignment = { vertical: "middle", horizontal: "left" };
 
-  // Widths follow the longest value, within [col.width, 48].
+  // Widths follow the longest value, within [col.width, 48]. Excel measures width in characters
+  // of the default font (Calibri 11), so the larger body font gets a matching allowance.
+  const widthScale = BODY_SIZE / 11;
   columns.forEach((col, idx) => {
-    sheet.getColumn(START_COL + idx).width = Math.min(Math.max(col.width, maxLens[idx] + 3), 48);
+    const width = Math.min(Math.max(col.width, maxLens[idx] + 3), 48) * widthScale;
+    sheet.getColumn(START_COL + idx).width = Math.round(width * 10) / 10;
   });
 };
 
