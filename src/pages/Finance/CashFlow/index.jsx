@@ -31,7 +31,7 @@ import CashFlowExportModal from "./Contents/CashFlowExportModal";
 import ExportExcelButton from "../../../components/ExportExcelButton";
 import AddCashTransactionModal from "./AddCashTransactionModal";
 import EditCashTransactionModal from "./EditCashTransactionModal";
-import { cashAmount, fmtMoney, isCashRow } from "./functions/cashFlowHelpers";
+import { cashAmount, dualCurrencyAmounts, fmtMoney, isCashRow } from "./functions/cashFlowHelpers";
 import { segmentedSx } from "../Overview/functions/analyticsFormat";
 
 const GREEN = "#16a34a";
@@ -289,15 +289,28 @@ const CashFlow = () => {
             );
           }
 
-          // Project row: sale, cost and profit in one cell
+          // Visa: the same sale priced in two currencies, no profit side.
+          const dual = dualCurrencyAmounts(r);
+          if (dual) {
+            return (
+              <Box sx={{ lineHeight: 1.3 }}>
+                {dual.map(({ currency, value }) => (
+                  <Typography key={currency} sx={{ ...numSx, color: GREEN }}>
+                    +{fmtMoney(value, currency)}
+                  </Typography>
+                ))}
+              </Box>
+            );
+          }
+
+          // Every other project row: sale price on top, profit underneath.
           const sale = Number(r.sale_price || 0);
-          const net = Number(r.net_price || 0);
           const profit = Number(r.profit || 0);
           return (
             <Box sx={{ lineHeight: 1.25 }}>
               <Typography sx={{ ...numSx, color: GREEN }}>+{fmtMoney(sale, cur)}</Typography>
               <Typography sx={{ fontSize: "11.5px", color: "text.secondary", whiteSpace: "nowrap" }}>
-                -{fmtMoney(net, cur)} ·{" "}
+                {t("finance.profit")}{" "}
                 <Box component="span" sx={{ color: profit >= 0 ? GREEN : RED, fontWeight: 600 }}>
                   {profit >= 0 ? "+" : "-"}
                   {fmtMoney(Math.abs(profit), cur)}

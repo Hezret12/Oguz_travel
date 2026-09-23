@@ -148,12 +148,12 @@ const Visa = () => {
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       },
       {
-        accessorFn: (row) => row.receiver_operator?.fullName,
+        accessorFn: (row) => row.receiveroperator?.fullName,
         id: "received_opr",
         header: t("columns.operatorTwo"),
         size: 200,
         Cell: ({ row }) => {
-          const opr = row?.original?.receiver_operator;
+          const opr = row?.original?.receiveroperator;
           return (
             <StackedCell
               primary={opr?.fullName}
@@ -210,11 +210,13 @@ const Visa = () => {
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ cell, row }) => {
+          const paidPercent =
+            row.original.paidPercentageTmt ?? row.original.paidPercentageUsd;
           if (
             (cell.getValue() === false || cell.getValue() === "false") &&
-            row.original.paidPercentage !== undefined
+            paidPercent !== undefined
           ) {
-            return <PaymentStatusCell percent={row.original.paidPercentage} />;
+            return <PaymentStatusCell percent={paidPercent} />;
           }
           return (
             <StatusChip

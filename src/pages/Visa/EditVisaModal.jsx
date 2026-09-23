@@ -51,10 +51,11 @@ const EditVisaModal = ({ table, row }) => {
       guid: row?.original?.guid || null,
       index_number: row?.original?.index_number || "",
       datetime: row?.original?.datetime || dayjs().toISOString(),
-      client_guid: row?.original?.client?.guid || null,
-      received_opr_guid:
-        row?.original?.received_opr_guid ||
-        row?.original?.receiver_operator?.guid ||
+      client_guid:
+        row?.original?.client_guid || row?.original?.client?.guid || null,
+      receiver_opr_guid:
+        row?.original?.receiver_opr_guid ||
+        row?.original?.receiveroperator?.guid ||
         null,
       status: row?.original?.status || VISA_STATUS.PROCESS,
       is_paid:
@@ -130,10 +131,10 @@ const EditVisaModal = ({ table, row }) => {
           />
 
           <GlobalEmployeeAutocomplete
-            name="received_opr_guid"
+            name="receiver_opr_guid"
             control={control}
             label={t("columns.operatorTwo")}
-            initialEmployee={row?.original?.receiver_operator}
+            initialEmployee={row?.original?.receiveroperator}
             required
           />
 

@@ -8,7 +8,7 @@ export const visaFilterSlice = createFilterSlice({
     end_date: '',
     package_guid: '',
     service_guid: '',
-    received_opr_guid: '',
+    receiver_opr_guid: '',
     status: '',
     is_paid: '',
   },

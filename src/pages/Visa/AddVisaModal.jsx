@@ -50,7 +50,7 @@ const AddVisaModal = ({ table }) => {
       index_number: "",
       datetime: dayjs().toISOString(),
       client_guid: null,
-      received_opr_guid: null,
+      receiver_opr_guid: null,
       status: VISA_STATUS.PROCESS,
       is_paid: true,
       agent: {
@@ -124,7 +124,7 @@ const AddVisaModal = ({ table }) => {
           />
 
           <GlobalEmployeeAutocomplete
-            name="received_opr_guid"
+            name="receiver_opr_guid"
             control={control}
             label={t("columns.operatorTwo")}
             required

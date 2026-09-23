@@ -32,6 +32,22 @@ export const isCashRow = (row) => row?.source === "MANUAL" || row?.source === "E
 export const cashAmount = (row) =>
   Number(row?.type === "INCOME" ? row?.sale_price : row?.net_price) || 0;
 
+// Visa project rows are priced in both currencies at once and have no cost
+// side, so there is no profit to show — they render as two currency lines.
+// Every other project row (tickets, translations…) is single-currency and
+// renders as sale price + profit.
+const DUAL_CURRENCY_FIELDS = [
+  { currency: "TMT", field: "price_tmt" },
+  { currency: "USD", field: "price_usd" },
+];
+
+export const dualCurrencyAmounts = (row) => {
+  const items = DUAL_CURRENCY_FIELDS.filter(
+    ({ field }) => row?.[field] !== undefined && row?.[field] !== null,
+  ).map(({ currency, field }) => ({ currency, value: Number(row[field]) || 0 }));
+  return items.length ? items : null;
+};
+
 export const toFormValues = (row = {}) => ({
   type: row.type || "EXPENSE",
   category_guid: row.category_guid || row.category?.guid || "",
