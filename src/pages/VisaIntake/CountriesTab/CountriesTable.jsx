@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState, forwardRef, useImperativeHandle } from "react";
+import { useMemo, useState, forwardRef, useImperativeHandle } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Chip } from "@mui/material";
+import { Alert, Box, Button, Chip } from "@mui/material";
+import { RotateCw } from "lucide-react";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
@@ -21,7 +22,7 @@ import Pagination from "../../../components/Pagination";
 
 export const CountriesTable = forwardRef((props, ref) => {
   const { t } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
 
   const [page, setPage] = useState(1);
   const [limit, setPageSize] = useState(20);
@@ -48,6 +49,7 @@ export const CountriesTable = forwardRef((props, ref) => {
     isLoading,
     isFetching,
     refetch,
+    isError,
     totalItems = 0,
     pageCount = 1,
   } = usePagginationGet({
@@ -68,10 +70,9 @@ export const CountriesTable = forwardRef((props, ref) => {
     onConfirm: (item) => deleteCountry(item.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (item) => deleteDialog.open(item),
-    [deleteDialog]
-  );
+  // Only `open` belongs in the column deps; the dialog object itself changes
+  // every time it opens or closes, which would rebuild every column with it.
+  const handleDeleteClick = deleteDialog.open;
 
   const columns = useMemo(() => {
     return [
@@ -149,6 +150,29 @@ export const CountriesTable = forwardRef((props, ref) => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    renderEmptyRowsFallback: () =>
+      isError ? (
+        <Box sx={{ p: 2 }}>
+          <Alert
+            severity="error"
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                startIcon={<RotateCw size={14} />}
+              >
+                {t("errorBoundary.retry")}
+              </Button>
+            }
+          >
+            {t("errorOccurred")}
+          </Alert>
+        </Box>
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     // Avoids nesting MRT's own create/edit <Dialog> around the one
     // CreateCountryModal/EditCountryModal already render — see
     // Translate/index.jsx for the full rationale.

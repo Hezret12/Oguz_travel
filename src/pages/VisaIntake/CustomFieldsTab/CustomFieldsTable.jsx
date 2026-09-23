@@ -1,9 +1,9 @@
-import { useCallback, useMemo, useState, forwardRef, useImperativeHandle, memo } from "react";
+import { useMemo, useState, forwardRef, useImperativeHandle, memo } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Chip, MenuItem, Select, FormControl, InputLabel, Tooltip } from "@mui/material";
+import { Alert, Box, Button, Chip, MenuItem, Select, FormControl, InputLabel, Tooltip } from "@mui/material";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
@@ -18,7 +18,7 @@ import CreateCustomFieldModal from "./CreateCustomFieldModal";
 import EditCustomFieldModal from "./EditCustomFieldModal";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, RotateCw } from "lucide-react";
 
 const OptionsCell = memo(({ options }) => {
   if (!Array.isArray(options) || options.length === 0) return "";
@@ -141,7 +141,7 @@ OptionsCell.displayName = "OptionsCell";
 
 export const CustomFieldsTable = forwardRef((props, ref) => {
   const { t } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
 
   const [page, setPage] = useState(1);
   const [limit, setPageSize] = useState(20);
@@ -166,6 +166,7 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
     isLoading,
     isFetching,
     refetch,
+    isError,
     totalItems = 0,
     pageCount = 1,
   } = usePagginationGet({
@@ -194,10 +195,9 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
     onConfirm: (item) => deleteCustomField(item.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (item) => deleteDialog.open(item),
-    [deleteDialog]
-  );
+  // Only `open` belongs in the column deps; the dialog object itself changes
+  // every time it opens or closes, which would rebuild every column with it.
+  const handleDeleteClick = deleteDialog.open;
 
   const columns = useMemo(() => {
     return [
@@ -303,6 +303,29 @@ export const CustomFieldsTable = forwardRef((props, ref) => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    renderEmptyRowsFallback: () =>
+      isError ? (
+        <Box sx={{ p: 2 }}>
+          <Alert
+            severity="error"
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                onClick={() => refetch()}
+                disabled={isFetching}
+                startIcon={<RotateCw size={14} />}
+              >
+                {t("errorBoundary.retry")}
+              </Button>
+            }
+          >
+            {t("errorOccurred")}
+          </Alert>
+        </Box>
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     // Avoids nesting MRT's own create/edit <Dialog> around the one
     // CreateCustomFieldModal/EditCustomFieldModal already render — see
     // Translate/index.jsx for the full rationale.
