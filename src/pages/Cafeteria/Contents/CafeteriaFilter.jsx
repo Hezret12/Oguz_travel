@@ -139,7 +139,7 @@ const CafeteriaFilter = ({ filters, onFilterChange }) => {
     <Stack spacing={3}>
       {/* 1. Transaction Type Segmented Control */}
       <Box>
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.25 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
           <SwapVertRoundedIcon sx={{ fontSize: 18, color: "primary.main" }} />
           <Typography
             variant="body2"
@@ -274,7 +274,7 @@ const CafeteriaFilter = ({ filters, onFilterChange }) => {
 
       {/* 2. Date Range Section with Quick Presets */}
       <Box>
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.25 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
           <CalendarMonthRoundedIcon sx={{ fontSize: 18, color: "primary.main" }} />
           <Typography
             variant="body2"

@@ -194,11 +194,9 @@ const DateRangeCard = ({
       {/* Card Header */}
       <Stack
         direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ mb: 1.25 }}
+        sx={{ alignItems: "center", justifyContent: "space-between", mb: 1.25 }}
       >
-        <Stack direction="row" alignItems="center" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           {Icon && (
             <Box
               sx={(theme) => ({
@@ -262,7 +260,7 @@ const DateRangeCard = ({
       />
 
       {/* Side-by-Side Date Pickers */}
-      <Stack direction="row" spacing={1.25} alignItems="flex-end">
+      <Stack direction="row" spacing={1.25} sx={{ alignItems: "flex-end" }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <CompactDatePicker
             label={startLabel}

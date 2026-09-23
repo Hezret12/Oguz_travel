@@ -75,7 +75,7 @@ const FilterDrawer = ({
       >
         <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
           <Funnel size={18} />
-          <Typography variant="h6" fontWeight={600} fontSize="1.1rem">
+          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: "1.1rem" }}>
             {t("filter")}
           </Typography>
         </Stack>

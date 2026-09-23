@@ -82,7 +82,7 @@ const LetterStockFilter = ({ filters, onFilterChange }) => {
 
   return (
     <Box>
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.25 }}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
         <Box component="span" sx={{ display: "inline-flex", color: "primary.main" }}>
           <CalendarRange size={18} />
         </Box>
