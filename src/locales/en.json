@@ -488,9 +488,9 @@
       "duplicate": "This number appears in more than one entry",
       "headerNotes": {
         "index": "Batch sequence number; on letter rows, the entry's number within its batch.",
-        "name": "Batch name. On the letter rows underneath, this column holds the entry's YH number (or number range).",
-        "startNo": "First YH number in the batch. Leading zeros are kept. Filled on batch rows only.",
-        "endNo": "Last YH number in the batch. The start and end numbers are both part of the batch. Filled on batch rows only.",
+        "name": "Batch name (given when the letter stock was added). Empty on letter rows.",
+        "startNo": "First YH number in the batch. Leading zeros are kept. On letter rows this and the next column are merged and hold the entry's YH number (or number range).",
+        "endNo": "Last YH number in the batch. The start and end numbers are both part of the batch. Merged with the start column on letter rows.",
         "total": "Total YH letters in the batch. Sold + damaged + lost + left = total. On letter rows, how many of the entry's numbers fall inside the batch; they add up to the batch total.",
         "status": "Letter rows only: what happened to the entry — sold, damaged, lost, or used by a referral letter.",
         "sold": "Letters sold, including those given to referral letters. Filled on batch rows only.",

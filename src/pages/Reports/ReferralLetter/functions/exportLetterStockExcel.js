@@ -227,15 +227,16 @@ const toBatchValues = ({ stock, total, counts, remaining }, offset) => ({
 
 /**
  * Letter row: one entry of the batch's panel. The status columns stay empty — the batch row
- * above holds their totals — and the number range moves into the name column, as in the panel.
+ * above holds their totals — and the entry's ÝH number (or range) sits under the batch's number
+ * columns, which are merged for the row.
  */
 const toLetterValues = (child, offset, t) => {
   const { letter, start, end, status, count } = child;
   const isReferral = Boolean(letter.isRefferal);
   return {
     index: offset + 1,
-    name: formatYhRange({ start, end }),
-    startNo: "",
+    name: "",
+    startNo: formatYhRange({ start, end }),
     endNo: "",
     total: count,
     status: isReferral ? t("sidebar.referalLetters") : t(STATUS_LABEL_KEY[status]),
@@ -259,7 +260,7 @@ const toLetterValues = (child, offset, t) => {
 const writeSheet = (workbook, batches, t, asOf) => {
   const columns = [
     { header: "T/B", key: "index", width: 6, align: "center" },
-    { header: `${t("referralLetter.batchName")} / ${t("referralLetter.letterNo")}`, key: "name", width: 24, align: "left" },
+    { header: t("referralLetter.batchName"), key: "name", width: 24, align: "left" },
     { header: t("referralLetter.startNo"), key: "startNo", width: 13, align: "center" },
     { header: t("referralLetter.endNo"), key: "endNo", width: 13, align: "center" },
     countColumn("total", t("referralLetter.totalCount")),
@@ -327,10 +328,12 @@ const writeSheet = (workbook, batches, t, asOf) => {
       const cell = row.getCell(colNumber);
       const value = values[c.key];
       cell.value = value === "" ? null : value;
+      // A letter's number sits under the batch's own number columns, which the row merges.
+      const isNumberCell = !isBatch && (c.key === "startNo" || c.key === "endNo");
       // Status counts in their colour; zero prints as "-", so empty statuses read at a glance.
       const color = c.key === "status" && !isBatch ? STATUS_COLOR[child.status] : c.color;
       cell.font = font({
-        bold: isBatch ? Boolean(c.color) || c.key === "name" : c.key === "name",
+        bold: isBatch ? Boolean(c.color) || c.key === "name" : isNumberCell,
         color: { argb: (isBatch ? c.color : color) || BLACK },
       });
       cell.fill = solid(bg);
@@ -338,16 +341,18 @@ const writeSheet = (workbook, batches, t, asOf) => {
         vertical: "middle",
         horizontal: c.align,
         wrapText: c.key === "note",
-        // Letter rows are indented under their batch, as in the panel.
-        ...(c.key === "name" && !isBatch ? { indent: 1 } : {}),
       };
       cell.border = frameBorder(colNumber, endCol, {
         ...(isBatch && offset > 0 ? { top: line("thin", GROUP_LINE) } : {}),
       });
       if (c.sum) cell.numFmt = COUNT_FMT;
+      // The merged number cell spans two columns, so its text must not widen either of them.
+      if (isNumberCell) return;
       const len = (typeof value === "number" ? value.toLocaleString("en-US") : String(value ?? "")).length;
       if (len > maxLens[idx]) maxLens[idx] = len;
     });
+
+    if (!isBatch) sheet.mergeCells(rowNumber, colOf("startNo"), rowNumber, colOf("endNo"));
 
     if (isBatch) {
       // A used-up batch has nothing left: greyed out.

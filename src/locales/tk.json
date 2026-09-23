@@ -488,9 +488,9 @@
       "duplicate": "Bu ÝH belgisi birnäçe ýazgyda bar",
       "headerNotes": {
         "index": "Partiýanyň tertip belgisi; hat setirlerinde bolsa şol partiýanyň içindäki nobat belgisi.",
-        "name": "Partiýanyň ady. Astyndaky hat setirlerinde bu sütünde şol ýazgynyň ÝH belgisi (ýa-da belgi aralygy) durýar.",
-        "startNo": "Partiýadaky ilkinji ÝH belgisi. Belginiň başyndaky nollar saklanýar. Diňe partiýa setirlerinde doldurylýar.",
-        "endNo": "Partiýadaky iň soňky ÝH belgisi. Başlangyç we soňky belgi hem partiýa girýär. Diňe partiýa setirlerinde doldurylýar.",
+        "name": "Partiýanyň ady (hat stoky goşulanda berlen at). Hat setirlerinde boş galýar.",
+        "startNo": "Partiýadaky ilkinji ÝH belgisi. Belginiň başyndaky nollar saklanýar. Hat setirlerinde bu we ýanyndaky sütün birleşdirilip, şol ýazgynyň ÝH belgisi (ýa-da belgi aralygy) ýazylýar.",
+        "endNo": "Partiýadaky iň soňky ÝH belgisi. Başlangyç we soňky belgi hem partiýa girýär. Hat setirlerinde başlangyç sütüni bilen birleşdirilýär.",
         "total": "Partiýadaky ÝH hatlarynyň jemi sany. Satylan + zyýan ýeten + ýitirilen + galan = jemi. Hat setirlerinde şol ýazgynyň partiýa goşýan sany görkezilýär; olar jemlenende partiýanyň sany çykýar.",
         "status": "Diňe hat setirlerinde: ýazgynyň ýagdaýy — satyldy, zyýan ýeten, ýitirilen ýa-da ýollanma haty.",
         "sold": "Satylan hatlaryň sany, ýollanma hatlaryna berlenler hem şu ýerde. Diňe partiýa setirlerinde doldurylýar.",
