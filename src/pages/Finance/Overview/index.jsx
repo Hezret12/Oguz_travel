@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { Box, Chip, Grid, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
-import { CalendarDays, CalendarRange, MapPinHouse } from "lucide-react";
-import dayjs from "dayjs";
+import { MapPinHouse } from "lucide-react";
 import PageHeader from "../../../components/PageHeader";
 import { useLocale } from "../../../hooks/useLocale";
 import { useAuth } from "../../../context/useAuth";
@@ -11,26 +9,10 @@ import CashFlowCard from "./Contents/CashFlowCard";
 import MoneyFlowCard from "./Contents/MoneyFlowCard";
 import OperatorCard from "./Contents/OperatorCard";
 import { CURRENCIES, segmentedSx, useOfficeAnalytics } from "./functions/analyticsFormat";
-import { CUSTOM_PERIOD, PERIODS, isValidCustomRange } from "./functions/officeAnalyticsMock";
-import DateRangePopover from "./Contents/DateRangePopover";
+import { useAnalyticsPrefs } from "./functions/useAnalyticsPrefs";
+import PeriodRangeFilter from "./Contents/PeriodRangeFilter";
 
 const STORAGE_KEY = "finance_overview_prefs";
-
-const readPrefs = () => {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
-};
-
-const writePrefs = (prefs) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-  } catch {
-    // Preferences are a convenience only.
-  }
-};
 
 const MetaItem = ({ icon: Icon, children }) => (
   <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, color: "text.secondary", minWidth: 0 }}>
@@ -47,38 +29,14 @@ const MetaItem = ({ icon: Icon, children }) => (
 const FinanceOverview = () => {
   const { t, selectedLang } = useLocale();
   const { user } = useAuth();
-  const [prefs, setPrefs] = useState(() => {
-    const saved = readPrefs();
-    const customRange = isValidCustomRange(saved.customRange) ? saved.customRange : null;
-    return {
-      period:
-        PERIODS.includes(saved.period) || (saved.period === CUSTOM_PERIOD && customRange)
-          ? saved.period
-          : "thisMonth",
-      customRange,
-      currency: CURRENCIES.includes(saved.currency) ? saved.currency : "USD",
-    };
-  });
+  const [prefs, updatePrefs] = useAnalyticsPrefs(STORAGE_KEY);
   const { period, currency, customRange } = prefs;
-  const [rangeAnchor, setRangeAnchor] = useState(null);
-
-  const updatePrefs = (patch) => {
-    const next = { ...prefs, ...patch };
-    setPrefs(next);
-    writePrefs(next);
-  };
-
-  const applyCustomRange = (nextRange) => {
-    updatePrefs({ period: CUSTOM_PERIOD, customRange: nextRange });
-    setRangeAnchor(null);
-  };
 
   const { data, isDemo } = useOfficeAnalytics(period, customRange);
 
   const officeName =
     (typeof user?.office === "string" ? user.office : selectedLang(user?.office)) ||
     selectedLang(data.office.name);
-  const range = `${dayjs(data.period.start).format("DD.MM.YYYY")} – ${dayjs(data.period.end).format("DD.MM.YYYY")}`;
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pb: 4 }}>
@@ -107,46 +65,10 @@ const FinanceOverview = () => {
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, minWidth: 0, flexWrap: "wrap" }}>
           <MetaItem icon={MapPinHouse}>{officeName}</MetaItem>
-          <MetaItem icon={CalendarDays}>{range}</MetaItem>
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-          <ToggleButtonGroup
-            exclusive
-            value={period}
-            onChange={(_e, next) => next && updatePrefs({ period: next })}
-            sx={segmentedSx}
-          >
-            {PERIODS.map((p) => (
-              <ToggleButton key={p} value={p}>
-                {t(`finance.analytics.periods.${p}`)}
-              </ToggleButton>
-            ))}
-            {/* Opens the picker instead of switching; the period only
-                becomes "custom" once a valid range is applied. */}
-            <ToggleButton
-              value={CUSTOM_PERIOD}
-              onClick={(e) => {
-                e.preventDefault();
-                setRangeAnchor(e.currentTarget);
-              }}
-              sx={{ gap: 0.75 }}
-            >
-              <CalendarRange size={15} />
-              {period === CUSTOM_PERIOD && customRange
-                ? `${dayjs(customRange.start).format("DD.MM")} – ${dayjs(customRange.end).format("DD.MM.YY")}`
-                : t("finance.analytics.periods.custom")}
-            </ToggleButton>
-          </ToggleButtonGroup>
-
-          {rangeAnchor && (
-            <DateRangePopover
-              anchorEl={rangeAnchor}
-              value={customRange}
-              onApply={applyCustomRange}
-              onClose={() => setRangeAnchor(null)}
-            />
-          )}
+          <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />
 
           <Tooltip title={t("finance.analytics.noConversion")} arrow>
             <ToggleButtonGroup

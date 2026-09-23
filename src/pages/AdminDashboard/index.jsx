@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Alert,
   Box,
@@ -14,16 +14,16 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { CalendarDays, CalendarRange, HandCoins, PiggyBank, Receipt, RefreshCw, TrendingUp } from "lucide-react";
+import { HandCoins, PiggyBank, Receipt, RefreshCw, TrendingUp } from "lucide-react";
 import dayjs from "dayjs";
 import PageHeader from "../../components/PageHeader";
 import { useLocale } from "../../hooks/useLocale";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllOfficeApi } from "../../api/queries/getters";
 import { KpiCard } from "../Finance/Overview/Contents/KpiGrid";
-import DateRangePopover from "../Finance/Overview/Contents/DateRangePopover";
+import PeriodRangeFilter from "../Finance/Overview/Contents/PeriodRangeFilter";
 import { CURRENCIES, KPI_TONES, segmentedSx } from "../Finance/Overview/functions/analyticsFormat";
-import { CUSTOM_PERIOD, PERIODS, isValidCustomRange } from "../Finance/Overview/functions/officeAnalyticsMock";
+import { useAnalyticsPrefs } from "../Finance/Overview/functions/useAnalyticsPrefs";
 import { aggregateSales, resolveRange, useSalesRows } from "./functions/salesDashboard";
 import { MOCK_OFFICES } from "./functions/salesMock";
 import SalesTrendCard from "./Contents/SalesTrendCard";
@@ -31,22 +31,6 @@ import PaymentStatusCard from "./Contents/PaymentStatusCard";
 import ModulesSection from "./Contents/ModulesSection";
 
 const STORAGE_KEY = "admin_dashboard_prefs";
-
-const readPrefs = () => {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
-};
-
-const writePrefs = (prefs) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-  } catch {
-    // Preferences are a convenience only.
-  }
-};
 
 const countFormat = (v) => Math.round(Number(v) || 0).toLocaleString("en-US");
 
@@ -56,25 +40,8 @@ const AdminDashboard = () => {
   const { t, selectedLang } = useLocale();
   const mode = useTheme().palette.mode === "dark" ? "dark" : "light";
 
-  const [prefs, setPrefs] = useState(() => {
-    const saved = readPrefs();
-    const customRange = isValidCustomRange(saved.customRange) ? saved.customRange : null;
-    return {
-      period:
-        PERIODS.includes(saved.period) || (saved.period === CUSTOM_PERIOD && customRange) ? saved.period : "thisMonth",
-      customRange,
-      currency: CURRENCIES.includes(saved.currency) ? saved.currency : "USD",
-      office: typeof saved.office === "string" ? saved.office : "",
-    };
-  });
+  const [prefs, updatePrefs] = useAnalyticsPrefs(STORAGE_KEY, { office: "" });
   const { period, customRange, currency, office } = prefs;
-  const [rangeAnchor, setRangeAnchor] = useState(null);
-
-  const updatePrefs = (patch) => {
-    const next = { ...prefs, ...patch };
-    setPrefs(next);
-    writePrefs(next);
-  };
 
   const rangeStart = customRange?.start;
   const rangeEnd = customRange?.end;
@@ -155,8 +122,6 @@ const AdminDashboard = () => {
     },
   ];
 
-  const rangeLabel = `${range.start.format("DD.MM.YYYY")} – ${range.end.format("DD.MM.YYYY")}`;
-
   return (
     <Box
       sx={{
@@ -183,12 +148,6 @@ const AdminDashboard = () => {
       {/* One filter row scopes everything below it */}
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, flexWrap: "wrap", mt: -1 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: "text.secondary", minWidth: 0 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-            <CalendarDays size={15} />
-            <Typography noWrap sx={{ fontSize: "0.85rem", color: "text.primary", fontWeight: 500 }}>
-              {rangeLabel}
-            </Typography>
-          </Box>
           {updatedAt > 0 && (
             <Typography noWrap sx={{ fontSize: "0.75rem" }}>
               {t("dashboard.updatedAt", { time: dayjs(updatedAt).format("HH:mm") })}
@@ -197,43 +156,7 @@ const AdminDashboard = () => {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-          <ToggleButtonGroup
-            exclusive
-            value={period}
-            onChange={(_e, next) => next && updatePrefs({ period: next })}
-            sx={segmentedSx}
-          >
-            {PERIODS.map((p) => (
-              <ToggleButton key={p} value={p}>
-                {t(`finance.analytics.periods.${p}`)}
-              </ToggleButton>
-            ))}
-            <ToggleButton
-              value={CUSTOM_PERIOD}
-              onClick={(e) => {
-                e.preventDefault();
-                setRangeAnchor(e.currentTarget);
-              }}
-              sx={{ gap: 0.75 }}
-            >
-              <CalendarRange size={15} />
-              {period === CUSTOM_PERIOD && customRange
-                ? `${dayjs(customRange.start).format("DD.MM")} – ${dayjs(customRange.end).format("DD.MM.YY")}`
-                : t("finance.analytics.periods.custom")}
-            </ToggleButton>
-          </ToggleButtonGroup>
-
-          {rangeAnchor && (
-            <DateRangePopover
-              anchorEl={rangeAnchor}
-              value={customRange}
-              onApply={(next) => {
-                updatePrefs({ period: CUSTOM_PERIOD, customRange: next });
-                setRangeAnchor(null);
-              }}
-              onClose={() => setRangeAnchor(null)}
-            />
-          )}
+          <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />
 
           <TextField
             select

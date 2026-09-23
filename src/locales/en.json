@@ -591,6 +591,8 @@
     "selectCountryDescription": "Please select a country from the header to view applications",
     "selectCountryPlaceholder": "Select a country...",
     "selectCountryToAdd": "Please select a country first to add an application",
+    "fieldsLoadError": "The country's fields could not be loaded, so its own columns may be missing.",
+    "fieldsLoadErrorForm": "The country's fields could not be loaded. Retry, so the application is not filed without them.",
     "defaultFieldsInfoTitle": "Standard Fields:",
     "defaultFieldsInfoDesc": "Client, Application date, Operator 1, Operator 2, and Notes are automatically included.",
     "fields": {

@@ -4,6 +4,7 @@ import { useLocale } from "../../hooks/useLocale";
 import AddButton from "../../components/AddButton";
 import { useDocumentTitle } from "../../hooks/useDocumentTitle";
 import CustomTabs from "../../components/CustomTabs";
+import ComponentErrorBoundary from "../../components/ComponentErrorBoundary";
 import FilterDrawer from "../../components/FilterDrawer";
 import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import {
@@ -163,24 +164,35 @@ export const VisaIntake = () => {
         </Tooltip>
       </Paper>
 
-      {activeTab === "applications" && (
-        <ApplicationsTable
-          ref={activeTabRef}
-          country={selectedCountry}
-          onCountryChange={setSelectedCountry}
-          queryParams={queryParams}
-          searchQuery={searchQuery}
-          setSearch={setSearch}
-          openDrawer={openDrawer}
-          isFilterActive={isFilterActive}
-          page={page}
-          setPage={setPage}
-        />
-      )}
+      {/* These tabs render columns and inputs the backend defines, so a record
+          in an unexpected shape can throw mid-render. Contained here, it costs
+          the tab — not the whole app, which is what the router's boundary
+          would do. Switching tabs or country clears it. */}
+      <ComponentErrorBoundary
+        resetKey={`${activeTab}:${selectedCountry?.guid || ""}`}
+        title={t("errorBoundary.genericErrorTitle")}
+        description={t("errorBoundary.genericErrorDesc")}
+        retryLabel={t("errorBoundary.retry")}
+      >
+        {activeTab === "applications" && (
+          <ApplicationsTable
+            ref={activeTabRef}
+            country={selectedCountry}
+            onCountryChange={setSelectedCountry}
+            queryParams={queryParams}
+            searchQuery={searchQuery}
+            setSearch={setSearch}
+            openDrawer={openDrawer}
+            isFilterActive={isFilterActive}
+            page={page}
+            setPage={setPage}
+          />
+        )}
 
-      {activeTab === "countries" && <CountriesTable ref={activeTabRef} />}
+        {activeTab === "countries" && <CountriesTable ref={activeTabRef} />}
 
-      {activeTab === "custom_fields" && <CustomFieldsTable ref={activeTabRef} />}
+        {activeTab === "custom_fields" && <CustomFieldsTable ref={activeTabRef} />}
+      </ComponentErrorBoundary>
 
       <VisaIntakeFilterDrawer />
     </Box>

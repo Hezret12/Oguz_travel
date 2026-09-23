@@ -3,7 +3,7 @@ import { useQueries } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { getAllTotalCalculationsApi } from "../../../api/queries/getters";
 import { fetchAllPaginatedData } from "../../../functions/excelExportHelper";
-import { CUSTOM_PERIOD, isValidCustomRange } from "../../Finance/Overview/functions/officeAnalyticsMock";
+import { CUSTOM_PERIOD, getPeriodRange, isValidCustomRange } from "../../Finance/Overview/functions/officeAnalyticsMock";
 import { buildMockSales } from "./salesMock";
 
 // Demo data until real sales are wired in: set to false to use the API below.
@@ -59,32 +59,13 @@ const PERIOD_GRANULARITY = { thisMonth: "day", lastMonth: "day", quarter: "week"
 
 // Current range + the previous range of the same length right before it.
 export const resolveRange = (period, customRange, today = dayjs()) => {
-  let start;
-  let end;
+  const isCustom = period === CUSTOM_PERIOD && isValidCustomRange(customRange, today);
+  const { start, end } = getPeriodRange(period, customRange, today);
   let granularity;
-  if (period === CUSTOM_PERIOD && isValidCustomRange(customRange, today)) {
-    start = dayjs(customRange.start).startOf("day");
-    end = dayjs(customRange.end).endOf("day");
+  if (isCustom) {
     const days = end.diff(start, "day") + 1;
     granularity = days <= 45 ? "day" : days <= 180 ? "week" : "month";
   } else {
-    switch (period) {
-      case "lastMonth":
-        start = today.subtract(1, "month").startOf("month");
-        end = start.endOf("month");
-        break;
-      case "quarter": // the last three complete months
-        start = today.startOf("month").subtract(3, "month");
-        end = today.startOf("month").subtract(1, "day").endOf("day");
-        break;
-      case "year":
-        start = today.startOf("year");
-        end = today.endOf("day");
-        break;
-      default:
-        start = today.startOf("month");
-        end = today.endOf("day");
-    }
     granularity = PERIOD_GRANULARITY[period] || "day";
   }
   // Running periods compare with the same span one month / one year back

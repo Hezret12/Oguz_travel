@@ -591,6 +591,8 @@
     "selectCountryDescription": "Arzalary görmek üçin ýokardan ýurt saýlaň",
     "selectCountryPlaceholder": "Ýurt saýlaň...",
     "selectCountryToAdd": "Arza goşmak üçin ilki bilen ýurt saýlaň",
+    "fieldsLoadError": "Ýurduň meýdanlary ýüklenmedi, şonuň üçin bu ýurda degişli sütünler görkezilmän biler.",
+    "fieldsLoadErrorForm": "Ýurduň meýdanlary ýüklenmedi. Ýazgyny ýarym maglumat bilen saklamazlyk üçin gaýtadan synanyşyň.",
     "defaultFieldsInfoTitle": "Standart Sütünler:",
     "defaultFieldsInfoDesc": "Müşderi, Arza berlen senesi, Operator 1, Operator 2 we Bellikler awtomatiki birikdirilýär.",
     "fields": {

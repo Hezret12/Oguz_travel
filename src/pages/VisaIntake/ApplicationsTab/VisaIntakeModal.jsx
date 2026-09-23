@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from "react";
-import { Grid, CircularProgress, Box } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Grid } from "@mui/material";
+import { RotateCw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
@@ -152,7 +153,13 @@ export const VisaIntakeModal = ({
     itemData?.country_guid ||
     "";
 
-  const { data: rawFields = [], isLoading: fieldsLoading } = useGet({
+  const {
+    data: rawFields = [],
+    isLoading: fieldsLoading,
+    isError: fieldsError,
+    isFetching: fieldsFetching,
+    refetch: refetchFields,
+  } = useGet({
     apiFn: () =>
       effectiveCountryGuid
         ? getCountryVisaFieldsApi(effectiveCountryGuid)
@@ -274,8 +281,9 @@ export const VisaIntakeModal = ({
   };
 
   const submitHandler = async (formData) => {
-    // On edit, start from the stored values so keys of fields that were since
-    // removed from the country config aren't silently wiped.
+    // Carry the stored values over on edit. The service then keeps only the keys
+    // that still match one of the country's `field_key`s (receiving.service.ts,
+    // updateReceiving), so this is what the record had, not a way around that.
     const custom_field_values = isEditing ? { ...existingCustomValues } : {};
     const payload = {
       country_guid: effectiveCountryGuid,
@@ -351,6 +359,27 @@ export const VisaIntakeModal = ({
       <CustomDialogHeader variant="h5" title={dialogTitle} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
         <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* Without the country's fields only the four built-in ones render, so
+              saving would file an application with none of its country data. */}
+          {fieldsError && (
+            <Alert
+              severity="error"
+              action={
+                <Button
+                  color="inherit"
+                  size="small"
+                  onClick={() => refetchFields()}
+                  disabled={fieldsFetching}
+                  startIcon={<RotateCw size={14} />}
+                >
+                  {t("errorBoundary.retry")}
+                </Button>
+              }
+            >
+              {t("visaIntake.fieldsLoadErrorForm")}
+            </Alert>
+          )}
+
           {fieldsLoading ? (
             <Box
               sx={{
@@ -394,6 +423,7 @@ export const VisaIntakeModal = ({
             loading={isCreating || isUpdating}
             onCancel={handleClose}
             type="submit"
+            disabled={fieldsLoading || fieldsError}
           />
         </Box>
       </CustomForm>

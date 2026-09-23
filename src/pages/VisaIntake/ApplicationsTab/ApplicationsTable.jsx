@@ -10,12 +10,13 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import {
+  Alert,
   Box,
   Button,
   Chip,
   Badge,
 } from "@mui/material";
-import { Funnel, Globe } from "lucide-react";
+import { Funnel, Globe, RotateCw } from "lucide-react";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
@@ -97,7 +98,7 @@ export const ApplicationsTable = forwardRef(
   ) => {
     const { t, selectedLang } = useLocale();
     const { formatChange } = useDateFormat();
-    const defaultMrtOptions = getDefaultMRTOptions();
+    const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
 
     // The picker hands back the full country object, so its custom_fields are
     // available even when it isn't in any cached list page.
@@ -148,15 +149,20 @@ export const ApplicationsTable = forwardRef(
       [selectedLang],
     );
 
-    const { data: rawCountryFields = [], isSuccess: countryFieldsLoaded } =
-      useGet({
-        apiFn: () =>
-          activeCountryGuid
-            ? getCountryVisaFieldsApi(activeCountryGuid)
-            : Promise.resolve([]),
-        key: ["countryVisaFields", activeCountryGuid],
-        options: { enabled: Boolean(activeCountryGuid) },
-      });
+    const {
+      data: rawCountryFields = [],
+      isSuccess: countryFieldsLoaded,
+      isError: isFieldsError,
+      isFetching: isFieldsFetching,
+      refetch: refetchFields,
+    } = useGet({
+      apiFn: () =>
+        activeCountryGuid
+          ? getCountryVisaFieldsApi(activeCountryGuid)
+          : Promise.resolve([]),
+      key: ["countryVisaFields", activeCountryGuid],
+      options: { enabled: Boolean(activeCountryGuid) },
+    });
 
     // The picker's copy of custom_fields is only a stand-in until the fresh
     // (mutation-invalidated) field list arrives — an empty fresh list is a
@@ -168,7 +174,13 @@ export const ApplicationsTable = forwardRef(
       return sortVisaFields(Array.isArray(apiList) ? apiList : []);
     }, [countryFieldsLoaded, rawCountryFields, selectedCountry]);
 
-    const employeeParams = useMemo(() => ({ page: 1, limit: 100 }), []);
+    // `/receivings/get-all-receiving` builds its rows with raw SQL, where the
+    // operator alias (`AS operator_fullName`) is unquoted and Postgres folds it
+    // to `operator_fullname`; the formatter then looks for the camelCase key and
+    // sends `operator_fullName: null`. Until that alias is quoted, the operator
+    // column is resolved from this list, so it has to cover every employee who
+    // can take an application — at 100 the ones past the first page read "-".
+    const employeeParams = useMemo(() => ({ page: 1, limit: 500 }), []);
     const { data: employees = [] } = useGet({
       apiFn: getAllEmployeeApi,
       key: "employees",
@@ -201,6 +213,7 @@ export const ApplicationsTable = forwardRef(
       data: rawApplicationsData = [],
       isLoading,
       isFetching,
+      isError: isApplicationsError,
       refetch,
       totalItems = 0,
       pageCount = 1,
@@ -228,17 +241,19 @@ export const ApplicationsTable = forwardRef(
       if (!activeCountryGuid || !Array.isArray(rawApplicationsData)) return [];
       return rawApplicationsData.map((row) => {
         const oprGuid = row.accepted_opr_guid || row.operator_guid;
-        const operator = row.operator?.fullName
-          ? {
-              fullName: row.operator.fullName,
-              office: getOfficeLabel(row.operator.office),
-            }
-          : (oprGuid && employeeMap.get(oprGuid)) || null;
+        // The record's own operator name comes first (create/update answers
+        // carry it through the Sequelize include); the employee list fills in
+        // both the list endpoint's null and the office line under the name.
+        const known = (oprGuid && employeeMap.get(oprGuid)) || null;
+        const fullName =
+          row.operator_fullName || row.operator?.fullName || known?.fullName || "";
+        const office =
+          known?.office || getOfficeLabel(row.operator?.office) || row.office_shortName || "";
 
         return {
           ...row,
           custom_field_values: parseCustomFieldValues(row.custom_field_values),
-          __operator: operator,
+          __operator: fullName ? { fullName, office } : null,
         };
       });
     }, [activeCountryGuid, rawApplicationsData, employeeMap, getOfficeLabel]);
@@ -263,11 +278,9 @@ export const ApplicationsTable = forwardRef(
     const deleteDialog = useDeleteDialog({
       onConfirm: (item) => deleteReceiving(item.guid),
     });
-
-    const handleDeleteClick = useCallback(
-      (item) => deleteDialog.open(item),
-      [deleteDialog],
-    );
+    // Only `open` belongs in the column deps; the dialog object itself changes
+    // every time it opens or closes, which would rebuild every column with it.
+    const handleDeleteClick = deleteDialog.open;
 
     // Columns Definition
     const columns = useMemo(() => {
@@ -365,11 +378,13 @@ export const ApplicationsTable = forwardRef(
       // 6. Dynamic Fields (All dynamic country-specific fields in order)
       const usedKeys = new Set(STANDARD_KEYS);
 
-      sortedFields.forEach((field, index) => {
-        const fieldKey =
-          field.fieldKey || field.field_key || field.guid || `col_${index}`;
+      sortedFields.forEach((field) => {
+        const fieldKey = field.fieldKey || field.field_key || field.guid;
         // Skip standard keys and duplicates — a repeated column id breaks MRT.
-        if (usedKeys.has(fieldKey) || isNotesField(field)) return;
+        // A field with no key at all is skipped too: the backend stores
+        // custom_field_values by `field_key`, so a made-up id could never match
+        // a stored value and the column would always be empty.
+        if (!fieldKey || usedKeys.has(fieldKey) || isNotesField(field)) return;
         usedKeys.add(fieldKey);
 
         const headerLabel = resolveFieldLabel(field) || fieldKey;
@@ -531,8 +546,33 @@ export const ApplicationsTable = forwardRef(
       },
       enablePagination: false,
       enableBottomToolbar: Boolean(activeCountryGuid),
-      renderEmptyRowsFallback: () =>
-        !activeCountryGuid ? (
+      // A failed request must not read as "no applications": the service answers
+      // with HTTP 500 on failure (ResponseInterceptor copies the body status),
+      // so the error is the one thing worth showing here.
+      renderEmptyRowsFallback: () => {
+        if (activeCountryGuid && isApplicationsError) {
+          return (
+            <Box sx={{ p: 2 }}>
+              <Alert
+                severity="error"
+                action={
+                  <Button
+                    color="inherit"
+                    size="small"
+                    onClick={() => refetch()}
+                    disabled={isFetching}
+                    startIcon={<RotateCw size={14} />}
+                  >
+                    {t("errorBoundary.retry")}
+                  </Button>
+                }
+              >
+                {t("errorOccurred")}
+              </Alert>
+            </Box>
+          );
+        }
+        return !activeCountryGuid ? (
           <TableEmptyState
             icon={Globe}
             title={t("visaIntake.selectCountryPrompt")}
@@ -540,7 +580,8 @@ export const ApplicationsTable = forwardRef(
           />
         ) : (
           <TableEmptyState />
-        ),
+        );
+      },
       renderBottomToolbarCustomActions: () => (
         <Box
           sx={{
@@ -662,6 +703,28 @@ export const ApplicationsTable = forwardRef(
             onRefresh={refetch}
             countryGuid={editingRow.original?.country_guid || activeCountryGuid}
           />
+        )}
+
+        {/* Without the field list the country's own columns are missing, and the
+            rows underneath look empty rather than broken. */}
+        {isFieldsError && (
+          <Alert
+            severity="warning"
+            sx={{ mb: 1.5 }}
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                onClick={() => refetchFields()}
+                disabled={isFieldsFetching}
+                startIcon={<RotateCw size={14} />}
+              >
+                {t("errorBoundary.retry")}
+              </Button>
+            }
+          >
+            {t("visaIntake.fieldsLoadError")}
+          </Alert>
         )}
 
         <MaterialReactTable table={table} />

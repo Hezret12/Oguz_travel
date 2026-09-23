@@ -32,6 +32,33 @@ export const isValidCustomRange = (customRange, today = dayjs()) => {
   );
 };
 
+/**
+ * The { start, end } dayjs bounds of a period (both inclusive), whether it is one of `PERIODS`
+ * or a picked range. Single source for every analytics page and its date range filter, so the
+ * dates shown in the filter are exactly the ones the report was built from.
+ */
+export const getPeriodRange = (period, customRange, today = dayjs()) => {
+  if (period === CUSTOM_PERIOD && isValidCustomRange(customRange, today)) {
+    return { start: dayjs(customRange.start).startOf("day"), end: dayjs(customRange.end).endOf("day") };
+  }
+  switch (period) {
+    case "lastMonth": {
+      const start = today.subtract(1, "month").startOf("month");
+      return { start, end: start.endOf("month") };
+    }
+    // The last three complete months.
+    case "quarter":
+      return {
+        start: today.startOf("month").subtract(3, "month"),
+        end: today.startOf("month").subtract(1, "day").endOf("day"),
+      };
+    case "year":
+      return { start: today.startOf("year"), end: today.endOf("day") };
+    default:
+      return { start: today.startOf("month"), end: today.endOf("day") };
+  }
+};
+
 // Seeded PRNG (mulberry32) so a period always renders the same demo numbers.
 const createRandom = (seedText) => {
   let seed = [...seedText].reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, 7);
@@ -108,24 +135,6 @@ const PERIOD_CONFIG = {
   lastMonth: { months: 1, granularity: "day" },
   quarter: { months: 3, granularity: "week" },
   year: { months: 12, granularity: "month" },
-};
-
-const getRange = (period, today) => {
-  switch (period) {
-    case "lastMonth": {
-      const start = today.subtract(1, "month").startOf("month");
-      return { start, end: start.endOf("month") };
-    }
-    case "quarter": {
-      // The last three complete months.
-      const start = today.startOf("month").subtract(3, "month");
-      return { start, end: today.startOf("month").subtract(1, "day").endOf("day") };
-    }
-    case "year":
-      return { start: today.startOf("year"), end: today.endOf("day") };
-    default:
-      return { start: today.startOf("month"), end: today.endOf("day") };
-  }
 };
 
 const emptyTotals = () => ({
@@ -436,8 +445,7 @@ const granularityForDays = (days) => (days <= 45 ? "day" : days <= 180 ? "week" 
 // Resolves a period key (or "custom" + { start, end }) to its range and size.
 const resolvePeriod = (period, today, customRange) => {
   if (period === CUSTOM_PERIOD && isValidCustomRange(customRange, today)) {
-    const start = dayjs(customRange.start).startOf("day");
-    const end = dayjs(customRange.end).endOf("day");
+    const { start, end } = getPeriodRange(CUSTOM_PERIOD, customRange, today);
     const days = end.diff(start, "day") + 1;
     return {
       range: { start, end },
@@ -457,7 +465,7 @@ const resolvePeriod = (period, today, customRange) => {
       : key === "year"
         ? (today.diff(today.startOf("year"), "day") + 1) / (today.endOf("year").diff(today.startOf("year"), "day") + 1)
         : 1;
-  return { range: getRange(key, today), granularity, scale: months * progress, seed: key, key };
+  return { range: getPeriodRange(key, null, today), granularity, scale: months * progress, seed: key, key };
 };
 
 export const getOfficeAnalyticsMock = (period = "thisMonth", today = dayjs(), customRange = null) => {
