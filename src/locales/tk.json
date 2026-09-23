@@ -470,7 +470,7 @@
     },
     "export": {
       "modalTitle": "Hat stoky boýunça hasabat",
-      "modalDesc": "Her partiýa bir setirde: näçe hat satyldy, zyýan ýetdi, ýitirildi we näçesi galdy.",
+      "modalDesc": "Her partiýa bir setirde — näçe hat satyldy, zyýan ýetdi, ýitirildi we näçesi galdy — astynda bolsa şol partiýanyň hat ýazgylary.",
       "fetchingStocks": "Partiýalar ýüklenýär...",
       "fetchingLetters": "Hasabat ýazgylary ýüklenýär...",
       "generating": "Excel faýly taýýarlanýar...",
@@ -487,17 +487,20 @@
       "unused": "Ulanylmadyk",
       "duplicate": "Bu ÝH belgisi birnäçe ýazgyda bar",
       "headerNotes": {
-        "index": "Partiýanyň tertip belgisi.",
-        "name": "Partiýanyň ady (hat stoky goşulanda berlen at).",
-        "startNo": "Partiýadaky ilkinji ÝH belgisi. Belginiň başyndaky nollar saklanýar.",
-        "endNo": "Partiýadaky iň soňky ÝH belgisi. Başlangyç we soňky belgi hem partiýa girýär.",
-        "total": "Partiýadaky ÝH hatlarynyň jemi sany. Satylan + zyýan ýeten + ýitirilen + galan = jemi.",
-        "sold": "Satylan hatlaryň sany, ýollanma hatlaryna berlenler hem şu ýerde.",
-        "damaged": "Zyýan ýeten (ulanyp bolmaýan) hatlaryň sany.",
+        "index": "Partiýanyň tertip belgisi; hat setirlerinde bolsa şol partiýanyň içindäki nobat belgisi.",
+        "name": "Partiýanyň ady. Astyndaky hat setirlerinde bu sütünde şol ýazgynyň ÝH belgisi (ýa-da belgi aralygy) durýar.",
+        "startNo": "Partiýadaky ilkinji ÝH belgisi. Belginiň başyndaky nollar saklanýar. Diňe partiýa setirlerinde doldurylýar.",
+        "endNo": "Partiýadaky iň soňky ÝH belgisi. Başlangyç we soňky belgi hem partiýa girýär. Diňe partiýa setirlerinde doldurylýar.",
+        "total": "Partiýadaky ÝH hatlarynyň jemi sany. Satylan + zyýan ýeten + ýitirilen + galan = jemi. Hat setirlerinde şol ýazgynyň partiýa goşýan sany görkezilýär; olar jemlenende partiýanyň sany çykýar.",
+        "status": "Diňe hat setirlerinde: ýazgynyň ýagdaýy — satyldy, zyýan ýeten, ýitirilen ýa-da ýollanma haty.",
+        "sold": "Satylan hatlaryň sany, ýollanma hatlaryna berlenler hem şu ýerde. Diňe partiýa setirlerinde doldurylýar.",
+        "damaged": "Zyýan ýeten (ulanyp bolmaýan) hatlaryň sany. Diňe partiýa setirlerinde doldurylýar.",
         "lost": "Ýitirilen hatlaryň sany. Mysal üçin diňe hat ýitirilen partiýalary görmek üçin bu sütüniň süzgüjini ulanyň.",
         "remaining": "Galan (heniz ulanylmadyk) hatlaryň sany. Partiýa doly ulanylan bolsa, çal reňkde görkezilýär.",
-        "date": "Partiýanyň ulgama goşulan senesi.",
-        "note": "Partiýa goşulanda ýazylan bellik."
+        "submittedBy": "Diňe hat setirlerinde: haty tabşyran işgär.",
+        "receivedBy": "Diňe hat setirlerinde: haty kabul eden adam.",
+        "date": "Partiýa setirinde partiýanyň ulgama goşulan senesi, hat setirinde ýazgynyň senesi.",
+        "note": "Partiýa goşulanda ýazylan bellik; hat setirlerinde şol ýazgynyň belligi."
       }
     }
   },

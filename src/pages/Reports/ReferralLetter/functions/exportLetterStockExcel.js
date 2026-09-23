@@ -6,6 +6,8 @@ import { getAllReportsApi, getLettersByDocumentRangeApi } from "../../../../api/
 import {
   LETTER_STATUS,
   formatYhNumber,
+  formatYhRange,
+  getLetterCount,
   getLetterRange,
   getStockRange,
   resolveLetterStatus,
@@ -13,24 +15,26 @@ import {
 
 /**
  * Letter stock report, in the layout of the other report exports (see exportCafeteriaExcel):
- * company banner on row 2 and one table from D4 with zebra rows, AutoFilter, a frozen header
- * and a SUBTOTAL total row.
+ * company banner on row 2 and one table from D4 with AutoFilter, a frozen header and a total row.
  *
- * One row per batch: its number range, size, and how many of its letters were sold, damaged,
- * lost and are left, each status in its own column. Referral letters count as sold: they use
- * their number up like a sale. Header cells carry a note explaining their column
- * (`referralLetter.export.headerNotes`).
+ * The table mirrors the page: a batch row (its number range, size and how many of its letters
+ * were sold, damaged, lost and are left, each status in its own column), followed by one row per
+ * letter recorded in it — exactly the rows of the batch's expanded panel. Letter rows sit in an
+ * Excel outline group, so they fold away under their batch with the +/- handle in the margin.
  *
- * Only numbers inside a batch are counted, like the page, and a number several entries cover
- * is counted once, so the statuses always add up to the batch size.
+ * Only numbers inside a batch are counted, like the page, and a number several entries cover is
+ * counted once, so a batch's letter rows always add up to its size.
  */
 
 const TEAL = "FF0E8584";
 const RED = "FFDC2626";
 const BLACK = "FF000000";
 const GREY_TEXT = "FF6B7280";
+const WARN_TEXT = "FFB45309";
 const GRID = "FFD9D9D9";
-const ZEBRA = "FFF3F4F6";
+const WHITE = "FFFFFFFF";
+const BATCH_FILL = "FFE9F3F3"; // Light teal: marks the batch row that opens each group.
+const GROUP_LINE = "FF9CA3AF";
 const COUNT_FMT = '#,##0;-#,##0;"-"';
 
 const START_ROW = 4;
@@ -42,6 +46,12 @@ const STATUS_COLOR = {
   [LETTER_STATUS.LOST]: "FF991B1B",
 };
 const USED_STATUSES = Object.keys(STATUS_COLOR);
+
+const STATUS_LABEL_KEY = {
+  [LETTER_STATUS.SOLD]: "referralLetter.statusSold",
+  [LETTER_STATUS.DAMAGED]: "referralLetter.statusDamaged",
+  [LETTER_STATUS.LOST]: "referralLetter.statusLost",
+};
 
 const font = (extra = {}) => ({ name: "Calibri", size: 10, color: { argb: BLACK }, ...extra });
 const solid = (argb) => ({ type: "pattern", pattern: "solid", fgColor: { argb } });
@@ -75,8 +85,10 @@ const getStatusKey = (letter) => {
 };
 
 /**
- * Counts each batch's numbers by status. Numbers outside the batch are ignored, and numbers an
- * earlier entry already covers are counted once.
+ * Counts each batch's numbers by status and keeps the entries behind the counts as its
+ * children. Numbers outside the batch are ignored, and numbers an earlier entry already covers
+ * are counted once, so `count` is what the entry contributes to this batch — not always the
+ * entry's own size (`ownCount`).
  */
 const buildBatches = (stocks, letters) => {
   const rows = letters
@@ -100,6 +112,7 @@ const buildBatches = (stocks, letters) => {
   return stocks.map((stock) => {
     const range = getStockRange(stock);
     const counts = Object.fromEntries(USED_STATUSES.map((status) => [status, 0]));
+    const children = [];
 
     if (range) {
       let cursor = range.start;
@@ -109,14 +122,24 @@ const buildBatches = (stocks, letters) => {
         const from = Math.max(row.start, range.start, cursor);
         const to = Math.min(row.end, range.end);
         if (to < from) continue;
-        counts[getStatusKey(row.letter)] += to - from + 1;
+        const status = getStatusKey(row.letter);
+        const count = to - from + 1;
+        counts[status] += count;
         cursor = to + 1;
+        children.push({
+          letter: row.letter,
+          start: row.start,
+          end: row.end,
+          status,
+          count,
+          ownCount: getLetterCount(row.letter) || count,
+        });
       }
     }
 
     const total = Number(stock.total_letter) || (range ? range.end - range.start + 1 : 0);
     const used = USED_STATUSES.reduce((sum, status) => sum + counts[status], 0);
-    return { stock, total, counts, remaining: Math.max(0, total - used) };
+    return { stock, total, counts, remaining: Math.max(0, total - used), children };
   });
 };
 
@@ -156,7 +179,7 @@ const writeHeader = (sheet, columns, t) => {
       margins: { insetmode: "custom", inset: [0.12, 0.12, 0.12, 0.12] },
     };
     cell.font = font({ size: 11, bold: true, color: { argb: col.color || BLACK } });
-    cell.fill = solid("FFFFFFFF");
+    cell.fill = solid(WHITE);
     cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
     cell.border = {
       top: line("medium", BLACK),
@@ -176,25 +199,81 @@ const countColumn = (key, header, color, width = 11) => ({
   color,
 });
 
+/** Batch row: the summary of one batch, as the page shows it in the parent table. */
+const toBatchValues = ({ stock, total, counts, remaining }, offset) => ({
+  index: stock.index_number ?? offset + 1,
+  // Text cells, so the leading zeros of the ÝH numbers show.
+  name: stock.name ? String(stock.name).trim() : "",
+  startNo: formatYhNumber(stock.start_yh_number),
+  endNo: formatYhNumber(stock.end_yh_number),
+  total,
+  status: "",
+  sold: counts[LETTER_STATUS.SOLD],
+  damaged: counts[LETTER_STATUS.DAMAGED],
+  lost: counts[LETTER_STATUS.LOST],
+  remaining,
+  submittedBy: "",
+  receivedBy: "",
+  date: formatExcelDate(stock.createdAt),
+  note: stock.note ? String(stock.note).trim() : "",
+});
+
+/**
+ * Letter row: one entry of the batch's panel. The status columns stay empty — the batch row
+ * above holds their totals — and the number range moves into the name column, as in the panel.
+ */
+const toLetterValues = (child, offset, t) => {
+  const { letter, start, end, status, count } = child;
+  const isReferral = Boolean(letter.isRefferal);
+  return {
+    index: offset + 1,
+    name: formatYhRange({ start, end }),
+    startNo: "",
+    endNo: "",
+    total: count,
+    status: isReferral ? t("sidebar.referalLetters") : t(STATUS_LABEL_KEY[status]),
+    sold: "",
+    damaged: "",
+    lost: "",
+    remaining: "",
+    submittedBy: letter.refferaloperator?.fullName || "",
+    receivedBy: letter.accepted_by || "",
+    date: formatExcelDate(isReferral ? letter.createdAt : letter.date_time),
+    // Referral letters have no note of their own; their destination and departure day identify
+    // them instead, as in the panel.
+    note: isReferral
+      ? [letter.destination_country, formatExcelDate(letter.departure_date)]
+          .filter(Boolean)
+          .join(" • ")
+      : String(letter.note || "").trim(),
+  };
+};
+
 const writeSheet = (workbook, batches, t, asOf) => {
   const columns = [
     { header: "T/B", key: "index", width: 6, align: "center" },
-    { header: t("referralLetter.batchName"), key: "name", width: 22, align: "left" },
+    { header: `${t("referralLetter.batchName")} / ${t("referralLetter.letterNo")}`, key: "name", width: 24, align: "left" },
     { header: t("referralLetter.startNo"), key: "startNo", width: 13, align: "center" },
     { header: t("referralLetter.endNo"), key: "endNo", width: 13, align: "center" },
     countColumn("total", t("referralLetter.totalCount")),
+    { header: t("columns.status"), key: "status", width: 14, align: "left" },
     countColumn("sold", t("referralLetter.statusSold"), STATUS_COLOR[LETTER_STATUS.SOLD]),
     countColumn("damaged", t("referralLetter.statusDamaged"), STATUS_COLOR[LETTER_STATUS.DAMAGED], 12),
     countColumn("lost", t("referralLetter.statusLost"), STATUS_COLOR[LETTER_STATUS.LOST]),
     countColumn("remaining", t("referralLetter.remainingCount"), TEAL),
+    { header: t("referralLetter.submittedBy"), key: "submittedBy", width: 18, align: "left" },
+    { header: t("referralLetter.receivedBy"), key: "receivedBy", width: 16, align: "left" },
     { header: t("columns.date"), key: "date", width: 12, align: "center" },
     { header: t("columns.note"), key: "note", width: 24, align: "left" },
   ];
   const endCol = START_COL + columns.length - 1;
-  const remainingCol = START_COL + columns.findIndex((c) => c.key === "remaining");
+  const colOf = (key) => START_COL + columns.findIndex((c) => c.key === key);
+  const remainingCol = colOf("remaining");
   const sheet = workbook.addWorksheet(t("referralLetter.export.sheetName").substring(0, 31), {
     // Header row stays visible while scrolling.
     views: [{ state: "frozen", ySplit: START_ROW, showGridLines: true }],
+    // The batch row opens its group, so the outline handle belongs next to it, not below.
+    properties: { outlineProperties: { summaryBelow: false, summaryRight: false } },
   });
   [1, 2, 3].forEach((c) => {
     sheet.getColumn(c).width = 4;
@@ -203,46 +282,88 @@ const writeSheet = (workbook, batches, t, asOf) => {
   writeBanner(sheet, endCol, t("referralLetter.export.reportTitle"), asOf);
   writeHeader(sheet, columns, t);
 
-  // Text cells, so the leading zeros of the ÝH numbers show.
-  const rowValues = batches.map(({ stock, total, counts, remaining }, offset) => ({
-    index: stock.index_number ?? offset + 1,
-    name: stock.name ? String(stock.name).trim() : "",
-    startNo: formatYhNumber(stock.start_yh_number),
-    endNo: formatYhNumber(stock.end_yh_number),
-    total,
-    sold: counts[LETTER_STATUS.SOLD],
-    damaged: counts[LETTER_STATUS.DAMAGED],
-    lost: counts[LETTER_STATUS.LOST],
-    remaining,
-    date: formatExcelDate(stock.createdAt),
-    note: stock.note ? String(stock.note).trim() : "",
-  }));
+  // Batch row followed by its letter rows, in one flat list of rows to write.
+  const entries = [];
+  const batchValues = [];
+  batches.forEach((batch, offset) => {
+    const values = toBatchValues(batch, offset);
+    batchValues.push(values);
+    entries.push({ isBatch: true, values });
+    const range = getStockRange(batch.stock);
+    batch.children.forEach((child, childOffset) => {
+      entries.push({
+        isBatch: false,
+        child,
+        range,
+        values: toLetterValues(child, childOffset, t),
+      });
+    });
+  });
+  // Excel draws the fold handles for the letter rows only once the sheet declares an outline
+  // level; with the default 0 every grouped row would also be written as collapsed.
+  if (entries.length > batches.length) sheet.properties.outlineLevelRow = 2;
 
   const firstDataRow = START_ROW + 1;
-  const lastDataRow = START_ROW + rowValues.length;
+  const lastDataRow = START_ROW + entries.length;
   const maxLens = columns.map((c) => String(c.header).length);
 
-  rowValues.forEach((values, offset) => {
-    const row = sheet.getRow(firstDataRow + offset);
-    row.height = 20;
-    const bg = offset % 2 === 1 ? ZEBRA : "FFFFFFFF";
+  entries.forEach(({ isBatch, child, range, values }, offset) => {
+    const rowNumber = firstDataRow + offset;
+    const row = sheet.getRow(rowNumber);
+    row.height = isBatch ? 20 : 18;
+    // Letter rows fold away under their batch.
+    if (!isBatch) row.outlineLevel = 1;
+    const bg = isBatch ? BATCH_FILL : WHITE;
+
     columns.forEach((c, idx) => {
       const colNumber = START_COL + idx;
       const cell = row.getCell(colNumber);
       const value = values[c.key];
-      cell.value = value;
+      cell.value = value === "" ? null : value;
       // Status counts in their colour; zero prints as "-", so empty statuses read at a glance.
-      cell.font = font({ bold: Boolean(c.color) || c.key === "name", color: { argb: c.color || BLACK } });
+      const color = c.key === "status" && !isBatch ? STATUS_COLOR[child.status] : c.color;
+      cell.font = font({
+        bold: isBatch ? Boolean(c.color) || c.key === "name" : c.key === "name",
+        color: { argb: (isBatch ? c.color : color) || BLACK },
+      });
       cell.fill = solid(bg);
-      cell.alignment = { vertical: "middle", horizontal: c.align, wrapText: c.key === "note" };
-      cell.border = frameBorder(colNumber, endCol);
+      cell.alignment = {
+        vertical: "middle",
+        horizontal: c.align,
+        wrapText: c.key === "note",
+        // Letter rows are indented under their batch, as in the panel.
+        ...(c.key === "name" && !isBatch ? { indent: 1 } : {}),
+      };
+      cell.border = frameBorder(colNumber, endCol, {
+        ...(isBatch && offset > 0 ? { top: line("thin", GROUP_LINE) } : {}),
+      });
       if (c.sum) cell.numFmt = COUNT_FMT;
       const len = (typeof value === "number" ? value.toLocaleString("en-US") : String(value ?? "")).length;
       if (len > maxLens[idx]) maxLens[idx] = len;
     });
-    // A used-up batch has nothing left: greyed out.
-    if (values.remaining === 0) {
-      row.getCell(remainingCol).font = font({ bold: true, color: { argb: GREY_TEXT } });
+
+    if (isBatch) {
+      // A used-up batch has nothing left: greyed out.
+      if (values.remaining === 0) {
+        row.getCell(remainingCol).font = font({ bold: true, color: { argb: GREY_TEXT } });
+      }
+    } else if (child.count !== child.ownCount && range) {
+      // The entry overhangs the batch; only the part inside it is counted here.
+      const cell = row.getCell(colOf("total"));
+      cell.font = font({ bold: true, color: { argb: WARN_TEXT } });
+      cell.note = {
+        texts: [
+          {
+            font: { size: 9 },
+            text: t("referralLetter.outsideStock", {
+              count: child.count,
+              start: formatYhNumber(range.start),
+              end: formatYhNumber(range.end),
+            }),
+          },
+        ],
+        margins: { insetmode: "custom", inset: [0.12, 0.12, 0.12, 0.12] },
+      };
     }
   });
 
@@ -251,8 +372,10 @@ const writeSheet = (workbook, batches, t, asOf) => {
     to: { row: lastDataRow, column: endCol },
   };
 
-  // Total row under the table, outside the AutoFilter range, with SUBTOTAL per count column
-  // so the totals follow the filter.
+  // Total row under the table, outside the AutoFilter range. Letter rows repeat their batch's
+  // numbers, so each sum counts the batch rows only — the rows that carry a "Galan" value.
+  const remainingRef = getColName(remainingCol);
+  const batchRowsTest = `($${remainingRef}$${firstDataRow}:$${remainingRef}$${lastDataRow}<>"")`;
   const totalRow = sheet.getRow(lastDataRow + 2);
   totalRow.height = 24;
   columns.forEach((c, idx) => {
@@ -265,10 +388,10 @@ const writeSheet = (workbook, batches, t, asOf) => {
       bottom: line("medium", BLACK),
     });
     if (c.sum) {
-      const letter = getColName(colNumber);
+      const ref = getColName(colNumber);
       cell.value = {
-        formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
-        result: rowValues.reduce((sum, values) => sum + Number(values[c.key] || 0), 0),
+        formula: `SUMPRODUCT(${batchRowsTest}*($${ref}$${firstDataRow}:$${ref}$${lastDataRow}))`,
+        result: batchValues.reduce((sum, values) => sum + Number(values[c.key] || 0), 0),
       };
       cell.numFmt = COUNT_FMT;
     }

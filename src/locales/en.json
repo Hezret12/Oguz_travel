@@ -470,7 +470,7 @@
     },
     "export": {
       "modalTitle": "Letter stock report",
-      "modalDesc": "Every batch on one row: how many letters were sold, damaged, lost and are left.",
+      "modalDesc": "Every batch on one row — sold, damaged, lost and left — with the batch's letter entries grouped underneath.",
       "fetchingStocks": "Loading batches...",
       "fetchingLetters": "Loading report entries...",
       "generating": "Generating Excel file...",
@@ -487,17 +487,20 @@
       "unused": "Unused",
       "duplicate": "This number appears in more than one entry",
       "headerNotes": {
-        "index": "Batch sequence number.",
-        "name": "Batch name (given when the letter stock was added).",
-        "startNo": "First YH number in the batch. Leading zeros are kept.",
-        "endNo": "Last YH number in the batch. The start and end numbers are both part of the batch.",
-        "total": "Total YH letters in the batch. Sold + damaged + lost + left = total.",
-        "sold": "Letters sold, including those given to referral letters.",
-        "damaged": "Damaged (unusable) letters.",
+        "index": "Batch sequence number; on letter rows, the entry's number within its batch.",
+        "name": "Batch name. On the letter rows underneath, this column holds the entry's YH number (or number range).",
+        "startNo": "First YH number in the batch. Leading zeros are kept. Filled on batch rows only.",
+        "endNo": "Last YH number in the batch. The start and end numbers are both part of the batch. Filled on batch rows only.",
+        "total": "Total YH letters in the batch. Sold + damaged + lost + left = total. On letter rows, how many of the entry's numbers fall inside the batch; they add up to the batch total.",
+        "status": "Letter rows only: what happened to the entry — sold, damaged, lost, or used by a referral letter.",
+        "sold": "Letters sold, including those given to referral letters. Filled on batch rows only.",
+        "damaged": "Damaged (unusable) letters. Filled on batch rows only.",
         "lost": "Lost letters. Use this column's filter to see e.g. only the batches with lost letters.",
         "remaining": "Letters left (not used yet). Shown in grey when the batch is used up.",
-        "date": "Date the batch was added to the system.",
-        "note": "Note written when the batch was added."
+        "submittedBy": "Letter rows only: the employee who submitted the letter.",
+        "receivedBy": "Letter rows only: who received the letter.",
+        "date": "On a batch row, the date the batch was added to the system; on a letter row, the entry's date.",
+        "note": "Note written when the batch was added; on letter rows, the entry's note."
       }
     }
   },
