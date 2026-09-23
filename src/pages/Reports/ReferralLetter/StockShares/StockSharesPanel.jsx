@@ -25,6 +25,7 @@ import {
   STOCK_LETTERS_KEY,
   findFirstFreeRange,
   formatYhNumber,
+  formatYhRange,
   getCountInStock,
   getLetterCount,
   getLetterRange,
@@ -33,9 +34,6 @@ import {
   isOutsideStock,
   resolveLetterStatus,
 } from "../functions/stockLetters";
-
-const formatRange = ({ start, end }) =>
-  start === end ? formatYhNumber(start) : `${formatYhNumber(start)} - ${formatYhNumber(end)}`;
 
 /** The letters of one stock batch: referral letters (read-only here) and other letters. */
 const StockSharesPanel = ({ stock }) => {
@@ -95,6 +93,9 @@ const StockSharesPanel = ({ stock }) => {
   const deleteDialog = useDeleteDialog({
     onConfirm: (letter) => deleteLetter(letter.guid),
   });
+  // Only `open` is used below; depending on the whole dialog object would rebuild the
+  // columns every time it opens or closes.
+  const openDeleteDialog = deleteDialog.open;
 
   const columns = useMemo(
     () => [
@@ -112,7 +113,7 @@ const StockSharesPanel = ({ stock }) => {
         size: 140,
         Cell: ({ row }) => (
           <Box component="span" sx={{ fontWeight: 650, fontVariantNumeric: "tabular-nums" }}>
-            {formatRange(row.original)}
+            {formatYhRange(row.original)}
           </Box>
         ),
       },
@@ -218,13 +219,13 @@ const StockSharesPanel = ({ stock }) => {
             <ColumnActionButtons
               row={row}
               onEdit={({ letter }) => setEditingLetter(letter)}
-              onDelete={({ letter }) => deleteDialog.open(letter)}
+              onDelete={({ letter }) => openDeleteDialog(letter)}
             />
           );
         },
       },
     ],
-    [t, formatChange, stockRange, deleteDialog],
+    [t, formatChange, stockRange, openDeleteDialog],
   );
 
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
@@ -260,14 +261,12 @@ const StockSharesPanel = ({ stock }) => {
         maxHeight: 360,
       }),
     },
+    // One quiet line, not the page-sized placeholder: this table sits inside a stock row.
     renderEmptyRowsFallback: () =>
       isLoading ? (
         <Box sx={{ height: 48 }} />
       ) : (
-        <TableEmptyState
-          title={t("referralLetter.noReports")}
-          sx={{ minHeight: 0, py: 3 }}
-        />
+        <TableEmptyState dense title={t("referralLetter.noReports")} />
       ),
   });
 

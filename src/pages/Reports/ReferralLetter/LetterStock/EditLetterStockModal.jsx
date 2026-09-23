@@ -1,5 +1,5 @@
 import { useMemo, useEffect } from "react";
-import { Alert, Box, Grid, Typography } from "@mui/material";
+import { Alert, Box, Grid } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import CustomTextField from "../../../../components/CustomTextField";
 import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
@@ -11,39 +11,37 @@ import { useLocale } from "../../../../hooks/useLocale";
 import { updateReportApi } from "../../../../api/queries/patch";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { getLettersByDocumentRangeApi } from "../../../../api/queries/getters";
+import { LetterTotalSummary } from "../components/LetterCount";
 import {
   STOCK_LETTERS_KEY,
+  YH_INPUT_PROPS,
+  formatYhNumber,
   getLetterRange,
+  getRangeCount,
   getStockLettersParams,
   getStockRange,
-  formatYhNumber,
   isYhNumber,
   normalizeYhNumber,
-  YH_INPUT_PROPS,
+  toYhInt,
 } from "../functions/stockLetters";
+
+const getFormValues = (stock) => ({
+  batchName: stock?.name || stock?.batchName || "",
+  startNo: formatYhNumber(stock?.start_yh_number ?? stock?.startNo),
+  endNo: formatYhNumber(stock?.end_yh_number ?? stock?.endNo),
+  note: stock?.note || "",
+});
 
 const EditLetterStockModal = ({ table, row }) => {
   const { t } = useLocale();
   const isModalOpen = Boolean(table && row && table.getState().editingRow?.id === row.id);
 
   const { control, handleSubmit, reset } = useForm({
-    defaultValues: {
-      batchName: row?.original?.name || row?.original?.batchName || "",
-      startNo: formatYhNumber(row?.original?.start_yh_number ?? row?.original?.startNo),
-      endNo: formatYhNumber(row?.original?.end_yh_number ?? row?.original?.endNo),
-      note: row?.original?.note || "",
-    },
+    defaultValues: getFormValues(row?.original),
   });
 
   useEffect(() => {
-    if (row?.original) {
-      reset({
-        batchName: row.original.name || row.original.batchName || "",
-        startNo: formatYhNumber(row.original.start_yh_number ?? row.original.startNo),
-        endNo: formatYhNumber(row.original.end_yh_number ?? row.original.endNo),
-        note: row.original.note || "",
-      });
-    }
+    if (row?.original) reset(getFormValues(row.original));
   }, [row, reset]);
 
   // Letters already recorded in this batch (same cache entry as its expanded panel). The new
@@ -82,19 +80,18 @@ const EditLetterStockModal = ({ table, row }) => {
   };
 
   const validateStartNo = (value) => {
-    const start = parseInt(value, 10);
     if (!isYhNumber(value)) return t("referralLetter.letterNoInvalid");
-    if (usedBounds && start > usedBounds.start) {
+    if (usedBounds && toYhInt(value) > usedBounds.start) {
       return t("referralLetter.stockMustContainUsed", usedBoundsLabel);
     }
     return true;
   };
 
   const validateEndNo = (value, formValues) => {
-    const end = parseInt(value, 10);
     if (!isYhNumber(value)) return t("referralLetter.letterNoInvalid");
-    const start = parseInt(formValues.startNo, 10);
-    if (!Number.isNaN(start) && end < start) return t("referralLetter.rangeInvalid");
+    const end = toYhInt(value);
+    const start = toYhInt(formValues.startNo);
+    if (Number.isInteger(start) && end < start) return t("referralLetter.rangeInvalid");
     if (usedBounds && end < usedBounds.end) {
       return t("referralLetter.stockMustContainUsed", usedBoundsLabel);
     }
@@ -106,14 +103,10 @@ const EditLetterStockModal = ({ table, row }) => {
     name: ["startNo", "endNo"],
   });
 
-  const calculatedCount = useMemo(() => {
-    const start = parseInt(watchStartNo || "0", 10);
-    const end = parseInt(watchEndNo || "0", 10);
-    if (!isNaN(start) && !isNaN(end) && end >= start) {
-      return end - start + 1;
-    }
-    return 1;
-  }, [watchStartNo, watchEndNo]);
+  const calculatedCount = useMemo(
+    () => getRangeCount(watchStartNo, watchEndNo),
+    [watchStartNo, watchEndNo],
+  );
 
   const { mutate: updateReport, isPending } = useUpdate({
     apiFn: updateReportApi,
@@ -195,33 +188,7 @@ const EditLetterStockModal = ({ table, row }) => {
             rows={2}
           />
 
-          <Box
-            sx={{
-              mt: 0.5,
-              p: 2,
-              borderRadius: "10px",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.04)"
-                  : "#F8FAFC",
-              border: "1px solid",
-              borderColor: "divider",
-            }}
-          >
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-                fontSize: "0.875rem",
-              }}
-            >
-              {t("referralLetter.totalQuantity")}:{" "}
-              <strong style={{ color: "text.primary", fontWeight: 700 }}>
-                {calculatedCount}
-              </strong>{" "}
-              {t("referralLetter.letterUnit")}
-            </Typography>
-          </Box>
+          <LetterTotalSummary count={calculatedCount} />
         </Box>
 
         {isLettersError && (
@@ -230,7 +197,7 @@ const EditLetterStockModal = ({ table, row }) => {
           </Alert>
         )}
 
-        {/* Saving waits for the batch's letters, so the new range can be checked against them. */}
+        {/* Saving waits for the letters of the batch, so the new range can be checked against them. */}
         <FooterButton
           loading={isPending}
           onCancel={handleClose}

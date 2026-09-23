@@ -7,6 +7,8 @@ const TableEmptyState = ({
   title,
   description,
   icon: CustomIcon,
+  // Nested / detail-panel tables: one quiet line instead of the full page-sized placeholder.
+  dense = false,
   sx = {},
 }) => {
   const { t } = useLocale();
@@ -14,6 +16,36 @@ const TableEmptyState = ({
   const displayTitle = title || t("noData");
 
   const IconComponent = CustomIcon || FolderSearch;
+
+  if (dense) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 1,
+          width: "100%",
+          py: 2.5,
+          px: 2,
+          textAlign: "center",
+          userSelect: "none",
+          color: "text.secondary",
+          ...sx,
+        }}
+      >
+        <IconComponent size={16} strokeWidth={1.75} />
+        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+          {displayTitle}
+        </Typography>
+        {description && (
+          <Typography variant="body2" sx={{ opacity: 0.75 }}>
+            {description}
+          </Typography>
+        )}
+      </Box>
+    );
+  }
 
   return (
     <Box

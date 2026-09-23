@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Alert, Badge, Box, Button, Chip, Paper, useTheme, Typography } from "@mui/material";
+import { Alert, Badge, Box, Button, Chip, Paper, Typography } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -58,10 +58,8 @@ const LetterStockFilterDrawer = () => {
 
 const ReferralLetterPage = () => {
   const { t } = useLocale();
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
   const { formatChange } = useDateFormat();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isLookupOpen, setIsLookupOpen] = useState(false);
 
@@ -110,6 +108,9 @@ const ReferralLetterPage = () => {
   const stockDeleteDialog = useDeleteDialog({
     onConfirm: (item) => deleteStock(item.guid || item.id),
   });
+  // Only `open` is used in the columns; the whole dialog object changes on every
+  // open/close and would rebuild them for nothing.
+  const openStockDeleteDialog = stockDeleteDialog.open;
 
   const stockColumns = useMemo(
     () => [
@@ -155,7 +156,9 @@ const ReferralLetterPage = () => {
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ row }) => (
-          <strong>{row.original?.total_letter || 0} sany hat</strong>
+          <strong>
+            {row.original?.total_letter || 0} {t("referralLetter.letterUnit")}
+          </strong>
         ),
       },
       {
@@ -185,12 +188,12 @@ const ReferralLetterPage = () => {
           <ColumnActionButtons
             row={row}
             table={table}
-            onDelete={(rowObj) => stockDeleteDialog.open(rowObj)}
+            onDelete={openStockDeleteDialog}
           />
         ),
       },
     ],
-    [formatChange, t, stockDeleteDialog],
+    [formatChange, t, openStockDeleteDialog],
   );
 
   const stockTable = useMaterialReactTable({
@@ -357,7 +360,6 @@ const ReferralLetterPage = () => {
           <Pagination
             pageIndex={pageIndex}
             pageCount={stockPageCount}
-            pageSize={limit}
             totalRows={stockTotal}
             onPageChange={(newIndex) => setPage(newIndex + 1)}
           />
@@ -379,8 +381,8 @@ const ReferralLetterPage = () => {
           px: 2,
           borderRadius: "14px",
           border: "1px solid",
-          borderColor: isDark ? "rgba(255,255,255,0.08)" : "#E2E8F0",
-          backgroundColor: isDark ? "rgba(15, 23, 42, 0.6)" : "#FFFFFF",
+          borderColor: "divider",
+          backgroundColor: "background.paper",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -402,16 +404,9 @@ const ReferralLetterPage = () => {
                 px: 2,
                 height: 48,
                 borderRadius: "12px",
-                backgroundColor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.04)"
-                    : "#F1F5F9",
+                backgroundColor: "action.hover",
                 border: "1px solid",
-                borderColor: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "rgba(255, 255, 255, 0.08)"
-                    : "#E2E8F0",
-                transition: "all 0.15s ease",
+                borderColor: "divider",
               }}
             >
               <Package size={17} style={{ opacity: 0.75 }} />

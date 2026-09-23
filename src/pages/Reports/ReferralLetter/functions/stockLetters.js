@@ -129,3 +129,73 @@ export const toOtherLetterPayload = ({ start, end, date, status, operatorGuid, r
     note: note || "",
   };
 };
+
+/** A typed ÝH field ("0000091", " 91 ") as a number, or NaN when empty/non-numeric. */
+export const toYhInt = (value) => {
+  const text = normalizeYhNumber(value);
+  return text === "" ? NaN : Number(text);
+};
+
+/** Letters covered by a typed start..end pair; 0 when either end is missing or reversed. */
+export const getRangeCount = (startValue, endValue) => {
+  const start = toYhInt(startValue);
+  const end = toYhInt(endValue);
+  if (!Number.isInteger(start) || !Number.isInteger(end) || end < start) return 0;
+  return end - start + 1;
+};
+
+/** "0000091" for a single number, "0000091 - 0000100" for a range. */
+export const formatYhRange = ({ start, end }) =>
+  start === end ? formatYhNumber(start) : `${formatYhNumber(start)} - ${formatYhNumber(end)}`;
+
+/**
+ * Validators for the ÝH number fields of a letter form: the number must be a valid serial,
+ * inside the batch, and free. Shared by the add and edit letter modals (`ignoreGuid` lets the
+ * edited letter overlap itself).
+ */
+export const createYhRangeValidators = ({ t, stock, occupied = [], ignoreGuid }) => {
+  const stockStart = Number(stock?.start_yh_number);
+  const stockEnd = Number(stock?.end_yh_number);
+
+  // An error message for a single number, or null when it is valid.
+  const checkNumber = (value) => {
+    if (!isYhNumber(value)) return t("referralLetter.letterNoInvalid");
+    const num = toYhInt(value);
+    if (stock && (num < stockStart || num > stockEnd)) {
+      return t("referralLetter.letterNoOutOfRange", {
+        start: formatYhNumber(stockStart),
+        end: formatYhNumber(stockEnd),
+      });
+    }
+    return null;
+  };
+
+  return {
+    /** Single-number mode: the number itself must be free. */
+    validateLetterNo: (value) => {
+      const error = checkNumber(value);
+      if (error) return error;
+      const num = toYhInt(value);
+      if (findOverlap(occupied, num, num, ignoreGuid)) return t("referralLetter.letterNoUsed");
+      return true;
+    },
+    validateStartNo: (value) => checkNumber(value) ?? true,
+    /** Range mode: checked on the end field, where both ends are known. */
+    validateEndNo: (value, formValues) => {
+      const error = checkNumber(value);
+      if (error) return error;
+      const end = toYhInt(value);
+      const start = toYhInt(formValues.startNo);
+      if (!Number.isInteger(start)) return true;
+      if (end < start) return t("referralLetter.rangeInvalid");
+      const overlap = findOverlap(occupied, start, end, ignoreGuid);
+      if (overlap) {
+        return t("referralLetter.rangeOverlap", {
+          start: formatYhNumber(overlap.start),
+          end: formatYhNumber(overlap.end),
+        });
+      }
+      return true;
+    },
+  };
+};

@@ -17,6 +17,7 @@ import {
   STOCK_LETTERS_KEY,
   YH_INPUT_PROPS,
   formatYhNumber,
+  formatYhRange,
   getLetterCount,
   getLetterRange,
   getStockRange,
@@ -53,9 +54,6 @@ const Section = ({ children }) => (
     {children}
   </Box>
 );
-
-const formatRange = ({ start, end }) =>
-  start === end ? formatYhNumber(start) : `${formatYhNumber(start)} - ${formatYhNumber(end)}`;
 
 /**
  * Looks up one ÝH number: the batch (partiýa) it belongs to and what happened to it —
@@ -128,7 +126,7 @@ const SerialLookupModal = ({ open, close }) => {
         {isRange && (
           <InfoRow label={t("referralLetter.lookup.record")}>
             {t("referralLetter.lookup.rangeRecord", {
-              range: formatRange(range),
+              range: formatYhRange(range),
               count: getLetterCount(letter),
             })}
           </InfoRow>

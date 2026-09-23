@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import CustomTextField from "../../../../components/CustomTextField";
 import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
@@ -9,7 +9,14 @@ import { FooterButton } from "../../../../components/Dialog/FooterButton";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { useLocale } from "../../../../hooks/useLocale";
 import { addReportApi } from "../../../../api/queries/post";
-import { isYhNumber, normalizeYhNumber, YH_INPUT_PROPS } from "../functions/stockLetters";
+import { LetterTotalSummary } from "../components/LetterCount";
+import {
+  YH_INPUT_PROPS,
+  getRangeCount,
+  isYhNumber,
+  normalizeYhNumber,
+  toYhInt,
+} from "../functions/stockLetters";
 
 // ÝH serials are typed as text so leading zeros ("0369420") are kept.
 
@@ -31,14 +38,10 @@ const AddLetterStockModal = ({ open, close, table }) => {
     name: ["startNo", "endNo"],
   });
 
-  const calculatedCount = useMemo(() => {
-    const start = parseInt(watchStartNo || "0", 10);
-    const end = parseInt(watchEndNo || "0", 10);
-    if (!isNaN(start) && !isNaN(end) && end >= start) {
-      return end - start + 1;
-    }
-    return 1;
-  }, [watchStartNo, watchEndNo]);
+  const calculatedCount = useMemo(
+    () => getRangeCount(watchStartNo, watchEndNo),
+    [watchStartNo, watchEndNo],
+  );
 
   const handleClose = () => {
     if (table) table.setCreatingRow(null);
@@ -60,8 +63,8 @@ const AddLetterStockModal = ({ open, close, table }) => {
   const validateEndNo = (value, formValues) => {
     const error = validateStartNo(value);
     if (error !== true) return error;
-    const start = parseInt(formValues.startNo, 10);
-    if (!Number.isNaN(start) && parseInt(value, 10) < start) return t("referralLetter.rangeInvalid");
+    const start = toYhInt(formValues.startNo);
+    if (Number.isInteger(start) && toYhInt(value) < start) return t("referralLetter.rangeInvalid");
     return true;
   };
 
@@ -128,33 +131,7 @@ const AddLetterStockModal = ({ open, close, table }) => {
             rows={2}
           />
 
-          <Box
-            sx={{
-              mt: 0.5,
-              p: 2,
-              borderRadius: "10px",
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(255, 255, 255, 0.04)"
-                  : "#F8FAFC",
-              border: "1px solid",
-              borderColor: "divider",
-            }}
-          >
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-                fontSize: "0.875rem",
-              }}
-            >
-              {t("referralLetter.totalQuantity")}:{" "}
-              <strong style={{ color: "text.primary", fontWeight: 800 }}>
-                {calculatedCount}
-              </strong>{" "}
-              {t("referralLetter.letterUnit")}
-            </Typography>
-          </Box>
+          <LetterTotalSummary count={calculatedCount} />
         </Box>
 
         <FooterButton loading={isPending} onCancel={handleClose} />

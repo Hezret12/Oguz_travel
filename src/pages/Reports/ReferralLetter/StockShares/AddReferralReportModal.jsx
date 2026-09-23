@@ -1,11 +1,10 @@
 import { useMemo, useState } from "react";
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import CustomTextField from "../../../../components/CustomTextField";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
 import CustomSelect from "../../../../components/CustomSelect";
 import CustomTabs from "../../../../components/CustomTabs";
-import OverflowTooltipLabel from "../../../../components/OverflowTooltipLabel";
 import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
@@ -14,25 +13,21 @@ import { FooterButton } from "../../../../components/Dialog/FooterButton";
 import { useCreate } from "../../../../hooks/CRUD/useCreate";
 import { useLocale } from "../../../../hooks/useLocale";
 import { addOtherLetterApi } from "../../../../api/queries/post";
+import { LetterCountField } from "../components/LetterCount";
 import {
   LETTER_STATUS,
   STOCK_LETTERS_KEY,
   YH_INPUT_PROPS,
+  createYhRangeValidators,
   formatYhNumber,
-  isYhNumber,
-  normalizeYhNumber,
-  findOverlap,
   getLetterStatusOptions,
+  getRangeCount,
   toOtherLetterPayload,
+  toYhInt,
 } from "../functions/stockLetters";
 
 const MODE_SINGLE = "single";
 const MODE_RANGE = "range";
-
-const toInt = (value) => {
-  const text = normalizeYhNumber(value);
-  return text === "" ? NaN : Number(text);
-};
 
 // Records an "other letter" (sold / damaged / lost) inside a stock batch. "single" mode is
 // one ÝH number (`isOne`); "range" mode covers start..end inclusive. `occupied` holds the
@@ -52,9 +47,6 @@ const AddReferralReportModal = ({
     open !== undefined ? Boolean(open) : Boolean(table?.getState().creatingRow);
 
   const [mode, setMode] = useState(MODE_SINGLE);
-
-  const stockStart = Number(stock?.start_yh_number);
-  const stockEnd = Number(stock?.end_yh_number);
 
   const statusOptions = useMemo(() => getLetterStatusOptions(t), [t]);
 
@@ -86,12 +78,12 @@ const AddReferralReportModal = ({
   });
 
   const [startNo, endNo] = useWatch({ control, name: ["startNo", "endNo"] });
-  const rangeCount = useMemo(() => {
-    const s = toInt(startNo);
-    const e = toInt(endNo);
-    if (!Number.isInteger(s) || !Number.isInteger(e) || e < s) return 0;
-    return e - s + 1;
-  }, [startNo, endNo]);
+  const rangeCount = useMemo(() => getRangeCount(startNo, endNo), [startNo, endNo]);
+
+  const { validateLetterNo, validateStartNo, validateEndNo } = useMemo(
+    () => createYhRangeValidators({ t, stock, occupied }),
+    [t, stock, occupied],
+  );
 
   const handleClose = () => {
     if (table) table.setCreatingRow(null);
@@ -105,7 +97,7 @@ const AddReferralReportModal = ({
     clearErrors();
   };
 
-  // Invalidated (not prepended): the batch's letters come from a range query.
+  // Invalidated (not prepended): the letters of a batch come from a range query.
   const { mutate: createOtherLetter, isPending } = useCreate({
     apiFn: addOtherLetterApi,
     key: STOCK_LETTERS_KEY,
@@ -115,50 +107,10 @@ const AddReferralReportModal = ({
     },
   });
 
-  // Returns an error message for a single number, or null when it is valid.
-  const checkNumber = (value) => {
-    if (!isYhNumber(value)) return t("referralLetter.letterNoInvalid");
-    const num = toInt(value);
-    if (stock && (num < stockStart || num > stockEnd)) {
-      return t("referralLetter.letterNoOutOfRange", {
-        start: formatYhNumber(stockStart),
-        end: formatYhNumber(stockEnd),
-      });
-    }
-    return null;
-  };
-
-  const validateLetterNo = (value) => {
-    const error = checkNumber(value);
-    if (error) return error;
-    const num = toInt(value);
-    if (findOverlap(occupied, num, num)) return t("referralLetter.letterNoUsed");
-    return true;
-  };
-
-  const validateStartNo = (value) => checkNumber(value) ?? true;
-
-  const validateEndNo = (value, formValues) => {
-    const error = checkNumber(value);
-    if (error) return error;
-    const end = toInt(value);
-    const start = toInt(formValues.startNo);
-    if (!Number.isInteger(start)) return true;
-    if (end < start) return t("referralLetter.rangeInvalid");
-    const overlap = findOverlap(occupied, start, end);
-    if (overlap) {
-      return t("referralLetter.rangeOverlap", {
-        start: formatYhNumber(overlap.start),
-        end: formatYhNumber(overlap.end),
-      });
-    }
-    return true;
-  };
-
   const handleFormSubmit = (data) => {
     const isRange = mode === MODE_RANGE;
-    const start = isRange ? toInt(data.startNo) : toInt(data.letterNo);
-    const end = isRange ? toInt(data.endNo) : start;
+    const start = isRange ? toYhInt(data.startNo) : toYhInt(data.letterNo);
+    const end = isRange ? toYhInt(data.endNo) : start;
     createOtherLetter(
       toOtherLetterPayload({
         start,
@@ -236,27 +188,7 @@ const AddReferralReportModal = ({
             </>
           )}
           <Grid size={{ xs: 12, sm: 4 }}>
-            <OverflowTooltipLabel label={t("referralLetter.quantity")} />
-            <Box
-              sx={{
-                minHeight: 44,
-                px: 1.5,
-                display: "flex",
-                alignItems: "center",
-                borderRadius: "7px",
-                border: "1px solid",
-                borderColor: "divider",
-                backgroundColor: "action.hover",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}
-                noWrap
-              >
-                {mode === MODE_SINGLE ? 1 : rangeCount} {t("referralLetter.letterUnit")}
-              </Typography>
-            </Box>
+            <LetterCountField count={mode === MODE_SINGLE ? 1 : rangeCount} />
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>

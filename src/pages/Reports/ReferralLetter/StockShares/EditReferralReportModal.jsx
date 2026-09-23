@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
-import { Box, Grid, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import { useForm, useWatch } from "react-hook-form";
 import CustomTextField from "../../../../components/CustomTextField";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
 import CustomSelect from "../../../../components/CustomSelect";
-import OverflowTooltipLabel from "../../../../components/OverflowTooltipLabel";
 import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { CustomDialog } from "../../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../../components/Dialog/CustomDialogHeader";
@@ -13,23 +12,19 @@ import { FooterButton } from "../../../../components/Dialog/FooterButton";
 import { useUpdate } from "../../../../hooks/CRUD/useUpdate";
 import { useLocale } from "../../../../hooks/useLocale";
 import { updateOtherLetterApi } from "../../../../api/queries/patch";
+import { LetterCountField } from "../components/LetterCount";
 import {
   STOCK_LETTERS_KEY,
   YH_INPUT_PROPS,
+  createYhRangeValidators,
   formatYhNumber,
-  isYhNumber,
-  normalizeYhNumber,
-  findOverlap,
   getLetterRange,
   getLetterStatusOptions,
+  getRangeCount,
   resolveLetterStatus,
   toOtherLetterPayload,
+  toYhInt,
 } from "../functions/stockLetters";
-
-const toInt = (value) => {
-  const text = normalizeYhNumber(value);
-  return text === "" ? NaN : Number(text);
-};
 
 /** Edits an "other letter" of a stock batch; the quantity follows from its ÝH range. */
 const EditReferralReportModal = ({ open, close, table, row, stock, occupied = [] }) => {
@@ -40,8 +35,6 @@ const EditReferralReportModal = ({ open, close, table, row, stock, occupied = []
       : Boolean(table && row && table.getState().editingRow?.id === row.id);
 
   const letter = row?.original;
-  const stockStart = Number(stock?.start_yh_number);
-  const stockEnd = Number(stock?.end_yh_number);
 
   const statusOptions = useMemo(() => getLetterStatusOptions(t), [t]);
 
@@ -70,12 +63,14 @@ const EditReferralReportModal = ({ open, close, table, row, stock, occupied = []
   }
 
   const [startNo, endNo] = useWatch({ control, name: ["startNo", "endNo"] });
-  const rangeCount = useMemo(() => {
-    const s = toInt(startNo);
-    const e = toInt(endNo);
-    if (!Number.isInteger(s) || !Number.isInteger(e) || e < s) return 0;
-    return e - s + 1;
-  }, [startNo, endNo]);
+  const rangeCount = useMemo(() => getRangeCount(startNo, endNo), [startNo, endNo]);
+
+  // The edited letter may keep (and shrink or grow into) its own range, so it is ignored
+  // when looking for overlaps.
+  const { validateStartNo, validateEndNo } = useMemo(
+    () => createYhRangeValidators({ t, stock, occupied, ignoreGuid: letter?.guid }),
+    [t, stock, occupied, letter?.guid],
+  );
 
   const { mutate: updateOtherLetter, isPending } = useUpdate({
     apiFn: updateOtherLetterApi,
@@ -86,44 +81,12 @@ const EditReferralReportModal = ({ open, close, table, row, stock, occupied = []
     },
   });
 
-  // Returns an error message for a single number, or null when it is valid.
-  const checkNumber = (value) => {
-    if (!isYhNumber(value)) return t("referralLetter.letterNoInvalid");
-    const num = toInt(value);
-    if (stock && (num < stockStart || num > stockEnd)) {
-      return t("referralLetter.letterNoOutOfRange", {
-        start: formatYhNumber(stockStart),
-        end: formatYhNumber(stockEnd),
-      });
-    }
-    return null;
-  };
-
-  const validateStartNo = (value) => checkNumber(value) ?? true;
-
-  const validateEndNo = (value, formValues) => {
-    const error = checkNumber(value);
-    if (error) return error;
-    const end = toInt(value);
-    const start = toInt(formValues.startNo);
-    if (!Number.isInteger(start)) return true;
-    if (end < start) return t("referralLetter.rangeInvalid");
-    const overlap = findOverlap(occupied, start, end, letter?.guid);
-    if (overlap) {
-      return t("referralLetter.rangeOverlap", {
-        start: formatYhNumber(overlap.start),
-        end: formatYhNumber(overlap.end),
-      });
-    }
-    return true;
-  };
-
   const handleFormSubmit = (data) => {
     updateOtherLetter({
       guid: letter.guid,
       ...toOtherLetterPayload({
-        start: toInt(data.startNo),
-        end: toInt(data.endNo),
+        start: toYhInt(data.startNo),
+        end: toYhInt(data.endNo),
         date: data.date,
         status: data.status,
         operatorGuid: data.assignment_opr_guid || undefined,
@@ -171,27 +134,7 @@ const EditReferralReportModal = ({ open, close, table, row, stock, occupied = []
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <OverflowTooltipLabel label={t("referralLetter.quantity")} />
-            <Box
-              sx={{
-                minHeight: 44,
-                px: 1.5,
-                display: "flex",
-                alignItems: "center",
-                borderRadius: "7px",
-                border: "1px solid",
-                borderColor: "divider",
-                backgroundColor: "action.hover",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums" }}
-                noWrap
-              >
-                {rangeCount} {t("referralLetter.letterUnit")}
-              </Typography>
-            </Box>
+            <LetterCountField count={rangeCount} />
           </Grid>
 
           <Grid size={{ xs: 12, sm: 6 }}>
