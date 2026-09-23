@@ -754,6 +754,7 @@
     "task": "Task"
   },
   "customFields": {
+    "reservedKey": "The key \"{{key}}\" is reserved by the system. Choose another name.",
     "title": "Custom Fields",
     "addTitle": "Create Custom Field",
     "editTitle": "Edit Custom Field",

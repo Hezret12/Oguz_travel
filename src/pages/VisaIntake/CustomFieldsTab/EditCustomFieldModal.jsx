@@ -8,7 +8,7 @@ import { CustomForm } from "../../../components/Dialog/CustomForm";
 import FooterButton from "../../../components/Dialog/FooterButton";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
-import { slugifyFieldKey } from "../../../functions/visaCountryFieldConfigs";
+import { isReservedFieldKey, slugifyFieldKey } from "../../../functions/visaCountryFieldConfigs";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { updateCustomFieldApi } from "../../../api/queries/patch";
 
@@ -97,6 +97,9 @@ export const EditCustomFieldModal = ({
       itemData.field_key ||
       itemData.fieldKey ||
       slugifyFieldKey(data.labelEn || data.labelTm);
+    // A key that the intake record already owns would make the field unusable; the field
+    // keeps its stored key, so this only guards the one derived from the label.
+    if (isReservedFieldKey(computedFieldKey)) return;
 
     const payload = {
       guid: itemData.guid,

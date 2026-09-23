@@ -31,6 +31,49 @@ export const DEFAULT_VISA_FIELDS = [
   },
 ];
 
+/**
+ * Keys an intake record already owns — its own columns plus the form's own inputs.
+ *
+ * A custom field whose key is one of these cannot work: `field_key` is slugified from the
+ * label, so a field labelled "Status" becomes `status` and would then share a form name with
+ * the visa status select — filling it would overwrite the record's status on save. Values also
+ * live in `custom_field_values`, which never holds these.
+ *
+ * The four keys the intake form adopts (`client_guid`, `accepted_opr_guid`, `application_date`,
+ * `note`) are deliberately absent: a field named after one of them becomes that standard field
+ * instead, which is what the country was configuring.
+ */
+const RESERVED_FIELD_KEYS = new Set([
+  "guid",
+  "index_number",
+  "actions",
+  "status",
+  "client_name",
+  "passport_number",
+  "passport_count",
+  "client_passport_count",
+  "passporthistory",
+  "passportexpirydate",
+  "passportcountryofissue",
+  "phone_number",
+  "dateofbirth",
+  "operator_rec",
+  "operator_fullname",
+  "office",
+  "office_guid",
+  "office_fullname",
+  "office_shortname",
+  "country",
+  "country_guid",
+  "country_name",
+  "custom_field_values",
+  "createdat",
+  "updatedat",
+]);
+
+export const isReservedFieldKey = (key) =>
+  RESERVED_FIELD_KEYS.has(String(key ?? "").toLowerCase().trim());
+
 export const isClientField = (field) => {
   const key = typeof field === "string" ? field : field?.fieldKey || field?.field_key || field?.custom_field?.field_key;
   if (!key) return false;
@@ -80,12 +123,16 @@ export const ensureAllVisaFields = (apiFields = []) => {
     fields.find((f) => f.fieldKey === "application_date") || DEFAULT_VISA_FIELDS[2];
   const notesField = fields.find(isNotesField) || DEFAULT_VISA_FIELDS[3];
 
+  // A reserved key is dropped here rather than in each consumer, so the table and the intake
+  // form always agree on which fields exist — a field the form renders but the table cannot
+  // show (or that would overwrite a record's own column) is worse than one that is missing.
   const dynamicFields = fields.filter(
     (f) =>
       f.fieldKey &&
       !isClientField(f) &&
       !isNotesField(f) &&
       !isOperatorField(f) &&
+      !isReservedFieldKey(f.fieldKey) &&
       f.fieldKey !== "application_date",
   );
 

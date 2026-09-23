@@ -60,6 +60,9 @@ const STANDARD_KEYS = new Set([
   "actions",
 ]);
 
+// Past this many columns the table renders them virtually (see `isVirtualized`).
+const VIRTUALIZE_FROM_COLUMNS = 20;
+
 const parseCustomFieldValues = (raw) => {
   if (!raw) return {};
   if (typeof raw === "string") {
@@ -174,12 +177,9 @@ export const ApplicationsTable = forwardRef(
       return sortVisaFields(Array.isArray(apiList) ? apiList : []);
     }, [countryFieldsLoaded, rawCountryFields, selectedCountry]);
 
-    // `/receivings/get-all-receiving` builds its rows with raw SQL, where the
-    // operator alias (`AS operator_fullName`) is unquoted and Postgres folds it
-    // to `operator_fullname`; the formatter then looks for the camelCase key and
-    // sends `operator_fullName: null`. Until that alias is quoted, the operator
-    // column is resolved from this list, so it has to cover every employee who
-    // can take an application — at 100 the ones past the first page read "-".
+    // The operator's name comes with the record itself; this list only adds the
+    // office under it, and covers every employee who can take an application so
+    // that line doesn't disappear for the ones a short page would miss.
     const employeeParams = useMemo(() => ({ page: 1, limit: 500 }), []);
     const { data: employees = [] } = useGet({
       apiFn: getAllEmployeeApi,
@@ -307,11 +307,14 @@ export const ApplicationsTable = forwardRef(
       const clientLabel =
         resolveFieldLabel(clientField) || t("columns.client");
 
+      // Every cell goes through `toDisplayText`: the list endpoint sends plain
+      // strings today, but a name that ever arrives as a { tk, ru, en } object
+      // would be handed straight to React and throw.
       cols.push({
         id: "client",
         header: clientLabel,
         size: 220,
-        accessorFn: (row) => row.client?.fullName || row.client_name || "-",
+        accessorFn: (row) => toDisplayText(row.client?.fullName || row.client_name),
       });
 
       // 2. Client Details (Passport, Date of Birth)
@@ -319,7 +322,8 @@ export const ApplicationsTable = forwardRef(
         id: "passport_number",
         header: t("columns.passportNumber"),
         size: 110,
-        accessorFn: (row) => row.passport_number || row.client?.passport_number || "-",
+        accessorFn: (row) =>
+          toDisplayText(row.passport_number || row.client?.passport_number),
       });
 
       cols.push({
@@ -503,6 +507,13 @@ export const ApplicationsTable = forwardRef(
     // append the new country's columns after "note". Drive it explicitly.
     const columnOrder = useMemo(() => columns.map((c) => c.id), [columns]);
 
+    // A country may define up to ~30 fields, which with the standard columns is
+    // close to 40 across 40 rows. Virtualising those pays off, but it costs on
+    // the narrow countries, and MRT decides it with a hook inside its own table
+    // component — flipping the flag in place would change that component's hook
+    // count and crash, so the table is remounted by `key` when it flips.
+    const isVirtualized = columns.length > VIRTUALIZE_FROM_COLUMNS;
+
     const table = useMaterialReactTable({
       ...defaultMrtOptions,
       // Avoids nesting MRT's own create/edit <Dialog> around the one this
@@ -531,6 +542,7 @@ export const ApplicationsTable = forwardRef(
         }),
       },
       enableColumnPinning: true,
+      enableColumnVirtualization: isVirtualized,
       initialState: {
         columnPinning: {
           left: ["index_number"],
@@ -727,7 +739,7 @@ export const ApplicationsTable = forwardRef(
           </Alert>
         )}
 
-        <MaterialReactTable table={table} />
+        <MaterialReactTable key={isVirtualized ? "virtual" : "plain"} table={table} />
 
         <DeleteDialog
           open={deleteDialog.isOpen}

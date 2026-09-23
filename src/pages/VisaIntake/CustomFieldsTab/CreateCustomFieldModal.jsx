@@ -8,7 +8,7 @@ import { CustomForm } from "../../../components/Dialog/CustomForm";
 import FooterButton from "../../../components/Dialog/FooterButton";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
-import { slugifyFieldKey } from "../../../functions/visaCountryFieldConfigs";
+import { isReservedFieldKey, slugifyFieldKey } from "../../../functions/visaCountryFieldConfigs";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { addCustomFieldApi } from "../../../api/queries/post";
 
@@ -55,6 +55,10 @@ export const CreateCustomFieldModal = ({
     [labelEn, labelTm],
   );
 
+  // The key is slugified from the label, so a label like "Status" would collide with a
+  // column the intake record already owns; such a field could never be saved or shown.
+  const isKeyReserved = isReservedFieldKey(autoKey);
+
   const handleAddOption = () => {
     if (optionInput.trim()) {
       setOptions((prev) => [...prev, optionInput.trim()]);
@@ -72,6 +76,7 @@ export const CreateCustomFieldModal = ({
 
     const computedFieldKey =
       autoKey || slugifyFieldKey(data.labelEn || data.labelTm);
+    if (isReservedFieldKey(computedFieldKey)) return;
 
     const payload = {
       field_label: {
@@ -154,7 +159,12 @@ export const CreateCustomFieldModal = ({
                 disabled
                 fullWidth
                 size="medium"
-                helperText="English label-dan döredilýär"
+                error={isKeyReserved}
+                helperText={
+                  isKeyReserved
+                    ? t("customFields.reservedKey", { key: autoKey })
+                    : "English label-dan döredilýär"
+                }
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "7px",
@@ -219,7 +229,12 @@ export const CreateCustomFieldModal = ({
             )}
           </Grid>
 
-          <FooterButton loading={isPending} onCancel={onClose} type="submit" />
+          <FooterButton
+            loading={isPending}
+            onCancel={onClose}
+            type="submit"
+            disabled={isKeyReserved}
+          />
         </Box>
       </CustomForm>
     </CustomDialog>

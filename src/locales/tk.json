@@ -754,6 +754,7 @@
     "task": "Ýumuş"
   },
   "customFields": {
+    "reservedKey": "\"{{key}}\" ady ulgam tarapyndan ulanylýar. Başga at saýlaň.",
     "title": "Sütünler",
     "addTitle": "Täze sütün döretmek",
     "editTitle": "Sütüni üýtgetmek",
