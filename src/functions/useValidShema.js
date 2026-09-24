@@ -62,13 +62,36 @@ export const useValidShema = () => {
     }),
   });
 
-  // Optional date: may be left empty, but anything typed must be a real date.
+  // Optional date: may be left empty, but anything typed must be a real date
+  // within a sane year range (a typo like 1211 is still a "valid" date).
+  const MIN_DATE_YEAR = 2000;
+  const MAX_DATE_YEAR = 2100;
   const optionalDateSchema = yup
     .string()
     .nullable()
-    .test("valid-date", t("validation.invalidDate"), (value) => !value || dayjs(value).isValid());
+    .test("valid-date", t("validation.invalidDate"), (value) => !value || dayjs(value).isValid())
+    .test(
+      "date-range",
+      t("validation.dateOutOfRange", { min: MIN_DATE_YEAR, max: MAX_DATE_YEAR }),
+      (value) => {
+        if (!value || !dayjs(value).isValid()) return true;
+        const year = dayjs(value).year();
+        return year >= MIN_DATE_YEAR && year <= MAX_DATE_YEAR;
+      },
+    );
+
+  const requiredDateSchema = optionalDateSchema.required(t("validation.dateRequired"));
+
+  const requiredNullableString = yup
+    .string()
+    .nullable()
+    .trim()
+    .required(t("validation.required"));
 
   const addReferralLetter = yup.object({
+    client_guid: requiredNullableString,
+    received_opr_guid: requiredNullableString,
+    destination_country: requiredNullableString,
     // Sent in its 7-digit form; old records missing their leading zeros are padded back.
     travel_document_number: yup
       .string()
@@ -78,8 +101,8 @@ export const useValidShema = () => {
       .test("yh-number", t("referralLetter.letterNoInvalid"), isYhNumber),
     bgn_departure: stringOptionalValidSchema(),
     note: stringOptionalValidSchema(),
-    departure_date: optionalDateSchema,
-    return_date: optionalDateSchema,
+    departure_date: requiredDateSchema,
+    return_date: requiredDateSchema,
     contract_date: optionalDateSchema,
   });
 

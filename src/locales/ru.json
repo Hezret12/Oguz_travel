@@ -55,7 +55,8 @@
     "messageMin": "Message must be at least 10 characters",
     "minPassengers": "At least 1 passenger must be selected",
     "invalidReturnDate": "Return date cannot be before departure date",
-    "invalidDate": "Неверный формат даты"
+    "invalidDate": "Неверный формат даты",
+    "dateOutOfRange": "Дата должна быть в диапазоне {{min}}–{{max}}"
   },
   "deleteConfirm": {
     "employee": "Вы действительно хотите удалить этого сотрудника? Это действие нельзя отменить."

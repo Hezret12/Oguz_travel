@@ -55,7 +55,8 @@
     "messageMin": "Message must be at least 10 characters",
     "minPassengers": "At least 1 passenger must be selected",
     "invalidReturnDate": "Return date cannot be before departure date",
-    "invalidDate": "Invalid date format"
+    "invalidDate": "Invalid date format",
+    "dateOutOfRange": "Date must be between {{min}} and {{max}}"
   },
   "deleteConfirm": {
     "employee": "Are you sure you want to delete this employee? This action cannot be undone."

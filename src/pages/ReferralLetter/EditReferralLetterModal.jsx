@@ -111,6 +111,7 @@ const EditReferralLetterModal = ({ table, row }) => {
               name="client_guid"
               label={t("columns.client")}
               columns={autocompleteColumns}
+              required
             />
           </Grid>
 
@@ -166,6 +167,7 @@ const EditReferralLetterModal = ({ table, row }) => {
               validateFormat
               control={control}
               label={t("columns.departureDate")}
+              required
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -174,6 +176,7 @@ const EditReferralLetterModal = ({ table, row }) => {
               validateFormat
               control={control}
               label={t("columns.returnDate")}
+              required
             />
           </Grid>
 

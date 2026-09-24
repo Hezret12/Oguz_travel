@@ -55,7 +55,8 @@
     "messageMin": "Düşündiriş 10 harpdan az bolmaly",
     "minPassengers": "1 myhman saýlanmaly",
     "invalidReturnDate": "Gidiş senesinden öň bolup bilmez",
-    "invalidDate": "Sene nädogry girizildi"
+    "invalidDate": "Sene nädogry girizildi",
+    "dateOutOfRange": "Sene {{min}}–{{max}} ýyllaryň aralygynda bolmaly"
   },
   "deleteConfirm": {
     "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi?"
