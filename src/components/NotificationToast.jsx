@@ -61,19 +61,12 @@ export const showNotificationToast = ({
           p: 2,
           borderRadius: '16px',
           border: '1px solid',
-          borderColor: (theme) =>
-            theme.palette.mode === 'dark'
-              ? 'rgba(20, 184, 166, 0.3)'
-              : 'rgba(14, 133, 132, 0.22)',
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'dark'
-              ? 'rgba(17, 24, 39, 0.94)'
-              : 'rgba(255, 255, 255, 0.96)',
-          backdropFilter: 'blur(16px)',
+          borderColor: 'divider',
+          backgroundColor: 'background.paper',
           boxShadow: (theme) =>
             theme.palette.mode === 'dark'
-              ? '0 16px 36px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06)'
-              : '0 14px 34px -6px rgba(14, 133, 132, 0.16), 0 4px 12px rgba(0, 0, 0, 0.05)',
+              ? '0 12px 28px -8px rgba(0, 0, 0, 0.6)'
+              : '0 12px 28px -8px rgba(15, 23, 42, 0.12)',
           position: 'relative',
           overflow: 'hidden',
           animation: t.visible
@@ -87,19 +80,9 @@ export const showNotificationToast = ({
             '0%': { transform: 'translateX(0) scale(1)', opacity: 1 },
             '100%': { transform: 'translateX(110%) scale(0.95)', opacity: 0 },
           },
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: 4,
-            background: 'linear-gradient(180deg, #0E8584 0%, #14B8A6 100%)',
-            borderRadius: '16px 0 0 16px',
-          },
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, pl: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
           {/* Avatar / Bell Icon with Pulse Indicator */}
           <Box sx={{ position: 'relative', flexShrink: 0, mt: 0.25 }}>
             <Avatar
@@ -107,16 +90,13 @@ export const showNotificationToast = ({
                 width: 40,
                 height: 40,
                 borderRadius: '12px',
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(20, 184, 166, 0.16)'
-                    : 'rgba(14, 133, 132, 0.1)',
-                color: 'primary.main',
+                bgcolor: 'action.hover',
+                color: 'text.secondary',
               }}
             >
               <Bell size={20} />
             </Avatar>
-            {/* Pulsing online badge */}
+            {/* Pulsing unread badge */}
             <Box
               sx={{
                 position: 'absolute',
@@ -125,14 +105,14 @@ export const showNotificationToast = ({
                 width: 10,
                 height: 10,
                 borderRadius: '50%',
-                bgcolor: '#10B981',
+                bgcolor: '#3B82F6',
                 border: '2px solid',
                 borderColor: 'background.paper',
                 animation: 'pulseGlow 2s infinite',
                 '@keyframes pulseGlow': {
-                  '0%': { boxShadow: '0 0 0 0 rgba(16, 185, 129, 0.7)' },
-                  '70%': { boxShadow: '0 0 0 6px rgba(16, 185, 129, 0)' },
-                  '100%': { boxShadow: '0 0 0 0 rgba(16, 185, 129, 0)' },
+                  '0%': { boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.7)' },
+                  '70%': { boxShadow: '0 0 0 6px rgba(59, 130, 246, 0)' },
+                  '100%': { boxShadow: '0 0 0 0 rgba(59, 130, 246, 0)' },
                 },
               }}
             />
@@ -242,8 +222,8 @@ export const showNotificationToast = ({
                       textTransform: 'none',
                       color: 'text.secondary',
                       '&:hover': {
-                        bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
-                        color: 'primary.main',
+                        bgcolor: 'action.hover',
+                        color: 'text.primary',
                       },
                     }}
                   >
@@ -266,10 +246,10 @@ export const showNotificationToast = ({
                     px: 1.25,
                     borderRadius: '8px',
                     textTransform: 'none',
-                    bgcolor: 'primary.main',
+                    bgcolor: '#2563EB',
                     boxShadow: 'none',
                     '&:hover': {
-                      bgcolor: 'primary.dark',
+                      bgcolor: '#1D4ED8',
                       boxShadow: 'none',
                     },
                   }}
