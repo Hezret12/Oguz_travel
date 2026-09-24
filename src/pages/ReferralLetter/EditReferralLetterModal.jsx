@@ -166,7 +166,6 @@ const EditReferralLetterModal = ({ table, row }) => {
               validateFormat
               control={control}
               label={t("columns.departureDate")}
-              required
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -175,7 +174,6 @@ const EditReferralLetterModal = ({ table, row }) => {
               validateFormat
               control={control}
               label={t("columns.returnDate")}
-              required
             />
           </Grid>
 
@@ -203,7 +201,6 @@ const EditReferralLetterModal = ({ table, row }) => {
               validateFormat
               control={control}
               label={t("columns.contractDate")}
-              required
             />
           </Grid>
 
