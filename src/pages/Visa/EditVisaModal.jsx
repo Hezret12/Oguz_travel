@@ -18,7 +18,11 @@ import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAu
 import CustomDatePicker from "../../components/CustomDatePicker";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { updateVisaApi } from "../../api/queries/patch";
-import { VISA_STATUS } from "../../functions/statusChipConfigs";
+import {
+  VISA_STATUS,
+  toVisaStatusCode,
+  toVisaStatusKey,
+} from "../../functions/statusChipConfigs";
 
 const EditVisaModal = ({ table, row }) => {
   const { t } = useLocale();
@@ -57,7 +61,8 @@ const EditVisaModal = ({ table, row }) => {
         row?.original?.receiver_opr_guid ||
         row?.original?.receiveroperator?.guid ||
         null,
-      status: row?.original?.status || VISA_STATUS.PROCESS,
+      // The record carries the API code (1 | 2 | 3); the select works with the key.
+      status: toVisaStatusKey(row?.original?.status),
       is_paid:
         row?.original?.is_paid !== undefined
           ? Boolean(row.original.is_paid)
@@ -78,7 +83,7 @@ const EditVisaModal = ({ table, row }) => {
   const submitHandler = (values) => {
     const payload = {
       ...values,
-      status: values.status || VISA_STATUS.PROCESS,
+      status: toVisaStatusCode(values.status),
       is_paid: Boolean(values.is_paid),
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),

@@ -60,6 +60,9 @@ const AddTurkishAirlinesContent = ({ table }) => {
   const { mutate: createTurkishAirlines, isPending: isSubmit } = useCreate({
     apiFn: addTurkishAirlinesApi,
     key: "turkish-airlines",
+    // The list is paginated server side, so the new record is fetched back
+    // rather than pushed into the cached page (which would leave a wrong count).
+    isPaginated: true,
     onSuccess: () => {
       closeDialog();
     },

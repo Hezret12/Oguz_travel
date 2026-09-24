@@ -13,6 +13,7 @@ import { useDateFormat } from "../../../functions/generalHelpers";
 import PageHeader from "../../../components/PageHeader";
 import Pagination from "../../../components/Pagination";
 import TableEmptyState from "../../../components/TableEmptyState";
+import TableErrorState from "../../../components/TableErrorState";
 import StatusChip from "../../../components/StatusChip";
 import { SALARY_PAID_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
@@ -83,7 +84,7 @@ const Salary = () => {
   // normalizeUser keeps the office's multilingual fullName object.
   const officeName =
     typeof user?.office === "string" ? user.office : selectedLang(user?.office) || "";
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
 
   const {
     applied,
@@ -110,6 +111,7 @@ const Salary = () => {
     data: salariesData,
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -575,6 +577,7 @@ const Salary = () => {
 
     renderEmptyRowsFallback: () => {
       if (isLoading || isFetching) return null;
+      if (isError) return <TableErrorState onRetry={refetch} isRetrying={isFetching} />;
       return <TableEmptyState onResetFilters={resetFilters} />;
     },
 

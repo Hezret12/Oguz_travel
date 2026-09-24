@@ -200,12 +200,9 @@ export default function TaskFlow() {
     },
   });
 
-  const handleDeleteTask = useCallback(
-    (taskOrGuid) => {
-      deleteDialog.open(taskOrGuid);
-    },
-    [deleteDialog],
-  );
+  // `open` never changes, so the boards below keep the same `onDeleteTask` prop
+  // instead of getting a new one every time the delete dialog opens or closes.
+  const handleDeleteTask = deleteDialog.open;
 
   const isBoardFetching = useIsFetching({ queryKey: [TASK_BOARD_KEY] }) > 0;
 

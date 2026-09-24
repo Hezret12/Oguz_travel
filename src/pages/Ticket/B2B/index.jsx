@@ -6,6 +6,7 @@ import {
 } from "material-react-table";
 import { useLocale } from "../../../hooks/useLocale";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
+import TableErrorState from "../../../components/TableErrorState";
 import PageHeader from "../../../components/PageHeader";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
@@ -101,7 +102,7 @@ const B2BFilterDrawer = () => {
 const B2B = () => {
   const { t, selectedLang } = useLocale();
   const { formatChange } = useDateFormat();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const [rowSelection, setRowSelection] = useState({});
   const [paymentModalRow, setPaymentModalRow] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -205,6 +206,7 @@ const B2B = () => {
     data: b2bData,
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -224,10 +226,9 @@ const B2B = () => {
     onConfirm: (ticket) => deleteB2BMutate(ticket.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (ticket) => deleteDialog.open(ticket),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   const columns = useMemo(
     () => [
@@ -472,8 +473,7 @@ const B2B = () => {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t],
+    [t, getStatusKey, handleDeleteClick],
   );
 
   const activeFilters = useMemo(
@@ -490,6 +490,13 @@ const B2B = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // A failed request must not read as "no records".
+    renderEmptyRowsFallback: () =>
+      isError ? (
+        <TableErrorState onRetry={refetch} isRetrying={isFetching} />
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     // Avoids nesting MRT's own create/edit <Dialog> around the one
     // AddB2BTicketDialog/EditB2BDialog already render — see
     // Translate/index.jsx for the full rationale.

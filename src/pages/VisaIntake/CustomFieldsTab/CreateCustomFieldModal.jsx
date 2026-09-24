@@ -25,6 +25,9 @@ export const CreateCustomFieldModal = ({
   const { mutate: createCustomField, isPending } = useCreate({
     apiFn: addCustomFieldApi,
     key: "customFields",
+    // The list is paginated server side, so the new record is fetched back
+    // rather than pushed into the cached page (which would leave a wrong count).
+    isPaginated: true,
     invalidateQueries: ["countries", "countryOptions", "countryVisaFields", "receivings"],
     onSuccess: (res) => {
       const createdItem = res?.data?.data || res?.data || res;

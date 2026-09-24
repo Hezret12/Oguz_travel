@@ -10,6 +10,7 @@ import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
 import TableEmptyState from "../../components/TableEmptyState";
+import TableErrorState from "../../components/TableErrorState";
 import StackedCell from "../../components/inputs/StackCell";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import OperatorsCell from "../../components/OperatorsCell";
@@ -118,7 +119,7 @@ const ReferralLetterFilterDrawer = () => {
 
 const ReferalLetter = () => {
   const { t } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -145,6 +146,7 @@ const ReferalLetter = () => {
     data: referralLetters,
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -164,10 +166,9 @@ const ReferalLetter = () => {
     onConfirm: (item) => deleteReferralLetter(item.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (item) => deleteDialog.open(item),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   // Fetch employees for filter chip labels
   const { data: employeeList } = useGet({
@@ -389,8 +390,7 @@ const ReferalLetter = () => {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t, formatChange],
+    [t, formatChange, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({
@@ -461,6 +461,7 @@ const ReferalLetter = () => {
     },
     renderEmptyRowsFallback: () => {
       if (isLoading || isFetching) return null;
+      if (isError) return <TableErrorState onRetry={refetch} isRetrying={isFetching} />;
       return <TableEmptyState onResetFilters={resetFilters} />;
     },
     renderTopToolbarCustomActions: () => (

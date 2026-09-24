@@ -14,6 +14,7 @@ import PageHeader from "../../components/PageHeader";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
 import TableEmptyState from "../../components/TableEmptyState";
+import TableErrorState from "../../components/TableErrorState";
 import DocumentPreviewModal from "../Visa/Package/DocumentPreviewModal";
 import { useLocale } from "../../hooks/useLocale";
 import { usePagginationGet } from "../../hooks/usePagginationGet";
@@ -45,6 +46,7 @@ const PackagesPage = () => {
     pageCount = 1,
     isLoading,
     isFetching,
+    isError,
     refetch,
   } = usePagginationGet({
     apiFn: getAllVisaDocsApi,
@@ -244,8 +246,9 @@ const PackagesPage = () => {
 
   const renderEmptyRowsFallback = useCallback(() => {
     if (isLoading || isFetching) return null;
+    if (isError) return <TableErrorState onRetry={refetch} isRetrying={isFetching} />;
     return <TableEmptyState />;
-  }, [isLoading, isFetching]);
+  }, [isLoading, isFetching, isError, refetch]);
 
   const renderTopToolbarCustomActions = useCallback(
     () => (

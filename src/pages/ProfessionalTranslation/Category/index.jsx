@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import {
   MaterialReactTable,
@@ -25,7 +25,7 @@ const isSystemCategory = (guid) => String(guid || "").startsWith(SYSTEM_CATEGORY
 
 const CategoryPage = () => {
   const { t } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const [searchQuery, setSearchQuery] = useState("");
 
   const {
@@ -49,10 +49,9 @@ const CategoryPage = () => {
     onConfirm: (item) => deleteCategory(item.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (item) => deleteDialog.open(item),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   // Client-side search filtering across all language fields
   const filteredData = useMemo(() => {

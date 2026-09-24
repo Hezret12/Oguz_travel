@@ -6,6 +6,7 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
+import TableErrorState from "../../components/TableErrorState";
 import { useLocale } from "../../hooks/useLocale";
 import { useAuth } from "../../context/useAuth";
 import PageHeader from "../../components/PageHeader";
@@ -75,7 +76,7 @@ const Clients = () => {
   const { user } = useAuth();
   const isAdmin = Boolean(user?.role === "admin" || user?.user_is_admin || user?.isAdmin);
 
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const [rowSelection, setRowSelection] = useState({});
   const [selectedDocClient, setSelectedDocClient] = useState(null);
 
@@ -100,6 +101,7 @@ const Clients = () => {
     data: clientsData,
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -119,10 +121,9 @@ const Clients = () => {
     onConfirm: (client) => deleteClientMutate(client.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (client) => deleteDialog.open(client),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   const getFilterChipLabel = useCallback(
     (key, value) => {
@@ -308,6 +309,13 @@ const Clients = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // A failed request must not read as "no records".
+    renderEmptyRowsFallback: () =>
+      isError ? (
+        <TableErrorState onRetry={refetch} isRetrying={isFetching} />
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     // Avoids nesting MRT's own create/edit <Dialog> around the one
     // AddClient/EditClient already render — see Translate/index.jsx for the
     // full rationale.

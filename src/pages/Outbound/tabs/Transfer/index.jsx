@@ -1,10 +1,11 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
 import { useLocale } from "../../../../hooks/useLocale";
 import { getDefaultMRTOptions } from "../../../../hooks/getDefaultMRTOptions";
+import TableErrorState from "../../../../components/TableErrorState";
 import { usePagginationGet } from "../../../../hooks/usePagginationGet";
 import { useDelete } from "../../../../hooks/CRUD/useDelete";
 import { useDeleteDialog } from "../../../../hooks/useDeleteDialog";
@@ -38,7 +39,7 @@ const TransferTab = ({
 }) => {
   const { t, selectedLang } = useLocale();
   const { formatChange } = useDateFormat();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const [paymentModalRow, setPaymentModalRow] = useState(null);
 
   const mergedParams = useMemo(
@@ -50,6 +51,7 @@ const TransferTab = ({
     data: transferData = [],
     isLoading,
     isFetching,
+    isError,
     refetch,
     totalItems,
   } = usePagginationGet({
@@ -71,10 +73,9 @@ const TransferTab = ({
     onConfirm: (item) => deleteTransfer(item.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (item) => deleteDialog.open(item),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   const columns = useMemo(
     () => [
@@ -286,6 +287,13 @@ const TransferTab = ({
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // A failed request must not read as "no records".
+    renderEmptyRowsFallback: () =>
+      isError ? (
+        <TableErrorState onRetry={refetch} isRetrying={isFetching} />
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     // The Add flow here is already driven by the parent's own isAddOpen state
     // (below), not table.setCreatingRow — renderCreateRowDialogContent was
     // dead code. Edit IS reached via ColumnActionButtons' table.setEditingRow,

@@ -7,6 +7,7 @@ import { Box, Chip, Divider, ToggleButton, ToggleButtonGroup, Tooltip, Typograph
 import { ArrowDownLeft, ArrowUpRight, Layers, Lock, Wallet, Zap } from "lucide-react";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
+import TableErrorState from "../../../components/TableErrorState";
 import { useLocale } from "../../../hooks/useLocale";
 import PageHeader from "../../../components/PageHeader";
 import Pagination from "../../../components/Pagination";
@@ -95,7 +96,7 @@ const CashFlowFilterDrawer = () => {
 
 const CashFlow = () => {
   const { t, selectedLang } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const { formatChange } = useDateFormat();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -120,6 +121,7 @@ const CashFlow = () => {
     meta,
     isLoading,
     isFetching,
+    isError,
     refetch,
     totalItems,
     pageCount,
@@ -341,6 +343,13 @@ const CashFlow = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // A failed request must not read as "no records".
+    renderEmptyRowsFallback: () =>
+      isError ? (
+        <TableErrorState onRetry={refetch} isRetrying={isFetching} />
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     // Add uses its own modal state; edit goes through table.setEditingRow via
     // ColumnActionButtons — "custom" stops MRT from wrapping our own <Dialog>.
     editDisplayMode: "custom",

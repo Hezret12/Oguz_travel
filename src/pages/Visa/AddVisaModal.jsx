@@ -18,7 +18,7 @@ import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAu
 import CustomDatePicker from "../../components/CustomDatePicker";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addVisaApi } from "../../api/queries/post";
-import { VISA_STATUS } from "../../functions/statusChipConfigs";
+import { VISA_STATUS, toVisaStatusCode } from "../../functions/statusChipConfigs";
 
 const AddVisaModal = ({ table }) => {
   const { t } = useLocale();
@@ -39,6 +39,9 @@ const AddVisaModal = ({ table }) => {
   const { mutate: createVisa, isPending: isSubmit } = useCreate({
     apiFn: addVisaApi,
     key: "visaApplications",
+    // The list is paginated server side: prepending the new visa to the cached
+    // page would put it on whatever page is open and leave the row count wrong.
+    isPaginated: true,
     onSuccess: () => {
       table.setCreatingRow(null);
     },
@@ -72,7 +75,8 @@ const AddVisaModal = ({ table }) => {
   const submitHandler = (values) => {
     const payload = {
       ...values,
-      status: values.status || VISA_STATUS.PROCESS,
+      // The API takes the status as 1 | 2 | 3, not as the form's readable key.
+      status: toVisaStatusCode(values.status),
       is_paid: Boolean(values.is_paid),
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),

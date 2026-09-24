@@ -61,6 +61,9 @@ const AddB2BTicketDialog = ({ table, open, close }) => {
   const { mutate: createB2B, isPending: isSubmit } = useCreate({
     apiFn: addB2BApi,
     key: "b2b",
+    // The list is paginated server side, so the new record is fetched back
+    // rather than pushed into the cached page (which would leave a wrong count).
+    isPaginated: true,
     onSuccess: () => {
       closeDialog();
     },

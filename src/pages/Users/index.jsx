@@ -1,9 +1,10 @@
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
+import TableErrorState from "../../components/TableErrorState";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import PageHeader from "../../components/PageHeader";
@@ -32,7 +33,7 @@ const Users = () => {
   const isAdmin = user?.role === "admin" || Boolean(user?.user_is_admin);
   const [selectedProfileUser, setSelectedProfileUser] = useState(null);
   const { t } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
 
   const [rowSelection, setRowSelection] = useState({});
 
@@ -54,6 +55,7 @@ const Users = () => {
     data: usersData = [],
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -74,10 +76,9 @@ const Users = () => {
     onConfirm: (user) => deleteUserMutate(user.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (user) => deleteDialog.open(user),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   const columns = useMemo(
     () => [
@@ -228,6 +229,13 @@ const Users = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // A failed request must not read as "no records".
+    renderEmptyRowsFallback: () =>
+      isError ? (
+        <TableErrorState onRetry={refetch} isRetrying={isFetching} />
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     // Avoids nesting MRT's own create/edit <Dialog> around the one
     // AddUserModal/EditUserModal already render — see Translate/index.jsx
     // for the full rationale.

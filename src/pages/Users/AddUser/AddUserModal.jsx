@@ -25,6 +25,9 @@ const AddUserModal = ({ table }) => {
   const { mutate: createUser, isLoading } = useCreate({
     apiFn: addUserApi,
     key: "users",
+    // The list is paginated server side, so the new record is fetched back
+    // rather than pushed into the cached page (which would leave a wrong count).
+    isPaginated: true,
     onSuccess: () => {
       table.setCreatingRow(null);
     },

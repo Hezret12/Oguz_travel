@@ -8,6 +8,7 @@ import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 import TableEmptyState from "../../components/TableEmptyState";
+import TableErrorState from "../../components/TableErrorState";
 import { Box, Chip, Typography } from "@mui/material";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
@@ -149,6 +150,7 @@ const TranslatePage = () => {
     data: translations = [],
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -238,10 +240,9 @@ const TranslatePage = () => {
     onConfirm: handleConfirmDelete,
   });
 
-  const handleDeleteClick = useCallback(
-    (item) => deleteDialog.open(item),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   const columns = useMemo(
     () => [
@@ -500,8 +501,9 @@ const TranslatePage = () => {
 
   const renderEmptyRowsFallback = useCallback(() => {
     if (isLoading || isFetching) return null;
+    if (isError) return <TableErrorState onRetry={refetch} isRetrying={isFetching} />;
     return <TableEmptyState onResetFilters={resetFilters} />;
-  }, [isLoading, isFetching, resetFilters]);
+  }, [isLoading, isFetching, isError, refetch, resetFilters]);
 
   const renderTopToolbarCustomActions = useCallback(
     () => (

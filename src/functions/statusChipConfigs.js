@@ -88,6 +88,32 @@ export const VISA_STATUS = Object.freeze({
   FAIL: "FAIL",
 });
 
+/**
+ * `tbl_visa.status` is an integer column and `CreateVisaDto` only accepts 1, 2 or 3
+ * (`@IsNumber() @IsIn([1,2,3])`), while the forms and the chip config work with the readable
+ * keys. Everything leaving for `/visa/add-visa` or `/visa/update-visa` goes through
+ * `toVisaStatusCode`, everything arriving through `toVisaStatusKey`.
+ */
+export const VISA_STATUS_CODE = Object.freeze({
+  [VISA_STATUS.PROCESS]: 1,
+  [VISA_STATUS.DONE]: 2,
+  [VISA_STATUS.FAIL]: 3,
+});
+
+const VISA_STATUS_BY_CODE = Object.freeze({
+  1: VISA_STATUS.PROCESS,
+  2: VISA_STATUS.DONE,
+  3: VISA_STATUS.FAIL,
+});
+
+/** Form value ("PROCESS", or an already numeric one) → the code the API expects. */
+export const toVisaStatusCode = (value) =>
+  VISA_STATUS_CODE[value] ?? (VISA_STATUS_BY_CODE[value] ? Number(value) : VISA_STATUS_CODE[VISA_STATUS.PROCESS]);
+
+/** API value (1, "1") → the key the forms and the chip config use. */
+export const toVisaStatusKey = (value) =>
+  VISA_STATUS_BY_CODE[value] ?? (VISA_STATUS_CODE[value] ? value : VISA_STATUS.PROCESS);
+
 export const VISA_STATUS_CONFIG = {
   [VISA_STATUS.PROCESS]: { label: "Işlenýär", color: "#2563eb" },
   [VISA_STATUS.DONE]: { label: "Tamamlandy", color: "#16a34a" },

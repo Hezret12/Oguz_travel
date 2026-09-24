@@ -26,6 +26,9 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
   const { mutate: createCountry, isLoading } = useCreate({
     apiFn: createCountryApi,
     key: "countries",
+    // The list is paginated server side, so the new record is fetched back
+    // rather than pushed into the cached page (which would leave a wrong count).
+    isPaginated: true,
     invalidateQueries: ["countryOptions", "countryVisaFields", "receivings", "customFields"],
     onSuccess: () => {
       onRefresh?.();

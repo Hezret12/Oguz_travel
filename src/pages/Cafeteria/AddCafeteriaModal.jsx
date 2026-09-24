@@ -24,6 +24,9 @@ const AddCafeteriaModal = ({ table }) => {
   const { mutate: createTransaction, isPending } = useCreate({
     apiFn: addCafeteriaTransactionApi,
     key: "cafeteriaTransactions",
+    // The list is paginated server side, so the new record is fetched back
+    // rather than pushed into the cached page (which would leave a wrong count).
+    isPaginated: true,
     invalidateQueries: [["cafeteria-summary"]],
     onSuccess: () => {
       table.setCreatingRow(null);

@@ -3,11 +3,12 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 import TableEmptyState from "../../components/TableEmptyState";
+import TableErrorState from "../../components/TableErrorState";
 import { Box, Chip } from "@mui/material";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
@@ -15,6 +16,7 @@ import StatusChip from "../../components/StatusChip";
 import {
   PAYMENT_STATUS_CONFIG,
   VISA_STATUS_CONFIG,
+  toVisaStatusKey,
 } from "../../functions/statusChipConfigs";
 import PaymentStatusCell from "../../components/PaymentStatusCell";
 import AddVisaModal from "./AddVisaModal";
@@ -72,7 +74,7 @@ const VisaFilterDrawer = () => {
 
 const Visa = () => {
   const { t, selectedLang } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
 
@@ -98,6 +100,7 @@ const Visa = () => {
     data: visasData,
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -107,11 +110,18 @@ const Visa = () => {
     params: queryParams,
   });
 
-  const visas = useMemo(() => visasData?.data ?? visasData ?? [], [visasData]);
+  const visas = useMemo(() => (Array.isArray(visasData) ? visasData : []), [visasData]);
+
+  // Deleting the last row of the last page (or narrowing a filter) leaves fewer
+  // pages than the one being viewed, which would render as an empty table.
+  useEffect(() => {
+    if (!isFetching && pageCount > 0 && page > pageCount) setPage(pageCount);
+  }, [isFetching, pageCount, page, setPage]);
 
   const { mutate: deleteVisa, isPending: isDeleting } = useDelete({
     deleteFn: deleteVisaApi,
-    queryKey: ["visaApplications", queryParams],
+    // Every cached page of the list, not just the one open right now.
+    queryKey: "visaApplications",
     idKey: "guid",
     isPaginated: true,
   });
@@ -120,7 +130,9 @@ const Visa = () => {
     onConfirm: (item) => deleteVisa(item.guid),
   });
 
-  const handleDeleteClick = (item) => deleteDialog.open(item);
+  // Only `open` is used in the columns, and it is stable — so the columns can
+  // depend on it honestly instead of dropping it from the dependency list.
+  const handleDeleteClick = deleteDialog.open;
 
   const activeFilters = useMemo(
     () =>
@@ -198,8 +210,12 @@ const Visa = () => {
         size: 140,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
+        // The API sends the status as 1 | 2 | 3; the chip config is keyed by name.
         Cell: ({ cell }) => (
-          <StatusChip status={cell.getValue()} config={VISA_STATUS_CONFIG} />
+          <StatusChip
+            status={toVisaStatusKey(cell.getValue())}
+            config={VISA_STATUS_CONFIG}
+          />
         ),
       },
       {
@@ -284,8 +300,7 @@ const Visa = () => {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t, selectedLang, formatChange],
+    [t, selectedLang, formatChange, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({
@@ -356,6 +371,7 @@ const Visa = () => {
 
     renderEmptyRowsFallback: () => {
       if (isLoading || isFetching) return null;
+      if (isError) return <TableErrorState onRetry={refetch} isRetrying={isFetching} />;
       return <TableEmptyState onResetFilters={resetFilters} />;
     },
 
@@ -428,7 +444,6 @@ const Visa = () => {
           <Pagination
             pageIndex={pageIndex}
             pageCount={pageCount}
-            pageSize={limit}
             totalRows={totalItems}
             onPageChange={(newIndex) => setPage(newIndex + 1)}
           />

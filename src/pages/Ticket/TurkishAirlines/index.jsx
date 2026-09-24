@@ -6,6 +6,7 @@ import {
 } from "material-react-table";
 import { useLocale } from "../../../hooks/useLocale";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
+import TableErrorState from "../../../components/TableErrorState";
 import PageHeader from "../../../components/PageHeader";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
@@ -95,7 +96,7 @@ const TurkishAirlinesFilterDrawer = () => {
 const TurkishAirlines = () => {
   const { t, selectedLang } = useLocale();
   const { formatChange } = useDateFormat();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const [rowSelection, setRowSelection] = useState({});
   const [paymentModalRow, setPaymentModalRow] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -225,6 +226,7 @@ const TurkishAirlines = () => {
     data: turkishData,
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -245,10 +247,9 @@ const TurkishAirlines = () => {
     onConfirm: (ticket) => deleteTurkishAirlinesMutate(ticket.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (ticket) => deleteDialog.open(ticket),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   const columns = useMemo(
     () => [
@@ -522,6 +523,13 @@ const TurkishAirlines = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // A failed request must not read as "no records".
+    renderEmptyRowsFallback: () =>
+      isError ? (
+        <TableErrorState onRetry={refetch} isRetrying={isFetching} />
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     // Avoids nesting MRT's own create/edit <Dialog> around the one
     // AddTurkishAirlinesContent/EditTurkishAirlinesContent already render —
     // see Translate/index.jsx for the full rationale.

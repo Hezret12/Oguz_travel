@@ -12,6 +12,7 @@ import { useLocale } from "../../hooks/useLocale";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 import TableEmptyState from "../../components/TableEmptyState";
+import TableErrorState from "../../components/TableErrorState";
 import StackedCell from "../../components/inputs/StackCell";
 import { useDateFormat } from "../../functions/generalHelpers";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
@@ -72,7 +73,7 @@ const CafeteriaFilterDrawer = () => {
 
 const Cafeteria = () => {
   const { t, selectedLang } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -99,6 +100,7 @@ const Cafeteria = () => {
     data: transactionsData,
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -125,7 +127,9 @@ const Cafeteria = () => {
     onConfirm: (item) => deleteTransaction(item.guid || item.id),
   });
 
-  const handleDeleteClick = (item) => deleteDialog.open(item);
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   const activeFilters = useMemo(
     () =>
@@ -273,8 +277,7 @@ const Cafeteria = () => {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t, selectedLang, formatChange, page, limit, handleDeleteClick]
+    [t, selectedLang, formatChange, handleDeleteClick]
   );
 
   const table = useMaterialReactTable({
@@ -341,6 +344,7 @@ const Cafeteria = () => {
 
     renderEmptyRowsFallback: () => {
       if (isLoading || isFetching) return null;
+      if (isError) return <TableErrorState onRetry={refetch} isRetrying={isFetching} />;
       return <TableEmptyState onResetFilters={resetFilters} />;
     },
 

@@ -1,4 +1,5 @@
 import { getDefaultMRTOptions } from "../../hooks/getDefaultMRTOptions";
+import TableErrorState from "../../components/TableErrorState";
 import { MaterialReactTable } from "material-react-table";
 import { useMaterialReactTable } from "material-react-table";
 import { useMemo, useState, useCallback } from "react";
@@ -71,7 +72,7 @@ const EmployeeFilterDrawer = () => {
 const Employee = () => {
   const [rowSelection, setRowSelection] = useState({});
   const { t, selectedLang } = useLocale();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
 
   const {
     applied,
@@ -128,6 +129,7 @@ const Employee = () => {
     data: employeesData,
     isLoading,
     isFetching,
+    isError,
     refetch,
     pageCount,
     totalItems,
@@ -148,10 +150,9 @@ const Employee = () => {
     onConfirm: (employee) => deleteEmployeeMutate(employee.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (employee) => deleteDialog.open(employee),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   const columns = useMemo(
     () => [
@@ -307,8 +308,7 @@ const Employee = () => {
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLang, t],
+    [selectedLang, t, handleDeleteClick],
   );
 
   const activeFilters = useMemo(
@@ -325,6 +325,13 @@ const Employee = () => {
 
   const table = useMaterialReactTable({
     ...defaultMrtOptions,
+    // A failed request must not read as "no records".
+    renderEmptyRowsFallback: () =>
+      isError ? (
+        <TableErrorState onRetry={refetch} isRetrying={isFetching} />
+      ) : (
+        defaultMrtOptions.renderEmptyRowsFallback()
+      ),
     // Avoids nesting MRT's own create/edit <Dialog> around the one
     // AddEmployee/EditEmployee already render — see Translate/index.jsx.
     createDisplayMode: "custom",

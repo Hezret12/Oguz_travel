@@ -52,6 +52,9 @@ const AddLetterStockModal = ({ open, close, table }) => {
   const { mutate: createReport, isPending } = useCreate({
     apiFn: addReportApi,
     key: "reports",
+    // The list is paginated server side, so the new record is fetched back
+    // rather than pushed into the cached page (which would leave a wrong count).
+    isPaginated: true,
     onSuccess: () => {
       handleClose();
     },

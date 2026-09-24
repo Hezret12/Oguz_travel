@@ -33,6 +33,9 @@ const AddReferralLetterModal = ({ table }) => {
   const { mutate: createReferralLetter, isPending: isSubmit } = useCreate({
     apiFn: addReferralLetterApi,
     key: "referralLetters",
+    // The list is paginated server side, so the new record is fetched back
+    // rather than pushed into the cached page (which would leave a wrong count).
+    isPaginated: true,
     onSuccess: () => {
       table.setCreatingRow(null);
     },

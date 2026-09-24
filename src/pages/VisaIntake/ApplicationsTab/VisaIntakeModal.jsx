@@ -256,6 +256,9 @@ export const VisaIntakeModal = ({
   const { mutate: createReceiving, isPending: isCreating } = useCreate({
     apiFn: addReceivingApi,
     key: "receivings",
+    // The list is paginated server side, so the new record is fetched back
+    // rather than pushed into the cached page (which would leave a wrong count).
+    isPaginated: true,
     onSuccess: () => {
       onRefresh?.();
       handleClose();

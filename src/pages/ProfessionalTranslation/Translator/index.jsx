@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import {
   MaterialReactTable,
@@ -22,7 +22,7 @@ import EditTranslatorModal from "./EditTranslatorModal";
 const TranslatorPage = () => {
   const { t } = useLocale();
   const { formatChange } = useDateFormat();
-  const defaultMrtOptions = getDefaultMRTOptions();
+  const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const [searchQuery, setSearchQuery] = useState("");
 
   const {
@@ -46,10 +46,9 @@ const TranslatorPage = () => {
     onConfirm: (item) => deleteTranslator(item.guid),
   });
 
-  const handleDeleteClick = useCallback(
-    (item) => deleteDialog.open(item),
-    [deleteDialog],
-  );
+  // `open` never changes, so the columns memo that uses this handler is no
+  // longer rebuilt every time the delete dialog opens or closes.
+  const handleDeleteClick = deleteDialog.open;
 
   const filteredData = useMemo(() => {
     if (!Array.isArray(translatorsData)) return [];
