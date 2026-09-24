@@ -287,7 +287,7 @@ export const useValidShema = () => {
   });
 
   const addOutbound = yup.object({
-    application_date: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
+    application_date: requiredDateSchema,
     opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
     client_name: yup.string().required(t("validation.required") || "Hökman girizilmeli"),
     prepared_opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),

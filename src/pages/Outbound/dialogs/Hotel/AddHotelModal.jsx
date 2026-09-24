@@ -106,7 +106,7 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2} sx={{ mt: 0.5 }}>
           <Grid size={4}>
-            <CustomDatePicker name="application_date" control={control} label={t("outbound.requestDate") || "Arza senesi"} required />
+            <CustomDatePicker name="application_date" validateFormat control={control} label={t("outbound.requestDate") || "Arza senesi"} required />
           </Grid>
           <Grid size={8}>
             <GlobalClientAutocomplete

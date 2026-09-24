@@ -132,6 +132,7 @@ const EditTourModal = ({ table, row }) => {
           <Grid size={4}>
             <CustomDatePicker
               name="application_date"
+              validateFormat
               control={control}
               label={t("outbound.requestDate")}
               required

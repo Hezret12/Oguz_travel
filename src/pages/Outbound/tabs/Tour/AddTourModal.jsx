@@ -111,6 +111,7 @@ const AddTourModal = ({ open = true, onClose, table }) => {
           <Grid size={4}>
             <CustomDatePicker
               name="application_date"
+              validateFormat
               control={control}
               label={t("outbound.requestDate") || "Arza senesi"}
               required
