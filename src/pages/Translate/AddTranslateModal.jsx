@@ -86,7 +86,9 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
         ? dayjs(data.completed_day).format("YYYY-MM-DD")
         : null,
       page_count: Number(data.page_count || 0),
-      completed_page_count: Number(data.completed_page_count || 0),
+      // Empty completion fields go as null (not 0 / ""), the backend treats them as optional.
+      completed_page_count: data.completed_page_count ? Number(data.completed_page_count) : null,
+      completed_time: data.completed_time || null,
       price: Number(data.price || 0),
       expense_price: Number(data.expense_price || 0),
       is_paid:
@@ -137,6 +139,7 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
           <Grid size={4}>
             <CustomDatePicker
               name="received_day"
+              validateFormat
               control={control}
               label={t("columns.receivedDay")}
               required
@@ -149,6 +152,7 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
               control={control}
               label={t("columns.receivedTime")}
               type="time"
+              required
             />
           </Grid>
 
@@ -177,6 +181,7 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
               control={control}
               label={t("columns.translator")}
               options={translatorOptions}
+              required
             />
           </Grid>
 
@@ -185,6 +190,7 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
               name="source_to_target"
               control={control}
               label={t("columns.direction")}
+              required
             />
           </Grid>
 
@@ -238,12 +244,14 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
               control={control}
               label={t("columns.paymentStatus") || "Töleg görnüşi"}
               options={paymentOptions}
+              required
             />
           </Grid>
 
           <Grid size={4}>
             <CustomDatePicker
               name="completed_day"
+              validateFormat
               control={control}
               label={t("columns.completedDay") || "Tabşyrylan güni"}
             />

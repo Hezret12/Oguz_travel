@@ -970,7 +970,7 @@
     "validation": {
       "typeRequired": "Выберите тип операции",
       "amountRequired": "Введите сумму",
-      "amountPositive": "Сумма должна быть больше 0",
+      "amountNotZero": "Сумма не может быть равна 0",
       "dateRequired": "Укажите дату"
     },
     "export": {

@@ -46,7 +46,7 @@ const buildDefaultValues = (row) => ({
       ? String(row.original.status)
       : (row?.original?.status_guid ? String(row.original.status_guid) : "false"),
   completed_page_count:
-    row?.original?.completed_page_count != null ? Number(row.original.completed_page_count) : 0,
+    row?.original?.completed_page_count != null ? Number(row.original.completed_page_count) : null,
   completed_day: row?.original?.completed_day
     ? dayjs(row.original.completed_day).format("YYYY-MM-DD")
     : null,
@@ -118,7 +118,9 @@ const EditTranslateModal = ({ row, onClose }) => {
         ? dayjs(data.completed_day).format("YYYY-MM-DD")
         : null,
       page_count: Number(data.page_count || 0),
-      completed_page_count: Number(data.completed_page_count || 0),
+      // Empty completion fields go as null (not 0 / ""), the backend treats them as optional.
+      completed_page_count: data.completed_page_count ? Number(data.completed_page_count) : null,
+      completed_time: data.completed_time || null,
       price: Number(data.price || 0),
       expense_price: Number(data.expense_price || 0),
       is_paid:
@@ -170,6 +172,7 @@ const EditTranslateModal = ({ row, onClose }) => {
           <Grid size={4}>
             <CustomDatePicker
               name="received_day"
+              validateFormat
               control={control}
               label={t("columns.receivedDay")}
               required
@@ -182,6 +185,7 @@ const EditTranslateModal = ({ row, onClose }) => {
               control={control}
               label={t("columns.receivedTime")}
               type="time"
+              required
             />
           </Grid>
 
@@ -211,6 +215,7 @@ const EditTranslateModal = ({ row, onClose }) => {
               control={control}
               label={t("columns.translator")}
               options={translatorOptions}
+              required
             />
           </Grid>
 
@@ -219,6 +224,7 @@ const EditTranslateModal = ({ row, onClose }) => {
               name="source_to_target"
               control={control}
               label={t("columns.direction")}
+              required
             />
           </Grid>
 
@@ -274,12 +280,14 @@ const EditTranslateModal = ({ row, onClose }) => {
               control={control}
               label={t("columns.paymentStatus") || "Töleg görnüşi"}
               options={paymentOptions}
+              required
             />
           </Grid>
 
           <Grid size={4}>
             <CustomDatePicker
               name="completed_day"
+              validateFormat
               control={control}
               label={t("columns.completedDay") || "Tabşyrylan güni"}
             />

@@ -970,7 +970,7 @@
     "validation": {
       "typeRequired": "Amalyň görnüşini saýlaň",
       "amountRequired": "Mukdary giriziň",
-      "amountPositive": "Mukdar 0-dan uly bolmaly",
+      "amountNotZero": "Mukdar 0 bolup bilmez",
       "dateRequired": "Senäni giriziň"
     },
     "export": {

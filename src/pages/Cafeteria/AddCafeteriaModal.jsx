@@ -167,6 +167,7 @@ const AddCafeteriaModal = ({ table }) => {
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomDatePicker
               name="date"
+              validateFormat
               control={control}
               label={t("cafeteria.date")}
               showTime

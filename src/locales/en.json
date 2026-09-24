@@ -970,7 +970,7 @@
     "validation": {
       "typeRequired": "Select transaction type",
       "amountRequired": "Enter amount",
-      "amountPositive": "Amount must be greater than 0",
+      "amountNotZero": "Amount cannot be 0",
       "dateRequired": "Select date"
     },
     "export": {

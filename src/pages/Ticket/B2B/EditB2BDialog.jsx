@@ -218,6 +218,8 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   name="datetime"
                   control={control}
                   label={t("columns.issueDate")}
+                  validateFormat
+                  required
                 />
               </Grid>
 
@@ -241,6 +243,8 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   name="flight_date"
                   control={control}
                   label={t("columns.flightDate")}
+                  validateFormat
+                  required
                 />
               </Grid>
 
@@ -330,6 +334,7 @@ const EditB2BDialog = ({ table, row, open, close }) => {
                   control={control}
                   label={t("columns.paymentStatus")}
                   options={paymentOptions}
+                  required
                 />
               </Grid>
 

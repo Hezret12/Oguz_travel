@@ -91,7 +91,7 @@ const AddB2BTicketDialog = ({ table, open, close }) => {
       card: "",
       note: "",
       pnr: "",
-      is_paid: true,
+      is_paid: false,
     },
     resolver: yupResolver(addB2BTicket),
     mode: "onSubmit",
@@ -211,6 +211,8 @@ const AddB2BTicketDialog = ({ table, open, close }) => {
                   name="datetime"
                   control={control}
                   label={t("columns.issueDate")}
+                  validateFormat
+                  required
                 />
               </Grid>
 
@@ -233,6 +235,8 @@ const AddB2BTicketDialog = ({ table, open, close }) => {
                   name="flight_date"
                   control={control}
                   label={t("columns.flightDate")}
+                  validateFormat
+                  required
                 />
               </Grid>
 
@@ -326,6 +330,7 @@ const AddB2BTicketDialog = ({ table, open, close }) => {
                   control={control}
                   label={t("columns.paymentStatus")}
                   options={paymentOptions}
+                  required
                 />
               </Grid>
 

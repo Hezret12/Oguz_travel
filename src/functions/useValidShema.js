@@ -66,19 +66,23 @@ export const useValidShema = () => {
   // within a sane year range (a typo like 1211 is still a "valid" date).
   const MIN_DATE_YEAR = 2000;
   const MAX_DATE_YEAR = 2100;
-  const optionalDateSchema = yup
-    .string()
-    .nullable()
-    .test("valid-date", t("validation.invalidDate"), (value) => !value || dayjs(value).isValid())
-    .test(
-      "date-range",
-      t("validation.dateOutOfRange", { min: MIN_DATE_YEAR, max: MAX_DATE_YEAR }),
-      (value) => {
+  const buildDateSchema = ({
+    invalidMessage = t("validation.invalidDate"),
+    rangeMessage = t("validation.dateOutOfRange", { min: MIN_DATE_YEAR, max: MAX_DATE_YEAR }),
+  } = {}) =>
+    yup
+      .string()
+      .nullable()
+      .test("valid-date", invalidMessage, (value) => !value || dayjs(value).isValid())
+      .test("date-range", rangeMessage, (value) => {
         if (!value || !dayjs(value).isValid()) return true;
         const year = dayjs(value).year();
         return year >= MIN_DATE_YEAR && year <= MAX_DATE_YEAR;
-      },
-    );
+      });
+
+  const optionalDateSchema = buildDateSchema();
+  // For forms that only mark invalid fields red, with no message underneath.
+  const silentDate = buildDateSchema({ invalidMessage: "", rangeMessage: "" });
 
   const requiredDateSchema = optionalDateSchema.required(t("validation.dateRequired"));
 
@@ -111,6 +115,13 @@ export const useValidShema = () => {
   });
 
   const addB2BTicket = yup.object({
+    datetime: silentDate.required(""),
+    flight_date: silentDate.required(""),
+    // Boolean select: `false` (Kredit) is a real answer, only empty is missing.
+    is_paid: yup
+      .mixed()
+      .nullable()
+      .test("required", "", (value) => value !== null && value !== undefined && value !== ""),
     client_guid: yup
       .string()
       .nullable()
@@ -261,13 +272,70 @@ export const useValidShema = () => {
       }),
   });
 
+  // Number inputs arrive as strings; a cleared input ("") counts as empty.
+  const emptyToNull = (value, original) => (original === "" ? null : value);
+
+  // Translation form: invalid fields only turn red, no message underneath.
+  const requiredText = yup.string().nullable().trim().required("");
+  // Native time inputs only ever yield "HH:mm" or "".
+  const requiredTime = yup.string().nullable().required("");
+  const completedDaySchema = silentDate.test(
+    "not-before-received",
+    "",
+    function (value) {
+      const { received_day } = this.parent;
+      if (!value || !received_day) return true;
+      const completed = dayjs(value);
+      const received = dayjs(received_day);
+      if (!completed.isValid() || !received.isValid()) return true;
+      return !completed.isBefore(received, "day");
+    },
+  );
+
   const addTranslation = yup.object({
-    received_day: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
-    client_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
-    opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
-    page_count: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
-    price: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
-    expense_price: yup.number().nullable().transform((v, o) => o === "" ? null : v).typeError(t("validation.requiredNumber") || "San bolmaly").optional(),
+    received_day: silentDate.required(""),
+    completed_day: completedDaySchema,
+    received_time: requiredTime,
+    completed_time: yup.string().nullable().optional(),
+    status: requiredText,
+    client_guid: requiredText,
+    opr_guid: requiredText,
+    translator_guid: requiredText,
+    source_to_target: requiredText,
+    // Boolean select: `false` is a real answer, only empty is missing.
+    is_paid: yup
+      .mixed()
+      .nullable()
+      .test("required", "", (value) => value !== null && value !== undefined && value !== ""),
+    page_count: yup
+      .number()
+      .nullable()
+      .transform(emptyToNull)
+      .typeError("")
+      .integer("")
+      .min(1, "")
+      .required(""),
+    // Optional; when filled the backend only accepts a positive count.
+    completed_page_count: yup
+      .number()
+      .nullable()
+      .transform(emptyToNull)
+      .typeError("")
+      .integer("")
+      .min(1, "")
+      .optional(),
+    price: yup
+      .number()
+      .nullable()
+      .transform(emptyToNull)
+      .typeError("")
+      .required(""),
+    expense_price: yup
+      .number()
+      .nullable()
+      .transform(emptyToNull)
+      .typeError("")
+      .required(""),
     note: stringOptionalValidSchema(),
   });
 
@@ -360,9 +428,9 @@ export const useValidShema = () => {
     amount: yup
       .number()
       .typeError(t("cafeteria.validation.amountRequired"))
-      .positive(t("cafeteria.validation.amountPositive"))
+      .notOneOf([0], t("cafeteria.validation.amountNotZero"))
       .required(t("cafeteria.validation.amountRequired")),
-    date: stringRequiredValidSchema(t("cafeteria.validation.dateRequired")),
+    date: optionalDateSchema.required(t("cafeteria.validation.dateRequired")),
     description: stringOptionalValidSchema(),
   });
 
