@@ -248,6 +248,8 @@ const NotificationPage = () => {
             value={activeTab}
             onChange={handleTabChange}
             tabs={notificationTabs}
+            variant="pills"
+            color="blue"
           />
         </Box>
       </Paper>

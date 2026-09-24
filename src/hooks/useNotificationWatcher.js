@@ -7,7 +7,7 @@ import { showNotificationToast } from '../components/NotificationToast';
 import { PATHS } from '../routes/paths';
 import { useLocale } from './useLocale';
 
-const WATCHER_INTERVAL_MS = 2 * 60 * 1000; // 2 minutes
+const WATCHER_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes
 const LAST_CHECK_KEY = 'oguz_last_notification_check_time';
 const SEEN_IDS_KEY = 'oguz_seen_notification_ids';
 
