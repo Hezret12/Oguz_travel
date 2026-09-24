@@ -21,28 +21,6 @@ const formatGender = (gender) => {
   return g;
 };
 
-const getOfficeName = (office) => {
-  if (!office) return "";
-  if (typeof office === "string") return office.trim();
-  if (office.shortName?.tk) return String(office.shortName.tk).trim();
-  if (office.fullName?.tk) return String(office.fullName.tk).trim();
-  if (typeof office.shortName === "string" && office.shortName) return office.shortName.trim();
-  if (typeof office.fullName === "string" && office.fullName) return office.fullName.trim();
-  if (office.shortName?.en) return String(office.shortName.en).trim();
-  if (office.fullName?.en) return String(office.fullName.en).trim();
-  if (office.shortName?.ru) return String(office.shortName.ru).trim();
-  if (office.fullName?.ru) return String(office.fullName.ru).trim();
-  if (office.name) return String(office.name).trim();
-  if (office.title) return String(office.title).trim();
-  return "";
-};
-
-const resolveOfficeName = (row) => {
-  const opr = row.received_opr;
-  const office = row.office || opr?.office;
-  return getOfficeName(office);
-};
-
 const getTurkmenOrdinalSuffix = (year) => {
   const y = Number(year);
   const lastTwo = y % 100;
@@ -157,8 +135,12 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   const columnsConfig = [
     { header: "T/b", key: "index_number", width: 8, align: "center" },
     { header: "Arza №", key: "application_number", width: 14, align: "center" },
-    { header: "Ofis", key: "office", width: 14, align: "center" },
-    { header: "Syýahatçynyň F.A.A.a.", key: "client_name", width: 34, align: "left" },
+    {
+      header: "Syýahatçynyň F.A.A.a.",
+      key: "client_name",
+      width: 34,
+      align: "left",
+    },
     { header: "Jynsy", key: "gender", width: 12, align: "center" },
     { header: "Doglan senesi", key: "dob", width: 16, align: "center" },
     {
@@ -176,26 +158,40 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       note: "Gidýän Ýurdy",
     },
     {
-      header: "BGN Gidiş",
-      key: "bgn_departure",
-      width: 16,
-      align: "center",
-      note: "BGN Gidiş",
-    },
-    {
       header: "S-ÝH №",
       key: "travel_doc",
       width: 18,
       align: "center",
       note: "Syýahat ýolhatynyň №",
     },
-    { header: "Gidýän wagty", key: "departure_date", width: 16, align: "center" },
+    {
+      header: "Gidýän wagty",
+      key: "departure_date",
+      width: 16,
+      align: "center",
+    },
     { header: "Gelýän wagty", key: "return_date", width: 16, align: "center" },
-    { header: "Bahasy (TMT)", key: "price", width: 18, align: "right" },
-    { header: "Operator", key: "operator", width: 16, align: "center" },
-    { header: "AGENT", key: "agent_name", width: 18, align: "left" },
-    { header: "şertnama №", key: "contract_number", width: 16, align: "center" },
-    { header: "şertnama sene", key: "contract_date", width: 16, align: "center" },
+    {
+      header: "BGN Gidiş",
+      key: "bgn_departure",
+      width: 16,
+      align: "center",
+      note: "BGN Gidiş",
+    },
+    { header: "Syýahat operator/agent", key: "operator", width: 16, align: "center" },
+    { header: "Bahasy, TMT", key: "price", width: 18, align: "right" },
+    {
+      header: "Şertnama №",
+      key: "contract_number",
+      width: 16,
+      align: "center",
+    },
+    {
+      header: "Şertnama sene",
+      key: "contract_date",
+      width: 16,
+      align: "center",
+    },
   ];
 
   const priceColIdx = columnsConfig.findIndex((c) => c.key === "price");
@@ -321,31 +317,38 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
 
     const clientName = row.client?.fullName ? String(row.client.fullName) : "";
 
-    const agentName = row.agent?.name
-      ? String(row.agent.name).trim()
-      : typeof row.agent === "string"
-      ? row.agent.trim()
-      : "";
-
-    const rowData = [
-      row.index_number ?? offset + 1,
-      row.application_number ? String(row.application_number).trim() : "",
-      resolveOfficeName(row),
-      clientName,
-      formatGender(row.client?.gender),
-      formatDate(row.client?.dateOfBirth),
-      row.client?.passport_number ? String(row.client.passport_number).toUpperCase() : "",
-      row.destination_country ? String(row.destination_country).trim() : "",
-      row.bgn_departure ? String(row.bgn_departure).trim() : (row.tranzit ? String(row.tranzit).trim() : ""),
-      formatYhNumber(row.travel_document_number),
-      formatDate(row.departure_date),
-      formatDate(row.return_date),
+    // Values keyed by column key — order comes from columnsConfig
+    const values = {
+      index_number: offset + 1,
+      application_number: row.application_number
+        ? String(row.application_number).trim()
+        : "",
+      client_name: clientName,
+      gender: formatGender(row.client?.gender),
+      dob: formatDate(row.client?.dateOfBirth),
+      passport: row.client?.passport_number
+        ? String(row.client.passport_number).toUpperCase()
+        : "",
+      destination_country: row.destination_country
+        ? String(row.destination_country).trim()
+        : "",
+      bgn_departure: row.bgn_departure
+        ? String(row.bgn_departure).trim()
+        : row.tranzit
+          ? String(row.tranzit).trim()
+          : "",
+      travel_doc: formatYhNumber(row.travel_document_number),
+      departure_date: formatDate(row.departure_date),
+      return_date: formatDate(row.return_date),
       price,
-      "Oguzabat",
-      agentName,
-      row.contract_number ? String(row.contract_number).trim() : "",
-      formatDate(row.contract_date),
-    ];
+      operator: '"Oguzabat" HJ',
+      contract_number: row.contract_number
+        ? String(row.contract_number).trim()
+        : "",
+      contract_date: formatDate(row.contract_date),
+    };
+
+    const rowData = columnsConfig.map((col) => values[col.key] ?? "");
 
     rowData.forEach((val, idx) => {
       const colNumber = START_COL + idx;
