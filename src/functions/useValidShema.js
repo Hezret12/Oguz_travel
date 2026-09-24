@@ -165,6 +165,9 @@ export const useValidShema = () => {
   });
 
   const addTurkishAirlinesTicket = yup.object({
+    // Required, complete and within 2000–2100.
+    datetime: silentDate.required(""),
+    flight_date: silentDate.required(""),
     client_guid: yup
       .string()
       .nullable()

@@ -305,6 +305,8 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomDatePicker
                   name="datetime"
+                  validateFormat
+                  required
                   control={control}
                   label={t("columns.issueDate")}
                 />
@@ -335,6 +337,8 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <CustomDatePicker
                   name="flight_date"
+                  validateFormat
+                  required
                   control={control}
                   label={t("columns.flightDate")}
                 />
