@@ -56,6 +56,18 @@ export const themeConfig = createTheme({
     borderRadius: 10,
   },
   components: {
+    // Browser autofill forces its own (black) text color; keep the theme's text
+    // color so autofilled values stay readable in dark mode.
+    MuiInputBase: {
+      styleOverrides: {
+        input: ({ theme }) => ({
+          '&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active': {
+            WebkitTextFillColor: theme.palette.text.primary,
+            caretColor: theme.palette.text.primary,
+          },
+        }),
+      },
+    },
     MuiPaper: {
       styleOverrides: {
         root: ({ theme }) => ({
