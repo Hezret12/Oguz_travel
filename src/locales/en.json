@@ -54,7 +54,8 @@
     "passportInvalid": "Invalid passport number",
     "messageMin": "Message must be at least 10 characters",
     "minPassengers": "At least 1 passenger must be selected",
-    "invalidReturnDate": "Return date cannot be before departure date"
+    "invalidReturnDate": "Return date cannot be before departure date",
+    "invalidDate": "Invalid date format"
   },
   "deleteConfirm": {
     "employee": "Are you sure you want to delete this employee? This action cannot be undone."

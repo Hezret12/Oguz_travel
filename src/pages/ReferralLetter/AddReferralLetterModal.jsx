@@ -147,6 +147,7 @@ const AddReferralLetterModal = ({ table }) => {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <CustomDatePicker
               name="departure_date"
+              validateFormat
               control={control}
               label={t("columns.departureDate")}
               required
@@ -155,6 +156,7 @@ const AddReferralLetterModal = ({ table }) => {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <CustomDatePicker
               name="return_date"
+              validateFormat
               control={control}
               label={t("columns.returnDate")}
               required
@@ -182,6 +184,7 @@ const AddReferralLetterModal = ({ table }) => {
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <CustomDatePicker
               name="contract_date"
+              validateFormat
               control={control}
               label={t("columns.contractDate")}
               required

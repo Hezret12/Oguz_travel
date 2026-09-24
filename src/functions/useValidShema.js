@@ -62,6 +62,12 @@ export const useValidShema = () => {
     }),
   });
 
+  // Optional date: may be left empty, but anything typed must be a real date.
+  const optionalDateSchema = yup
+    .string()
+    .nullable()
+    .test("valid-date", t("validation.invalidDate"), (value) => !value || dayjs(value).isValid());
+
   const addReferralLetter = yup.object({
     // Sent in its 7-digit form; old records missing their leading zeros are padded back.
     travel_document_number: yup
@@ -72,6 +78,9 @@ export const useValidShema = () => {
       .test("yh-number", t("referralLetter.letterNoInvalid"), isYhNumber),
     bgn_departure: stringOptionalValidSchema(),
     note: stringOptionalValidSchema(),
+    departure_date: optionalDateSchema,
+    return_date: optionalDateSchema,
+    contract_date: optionalDateSchema,
   });
 
   const addVisa = yup.object({

@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { Box } from "@mui/material";
 import OverflowTooltipLabel from "./OverflowTooltipLabel";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { Controller } from "react-hook-form";
 import dayjs from "dayjs";
+
+// Form value stored for a typed-but-invalid date when `validateFormat` is on,
+// so the form schema can reject it instead of it being silently dropped.
+export const INVALID_DATE = "Invalid Date";
 
 const CustomDatePicker = ({
   name,
@@ -18,9 +23,12 @@ const CustomDatePicker = ({
   sx = {},
   inputSx = {},
   slotProps: externalSlotProps = {},
+  validateFormat = false,
   ...props
 }) => {
   const PickerComponent = showTime ? DateTimePicker : DatePicker;
+  // The picker's own invalid value, fed back so the typed sections stay on screen.
+  const [invalidDraft, setInvalidDraft] = useState(null);
 
   return (
     <Controller
@@ -30,11 +38,12 @@ const CustomDatePicker = ({
       render={({ field, fieldState: { error } }) => {
         const hasError = Boolean(error);
 
-        const parsedValue = field.value
-          ? dayjs(field.value).isValid()
-            ? dayjs(field.value)
-            : null
-          : null;
+        const parsedValue =
+          field.value === INVALID_DATE
+            ? invalidDraft
+            : field.value && dayjs(field.value).isValid()
+              ? dayjs(field.value)
+              : null;
 
         return (
           <Box
@@ -100,6 +109,9 @@ const CustomDatePicker = ({
                   field.onChange(null);
                 } else if (dayjs.isDayjs(newValue) && newValue.isValid()) {
                   field.onChange(newValue.toISOString());
+                } else if (validateFormat) {
+                  setInvalidDraft(newValue);
+                  field.onChange(INVALID_DATE);
                 }
               }}
               format={format}

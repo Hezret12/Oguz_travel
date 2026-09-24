@@ -54,7 +54,8 @@
     "passportInvalid": "Dogry girizilmedi",
     "messageMin": "Düşündiriş 10 harpdan az bolmaly",
     "minPassengers": "1 myhman saýlanmaly",
-    "invalidReturnDate": "Gidiş senesinden öň bolup bilmez"
+    "invalidReturnDate": "Gidiş senesinden öň bolup bilmez",
+    "invalidDate": "Sene nädogry girizildi"
   },
   "deleteConfirm": {
     "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi?"
