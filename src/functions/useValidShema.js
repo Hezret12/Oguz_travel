@@ -291,8 +291,8 @@ export const useValidShema = () => {
     opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
     client_name: yup.string().required(t("validation.required") || "Hökman girizilmeli"),
     prepared_opr_guid: yup.string().nullable().required(t("validation.required") || "Hökman girizilmeli"),
-    net_fare: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
-    price: yup.number().nullable().typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
+    net_fare: yup.number().nullable().transform((value, original) => (original === "" ? null : value)).typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
+    price: yup.number().nullable().transform((value, original) => (original === "" ? null : value)).typeError(t("validation.requiredNumber") || "San bolmaly").required(t("validation.required") || "Hökman girizilmeli"),
   });
 
   const addNotification = yup.object({
