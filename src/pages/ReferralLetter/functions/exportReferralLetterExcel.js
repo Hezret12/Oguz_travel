@@ -155,7 +155,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       key: "destination_country",
       width: 18,
       align: "center",
-      note: "Gidýän Ýurdy",
     },
     {
       header: "S-ÝH №",
@@ -176,9 +175,8 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       key: "bgn_departure",
       width: 16,
       align: "center",
-      note: "BGN Gidiş",
     },
-    { header: "Syýahat operator/agent", key: "operator", width: 16, align: "center" },
+    { header: "Syýahat operator/agent", key: "operator", width: 25, align: "center" },
     { header: "Bahasy, TMT", key: "price", width: 18, align: "right" },
     {
       header: "Şertnama №",
