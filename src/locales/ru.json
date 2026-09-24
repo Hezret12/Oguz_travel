@@ -922,7 +922,11 @@
   "autocomplete": {
     "addClient": "Добавить клиента",
     "noEmployeeFound": "Сотрудник не найден",
-    "noClientFound": "Клиент не найден"
+    "noClientFound": "Клиент не найден",
+    "selectedCount": "Выбрано: {{count}}",
+    "clearSelection": "Очистить выбор",
+    "noUserFound": "Пользователь не найден",
+    "moreSelected": "и ещё {{count}}"
   },
   "fields": {
     "fullName": "Полное имя",

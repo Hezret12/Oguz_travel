@@ -128,7 +128,13 @@ const FlatItem = ({ item, isActive, onSidebarClose, collapsed, isDark }) => {
 const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, collapsed, isDark }) => {
   const t = getTokens(isDark);
   const itemKey = item.id || item.text;
-  const hasActiveChild = item.children?.some((c) => isPathActive(c.path, location.pathname));
+  // Sibling paths can be prefixes of each other (/employee vs /employee/users),
+  // so only the most specific matching child counts as active.
+  const activeChildPath = item.children?.reduce((best, c) => {
+    if (!isPathActive(c.path, location.pathname)) return best;
+    return !best || c.path.length > best.length ? c.path : best;
+  }, null);
+  const hasActiveChild = Boolean(activeChildPath);
 
   const headerEl = (
     <ListItemButton
@@ -229,13 +235,15 @@ const GroupItem = ({ item, location, onSidebarClose, isExpanded, onToggleGroup, 
         >
           {item.children?.map((child) => {
             const childKey = child.id || child.path || child.text;
-            const isChildActive = isPathActive(child.path, location.pathname);
+            const isChildActive = child.path === activeChildPath;
             return (
               <ListItemButton
                 key={childKey}
                 component={NavLink}
                 to={child.path}
-                end={child.path === '/' || child.path === PATHS.ROOT}
+                // Active state comes from `selected`; `end` stops NavLink's own
+                // prefix-matching `.active` class from highlighting a parent path too
+                end
                 selected={isChildActive}
                 onClick={onSidebarClose}
                 sx={{

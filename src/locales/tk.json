@@ -922,7 +922,11 @@
   "autocomplete": {
     "addClient": "Täze müşderi goşmak",
     "noEmployeeFound": "Işgär tapylmady",
-    "noClientFound": "Müşderi tapylmady"
+    "noClientFound": "Müşderi tapylmady",
+    "selectedCount": "{{count}} sany saýlandy",
+    "clearSelection": "Saýlanany arassala",
+    "noUserFound": "Ulanyjy tapylmady",
+    "moreSelected": "we ýene {{count}} sany"
   },
   "fields": {
     "fullName": "Doly ady",

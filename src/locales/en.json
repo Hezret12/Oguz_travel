@@ -922,7 +922,11 @@
   "autocomplete": {
     "addClient": "Add Client",
     "noEmployeeFound": "No employee found",
-    "noClientFound": "No client found"
+    "noClientFound": "No client found",
+    "selectedCount": "{{count}} selected",
+    "clearSelection": "Clear selection",
+    "noUserFound": "No user found",
+    "moreSelected": "and {{count}} more"
   },
   "fields": {
     "fullName": "Full Name",

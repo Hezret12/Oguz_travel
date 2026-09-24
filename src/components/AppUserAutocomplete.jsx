@@ -7,6 +7,7 @@ import {
   Chip,
   Checkbox,
   CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
 import { ChevronDown } from "lucide-react";
@@ -16,9 +17,15 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import { useInfiniteGet } from "../hooks/useInfiniteGet";
 import { getAllUsersApi } from "../api/queries/getters";
 import { useDebounce } from "../hooks/useDebounce";
+import { useLocale } from "../hooks/useLocale";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
+// Chips rendered inside the input before collapsing the rest into "+N"
+const MAX_VISIBLE_CHIPS = 3;
+// Names listed in the "+N" tooltip before summarising the remainder
+const MAX_TOOLTIP_NAMES = 12;
 
 export default function AppUserAutocomplete({
   name,
@@ -34,8 +41,15 @@ export default function AppUserAutocomplete({
   multiple = true,
   initialOptions = [],
 }) {
+  const { t } = useLocale();
+
+  // `inputValue` is what the field displays; `searchTerm` is what we query with.
+  // They are split so MUI's internal resets (after a selection or a value change)
+  // can't wipe what the user is typing or trigger a search for a selected label.
   const [inputValue, setInputValue] = useState("");
-  const debouncedSearch = useDebounce(inputValue, 350);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 350);
+  const trimmedSearch = debouncedSearch.trim();
 
   const {
     data: rawUsersData,
@@ -43,12 +57,13 @@ export default function AppUserAutocomplete({
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isFetching,
   } = useInfiniteGet({
     apiFn: getAllUsersApi,
     key: ["users", "autocomplete"],
     params: {
       limit: 40,
-      search: debouncedSearch.trim() || undefined,
+      search: trimmedSearch || undefined,
     },
   });
 
@@ -86,8 +101,26 @@ export default function AppUserAutocomplete({
     });
   }, [rawUsersData]);
 
-  // Combine fetched options with initial / preserved options
-  const options = useMemo(() => {
+  // Every option we know about, used to resolve selected guids into chips.
+  // `selectedMap` goes last so a selected option keeps a stable object identity.
+  const knownOptions = useMemo(() => {
+    const map = new Map();
+    initialOptions.forEach((opt) => {
+      if (opt?.value) map.set(opt.value, opt);
+    });
+    fetchedOptions.forEach((opt) => {
+      if (opt?.value) map.set(opt.value, opt);
+    });
+    Object.values(selectedMap).forEach((opt) => {
+      if (opt?.value) map.set(opt.value, opt);
+    });
+    return map;
+  }, [fetchedOptions, initialOptions, selectedMap]);
+
+  // Options shown in the dropdown. While searching, show only the server's
+  // matches — previously selected users stay as chips but don't pollute results.
+  const listOptions = useMemo(() => {
+    if (trimmedSearch) return fetchedOptions;
     const map = new Map();
     initialOptions.forEach((opt) => {
       if (opt?.value) map.set(opt.value, opt);
@@ -96,10 +129,10 @@ export default function AppUserAutocomplete({
       if (opt?.value) map.set(opt.value, opt);
     });
     fetchedOptions.forEach((opt) => {
-      if (opt?.value) map.set(opt.value, opt);
+      if (opt?.value && !map.has(opt.value)) map.set(opt.value, opt);
     });
     return Array.from(map.values());
-  }, [fetchedOptions, initialOptions, selectedMap]);
+  }, [trimmedSearch, fetchedOptions, initialOptions, selectedMap]);
 
   const handleListboxScroll = useCallback(
     (event) => {
@@ -116,6 +149,28 @@ export default function AppUserAutocomplete({
     [hasNextPage, isFetchingNextPage, fetchNextPage]
   );
 
+  const handleInputChange = useCallback(
+    (_, newInputValue, reason) => {
+      if (reason === "input") {
+        setInputValue(newInputValue);
+        setSearchTerm(newInputValue);
+        return;
+      }
+      if (reason === "clear" || reason === "blur") {
+        setInputValue(multiple ? "" : newInputValue);
+        setSearchTerm("");
+        return;
+      }
+      // "reset" / "selectOption" / "removeOption": in multiple mode keep the
+      // typed search so several users can be picked from the same results.
+      if (!multiple) {
+        setInputValue(newInputValue);
+        setSearchTerm("");
+      }
+    },
+    [multiple]
+  );
+
   const renderAutocompleteField = ({
     value,
     onChange,
@@ -126,8 +181,16 @@ export default function AppUserAutocomplete({
     const currentValues = Array.isArray(value) ? value : value ? [value] : [];
 
     const selectedValue = multiple
-      ? options.filter((opt) => currentValues.includes(opt.value))
-      : options.find((opt) => opt.value === value) || null;
+      ? currentValues.map((guid) => knownOptions.get(guid)).filter(Boolean)
+      : knownOptions.get(value) || null;
+
+    // A single-select value must exist in `options` or MUI warns.
+    const options =
+      !multiple && selectedValue && !listOptions.includes(selectedValue)
+        ? [selectedValue, ...listOptions]
+        : listOptions;
+
+    const showSpinner = isLoading || isFetchingNextPage || (isFetching && Boolean(trimmedSearch));
 
     return (
       <Box sx={{ width: fullWidth ? "100%" : "auto" }}>
@@ -156,14 +219,13 @@ export default function AppUserAutocomplete({
           disabled={disabled}
           options={options}
           value={selectedValue}
+          inputValue={inputValue}
+          onInputChange={handleInputChange}
           filterOptions={(x) => x}
           popupIcon={<ChevronDown size={18} />}
           loading={isLoading || isFetchingNextPage}
-          onInputChange={(_, newInputValue, reason) => {
-            if (reason === "input" || reason === "clear") {
-              setInputValue(newInputValue);
-            }
-          }}
+          loadingText={t("loading")}
+          noOptionsText={t("autocomplete.noUserFound")}
           getOptionKey={(option, index) =>
             option?.value ?? option?.userGuid ?? index
           }
@@ -174,11 +236,13 @@ export default function AppUserAutocomplete({
           onChange={(_, newValue) => {
             if (multiple) {
               const selectedArr = Array.isArray(newValue) ? newValue : [];
-              const newMap = { ...selectedMap };
-              selectedArr.forEach((item) => {
-                if (item?.value) newMap[item.value] = item;
+              setSelectedMap((prev) => {
+                const next = { ...prev };
+                selectedArr.forEach((item) => {
+                  if (item?.value) next[item.value] = item;
+                });
+                return next;
               });
-              setSelectedMap(newMap);
 
               onChange(selectedArr.map((v) => v.value));
             } else {
@@ -200,7 +264,10 @@ export default function AppUserAutocomplete({
           {...(multiple
             ? {
                 renderValue: (selectedOptions, getItemProps) => {
-                  return selectedOptions.map((opt, idx) => {
+                  const visible = selectedOptions.slice(0, MAX_VISIBLE_CHIPS);
+                  const hidden = selectedOptions.slice(MAX_VISIBLE_CHIPS);
+
+                  const chips = visible.map((opt, idx) => {
                     const { key: tagKey, ...tagProps } = getItemProps({ index: idx });
                     delete tagProps.ownerState;
 
@@ -222,6 +289,51 @@ export default function AppUserAutocomplete({
                       />
                     );
                   });
+
+                  if (hidden.length > 0) {
+                    const listed = hidden.slice(0, MAX_TOOLTIP_NAMES);
+                    const rest = hidden.length - listed.length;
+
+                    chips.push(
+                      <Tooltip
+                        key="__more__"
+                        arrow
+                        placement="top"
+                        title={
+                          <Box sx={{ py: 0.25 }}>
+                            {listed.map((opt) => (
+                              <Box key={opt.value} sx={{ fontSize: "0.75rem", lineHeight: 1.6 }}>
+                                {opt.label}
+                              </Box>
+                            ))}
+                            {rest > 0 && (
+                              <Box sx={{ fontSize: "0.75rem", lineHeight: 1.6, opacity: 0.75, mt: 0.25 }}>
+                                {t("autocomplete.moreSelected", { count: rest })}
+                              </Box>
+                            )}
+                          </Box>
+                        }
+                      >
+                        <Chip
+                          label={`+${hidden.length}`}
+                          size="small"
+                          sx={{
+                            borderRadius: "6px",
+                            height: "24px",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            my: 0.25,
+                            mr: 0.5,
+                            bgcolor: "action.selected",
+                            color: "text.primary",
+                            cursor: "default",
+                          }}
+                        />
+                      </Tooltip>
+                    );
+                  }
+
+                  return chips;
                 },
               }
             : {})}
@@ -282,7 +394,7 @@ export default function AppUserAutocomplete({
                     ...paramsSlotProps?.input,
                     endAdornment: (
                       <>
-                        {isLoading || isFetchingNextPage ? (
+                        {showSpinner ? (
                           <CircularProgress color="inherit" size={18} sx={{ mr: 1 }} />
                         ) : null}
                         {paramsSlotProps?.input?.endAdornment || InputProps?.endAdornment}
@@ -310,6 +422,8 @@ export default function AppUserAutocomplete({
                   },
                   "& .MuiOutlinedInput-input": {
                     py: "4px",
+                    // Keep room to type even when the row is full of chips
+                    minWidth: "80px !important",
                   },
                   "& .MuiFormHelperText-root": {
                     position: "absolute",

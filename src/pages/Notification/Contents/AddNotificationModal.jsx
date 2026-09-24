@@ -5,8 +5,10 @@ import {
   Typography,
   Switch,
   FormControlLabel,
+  Chip,
+  Button,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
@@ -39,6 +41,13 @@ const AddNotificationModal = ({ open, onClose }) => {
     resolver: yupResolver(addNotification),
     mode: "onSubmit",
   });
+
+  const assigneeGuids = useWatch({ control, name: "assignee_guids" });
+  const selectedCount = Array.isArray(assigneeGuids) ? assigneeGuids.length : 0;
+
+  const handleClearSelection = useCallback(() => {
+    setValue("assignee_guids", []);
+  }, [setValue]);
 
   const { mutateAsync: createNotification, isPending } = useCreate({
     apiFn: addNotificationApi,
@@ -130,6 +139,40 @@ const AddNotificationModal = ({ open, onClose }) => {
                 >
                   *
                 </Box>
+                {!isSendToAll && selectedCount > 0 && (
+                  <>
+                    <Chip
+                      size="small"
+                      label={t("autocomplete.selectedCount", { count: selectedCount })}
+                      sx={{
+                        ml: 1,
+                        height: 20,
+                        fontSize: "0.7rem",
+                        fontWeight: 700,
+                        borderRadius: "6px",
+                        bgcolor: "action.selected",
+                        color: "text.primary",
+                      }}
+                    />
+                    <Button
+                      size="small"
+                      onClick={handleClearSelection}
+                      sx={{
+                        ml: 0.5,
+                        minWidth: 0,
+                        px: 0.75,
+                        py: 0,
+                        fontSize: "0.7rem",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        color: "text.secondary",
+                        "&:hover": { color: "error.main", bgcolor: "action.hover" },
+                      }}
+                    >
+                      {t("autocomplete.clearSelection")}
+                    </Button>
+                  </>
+                )}
               </Typography>
 
               <FormControlLabel
