@@ -14,7 +14,6 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CurrencyAmount from "../../components/inputs/CurrencyAmount";
-import PhoneNumberField from "../../components/inputs/PhoneNumber";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import LabelWithTooltip from "../../components/LabelWithTooltip";
 import { YH_INPUT_PROPS } from "../../functions/yhNumber";
@@ -46,10 +45,6 @@ const EditReferralLetterModal = ({ table, row }) => {
       client_guid: row?.original?.client_guid || row?.original?.client?.guid || null,
       application_number: row?.original?.application_number || null,
       received_opr_guid: row?.original?.received_opr_guid || null,
-      agent: {
-        name: row?.original?.agent?.name || null,
-        phone_number: row?.original?.agent?.phone_number || null,
-      },
       destination_country: row?.original?.destination_country || null,
       bgn_departure: row?.original?.bgn_departure || row?.original?.tranzit || null,
       travel_document_number: row?.original?.travel_document_number || null,
@@ -208,18 +203,6 @@ const EditReferralLetterModal = ({ table, row }) => {
             name="application_number"
             control={control}
             label={t("application_number")}
-          />
-
-          <CustomTextField
-            name="agent.name"
-            control={control}
-            label={t("columns.agentFullName")}
-          />
-
-          <PhoneNumberField
-            name="agent.phone_number"
-            control={control}
-            label={t("columns.phoneNumber")}
           />
 
           <Box sx={{ gridColumn: "1 / -1" }}>

@@ -14,7 +14,6 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CurrencyAmount from "../../components/inputs/CurrencyAmount";
-import PhoneNumberField from "../../components/inputs/PhoneNumber";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import LabelWithTooltip from "../../components/LabelWithTooltip";
 import { YH_INPUT_PROPS } from "../../functions/yhNumber";
@@ -47,7 +46,6 @@ const AddReferralLetterModal = ({ table }) => {
       client_guid: null,
       application_number: null,
       received_opr_guid: null,
-      agent: { name: null, phone_number: null },
       destination_country: null,
       bgn_departure: null,
       travel_document_number: null,
@@ -189,18 +187,6 @@ const AddReferralLetterModal = ({ table }) => {
             name="application_number"
             control={control}
             label={t("application_number")}
-          />
-
-          <CustomTextField
-            name="agent.name"
-            control={control}
-            label={t("columns.agentFullName")}
-          />
-
-          <PhoneNumberField
-            name="agent.phone_number"
-            control={control}
-            label={t("columns.phoneNumber")}
           />
 
           <Box sx={{ gridColumn: "1 / -1" }}>

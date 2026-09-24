@@ -11,7 +11,6 @@ import GlobalSearchInput from "../../components/GlobalSearchInput";
 import Pagination from "../../components/Pagination";
 import TableEmptyState from "../../components/TableEmptyState";
 import TableErrorState from "../../components/TableErrorState";
-import StackedCell from "../../components/inputs/StackCell";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import OperatorsCell from "../../components/OperatorsCell";
 import ClientCell from "../../components/ClientCell";
@@ -355,18 +354,6 @@ const ReferalLetter = () => {
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
-      },
-      {
-        id: "agent",
-        header: t("columns.agent"),
-        size: 170,
-        accessorFn: (row) => row.agent?.name ?? "",
-        Cell: ({ row }) => (
-          <StackedCell
-            primary={row.original.agent?.name}
-            secondary={row.original.agent?.phone_number}
-          />
-        ),
       },
       {
         accessorKey: "note",
