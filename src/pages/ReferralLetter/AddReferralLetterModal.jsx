@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { Box } from "@mui/material";
-import { useForm, useWatch } from "react-hook-form";
+import { Grid } from "@mui/material";
+import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 
@@ -13,17 +13,11 @@ import CustomTextField from "../../components/CustomTextField";
 import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
-import CurrencyAmount from "../../components/inputs/CurrencyAmount";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import LabelWithTooltip from "../../components/LabelWithTooltip";
 import { YH_INPUT_PROPS } from "../../functions/yhNumber";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addReferralLetterApi } from "../../api/queries/post";
-
-const REFERRAL_CURRENCIES = [
-  { code: "USD", symbol: "$" },
-  { code: "TMT", symbol: "m" },
-];
 
 const AddReferralLetterModal = ({ table }) => {
   const { t } = useLocale();
@@ -40,7 +34,7 @@ const AddReferralLetterModal = ({ table }) => {
     },
   });
 
-  const { control, handleSubmit, setValue } = useForm({
+  const { control, handleSubmit } = useForm({
     defaultValues: {
       date_time: dayjs().format("YYYY-MM-DD"),
       client_guid: null,
@@ -61,8 +55,6 @@ const AddReferralLetterModal = ({ table }) => {
     mode: "onSubmit",
   });
 
-  const selectedCurrency = useWatch({ control, name: "currency" }) || "TMT";
-
   const closeDialog = () => {
     table.setCreatingRow(null);
   };
@@ -78,6 +70,7 @@ const AddReferralLetterModal = ({ table }) => {
       datetime: values.date_time || formattedDate,
       date: formattedDate,
       price: Number(values.price || 0),
+      currency: "TMT",
     });
   };
 
@@ -95,108 +88,114 @@ const AddReferralLetterModal = ({ table }) => {
     <CustomDialog widthX={860} open={true} close={closeDialog}>
       <CustomDialogHeader variant="h5" title={t("referralLetter.add")} />
       <CustomForm handleSubmit={handleSubmit(submitHandler)}>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
-            gap: 2.5,
-            mb: 2,
-          }}
-        >
-          <Box sx={{ gridColumn: "1 / -1" }}>
+        <Grid container spacing={2.5} sx={{ mb: 2 }}>
+          <Grid size={12}>
             <GlobalClientAutocomplete
               control={control}
               name="client_guid"
               label={t("columns.client")}
               columns={autocompleteColumns}
             />
-          </Box>
+          </Grid>
 
-          <GlobalEmployeeAutocomplete
-            name="received_opr_guid"
-            control={control}
-            label={t("outbound.operator")}
-            required
-          />
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <GlobalEmployeeAutocomplete
+              name="received_opr_guid"
+              control={control}
+              label={t("outbound.operator")}
+              required
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <CustomTextField
+              name="destination_country"
+              control={control}
+              label={t("columns.destinationCountry")}
+              required
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <CustomTextField
+              name="bgn_departure"
+              control={control}
+              label={t("columns.bgnDeparture")}
+            />
+          </Grid>
 
-          <CustomTextField
-            name="destination_country"
-            control={control}
-            label={t("columns.destinationCountry")}
-            required
-          />
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <CustomTextField
+              name="application_number"
+              control={control}
+              label={t("application_number")}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <CustomTextField
+              name="travel_document_number"
+              control={control}
+              placeholder="0369420"
+              InputProps={YH_INPUT_PROPS}
+              label={
+                <LabelWithTooltip
+                  label={t("columns.syhNo", "S-ÝH №")}
+                  tooltip={t("referralLetter.travel_doc_tooltip")}
+                />
+              }
+              required
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <CustomDatePicker
+              name="departure_date"
+              control={control}
+              label={t("columns.departureDate")}
+              required
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <CustomDatePicker
+              name="return_date"
+              control={control}
+              label={t("columns.returnDate")}
+              required
+            />
+          </Grid>
 
-          <CustomTextField
-            name="bgn_departure"
-            control={control}
-            label={t("columns.bgnDeparture")}
-          />
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <CustomTextField
+              name="price"
+              control={control}
+              label={t("price")}
+              type="number"
+              allowNegative={false}
+              endIcon="TMT"
+              required
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <CustomTextField
+              name="contract_number"
+              control={control}
+              label={t("columns.contract_number")}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <CustomDatePicker
+              name="contract_date"
+              control={control}
+              label={t("columns.contractDate")}
+              required
+            />
+          </Grid>
 
-          <CustomDatePicker
-            name="departure_date"
-            control={control}
-            label={t("columns.departureDate")}
-            required
-          />
-
-          <CustomDatePicker
-            name="return_date"
-            control={control}
-            label={t("columns.returnDate")}
-            required
-          />
-
-          <CustomTextField
-            name="travel_document_number"
-            control={control}
-            placeholder="0369420"
-            InputProps={YH_INPUT_PROPS}
-            label={
-              <LabelWithTooltip
-                label={t("columns.syhNo", "S-ÝH №")}
-                tooltip={t("referralLetter.travel_doc_tooltip")}
-              />
-            }
-            required
-          />
-
-          <CurrencyAmount
-            name="price"
-            control={control}
-            label={t("price")}
-            currency={selectedCurrency}
-            currencies={REFERRAL_CURRENCIES}
-            onCurrencyChange={(curr) => setValue("currency", curr)}
-            required
-          />
-
-          <CustomTextField
-            name="contract_number"
-            control={control}
-            label={t("columns.contract_number")}
-          />
-
-          <CustomDatePicker
-            name="contract_date"
-            control={control}
-            label={t("columns.contractDate")}
-            required
-          />
-
-          <CustomTextField
-            name="application_number"
-            control={control}
-            label={t("application_number")}
-          />
-
-          <Box sx={{ gridColumn: "1 / -1" }}>
+          <Grid size={12}>
             <CustomTextField
               name="note"
               control={control}
               label={t("columns.note")}
             />
-          </Box>
-        </Box>
+          </Grid>
+        </Grid>
 
         <FooterButton loading={isSubmit} onCancel={closeDialog} type="submit" />
       </CustomForm>

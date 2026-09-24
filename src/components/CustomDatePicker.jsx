@@ -70,7 +70,7 @@ const CustomDatePicker = ({
                 textAlign: "left !important",
               },
               "& .MuiPickersSectionList-root": {
-                padding: "0 12px !important",
+                padding: "0 !important",
                 height: "100% !important",
                 display: "flex",
                 alignItems: "center",
@@ -104,7 +104,6 @@ const CustomDatePicker = ({
               }}
               format={format}
               disabled={disabled}
-              enableAccessibleFieldDOMStructure={false}
               slotProps={{
                 textField: {
                   fullWidth: true,
