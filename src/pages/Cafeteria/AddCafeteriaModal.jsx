@@ -65,8 +65,7 @@ const AddCafeteriaModal = ({ table }) => {
       amount: Number(values.amount || 0),
       currency: values.currency || "TMT",
       date: dayjs(values.date).format("YYYY-MM-DD"),
-      // Left empty, the backend uses the creator's office.
-      office_guid: values.office_guid || undefined,
+      office_guid: values.office_guid,
     };
     createTransaction(payload);
   };
@@ -199,6 +198,7 @@ const AddCafeteriaModal = ({ table }) => {
               control={control}
               label={t("columns.office")}
               options={officeOptions}
+              required
             />
           </Grid>
 

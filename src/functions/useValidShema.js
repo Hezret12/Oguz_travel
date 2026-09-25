@@ -436,6 +436,7 @@ export const useValidShema = () => {
       .required(t("cafeteria.validation.amountRequired")),
     date: optionalDateSchema.required(t("cafeteria.validation.dateRequired")),
     description: stringOptionalValidSchema(),
+    office_guid: yup.string().nullable().required(t("validation.required")),
   });
 
   // Money inputs arrive as strings; empty means 0.
