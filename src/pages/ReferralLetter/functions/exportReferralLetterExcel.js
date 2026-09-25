@@ -110,18 +110,71 @@ const resolveDateText = (letters = [], options = {}) => {
     : `${years.join("-")}${suffix} ýyllaryň DOWAMYNDA`;
 };
 
+const bgnDepartureOf = (row) => String(row.bgn_departure || row.tranzit || "").trim();
+
+// Printed 7-digit form; only a plain 7-digit serial sorts by number, anything
+// else (empty, malformed) goes after them.
+const yhSortKey = (row) => {
+  const yh = formatYhNumber(row.travel_document_number);
+  return /^[0-9]{7}$/.test(yh) ? yh : null;
+};
+
+const collator = new Intl.Collator("tk", { sensitivity: "base", numeric: true });
+
+// Empty values last; ties keep a stable, meaningful order via the fallbacks.
+const compareBy = (...keys) => (a, b) => {
+  for (const key of keys) {
+    const x = key(a);
+    const y = key(b);
+    if (!x && !y) continue;
+    if (!x) return 1;
+    if (!y) return -1;
+    const diff = collator.compare(x, y);
+    if (diff) return diff;
+  }
+  return 0;
+};
+
+const departureKey = (row) => String(row.departure_date || "").slice(0, 10);
+
+// Sheet 1 — by BGN departure (then ÝH №); sheet 2 — by ÝH № (then BGN departure).
+const SHEETS = [
+  { name: "BGN Gidiş boýunça", compare: compareBy(bgnDepartureOf, yhSortKey, departureKey) },
+  { name: "S-ÝH № boýunça", compare: compareBy(yhSortKey, bgnDepartureOf, departureKey) },
+];
+
+/**
+ * Two sheets of the same letters: one sorted by BGN departure, one by the ÝH
+ * (travel document) number. Numbering (T/b) restarts at 1 on each sheet.
+ */
 export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   const fileName = options.fileName || "Ýollanma_Hatlary_Hasabaty";
-  const sheetName = options.sheetName || "Ýollanma Hatlary";
-  const dateText = options.dateText || resolveDateText(letters, options);
-  const titleBanner = options.titleBanner;
+  const header = {
+    dateText: options.dateText || resolveDateText(letters, options),
+    titleBanner: options.titleBanner,
+  };
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "OGUZTRAVEL";
   workbook.created = new Date();
 
+  for (const sheet of SHEETS) {
+    addLetterSheet(workbook, sheet.name, [...letters].sort(sheet.compare), header);
+  }
+
+  // Export buffer & download
+  const buffer = await workbook.xlsx.writeBuffer();
+  const cleanFileName = `${fileName}_${dayjs().format("YYYY-MM-DD")}.xlsx`;
+
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(blob, cleanFileName);
+};
+
+function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner }) {
   const worksheet = workbook.addWorksheet(sheetName.substring(0, 31), {
-    views: [{ showGridLines: true }],
+    views: [{ state: "frozen", ySplit: 4, showGridLines: true }],
   });
 
   const START_ROW = 4;
@@ -134,7 +187,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
 
   const columnsConfig = [
     { header: "T/b", key: "index_number", width: 8, align: "center" },
-    { header: "Arza №", key: "application_number", width: 14, align: "center" },
     {
       header: "Syýahatçynyň F.A.A.a.",
       key: "client_name",
@@ -176,14 +228,14 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       width: 16,
       align: "center",
     },
-    { header: "Syýahat operator/agent", key: "operator", width: 25, align: "center" },
-    { header: "Bahasy, TMT", key: "price", width: 18, align: "right" },
     {
-      header: "Şertnama №",
-      key: "contract_number",
+      header: "BGN Geliş",
+      key: "bgn_arrival",
       width: 16,
       align: "center",
     },
+    { header: "Syýahat operator/agent", key: "operator", width: 25, align: "center" },
+    { header: "Bahasy, TMT", key: "price", width: 18, align: "right" },
     {
       header: "Şertnama sene",
       key: "contract_date",
@@ -191,8 +243,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       align: "center",
     },
   ];
-
-  const priceColIdx = columnsConfig.findIndex((c) => c.key === "price");
 
   // Set column widths
   columnsConfig.forEach((col, idx) => {
@@ -305,6 +355,17 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
 
   const currencyNumFmt = '#,##0.00" TMT"';
 
+  // One style object per column, shared by all its cells: with thousands of
+  // rows, fresh font/border objects per cell cost hundreds of MB.
+  const thinBorder = { style: "thin", color: { argb: "FF000000" } };
+  const border = { top: thinBorder, bottom: thinBorder, left: thinBorder, right: thinBorder };
+  const cellStyles = columnsConfig.map((col) => ({
+    font: { name: "Times New Roman", size: 10, bold: col.key === "operator", color: { argb: "FF000000" } },
+    alignment: { vertical: "middle", horizontal: col.align },
+    border,
+    ...(col.key === "price" ? { numFmt: currencyNumFmt } : {}),
+  }));
+
   // Data rows
   letters.forEach((row, offset) => {
     const rowIndex = START_ROW + 1 + offset;
@@ -318,9 +379,6 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
     // Values keyed by column key — order comes from columnsConfig
     const values = {
       index_number: offset + 1,
-      application_number: row.application_number
-        ? String(row.application_number).trim()
-        : "",
       client_name: clientName,
       gender: formatGender(row.client?.gender),
       dob: formatDate(row.client?.dateOfBirth),
@@ -330,58 +388,22 @@ export const exportReferralLetterExcel = async (letters = [], options = {}) => {
       destination_country: row.destination_country
         ? String(row.destination_country).trim()
         : "",
-      bgn_departure: row.bgn_departure
-        ? String(row.bgn_departure).trim()
-        : row.tranzit
-          ? String(row.tranzit).trim()
-          : "",
+      bgn_departure: bgnDepartureOf(row),
+      bgn_arrival: row.bgn_arrival ? String(row.bgn_arrival).trim() : "",
       travel_doc: formatYhNumber(row.travel_document_number),
       departure_date: formatDate(row.departure_date),
       return_date: formatDate(row.return_date),
       price,
       operator: '"Oguzabat" HJ',
-      contract_number: row.contract_number
-        ? String(row.contract_number).trim()
-        : "",
       contract_date: formatDate(row.contract_date),
     };
 
     const rowData = columnsConfig.map((col) => values[col.key] ?? "");
 
     rowData.forEach((val, idx) => {
-      const colNumber = START_COL + idx;
-      const cell = currentRow.getCell(colNumber);
+      const cell = currentRow.getCell(START_COL + idx);
       cell.value = val;
-      cell.font = {
-        name: "Times New Roman",
-        size: 10,
-        bold: columnsConfig[idx].key === "operator",
-        color: { argb: "FF000000" },
-      };
-      cell.alignment = {
-        vertical: "middle",
-        horizontal: columnsConfig[idx].align,
-      };
-      cell.border = {
-        top: { style: "thin", color: { argb: "FF000000" } },
-        bottom: { style: "thin", color: { argb: "FF000000" } },
-        left: { style: "thin", color: { argb: "FF000000" } },
-        right: { style: "thin", color: { argb: "FF000000" } },
-      };
-
-      // Numerical formatting for price with currency suffix
-      if (idx === priceColIdx && typeof val === "number") {
-        cell.numFmt = currencyNumFmt;
-      }
+      cell.style = cellStyles[idx];
     });
   });
-
-  // Export buffer & download
-  const buffer = await workbook.xlsx.writeBuffer();
-  const cleanFileName = `${fileName}_${dayjs().format("YYYY-MM-DD")}.xlsx`;
-
-  const blob = new Blob([buffer], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
-  saveAs(blob, cleanFileName);
-};
+}

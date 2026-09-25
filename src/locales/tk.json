@@ -121,6 +121,7 @@
     "destinationCountry": "Gidýän ýurdy",
     "transit": "Tranzit",
     "bgnDeparture": "BGN Gidiş",
+    "bgnArrival": "BGN Geliş",
     "departureDate": "Gidýän senesi",
     "startDepartureDate": "Gidýän senesi (Başlangyç)",
     "endDepartureDate": "Gidýän senesi (Soňky)",
@@ -130,7 +131,6 @@
     "contractDate": "Şertnama senesi",
     "startContractDate": "Şertnama senesi (Başlangyç)",
     "endContractDate": "Şertnama senesi (Soňky)",
-    "contract_number": "Şertnama №",
     "syhNo": "S-ÝH №",
     "milesSmiles": "Miles & Smiles",
     "quotedFare": "Satylan baha",
@@ -511,7 +511,6 @@
   "categoryExists": "Bu kategoriýa eýýäm bar!",
   "editCategory": "Kategoriýany düzetmek",
   "addCategory": "Täze kategoriýa goşmak",
-  "application_number": "Arza №",
   "outbound": {
     "title": "Outbound satuwlar",
     "hotel": "Otel",

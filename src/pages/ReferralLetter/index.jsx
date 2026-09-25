@@ -298,6 +298,14 @@ const ReferalLetter = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
+        accessorKey: "bgn_arrival",
+        id: "bgn_arrival",
+        header: t("columns.bgnArrival"),
+        size: 110,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+      },
+      {
         accessorKey: "travel_document_number",
         id: "travel_document_number",
         header: t("columns.syhNo"),
@@ -337,14 +345,6 @@ const ReferalLetter = () => {
         },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
-      },
-      {
-        accessorKey: "contract_number",
-        id: "contract_number",
-        header: t("columns.contract_number"),
-        size: 110,
-        muiTableHeadCellProps: { align: "center" },
-        muiTableBodyCellProps: { align: "center" },
       },
       {
         accessorKey: "contract_date",
@@ -560,6 +560,7 @@ const ReferalLetter = () => {
           title={`${t("referralLetter.title")} ${t("common.exportReportSuffix")}`}
           fileName="Yollanma_Hatlary_Hasabaty"
           sheetName="Ýollanma Hatlary"
+          pageSize={500}
           ranges={REFERRAL_LETTER_EXPORT_RANGES}
         />
       )}

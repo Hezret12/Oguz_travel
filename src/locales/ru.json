@@ -121,6 +121,7 @@
     "destinationCountry": "Страна назначения",
     "transit": "Транзит",
     "bgnDeparture": "BGN Выезд",
+    "bgnArrival": "BGN Прибытие",
     "departureDate": "Дата выезда",
     "startDepartureDate": "Дата выезда (Начало)",
     "endDepartureDate": "Дата выезда (Конец)",
@@ -130,7 +131,6 @@
     "contractDate": "Дата договора",
     "startContractDate": "Дата договора (Начало)",
     "endContractDate": "Дата договора (Конец)",
-    "contract_number": "Номер договора",
     "syhNo": "С-Проездной №",
     "milesSmiles": "Miles & Smiles",
     "quotedFare": "Названная цена",
@@ -511,7 +511,6 @@
   "categoryExists": "Эта категория уже существует!",
   "editCategory": "Редактировать категорию",
   "addCategory": "Добавить новую категорию",
-  "application_number": "Arza №",
   "outbound": {
     "title": "Продажи Outbound",
     "hotel": "Отель",

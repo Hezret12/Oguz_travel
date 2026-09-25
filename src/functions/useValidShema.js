@@ -104,6 +104,7 @@ export const useValidShema = () => {
       .required(t("validation.required"))
       .test("yh-number", t("referralLetter.letterNoInvalid"), isYhNumber),
     bgn_departure: stringOptionalValidSchema(),
+    bgn_arrival: stringOptionalValidSchema(),
     note: stringOptionalValidSchema(),
     departure_date: requiredDateSchema,
     return_date: requiredDateSchema,

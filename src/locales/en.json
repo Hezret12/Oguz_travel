@@ -121,6 +121,7 @@
     "destinationCountry": "Destination Country",
     "transit": "Transit",
     "bgnDeparture": "BGN Departure",
+    "bgnArrival": "BGN Arrival",
     "departureDate": "Departure Date",
     "startDepartureDate": "Departure Date (Start)",
     "endDepartureDate": "Departure Date (End)",
@@ -130,7 +131,6 @@
     "contractDate": "Contract Date",
     "startContractDate": "Contract Date (Start)",
     "endContractDate": "Contract Date (End)",
-    "contract_number": "Contract №",
     "syhNo": "Travel Doc №",
     "milesSmiles": "Miles & Smiles",
     "quotedFare": "Quoted Fare",
@@ -511,7 +511,6 @@
   "categoryExists": "This category already exists!",
   "editCategory": "Edit Category",
   "addCategory": "Add New Category",
-  "application_number": "Arza №",
   "outbound": {
     "title": "Outbound Sales",
     "hotel": "Hotel",

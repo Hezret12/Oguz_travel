@@ -37,10 +37,10 @@ const EditReferralLetterModal = ({ table, row }) => {
       guid: row?.original?.guid || null,
       date_time: row?.original?.date_time || null,
       client_guid: row?.original?.client_guid || row?.original?.client?.guid || null,
-      application_number: row?.original?.application_number || null,
       received_opr_guid: row?.original?.received_opr_guid || null,
       destination_country: row?.original?.destination_country || null,
       bgn_departure: row?.original?.bgn_departure || row?.original?.tranzit || null,
+      bgn_arrival: row?.original?.bgn_arrival || null,
       travel_document_number: row?.original?.travel_document_number || null,
       departure_date: row?.original?.departure_date || null,
       return_date: row?.original?.return_date || null,
@@ -49,7 +49,6 @@ const EditReferralLetterModal = ({ table, row }) => {
           ? String(row.original.price)
           : "",
       currency: "TMT",
-      contract_number: row?.original?.contract_number || null,
       contract_date: row?.original?.contract_date || null,
       note: row?.original?.note || "",
     };
@@ -133,21 +132,6 @@ const EditReferralLetterModal = ({ table, row }) => {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <CustomTextField
-              name="bgn_departure"
-              control={control}
-              label={t("columns.bgnDeparture")}
-            />
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <CustomTextField
-              name="application_number"
-              control={control}
-              label={t("application_number")}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <CustomTextField
               name="travel_document_number"
               control={control}
               placeholder="0369420"
@@ -159,6 +143,21 @@ const EditReferralLetterModal = ({ table, row }) => {
                 />
               }
               required
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <CustomTextField
+              name="bgn_departure"
+              control={control}
+              label={t("columns.bgnDeparture")}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <CustomTextField
+              name="bgn_arrival"
+              control={control}
+              label={t("columns.bgnArrival")}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -180,7 +179,7 @@ const EditReferralLetterModal = ({ table, row }) => {
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               name="price"
               control={control}
@@ -191,14 +190,7 @@ const EditReferralLetterModal = ({ table, row }) => {
               required
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <CustomTextField
-              name="contract_number"
-              control={control}
-              label={t("columns.contract_number")}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <CustomDatePicker
               name="contract_date"
               validateFormat
