@@ -16,7 +16,7 @@ import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import SwapVertRoundedIcon from "@mui/icons-material/SwapVertRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
+import { MapPinHouse } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
 import { useOfficeOptions } from "../functions/useOfficeOptions";
@@ -280,7 +280,9 @@ const CafeteriaFilter = ({ filters, onFilterChange }) => {
       {/* 2. Office */}
       <Box>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
-          <StorefrontRoundedIcon sx={{ fontSize: 18, color: "primary.main" }} />
+          <Box sx={{ display: "flex", color: "primary.main" }}>
+            <MapPinHouse size={18} strokeWidth={2.2} />
+          </Box>
           <Typography
             variant="body2"
             sx={{ fontWeight: 650, color: "text.primary", fontSize: "13.5px" }}

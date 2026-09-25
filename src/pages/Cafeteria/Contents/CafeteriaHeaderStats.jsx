@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { Box, Typography, alpha } from "@mui/material";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
@@ -15,7 +15,19 @@ const formatMoney = (amount) => {
   }).format(num);
 };
 
-const StatPill = ({ icon, label, value, color, prefix = "" }) => (
+// "+1,200.00" / "-300.00": the sign comes from the amount itself (negative
+// amounts are allowed), `forceSign` also shows "+" on positive ones.
+const signed = (amount, forceSign) => {
+  const num = Number(amount || 0);
+  const sign = num < 0 ? "-" : forceSign && num > 0 ? "+" : "";
+  return `${sign}${formatMoney(Math.abs(num))}`;
+};
+
+// Params that don't change the totals (paging, sorting) are left out, so the
+// summary isn't refetched on every page change.
+const SUMMARY_KEYS = ["search", "start_date", "end_date", "type", "office_guid"];
+
+const StatPill = ({ icon, label, amounts, color, forceSign = false }) => (
   <Box
     sx={{
       height: 40,
@@ -54,18 +66,22 @@ const StatPill = ({ icon, label, value, color, prefix = "" }) => (
           letterSpacing: "-0.01em",
         }}
       >
-        {prefix}
-        {value}{" "}
-        <Typography
-          component="span"
-          sx={{
-            fontSize: "10.5px",
-            fontWeight: 600,
-            opacity: 0.8,
-          }}
-        >
-          TMT
-        </Typography>
+        {amounts.map(({ currency, amount }, i) => (
+          <span key={currency}>
+            {i > 0 && " · "}
+            {signed(amount, forceSign)}{" "}
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "10.5px",
+                fontWeight: 600,
+                opacity: 0.8,
+              }}
+            >
+              {currency}
+            </Typography>
+          </span>
+        ))}
       </Typography>
     </Box>
   </Box>
@@ -74,17 +90,37 @@ const StatPill = ({ icon, label, value, color, prefix = "" }) => (
 const CafeteriaHeaderStats = ({ queryParams = {} }) => {
   const { t } = useLocale();
 
+  const summaryParams = useMemo(
+    () =>
+      Object.fromEntries(
+        SUMMARY_KEYS.filter((k) => queryParams[k] !== undefined && queryParams[k] !== "").map((k) => [k, queryParams[k]]),
+      ),
+    [queryParams],
+  );
+
   const { data: summaryData } = useGet({
     apiFn: getCafeteriaSummaryApi,
-    key: ["cafeteria-summary", queryParams],
-    params: queryParams,
+    key: ["cafeteria-summary", summaryParams],
+    params: summaryParams,
   });
 
-  const totalIncome = Number(summaryData?.totalIncome ?? 0);
-  const totalExpense = Number(summaryData?.totalExpense ?? 0);
-  const balance = Number(
-    summaryData?.balance ?? totalIncome - totalExpense
-  );
+  // TMT always; other currencies only when they have movements. Never summed together.
+  const currencies = useMemo(() => {
+    const byCurrency = summaryData?.currencies || {
+      TMT: { totalIncome: summaryData?.totalIncome, totalExpense: summaryData?.totalExpense, balance: summaryData?.balance },
+    };
+    return Object.entries(byCurrency)
+      .map(([currency, v]) => ({
+        currency,
+        income: Number(v?.totalIncome ?? 0),
+        expense: Number(v?.totalExpense ?? 0),
+        balance: Number(v?.balance ?? Number(v?.totalIncome ?? 0) - Number(v?.totalExpense ?? 0)),
+      }))
+      .filter((c) => c.currency === "TMT" || c.income || c.expense);
+  }, [summaryData]);
+
+  const pick = (field) => currencies.map((c) => ({ currency: c.currency, amount: c[field] }));
+  const tmtBalance = currencies.find((c) => c.currency === "TMT")?.balance ?? 0;
 
   return (
     <Box
@@ -97,27 +133,27 @@ const CafeteriaHeaderStats = ({ queryParams = {} }) => {
       <StatPill
         icon={<TrendingUpRoundedIcon sx={{ fontSize: 18 }} />}
         label={t("cafeteria.income")}
-        value={formatMoney(totalIncome)}
+        amounts={pick("income")}
         color={(theme) => theme.palette.success.main}
-        prefix="+"
+        forceSign
       />
 
       <StatPill
         icon={<TrendingDownRoundedIcon sx={{ fontSize: 18 }} />}
         label={t("cafeteria.expense")}
-        value={formatMoney(totalExpense)}
+        // Money going out is shown with a minus, as before.
+        amounts={pick("expense").map((x) => ({ ...x, amount: -x.amount }))}
         color={(theme) => theme.palette.error.main}
-        prefix="-"
       />
 
       <StatPill
         icon={<AccountBalanceWalletRoundedIcon sx={{ fontSize: 18 }} />}
         label={t("cafeteria.balance")}
-        value={formatMoney(Math.abs(balance))}
+        amounts={pick("balance")}
         color={(theme) =>
-          balance >= 0 ? theme.palette.success.main : theme.palette.error.main
+          tmtBalance >= 0 ? theme.palette.success.main : theme.palette.error.main
         }
-        prefix={balance < 0 ? "-" : balance > 0 ? "+" : ""}
+        forceSign
       />
     </Box>
   );

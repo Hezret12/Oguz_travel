@@ -35,7 +35,7 @@ import EditCafeteriaModal from "./EditCafeteriaModal";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import ExportExcelButton from "../../components/ExportExcelButton";
 import CafeteriaExportModal from "./Contents/CafeteriaExportModal";
-import { getRowOffice } from "./functions/useOfficeOptions";
+import { getRowOffice, useOfficeOptions } from "./functions/useOfficeOptions";
 
 const CafeteriaFilterDrawer = () => {
   const {
@@ -144,6 +144,12 @@ const Cafeteria = () => {
     [applied]
   );
 
+  const officeOptions = useOfficeOptions();
+  const officeLabels = useMemo(
+    () => new Map(officeOptions.map((o) => [o.value, o.label])),
+    [officeOptions],
+  );
+
   const getFilterChipLabel = useCallback(
     (key, value) => {
       let fieldTitle = t(`columns.${key}`, key);
@@ -153,6 +159,8 @@ const Cafeteria = () => {
         fieldTitle = t("columns.endDate") || t("columns.end_date") || "Ahyrky senesi";
       } else if (key === "type") {
         fieldTitle = t("cafeteria.type") || "Görnüşi";
+      } else if (key === "office_guid") {
+        fieldTitle = t("columns.office");
       }
 
       let displayVal = value;
@@ -164,6 +172,9 @@ const Cafeteria = () => {
           value === "INCOME"
             ? t("cafeteria.types.income")
             : t("cafeteria.types.expense");
+      } else if (key === "office_guid") {
+        // Until the office list loads, show nothing rather than the raw GUID.
+        displayVal = officeLabels.get(value) || "…";
       } else if (key === "start_date" || key === "end_date") {
         displayVal = dayjs(value).isValid()
           ? dayjs(value).format("DD.MM.YYYY")
@@ -172,7 +183,7 @@ const Cafeteria = () => {
 
       return `${fieldTitle}: ${displayVal}`;
     },
-    [t]
+    [t, officeLabels]
   );
 
   const columns = useMemo(

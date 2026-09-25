@@ -74,14 +74,14 @@ const SidebarPanel = ({
           cursor: "pointer",
         }}
       >
-        <OguzLogo
+        {/* <OguzLogo
           iconOnly={collapsed}
           sx={{
             width: collapsed ? 36 : 175,
             height: collapsed ? 36 : 82,
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
-        />
+        /> */}
       </Box>
     </Box>
 

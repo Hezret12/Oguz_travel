@@ -39,9 +39,7 @@ import DateRangeExcelExportModal from "../../components/Dialog/DateRangeExcelExp
 import { useDateFormat } from "../../functions/generalHelpers";
 import { formatYhNumber } from "../../functions/yhNumber";
 
-// Excel export date ranges (same three dates as the filter drawer). Departure
-// starts on this month; the others start unset ("Ähli döwür") so they don't
-// narrow the export unless chosen.
+// Excel export is filtered by the departure date only (default: this month).
 const REFERRAL_LETTER_EXPORT_RANGES = [
   {
     key: "departure",
@@ -49,20 +47,6 @@ const REFERRAL_LETTER_EXPORT_RANGES = [
     startParamKey: "start_departure_date",
     endParamKey: "end_departure_date",
     defaultPreset: "thisMonth",
-  },
-  {
-    key: "return",
-    titleKey: "columns.returnDate",
-    startParamKey: "start_return_date",
-    endParamKey: "end_return_date",
-    defaultPreset: "all",
-  },
-  {
-    key: "contract",
-    titleKey: "columns.contractDate",
-    startParamKey: "start_contract_date",
-    endParamKey: "end_contract_date",
-    defaultPreset: "all",
   },
 ];
 

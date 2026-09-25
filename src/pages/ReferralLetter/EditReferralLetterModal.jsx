@@ -32,6 +32,15 @@ const EditReferralLetterModal = ({ table, row }) => {
     },
   });
 
+  // The autocomplete only knows clients it has searched for, so the saved
+  // client is handed to it to show the current selection on open.
+  const initialClient = useMemo(() => {
+    const original = row?.original;
+    if (original?.client?.guid) return original.client;
+    if (original?.client_guid) return { guid: original.client_guid, fullName: original.client_name || "" };
+    return null;
+  }, [row]);
+
   const initialValues = useMemo(() => {
     return {
       guid: row?.original?.guid || null,
@@ -110,6 +119,7 @@ const EditReferralLetterModal = ({ table, row }) => {
               name="client_guid"
               label={t("columns.client")}
               columns={autocompleteColumns}
+              initialClient={initialClient}
               required
             />
           </Grid>
