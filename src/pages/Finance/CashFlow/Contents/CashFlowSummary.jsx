@@ -1,5 +1,5 @@
 import { Fragment, memo } from "react";
-import { Box, Divider, Skeleton, Tooltip, Typography, alpha } from "@mui/material";
+import { Box, Skeleton, Tooltip, Typography, alpha } from "@mui/material";
 import { ArrowDownLeft, ArrowUpRight, Info } from "lucide-react";
 import { useLocale } from "../../../../hooks/useLocale";
 import { fmtMoney } from "../functions/cashFlowHelpers";
@@ -17,7 +17,19 @@ const TotalGroup = ({ label, icon: Icon, tone, items }) => {
   const { t } = useLocale();
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+    <Box
+      sx={(theme) => ({
+        height: 40,
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        px: 1.5,
+        borderRadius: "10px",
+        whiteSpace: "nowrap",
+        backgroundColor: alpha(theme.palette[tone].main, theme.palette.mode === "dark" ? 0.1 : 0.06),
+        border: `1px solid ${alpha(theme.palette[tone].main, 0.22)}`,
+      })}
+    >
       <Box
         aria-hidden
         sx={(theme) => ({
@@ -71,12 +83,21 @@ const TotalGroup = ({ label, icon: Icon, tone, items }) => {
   );
 };
 
-// Inline totals for the table's bottom bar, so they take no extra page height.
+// Totals of everything the current tab + filters match (not just this page),
+// shown as pills in the page header. Hidden on small screens, like the
+// Cafeteria header stats, where they would crowd the header buttons.
 const CashFlowSummary = ({ totals = [], isLoading, isProjectTab, note }) => {
   const { t } = useLocale();
 
   if (isLoading && !totals.length) {
-    return <Skeleton variant="rounded" width={420} height={22} sx={{ borderRadius: "6px" }} />;
+    return (
+      <Skeleton
+        variant="rounded"
+        width={460}
+        height={40}
+        sx={{ borderRadius: "10px", display: { xs: "none", md: "block" } }}
+      />
+    );
   }
 
   const byCurrency = CURRENCIES.map((currency) =>
@@ -109,17 +130,15 @@ const CashFlowSummary = ({ totals = [], isLoading, isProjectTab, note }) => {
   ];
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", columnGap: 2, rowGap: 0.75, flexWrap: "wrap", minWidth: 0 }}>
-      {metrics.map((m, i) => (
-        <Fragment key={m.key}>
-          {i > 0 && <Divider orientation="vertical" flexItem sx={{ my: 0.25 }} />}
-          <TotalGroup
-            label={m.label}
-            icon={m.icon}
-            tone={m.tone}
-            items={byCurrency.map((c) => ({ currency: c.currency, value: c[m.key], count: c.count }))}
-          />
-        </Fragment>
+    <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 1.2, minWidth: 0 }}>
+      {metrics.map((m) => (
+        <TotalGroup
+          key={m.key}
+          label={m.label}
+          icon={m.icon}
+          tone={m.tone}
+          items={byCurrency.map((c) => ({ currency: c.currency, value: c[m.key], count: c.count }))}
+        />
       ))}
       {note && (
         <Tooltip title={note} placement="top" arrow>

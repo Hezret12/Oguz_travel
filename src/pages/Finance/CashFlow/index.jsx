@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Chip, Divider, ToggleButton, ToggleButtonGroup, Tooltip, Typography, alpha } from "@mui/material";
+import { Box, Chip, ToggleButton, ToggleButtonGroup, Tooltip, Typography, alpha } from "@mui/material";
 import { ArrowDownLeft, ArrowUpRight, Layers, Lock, Wallet, Zap } from "lucide-react";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
@@ -431,13 +431,6 @@ const CashFlow = () => {
           <Typography sx={{ fontSize: "13px", color: "text.secondary", whiteSpace: "nowrap" }}>
             {t("finance.cashBook.operations", { count: totalItems })}
           </Typography>
-          <Divider orientation="vertical" flexItem sx={{ my: 0.25 }} />
-          <CashFlowSummary
-            totals={totals}
-            isLoading={isLoading}
-            isProjectTab={activeSource === "PROJECT"}
-            note={activeSource === "" ? t("finance.cashBook.allTabNote") : undefined}
-          />
         </Box>
         <Pagination
           pageIndex={page - 1}
@@ -459,6 +452,12 @@ const CashFlow = () => {
         filterButtonText={t("filter")}
         onFilterClick={openDrawer}
       >
+        <CashFlowSummary
+          totals={totals}
+          isLoading={isLoading}
+          isProjectTab={activeSource === "PROJECT"}
+          note={activeSource === "" ? t("finance.cashBook.allTabNote") : undefined}
+        />
         <ExportExcelButton onClick={() => setIsExportOpen(true)} />
       </PageHeader>
 
