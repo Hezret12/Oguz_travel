@@ -5,7 +5,9 @@ import {
   Chip,
   Divider,
   FormControl,
+  MenuItem,
   Stack,
+  TextField,
   Typography,
   alpha,
 } from "@mui/material";
@@ -14,8 +16,10 @@ import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import SwapVertRoundedIcon from "@mui/icons-material/SwapVertRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
+import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 import dayjs from "dayjs";
 import { useLocale } from "../../../hooks/useLocale";
+import { useOfficeOptions } from "../functions/useOfficeOptions";
 
 const FilterDatePicker = ({
   label,
@@ -80,6 +84,7 @@ const CafeteriaFilter = ({ filters, onFilterChange }) => {
   const { t } = useLocale();
 
   const currentType = String(filters?.type ?? "");
+  const officeOptions = useOfficeOptions();
 
   // Quick Date Range Presets
   const presets = useMemo(() => {
@@ -272,7 +277,45 @@ const CafeteriaFilter = ({ filters, onFilterChange }) => {
 
       <Divider sx={{ borderColor: "divider" }} />
 
-      {/* 2. Date Range Section with Quick Presets */}
+      {/* 2. Office */}
+      <Box>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
+          <StorefrontRoundedIcon sx={{ fontSize: 18, color: "primary.main" }} />
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 650, color: "text.primary", fontSize: "13.5px" }}
+          >
+            {t("columns.office")}
+          </Typography>
+        </Stack>
+        <TextField
+          select
+          fullWidth
+          size="small"
+          value={filters?.office_guid ?? ""}
+          onChange={(e) => onFilterChange("office_guid", e.target.value)}
+          slotProps={{ select: { displayEmpty: true } }}
+          sx={{
+            "& .MuiInputBase-root": {
+              fontSize: "0.875rem",
+              height: "42px",
+              borderRadius: "10px",
+              backgroundColor: "background.paper",
+            },
+          }}
+        >
+          <MenuItem value="">{t("all")}</MenuItem>
+          {officeOptions.map((o) => (
+            <MenuItem key={o.value} value={o.value}>
+              {o.label}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Box>
+
+      <Divider sx={{ borderColor: "divider" }} />
+
+      {/* 3. Date Range Section with Quick Presets */}
       <Box>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
           <CalendarMonthRoundedIcon sx={{ fontSize: 18, color: "primary.main" }} />

@@ -46,7 +46,7 @@ const getExcelColName = (colNum) => {
 };
 
 const resolveOffice = (row, selectedLang) => {
-  const shortName = row?.createdBy?.office?.shortName;
+  const shortName = (row?.office || row?.createdBy?.office)?.shortName;
   if (!shortName) return "";
   if (typeof shortName === "string") return shortName.trim().toUpperCase();
   const val = selectedLang?.(shortName) || shortName.tk || shortName.ru || shortName.en || "";

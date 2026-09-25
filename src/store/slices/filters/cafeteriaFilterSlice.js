@@ -7,6 +7,7 @@ export const cafeteriaFilterSlice = createFilterSlice({
     start_date: '',
     end_date: '',
     type: '',
+    office_guid: '',
   },
   defaultPageSize: 40,
 });

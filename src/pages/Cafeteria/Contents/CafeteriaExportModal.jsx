@@ -141,6 +141,7 @@ export const CafeteriaExportModal = ({ open, close, queryParams = {} }) => {
   // Modal is mounted only while open, so page filters seed the initial state once.
   // The type filter isn't editable here; the page's applied type filter is kept.
   const type = String(queryParams?.type ?? "");
+  const officeGuid = queryParams?.office_guid || "";
   // Defaults to this month unless the page already has a date filter
   const hasPageDates = Boolean(queryParams?.start_date || queryParams?.end_date);
   const [startDate, setStartDate] = useState(() =>
@@ -159,8 +160,9 @@ export const CafeteriaExportModal = ({ open, close, queryParams = {} }) => {
     if (endDate?.isValid()) params.end_date = endDate.format("YYYY-MM-DD");
     if (type !== "") params.type = type;
     if (search) params.search = search;
+    if (officeGuid) params.office_guid = officeGuid;
     return params;
-  }, [startDate, endDate, type, search]);
+  }, [startDate, endDate, type, search, officeGuid]);
 
   // Live preview of what will land in the file. Never served from cache: the
   // global staleTime is 30 min and add/edit/delete don't invalidate these keys,

@@ -14,12 +14,15 @@ import CustomTextField from "../../components/CustomTextField";
 import CurrencyAmount from "../../components/inputs/CurrencyAmount";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import FooterButton from "../../components/Dialog/FooterButton";
+import CustomSelect from "../../components/CustomSelect";
+import { getRowOffice, useOfficeOptions } from "./functions/useOfficeOptions";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
 import { updateCafeteriaTransactionApi } from "../../api/queries/patch";
 
 const EditCafeteriaModal = ({ table, row }) => {
   const { t } = useLocale();
   const { addCafeteriaTransaction } = useValidShema();
+  const officeOptions = useOfficeOptions();
 
   const { mutate: updateTransaction, isPending } = useUpdate({
     apiFn: updateCafeteriaTransactionApi,
@@ -42,6 +45,7 @@ const EditCafeteriaModal = ({ table, row }) => {
       amount: row?.original?.amount != null ? Number(row.original.amount) : "",
       currency: row?.original?.currency || "TMT",
       description: row?.original?.description || "",
+      office_guid: row?.original?.office_guid || getRowOffice(row?.original)?.guid || "",
     },
     resolver: yupResolver(addCafeteriaTransaction),
     mode: "onSubmit",
@@ -63,6 +67,8 @@ const EditCafeteriaModal = ({ table, row }) => {
       amount: Number(values.amount || 0),
       currency: values.currency || "TMT",
       date: dayjs(values.date).format("YYYY-MM-DD"),
+      // Left empty, the backend uses the creator's office.
+      office_guid: values.office_guid || undefined,
     };
     updateTransaction(payload);
   };
@@ -186,6 +192,15 @@ const EditCafeteriaModal = ({ table, row }) => {
               onCurrencyChange={(curr) => setValue("currency", curr)}
               placeholder=""
               required
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <CustomSelect
+              name="office_guid"
+              control={control}
+              label={t("columns.office")}
+              options={officeOptions}
             />
           </Grid>
 

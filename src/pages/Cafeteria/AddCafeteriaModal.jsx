@@ -14,12 +14,15 @@ import CurrencyAmount from "../../components/inputs/CurrencyAmount";
 import CustomTextField from "../../components/CustomTextField";
 import CustomDatePicker from "../../components/CustomDatePicker";
 import FooterButton from "../../components/Dialog/FooterButton";
+import CustomSelect from "../../components/CustomSelect";
+import { useOfficeOptions } from "./functions/useOfficeOptions";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { addCafeteriaTransactionApi } from "../../api/queries/post";
 
 const AddCafeteriaModal = ({ table }) => {
   const { t } = useLocale();
   const { addCafeteriaTransaction } = useValidShema();
+  const officeOptions = useOfficeOptions();
 
   const { mutate: createTransaction, isPending } = useCreate({
     apiFn: addCafeteriaTransactionApi,
@@ -40,6 +43,7 @@ const AddCafeteriaModal = ({ table }) => {
       amount: "",
       currency: "TMT",
       description: "",
+      office_guid: "",
     },
     resolver: yupResolver(addCafeteriaTransaction),
     mode: "onSubmit",
@@ -61,6 +65,8 @@ const AddCafeteriaModal = ({ table }) => {
       amount: Number(values.amount || 0),
       currency: values.currency || "TMT",
       date: dayjs(values.date).format("YYYY-MM-DD"),
+      // Left empty, the backend uses the creator's office.
+      office_guid: values.office_guid || undefined,
     };
     createTransaction(payload);
   };
@@ -184,6 +190,15 @@ const AddCafeteriaModal = ({ table }) => {
               onCurrencyChange={(curr) => setValue("currency", curr)}
               placeholder=""
               required
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <CustomSelect
+              name="office_guid"
+              control={control}
+              label={t("columns.office")}
+              options={officeOptions}
             />
           </Grid>
 

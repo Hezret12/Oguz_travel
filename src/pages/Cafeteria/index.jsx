@@ -35,6 +35,7 @@ import EditCafeteriaModal from "./EditCafeteriaModal";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import ExportExcelButton from "../../components/ExportExcelButton";
 import CafeteriaExportModal from "./Contents/CafeteriaExportModal";
+import { getRowOffice } from "./functions/useOfficeOptions";
 
 const CafeteriaFilterDrawer = () => {
   const {
@@ -245,6 +246,14 @@ const Cafeteria = () => {
             </Box>
           );
         },
+      },
+      {
+        id: "office",
+        header: t("columns.office"),
+        size: 110,
+        accessorFn: (row) => selectedLang(getRowOffice(row)?.shortName) || "",
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
       },
       {
         id: "createdBy",
