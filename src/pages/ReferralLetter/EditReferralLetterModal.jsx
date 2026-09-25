@@ -156,21 +156,21 @@ const EditReferralLetterModal = ({ table, row }) => {
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <CustomTextField
               name="bgn_departure"
               control={control}
               label={t("columns.bgnDeparture")}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <CustomTextField
               name="bgn_arrival"
               control={control}
               label={t("columns.bgnArrival")}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <CustomDatePicker
               name="departure_date"
               validateFormat
@@ -179,7 +179,7 @@ const EditReferralLetterModal = ({ table, row }) => {
               required
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <CustomDatePicker
               name="return_date"
               validateFormat
@@ -189,7 +189,7 @@ const EditReferralLetterModal = ({ table, row }) => {
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <CustomTextField
               name="price"
               control={control}
@@ -200,7 +200,7 @@ const EditReferralLetterModal = ({ table, row }) => {
               required
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <CustomDatePicker
               name="contract_date"
               validateFormat
