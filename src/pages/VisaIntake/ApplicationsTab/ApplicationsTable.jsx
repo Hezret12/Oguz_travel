@@ -1,6 +1,7 @@
 import {
   useCallback,
   useMemo,
+  useState,
   forwardRef,
   useImperativeHandle,
   startTransition,
@@ -27,8 +28,10 @@ import { useDateFormat } from "../../../functions/generalHelpers";
 import {
   getAllReceivingsApi,
   getAllEmployeeApi,
+  getCountriesApi,
   getCountryVisaFieldsApi,
 } from "../../../api/queries/getters";
+import { fetchAllPaginatedData } from "../../../functions/excelExportHelper";
 import { deleteReceivingApi } from "../../../api/queries/delete";
 import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import DeleteDialog from "../../../components/DeleteDialog";
@@ -41,6 +44,22 @@ import { sortVisaFields, isNotesField } from "../../../functions/visaCountryFiel
 import { VISA_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 import VisaIntakeModal from "./VisaIntakeModal";
 import CountrySelect from "./Contents/CountrySelect";
+import ExportExcelButton from "../../../components/ExportExcelButton";
+import DateRangeExcelExportModal from "../../../components/Dialog/DateRangeExcelExportModal";
+import { exportVisaIntakeExcel } from "../functions/exportVisaIntakeExcel";
+
+// Excel export filters on the application date (backend: start_date / end_date).
+const EXPORT_RANGES = [
+  {
+    key: "application",
+    titleKey: "visaIntake.fields.applicationDate",
+    startParamKey: "start_date",
+    endParamKey: "end_date",
+    defaultPreset: "thisMonth",
+  },
+];
+// The receivings endpoint returns up to 500 rows per request.
+const EXPORT_PAGE_SIZE = 500;
 
 // Field keys that already have a dedicated column, so they're never rendered
 // again as a dynamic country field.
@@ -281,6 +300,17 @@ export const ApplicationsTable = forwardRef(
     // Only `open` belongs in the column deps; the dialog object itself changes
     // every time it opens or closes, which would rebuild every column with it.
     const handleDeleteClick = deleteDialog.open;
+
+    // Export covers every country: one sheet each, built from that country's
+    // own fields, so the country list (with fields) is loaded once per export.
+    const [isExportOpen, setIsExportOpen] = useState(false);
+    const exportFn = useCallback(
+      async (items, opts) => {
+        const countries = await fetchAllPaginatedData(getCountriesApi, {}, null, 100);
+        return exportVisaIntakeExcel(items, { ...opts, countries, resolveLabel });
+      },
+      [resolveLabel],
+    );
 
     // Columns Definition
     const columns = useMemo(() => {
@@ -682,6 +712,8 @@ export const ApplicationsTable = forwardRef(
             value={selectedCountry}
             onChange={handleCountrySelect}
           />
+
+          <ExportExcelButton onClick={() => setIsExportOpen(true)} />
         </Box>
       ),
     });
@@ -740,6 +772,19 @@ export const ApplicationsTable = forwardRef(
         )}
 
         <MaterialReactTable key={isVirtualized ? "virtual" : "plain"} table={table} />
+
+        {isExportOpen && (
+          <DateRangeExcelExportModal
+            open={isExportOpen}
+            close={() => setIsExportOpen(false)}
+            apiFn={getAllReceivingsApi}
+            exportFn={exportFn}
+            title={`${t("visaIntake.title")} ${t("common.exportReportSuffix")}`}
+            fileName="Wiza_arzalary"
+            ranges={EXPORT_RANGES}
+            pageSize={EXPORT_PAGE_SIZE}
+          />
+        )}
 
         <DeleteDialog
           open={deleteDialog.isOpen}

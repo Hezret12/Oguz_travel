@@ -188,6 +188,7 @@ DateRangeSection.displayName = "DateRangeSection";
  *   Defaults to a single `start_date` / `end_date` range starting on this month.
  *
  * `exportFn(items, { fileName, sheetName, params })` builds the file.
+ * `pageSize`: rows per request while collecting the data (the API's max).
  */
 export const DateRangeExcelExportModal = ({
   open,
@@ -198,6 +199,7 @@ export const DateRangeExcelExportModal = ({
   fileName = "Export",
   sheetName = "Hasabat",
   ranges = DEFAULT_RANGES,
+  pageSize = 100,
 }) => {
   const { t } = useLocale();
 
@@ -250,7 +252,7 @@ export const DateRangeExcelExportModal = ({
         apiFn,
         params,
         (loaded, total) => setProgress({ loaded, total }),
-        100
+        pageSize
       );
 
       if (!items?.length) {

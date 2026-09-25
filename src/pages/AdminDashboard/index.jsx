@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import {
   Alert,
   Box,
-  Chip,
   Grid,
   IconButton,
   MenuItem,
@@ -24,8 +23,7 @@ import { KpiCard } from "../Finance/Overview/Contents/KpiGrid";
 import PeriodRangeFilter from "../Finance/Overview/Contents/PeriodRangeFilter";
 import { CURRENCIES, KPI_TONES, segmentedSx } from "../Finance/Overview/functions/analyticsFormat";
 import { useAnalyticsPrefs } from "../Finance/Overview/functions/useAnalyticsPrefs";
-import { aggregateSales, resolveRange, useSalesRows } from "./functions/salesDashboard";
-import { MOCK_OFFICES } from "./functions/salesMock";
+import { EMPTY_SALES, resolveRange, useDashboardSummary } from "./functions/salesDashboard";
 import SalesTrendCard from "./Contents/SalesTrendCard";
 import PaymentStatusCard from "./Contents/PaymentStatusCard";
 import ModulesSection from "./Contents/ModulesSection";
@@ -50,27 +48,23 @@ const AdminDashboard = () => {
     [period, rangeStart, rangeEnd],
   );
 
-  const { rows, isLoading, isFetching, isError, refetch, updatedAt, isDemo } = useSalesRows(range);
+  const { summary, isLoading, isFetching, isError, refetch, updatedAt } = useDashboardSummary(range, office);
 
   const { data: officesData } = useGet({ apiFn: getAllOfficeApi, key: "all-offices-filter" });
   const officeOptions = useMemo(
     () =>
-      (isDemo ? MOCK_OFFICES : Array.isArray(officesData) ? officesData : []).map((o) => ({
+      (Array.isArray(officesData) ? officesData : []).map((o) => ({
         value: o.guid,
         label: selectedLang(o.shortName) || selectedLang(o.fullName) || "—",
       })),
-    [isDemo, officesData, selectedLang],
+    [officesData, selectedLang],
   );
 
   const otherCurrency = currency === "USD" ? "TMT" : "USD";
-  const data = useMemo(
-    () => aggregateSales(rows, { range, currency, officeGuid: office }),
-    [rows, range, currency, office],
-  );
-  const other = useMemo(
-    () => aggregateSales(rows, { range, currency: otherCurrency, officeGuid: office }),
-    [rows, range, otherCurrency, office],
-  );
+  // Both currencies come in one response, so switching currency is instant.
+  const data = summary?.byCurrency[currency] ?? EMPTY_SALES;
+  const other = summary?.byCurrency[otherCurrency] ?? EMPTY_SALES;
+  const granularity = summary?.granularity ?? range.granularity;
 
   const labels = data.buckets.map((b) => b.label);
   const compareLabel = t(`finance.analytics.vsPeriod.${period}`);
@@ -132,18 +126,7 @@ const AdminDashboard = () => {
         "@keyframes dashSpin": { to: { transform: "rotate(360deg)" } },
       }}
     >
-      <PageHeader title={t("sidebar.adminDashboard")} pageTitle={`${t("sidebar.adminDashboard")} | Oguz Travel`}>
-        {isDemo && (
-          <Tooltip title={t("finance.analytics.demoHint")} arrow>
-            <Chip
-              label={t("finance.analytics.demo")}
-              size="small"
-              variant="outlined"
-              sx={{ height: 24, fontSize: "0.72rem", fontWeight: 500, color: "text.secondary", borderColor: "divider" }}
-            />
-          </Tooltip>
-        )}
-      </PageHeader>
+      <PageHeader title={t("sidebar.adminDashboard")} pageTitle={`${t("sidebar.adminDashboard")} | Oguz Travel`} />
 
       {/* One filter row scopes everything below it */}
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, flexWrap: "wrap", mt: -1 }}>
@@ -208,7 +191,7 @@ const AdminDashboard = () => {
 
       {isError && <Alert severity="error">{t("dashboard.loadError")}</Alert>}
 
-      {isLoading && rows.length === 0 ? (
+      {isLoading && !summary ? (
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" }, gap: 2 }}>
           {[0, 1, 2, 3].map((i) => (
             <Skeleton key={i} variant="rounded" height={190} sx={{ borderRadius: "14px" }} />
@@ -258,7 +241,7 @@ const AdminDashboard = () => {
 
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, lg: 8 }} sx={{ display: "flex", flexDirection: "column" }}>
-              <SalesTrendCard buckets={data.buckets} currency={currency} granularity={range.granularity} />
+              <SalesTrendCard buckets={data.buckets} currency={currency} granularity={granularity} />
             </Grid>
             <Grid size={{ xs: 12, lg: 4 }} sx={{ display: "flex", flexDirection: "column" }}>
               <PaymentStatusCard payment={data.payment} receivable={data.current.receivable} currency={currency} />

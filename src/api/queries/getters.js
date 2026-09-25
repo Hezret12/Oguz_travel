@@ -262,3 +262,8 @@ export const getSalaryMonthStatusApi = async (params = {}) => {
 export const getSalaryEmployeesApi = async (params = {}) => {
   return await api.getPrivate('/salary/get-employees', params);
 };
+
+// Sales dashboard: totals, chart buckets, payment split and per-module data (USD + TMT) in one call.
+export const getDashboardSummaryApi = async (params = {}) => {
+  return await api.getPrivate('/dashboard/get-summary', params);
+};

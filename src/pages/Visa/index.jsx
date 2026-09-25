@@ -36,6 +36,20 @@ import {
 import FilterDrawer from "../../components/FilterDrawer";
 import VisaFilter from "./Contents/VisaFilter";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
+import ExportExcelButton from "../../components/ExportExcelButton";
+import DateRangeExcelExportModal from "../../components/Dialog/DateRangeExcelExportModal";
+import { exportVisaExcel } from "./functions/exportVisaExcel";
+
+// Excel export filters on the visa date (backend: start_date / end_date).
+const VISA_EXPORT_RANGES = [
+  {
+    key: "date",
+    titleKey: "columns.issueDate",
+    startParamKey: "start_date",
+    endParamKey: "end_date",
+    defaultPreset: "thisMonth",
+  },
+];
 
 const VisaFilterDrawer = () => {
   const {
@@ -77,6 +91,7 @@ const Visa = () => {
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   const {
     applied,
@@ -461,7 +476,22 @@ const Visa = () => {
         filterButtonText={t("filter")}
         onAddClick={() => table.setCreatingRow(true)}
         onFilterClick={openDrawer}
-      />
+      >
+        <ExportExcelButton onClick={() => setIsExportOpen(true)} />
+      </PageHeader>
+
+      {isExportOpen && (
+        <DateRangeExcelExportModal
+          open={isExportOpen}
+          close={() => setIsExportOpen(false)}
+          apiFn={getAllVisasApi}
+          exportFn={exportVisaExcel}
+          title={`${t("sidebar.visaApplications")} ${t("common.exportReportSuffix")}`}
+          fileName="Wiza_Hasabaty"
+          sheetName="Wiza"
+          ranges={VISA_EXPORT_RANGES}
+        />
+      )}
 
       <VisaFilterDrawer />
 

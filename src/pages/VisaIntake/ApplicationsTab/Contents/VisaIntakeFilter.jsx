@@ -175,9 +175,16 @@ const VisaIntakeFilter = ({
   return (
     <Stack spacing={2.5}>
       <FilterDatePicker
-        label={t("visaIntake.fields.applicationDate")}
+        label={`${t("visaIntake.fields.applicationDate")} · ${t("columns.startDate")}`}
         name="start_date"
         value={filters.start_date}
+        onChange={onFilterChange}
+      />
+
+      <FilterDatePicker
+        label={`${t("visaIntake.fields.applicationDate")} · ${t("columns.endDate")}`}
+        name="end_date"
+        value={filters.end_date}
         onChange={onFilterChange}
       />
 
