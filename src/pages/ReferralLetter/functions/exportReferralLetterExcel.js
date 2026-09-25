@@ -185,63 +185,23 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
   worksheet.getColumn(2).width = 4;
   worksheet.getColumn(3).width = 4;
 
+  // Same columns, order and header texts as the paper report
+  // ("Çykyş syýahat hasabat"), plus the contract date at the end.
   const columnsConfig = [
     { header: "T/b", key: "index_number", width: 8, align: "center" },
-    {
-      header: "Syýahatçynyň F.A.A.a.",
-      key: "client_name",
-      width: 34,
-      align: "left",
-    },
-    { header: "Jynsy", key: "gender", width: 12, align: "center" },
-    { header: "Doglan senesi", key: "dob", width: 16, align: "center" },
-    {
-      header: "Pasport №",
-      key: "passport",
-      width: 18,
-      align: "center",
-      note: "Pasportynyň seriýasy we belgisi",
-    },
-    {
-      header: "Gidýän ýurdy",
-      key: "destination_country",
-      width: 18,
-      align: "center",
-    },
-    {
-      header: "S-ÝH №",
-      key: "travel_doc",
-      width: 18,
-      align: "center",
-      note: "Syýahat ýolhatynyň №",
-    },
-    {
-      header: "Gidýän wagty",
-      key: "departure_date",
-      width: 16,
-      align: "center",
-    },
-    { header: "Gelýän wagty", key: "return_date", width: 16, align: "center" },
-    {
-      header: "BGN Gidiş",
-      key: "bgn_departure",
-      width: 16,
-      align: "center",
-    },
-    {
-      header: "BGN Geliş",
-      key: "bgn_arrival",
-      width: 16,
-      align: "center",
-    },
+    { header: "Syýahatçynyň F.A.A.a.", key: "client_name", width: 34, align: "left" },
+    { header: "Jynsy", key: "gender", width: 10, align: "center" },
+    { header: "Doglan senesi", key: "dob", width: 14, align: "center" },
+    { header: "Pasportynyň seriýasy we belgisi", key: "passport", width: 18, align: "center" },
+    { header: "Gidýän ýurdy", key: "destination_country", width: 16, align: "center" },
+    { header: "Syýahat ýolhatynyň №", key: "travel_doc", width: 16, align: "center" },
+    { header: "Gidýän wagty", key: "departure_date", width: 14, align: "center" },
+    { header: "Gelýän wagty", key: "return_date", width: 14, align: "center" },
+    { header: "BGN gidiş", key: "bgn_departure", width: 16, align: "center" },
+    { header: "BGN geliş", key: "bgn_arrival", width: 16, align: "center" },
     { header: "Syýahat operator/agent", key: "operator", width: 25, align: "center" },
-    { header: "Bahasy, TMT", key: "price", width: 18, align: "right" },
-    {
-      header: "Şertnama sene",
-      key: "contract_date",
-      width: 16,
-      align: "center",
-    },
+    { header: "TMT", key: "price", width: 16, align: "right" },
+    { header: "Şertnama senesi", key: "contract_date", width: 16, align: "center" },
   ];
 
   // Set column widths
@@ -313,7 +273,7 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
 
   // Header Row (Row 4)
   const headerRow = worksheet.getRow(START_ROW);
-  headerRow.height = 28;
+  headerRow.height = 32;
 
   columnsConfig.forEach((col, idx) => {
     const colNumber = START_COL + idx;
@@ -353,7 +313,8 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
     }
   });
 
-  const currencyNumFmt = '#,##0.00" TMT"';
+  // The column header already says TMT, so the amount is shown as a plain number.
+  const currencyNumFmt = "#,##0.00";
 
   // One style object per column, shared by all its cells: with thousands of
   // rows, fresh font/border objects per cell cost hundreds of MB.
@@ -406,4 +367,10 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
       cell.style = cellStyles[idx];
     });
   });
+
+  // Filter dropdowns on the header row, as in the paper report.
+  worksheet.autoFilter = {
+    from: { row: START_ROW, column: START_COL },
+    to: { row: START_ROW + Math.max(letters.length, 1), column: END_COL },
+  };
 }
