@@ -105,6 +105,10 @@ export const updatePackageApi = async (data) => {
   return await api.patchPrivate('/package/update-package', data);
 };
 
+export const updateVisaPaymentApi = async (data) => {
+  return await api.patchPrivate('/visa-payment/update-visa-payment', data);
+};
+
 export const updateHarPaymentApi = async (data) => {
   return await api.patchPrivate('/har-payment/update-har-payment', data);
 };

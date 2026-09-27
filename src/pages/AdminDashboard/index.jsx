@@ -191,7 +191,7 @@ const AdminDashboard = () => {
 
       {isError && <Alert severity="error">{t("dashboard.loadError")}</Alert>}
 
-      {isLoading && !summary ? (
+      {!summary && isError ? null : isLoading && !summary ? (
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" }, gap: 2 }}>
           {[0, 1, 2, 3].map((i) => (
             <Skeleton key={i} variant="rounded" height={190} sx={{ borderRadius: "14px" }} />

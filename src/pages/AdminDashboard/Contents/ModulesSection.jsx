@@ -83,7 +83,10 @@ const ModulesSection = ({ modules, currency, labels, compareLabel }) => {
   const [selected, setSelected] = useState(modules[0]?.key);
 
   const mod = modules.find((m) => m.key === selected) || modules[0];
-  const meta = MODULE_META[mod.key];
+  const meta = mod && MODULE_META[mod.key];
+  // Nothing to show (no data yet, or a module the UI doesn't know).
+  if (!mod || !meta) return null;
+
   const { revenue, profit, count, receivable, refunds } = mod.current;
   const money = (v) => formatAmount(v, currency);
   const hasData = count > 0;

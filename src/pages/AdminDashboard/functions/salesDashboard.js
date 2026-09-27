@@ -55,21 +55,30 @@ const EMPTY_PAYMENT = {
 
 const toTotals = (t) => (t ? { ...t, refundAmount: t.refund_amount ?? 0 } : EMPTY_TOTALS);
 
-// API (snake_case) → the shape the dashboard components render.
-const toCurrencyData = (c) => ({
-  current: toTotals(c?.current),
-  previous: toTotals(c?.previous),
-  buckets: c?.buckets ?? [],
-  payment: c?.payment ?? EMPTY_PAYMENT,
-  modules: (c?.modules ?? []).map((m) => ({
-    key: m.key,
-    current: toTotals(m.current),
-    previous: toTotals(m.previous),
-    buckets: m.buckets,
-    prevRevenue: m.prev_revenue,
-    operators: m.operators,
-  })),
+// Same modules, same order as the backend sends them.
+export const MODULE_KEYS = ["b2b", "thy", "outbound", "visa", "translation", "referral", "cafeteria"];
+
+const toModule = (key, m) => ({
+  key,
+  current: toTotals(m?.current),
+  previous: toTotals(m?.previous),
+  buckets: m?.buckets ?? [],
+  prevRevenue: m?.prev_revenue ?? [],
+  operators: m?.operators ?? [],
 });
+
+// API (snake_case) → the shape the dashboard components render. Every module
+// is always present (zeros when missing), so the UI never gets an empty list.
+const toCurrencyData = (c) => {
+  const byKey = new Map((c?.modules ?? []).map((m) => [m.key, m]));
+  return {
+    current: toTotals(c?.current),
+    previous: toTotals(c?.previous),
+    buckets: c?.buckets ?? [],
+    payment: c?.payment ?? EMPTY_PAYMENT,
+    modules: MODULE_KEYS.map((key) => toModule(key, byKey.get(key))),
+  };
+};
 
 export const EMPTY_SALES = toCurrencyData(null);
 

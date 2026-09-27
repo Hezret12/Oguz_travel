@@ -10,6 +10,7 @@ const ColumnActionButtons = ({
   onEdit,
   showPayment = false,
   onPaymentClick,
+  onPaymentsChanged,
   showDelete = true,
 }) => {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
@@ -154,7 +155,11 @@ const ColumnActionButtons = ({
       {isPaymentOpen && (
         <PaymentManagementModal
           open={isPaymentOpen}
-          onClose={() => setIsPaymentOpen(false)}
+          onClose={(changed) => {
+            setIsPaymentOpen(false);
+            // Lets the page refresh paid totals / status after payments changed.
+            if (changed) onPaymentsChanged?.(row);
+          }}
           row={row}
         />
       )}

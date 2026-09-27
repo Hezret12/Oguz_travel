@@ -146,6 +146,14 @@ export const addTransPaymentApi = async (data) => {
   return response;
 };
 
+export const addVisaPaymentApi = async (data) => {
+  const response = await api.postPrivate(
+    "/visa-payment/add-visa-payment",
+    data,
+  );
+  return response;
+};
+
 export const addHarPaymentApi = async (data) => {
   const response = await api.postPrivate(
     "/har-payment/add-har-payment",

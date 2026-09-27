@@ -168,6 +168,10 @@ export const getAllPackagesApi = async (params = {}) => {
   return await api.getPrivate('/package/get-packages', params);
 };
 
+export const getAllVisaPaymentApi = async (params = {}) => {
+  return await api.getPrivate('/visa-payment/getAll-visa-payment', params);
+};
+
 export const getAllHarPaymentApi = async (params = {}) => {
   return await api.getPrivate('/har-payment/get-all-har-payment', params);
 };

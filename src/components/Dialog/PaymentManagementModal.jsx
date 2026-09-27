@@ -13,6 +13,8 @@ import {
   Divider,
   Pagination,
   Skeleton,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   alpha,
 } from "@mui/material";
@@ -26,10 +28,10 @@ import CustomTextField from "../CustomTextField";
 import CustomDatePicker from "../CustomDatePicker";
 import GlobalEmployeeAutocomplete from "../global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { useLocale } from "../../hooks/useLocale";
-import { getAllPaymentStatusApi, getAllEmployeeApi, getAllTransPaymentApi, getAllHarPaymentApi, getAllTtpPaymentApi, getAllTurkishPaymentApi } from "../../api/queries/getters";
-import { deleteTicketPaymentApi, deleteTransPaymentApi, deleteHarPaymentApi, deleteTtpPaymentApi, deleteTurkishPaymentApi } from "../../api/queries/delete";
-import { addPaymentApi, addTransPaymentApi, addHarPaymentApi, addTtpPaymentApi, addTurkishPaymentApi } from "../../api/queries/post";
-import { updateTicketPaymentApi, updateTransPaymentApi, updateHarPaymentApi, updateTtpPaymentApi, updateTurkishPaymentApi } from "../../api/queries/patch";
+import { getAllPaymentStatusApi, getAllEmployeeApi, getAllTransPaymentApi, getAllHarPaymentApi, getAllTtpPaymentApi, getAllTurkishPaymentApi, getAllVisaPaymentApi } from "../../api/queries/getters";
+import { deleteTicketPaymentApi, deleteTransPaymentApi, deleteHarPaymentApi, deleteTtpPaymentApi, deleteTurkishPaymentApi, deleteVisaPaymentApi } from "../../api/queries/delete";
+import { addPaymentApi, addTransPaymentApi, addHarPaymentApi, addTtpPaymentApi, addTurkishPaymentApi, addVisaPaymentApi } from "../../api/queries/post";
+import { updateTicketPaymentApi, updateTransPaymentApi, updateHarPaymentApi, updateTtpPaymentApi, updateTurkishPaymentApi, updateVisaPaymentApi } from "../../api/queries/patch";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { useCreate } from "../../hooks/CRUD/useCreate";
 import { useDelete } from "../../hooks/CRUD/useDelete";
@@ -163,7 +165,24 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   const isTTP = isTour || isTransfer || isPackage;
 
-  const ticketCurrency = ticket?.currency || (isTranslation ? "TMT" : "USD");
+  // A visa has two separate prices (TMT and USD); each currency is paid and
+  // tracked on its own, never converted into the other.
+  const isVisa = useMemo(() => {
+    if (!ticket) return false;
+    return "price_tmt" in ticket || "price_usd" in ticket;
+  }, [ticket]);
+
+  // Opens on the currency that still has something to pay.
+  const defaultVisaCurrency = () => {
+    const leftTmt = Number(ticket?.price_tmt || 0) - Number(ticket?.totalPaidTmt || 0);
+    const leftUsd = Number(ticket?.price_usd || 0) - Number(ticket?.totalPaidUsd || 0);
+    if (leftTmt > 0) return "TMT";
+    if (leftUsd > 0) return "USD";
+    return Number(ticket?.price_usd || 0) > 0 && !Number(ticket?.price_tmt || 0) ? "USD" : "TMT";
+  };
+  const [visaCurrency, setVisaCurrency] = useState(defaultVisaCurrency);
+
+  const ticketCurrency = isVisa ? visaCurrency : ticket?.currency || (isTranslation ? "TMT" : "USD");
 
   const isCredit =
     ticket?.is_paid === false ||
@@ -174,7 +193,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     isHAR ||
     isTTP ||
     isTranslation ||
-    isTurkish;
+    isTurkish ||
+    isVisa;
 
   const apiFn = isTranslation
     ? getAllTransPaymentApi
@@ -184,6 +204,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     ? getAllTtpPaymentApi
     : isTurkish
     ? getAllTurkishPaymentApi
+    : isVisa
+    ? getAllVisaPaymentApi
     : getAllPaymentStatusApi;
 
   const key = isTranslation
@@ -194,6 +216,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     ? "ttp-payment"
     : isTurkish
     ? "turkish-payment"
+    : isVisa
+    ? "visa-payment"
     : "payment-status";
 
   const [localPayments, setLocalPayments] = useState([]);
@@ -212,6 +236,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     setEditingPayment(null);
     setLocalPayments([]);
     setHasChanged(false);
+    setVisaCurrency(defaultVisaCurrency());
     if (currentTicketKey) {
       queryClient.removeQueries({ queryKey: [key] });
     }
@@ -245,11 +270,13 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       else if (isPackage) params.package_guid = ticket?.guid;
     } else if (isTurkish) {
       params.turkish_airline_guid = ticket?.guid;
+    } else if (isVisa) {
+      params.visa_guid = ticket?.guid;
     } else {
       params.b2b_guid = ticket?.guid;
     }
     return params;
-  }, [ticket?.guid, page, limit, isTurkish, isTranslation, isHAR, isHotel, isAirway, isRailway, isTTP, isTour, isTransfer, isPackage]);
+  }, [ticket?.guid, page, limit, isTurkish, isTranslation, isHAR, isHotel, isAirway, isRailway, isTTP, isTour, isTransfer, isPackage, isVisa]);
 
   const { data: allPayments, rawResponse, isLoading: paymentsLoading, refetch: refetchPayments } = useGet({
     apiFn,
@@ -301,6 +328,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ? addTtpPaymentApi
       : isTurkish
       ? addTurkishPaymentApi
+      : isVisa
+      ? addVisaPaymentApi
       : addPaymentApi,
     key: key,
     invalidateQueries: [key],
@@ -325,6 +354,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ? deleteTtpPaymentApi
       : isTurkish
       ? deleteTurkishPaymentApi
+      : isVisa
+      ? deleteVisaPaymentApi
       : deleteTicketPaymentApi,
     queryKey: [key, queryParams],
     idKey: "guid",
@@ -340,6 +371,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       ? updateTtpPaymentApi
       : isTurkish
       ? updateTurkishPaymentApi
+      : isVisa
+      ? updateVisaPaymentApi
       : updateTicketPaymentApi,
     key: key,
     idKey: "guid",
@@ -381,6 +414,9 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         if (isTransfer) return p.transfer_guid === ticket.guid || p.transferGuid === ticket.guid || p.transfer?.guid === ticket.guid;
         if (isPackage) return p.package_guid === ticket.guid || p.packageGuid === ticket.guid || p.package?.guid === ticket.guid;
       }
+      if (isVisa) {
+        return p.visa_guid === ticket.guid || p.visa?.guid === ticket.guid;
+      }
       if (isTurkish) {
         return (
           p.turkish_airline_guid === ticket.guid ||
@@ -397,13 +433,16 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
         p.ticketGuid === ticket.guid
       );
     });
-  }, [allPayments, ticket, localPayments, isTurkish, isTranslation, isHAR, isHotel, isAirway, isRailway, isTTP, isTour, isTransfer, isPackage]);
+  }, [allPayments, ticket, localPayments, isTurkish, isTranslation, isHAR, isHotel, isAirway, isRailway, isTTP, isTour, isTransfer, isPackage, isVisa]);
 
 
   const isInitialLoading = paymentsLoading && !rawResponse;
-  const stats = responseData?.stats || responseData?.data?.stats || allPayments?.stats;
+  const rawStats = responseData?.stats || responseData?.data?.stats || allPayments?.stats;
+  // Visa stats come per currency ({ TMT: {...}, USD: {...} }); use the selected one.
+  const stats = isVisa ? rawStats?.[visaCurrency] : rawStats;
   const salesTotal = Number(
     stats?.total_sales ??
+    (isVisa ? ticket?.["price_" + visaCurrency.toLowerCase()] : undefined) ??
     ticket?.price ??
     ticket?.total_price ??
     ticket?.sale_price ??
@@ -422,7 +461,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       .reduce((sum, p) => sum + Number(p.amount || 0), 0);
   }, [payments, ticketCurrency]);
 
-  const hasMixedPaid = paidUsd > 0 && paidTmt > 0;
+  // Visa currencies are separate balances, never mixed or converted.
+  const hasMixedPaid = !isVisa && paidUsd > 0 && paidTmt > 0;
 
   const convertedTotalPaid = useMemo(() => {
     if (hasMixedPaid) {
@@ -444,9 +484,16 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
       : (salesTotal - convertedTotalPaid)
   );
 
-  const isFullyPaid = !isInitialLoading && remaining <= 0.01;
+  // A visa is paid only when both of its currencies are.
+  const isFullyPaid =
+    !isInitialLoading &&
+    (isVisa && rawStats
+      ? Number(rawStats?.TMT?.remaining ?? 0) <= 0.01 && Number(rawStats?.USD?.remaining ?? 0) <= 0.01
+      : remaining <= 0.01);
 
   const handleEditClick = (p) => {
+    // Editing a payment in the other currency switches the balance shown.
+    if (isVisa && p.currency) setVisaCurrency(p.currency);
     setEditingPayment(p);
     reset({
       amount: p.amount,
@@ -527,6 +574,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           payload.package_guid = isPackage ? ticketGuid : null;
         } else if (isTurkish) {
           payload.turkish_airline_guid = ticketGuid;
+        } else if (isVisa) {
+          payload.visa_guid = ticketGuid;
         } else {
           payload.b2b_guid = ticketGuid;
         }
@@ -570,6 +619,8 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
           payload.package_guid = isPackage ? ticketGuid : null;
         } else if (isTurkish) {
           payload.turkish_airline_guid = ticketGuid;
+        } else if (isVisa) {
+          payload.visa_guid = ticketGuid;
         } else {
           payload.b2b_guid = ticketGuid;
         }
@@ -670,6 +721,26 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             overflowY: "auto",
           }}
         >
+          {/* Visa: pick the currency whose balance is shown and paid */}
+          {isVisa && (
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              value={visaCurrency}
+              onChange={(_e, next) => {
+                if (!next || editingPayment) return;
+                setVisaCurrency(next);
+              }}
+              sx={{ alignSelf: "flex-start", flexShrink: 0 }}
+            >
+              {["TMT", "USD"].map((cur) => (
+                <ToggleButton key={cur} value={cur} sx={{ px: 2, fontWeight: 700, textTransform: "none" }}>
+                  {cur}
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          )}
+
           {/* Summary Cards Section (Inline & Sleek) */}
           <Box
             sx={(theme) => ({
@@ -940,7 +1011,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
                               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "primary.main" }}>
                                 {formatCurrency(p.amount, p.currency || ticketCurrency)}
                               </Typography>
-                              {p.currency && p.currency !== ticketCurrency && (
+                              {!isVisa && p.currency && p.currency !== ticketCurrency && (
                                 <Typography
                                   variant="caption"
                                   sx={{

@@ -311,11 +311,14 @@ const Visa = () => {
             row={row}
             table={table}
             onDelete={() => handleDeleteClick(row.original)}
+            showPayment
+            // Paid totals / status on the row come from the list; reload it.
+            onPaymentsChanged={refetch}
           />
         ),
       },
     ],
-    [t, selectedLang, formatChange, handleDeleteClick],
+    [t, selectedLang, formatChange, handleDeleteClick, refetch],
   );
 
   const table = useMaterialReactTable({
