@@ -152,8 +152,12 @@ const Visa = () => {
   const activeFilters = useMemo(
     () =>
       Object.entries(applied).filter(
-        // eslint-disable-next-line no-unused-vars
-        ([_, value]) => value !== undefined && value !== null && value !== "",
+        // Search already shows in its own input, so it gets no chip.
+        ([key, value]) =>
+          key !== "search" &&
+          value !== undefined &&
+          value !== null &&
+          value !== "",
       ),
     [applied],
   );
@@ -240,21 +244,34 @@ const Visa = () => {
         size: 110,
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "center" },
-        Cell: ({ cell, row }) => {
-          const paidPercent =
-            row.original.paidPercentageTmt ?? row.original.paidPercentageUsd;
-          if (
-            (cell.getValue() === false || cell.getValue() === "false") &&
-            paidPercent !== undefined
-          ) {
-            return <PaymentStatusCell percent={paidPercent} />;
-          }
-          return (
-            <StatusChip
-              status={cell.getValue()}
-              config={PAYMENT_STATUS_CONFIG}
-            />
-          );
+        Cell: ({ cell }) => (
+          <StatusChip
+            status={cell.getValue()}
+            config={PAYMENT_STATUS_CONFIG}
+            size="small"
+          />
+        ),
+      },
+      {
+        id: "paidPercentage",
+        header: t("columns.paymentPercentage"),
+        size: 110,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "center" },
+        // A visa can be priced in TMT, USD or both, and the API sends a paid
+        // percentage per currency — average the priced ones into one ring.
+        Cell: ({ row }) => {
+          const { price_tmt, price_usd, paidPercentageTmt, paidPercentageUsd } =
+            row.original;
+          const percents = [
+            Number(price_tmt) > 0 && parseFloat(paidPercentageTmt),
+            Number(price_usd) > 0 && parseFloat(paidPercentageUsd),
+          ].filter((p) => p !== false && !Number.isNaN(p));
+          const percent = percents.length
+            ? percents.reduce((sum, p) => sum + p, 0) / percents.length
+            : 0;
+          return <PaymentStatusCell percent={percent} />;
         },
       },
       {

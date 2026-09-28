@@ -50,6 +50,13 @@ const CURRENCY_SYMBOLS = {
   AED: "AED",
 };
 
+// A visa row carries a price and a paid total per currency.
+const VISA_CURRENCY_FIELDS = {
+  TMT: { price: "price_tmt", paid: "totalPaidTmt" },
+  USD: { price: "price_usd", paid: "totalPaidUsd" },
+};
+const VISA_CURRENCIES = Object.keys(VISA_CURRENCY_FIELDS);
+
 let localPaymentIdCounter = 0;
 const getNextLocalPaymentGuid = () => {
   localPaymentIdCounter += 1;
@@ -172,17 +179,14 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     return "price_tmt" in ticket || "price_usd" in ticket;
   }, [ticket]);
 
-  // Opens on the currency that still has something to pay.
-  const defaultVisaCurrency = () => {
-    const leftTmt = Number(ticket?.price_tmt || 0) - Number(ticket?.totalPaidTmt || 0);
-    const leftUsd = Number(ticket?.price_usd || 0) - Number(ticket?.totalPaidUsd || 0);
-    if (leftTmt > 0) return "TMT";
-    if (leftUsd > 0) return "USD";
-    return Number(ticket?.price_usd || 0) > 0 && !Number(ticket?.price_tmt || 0) ? "USD" : "TMT";
-  };
+  // Opens on the currency that still has something to pay; an unselectable
+  // pick falls back to the first selectable one (see activeVisaCurrency).
+  const defaultVisaCurrency = () =>
+    VISA_CURRENCIES.find((cur) => {
+      const { price, paid } = VISA_CURRENCY_FIELDS[cur];
+      return Number(ticket?.[price] || 0) - Number(ticket?.[paid] || 0) > 0;
+    }) ?? VISA_CURRENCIES[0];
   const [visaCurrency, setVisaCurrency] = useState(defaultVisaCurrency);
-
-  const ticketCurrency = isVisa ? visaCurrency : ticket?.currency || (isTranslation ? "TMT" : "USD");
 
   const isCredit =
     ticket?.is_paid === false ||
@@ -223,7 +227,6 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
   const [localPayments, setLocalPayments] = useState([]);
   const [editingPayment, setEditingPayment] = useState(null);
   const [prevTicketKey, setPrevTicketKey] = useState(null);
-  const activeCurrency = editingPayment?.currency || ticketCurrency || "USD";
   const [hasChanged, setHasChanged] = useState(false);
   const exchangeRate = useMemo(() => {
     return parseFloat(localStorage.getItem("finance_usd_tmt_rate") || "19.5") || 19.5;
@@ -384,6 +387,30 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
     },
   });
 
+  const rawStats = responseData?.stats || responseData?.data?.stats || allPayments?.stats;
+
+  // A visa currency is selectable while it has a price or payments to show;
+  // live stats win over the row, which is stale after changes in this modal.
+  const visaCurrencies = useMemo(() => {
+    if (!isVisa) return [];
+    return VISA_CURRENCIES.filter((cur) => {
+      const { price, paid } = VISA_CURRENCY_FIELDS[cur];
+      const total = Number(rawStats?.[cur]?.total_sales ?? ticket?.[price] ?? 0);
+      const totalPaid = Number(rawStats?.[cur]?.total_paid ?? ticket?.[paid] ?? 0);
+      return total > 0 || totalPaid > 0;
+    });
+  }, [isVisa, rawStats, ticket]);
+
+  // Falls back when the picked currency stops being selectable (e.g. its last
+  // payment was deleted) — derived, so no state sync is needed.
+  const activeVisaCurrency =
+    visaCurrencies.length === 0 || visaCurrencies.includes(visaCurrency)
+      ? visaCurrency
+      : visaCurrencies[0];
+
+  const ticketCurrency = isVisa ? activeVisaCurrency : ticket?.currency || (isTranslation ? "TMT" : "USD");
+  const activeCurrency = editingPayment?.currency || ticketCurrency || "USD";
+
   const handleModalClose = () => {
     onClose?.(hasChanged);
   };
@@ -437,12 +464,11 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
 
   const isInitialLoading = paymentsLoading && !rawResponse;
-  const rawStats = responseData?.stats || responseData?.data?.stats || allPayments?.stats;
   // Visa stats come per currency ({ TMT: {...}, USD: {...} }); use the selected one.
-  const stats = isVisa ? rawStats?.[visaCurrency] : rawStats;
+  const stats = isVisa ? rawStats?.[activeVisaCurrency] : rawStats;
   const salesTotal = Number(
     stats?.total_sales ??
-    (isVisa ? ticket?.["price_" + visaCurrency.toLowerCase()] : undefined) ??
+    (isVisa ? ticket?.[VISA_CURRENCY_FIELDS[activeVisaCurrency]?.price] : undefined) ??
     ticket?.price ??
     ticket?.total_price ??
     ticket?.sale_price ??
@@ -493,7 +519,7 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
 
   const handleEditClick = (p) => {
     // Editing a payment in the other currency switches the balance shown.
-    if (isVisa && p.currency) setVisaCurrency(p.currency);
+    if (isVisa && VISA_CURRENCY_FIELDS[p.currency]) setVisaCurrency(p.currency);
     setEditingPayment(p);
     reset({
       amount: p.amount,
@@ -721,19 +747,20 @@ export const PaymentManagementModal = ({ open, onClose, row }) => {
             overflowY: "auto",
           }}
         >
-          {/* Visa: pick the currency whose balance is shown and paid */}
-          {isVisa && (
+          {/* Visa: pick the currency whose balance is shown and paid —
+              only worth showing when there is more than one to pick. */}
+          {visaCurrencies.length > 1 && (
             <ToggleButtonGroup
               exclusive
               size="small"
-              value={visaCurrency}
+              value={activeVisaCurrency}
               onChange={(_e, next) => {
                 if (!next || editingPayment) return;
                 setVisaCurrency(next);
               }}
               sx={{ alignSelf: "flex-start", flexShrink: 0 }}
             >
-              {["TMT", "USD"].map((cur) => (
+              {visaCurrencies.map((cur) => (
                 <ToggleButton key={cur} value={cur} sx={{ px: 2, fontWeight: 700, textTransform: "none" }}>
                   {cur}
                 </ToggleButton>
