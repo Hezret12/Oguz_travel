@@ -38,11 +38,15 @@ export const useValidShema = () => {
 
   const addEmployee = yup.object({
     fullName: stringRequiredValidSchema(t("employee.validation.fullNameRequired")),
-     phone_number: phoneNumberRequiredValidSchema({
+    phone_number: phoneNumberRequiredValidSchema({
       requiredMessage: t("users.validation.phoneNumberRequired"),
       lengthMessage: t("users.validation.phoneNumberLength"),
       invalidMessage: t("users.validation.phoneNumberInvalid"),
     }),
+    loan: yup
+      .mixed()
+      .nullable()
+      .transform((v) => (v === "" || v === undefined ? null : v)),
   });
 
   const editEmployee = yup.object({
@@ -53,6 +57,10 @@ export const useValidShema = () => {
       invalidMessage: t("users.validation.phoneNumberInvalid"),
     }),
     guid: guidRequiredValidSchema(),
+    loan: yup
+      .mixed()
+      .nullable()
+      .transform((v) => (v === "" || v === undefined ? null : v)),
   });
 
   const clientValidShema = yup.object({

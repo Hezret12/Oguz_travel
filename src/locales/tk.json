@@ -171,7 +171,8 @@
     "endDate": "Gutarýan senesi",
     "start_date": "Başlangyç senesi",
     "end_date": "Ahyrky senesi",
-    "visaStatus": "Wiza ýagdaýy"
+    "visaStatus": "Wiza ýagdaýy",
+    "loan": "Karz"
   },
   "visa": {
     "title": "Wiza",
@@ -191,6 +192,16 @@
     "active": "Işjeň",
     "inactive": "Işjeň däl",
     "isActive": "Işjeň işgär (aýlyk sanawynda görünýär)",
+    "loan": "Karz",
+    "loanHistory": "Karz taryhy",
+    "currentLoan": "Häzirki karz",
+    "totalLoanDeducted": "Jemi tutulan karz",
+    "loanMonthsCount": "Karz aýlary",
+    "noLoanHistory": "Karz ýazgysy tapylmady",
+    "baseSalary": "Esasy aýlyk",
+    "paidDate": "Tölenen senesi",
+    "monthYear": "Aý / Ýyl",
+    "loanAmount": "Karz möçberi",
     "validation": {
       "fullNameRequired": "Doly ady zerurdyr"
     }

@@ -74,6 +74,10 @@ const EditEmployee = ({ table, row }) => {
       position_guids: Array.isArray(row?.original?.positions) ? row.original.positions.map((p) => p.guid) : [],
       office_guid: row?.original?.office?.guid || "",
       address: row?.original?.address || "",
+      loan:
+        row?.original?.loan !== undefined && row?.original?.loan !== null
+          ? String(row.original.loan)
+          : "",
       is_active: row?.original?.is_active !== false,
     },
     resolver: yupResolver(editEmployee),
@@ -99,6 +103,11 @@ const EditEmployee = ({ table, row }) => {
       if (data.department_guid) payload.department_guid = data.department_guid;
       if (data.gmail) payload.gmail = data.gmail;
       if (data.address) payload.address = data.address;
+      if (data.loan !== undefined && data.loan !== "") {
+        payload.loan = Number(data.loan);
+      } else {
+        payload.loan = 0;
+      }
 
       await updateEmployee(payload);
     } catch (err) {
@@ -193,7 +202,18 @@ const EditEmployee = ({ table, row }) => {
             />
           </Grid>
 
-          <Grid size={{ xs: 12, sm: 6 }} sx={{ display: "flex", alignItems: "flex-end" }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CustomTextField
+              name="loan"
+              control={control}
+              type="number"
+              label={t("employee.loan")}
+              placeholder="0.00"
+              allowNegative={false}
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12 }} sx={{ display: "flex", alignItems: "center", pt: 1 }}>
             <CustomCheckbox
               name="is_active"
               control={control}

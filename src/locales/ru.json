@@ -171,7 +171,8 @@
     "endDate": "Дата окончания",
     "start_date": "Дата начала",
     "end_date": "Дата окончания",
-    "visaStatus": "Статус визы"
+    "visaStatus": "Статус визы",
+    "loan": "Долг"
   },
   "visa": {
     "title": "Виза",
@@ -184,15 +185,25 @@
   "addTranslator": "Добавить переводчика",
   "editTranslator": "Редактировать переводчика",
   "employee": {
-    "title": "Işgärler",
-    "add": "Işgär goşmak",
-    "edit": "Işgär üýtgetmek",
-    "deleteConfirm": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi? Bu amaly yza gaýtaryp bolmaz.",
+    "title": "Сотрудники",
+    "add": "Добавить сотрудника",
+    "edit": "Редактировать сотрудника",
+    "deleteConfirm": "Вы уверены, что хотите удалить этого сотрудника? Это действие нельзя отменить.",
     "active": "Активен",
     "inactive": "Неактивен",
     "isActive": "Активный сотрудник (виден в зарплате)",
+    "loan": "Долг",
+    "loanHistory": "История долгов",
+    "currentLoan": "Текущий долг",
+    "totalLoanDeducted": "Всего удержано",
+    "loanMonthsCount": "Месяцы с долгом",
+    "noLoanHistory": "История долгов не найдена",
+    "baseSalary": "Базовый оклад",
+    "paidDate": "Дата выплаты",
+    "monthYear": "Месяц / Год",
+    "loanAmount": "Сумма долга",
     "validation": {
-      "fullNameRequired": "Doly ady zerurdyr"
+      "fullNameRequired": "ФИО обязательно"
     }
   },
   "clients": {

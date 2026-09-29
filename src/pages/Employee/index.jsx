@@ -7,12 +7,15 @@ import { useLocale } from "../../hooks/useLocale";
 import GlobalSearchInput from "../../components/GlobalSearchInput";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
-import { Box, Chip, Tooltip } from "@mui/material";
+import { Box, Chip, IconButton, Tooltip, Typography } from "@mui/material";
+import { History } from "lucide-react";
 import ColumnActionButtons from "../../components/ColumnActionButtons";
 import StatusChip from "../../components/StatusChip";
 import { EMPLOYEE_ACTIVE_CONFIG } from "../../functions/statusChipConfigs";
 import AddEmployee from "./Contents/AddEmployee";
 import EditEmployee from "./Contents/EditEmployee";
+import EmployeeLoanHistoryModal from "./Contents/EmployeeLoanHistoryModal";
+import { formatMoney } from "../Finance/Salary/functions/salaryUtils";
 import { useTableFilters, useDrawerFilters } from "../../hooks/usePageFilters";
 import {
   employeeFilterActions,
@@ -71,8 +74,17 @@ const EmployeeFilterDrawer = () => {
 
 const Employee = () => {
   const [rowSelection, setRowSelection] = useState({});
+  const [loanHistoryEmployee, setLoanHistoryEmployee] = useState(null);
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
+
+  const handleOpenLoanHistory = useCallback((emp) => {
+    setLoanHistoryEmployee(emp);
+  }, []);
+
+  const handleCloseLoanHistory = useCallback(() => {
+    setLoanHistoryEmployee(null);
+  }, []);
 
   const {
     applied,
@@ -282,6 +294,30 @@ const Employee = () => {
         size: 130,
       },
       {
+        accessorKey: "loan",
+        id: "loan",
+        header: t("columns.loan"),
+        size: 110,
+        muiTableHeadCellProps: { align: "right" },
+        muiTableBodyCellProps: { align: "right" },
+        Cell: ({ row }) => {
+          const val = Number(row.original.loan) || 0;
+          return (
+            <Typography
+              component="span"
+              sx={{
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                fontVariantNumeric: "tabular-nums",
+                color: val > 0 ? "#d97706" : "text.secondary",
+              }}
+            >
+              {val > 0 ? `${formatMoney(val, { dashZero: false })} TMT` : "-"}
+            </Typography>
+          );
+        },
+      },
+      {
         accessorKey: "is_active",
         id: "is_active",
         header: t("columns.status"),
@@ -296,19 +332,65 @@ const Employee = () => {
       {
         id: "actions",
         header: t("columns.actions"),
-        size: actions,
+        size: 135,
         enableSorting: false,
         muiTableHeadCellProps: { align: "center" },
         Cell: ({ row, table }) => (
-          <ColumnActionButtons
-            row={row}
-            table={table}
-            onDelete={handleDeleteClick}
-          />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+            }}
+          >
+            <Tooltip title={t("employee.loanHistory")} arrow placement="top">
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.currentTarget.blur();
+                  handleOpenLoanHistory(row.original);
+                }}
+                size="small"
+                sx={(theme) => ({
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "6px",
+                  border: "1px solid rgba(245, 158, 11, 0.3)",
+                  backgroundColor: "rgba(245, 158, 11, 0.06)",
+                  color: "#d97706",
+                  transition: "all 0.15s ease",
+                  "&:hover": {
+                    backgroundColor: "rgba(245, 158, 11, 0.15)",
+                    borderColor: "#d97706",
+                    transform: "translateY(-1px)",
+                  },
+                  "&:active": { transform: "scale(0.95)" },
+                  ...theme.applyStyles("dark", {
+                    border: "1px solid rgba(245, 158, 11, 0.35)",
+                    backgroundColor: "rgba(245, 158, 11, 0.1)",
+                    color: "#fbbf24",
+                    "&:hover": {
+                      backgroundColor: "rgba(245, 158, 11, 0.2)",
+                      borderColor: "#fbbf24",
+                    },
+                  }),
+                })}
+              >
+                <History size={15} />
+              </IconButton>
+            </Tooltip>
+
+            <ColumnActionButtons
+              row={row}
+              table={table}
+              onDelete={handleDeleteClick}
+            />
+          </Box>
         ),
       },
     ],
-    [selectedLang, t, handleDeleteClick],
+    [selectedLang, t, handleDeleteClick, handleOpenLoanHistory],
   );
 
   const activeFilters = useMemo(
@@ -479,6 +561,20 @@ const Employee = () => {
 
       {Boolean(table.getState().editingRow) && (
         <EditEmployee table={table} row={table.getState().editingRow} />
+      )}
+
+      {Boolean(loanHistoryEmployee) && (
+        <EmployeeLoanHistoryModal
+          open={Boolean(loanHistoryEmployee)}
+          close={handleCloseLoanHistory}
+          employee={loanHistoryEmployee}
+          onEditEmployee={(emp) => {
+            const mrtRow = table.getRow(emp.guid);
+            if (mrtRow) {
+              table.setEditingRow(mrtRow);
+            }
+          }}
+        />
       )}
 
       <MaterialReactTable table={table} />
