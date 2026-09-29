@@ -460,14 +460,6 @@ const Salary = () => {
         Footer: footerMoney("payable_amount"),
       },
       {
-        id: "paid_amount",
-        header: t("salary.paidAmount"),
-        size: 120,
-        ...RIGHT,
-        ...editable("paid_amount"),
-        Footer: footerMoney("paid_amount"),
-      },
-      {
         id: "paid_date",
         header: t("salary.paidDate"),
         size: 110,
