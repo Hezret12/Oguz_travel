@@ -21,48 +21,14 @@ import {
 } from "../functions/analyticsFormat";
 import { ChartGradients } from "./SectionCard";
 
-// `upIsGood: false` where growth is bad news (spending, unpaid credit).
+// `key` names both the card figure and the chart bucket field (see dashboardData).
+// `upIsGood: false` where growth is bad news (cost, unpaid credit).
 const KPI_DEFS = [
-  { key: "moneyOut", upIsGood: false, icon: BanknoteArrowUp, tone: "outflow" },
-  { key: "moneyIn", upIsGood: true, icon: BanknoteArrowDown, tone: "inflow" },
-  { key: "credit", upIsGood: false, icon: HandCoins, tone: "credit" },
+  { key: "cost", upIsGood: false, icon: BanknoteArrowUp, tone: "outflow" },
+  { key: "revenue", upIsGood: true, icon: BanknoteArrowDown, tone: "inflow" },
+  { key: "receivable", upIsGood: false, icon: HandCoins, tone: "credit" },
   { key: "profit", upIsGood: true, icon: PiggyBank, tone: "profit" },
 ];
-
-// Current value, previous-period value and in-period series for each card.
-const getKpiData = (key, { totals, trend, cashFlow }, currency) => {
-  const series = cashFlow.series;
-  switch (key) {
-    case "moneyOut":
-      return {
-        value: cashFlow.current[currency].outflow,
-        previous: cashFlow.previous[currency].outflow,
-        points: series.map((p) => p[currency].outflow),
-        labels: series.map((p) => p.label),
-      };
-    case "moneyIn":
-      return {
-        value: cashFlow.current[currency].inflow,
-        previous: cashFlow.previous[currency].inflow,
-        points: series.map((p) => p[currency].inflow),
-        labels: series.map((p) => p.label),
-      };
-    case "credit":
-      return {
-        value: totals.current[currency].receivable,
-        previous: totals.previous[currency].receivable,
-        points: trend.map((p) => p[currency].receivable ?? 0),
-        labels: trend.map((p) => p.label),
-      };
-    default:
-      return {
-        value: totals.current[currency].netProfit,
-        previous: totals.previous[currency].netProfit,
-        points: trend.map((p) => p[currency].netProfit ?? 0),
-        labels: trend.map((p) => p.label),
-      };
-  }
-};
 
 // Change vs the previous period as plain text: arrow + number (never colour alone).
 export const DeltaBadge = ({ change, upIsGood }) => {
@@ -265,13 +231,15 @@ export const KpiCard = ({
   );
 };
 
-// Headline cash figures for the period, each compared with the previous
-// period and drawn as its in-period trend.
-const KpiGrid = ({ totals, trend, cashFlow, currency, period }) => {
+// Headline figures for the period, each compared with the previous period and
+// drawn as its in-period trend. `cards` holds both currencies; `buckets` (the
+// chart series) only the selected one.
+const KpiGrid = ({ cards, buckets, currency, period }) => {
   const { t } = useLocale();
   const mode = useTheme().palette.mode === "dark" ? "dark" : "light";
   const compareLabel = t(`finance.analytics.vsPeriod.${period}`);
   const otherCurrency = currency === "USD" ? "TMT" : "USD";
+  const labels = buckets.map((b) => b.label);
 
   return (
     <Box
@@ -296,8 +264,11 @@ const KpiGrid = ({ totals, trend, cashFlow, currency, period }) => {
           currency={currency}
           compareLabel={compareLabel}
           otherCurrency={otherCurrency}
-          otherValue={getKpiData(key, { totals, trend, cashFlow }, otherCurrency).value}
-          {...getKpiData(key, { totals, trend, cashFlow }, currency)}
+          otherValue={cards[key][otherCurrency].value}
+          value={cards[key][currency].value}
+          previous={cards[key][currency].previous}
+          points={buckets.map((b) => b[key])}
+          labels={labels}
         />
       ))}
     </Box>

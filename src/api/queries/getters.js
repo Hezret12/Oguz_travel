@@ -275,7 +275,34 @@ export const getSalaryEmployeesApi = async (params = {}) => {
   return await api.getPrivate('/salary/get-employees', params);
 };
 
-// Sales dashboard: totals, chart buckets, payment split and per-module data (USD + TMT) in one call.
-export const getDashboardSummaryApi = async (params = {}) => {
-  return await api.getPrivate('/dashboard/get-summary', params);
+// Dashboard aggregates over tbl_total_calculations. Every endpoint takes a
+// period (`period_preset` or `start_date` + `end_date`) and an optional
+// `office_guid`; all but the cards and offices ones also take `currency`.
+
+// KPI cards: sales count, sale, net (cost), credit and profit, USD and TMT, vs the previous period.
+export const getDashboardCardsApi = async (params = {}) => {
+  return await api.getPrivate('/dashboard/admin-vs-maliya-vs-office-cards', params);
+};
+
+// Per day / month series with a running profit (`last_profit`).
+export const getDashboardChartApi = async (params = {}) => {
+  return await api.getPrivate('/dashboard/admin-chart-data', params);
+};
+
+// Sales split by payment status.
+export const getDashboardStatusApi = async (params = {}) => {
+  return await api.getPrivate('/dashboard/admin-by-status', params);
+};
+
+export const getDashboardOperatorsApi = async (params = {}) => {
+  return await api.getPrivate('/dashboard/admin-vs-maliya-operators', params);
+};
+
+export const getDashboardCategoriesApi = async (params = {}) => {
+  return await api.getPrivate('/dashboard/maliya-by-categories', params);
+};
+
+// Every office's sale, net, credit and profit in USD and TMT, plus the grand total.
+export const getDashboardOfficesApi = async (params = {}) => {
+  return await api.getPrivate('/dashboard/office-by-office', params);
 };

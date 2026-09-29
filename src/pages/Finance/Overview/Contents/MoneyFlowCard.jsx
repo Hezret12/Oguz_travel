@@ -17,10 +17,12 @@ import {
 const MAX_ROWS = 5;
 const DONUT = 188;
 
-const toRows = (items, currency, otherName, selectedLang) => {
-  const sorted = items.filter((i) => i[currency] > 0).sort((a, b) => b[currency] - a[currency]);
-  const rows = sorted.slice(0, MAX_ROWS).map((i) => ({ key: i.key, name: selectedLang(i.name), value: i[currency] }));
-  const rest = sorted.slice(MAX_ROWS).reduce((s, i) => s + i[currency], 0);
+// `field` picks the figure per category: "revenue" (sales) or "cost".
+const toRows = (categories, field, currency, otherName, selectedLang) => {
+  const valueOf = (c) => c[currency]?.[field] ?? 0;
+  const sorted = categories.filter((c) => valueOf(c) > 0).sort((a, b) => valueOf(b) - valueOf(a));
+  const rows = sorted.slice(0, MAX_ROWS).map((c) => ({ key: c.key, name: selectedLang(c.name), value: valueOf(c) }));
+  const rest = sorted.slice(MAX_ROWS).reduce((s, c) => s + valueOf(c), 0);
   if (rest > 0) rows.push({ key: "other", name: otherName, value: rest, isOther: true });
   return rows;
 };
@@ -156,17 +158,17 @@ const FlowDonut = ({ id, rows, total, currency, totalLabel }) => {
   );
 };
 
-// Where the money came from and where it went, side by side, and what is
-// left in the till. Selected currency only; USD and TMT are never mixed.
-const MoneyFlowCard = ({ cashFlow, currency }) => {
+// Sales and cost of sales by service, side by side, and the gross profit
+// between them. Selected currency only; USD and TMT are never mixed.
+const MoneyFlowCard = ({ categories, currency }) => {
   const { t, selectedLang } = useLocale();
   const colors = useFlowColors();
   const [view, setView] = useState("chart");
   const other = t("finance.analytics.flow.other");
 
   const sides = [
-    { id: "in", title: t("finance.analytics.flow.inTitle"), color: colors.inflow, rows: toRows(cashFlow.inflow, currency, other, selectedLang) },
-    { id: "out", title: t("finance.analytics.flow.outTitle"), color: colors.outflow, rows: toRows(cashFlow.outflow, currency, other, selectedLang) },
+    { id: "in", title: t("finance.analytics.flow.inTitle"), color: colors.inflow, rows: toRows(categories, "revenue", currency, other, selectedLang) },
+    { id: "out", title: t("finance.analytics.flow.outTitle"), color: colors.outflow, rows: toRows(categories, "cost", currency, other, selectedLang) },
   ].map((s) => ({ ...s, total: s.rows.reduce((sum, r) => sum + r.value, 0) }));
   const left = sides[0].total - sides[1].total;
   const hasData = sides.some((s) => s.rows.length > 0);

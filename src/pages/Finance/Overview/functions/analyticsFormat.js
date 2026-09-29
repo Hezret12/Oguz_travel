@@ -1,6 +1,4 @@
-import { useMemo } from "react";
 import { useTheme } from "@mui/material";
-import { getOfficeAnalyticsMock } from "./officeAnalyticsMock";
 
 export const CURRENCIES = ["USD", "TMT"];
 
@@ -201,17 +199,3 @@ export const tableSx = (theme) => ({
   "& .MuiTableCell-root:first-of-type": { pl: 0 },
   "& .MuiTableCell-root:last-of-type": { pr: 0 },
 });
-
-// Demo data today; replace the body with a useGet on
-// /total-calculations/get-office-analytics once the endpoint exists.
-// `customRange` ({ start, end } as "YYYY-MM-DD") applies when period is "custom";
-// the real request should send it as start_date / end_date.
-export const useOfficeAnalytics = (period, customRange) => {
-  const start = customRange?.start;
-  const end = customRange?.end;
-  const data = useMemo(
-    () => getOfficeAnalyticsMock(period, undefined, start && end ? { start, end } : null),
-    [period, start, end],
-  );
-  return { data, isLoading: false, isDemo: true };
-};

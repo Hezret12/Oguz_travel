@@ -99,6 +99,8 @@ export function normalizeUser(rawUser) {
     office,
     avatar_url,
     employee_guid: emp.guid || emp.id || rawUser.employee_guid || null,
+    // The office the user works in; scopes office-level reports.
+    office_guid: emp.office?.guid || rawUser.office_guid || null,
   };
 }
 

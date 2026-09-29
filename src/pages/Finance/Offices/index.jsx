@@ -1,4 +1,4 @@
-import { Box, Chip, CircularProgress, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import { Building } from "lucide-react";
 import PageHeader from "../../../components/PageHeader";
 import { useLocale } from "../../../hooks/useLocale";
@@ -20,29 +20,18 @@ const MetaItem = ({ icon: Icon, children }) => (
   </Box>
 );
 
-// Every office's money in, money out and profit for a period, one total per
+// Every office's sales, cost of sales and profit for a period, one total per
 // office, in USD and TMT side by side (never converted).
 const FinanceOffices = () => {
   const { t } = useLocale();
   const [prefs, updatePrefs] = useAnalyticsPrefs(STORAGE_KEY);
   const { period, customRange, currency } = prefs;
 
-  const { data, isLoading, isDemo } = useOfficesFinance(period, customRange);
+  const { data, isLoading, isFetching, isError } = useOfficesFinance(period, customRange);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pb: 4 }}>
-      <PageHeader title={t("finance.offices.title")} pageTitle={`${t("finance.offices.title")} | Oguz Travel`}>
-        {isDemo && (
-          <Tooltip title={t("finance.analytics.demoHint")} arrow>
-            <Chip
-              label={t("finance.analytics.demo")}
-              size="small"
-              variant="outlined"
-              sx={{ height: 24, fontSize: "0.72rem", fontWeight: 500, color: "text.secondary", borderColor: "divider" }}
-            />
-          </Tooltip>
-        )}
-      </PageHeader>
+      <PageHeader title={t("finance.offices.title")} pageTitle={`${t("finance.offices.title")} | Oguz Travel`} />
 
       <Box
         sx={{
@@ -59,19 +48,31 @@ const FinanceOffices = () => {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-          <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />        </Box>
+          <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />
+        </Box>
       </Box>
+
+      {isError && <Alert severity="error">{t("dashboard.loadError")}</Alert>}
 
       {isLoading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress size={28} />
         </Box>
       ) : (
-        <>
+        // A refetch keeps the current render, slightly dimmed.
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2.5,
+            opacity: isFetching ? 0.6 : 1,
+            transition: "opacity .2s ease",
+          }}
+        >
           <OfficesSummary rows={data.rows} totals={data.totals} />
           <OfficesChart rows={data.rows} currency={currency} />
           <OfficesTable rows={data.rows} totals={data.totals} />
-        </>
+        </Box>
       )}
     </Box>
   );

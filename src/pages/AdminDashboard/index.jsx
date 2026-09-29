@@ -19,12 +19,24 @@ import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllOfficeApi } from "../../api/queries/getters";
 import { KpiCard } from "../Finance/Overview/Contents/KpiGrid";
 import PeriodRangeFilter from "../Finance/Overview/Contents/PeriodRangeFilter";
+import CategoryCard from "../Finance/Overview/Contents/CategoryCard";
+import OperatorCard from "../Finance/Overview/Contents/OperatorCard";
 import { KPI_TONES } from "../Finance/Overview/functions/analyticsFormat";
 import { useAnalyticsPrefs } from "../Finance/Overview/functions/useAnalyticsPrefs";
-import { EMPTY_SALES, resolveRange, useDashboardSummary } from "./functions/salesDashboard";
+import {
+  EMPTY_CARDS,
+  EMPTY_PAYMENT,
+  combineQueries,
+  dashboardGranularity,
+  toDashboardParams,
+  useDashboardCards,
+  useDashboardCategories,
+  useDashboardChart,
+  useDashboardOperators,
+  useDashboardStatus,
+} from "../Finance/Overview/functions/dashboardData";
 import SalesTrendCard from "./Contents/SalesTrendCard";
 import PaymentStatusCard from "./Contents/PaymentStatusCard";
-import ModulesSection from "./Contents/ModulesSection";
 
 const STORAGE_KEY = "admin_dashboard_prefs";
 
@@ -41,12 +53,30 @@ const AdminDashboard = () => {
 
   const rangeStart = customRange?.start;
   const rangeEnd = customRange?.end;
-  const range = useMemo(
-    () => resolveRange(period, rangeStart && rangeEnd ? { start: rangeStart, end: rangeEnd } : null),
-    [period, rangeStart, rangeEnd],
+  const params = useMemo(
+    () =>
+      toDashboardParams({
+        period,
+        customRange: rangeStart && rangeEnd ? { start: rangeStart, end: rangeEnd } : null,
+        officeGuid: office,
+        currency,
+      }),
+    [period, rangeStart, rangeEnd, office, currency],
   );
 
-  const { summary, isLoading, isFetching, isError, refetch, updatedAt } = useDashboardSummary(range, office);
+  const cardsQuery = useDashboardCards(params);
+  const chartQuery = useDashboardChart(params);
+  const statusQuery = useDashboardStatus(params);
+  const categoriesQuery = useDashboardCategories(params);
+  const operatorsQuery = useDashboardOperators(params);
+  const { isLoading, isFetching, isError, refetch, updatedAt } = combineQueries([
+    cardsQuery,
+    chartQuery,
+    statusQuery,
+    categoriesQuery,
+    operatorsQuery,
+  ]);
+  const hasData = Boolean(cardsQuery.data);
 
   const { data: officesData } = useGet({ apiFn: getAllOfficeApi, key: "all-offices-filter" });
   const officeOptions = useMemo(
@@ -59,13 +89,18 @@ const AdminDashboard = () => {
   );
 
   const otherCurrency = currency === "USD" ? "TMT" : "USD";
-  // Both currencies come in one response, so switching currency is instant.
-  const data = summary?.byCurrency[currency] ?? EMPTY_SALES;
-  const other = summary?.byCurrency[otherCurrency] ?? EMPTY_SALES;
-  const granularity = summary?.granularity ?? range.granularity;
+  // The cards carry both currencies; the chart and lists come in `currency`.
+  const cards = cardsQuery.data ?? EMPTY_CARDS;
+  const buckets = chartQuery.data ?? [];
+  const granularity = dashboardGranularity(period);
 
-  const labels = data.buckets.map((b) => b.label);
+  const labels = buckets.map((b) => b.label);
   const compareLabel = t(`finance.analytics.vsPeriod.${period}`);
+  const money = (key) => ({
+    ...cards[key][currency],
+    otherValue: cards[key][otherCurrency].value,
+    points: buckets.map((b) => b[key]),
+  });
   const kpis = [
     // Card order matches the validated KPI tone order (orange, teal, amber, blue).
     {
@@ -73,45 +108,21 @@ const AdminDashboard = () => {
       label: t("dashboard.salesCount"),
       icon: Receipt,
       tone: "outflow",
-      value: data.current.count,
-      previous: data.previous.count,
-      points: data.buckets.map((b) => b.count),
+      ...cards.count,
+      points: buckets.map((b) => b.count),
       format: countFormat,
       upIsGood: true,
     },
-    {
-      key: "revenue",
-      label: t("dashboard.sales"),
-      icon: TrendingUp,
-      tone: "inflow",
-      value: data.current.revenue,
-      previous: data.previous.revenue,
-      points: data.buckets.map((b) => b.revenue),
-      otherValue: other.current.revenue,
-      upIsGood: true,
-    },
+    { key: "revenue", label: t("dashboard.sales"), icon: TrendingUp, tone: "inflow", ...money("revenue"), upIsGood: true },
     {
       key: "receivable",
       label: t("dashboard.receivable"),
       icon: HandCoins,
       tone: "credit",
-      value: data.current.receivable,
-      previous: data.previous.receivable,
-      points: data.buckets.map((b) => b.receivable),
-      otherValue: other.current.receivable,
+      ...money("receivable"),
       upIsGood: false,
     },
-    {
-      key: "profit",
-      label: t("dashboard.profit"),
-      icon: PiggyBank,
-      tone: "profit",
-      value: data.current.profit,
-      previous: data.previous.profit,
-      points: data.buckets.map((b) => b.profit),
-      otherValue: other.current.profit,
-      upIsGood: true,
-    },
+    { key: "profit", label: t("dashboard.profit"), icon: PiggyBank, tone: "profit", ...money("profit"), upIsGood: true },
   ];
 
   return (
@@ -174,7 +185,7 @@ const AdminDashboard = () => {
 
       {isError && <Alert severity="error">{t("dashboard.loadError")}</Alert>}
 
-      {!summary && isError ? null : isLoading && !summary ? (
+      {!hasData && isError ? null : isLoading && !hasData ? (
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", lg: "repeat(4, 1fr)" }, gap: 2 }}>
           {[0, 1, 2, 3].map((i) => (
             <Skeleton key={i} variant="rounded" height={190} sx={{ borderRadius: "14px" }} />
@@ -220,14 +231,25 @@ const AdminDashboard = () => {
             ))}
           </Box>
 
-          <ModulesSection modules={data.modules} currency={currency} labels={labels} compareLabel={compareLabel} />
-
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, lg: 8 }} sx={{ display: "flex", flexDirection: "column" }}>
-              <SalesTrendCard buckets={data.buckets} currency={currency} granularity={granularity} />
+              <SalesTrendCard buckets={buckets} currency={currency} granularity={granularity} />
             </Grid>
             <Grid size={{ xs: 12, lg: 4 }} sx={{ display: "flex", flexDirection: "column" }}>
-              <PaymentStatusCard payment={data.payment} receivable={data.current.receivable} currency={currency} />
+              <PaymentStatusCard
+                payment={statusQuery.data ?? EMPTY_PAYMENT}
+                receivable={cards.receivable[currency].value}
+                currency={currency}
+              />
+            </Grid>
+          </Grid>
+
+          <Grid container spacing={2.5}>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: "flex", flexDirection: "column" }}>
+              <CategoryCard categories={categoriesQuery.data ?? []} currency={currency} />
+            </Grid>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: "flex", flexDirection: "column" }}>
+              <OperatorCard operators={operatorsQuery.data ?? []} currency={currency} />
             </Grid>
           </Grid>
         </Box>

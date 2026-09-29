@@ -8,7 +8,7 @@ import {
   MAX_RANGE_DAYS,
   PERIODS,
   getPeriodRange,
-} from "../functions/officeAnalyticsMock";
+} from "../functions/periods";
 
 const FIELD_SX = {
   width: 146,

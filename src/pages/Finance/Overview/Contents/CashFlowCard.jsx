@@ -19,16 +19,14 @@ const numCell = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteS
 const axisLabelStyle = { ...tickLabelStyle, fontSize: 12 };
 const GRADIENTS = { inflow: "cashflow-in-gradient", outflow: "cashflow-out-gradient" };
 
-// Money actually received and paid out over the period: two soft lines,
-// one axis, one currency.
-const CashFlowCard = ({ cashFlow, currency, granularity }) => {
+// Sales and their cost over the period: two soft lines, one axis, one
+// currency. The table adds profit and the running profit (`balance`).
+const CashFlowCard = ({ buckets, currency, granularity }) => {
   const { t } = useLocale();
   const colors = useFlowColors();
   const [view, setView] = useState("chart");
 
-  const cur = cashFlow.current[currency];
-  const series = cashFlow.series;
-  const hasData = cur.inflow > 0 || cur.outflow > 0;
+  const hasData = buckets.some((b) => b.revenue > 0 || b.cost > 0);
   const label = (key) => t(`finance.analytics.cash.${key}`);
   const money = (v) => formatAmount(v, currency);
 
@@ -77,7 +75,7 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
               skipAnimation
               margin={{ top: 12, right: 24, bottom: 4, left: 0 }}
               grid={{ horizontal: true }}
-              xAxis={[{ ...xAxisBase, scaleType: "point", data: series.map((p) => p.label), tickLabelStyle: axisLabelStyle }]}
+              xAxis={[{ ...xAxisBase, scaleType: "point", data: buckets.map((b) => b.label), tickLabelStyle: axisLabelStyle }]}
               yAxis={[
                 {
                   ...yAxisBase,
@@ -91,7 +89,7 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
                 {
                   id: "inflow",
                   label: label("inflow"),
-                  data: series.map((p) => p[currency].inflow),
+                  data: buckets.map((b) => b.revenue),
                   color: colors.inflow,
                   area: true,
                   curve: "monotoneX",
@@ -101,7 +99,7 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
                 {
                   id: "outflow",
                   label: label("outflow"),
-                  data: series.map((p) => p[currency].outflow),
+                  data: buckets.map((b) => b.cost),
                   color: colors.outflow,
                   area: true,
                   curve: "monotoneX",
@@ -127,20 +125,17 @@ const CashFlowCard = ({ cashFlow, currency, granularity }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {series.map((p) => {
-                const row = p[currency];
-                return (
-                  <TableRow key={p.date} hover>
-                    <TableCell>{p.label}</TableCell>
-                    <TableCell sx={numCell}>{money(row.inflow)}</TableCell>
-                    <TableCell sx={numCell}>{money(row.outflow)}</TableCell>
-                    <TableCell sx={{ ...numCell, fontWeight: 700, color: row.net < 0 ? "error.main" : "text.primary" }}>
-                      {money(row.net)}
-                    </TableCell>
-                    <TableCell sx={numCell}>{money(row.balance)}</TableCell>
-                  </TableRow>
-                );
-              })}
+              {buckets.map((b) => (
+                <TableRow key={b.key} hover>
+                  <TableCell>{b.label}</TableCell>
+                  <TableCell sx={numCell}>{money(b.revenue)}</TableCell>
+                  <TableCell sx={numCell}>{money(b.cost)}</TableCell>
+                  <TableCell sx={{ ...numCell, fontWeight: 700, color: b.profit < 0 ? "error.main" : "text.primary" }}>
+                    {money(b.profit)}
+                  </TableCell>
+                  <TableCell sx={numCell}>{money(b.balance)}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>

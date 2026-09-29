@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { CUSTOM_PERIOD, PERIODS, isValidCustomRange } from "./officeAnalyticsMock";
+import { CUSTOM_PERIOD, PERIODS, isValidCustomRange } from "./periods";
 
 const read = (storageKey) => {
   try {
