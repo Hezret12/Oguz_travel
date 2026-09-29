@@ -70,7 +70,7 @@ const AddEmployee = ({ table }) => {
       position_guid: [],
       office_guid: "",
       address: "",
-      loan: "",
+      empl_loan: "",
     },
     resolver: yupResolver(addEmployee),
     mode: "onSubmit",
@@ -93,8 +93,12 @@ const AddEmployee = ({ table }) => {
       if (data.department_guid) payload.department_guid = data.department_guid;
       if (data.gmail) payload.gmail = data.gmail;
       if (data.address) payload.address = data.address;
-      if (data.loan !== undefined && data.loan !== "") {
-        payload.loan = Number(data.loan);
+
+      const rawLoan = data.empl_loan ?? data.loan;
+      if (rawLoan !== undefined && rawLoan !== "") {
+        const numLoan = Number(rawLoan) || 0;
+        payload.empl_loan = numLoan;
+        payload.loan = numLoan;
       }
 
       await createEmployee(payload);
@@ -192,7 +196,7 @@ const AddEmployee = ({ table }) => {
 
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
-              name="loan"
+              name="empl_loan"
               control={control}
               type="number"
               label={t("employee.loan")}

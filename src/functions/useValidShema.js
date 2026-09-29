@@ -43,6 +43,10 @@ export const useValidShema = () => {
       lengthMessage: t("users.validation.phoneNumberLength"),
       invalidMessage: t("users.validation.phoneNumberInvalid"),
     }),
+    empl_loan: yup
+      .mixed()
+      .nullable()
+      .transform((v) => (v === "" || v === undefined ? null : v)),
     loan: yup
       .mixed()
       .nullable()
@@ -57,6 +61,10 @@ export const useValidShema = () => {
       invalidMessage: t("users.validation.phoneNumberInvalid"),
     }),
     guid: guidRequiredValidSchema(),
+    empl_loan: yup
+      .mixed()
+      .nullable()
+      .transform((v) => (v === "" || v === undefined ? null : v)),
     loan: yup
       .mixed()
       .nullable()
