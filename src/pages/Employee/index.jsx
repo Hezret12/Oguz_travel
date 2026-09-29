@@ -294,26 +294,94 @@ const Employee = () => {
         size: 130,
       },
       {
-        accessorKey: "loan",
         id: "loan",
         header: t("columns.loan"),
-        size: 110,
+        size: 130,
         muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
         Cell: ({ row }) => {
-          const val = Number(row.original.loan) || 0;
+          const raw = row.original;
+          const initial = Number(raw.empl_loan ?? raw.loan ?? 0);
+          const deducted = Number(raw.salary_loans_total ?? 0);
+          const remaining = Number(
+            raw.remaining_loan !== undefined
+              ? raw.remaining_loan
+              : initial - deducted
+          );
+
+          if (initial === 0 && remaining === 0) {
+            return (
+              <Typography
+                component="span"
+                sx={{ color: "text.secondary", fontSize: "0.85rem" }}
+              >
+                -
+              </Typography>
+            );
+          }
+
+          if (remaining <= 0 && initial > 0) {
+            return (
+              <Tooltip
+                title={`${t("employee.initialLoan")}: ${formatMoney(initial, { dashZero: false })} TMT • ${t("employee.totalLoanDeducted")}: ${formatMoney(deducted, { dashZero: false })} TMT`}
+                arrow
+                placement="top"
+              >
+                <Chip
+                  size="small"
+                  label={t("employee.fullyPaid")}
+                  color="success"
+                  variant="outlined"
+                  sx={{
+                    height: "22px",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    borderRadius: "6px",
+                  }}
+                />
+              </Tooltip>
+            );
+          }
+
           return (
-            <Typography
-              component="span"
-              sx={{
-                fontWeight: 600,
-                fontSize: "0.85rem",
-                fontVariantNumeric: "tabular-nums",
-                color: val > 0 ? "#d97706" : "text.secondary",
-              }}
+            <Tooltip
+              title={`${t("employee.initialLoan")}: ${formatMoney(initial, { dashZero: false })} TMT • ${t("employee.totalLoanDeducted")}: ${formatMoney(deducted, { dashZero: false })} TMT`}
+              arrow
+              placement="top"
             >
-              {val > 0 ? `${formatMoney(val, { dashZero: false })} TMT` : "-"}
-            </Typography>
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  cursor: "pointer",
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: "0.85rem",
+                    fontVariantNumeric: "tabular-nums",
+                    color: "#d97706",
+                  }}
+                >
+                  {formatMoney(remaining, { dashZero: false })} TMT
+                </Typography>
+                {deducted > 0 && (
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: "0.7rem",
+                      color: "text.secondary",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    -{formatMoney(deducted, { dashZero: false })}
+                  </Typography>
+                )}
+              </Box>
+            </Tooltip>
           );
         },
       },
