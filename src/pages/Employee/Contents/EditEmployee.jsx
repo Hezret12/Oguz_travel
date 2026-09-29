@@ -74,8 +74,10 @@ const EditEmployee = ({ table, row }) => {
       position_guids: Array.isArray(row?.original?.positions) ? row.original.positions.map((p) => p.guid) : [],
       office_guid: row?.original?.office?.guid || "",
       address: row?.original?.address || "",
-      loan:
-        row?.original?.loan !== undefined && row?.original?.loan !== null
+      empl_loan:
+        row?.original?.empl_loan !== undefined && row?.original?.empl_loan !== null
+          ? String(row.original.empl_loan)
+          : row?.original?.loan !== undefined && row?.original?.loan !== null
           ? String(row.original.loan)
           : "",
       is_active: row?.original?.is_active !== false,
@@ -103,11 +105,12 @@ const EditEmployee = ({ table, row }) => {
       if (data.department_guid) payload.department_guid = data.department_guid;
       if (data.gmail) payload.gmail = data.gmail;
       if (data.address) payload.address = data.address;
-      if (data.loan !== undefined && data.loan !== "") {
-        payload.loan = Number(data.loan);
-      } else {
-        payload.loan = 0;
-      }
+
+      const rawLoan = data.empl_loan ?? data.loan;
+      const numLoan =
+        rawLoan !== undefined && rawLoan !== "" ? Number(rawLoan) || 0 : 0;
+      payload.empl_loan = numLoan;
+      payload.loan = numLoan;
 
       await updateEmployee(payload);
     } catch (err) {
@@ -204,7 +207,7 @@ const EditEmployee = ({ table, row }) => {
 
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
-              name="loan"
+              name="empl_loan"
               control={control}
               type="number"
               label={t("employee.loan")}
