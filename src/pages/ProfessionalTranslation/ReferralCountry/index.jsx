@@ -42,6 +42,8 @@ const ReferralCountryPage = () => {
     queryKey: "referralCountries",
     idKey: "guid",
     isPaginated: false,
+    // Referral letters show the country name from their cached relation.
+    invalidateQueries: ["referralLetters"],
   });
 
   const deleteDialog = useDeleteDialog({

@@ -32,6 +32,8 @@ const AddReferralLetterModal = ({ table }) => {
     // The list is paginated server side, so the new record is fetched back
     // rather than pushed into the cached page (which would leave a wrong count).
     isPaginated: true,
+    // The letter-stock report counts used ÝH numbers from these letters.
+    invalidateQueries: ["stockLetters"],
     onSuccess: () => {
       table.setCreatingRow(null);
     },

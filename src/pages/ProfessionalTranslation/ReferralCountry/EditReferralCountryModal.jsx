@@ -32,6 +32,8 @@ const EditReferralCountryModal = ({ table, row, open, close }) => {
     apiFn: updateReferralCountryApi,
     key: "referralCountries",
     idKey: "guid",
+    // Referral letters show the country name from their cached relation.
+    invalidateQueries: ["referralLetters"],
     onSuccessUpdate: handleClose,
   });
 

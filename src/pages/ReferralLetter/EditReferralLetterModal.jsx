@@ -30,6 +30,8 @@ const EditReferralLetterModal = ({ table, row }) => {
     apiFn: updateReferralLetterApi,
     key: "referralLetters",
     idKey: "guid",
+    // The letter-stock report counts used ÝH numbers from these letters.
+    invalidateQueries: ["stockLetters"],
     onSuccessUpdate: () => {
       table.setEditingRow(null);
     },

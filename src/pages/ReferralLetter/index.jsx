@@ -145,6 +145,10 @@ const ReferalLetter = () => {
     deleteFn: deleteReferralLetterApi,
     queryKey: "referralLetters",
     idKey: "guid",
+    // Server-paginated: refetch so the page refills and the counts stay right.
+    isPaginated: true,
+    // The letter-stock report counts used ÝH numbers from these letters.
+    invalidateQueries: ["stockLetters"],
   });
 
   const deleteDialog = useDeleteDialog({
