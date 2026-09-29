@@ -246,7 +246,7 @@ const Salary = () => {
   );
 
   const editable = useCallback(
-    (field, { integer = false, currencyOf } = {}) => ({
+    (field, { integer = false, currencyOf, onCurrencyChange } = {}) => ({
       Cell: ({ row }) => (
         <EditableCell
           value={row.original[field]}
@@ -257,6 +257,11 @@ const Salary = () => {
           readOnly={isLocked}
           align={integer ? "center" : "right"}
           currency={currencyOf?.(row.original)}
+          onCurrencyChange={
+            onCurrencyChange
+              ? (nextCurrency) => onCurrencyChange(row.original, nextCurrency)
+              : undefined
+          }
           onCommit={(value) => saveCell(row.original, field, value)}
         />
       ),
@@ -361,31 +366,54 @@ const Salary = () => {
       {
         id: "bonus",
         header: t("salary.bonus"),
-        size: 130,
+        size: 135,
         ...RIGHT,
         // A percent bonus is derived from sales × %, so it is edited in the
-        // modal; only fixed bonuses are edited inline. The bonus currency is
-        // picked in the modal too.
+        // modal; only fixed bonuses are edited inline. Both modes allow
+        // quick-toggling the currency directly from the table badge.
         Cell: (props) => {
           const { row } = props;
           if (!isPercentRow(row.original)) {
-            return editable("bonus", { currencyOf: getBonusCurrency }).Cell(props);
+            return editable("bonus", {
+              currencyOf: getBonusCurrency,
+              onCurrencyChange: (original, nextCurrency) =>
+                saveCell(original, "bonus_currency", nextCurrency),
+            }).Cell(props);
           }
           const currency = getBonusCurrency(row.original);
           return (
-            <Tooltip title={t("salary.bonusPercent")} arrow placement="top">
-              <Box sx={{ textAlign: "right", lineHeight: 1.2 }}>
-                <Box component="span" sx={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-                  {formatMoney(row.original.bonus, { currency })}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
+                height: 34,
+                px: 1,
+                gap: 0.5,
+              }}
+            >
+              <SalaryCurrencyBadge
+                currency={currency}
+                onToggle={(nextCurrency) =>
+                  saveCell(row.original, "bonus_currency", nextCurrency)
+                }
+                readOnly={isLocked}
+              />
+              <Tooltip title={t("salary.bonusPercent")} arrow placement="top">
+                <Box sx={{ textAlign: "right", lineHeight: 1.2, minWidth: 0, flexGrow: 1 }}>
+                  <Box component="span" sx={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
+                    {formatMoney(row.original.bonus)}
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                    {t("salary.percentOf", {
+                      sales: formatMoney(row.original.sales_amount, { dashZero: false, currency }),
+                      percent: toNumber(row.original.bonus_percent),
+                    })}
+                  </Typography>
                 </Box>
-                <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
-                  {t("salary.percentOf", {
-                    sales: formatMoney(row.original.sales_amount, { dashZero: false, currency }),
-                    percent: toNumber(row.original.bonus_percent),
-                  })}
-                </Typography>
-              </Box>
-            </Tooltip>
+              </Tooltip>
+            </Box>
           );
         },
         // `bonus` sums TMT bonuses; USD bonuses come as `bonus_usd`.
