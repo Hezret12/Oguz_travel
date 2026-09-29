@@ -1354,6 +1354,8 @@
     "percentOf": "{{sales}} × {{percent}}%",
     "sectionBonus": "Бонус",
     "bonusSeparate": "Бонус в USD выдаётся отдельно и не входит в итог",
+    "currencyToggleToUsd": "TMT (m) — Нажмите для переключения на USD ($)",
+    "currencyToggleToTmt": "USD ($) — Нажмите для переключения на TMT (m)",
     "validation": {
       "monthRequired": "Выберите месяц",
       "employeeRequired": "Выберите сотрудника",
