@@ -29,11 +29,10 @@ import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import { useLocale } from "../../../hooks/useLocale";
 import { useGet } from "../../../hooks/CRUD/useGet";
-import { getAllSalariesApi } from "../../../api/queries/getters";
+import { getEmployeeLoanDetailsApi } from "../../../api/queries/getters";
 import {
   formatMoney,
   formatMonthTk,
-  isSalaryPaid,
 } from "../../Finance/Salary/functions/salaryUtils";
 import { useDateFormat } from "../../../functions/generalHelpers";
 
@@ -131,39 +130,34 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
 
   const employeeGuid = employee?.guid;
 
-  const { data: salariesData, isLoading, isError, refetch } = useGet({
-    apiFn: getAllSalariesApi,
-    key: ["employeeLoanHistory", employeeGuid],
-    params: {
-      employee_guid: employeeGuid,
-      search: employee?.fullName || "",
-      limit: 100,
-    },
+  const { data: loanResponse, isLoading, isError, refetch } = useGet({
+    apiFn: getEmployeeLoanDetailsApi,
+    key: ["employeeLoanDetails", employeeGuid],
+    params: { employee_guid: employeeGuid },
     options: { enabled: Boolean(open && employeeGuid) },
   });
 
+  const details = loanResponse?.data ?? loanResponse ?? {};
+  const empl_loan = Number(
+    details.empl_loan ?? employee?.empl_loan ?? employee?.loan ?? 0
+  );
+  const salary_loans_total = Number(
+    details.salary_loans_total ?? employee?.salary_loans_total ?? 0
+  );
+  const remaining_loan = Number(
+    details.remaining_loan !== undefined
+      ? details.remaining_loan
+      : empl_loan - salary_loans_total
+  );
+
   const loanRecords = useMemo(() => {
-    if (!Array.isArray(salariesData)) return [];
-    return salariesData
-      .filter((s) => {
-        const isThisEmp =
-          s.employee_guid === employeeGuid ||
-          s.employee?.guid === employeeGuid ||
-          (employee?.fullName &&
-            s.employee?.fullName &&
-            s.employee.fullName.toLowerCase().trim() ===
-              employee.fullName.toLowerCase().trim());
-        const loanAmount = Number(s.loan) || 0;
-        return isThisEmp && loanAmount > 0;
-      })
-      .sort((a, b) => (b.month || "").localeCompare(a.month || ""));
-  }, [salariesData, employeeGuid, employee?.fullName]);
-
-  const totalLoanDeducted = useMemo(() => {
-    return loanRecords.reduce((sum, r) => sum + (Number(r.loan) || 0), 0);
-  }, [loanRecords]);
-
-  const currentLoan = Number(employee?.loan) || 0;
+    const rawList = Array.isArray(details.loans)
+      ? details.loans
+      : Array.isArray(details)
+      ? details
+      : [];
+    return [...rawList].sort((a, b) => (b.month || "").localeCompare(a.month || ""));
+  }, [details]);
 
   return (
     <CustomDialog open={Boolean(open)} close={close} widthX={860}>
@@ -189,7 +183,7 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Box
-              sx={(theme) => ({
+              sx={{
                 width: 40,
                 height: 40,
                 borderRadius: "50%",
@@ -200,13 +194,13 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
                 justifyContent: "center",
                 fontWeight: 700,
                 fontSize: "1rem",
-              })}
+              }}
             >
               {employee?.fullName ? employee.fullName.charAt(0).toUpperCase() : <User size={20} />}
             </Box>
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                {employee?.fullName || "-"}
+                {employee?.fullName || details.fullName || "-"}
               </Typography>
               <Typography variant="caption" sx={{ color: "text.secondary" }}>
                 {employee?.phone_number || "-"}
@@ -246,29 +240,33 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <StatCard
-              title={t("employee.currentLoan")}
-              value={`${formatMoney(currentLoan, { dashZero: false })} TMT`}
-              subtitle={t("columns.status")}
+              title={t("employee.remainingLoan")}
+              value={`${formatMoney(remaining_loan, { dashZero: false })} TMT`}
+              subtitle={
+                remaining_loan <= 0 && empl_loan > 0
+                  ? t("employee.fullyPaid")
+                  : t("columns.status")
+              }
               icon={Wallet}
-              color={currentLoan > 0 ? "warning" : "primary"}
+              color={remaining_loan > 0 ? "warning" : "success"}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <StatCard
+              title={t("employee.initialLoan")}
+              value={`${formatMoney(empl_loan, { dashZero: false })} TMT`}
+              subtitle={t("employee.loan")}
+              icon={Receipt}
+              color="primary"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
             <StatCard
               title={t("employee.totalLoanDeducted")}
-              value={`${formatMoney(totalLoanDeducted, { dashZero: false })} TMT`}
-              subtitle={t("salary.title")}
-              icon={Receipt}
-              color="success"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <StatCard
-              title={t("employee.loanMonthsCount")}
-              value={loanRecords.length}
-              subtitle={t("columns.dateTime")}
+              value={`${formatMoney(salary_loans_total, { dashZero: false })} TMT`}
+              subtitle={`${loanRecords.length} ${t("employee.loanMonthsCount")}`}
               icon={Calendar}
-              color="primary"
+              color="success"
             />
           </Grid>
         </Grid>
@@ -303,24 +301,18 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
                   <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.75rem" }}>
                     {t("employee.loanAmount")}
                   </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 700, fontSize: "0.75rem" }}>
-                    {t("employee.baseSalary")}
-                  </TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700, fontSize: "0.75rem" }}>
                     {t("columns.status")}
                   </TableCell>
                   <TableCell align="center" sx={{ fontWeight: 700, fontSize: "0.75rem" }}>
                     {t("employee.paidDate")}
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 700, fontSize: "0.75rem" }}>
-                    {t("columns.description")}
-                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                    <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
                       <CircularProgress size={30} />
                       <Typography variant="body2" sx={{ mt: 1, color: "text.secondary" }}>
                         {t("loading")}...
@@ -329,7 +321,7 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
                   </TableRow>
                 ) : isError ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                       <Typography variant="body2" color="error">
                         {t("errorOccurred")}
                       </Typography>
@@ -340,7 +332,7 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
                   </TableRow>
                 ) : loanRecords.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                    <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
                       <Box
                         sx={{
                           display: "flex",
@@ -360,7 +352,7 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
                   </TableRow>
                 ) : (
                   loanRecords.map((record, idx) => {
-                    const isPaid = isSalaryPaid(record);
+                    const isPaid = Boolean(record.paid_date);
                     return (
                       <TableRow
                         key={record.guid || record.id || `${record.month}-${idx}`}
@@ -384,9 +376,6 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
                         >
                           {formatMoney(record.loan, { dashZero: false })} TMT
                         </TableCell>
-                        <TableCell align="right" sx={{ fontVariantNumeric: "tabular-nums" }}>
-                          {formatMoney(record.base_salary, { dashZero: false })} TMT
-                        </TableCell>
                         <TableCell align="center">
                           <Chip
                             size="small"
@@ -405,9 +394,6 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
                           {record.paid_date
                             ? formatChange(record.paid_date, { dateOnly: true })
                             : "-"}
-                        </TableCell>
-                        <TableCell sx={{ fontSize: "0.8rem", color: "text.secondary", maxWidth: 180 }} noWrap title={record.note || ""}>
-                          {record.note || "-"}
                         </TableCell>
                       </TableRow>
                     );
