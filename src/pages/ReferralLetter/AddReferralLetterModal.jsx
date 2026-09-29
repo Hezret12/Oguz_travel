@@ -14,6 +14,8 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CustomDatePicker from "../../components/CustomDatePicker";
+import AppAutocomplete from "../../components/AppAutocomplete";
+import { useReferralCountryOptions } from "./functions/useReferralCountryOptions";
 import LabelWithTooltip from "../../components/LabelWithTooltip";
 import { YH_INPUT_PROPS } from "../../functions/yhNumber";
 import { useCreate } from "../../hooks/CRUD/useCreate";
@@ -22,6 +24,7 @@ import { addReferralLetterApi } from "../../api/queries/post";
 const AddReferralLetterModal = ({ table }) => {
   const { t } = useLocale();
   const { addReferralLetter } = useValidShema();
+  const countryOptions = useReferralCountryOptions();
 
   const { mutate: createReferralLetter, isPending: isSubmit } = useCreate({
     apiFn: addReferralLetterApi,
@@ -39,7 +42,7 @@ const AddReferralLetterModal = ({ table }) => {
       date_time: dayjs().format("YYYY-MM-DD"),
       client_guid: null,
       received_opr_guid: null,
-      destination_country: null,
+      refferal_country_guid: null,
       bgn_departure: null,
       bgn_arrival: null,
       travel_document_number: null,
@@ -107,10 +110,11 @@ const AddReferralLetterModal = ({ table }) => {
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <CustomTextField
-              name="destination_country"
+            <AppAutocomplete
+              name="refferal_country_guid"
               control={control}
               label={t("columns.destinationCountry")}
+              options={countryOptions}
               required
             />
           </Grid>

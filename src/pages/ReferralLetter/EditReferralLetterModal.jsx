@@ -14,6 +14,8 @@ import FooterButton from "../../components/Dialog/FooterButton";
 import GlobalClientAutocomplete from "../../components/global/GlobalClientAutocomplete/GlobalClientAutocomplete";
 import GlobalEmployeeAutocomplete from "../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CustomDatePicker from "../../components/CustomDatePicker";
+import AppAutocomplete from "../../components/AppAutocomplete";
+import { useReferralCountryOptions } from "./functions/useReferralCountryOptions";
 import LabelWithTooltip from "../../components/LabelWithTooltip";
 import { YH_INPUT_PROPS } from "../../functions/yhNumber";
 import { useUpdate } from "../../hooks/CRUD/useUpdate";
@@ -22,6 +24,7 @@ import { updateReferralLetterApi } from "../../api/queries/patch";
 const EditReferralLetterModal = ({ table, row }) => {
   const { t } = useLocale();
   const { addReferralLetter } = useValidShema();
+  const countryOptions = useReferralCountryOptions();
 
   const { mutate: updateReferralLetter, isPending: isSubmit } = useUpdate({
     apiFn: updateReferralLetterApi,
@@ -47,7 +50,9 @@ const EditReferralLetterModal = ({ table, row }) => {
       date_time: row?.original?.date_time || null,
       client_guid: row?.original?.client_guid || row?.original?.client?.guid || null,
       received_opr_guid: row?.original?.received_opr_guid || null,
-      destination_country: row?.original?.destination_country || null,
+      // The API sends the country only as the nested relation.
+      refferal_country_guid:
+        row?.original?.refferal_country_guid || row?.original?.refferalCountry?.guid || null,
       bgn_departure: row?.original?.bgn_departure || row?.original?.tranzit || null,
       bgn_arrival: row?.original?.bgn_arrival || null,
       travel_document_number: row?.original?.travel_document_number || null,
@@ -133,10 +138,11 @@ const EditReferralLetterModal = ({ table, row }) => {
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <CustomTextField
-              name="destination_country"
+            <AppAutocomplete
+              name="refferal_country_guid"
               control={control}
               label={t("columns.destinationCountry")}
+              options={countryOptions}
               required
             />
           </Grid>

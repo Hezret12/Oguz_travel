@@ -5,6 +5,7 @@ export const referralLetterFilterSlice = createFilterSlice({
   defaultFilters: {
     search: '',
     received_opr_guid: '',
+    refferal_country_guid: '',
     start_departure_date: '',
     end_departure_date: '',
     start_return_date: '',

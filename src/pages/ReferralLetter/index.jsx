@@ -38,6 +38,7 @@ import { exportReferralLetterExcel } from "./functions/exportReferralLetterExcel
 import DateRangeExcelExportModal from "../../components/Dialog/DateRangeExcelExportModal";
 import { useDateFormat } from "../../functions/generalHelpers";
 import { formatYhNumber } from "../../functions/yhNumber";
+import { useReferralCountryOptions } from "./functions/useReferralCountryOptions";
 
 // Excel export is filtered by the departure date only (default: this month).
 const REFERRAL_LETTER_EXPORT_RANGES = [
@@ -101,7 +102,8 @@ const ReferralLetterFilterDrawer = () => {
 };
 
 const ReferalLetter = () => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
+  const countryOptions = useReferralCountryOptions();
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const { formatChange } = useDateFormat();
   const [rowSelection, setRowSelection] = useState({});
@@ -182,6 +184,10 @@ const ReferalLetter = () => {
       if (key === "received_opr_guid") {
         return `${t("columns.operator")}: ${employeeById[value]?.fullName || value}`;
       }
+      if (key === "refferal_country_guid") {
+        const country = countryOptions.find((c) => c.value === value);
+        return `${t("columns.destinationCountry")}: ${country?.label || value}`;
+      }
       if (key === "start_departure_date") {
         return `${t("columns.startDepartureDate")}: ${formatChange(value, { dateOnly: true })}`;
       }
@@ -202,7 +208,7 @@ const ReferalLetter = () => {
       }
       return `${t(`columns.${key}`, key)}: ${value}`;
     },
-    [t, employeeById, formatChange],
+    [t, employeeById, countryOptions, formatChange],
   );
 
   const columns = useMemo(
@@ -266,7 +272,11 @@ const ReferalLetter = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        accessorKey: "destination_country",
+        // Older letters only have the free-text country.
+        accessorFn: (row) =>
+          (row.refferalCountry && selectedLang(row.refferalCountry.name)) ||
+          row.destination_country ||
+          "",
         id: "destination_country",
         header: t("columns.destinationCountry"),
         size: 110,
@@ -361,7 +371,7 @@ const ReferalLetter = () => {
         ),
       },
     ],
-    [t, formatChange, handleDeleteClick],
+    [t, selectedLang, formatChange, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({
