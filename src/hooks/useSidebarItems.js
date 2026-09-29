@@ -28,6 +28,7 @@ import {
   WalletMinimal,
   MapPinHouse,
   Tags,
+  Globe,
 } from "lucide-react";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 import { PATHS } from "../routes/paths";
@@ -196,6 +197,12 @@ export const useSidebarItems = () => {
             text: t("sidebar.category"),
             path: PATHS.PROFESSIONAL_TRANSLATION.CATEGORY,
             icon: createElement(Tags, { size: 18, strokeWidth: 2.2 }),
+          },
+          {
+            id: "pt-referral-country",
+            text: t("sidebar.referralCountry"),
+            path: PATHS.PROFESSIONAL_TRANSLATION.REFERRAL_COUNTRY,
+            icon: createElement(Globe, { size: 18, strokeWidth: 2.2 }),
           },
         ],
       },

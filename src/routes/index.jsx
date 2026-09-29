@@ -61,6 +61,7 @@ const DepartmentPage = lazyRetry(() => import('../pages/ProfessionalTranslation/
 const PositionPage = lazyRetry(() => import('../pages/ProfessionalTranslation/Position'));
 const TranslatorPage = lazyRetry(() => import('../pages/ProfessionalTranslation/Translator'));
 const CategoryPage = lazyRetry(() => import('../pages/ProfessionalTranslation/Category'));
+const ReferralCountryPage = lazyRetry(() => import('../pages/ProfessionalTranslation/ReferralCountry'));
 
 function PageLoader() {
   const [visible, setVisible] = useState(false);
@@ -137,6 +138,7 @@ const Department = Loadable(DepartmentPage);
 const Position = Loadable(PositionPage);
 const Translator = Loadable(TranslatorPage);
 const Category = Loadable(CategoryPage);
+const ReferralCountry = Loadable(ReferralCountryPage);
 const Unauthorized = Loadable(UnauthorizedPage);
 const NotFound = Loadable(NotFoundPage);
 const Login = Loadable(LoginPage);
@@ -206,6 +208,7 @@ const router = createBrowserRouter([
                   { path: 'position', element: <Position /> },
                   { path: 'translator', element: <Translator /> },
                   { path: 'category', element: <Category /> },
+                  { path: 'referral-country', element: <ReferralCountry /> },
                 ],
               },
               { path: 'notifications', element: <Notification /> },

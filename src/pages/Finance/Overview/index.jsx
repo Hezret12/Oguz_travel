@@ -1,4 +1,4 @@
-import { Box, Chip, Grid, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
+import { Box, Chip, Grid, Tooltip, Typography } from "@mui/material";
 import { MapPinHouse } from "lucide-react";
 import PageHeader from "../../../components/PageHeader";
 import { useLocale } from "../../../hooks/useLocale";
@@ -8,7 +8,7 @@ import CategoryCard from "./Contents/CategoryCard";
 import CashFlowCard from "./Contents/CashFlowCard";
 import MoneyFlowCard from "./Contents/MoneyFlowCard";
 import OperatorCard from "./Contents/OperatorCard";
-import { CURRENCIES, segmentedSx, useOfficeAnalytics } from "./functions/analyticsFormat";
+import { useOfficeAnalytics } from "./functions/analyticsFormat";
 import { useAnalyticsPrefs } from "./functions/useAnalyticsPrefs";
 import PeriodRangeFilter from "./Contents/PeriodRangeFilter";
 
@@ -23,9 +23,7 @@ const MetaItem = ({ icon: Icon, children }) => (
   </Box>
 );
 
-// Finance report for the signed-in user's office. USD and TMT are reported
-// separately (never converted); the currency switch picks which one the
-// charts and tables show.
+// Finance report for the signed-in user's office, in USD.
 const FinanceOverview = () => {
   const { t, selectedLang } = useLocale();
   const { user } = useAuth();
@@ -69,21 +67,6 @@ const FinanceOverview = () => {
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
           <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />
-
-          <Tooltip title={t("finance.analytics.noConversion")} arrow>
-            <ToggleButtonGroup
-              exclusive
-              value={currency}
-              onChange={(_e, next) => next && updatePrefs({ currency: next })}
-              sx={segmentedSx}
-            >
-              {CURRENCIES.map((c) => (
-                <ToggleButton key={c} value={c}>
-                  {c}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-          </Tooltip>
         </Box>
       </Box>
 

@@ -7,8 +7,6 @@ import {
   MenuItem,
   Skeleton,
   TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
   Typography,
   useTheme,
@@ -21,7 +19,7 @@ import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllOfficeApi } from "../../api/queries/getters";
 import { KpiCard } from "../Finance/Overview/Contents/KpiGrid";
 import PeriodRangeFilter from "../Finance/Overview/Contents/PeriodRangeFilter";
-import { CURRENCIES, KPI_TONES, segmentedSx } from "../Finance/Overview/functions/analyticsFormat";
+import { KPI_TONES } from "../Finance/Overview/functions/analyticsFormat";
 import { useAnalyticsPrefs } from "../Finance/Overview/functions/useAnalyticsPrefs";
 import { EMPTY_SALES, resolveRange, useDashboardSummary } from "./functions/salesDashboard";
 import SalesTrendCard from "./Contents/SalesTrendCard";
@@ -156,21 +154,6 @@ const AdminDashboard = () => {
               </MenuItem>
             ))}
           </TextField>
-
-          <Tooltip title={t("finance.analytics.noConversion")} arrow>
-            <ToggleButtonGroup
-              exclusive
-              value={currency}
-              onChange={(_e, next) => next && updatePrefs({ currency: next })}
-              sx={segmentedSx}
-            >
-              {CURRENCIES.map((c) => (
-                <ToggleButton key={c} value={c}>
-                  {c}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-          </Tooltip>
 
           <Tooltip title={t("dashboard.refresh")} arrow>
             <span>

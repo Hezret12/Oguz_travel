@@ -255,6 +255,10 @@ export const getAllCategoriesApi = async (params = {}) => {
   return await api.getPrivate('/category/get-all-category', params);
 };
 
+export const getAllReferralCountriesApi = async (params = {}) => {
+  return await api.getPrivate('/refferal-country/get-all-refferal-country', params);
+};
+
 export const getAllSalariesApi = async (params = {}) => {
   return await api.getPrivate('/salary/get-all-salaries', params);
 };

@@ -111,7 +111,7 @@ export const useValidShema = () => {
   const addReferralLetter = yup.object({
     client_guid: requiredNullableString,
     received_opr_guid: requiredNullableString,
-    destination_country: requiredNullableString,
+    refferal_country_guid: requiredNullableString,
     // Sent in its 7-digit form; old records missing their leading zeros are padded back.
     travel_document_number: yup
       .string()
@@ -614,6 +614,19 @@ export const useValidShema = () => {
     name_en: stringOptionalValidSchema(),
   });
 
+  const addReferralCountry = yup.object({
+    name_tk: yup.string().trim().required(t("validation.required")),
+    name_ru: stringOptionalValidSchema(),
+    name_en: stringOptionalValidSchema(),
+  });
+
+  const editReferralCountry = yup.object({
+    guid: guidRequiredValidSchema(),
+    name_tk: yup.string().trim().required(t("validation.required")),
+    name_ru: stringOptionalValidSchema(),
+    name_en: stringOptionalValidSchema(),
+  });
+
   return {
     addB2BTicket,
     addTurkishAirlinesTicket,
@@ -639,6 +652,8 @@ export const useValidShema = () => {
     editPosition,
     addCategory,
     editCategory,
+    addReferralCountry,
+    editReferralCountry,
     cashTransaction,
     editTranslator,
     addTask,

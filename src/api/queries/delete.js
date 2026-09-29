@@ -159,6 +159,11 @@ export const deleteCategoryApi = async (guid) => {
   return await api.deletePrivate('/category/delete-category', { guid: actualGuid });
 };
 
+export const deleteReferralCountryApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/refferal-country/delete-refferal-country', { guid: actualGuid });
+};
+
 export const deleteOfficeApi = async (guid) => {
   const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
   return await api.deletePrivate('/office/delete-office', { guid: actualGuid });

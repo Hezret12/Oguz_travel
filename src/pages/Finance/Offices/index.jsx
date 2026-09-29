@@ -1,9 +1,8 @@
-import { Box, Chip, CircularProgress, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
+import { Box, Chip, CircularProgress, Tooltip, Typography } from "@mui/material";
 import { Building } from "lucide-react";
 import PageHeader from "../../../components/PageHeader";
 import { useLocale } from "../../../hooks/useLocale";
 import PeriodRangeFilter from "../Overview/Contents/PeriodRangeFilter";
-import { CURRENCIES, segmentedSx } from "../Overview/functions/analyticsFormat";
 import { useAnalyticsPrefs } from "../Overview/functions/useAnalyticsPrefs";
 import OfficesSummary from "./Contents/OfficesSummary";
 import OfficesChart from "./Contents/OfficesChart";
@@ -60,24 +59,7 @@ const FinanceOffices = () => {
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-          <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />
-
-          {/* Currency for the chart; the summary and table show both */}
-          <Tooltip title={t("finance.analytics.noConversion")} arrow>
-            <ToggleButtonGroup
-              exclusive
-              value={currency}
-              onChange={(_e, next) => next && updatePrefs({ currency: next })}
-              sx={segmentedSx}
-            >
-              {CURRENCIES.map((c) => (
-                <ToggleButton key={c} value={c}>
-                  {c}
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-          </Tooltip>
-        </Box>
+          <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />        </Box>
       </Box>
 
       {isLoading ? (

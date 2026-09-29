@@ -234,6 +234,10 @@ export const updateCategoryApi = async (data) => {
   return await api.patchPrivate('/category/update-category', data);
 };
 
+export const updateReferralCountryApi = async (data) => {
+  return await api.patchPrivate('/refferal-country/update-refferal-country', data);
+};
+
 export const updateOfficeApi = async (data) => {
   return await api.patchPrivate('/office/update-office', data);
 };
