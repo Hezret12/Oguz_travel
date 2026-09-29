@@ -1,11 +1,12 @@
 import { memo, useCallback } from "react";
+import { flushSync } from "react-dom";
 import { IconButton, Box, Tooltip, useColorScheme } from "@mui/material";
 import { Sun, Moon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 /**
- * Modern Dark/Light theme toggle button with smooth morphing rotation & scale transition.
- * Replaces the old switch slider with a clean, fluid icon button.
+ * Modern Dark/Light theme toggle button with Circular Reveal View Transition
+ * and smooth morphing rotation & scale transition.
  */
 const ThemeToggle = memo(({ variant = "header" }) => {
   const { t } = useTranslation();
@@ -13,9 +14,53 @@ const ThemeToggle = memo(({ variant = "header" }) => {
   const isDark = mode === "dark";
   const isLogin = variant === "login";
 
-  const toggleTheme = useCallback(() => {
-    setMode(isDark ? "light" : "dark");
-  }, [setMode, isDark]);
+  const toggleTheme = useCallback(
+    (event) => {
+      const nextMode = isDark ? "light" : "dark";
+
+      // Circular Reveal View Transition (if supported by the browser)
+      const isAppearanceTransition =
+        typeof document.startViewTransition === "function" &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (!isAppearanceTransition) {
+        setMode(nextMode);
+        return;
+      }
+
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX || rect.left + rect.width / 2;
+      const y = event.clientY || rect.top + rect.height / 2;
+
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+
+      const transition = document.startViewTransition(() => {
+        flushSync(() => {
+          setMode(nextMode);
+        });
+      });
+
+      transition.ready.then(() => {
+        document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${endRadius}px at ${x}px ${y}px)`,
+            ],
+          },
+          {
+            duration: 480,
+            easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+            pseudoElement: "::view-transition-new(root)",
+          }
+        );
+      });
+    },
+    [setMode, isDark]
+  );
 
   const tooltipTitle = isDark
     ? t("header.themeTooltipLight")
