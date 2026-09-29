@@ -82,14 +82,16 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
             </Box>
           }
           sx={{
-            width: 142,
-            minWidth: 142,
-            maxWidth: 142,
+            width: isLogin ? 80 : 84,
+            minWidth: isLogin ? 80 : 84,
+            maxWidth: isLogin ? 80 : 84,
             height: isLogin ? 36 : 38,
-            px: 1.2,
+            px: 1,
             borderRadius: '10px',
             textTransform: 'none',
             justifyContent: 'space-between',
+            '& .MuiButton-startIcon': { mr: 0.6, ml: 0 },
+            '& .MuiButton-endIcon': { ml: 0.5, mr: 0 },
             border: '1px solid',
             borderColor: isLogin
               ? 'rgba(255,255,255,0.18)'
@@ -126,14 +128,14 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
             noWrap
             sx={{
               flex: 1,
-              textAlign: 'left',
-              ml: 0.25,
-              fontWeight: 600,
-              fontSize: '0.85rem',
+              textAlign: 'center',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+              letterSpacing: '0.02em',
               color: 'inherit',
             }}
           >
-            {activeLangObj.label}
+            {activeLangObj.shortLabel}
           </Typography>
         </Button>
       </Tooltip>
@@ -151,7 +153,7 @@ const LanguageSwitcher = ({ variant = 'header' }) => {
             sx: {
               mt: 1,
               borderRadius: '12px',
-              width: 142,
+              minWidth: 148,
               p: 0.5,
               backdropFilter: isLogin ? 'blur(12px)' : undefined,
               backgroundColor: isLogin
