@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import { CustomDialog } from "../../../components/Dialog/CustomDialog";
 import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeader";
 import { CustomForm } from "../../../components/Dialog/CustomForm";
@@ -20,7 +20,7 @@ const AddReferralCountryModal = ({ table, open, close }) => {
 
   const { control, handleSubmit, reset } = useForm({
     resolver: yupResolver(addReferralCountry),
-    defaultValues: { name_tk: "", name_ru: "", name_en: "" },
+    defaultValues: { name: "" },
     mode: "onTouched",
   });
 
@@ -38,47 +38,22 @@ const AddReferralCountryModal = ({ table, open, close }) => {
     onSuccess: handleClose,
   });
 
-  // Empty RU/EN names fall back to the TK one.
+  // The name is Turkmen only; the backend stores a plain string under every language.
   const onSubmit = (data) => {
-    const tkName = data.name_tk?.trim() || "";
-    createCountry({
-      name: {
-        tk: tkName,
-        ru: data.name_ru?.trim() || tkName,
-        en: data.name_en?.trim() || tkName,
-      },
-    });
+    createCountry({ name: data.name.trim() });
   };
 
   return (
-    <CustomDialog open={isModalOpen} close={handleClose} widthX={520}>
+    <CustomDialog open={isModalOpen} close={handleClose} widthX={460}>
       <CustomDialogHeader variant="h6" title={t("professionalTranslation.referralCountry.add")} />
       <CustomForm onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ px: 3, py: 2 }}>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12 }}>
-              <CustomTextField
-                name="name_tk"
-                control={control}
-                label={t("professionalTranslation.referralCountry.nameTk")}
-                required
-              />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <CustomTextField
-                name="name_ru"
-                control={control}
-                label={t("professionalTranslation.referralCountry.nameRu")}
-              />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <CustomTextField
-                name="name_en"
-                control={control}
-                label={t("professionalTranslation.referralCountry.nameEn")}
-              />
-            </Grid>
-          </Grid>
+          <CustomTextField
+            name="name"
+            control={control}
+            label={t("professionalTranslation.referralCountry.name")}
+            required
+          />
         </Box>
 
         <FooterButton loading={isPending} onCancel={handleClose} />

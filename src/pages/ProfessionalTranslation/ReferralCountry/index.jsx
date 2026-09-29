@@ -15,6 +15,7 @@ import { useGet } from "../../../hooks/CRUD/useGet";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { getAllReferralCountriesApi } from "../../../api/queries/getters";
 import { deleteReferralCountryApi } from "../../../api/queries/delete";
+import { useDateFormat } from "../../../functions/generalHelpers";
 import AddReferralCountryModal from "./AddReferralCountryModal";
 import EditReferralCountryModal from "./EditReferralCountryModal";
 
@@ -22,6 +23,7 @@ import EditReferralCountryModal from "./EditReferralCountryModal";
 // letter form and filter.
 const ReferralCountryPage = () => {
   const { t } = useLocale();
+  const { formatChange } = useDateFormat();
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -53,9 +55,7 @@ const ReferralCountryPage = () => {
     if (!Array.isArray(countriesData)) return [];
     if (!searchQuery.trim()) return countriesData;
     const q = searchQuery.toLowerCase();
-    return countriesData.filter((item) =>
-      ["tk", "ru", "en"].some((l) => item.name?.[l]?.toLowerCase().includes(q)),
-    );
+    return countriesData.filter((item) => item.name?.tk?.toLowerCase().includes(q));
   }, [countriesData, searchQuery]);
 
   const columns = useMemo(
@@ -69,24 +69,22 @@ const ReferralCountryPage = () => {
       },
       {
         accessorFn: (row) => row.name?.tk,
-        id: "name_tk",
-        header: t("professionalTranslation.referralCountry.nameTk"),
-        size: 240,
+        id: "name",
+        header: t("professionalTranslation.referralCountry.name"),
+        size: 320,
         Cell: ({ cell }) => cell.getValue() || "-",
       },
       {
-        accessorFn: (row) => row.name?.ru,
-        id: "name_ru",
-        header: t("professionalTranslation.referralCountry.nameRu"),
-        size: 240,
-        Cell: ({ cell }) => cell.getValue() || "-",
+        accessorKey: "createdAt",
+        header: t("columns.createdAt"),
+        size: 160,
+        Cell: ({ cell }) => formatChange(cell.getValue()),
       },
       {
-        accessorFn: (row) => row.name?.en,
-        id: "name_en",
-        header: t("professionalTranslation.referralCountry.nameEn"),
-        size: 240,
-        Cell: ({ cell }) => cell.getValue() || "-",
+        accessorKey: "updatedAt",
+        header: t("columns.updatedAt"),
+        size: 160,
+        Cell: ({ cell }) => formatChange(cell.getValue()),
       },
       {
         id: "actions",
@@ -98,7 +96,7 @@ const ReferralCountryPage = () => {
         ),
       },
     ],
-    [t, handleDeleteClick],
+    [t, formatChange, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({

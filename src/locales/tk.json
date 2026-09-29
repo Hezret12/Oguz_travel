@@ -1280,9 +1280,7 @@
       "title": "Ýollanma ýurtlary",
       "add": "Ýurt goşmak",
       "edit": "Ýurdy üýtgetmek",
-      "nameTk": "Ýurduň ady, Tk",
-      "nameRu": "Ýurduň ady, Ru",
-      "nameEn": "Ýurduň ady, En",
+      "name": "Ýurduň ady",
       "deleteConfirm": "Bu ýurdy pozmak isleýändigiňize ynanýarsyňyzmy?"
     },
     "translator": {

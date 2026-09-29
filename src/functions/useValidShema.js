@@ -615,16 +615,12 @@ export const useValidShema = () => {
   });
 
   const addReferralCountry = yup.object({
-    name_tk: yup.string().trim().required(t("validation.required")),
-    name_ru: stringOptionalValidSchema(),
-    name_en: stringOptionalValidSchema(),
+    name: yup.string().trim().required(t("validation.required")),
   });
 
   const editReferralCountry = yup.object({
     guid: guidRequiredValidSchema(),
-    name_tk: yup.string().trim().required(t("validation.required")),
-    name_ru: stringOptionalValidSchema(),
-    name_en: stringOptionalValidSchema(),
+    name: yup.string().trim().required(t("validation.required")),
   });
 
   return {

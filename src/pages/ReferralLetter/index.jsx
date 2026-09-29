@@ -102,7 +102,7 @@ const ReferralLetterFilterDrawer = () => {
 };
 
 const ReferalLetter = () => {
-  const { t, selectedLang } = useLocale();
+  const { t } = useLocale();
   const countryOptions = useReferralCountryOptions();
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const { formatChange } = useDateFormat();
@@ -272,11 +272,8 @@ const ReferalLetter = () => {
         muiTableBodyCellProps: { align: "center" },
       },
       {
-        // Older letters only have the free-text country.
-        accessorFn: (row) =>
-          (row.refferalCountry && selectedLang(row.refferalCountry.name)) ||
-          row.destination_country ||
-          "",
+        // Country names are Turkmen only; older letters only have the free-text country.
+        accessorFn: (row) => row.refferalCountry?.name?.tk || row.destination_country || "",
         id: "destination_country",
         header: t("columns.destinationCountry"),
         size: 110,
@@ -371,7 +368,7 @@ const ReferalLetter = () => {
         ),
       },
     ],
-    [t, selectedLang, formatChange, handleDeleteClick],
+    [t, formatChange, handleDeleteClick],
   );
 
   const table = useMaterialReactTable({

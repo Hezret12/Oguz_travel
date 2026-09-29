@@ -21,16 +21,68 @@ const formatGender = (gender) => {
   return g;
 };
 
+// Ordinal suffix follows the vowel of the year's last spoken word
+// (alty, dokuz, on, otuz, kyrk, altmyş, togsan → -njy; the rest → -nji).
 const getTurkmenOrdinalSuffix = (year) => {
   const y = Number(year);
   const lastTwo = y % 100;
   if (lastTwo === 0) return "-nji";
   if (lastTwo % 10 === 0) {
-    const backVowels = [30, 40, 60, 90];
-    return backVowels.includes(lastTwo) ? "-njy" : "-nji";
+    return [10, 30, 40, 60, 90].includes(lastTwo) ? "-njy" : "-nji";
   }
   const lastDigit = y % 10;
   return lastDigit === 6 || lastDigit === 9 ? "-njy" : "-nji";
+};
+
+const TURKMEN_MONTHS = [
+  "ýanwar", "fewral", "mart", "aprel", "maý", "iýun",
+  "iýul", "awgust", "sentýabr", "oktýabr", "noýabr", "dekabr",
+];
+
+// "2026-njy ýylyň"
+const yearOf = (d) => `${d.year()}${getTurkmenOrdinalSuffix(d.year())} ýylyň`;
+const monthOf = (d) => TURKMEN_MONTHS[d.month()];
+
+/**
+ * Title period for the exported date range, e.g.
+ *   whole year     → "2026-njy ýylyň DOWAMYNDA"
+ *   whole month    → "2026-njy ýylyň sentýabr aýynyň DOWAMYNDA"
+ *   whole months   → "2026-njy ýylyň ýanwar – mart aýlarynyň DOWAMYNDA"
+ *   months (years) → "2025-nji ýylyň noýabr aýyndan 2026-njy ýylyň fewral aýyna çenli ARALYKDA"
+ *   any other span → "01.09.2026 – 15.09.2026 ARALYGYNDA"
+ * Returns null when there is no usable range.
+ */
+const resolveRangeText = (startD, endD) => {
+  const start = startD ? dayjs(startD) : null;
+  const end = endD ? dayjs(endD) : null;
+  const hasStart = start?.isValid();
+  const hasEnd = end?.isValid();
+
+  if (hasStart && !hasEnd) return `${start.format("DD.MM.YYYY")} SENESINDEN BAŞLAP`;
+  if (!hasStart && hasEnd) return `${end.format("DD.MM.YYYY")} SENESINE ÇENLI`;
+  if (!hasStart || !hasEnd || end.isBefore(start, "day")) return null;
+
+  const wholeMonths =
+    start.isSame(start.startOf("month"), "day") && end.isSame(end.endOf("month"), "day");
+
+  if (!wholeMonths) {
+    return start.isSame(end, "day")
+      ? `${start.format("DD.MM.YYYY")} SENESINDE`
+      : `${start.format("DD.MM.YYYY")} – ${end.format("DD.MM.YYYY")} ARALYGYNDA`;
+  }
+
+  if (start.year() !== end.year()) {
+    const wholeYears = start.month() === 0 && end.month() === 11;
+    if (wholeYears) {
+      const suffix = getTurkmenOrdinalSuffix(end.year());
+      return `${start.year()}-${end.year()}${suffix} ýyllaryň DOWAMYNDA`;
+    }
+    return `${yearOf(start)} ${monthOf(start)} aýyndan ${yearOf(end)} ${monthOf(end)} aýyna çenli ARALYKDA`;
+  }
+
+  if (start.month() === 0 && end.month() === 11) return `${yearOf(start)} DOWAMYNDA`;
+  if (start.month() === end.month()) return `${yearOf(start)} ${monthOf(start)} aýynyň DOWAMYNDA`;
+  return `${yearOf(start)} ${monthOf(start)} – ${monthOf(end)} aýlarynyň DOWAMYNDA`;
 };
 
 const resolveDateText = (letters = [], options = {}) => {
@@ -47,55 +99,37 @@ const resolveDateText = (letters = [], options = {}) => {
     options.queryParams?.end_departure_date ||
     options.queryParams?.end_contract_date;
 
-  if (startD && endD) {
-    const sY = dayjs(startD).year();
-    const eY = dayjs(endD).year();
-    if (sY && eY && sY <= eY) {
-      if (eY - sY <= 5) {
-        for (let y = sY; y <= eY; y++) {
-          years.push(y);
-        }
-      } else {
-        years = [sY, eY];
+  const rangeText = resolveRangeText(startD, endD);
+  if (rangeText) return rangeText;
+
+  // No range picked ("all time"): name the years the letters fall in.
+  const yearsSet = new Set();
+  letters.forEach((row) => {
+    const raw =
+      row.date_time ||
+      row.datetime ||
+      row.date ||
+      row.departure_date ||
+      row.contract_date ||
+      row.createdAt ||
+      row.created_at;
+    if (raw) {
+      const y = dayjs(raw).year();
+      if (y && !isNaN(y) && y > 2000 && y < 2100) {
+        yearsSet.add(y);
       }
     }
-  } else if (startD) {
-    const sY = dayjs(startD).year();
-    if (sY) years.push(sY);
-  } else if (endD) {
-    const eY = dayjs(endD).year();
-    if (eY) years.push(eY);
-  }
-
-  if (years.length === 0) {
-    const yearsSet = new Set();
-    letters.forEach((row) => {
-      const raw =
-        row.date_time ||
-        row.datetime ||
-        row.date ||
-        row.departure_date ||
-        row.contract_date ||
-        row.createdAt ||
-        row.created_at;
-      if (raw) {
-        const y = dayjs(raw).year();
-        if (y && !isNaN(y) && y > 2000 && y < 2100) {
-          yearsSet.add(y);
-        }
+  });
+  const sortedYears = Array.from(yearsSet).sort((a, b) => a - b);
+  if (sortedYears.length > 0) {
+    const minY = sortedYears[0];
+    const maxY = sortedYears[sortedYears.length - 1];
+    if (maxY > minY && maxY - minY <= 5) {
+      for (let y = minY; y <= maxY; y++) {
+        years.push(y);
       }
-    });
-    const sortedYears = Array.from(yearsSet).sort((a, b) => a - b);
-    if (sortedYears.length > 0) {
-      const minY = sortedYears[0];
-      const maxY = sortedYears[sortedYears.length - 1];
-      if (maxY > minY && maxY - minY <= 5) {
-        for (let y = minY; y <= maxY; y++) {
-          years.push(y);
-        }
-      } else {
-        years = sortedYears;
-      }
+    } else {
+      years = sortedYears;
     }
   }
 
@@ -189,7 +223,7 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
   // ("Çykyş syýahat hasabat"), plus the contract date at the end.
   const columnsConfig = [
     { header: "T/b", key: "index_number", width: 8, align: "center" },
-    { header: "Syýahatçynyň F.A.A.a.", key: "client_name", width: 34, align: "left" },
+    { header: "Syýahatçynyň F.A.A.a.", key: "client_name", width: 44, align: "left" },
     { header: "Jynsy", key: "gender", width: 10, align: "center" },
     { header: "Doglan senesi", key: "dob", width: 14, align: "center" },
     { header: "Pasportynyň seriýasy we belgisi", key: "passport", width: 18, align: "center" },
@@ -197,16 +231,21 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
     { header: "Syýahat ýolhatynyň №", key: "travel_doc", width: 16, align: "center" },
     { header: "Gidýän wagty", key: "departure_date", width: 14, align: "center" },
     { header: "Gelýän wagty", key: "return_date", width: 14, align: "center" },
-    { header: "BGN gidiş", key: "bgn_departure", width: 16, align: "center" },
-    { header: "BGN geliş", key: "bgn_arrival", width: 16, align: "center" },
+    { header: "BGN gidiş", key: "bgn_departure", width: 24, align: "center" },
+    { header: "BGN geliş", key: "bgn_arrival", width: 24, align: "center" },
     { header: "Syýahat operator/agent", key: "operator", width: 25, align: "center" },
     { header: "TMT", key: "price", width: 16, align: "right" },
     { header: "Şertnama senesi", key: "contract_date", width: 16, align: "center" },
   ];
 
-  // Set column widths
+  // Each column is at least as wide as its header on one line, plus room for
+  // the filter dropdown arrow, so no header wraps.
+  const HEADER_PADDING = 6;
   columnsConfig.forEach((col, idx) => {
-    worksheet.getColumn(START_COL + idx).width = col.width;
+    worksheet.getColumn(START_COL + idx).width = Math.max(
+      col.width,
+      col.header.length + HEADER_PADDING,
+    );
   });
 
   const END_COL = START_COL + columnsConfig.length - 1;
@@ -273,7 +312,7 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
 
   // Header Row (Row 4)
   const headerRow = worksheet.getRow(START_ROW);
-  headerRow.height = 32;
+  headerRow.height = 24;
 
   columnsConfig.forEach((col, idx) => {
     const colNumber = START_COL + idx;
@@ -288,7 +327,6 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
     cell.alignment = {
       vertical: "middle",
       horizontal: "center",
-      wrapText: true,
     };
     cell.border = {
       top: { style: "thin", color: { argb: "FF000000" } },
@@ -346,7 +384,7 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
       passport: row.client?.passport_number
         ? String(row.client.passport_number).toUpperCase()
         : "",
-      // The sheet is in Turkmen; older letters only have the free-text country.
+      // Country names are Turkmen only; older letters only have the free-text country.
       destination_country: String(
         row.refferalCountry?.name?.tk || row.destination_country || "",
       ).trim(),

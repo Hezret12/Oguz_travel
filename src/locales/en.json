@@ -1294,9 +1294,7 @@
       "title": "Referral countries",
       "add": "Add country",
       "edit": "Edit country",
-      "nameTk": "Country name, Tk",
-      "nameRu": "Country name, Ru",
-      "nameEn": "Country name, En",
+      "name": "Country name",
       "deleteConfirm": "Are you sure you want to delete this country?"
     },
     "translator": {
