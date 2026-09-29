@@ -1,6 +1,5 @@
 import { memo, useState } from "react";
-import { Box, CircularProgress, Tooltip } from "@mui/material";
-import { useLocale } from "../../../../hooks/useLocale";
+import { Box, CircularProgress } from "@mui/material";
 import { BONUS_CURRENCY } from "../functions/salaryUtils";
 
 /**
@@ -9,7 +8,6 @@ import { BONUS_CURRENCY } from "../functions/salaryUtils";
  * Clicking toggles the currency directly via onToggle callback.
  */
 const SalaryCurrencyBadge = ({ currency, onToggle, readOnly = false }) => {
-  const { t } = useLocale();
   const [pending, setPending] = useState(false);
   const isUsd = currency === BONUS_CURRENCY.USD;
 
@@ -28,21 +26,16 @@ const SalaryCurrencyBadge = ({ currency, onToggle, readOnly = false }) => {
     }
   };
 
-  const tooltipTitle = readOnly
-    ? (isUsd ? "USD ($)" : "TMT (m)")
-    : (isUsd ? t("salary.currencyToggleToTmt") : t("salary.currencyToggleToUsd"));
-
   return (
-    <Tooltip title={tooltipTitle} arrow placement="top">
-      <Box
-        component="button"
-        type="button"
-        disabled={readOnly || pending}
-        onClick={handleClick}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
+    <Box
+      component="button"
+      type="button"
+      disabled={readOnly || pending}
+      onClick={handleClick}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
         sx={(theme) => ({
           flexShrink: 0,
           display: "inline-flex",
@@ -110,7 +103,6 @@ const SalaryCurrencyBadge = ({ currency, onToggle, readOnly = false }) => {
           "m"
         )}
       </Box>
-    </Tooltip>
   );
 };
 
