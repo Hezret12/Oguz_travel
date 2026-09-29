@@ -43,6 +43,7 @@ import {
 import SalaryMonthPicker from "./Contents/SalaryMonthPicker";
 import SalaryGenerateState from "./Contents/SalaryGenerateState";
 import EditableCell from "./Contents/EditableCell";
+import SalaryCurrencyBadge from "./Contents/SalaryCurrencyBadge";
 import EditSalaryModal from "./EditSalaryModal";
 import AddSalaryModal from "./AddSalaryModal";
 import {

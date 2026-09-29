@@ -2,6 +2,7 @@ import { memo, useRef, useState } from "react";
 import { Box, CircularProgress, InputBase, Tooltip } from "@mui/material";
 import { useLocale } from "../../../../hooks/useLocale";
 import { formatMoney, toNumber } from "../functions/salaryUtils";
+import SalaryCurrencyBadge from "./SalaryCurrencyBadge";
 
 const CELL_ATTR = "data-salary-cell";
 // Fixed tints that read on both themes (info blue, primary teal), so the
@@ -38,6 +39,7 @@ const EditableCell = ({
   readOnly = false,
   align = "right",
   currency,
+  onCurrencyChange,
   onCommit,
 }) => {
   const { t } = useLocale();
@@ -48,7 +50,7 @@ const EditableCell = ({
   const moveRef = useRef(0);
 
   const current = toNumber(value);
-  const format = (v) => (integer ? String(toNumber(v)) : formatMoney(v, { currency }));
+  const format = (v) => (integer ? String(toNumber(v)) : formatMoney(v));
   const hasPrevious = previous !== undefined && previous !== null;
   const changed = hasPrevious && toNumber(previous) !== current;
 
@@ -112,7 +114,8 @@ const EditableCell = ({
         height: 34,
         display: "flex",
         alignItems: "center",
-        justifyContent: align === "right" ? "flex-end" : "center",
+        justifyContent: currency ? "space-between" : align === "right" ? "flex-end" : "center",
+        gap: 0.5,
         borderRadius: "7px",
         border: "1px solid",
         borderColor: readOnly ? "transparent" : editing ? "primary.main" : "divider",
@@ -132,6 +135,13 @@ const EditableCell = ({
         }),
       }}
     >
+      {currency && (
+        <SalaryCurrencyBadge
+          currency={currency}
+          onToggle={onCurrencyChange}
+          readOnly={readOnly}
+        />
+      )}
       {editing ? (
         <InputBase
           autoFocus
@@ -146,7 +156,7 @@ const EditableCell = ({
           sx={{ width: "100%", fontSize: "inherit", fontWeight: 600 }}
         />
       ) : (
-        <Box component="span" sx={{ opacity: pending !== null ? 0.6 : 1 }}>
+        <Box component="span" sx={{ opacity: pending !== null ? 0.6 : 1, width: "100%", textAlign: align }}>
           {format(shown)}
         </Box>
       )}
@@ -162,7 +172,13 @@ const EditableCell = ({
   if (!changed) return cell;
   return (
     <Tooltip
-      title={editing ? "" : t("salary.previousValue", { value: format(previous) })}
+      title={
+        editing
+          ? ""
+          : t("salary.previousValue", {
+              value: integer ? String(toNumber(previous)) : formatMoney(previous, { currency }),
+            })
+      }
       arrow
       placement="top"
     >
