@@ -164,14 +164,14 @@ const Salary = () => {
     idKey: "guid",
     isPaginated: true,
     // A deleted row's employee becomes addable again.
-    invalidateQueries: ["salarySummary", "salaryMissingEmployees"],
+    invalidateQueries: ["salarySummary", "salaryMissingEmployees", "employees", "employeeLoanDetails"],
   });
 
   const { mutateAsync: updateSalaryAsync } = useUpdate({
     apiFn: updateSalaryApi,
     key: "salaries",
     idKey: "guid",
-    invalidateQueries: ["salarySummary"],
+    invalidateQueries: ["salarySummary", "employees", "employeeLoanDetails"],
     showSuccessMessage: false,
   });
 
@@ -186,7 +186,7 @@ const Salary = () => {
     apiFn: markSalaryPaidApi,
     key: "salaries",
     isPaginated: true,
-    invalidateQueries: ["salarySummary"],
+    invalidateQueries: ["salarySummary", "employees", "employeeLoanDetails"],
   });
 
   // Locking also marks every unpaid row of the month as paid on the server.

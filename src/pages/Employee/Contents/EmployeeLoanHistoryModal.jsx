@@ -132,12 +132,16 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
 
   const { data: loanResponse, isLoading, isError, refetch } = useGet({
     apiFn: getEmployeeLoanDetailsApi,
-    key: ["employeeLoanDetails", employeeGuid],
+    key: "employeeLoanDetails",
     params: { employee_guid: employeeGuid },
     options: { enabled: Boolean(open && employeeGuid) },
   });
 
-  const details = loanResponse?.data ?? loanResponse ?? {};
+  const details =
+    loanResponse?.employee_guid || loanResponse?.empl_loan !== undefined
+      ? loanResponse
+      : loanResponse?.data ?? loanResponse ?? {};
+
   const empl_loan = Number(
     details.empl_loan ?? employee?.empl_loan ?? employee?.loan ?? 0
   );
@@ -147,17 +151,19 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
   const remaining_loan = Number(
     details.remaining_loan !== undefined
       ? details.remaining_loan
-      : empl_loan - salary_loans_total
+      : Math.round((empl_loan - salary_loans_total) * 100) / 100
   );
 
   const loanRecords = useMemo(() => {
     const rawList = Array.isArray(details.loans)
       ? details.loans
+      : Array.isArray(loanResponse?.loans)
+      ? loanResponse.loans
       : Array.isArray(details)
       ? details
       : [];
     return [...rawList].sort((a, b) => (b.month || "").localeCompare(a.month || ""));
-  }, [details]);
+  }, [details, loanResponse]);
 
   return (
     <CustomDialog open={Boolean(open)} close={close} widthX={860}>

@@ -303,11 +303,10 @@ const Employee = () => {
           const raw = row.original;
           const initial = Number(raw.empl_loan ?? raw.loan ?? 0);
           const deducted = Number(raw.salary_loans_total ?? 0);
-          const remaining = Number(
-            raw.remaining_loan !== undefined
-              ? raw.remaining_loan
-              : initial - deducted
-          );
+          const remaining =
+            raw.salary_loans_total !== undefined
+              ? Math.round((initial - deducted) * 100) / 100
+              : Number(raw.remaining_loan ?? Math.round((initial - deducted) * 100) / 100);
 
           if (initial === 0 && remaining === 0) {
             return (

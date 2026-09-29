@@ -46,7 +46,7 @@ const EditSalaryModal = ({ table, row, open, close }) => {
     key: "salaries",
     idKey: "guid",
     // useUpdate wraps each entry as [entry], so pass plain keys.
-    invalidateQueries: ["salarySummary"],
+    invalidateQueries: ["salarySummary", "employees", "employeeLoanDetails"],
     onSuccessUpdate: handleClose,
   });
 

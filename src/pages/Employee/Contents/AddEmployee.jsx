@@ -23,7 +23,7 @@ const AddEmployee = ({ table }) => {
   const { t, selectedLang } = useLocale();
   const { addEmployee } = useValidShema();
 
-  const { mutate: createEmployee, isLoading: isSubmit } = useCreate({
+  const { mutate: createEmployee, isPending: isSubmit } = useCreate({
     apiFn: addEmployeeApi,
     key: "employees",
     // The list is paginated server side, so the new record is fetched back
@@ -67,7 +67,7 @@ const AddEmployee = ({ table }) => {
       phone_number: "",
       gmail: "",
       department_guid: "",
-      position_guid: [],
+      position_guids: [],
       office_guid: "",
       address: "",
       empl_loan: "",
@@ -83,11 +83,18 @@ const AddEmployee = ({ table }) => {
         ? rawPhone
         : `+993${rawPhone}`;
 
+      const posGuids = Array.isArray(data.position_guids)
+        ? data.position_guids
+        : Array.isArray(data.position_guid)
+        ? data.position_guid
+        : [];
+
       const payload = {
         fullName: data.fullName,
         phone_number: formattedPhone,
-        position_guid: data.position_guid,
+        position_guids: posGuids,
         office_guid: data.office_guid,
+        is_active: true,
       };
 
       if (data.department_guid) payload.department_guid = data.department_guid;
@@ -95,11 +102,12 @@ const AddEmployee = ({ table }) => {
       if (data.address) payload.address = data.address;
 
       const rawLoan = data.empl_loan ?? data.loan;
-      if (rawLoan !== undefined && rawLoan !== "") {
-        const numLoan = Number(rawLoan) || 0;
-        payload.empl_loan = numLoan;
-        payload.loan = numLoan;
-      }
+      const numLoan =
+        rawLoan !== undefined && rawLoan !== "" && rawLoan !== null
+          ? Number(rawLoan) || 0
+          : 0;
+      payload.empl_loan = numLoan;
+      payload.loan = numLoan;
 
       await createEmployee(payload);
     } catch (err) {
@@ -146,7 +154,7 @@ const AddEmployee = ({ table }) => {
 
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomSelect
-              name="position_guid"
+              name="position_guids"
               control={control}
               label={t("columns.position")}
               options={position}

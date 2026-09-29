@@ -28,6 +28,7 @@ const EditEmployee = ({ table, row }) => {
     apiFn: updateEmployeeApi,
     key: "employees",
     idKey: "guid",
+    invalidateQueries: ["employees", "employeeLoanDetails"],
     onSuccessUpdate: () => {
       table.setEditingRow(null);
     },
