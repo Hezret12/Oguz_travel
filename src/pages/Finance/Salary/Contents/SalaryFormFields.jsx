@@ -3,11 +3,14 @@ import { Controller, useWatch } from "react-hook-form";
 import { Info, Percent } from "lucide-react";
 import CustomTextField from "../../../../components/CustomTextField";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
+import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import OverflowTooltipLabel from "../../../../components/OverflowTooltipLabel";
 import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { useLocale } from "../../../../hooks/useLocale";
 import { getSalaryEmployeesApi } from "../../../../api/queries/getters";
 import {
+  BONUS_CURRENCIES,
+  BONUS_CURRENCY,
   BONUS_TYPE,
   calculatePercentBonus,
   calculateSalary,
@@ -27,11 +30,12 @@ const CALC_FIELDS = [
   "loan",
   "bonus",
   "bonus_type",
+  "bonus_currency",
   "sales_amount",
   "bonus_percent",
 ];
 
-const money = (v) => formatMoney(v, { dashZero: false });
+const money = (v, currency) => formatMoney(v, { dashZero: false, currency });
 
 // Shrinks every input in the form (text, picker, autocomplete) from the
 // shared 44px default to FIELD_HEIGHT. Three-class selectors + !important are needed
@@ -111,12 +115,33 @@ const BonusTypeField = ({ control }) => {
   );
 };
 
+// Bonus money input with its currency (TMT / USD) picked right beside it.
+const BonusAmountField = ({ control, name, label }) => (
+  <Controller
+    name="bonus_currency"
+    control={control}
+    render={({ field }) => (
+      <CurrencyAmount
+        name={name}
+        control={control}
+        label={label}
+        currency={field.value}
+        onCurrencyChange={field.onChange}
+        currencies={BONUS_CURRENCIES}
+        allowNegative={false}
+        placeholder="0"
+      />
+    )}
+  />
+);
+
 // Percent-of-sales or fixed amount; the row keeps the same height either way.
-const BonusFields = ({ control, moneyField }) => {
+// The currency picked on the amount is the bonus currency in both modes.
+const BonusFields = ({ control }) => {
   const { t } = useLocale();
-  const [bonusType, sales, percent] = useWatch({
+  const [bonusType, sales, percent, currency] = useWatch({
     control,
-    name: ["bonus_type", "sales_amount", "bonus_percent"],
+    name: ["bonus_type", "sales_amount", "bonus_percent", "bonus_currency"],
   });
 
   if (bonusType !== BONUS_TYPE.PERCENT) {
@@ -124,7 +149,9 @@ const BonusFields = ({ control, moneyField }) => {
     // fixed input keeps its row and the fields below never move up.
     return (
       <>
-        <Grid size={{ xs: 12, sm: 4 }}>{moneyField("bonus", t("salary.bonusResult"))}</Grid>
+        <Grid size={{ xs: 12, sm: 4 }}>
+          <BonusAmountField control={control} name="bonus" label={t("salary.bonusResult")} />
+        </Grid>
         <Grid size={{ xs: 0, sm: 5 }} sx={{ display: { xs: "none", sm: "block" } }} />
       </>
     );
@@ -132,7 +159,9 @@ const BonusFields = ({ control, moneyField }) => {
 
   return (
     <>
-      <Grid size={{ xs: 12, sm: 4 }}>{moneyField("sales_amount", t("salary.salesAmount"))}</Grid>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        <BonusAmountField control={control} name="sales_amount" label={t("salary.salesAmount")} />
+      </Grid>
       <Grid size={{ xs: 5, sm: 2 }}>
         <CustomTextField
           name="bonus_percent"
@@ -146,13 +175,16 @@ const BonusFields = ({ control, moneyField }) => {
         />
       </Grid>
       <Grid size={{ xs: 7, sm: 3 }}>
-        <ResultBox label={t("salary.bonusResult")} value={money(calculatePercentBonus(sales, percent))} />
+        <ResultBox
+          label={t("salary.bonusResult")}
+          value={money(calculatePercentBonus(sales, percent), currency)}
+        />
       </Grid>
     </>
   );
 };
 
-const SummaryItem = ({ label, value, strong = false }) => (
+const SummaryItem = ({ label, value, extra, strong = false }) => (
   <Box sx={{ minWidth: 0 }}>
     <Typography noWrap sx={{ fontSize: "0.78rem", color: "text.secondary", fontWeight: 600 }}>
       {label}
@@ -169,6 +201,14 @@ const SummaryItem = ({ label, value, strong = false }) => (
     >
       {value}
     </Typography>
+    {extra && (
+      <Typography
+        noWrap
+        sx={{ fontSize: "0.78rem", fontWeight: 700, color: "text.secondary", fontVariantNumeric: "tabular-nums" }}
+      >
+        {extra}
+      </Typography>
+    )}
   </Box>
 );
 
@@ -179,18 +219,26 @@ const SalarySummaryBar = ({ control }) => {
   const values = Object.fromEntries(CALC_FIELDS.map((f, i) => [f, watched[i]]));
   const calc = calculateSalary(values);
   const isPercent = values.bonus_type === BONUS_TYPE.PERCENT;
+  const isUsdBonus = calc.bonusCurrency === BONUS_CURRENCY.USD;
 
+  const bonusLine = `${t("salary.bonus")}: ${money(calc.bonus, calc.bonusCurrency)}${
+    isPercent
+      ? ` (${t("salary.percentOf", {
+          sales: money(values.sales_amount, calc.bonusCurrency),
+          percent: toNumber(values.bonus_percent),
+        })})`
+      : ""
+  }`;
+
+  // A USD bonus is not part of the TMT sum, so it is listed after it.
   const formula = [
     `${t("salary.baseSalary")}: ${money(calc.baseSalary)} × ${calc.workedDays}/${calc.workDays} = ${money(calc.earned)}`,
-    `+ ${t("salary.bonus")}: ${money(calc.bonus)}${
-      isPercent
-        ? ` (${t("salary.percentOf", { sales: money(values.sales_amount), percent: toNumber(values.bonus_percent) })})`
-        : ""
-    }`,
+    ...(isUsdBonus ? [] : [`+ ${bonusLine}`]),
     `= ${t("salary.total")}: ${money(calc.total)}`,
     `− ${t("salary.deductions")}: ${money(calc.deductions)}`,
     `= ${t("salary.payable")}: ${money(calc.payable)}`,
     `− ${t("salary.paidAmount")}: ${money(values.paid_amount)} → ${t("salary.remaining")}: ${money(calc.remaining)}`,
+    ...(isUsdBonus ? [`${bonusLine} — ${t("salary.bonusSeparate")}`] : []),
   ];
 
   return (
@@ -210,7 +258,12 @@ const SalarySummaryBar = ({ control }) => {
       <SummaryItem label={t("salary.earned")} value={money(calc.earned)} />
       <SummaryItem label={t("salary.total")} value={money(calc.total)} />
       <SummaryItem label={t("salary.deductions")} value={`− ${money(calc.deductions)}`} />
-      <SummaryItem label={t("salary.payable")} value={money(calc.payable)} strong />
+      <SummaryItem
+        label={t("salary.payable")}
+        value={money(calc.payable)}
+        extra={calc.bonusUsd > 0 ? `+ ${money(calc.bonusUsd, BONUS_CURRENCY.USD)} ${t("salary.bonus")}` : null}
+        strong
+      />
       <Tooltip
         arrow
         placement="top"
@@ -300,7 +353,7 @@ const SalaryFormFields = ({ control, initialEmployee, onEmployeeChange }) => {
         <Grid size={{ xs: 12, sm: 3 }}>
           <BonusTypeField control={control} />
         </Grid>
-        <BonusFields control={control} moneyField={moneyField} />
+        <BonusFields control={control} />
 
         <Grid size={{ xs: 6, sm: 4 }}>{moneyField("paid_amount", t("salary.paidAmount"))}</Grid>
         <Grid size={{ xs: 6, sm: 4 }}>

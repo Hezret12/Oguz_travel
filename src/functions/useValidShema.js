@@ -478,6 +478,7 @@ export const useValidShema = () => {
     loan: salaryMoney(),
     bonus: salaryMoney(),
     bonus_type: yup.string().oneOf(["fixed", "percent"]),
+    bonus_currency: yup.string().oneOf(["TMT", "USD"]),
     sales_amount: salaryMoney(),
     bonus_percent: yup
       .number()

@@ -37,6 +37,7 @@ const EditableCell = ({
   integer = false,
   readOnly = false,
   align = "right",
+  currency,
   onCommit,
 }) => {
   const { t } = useLocale();
@@ -47,7 +48,7 @@ const EditableCell = ({
   const moveRef = useRef(0);
 
   const current = toNumber(value);
-  const format = (v) => (integer ? String(toNumber(v)) : formatMoney(v));
+  const format = (v) => (integer ? String(toNumber(v)) : formatMoney(v, { currency }));
   const hasPrevious = previous !== undefined && previous !== null;
   const changed = hasPrevious && toNumber(previous) !== current;
 

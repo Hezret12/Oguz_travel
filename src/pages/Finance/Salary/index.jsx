@@ -46,8 +46,10 @@ import EditableCell from "./Contents/EditableCell";
 import EditSalaryModal from "./EditSalaryModal";
 import AddSalaryModal from "./AddSalaryModal";
 import {
+  BONUS_CURRENCY,
   formatMoney,
   formatMonthTk,
+  getBonusCurrency,
   isSalaryPaid,
   isPercentRow,
   toNumber,
@@ -243,7 +245,7 @@ const Salary = () => {
   );
 
   const editable = useCallback(
-    (field, { integer = false } = {}) => ({
+    (field, { integer = false, currencyOf } = {}) => ({
       Cell: ({ row }) => (
         <EditableCell
           value={row.original[field]}
@@ -253,6 +255,7 @@ const Salary = () => {
           integer={integer}
           readOnly={isLocked}
           align={integer ? "center" : "right"}
+          currency={currencyOf?.(row.original)}
           onCommit={(value) => saveCell(row.original, field, value)}
         />
       ),
@@ -360,19 +363,23 @@ const Salary = () => {
         size: 130,
         ...RIGHT,
         // A percent bonus is derived from sales × %, so it is edited in the
-        // modal; only fixed bonuses are edited inline.
+        // modal; only fixed bonuses are edited inline. The bonus currency is
+        // picked in the modal too.
         Cell: (props) => {
           const { row } = props;
-          if (!isPercentRow(row.original)) return editable("bonus").Cell(props);
+          if (!isPercentRow(row.original)) {
+            return editable("bonus", { currencyOf: getBonusCurrency }).Cell(props);
+          }
+          const currency = getBonusCurrency(row.original);
           return (
             <Tooltip title={t("salary.bonusPercent")} arrow placement="top">
               <Box sx={{ textAlign: "right", lineHeight: 1.2 }}>
                 <Box component="span" sx={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-                  {formatMoney(row.original.bonus)}
+                  {formatMoney(row.original.bonus, { currency })}
                 </Box>
                 <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
                   {t("salary.percentOf", {
-                    sales: formatMoney(row.original.sales_amount, { dashZero: false }),
+                    sales: formatMoney(row.original.sales_amount, { dashZero: false, currency }),
                     percent: toNumber(row.original.bonus_percent),
                   })}
                 </Typography>
@@ -380,7 +387,17 @@ const Salary = () => {
             </Tooltip>
           );
         },
-        Footer: footerMoney("bonus"),
+        // `bonus` sums TMT bonuses; USD bonuses come as `bonus_usd`.
+        Footer: () => {
+          const bonusUsd = toNumber(summary?.bonus_usd);
+          if (!bonusUsd) return <FooterValue value={formatMoney(summary?.bonus)} />;
+          return (
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+              <FooterValue value={formatMoney(summary?.bonus)} />
+              <FooterValue value={formatMoney(bonusUsd, { currency: BONUS_CURRENCY.USD })} />
+            </Box>
+          );
+        },
       },
       {
         id: "total_amount",

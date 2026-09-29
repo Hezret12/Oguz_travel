@@ -1353,6 +1353,7 @@
     "remaining": "Остаток",
     "percentOf": "{{sales}} × {{percent}}%",
     "sectionBonus": "Бонус",
+    "bonusSeparate": "Бонус в USD выдаётся отдельно и не входит в итог",
     "validation": {
       "monthRequired": "Выберите месяц",
       "employeeRequired": "Выберите сотрудника",

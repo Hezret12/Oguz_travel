@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import dayjs from "dayjs";
-import { isSalaryPaid, toNumber } from "./salaryUtils";
+import { BONUS_CURRENCY, getBonusCurrency, isSalaryPaid, toNumber } from "./salaryUtils";
 
 // Same look as the B2B / Turkish Airlines exports: title banner on rows 2-3,
 // table from D5 with a white bold header, zebra rows, medium outer frame and
@@ -9,6 +9,7 @@ import { isSalaryPaid, toNumber } from "./salaryUtils";
 const START_ROW = 5;
 const START_COL = 4;
 const MONEY_FORMAT = '#,##0.00;-#,##0.00;"-"';
+const USD_FORMAT = '"$"#,##0.00;-"$"#,##0.00;"-"';
 const ACCENT_RED = "FFDC2626";
 const BLACK = "FF000000";
 const GRID = "FFD9D9D9";
@@ -70,6 +71,10 @@ export const exportSalaryExcel = async (rows = [], { monthLabel, officeName, sel
   const columns = getColumns(t);
   const payableIdx = columns.findIndex((c) => c.key === "payable_amount");
   const statusIdx = columns.findIndex((c) => c.key === "paid_status");
+  const bonusIdx = columns.findIndex((c) => c.key === "bonus");
+  const isUsdBonus = (r) => getBonusCurrency(r) === BONUS_CURRENCY.USD;
+  const usdBonusTotal = rows.reduce((sum, r) => sum + (isUsdBonus(r) ? toNumber(r.bonus) : 0), 0);
+  const hasUsdBonus = rows.some(isUsdBonus);
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "OGUZTRAVEL";
@@ -191,7 +196,7 @@ export const exportSalaryExcel = async (rows = [], { monthLabel, officeName, sel
         top: { style: "thin", color: { argb: GRID } },
         bottom: { style: "thin", color: { argb: GRID } },
       });
-      if (col.money) cell.numFmt = MONEY_FORMAT;
+      if (col.money) cell.numFmt = idx === bonusIdx && isUsdBonus(r) ? USD_FORMAT : MONEY_FORMAT;
 
       if (idx === payableIdx) {
         cell.font = { name: "Calibri", size: 10, bold: true, color: { argb: ACCENT_RED } };
@@ -222,10 +227,16 @@ export const exportSalaryExcel = async (rows = [], { monthLabel, officeName, sel
 
     if (col.money && rows.length > 0) {
       const letter = getExcelColName(colNumber);
-      cell.value = {
-        formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
-        result: rows.reduce((sum, r) => sum + toNumber(r[col.key]), 0),
-      };
+      const sum = rows.reduce((acc, r) => acc + toNumber(r[col.key]), 0);
+      // A SUBTOTAL over the bonus column would add USD to TMT, so with USD
+      // bonuses present it holds the plain TMT sum and USD gets its own row.
+      cell.value =
+        idx === bonusIdx && hasUsdBonus
+          ? sum - usdBonusTotal
+          : {
+              formula: `SUBTOTAL(109,${letter}${firstDataRow}:${letter}${lastDataRow})`,
+              result: sum,
+            };
       cell.numFmt = MONEY_FORMAT;
       if (idx === payableIdx) {
         cell.font = { name: "Calibri", size: 10.5, bold: true, color: { argb: ACCENT_RED } };
@@ -235,6 +246,20 @@ export const exportSalaryExcel = async (rows = [], { monthLabel, officeName, sel
   const totalLabel = totalRow.getCell(START_COL + 1);
   totalLabel.value = `${t("salary.total")}: ${rows.length}`;
   totalLabel.alignment = { vertical: "middle", horizontal: "left" };
+
+  if (hasUsdBonus) {
+    const usdRow = sheet.getRow(totalRowIndex + 1);
+    usdRow.height = 20;
+    const usdLabel = usdRow.getCell(START_COL + 1);
+    usdLabel.value = `${t("salary.bonus")}, USD`;
+    usdLabel.font = { name: "Calibri", size: 10, bold: true };
+    usdLabel.alignment = { vertical: "middle", horizontal: "left" };
+    const usdCell = usdRow.getCell(START_COL + bonusIdx);
+    usdCell.value = usdBonusTotal;
+    usdCell.numFmt = USD_FORMAT;
+    usdCell.font = { name: "Calibri", size: 10, bold: true };
+    usdCell.alignment = { vertical: "middle", horizontal: "right" };
+  }
 
   columns.forEach((col, idx) => {
     sheet.getColumn(START_COL + idx).width = Math.min(Math.max(col.width, colMaxLens[idx] + 3), 48);

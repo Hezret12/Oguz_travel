@@ -9,6 +9,18 @@ export const toNumber = (value) => {
 
 export const BONUS_TYPE = { FIXED: "fixed", PERCENT: "percent" };
 
+// The salary itself is always TMT; only the bonus may be paid in USD.
+export const BONUS_CURRENCY = { TMT: "TMT", USD: "USD" };
+
+// CurrencyAmount options, TMT first so it is the default.
+export const BONUS_CURRENCIES = [
+  { code: BONUS_CURRENCY.TMT, symbol: "m" },
+  { code: BONUS_CURRENCY.USD, symbol: "$" },
+];
+
+export const getBonusCurrency = (source) =>
+  source?.bonus_currency === BONUS_CURRENCY.USD ? BONUS_CURRENCY.USD : BONUS_CURRENCY.TMT;
+
 // 1 000 sales at 10% → 100.
 export const calculatePercentBonus = (sales, percent) =>
   round2((toNumber(sales) * toNumber(percent)) / 100);
@@ -20,9 +32,11 @@ export const resolveBonus = (values = {}) =>
 
 // Mirrors SalaryService.normalize/calculate on the backend (the "Aýlyk" sheet):
 //   BONUS   = SATUW × % / 100, or a fixed amount
-//   JEMI    = OKLAD × IŞLÄN / IŞ GÜN + BONUS
+//   JEMI    = OKLAD × IŞLÄN / IŞ GÜN + BONUS (TMT bonus only)
 //   BERMELI = JEMI − KART − AWANS − Kofe KREDIT − KARZ
-// The server recomputes these on save; this is only for the live preview.
+// A USD bonus is paid separately: there is no exchange rate to fold it into
+// the TMT totals. The server recomputes these on save; this is only for the
+// live preview.
 export const calculateSalary = (values = {}) => {
   const baseSalary = toNumber(values.base_salary);
   const workDays = toNumber(values.work_days);
@@ -30,7 +44,9 @@ export const calculateSalary = (values = {}) => {
   const ratio = workDays > 0 ? workedDays / workDays : 1;
   const earned = round2(baseSalary * ratio);
   const bonus = resolveBonus(values);
-  const total = round2(earned + bonus);
+  const bonusCurrency = getBonusCurrency(values);
+  const bonusUsd = bonusCurrency === BONUS_CURRENCY.USD ? bonus : 0;
+  const total = round2(earned + bonus - bonusUsd);
   const deductions = round2(
     toNumber(values.card_amount) +
       toNumber(values.advance) +
@@ -44,6 +60,8 @@ export const calculateSalary = (values = {}) => {
     workedDays,
     earned,
     bonus,
+    bonusCurrency,
+    bonusUsd,
     total,
     deductions,
     payable,
@@ -84,11 +102,13 @@ const moneyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-// Zero renders as "-" like the Excel sheet so deductions stand out.
-export const formatMoney = (value, { dashZero = true } = {}) => {
+// Zero renders as "-" like the Excel sheet so deductions stand out. TMT, the
+// salary currency, stays unmarked; a USD amount gets a "$".
+export const formatMoney = (value, { dashZero = true, currency } = {}) => {
   const num = toNumber(value);
   if (dashZero && num === 0) return "-";
-  return moneyFormatter.format(num);
+  const text = moneyFormatter.format(num);
+  return currency === BONUS_CURRENCY.USD ? `$${text}` : text;
 };
 
 // Paid only once explicitly settled: "mark paid" and the month lock set
@@ -113,6 +133,7 @@ export const buildSalaryPayload = (values) => ({
         bonus: calculatePercentBonus(values.sales_amount, values.bonus_percent),
       }
     : { sales_amount: null, bonus_percent: null, bonus: toNumber(values.bonus) }),
+  bonus_currency: getBonusCurrency(values),
   paid_amount: toNumber(values.paid_amount),
   paid_date: values.paid_date ? dayjs(values.paid_date).format("YYYY-MM-DD") : null,
   note: values.note || "",
@@ -137,6 +158,7 @@ export const salaryToFormValues = (row) => ({
   loan: asInput(row?.loan),
   bonus: asInput(row?.bonus),
   bonus_type: isPercentRow(row) ? BONUS_TYPE.PERCENT : BONUS_TYPE.FIXED,
+  bonus_currency: getBonusCurrency(row),
   sales_amount: asInput(row?.sales_amount),
   bonus_percent: asInput(row?.bonus_percent),
   paid_amount: asInput(row?.paid_amount),

@@ -1339,6 +1339,7 @@
     "remaining": "Galan",
     "percentOf": "{{sales}} × {{percent}}%",
     "sectionBonus": "Bonus",
+    "bonusSeparate": "USD bonus aýratyn berilýär, Jemi-ä goşulmaýar",
     "validation": {
       "monthRequired": "Aý saýlanmaly",
       "employeeRequired": "Işgär saýlanmaly",
