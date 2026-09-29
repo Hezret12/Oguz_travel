@@ -237,7 +237,6 @@ const SalarySummaryBar = ({ control }) => {
     `= ${t("salary.total")}: ${money(calc.total)}`,
     `− ${t("salary.deductions")}: ${money(calc.deductions)}`,
     `= ${t("salary.payable")}: ${money(calc.payable)}`,
-    `− ${t("salary.paidAmount")}: ${money(values.paid_amount)} → ${t("salary.remaining")}: ${money(calc.remaining)}`,
     ...(isUsdBonus ? [`${bonusLine} — ${t("salary.bonusSeparate")}`] : []),
   ];
 
@@ -355,11 +354,10 @@ const SalaryFormFields = ({ control, initialEmployee, onEmployeeChange }) => {
         </Grid>
         <BonusFields control={control} />
 
-        <Grid size={{ xs: 6, sm: 4 }}>{moneyField("paid_amount", t("salary.paidAmount"))}</Grid>
-        <Grid size={{ xs: 6, sm: 4 }}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <CustomDatePicker name="paid_date" control={control} label={t("salary.paidDate")} />
         </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid size={{ xs: 12, sm: 8 }}>
           <CustomTextField name="note" control={control} label={t("salary.note")} size="small" />
         </Grid>
 
