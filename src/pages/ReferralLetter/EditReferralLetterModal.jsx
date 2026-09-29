@@ -30,6 +30,8 @@ const EditReferralLetterModal = ({ table, row }) => {
     apiFn: updateReferralLetterApi,
     key: "referralLetters",
     idKey: "guid",
+    // An edited letter may no longer match the active filters or search.
+    isPaginated: true,
     // The letter-stock report counts used ÝH numbers from these letters.
     invalidateQueries: ["stockLetters"],
     onSuccessUpdate: () => {

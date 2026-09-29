@@ -118,7 +118,7 @@ const Cafeteria = () => {
 
   const { mutate: deleteTransaction, isPending: isDeleting } = useDelete({
     deleteFn: deleteCafeteriaTransactionApi,
-    queryKey: ["cafeteriaTransactions", queryParams],
+    queryKey: "cafeteriaTransactions",
     idKey: "guid",
     isPaginated: true,
     invalidateQueries: [["cafeteria-summary"]],

@@ -75,6 +75,7 @@ const EditHotelModal = ({ table, row }) => {
   const { mutate: updateHotel } = useUpdate({
     apiFn: updateHotelApi,
     key: ["outbound", "hotel"],
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);

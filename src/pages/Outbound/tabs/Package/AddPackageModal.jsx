@@ -58,6 +58,7 @@ const AddPackageModal = ({ open = true, onClose, table }) => {
   const { mutate: createPackage } = useCreate({
     apiFn: addPackageApi,
     key: ["outbound", "package"],
+    isPaginated: true,
     onSuccess: () => {
       handleClose();
     },

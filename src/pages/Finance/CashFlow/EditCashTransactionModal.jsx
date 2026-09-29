@@ -40,10 +40,10 @@ const EditCashTransactionModal = ({ open, close, table, row }) => {
   const { mutate: updateTransaction, isPending } = useUpdate({
     apiFn: updateTotalCalculationApi,
     key: "totalCalculations",
-    idKey: "guid",
     // The row merge alone would leave the server-computed meta.totals (summary
     // cards) stale after an amount/type/currency change, so refetch the list.
-    invalidateQueries: ["totalCalculations"],
+    isPaginated: true,
+    idKey: "guid",
     onSuccessUpdate: handleClose,
   });
 

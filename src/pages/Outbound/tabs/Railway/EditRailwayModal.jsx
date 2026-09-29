@@ -78,6 +78,7 @@ const EditRailwayModal = ({ table, row }) => {
   const { mutate: updateRailway } = useUpdate({
     apiFn: updateRailwayApi,
     key: ["outbound", "railway"],
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);

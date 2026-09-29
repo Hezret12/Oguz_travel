@@ -63,6 +63,7 @@ const EditUserModal = ({ table, row }) => {
   const { mutate: updateUser, isPending: submitLoading } = useUpdate({
     apiFn: updateUserApi,
     key: "users",
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table?.setEditingRow(null);

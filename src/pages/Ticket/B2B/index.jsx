@@ -219,6 +219,7 @@ const B2B = () => {
   const { mutate: deleteB2BMutate, isPending: isDeleting } = useDelete({
     deleteFn: deleteB2BApi,
     queryKey: "b2b",
+    isPaginated: true,
     idKey: "guid",
   });
 

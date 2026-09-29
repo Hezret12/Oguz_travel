@@ -61,6 +61,7 @@ const EditB2BDialog = ({ table, row, open, close }) => {
   const { mutate: updateB2B, isPending: isSubmit } = useUpdate({
     apiFn: updateB2BApi,
     key: "b2b",
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       closeDialog();

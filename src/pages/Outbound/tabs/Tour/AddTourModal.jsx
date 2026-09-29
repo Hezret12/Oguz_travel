@@ -60,6 +60,7 @@ const AddTourModal = ({ open = true, onClose, table }) => {
   const { mutate: createTour } = useCreate({
     apiFn: addTourApi,
     key: ["outbound", "tour"],
+    isPaginated: true,
     onSuccess: () => {
       handleClose();
     },

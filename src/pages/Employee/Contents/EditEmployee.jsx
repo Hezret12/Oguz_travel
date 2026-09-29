@@ -27,8 +27,9 @@ const EditEmployee = ({ table, row }) => {
   const { mutate: updateEmployee, isPending: loading } = useUpdate({
     apiFn: updateEmployeeApi,
     key: "employees",
+    isPaginated: true,
     idKey: "guid",
-    invalidateQueries: ["employees", "employeeLoanDetails"],
+    invalidateQueries: ["employeeLoanDetails"],
     onSuccessUpdate: () => {
       table.setEditingRow(null);
     },

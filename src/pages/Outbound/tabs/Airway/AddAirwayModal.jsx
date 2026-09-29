@@ -62,6 +62,7 @@ const AddAirwayModal = ({ open = true, onClose, table }) => {
   const { mutate: createAirway } = useCreate({
     apiFn: addAirwayApi,
     key: ["outbound", "airway"],
+    isPaginated: true,
     onSuccess: () => {
       handleClose();
     },

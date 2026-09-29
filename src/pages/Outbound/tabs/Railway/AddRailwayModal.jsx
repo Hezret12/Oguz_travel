@@ -63,6 +63,7 @@ const AddRailwayModal = ({ open = true, onClose, table }) => {
   const { mutate: createRailway } = useCreate({
     apiFn: addRailwayApi,
     key: ["outbound", "railway"],
+    isPaginated: true,
     onSuccess: () => {
       handleClose();
     },

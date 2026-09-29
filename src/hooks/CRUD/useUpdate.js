@@ -10,6 +10,9 @@ export const useUpdate = ({
   isInfiniteQuery = false,
   // false for silent saves (e.g. inline cell edits); errors still toast.
   showSuccessMessage = true,
+  // Server-filtered/paginated lists: after the instant merge, refetch so a row
+  // that no longer matches the active filters or search leaves the page.
+  isPaginated = false,
 }) => {
   const queryClient = useQueryClient();
 
@@ -82,6 +85,10 @@ export const useUpdate = ({
           return old;
         },
       );
+
+      if (isPaginated) {
+        queryClient.invalidateQueries({ queryKey: finalKey, refetchType: "active" });
+      }
 
       invalidateQueries?.forEach((queryKey) => {
         queryClient.invalidateQueries({

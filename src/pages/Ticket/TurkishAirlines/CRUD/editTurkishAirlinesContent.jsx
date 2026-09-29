@@ -60,6 +60,7 @@ const EditTurkishAirlinesContent = ({ table, row }) => {
   const { mutate: updateTurkishAirlines, isPending: isSubmit } = useUpdate({
     apiFn: updateTurkishAirlinesApi,
     key: "turkish-airlines",
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       closeDialog();

@@ -77,6 +77,7 @@ const EditAirwayModal = ({ table, row }) => {
   const { mutate: updateAirway } = useUpdate({
     apiFn: updateAirwayApi,
     key: ["outbound", "airway"],
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);

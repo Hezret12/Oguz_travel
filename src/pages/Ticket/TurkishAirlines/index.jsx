@@ -240,6 +240,7 @@ const TurkishAirlines = () => {
     useDelete({
       deleteFn: deleteTurkishAirlinesApi,
       queryKey: "turkish-airlines",
+      isPaginated: true,
       idKey: "guid",
     });
 

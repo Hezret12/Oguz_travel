@@ -43,6 +43,7 @@ const EditVisaModal = ({ table, row }) => {
   const { mutate: updateVisa, isPending: isSubmit } = useUpdate({
     apiFn: updateVisaApi,
     key: "visaApplications",
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);

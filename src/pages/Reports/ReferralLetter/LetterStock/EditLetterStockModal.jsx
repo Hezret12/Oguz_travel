@@ -111,6 +111,7 @@ const EditLetterStockModal = ({ table, row }) => {
   const { mutate: updateReport, isPending } = useUpdate({
     apiFn: updateReportApi,
     key: "reports",
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table?.setEditingRow(null);

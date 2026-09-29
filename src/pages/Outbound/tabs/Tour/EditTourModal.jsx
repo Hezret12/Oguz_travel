@@ -75,6 +75,7 @@ const EditTourModal = ({ table, row }) => {
   const { mutate: updateTour } = useUpdate({
     apiFn: updateTourApi,
     key: ["outbound", "tour"],
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);

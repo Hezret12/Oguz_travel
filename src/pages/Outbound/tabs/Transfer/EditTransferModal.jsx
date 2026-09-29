@@ -77,6 +77,7 @@ const EditTransferModal = ({ table, row }) => {
   const { mutate: updateTransfer } = useUpdate({
     apiFn: updateTransferApi,
     key: ["outbound", "transfer"],
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);

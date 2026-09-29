@@ -27,6 +27,7 @@ const EditCafeteriaModal = ({ table, row }) => {
   const { mutate: updateTransaction, isPending } = useUpdate({
     apiFn: updateCafeteriaTransactionApi,
     key: "cafeteriaTransactions",
+    isPaginated: true,
     idKey: "guid",
     invalidateQueries: [["cafeteria-summary"]],
     onSuccessUpdate: () => {

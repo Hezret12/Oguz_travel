@@ -35,7 +35,6 @@ import DeleteDialog from "../../components/DeleteDialog";
 import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { deleteEmployee } from "../../api/queries/delete";
-import { actions } from "../../utils/helperConstant";
 
 const EmployeeFilterDrawer = () => {
   const {
@@ -153,7 +152,8 @@ const Employee = () => {
 
   const { mutate: deleteEmployeeMutate, isPending: isDeleting } = useDelete({
     deleteFn: deleteEmployee,
-    queryKey: ["employees", queryParams],
+    queryKey: "employees",
+    isPaginated: true,
     idKey: "guid",
     apiName: "guid",
   });

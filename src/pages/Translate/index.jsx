@@ -225,6 +225,7 @@ const TranslatePage = () => {
   const { mutate: deleteTranslation, isPending: isDeleting } = useDelete({
     deleteFn: deleteTranslationApi,
     queryKey: "translations",
+    isPaginated: true,
     idKey: "guid",
   });
 

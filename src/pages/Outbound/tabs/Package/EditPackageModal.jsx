@@ -73,6 +73,7 @@ const EditPackageModal = ({ table, row }) => {
   const { mutate: updatePackage } = useUpdate({
     apiFn: updatePackageApi,
     key: ["outbound", "package"],
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);

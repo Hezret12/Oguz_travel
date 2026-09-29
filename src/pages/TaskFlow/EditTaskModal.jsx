@@ -40,6 +40,7 @@ export default function EditTaskModal({ open, onClose, task }) {
   const updateMutation = useUpdate({
     apiFn: updateTaskApi,
     key: "tasks",
+    isPaginated: true,
     idKey: "guid",
     // The board card is patched (or moved, if the status changed) in place instead of
     // refetching every loaded board page.

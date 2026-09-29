@@ -62,6 +62,7 @@ const AddTransferModal = ({ open = true, onClose, table }) => {
   const { mutate: createTransfer } = useCreate({
     apiFn: addTransferApi,
     key: ["outbound", "transfer"],
+    isPaginated: true,
     onSuccess: () => {
       handleClose();
     },

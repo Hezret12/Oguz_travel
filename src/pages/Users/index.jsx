@@ -67,7 +67,7 @@ const Users = () => {
 
   const { mutate: deleteUserMutate, isPending: isDeleting } = useDelete({
     deleteFn: deleteUser,
-    queryKey: ["users", queryParams],
+    queryKey: "users",
     idKey: "guid",
     isPaginated: true,
   });

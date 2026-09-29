@@ -75,6 +75,7 @@ const EditReferralReportModal = ({ open, close, table, row, stock, occupied = []
   const { mutate: updateOtherLetter, isPending } = useUpdate({
     apiFn: updateOtherLetterApi,
     key: STOCK_LETTERS_KEY,
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       handleClose();

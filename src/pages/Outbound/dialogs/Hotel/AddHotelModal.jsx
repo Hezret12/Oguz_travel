@@ -62,6 +62,7 @@ const AddHotelModal = ({ open = true, onClose, table }) => {
   const { mutate: createHotel } = useCreate({
     apiFn: addHotelApi,
     key: ["outbound", "hotel"],
+    isPaginated: true,
     onSuccess: () => {
       handleClose();
     },

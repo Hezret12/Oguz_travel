@@ -2,6 +2,9 @@ import { createTheme } from "@mui/material/styles";
 
 export const themeConfig = createTheme({
   defaultColorScheme: 'light',
+  // Mirrors the active scheme onto <html data-mui-color-scheme="…"> so plain CSS
+  // (scrollbars, nprogress in index.css) can follow the theme.
+  colorSchemeSelector: 'data-mui-color-scheme',
   colorSchemes: {
     light: {
       palette: {

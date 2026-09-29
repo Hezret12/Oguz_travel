@@ -25,7 +25,7 @@ useCreate({ apiFn, key, onSuccess, invalidateQueries = [], isPaginated = false }
 
 ### `useUpdate` (`src/hooks/CRUD/useUpdate.js`)
 ```js
-useUpdate({ apiFn, key, idKey, onSuccessUpdate, invalidateQueries = [], isInfiniteQuery = false, showSuccessMessage = true })
+useUpdate({ apiFn, key, idKey, onSuccessUpdate, invalidateQueries = [], isInfiniteQuery = false, showSuccessMessage = true, isPaginated = false })
 ```
 | Param | Type | Required | Notes |
 |---|---|---|---|
@@ -36,6 +36,7 @@ useUpdate({ apiFn, key, idKey, onSuccessUpdate, invalidateQueries = [], isInfini
 | `invalidateQueries` | string[] | optional | Additional query keys to invalidate. |
 | `isInfiniteQuery` | boolean | optional | Set `true` for infinite scroll queries. |
 | `showSuccessMessage` | boolean | optional | `false` skips the success toast (e.g. inline cell saves). Errors always toast. |
+| `isPaginated` | boolean | optional | When `true`, also refetches the primary key after the merge, so a row that no longer matches the server-side filters/search/sort leaves the page. Use for server-filtered tables. |
 
 - **Cache behavior**: Automatically merges (`{ ...oldItem, ...updatedItem }`) matching items by `idKey` using `setQueriesData`. **Do NOT manually call `queryClient.setQueriesData` or `queryClient.invalidateQueries` in `onSuccessUpdate` unless you need to update a DIFFERENT query key.** The hook handles the primary key cache update internally.
 - **Success handler name**: `onSuccessUpdate` — NOT `onSuccess`.
@@ -283,7 +284,7 @@ Cell: ({ cell }) => formatChange(cell.getValue())
 ## 7. Cache Management Rules
 
 1. **useCreate**: Automatically prepends new item to cache. Only add `invalidateQueries` if you need to refresh a DIFFERENT query.
-2. **useUpdate**: Automatically merges updated fields into cache by `idKey`. Only add `invalidateQueries` if you need to refresh a DIFFERENT query. **Do NOT call `queryClient.invalidateQueries` inside `onSuccessUpdate` for the same key.**
+2. **useUpdate**: Automatically merges updated fields into cache by `idKey`. Only add `invalidateQueries` if you need to refresh a DIFFERENT query. **Do NOT call `queryClient.invalidateQueries` inside `onSuccessUpdate` for the same key** — for server-filtered/paginated tables pass `isPaginated: true` instead.
 3. **useDelete**: Automatically removes item from cache by `idKey`. For paginated queries, use `isPaginated: true` (invalidates instead of optimistic removal).
 
 ---

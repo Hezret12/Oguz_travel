@@ -18,7 +18,7 @@ import { updateClientApi } from "../../../api/queries/patch";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import CustomDatePicker from "../../../components/CustomDatePicker";
 
-const EditClient = ({ table, row, queryParams }) => {
+const EditClient = ({ table, row }) => {
   const { t } = useLocale();
   const { user } = useAuth();
   const isAdmin = Boolean(user?.role === "admin" || user?.user_is_admin || user?.isAdmin);
@@ -54,7 +54,8 @@ const EditClient = ({ table, row, queryParams }) => {
 
   const { mutate: updateClient, isPending } = useUpdate({
     apiFn: updateClientApi,
-    key: ["clients", queryParams],
+    key: "clients",
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       table.setEditingRow(null);

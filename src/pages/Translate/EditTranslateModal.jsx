@@ -101,6 +101,7 @@ const EditTranslateModal = ({ row, onClose }) => {
   const { mutate: updateTranslation, isPending: isUpdatingTranslation } = useUpdate({
     apiFn: updateTranslationApi,
     key: "translations",
+    isPaginated: true,
     idKey: "guid",
     onSuccessUpdate: () => {
       onClose();

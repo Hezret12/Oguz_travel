@@ -44,6 +44,7 @@ const EditSalaryModal = ({ table, row, open, close }) => {
   const { mutate: updateSalary, isPending } = useUpdate({
     apiFn: updateSalaryApi,
     key: "salaries",
+    isPaginated: true,
     idKey: "guid",
     // useUpdate wraps each entry as [entry], so pass plain keys.
     invalidateQueries: ["salarySummary", "employees", "employeeLoanDetails"],

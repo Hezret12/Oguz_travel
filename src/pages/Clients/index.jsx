@@ -114,6 +114,7 @@ const Clients = () => {
   const { mutate: deleteClientMutate, isPending: isDeleting } = useDelete({
     deleteFn: deleteClient,
     queryKey: "clients",
+    isPaginated: true,
     idKey: "guid",
   });
 
@@ -457,7 +458,6 @@ const Clients = () => {
         <EditClient
           table={table}
           row={table.getState().editingRow}
-          queryParams={queryParams}
         />
       )}
 

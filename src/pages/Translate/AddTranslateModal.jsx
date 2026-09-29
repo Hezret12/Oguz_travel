@@ -69,7 +69,6 @@ const AddTranslateModal = ({ open: isOpen, onClose }) => {
       apiFn: addTranslationApi,
       key: "translations",
       isPaginated: true,
-      invalidateQueries: ["translations"],
       onSuccess: () => {
         onClose();
       },
