@@ -1354,6 +1354,8 @@
     "percentOf": "{{sales}} × {{percent}}%",
     "sectionBonus": "Bonus",
     "bonusSeparate": "USD bonus is paid separately and is not included in the total",
+    "currencyToggleToUsd": "TMT (m) — Click to switch to USD ($)",
+    "currencyToggleToTmt": "USD ($) — Click to switch to TMT (m)",
     "validation": {
       "monthRequired": "Select a month",
       "employeeRequired": "Select an employee",
