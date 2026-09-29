@@ -1089,8 +1089,8 @@
         "expenses": "Çykdajylar",
         "netProfit": "Arassa peýda",
         "receivable": "Alynmaly",
-        "moneyOut": "Pul çykdy",
-        "moneyIn": "Pul girdi",
+        "moneyOut": "Özüne düşýän baha",
+        "moneyIn": "Satyş",
         "credit": "Kredit",
         "profit": "Peýda"
       },
@@ -1137,17 +1137,17 @@
         "operator": "Operator"
       },
       "cash": {
-        "title": "Girýän we çykýan pul",
-        "subtitle": "Hakyky tölegler we çykdajylar",
-        "inflow": "Girdi",
-        "outflow": "Çykdy",
-        "net": "Arassa akym",
-        "closing": "Ahyrky galyndy"
+        "title": "Satyş we özüne düşýän baha",
+        "subtitle": "Döwür boýunça satyş we onuň özüne düşýän bahasy",
+        "inflow": "Satyş",
+        "outflow": "Özüne düşýän baha",
+        "net": "Peýda",
+        "closing": "Jemlenen peýda"
       },
       "flow": {
-        "inTitle": "Pul nireden geldi",
+        "inTitle": "Hyzmatlar boýunça satyş",
         "inSubtitle": "Hyzmatlar boýunça alnan tölegler",
-        "outTitle": "Pul nirä gitdi",
+        "outTitle": "Hyzmatlar boýunça özüne düşýän baha",
         "outSubtitle": "Üpjün edijiler, çykdajylar we aýlyklar",
         "item": "Madda",
         "group": "Görnüşi",
@@ -1160,25 +1160,25 @@
           "exchange": "Walýuta çalşygy"
         },
         "other": "Beýlekiler",
-        "leftover": "Kassada galdy",
-        "drawdown": "Kassadan alyndy",
-        "cardTitle": "Pul nireden geldi we nirä gitdi",
-        "cardSubtitle": "Iň uly çeşmeler we çykdajylar · saýlanan walýutada"
+        "leftover": "Brutto peýda",
+        "drawdown": "Zyýan",
+        "cardTitle": "Hyzmatlar boýunça satyş we özüne düşýän baha",
+        "cardSubtitle": "Iň uly hyzmatlar · saýlanan walýutada"
       }
     },
     "offices": {
       "title": "Ofisleriň hasabaty",
       "officeCount": "{{count}} ofis",
       "office": "Ofis",
-      "profitHint": "Girdi − çykdy",
+      "profitHint": "Satyşdan peýda",
       "topOffice": "Iň girdejili ofis",
       "chartTitle": "Ofisleri deňeşdirmek",
-      "chartSubtitle": "Her ofisiň girdisi, çykdysy we peýdasy",
+      "chartSubtitle": "Her ofisiň satyşy, özüne düşýän bahasy we peýdasy",
       "tableTitle": "Ofisler boýunça jemi",
       "tableSubtitle": "Her ofis bir setir · USD we TMT aýratyn",
       "cardsTitle": "Ofisleriň netijesi",
-      "cardsSubtitle": "Her ofisiň girdisi, çykdysy we peýdasy",
-      "shareOfIncome": "Jemi girdideki paýy",
+      "cardsSubtitle": "Her ofisiň satyşy, özüne düşýän bahasy we peýdasy",
+      "shareOfIncome": "Jemi satyşdaky paýy",
       "cardsView": "Kartlar"
     },
     "cashBook": {

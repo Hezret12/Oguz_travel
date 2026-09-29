@@ -1103,8 +1103,8 @@
         "expenses": "Expenses",
         "netProfit": "Net profit",
         "receivable": "Receivable",
-        "moneyOut": "Money out",
-        "moneyIn": "Money in",
+        "moneyOut": "Cost of sales",
+        "moneyIn": "Sales",
         "credit": "Credit",
         "profit": "Profit"
       },
@@ -1151,17 +1151,17 @@
         "operator": "Operator"
       },
       "cash": {
-        "title": "Money in and out",
-        "subtitle": "Actual payments and spending",
-        "inflow": "Money in",
-        "outflow": "Money out",
-        "net": "Net flow",
-        "closing": "Closing balance"
+        "title": "Sales and cost",
+        "subtitle": "Sales and their cost over the period",
+        "inflow": "Sales",
+        "outflow": "Cost of sales",
+        "net": "Profit",
+        "closing": "Running profit"
       },
       "flow": {
-        "inTitle": "Where money came from",
+        "inTitle": "Sales by service",
         "inSubtitle": "Payments received by service",
-        "outTitle": "Where money went",
+        "outTitle": "Cost by service",
         "outSubtitle": "Suppliers, expenses and salaries",
         "item": "Item",
         "group": "Type",
@@ -1174,25 +1174,25 @@
           "exchange": "Currency exchange"
         },
         "other": "Other",
-        "leftover": "Left in the till",
-        "drawdown": "Drawn from the till",
-        "cardTitle": "Where the money came from and went",
-        "cardSubtitle": "Largest sources and expenses · selected currency"
+        "leftover": "Gross profit",
+        "drawdown": "Loss",
+        "cardTitle": "Sales and cost by service",
+        "cardSubtitle": "Largest services · selected currency"
       }
     },
     "offices": {
       "title": "Offices report",
       "officeCount": "Offices: {{count}}",
       "office": "Office",
-      "profitHint": "Money in − money out",
+      "profitHint": "Profit on sales",
       "topOffice": "Most profitable office",
       "chartTitle": "Office comparison",
-      "chartSubtitle": "Money in, money out and profit per office",
+      "chartSubtitle": "Sales, cost and profit per office",
       "tableTitle": "Totals by office",
       "tableSubtitle": "One row per office · USD and TMT kept separate",
       "cardsTitle": "Office results",
-      "cardsSubtitle": "Each office’s money in, money out and profit",
-      "shareOfIncome": "Share of total money in",
+      "cardsSubtitle": "Each office’s sales, cost and profit",
+      "shareOfIncome": "Share of total sales",
       "cardsView": "Cards"
     },
     "cashBook": {
