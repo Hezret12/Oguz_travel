@@ -401,7 +401,8 @@
     "department": "Bölüm",
     "position": "Wezipe",
     "translator": "Terjimeçi",
-    "category": "Kategoriýa"
+    "category": "Kategoriýa",
+    "referralCountry": "Ýollanma ýurtlary"
   },
   "turkish": {
     "addTicket": "Türk howa ýollary bilet goşmak",
@@ -1274,6 +1275,15 @@
       "nameRu": "Kategoriýa ady, Ru",
       "nameEn": "Kategoriýa ady, En",
       "deleteConfirm": "Bu kategoriýany pozmak isleýändigiňize ynanýarsyňyzmy?"
+    },
+    "referralCountry": {
+      "title": "Ýollanma ýurtlary",
+      "add": "Ýurt goşmak",
+      "edit": "Ýurdy üýtgetmek",
+      "nameTk": "Ýurduň ady, Tk",
+      "nameRu": "Ýurduň ady, Ru",
+      "nameEn": "Ýurduň ady, En",
+      "deleteConfirm": "Bu ýurdy pozmak isleýändigiňize ynanýarsyňyzmy?"
     },
     "translator": {
       "title": "Terjimeçiler",

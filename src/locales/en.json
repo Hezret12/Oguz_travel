@@ -401,7 +401,8 @@
     "department": "Department",
     "position": "Position",
     "translator": "Translator",
-    "category": "Category"
+    "category": "Category",
+    "referralCountry": "Referral countries"
   },
   "turkish": {
     "addTicket": "Add Turkish Airlines Ticket",
@@ -1288,6 +1289,15 @@
       "nameRu": "Category Name, Ru",
       "nameEn": "Category Name, En",
       "deleteConfirm": "Are you sure you want to delete this category?"
+    },
+    "referralCountry": {
+      "title": "Referral countries",
+      "add": "Add country",
+      "edit": "Edit country",
+      "nameTk": "Country name, Tk",
+      "nameRu": "Country name, Ru",
+      "nameEn": "Country name, En",
+      "deleteConfirm": "Are you sure you want to delete this country?"
     },
     "translator": {
       "title": "Translators",

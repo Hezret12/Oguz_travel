@@ -401,7 +401,8 @@
     "department": "Отдел",
     "position": "Должность",
     "translator": "Переводчик",
-    "category": "Категория"
+    "category": "Категория",
+    "referralCountry": "Страны направлений"
   },
   "turkish": {
     "addTicket": "Добавить билет Turkish Airlines",
@@ -1288,6 +1289,15 @@
       "nameRu": "Название категории, Ru",
       "nameEn": "Название категории, En",
       "deleteConfirm": "Вы уверены, что хотите удалить эту категорию?"
+    },
+    "referralCountry": {
+      "title": "Страны направлений",
+      "add": "Добавить страну",
+      "edit": "Редактировать страну",
+      "nameTk": "Название страны, Tk",
+      "nameRu": "Название страны, Ru",
+      "nameEn": "Название страны, En",
+      "deleteConfirm": "Вы уверены, что хотите удалить эту страну?"
     },
     "translator": {
       "title": "Переводчики",

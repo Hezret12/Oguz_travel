@@ -4,6 +4,8 @@ import {
   Chip,
   FormControl,
   IconButton,
+  MenuItem,
+  Select,
   Stack,
   Tooltip,
   Typography,
@@ -15,7 +17,9 @@ import FlightLandRoundedIcon from "@mui/icons-material/FlightLandRounded";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import dayjs from "dayjs";
+import { ChevronDown } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
+import { useReferralCountryOptions } from "../functions/useReferralCountryOptions";
 import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 
 const CompactDatePicker = ({ label, value, onChange, minDate, maxDate }) => (
@@ -283,12 +287,48 @@ const DateRangeCard = ({
   );
 };
 
+const FilterSelect = ({ label, name, value, options, isOpen, allText, onChange, onOpen, onClose }) => (
+  <FormControl fullWidth size="small">
+    <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}>
+      {label}
+    </Typography>
+    <Select
+      value={value ?? ""}
+      onChange={(e) => onChange(name, e.target.value)}
+      open={Boolean(isOpen)}
+      onOpen={() => onOpen?.(name)}
+      onClose={() => onClose?.(name)}
+      displayEmpty
+      sx={{
+        borderRadius: "8px",
+        "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+        "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
+      }}
+      MenuProps={{ slotProps: { paper: { sx: { borderRadius: "12px", mt: 0.5 } } } }}
+      IconComponent={(props) => <ChevronDown size={18} {...props} />}
+    >
+      <MenuItem value="">
+        <Typography sx={{ color: "text.secondary", fontSize: "0.875rem" }}>{allText}</Typography>
+      </MenuItem>
+      {options.map((opt) => (
+        <MenuItem key={opt.value} value={opt.value}>
+          {opt.label}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+);
+
 const ReferralLetterFilter = ({
   filters,
+  selectsOpen = {},
   onFilterChange,
+  onSelectOpen,
+  onSelectClose,
 }) => {
   const { t } = useLocale();
   const allText = t("all");
+  const countryOptions = useReferralCountryOptions();
 
   const handleDateChange = (name, val) => {
     onFilterChange(name, val);
@@ -309,6 +349,18 @@ const ReferralLetterFilter = ({
         label={t("columns.operator")}
         placeholder={allText}
         size="small"
+      />
+
+      <FilterSelect
+        label={t("columns.destinationCountry")}
+        name="refferal_country_guid"
+        value={filters?.refferal_country_guid}
+        options={countryOptions}
+        isOpen={selectsOpen.refferal_country_guid}
+        allText={allText}
+        onChange={onFilterChange}
+        onOpen={onSelectOpen}
+        onClose={onSelectClose}
       />
 
       {/* Departure Date Group (Gidiş senesi) */}
