@@ -91,7 +91,6 @@ const resolveDateText = (letters = [], options = {}) => {
   const rangeText = resolveRangeText(startD, endD);
   if (rangeText) return rangeText;
 
-  // No range picked ("all time"): name the years the letters fall in.
   const yearsSet = new Set();
   letters.forEach((row) => {
     const raw =
