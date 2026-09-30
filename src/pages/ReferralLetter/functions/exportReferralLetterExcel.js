@@ -21,8 +21,7 @@ const formatGender = (gender) => {
   return g;
 };
 
-// Ordinal suffix follows the vowel of the year's last spoken word
-// (alty, dokuz, on, otuz, kyrk, altmyş, togsan → -njy; the rest → -nji).
+
 const getTurkmenOrdinalSuffix = (year) => {
   const y = Number(year);
   const lastTwo = y % 100;
