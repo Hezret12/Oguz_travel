@@ -81,10 +81,19 @@ const mapCards = (raw) => ({
 
 export const EMPTY_CARDS = mapCards(null);
 
+// The running presets come filled with zeros up to the month / year end; the days and
+// months still to come are cut, so the lines don't fall to zero after today.
+const RUNNING_PRESETS = new Set(["this_month", "this_year"]);
+const isRunning = (params) => RUNNING_PRESETS.has(params?.period_preset);
+const notYet = (date, unit) => date.isAfter(dayjs(), unit);
+
 // Chart points in the request's currency; `balance` is the running profit since the start.
 // The series has no credit, so the receivable card shows no sparkline.
-const mapChart = (raw) => {
-  const rows = Array.isArray(raw) ? raw : [];
+const mapChart = (raw, params) => {
+  const all = Array.isArray(raw) ? raw : [];
+  const rows = isRunning(params)
+    ? all.filter((r) => !notYet(periodDate(r.period), isDayKey(r.period) ? "day" : "month"))
+    : all;
   const days = rows.map((r) => String(r.period)).filter(isDayKey);
   const sameMonth = days.length > 0 && days.every((p) => p.slice(0, 7) === days[0].slice(0, 7));
   return rows.map((r) => ({
@@ -141,9 +150,19 @@ const mapOffices = (raw) =>
 // A change percentage is null where the previous period has nothing to compare with.
 const changeOrNull = (percentage, hasPrevious) => (hasPrevious ? num(percentage) : null);
 
+// Chart labels here are preformatted: "MM.YYYY" per month, "DD.MM" per day. Only the
+// running presets are cut, where "DD.MM" is always in the current year.
+const labelIsAhead = (label) => {
+  const [first, second] = String(label).split(".");
+  return second?.length === 4
+    ? notYet(dayjs(`${second}-${first}-01`), "month")
+    : notYet(dayjs(`${dayjs().year()}-${second}-${first}`), "day");
+};
+
 // One service (or all): totals, change vs the previous period and the chart.
-const mapCategoryAnalytics = (raw) => {
-  const chart = (Array.isArray(raw?.chart) ? raw.chart : []).map((p) => ({
+const mapCategoryAnalytics = (raw, params) => {
+  const points = Array.isArray(raw?.chart) ? raw.chart : [];
+  const chart = (isRunning(params) ? points.filter((p) => !labelIsAhead(p.label)) : points).map((p) => ({
     label: p.label,
     sale: num(p.sale),
     profit: num(p.profit),
@@ -175,14 +194,17 @@ const useDashboardQuery = (name, apiFn, params, map) =>
   });
 
 export const useDashboardCards = (params) => useDashboardQuery("cards", getDashboardCardsApi, params, mapCards);
-export const useDashboardChart = (params) => useDashboardQuery("chart", getDashboardChartApi, params, mapChart);
+export const useDashboardChart = (params) =>
+  useDashboardQuery("chart", getDashboardChartApi, params, (raw) => mapChart(raw, params));
 export const useDashboardStatus = (params) => useDashboardQuery("status", getDashboardStatusApi, params, mapStatus);
 export const useDashboardOperators = (params) =>
   useDashboardQuery("operators", getDashboardOperatorsApi, params, (raw) => mapOperators(raw, params.currency));
 export const useDashboardCategories = (params) =>
   useDashboardQuery("categories", getDashboardCategoriesApi, params, (raw) => mapCategories(raw, params.currency));
 export const useDashboardCategoryAnalytics = (params) =>
-  useDashboardQuery("categoryAnalytics", getDashboardCategoryAnalyticsApi, params, mapCategoryAnalytics);
+  useDashboardQuery("categoryAnalytics", getDashboardCategoryAnalyticsApi, params, (raw) =>
+    mapCategoryAnalytics(raw, params),
+  );
 export const useDashboardOffices = (params) => useDashboardQuery("offices", getDashboardOfficesApi, params, mapOffices);
 
 /** Loading / fetching / error flags and a refetch for a group of dashboard queries. */

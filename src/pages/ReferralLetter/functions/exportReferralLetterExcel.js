@@ -43,15 +43,6 @@ const TURKMEN_MONTHS = [
 const yearOf = (d) => `${d.year()}${getTurkmenOrdinalSuffix(d.year())} ýylyň`;
 const monthOf = (d) => TURKMEN_MONTHS[d.month()];
 
-/**
- * Title period for the exported date range, e.g.
- *   whole year     → "2026-njy ýylyň DOWAMYNDA"
- *   whole month    → "2026-njy ýylyň sentýabr aýynyň DOWAMYNDA"
- *   whole months   → "2026-njy ýylyň ýanwar – mart aýlarynyň DOWAMYNDA"
- *   months (years) → "2025-nji ýylyň noýabr aýyndan 2026-njy ýylyň fewral aýyna çenli ARALYKDA"
- *   any other span → "01.09.2026 – 15.09.2026 ARALYGYNDA"
- * Returns null when there is no usable range.
- */
 const resolveRangeText = (startD, endD) => {
   const start = startD ? dayjs(startD) : null;
   const end = endD ? dayjs(endD) : null;
