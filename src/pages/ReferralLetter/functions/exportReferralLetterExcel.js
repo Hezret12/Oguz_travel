@@ -157,16 +157,12 @@ const compareBy = (...keys) => (a, b) => {
 
 const departureKey = (row) => String(row.departure_date || "").slice(0, 10);
 
-// Sheet 1 — by BGN departure (then ÝH №); sheet 2 — by ÝH № (then BGN departure).
 const SHEETS = [
   { name: "BGN Gidiş boýunça", compare: compareBy(bgnDepartureOf, yhSortKey, departureKey) },
   { name: "S-ÝH № boýunça", compare: compareBy(yhSortKey, bgnDepartureOf, departureKey) },
 ];
 
-/**
- * Two sheets of the same letters: one sorted by BGN departure, one by the ÝH
- * (travel document) number. Numbering (T/b) restarts at 1 on each sheet.
- */
+
 export const exportReferralLetterExcel = async (letters = [], options = {}) => {
   const fileName = options.fileName || "Ýollanma_Hatlary_Hasabaty";
   const header = {
