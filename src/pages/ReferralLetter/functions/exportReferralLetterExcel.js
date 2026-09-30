@@ -266,7 +266,7 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
             name: "Times New Roman",
             size: 11,
             bold: true,
-            color: { argb: "FFFF0000" }, // Red date as in user reference
+            color: { argb: "FFFF0000" },
           },
         },
         {
