@@ -142,7 +142,6 @@ const yhSortKey = (row) => {
 
 const collator = new Intl.Collator("tk", { sensitivity: "base", numeric: true });
 
-// Empty values last; ties keep a stable, meaningful order via the fallbacks.
 const compareBy = (...keys) => (a, b) => {
   for (const key of keys) {
     const x = key(a);
