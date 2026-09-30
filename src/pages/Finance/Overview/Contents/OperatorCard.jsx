@@ -11,10 +11,12 @@ import {
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 
-// Operator ranking by sales in the selected currency.
-const OperatorCard = ({ operators, currency }) => {
+// Operator ranking by sales in the selected currency. `scope` (e.g. the
+// selected service's name) is added to the subtitle when the list is narrowed.
+const OperatorCard = ({ operators, currency, scope }) => {
   const { t } = useLocale();
   const colors = useSeriesColors();
+  const subtitle = t("finance.analytics.operators.subtitle");
 
   const rows = operators
     .filter((o) => o[currency].revenue > 0)
@@ -24,7 +26,7 @@ const OperatorCard = ({ operators, currency }) => {
   return (
     <SectionCard
       title={t("finance.analytics.operators.title")}
-      subtitle={t("finance.analytics.operators.subtitle")}
+      subtitle={scope ? `${scope} · ${subtitle}` : subtitle}
     >
       {rows.length === 0 ? (
         <EmptyState>{t("finance.analytics.noData")}</EmptyState>

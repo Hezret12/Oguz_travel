@@ -71,7 +71,7 @@ const FinanceOffices = () => {
         >
           <OfficesSummary rows={data.rows} totals={data.totals} />
           <OfficesChart rows={data.rows} currency={currency} />
-          <OfficesTable rows={data.rows} totals={data.totals} />
+          <OfficesTable rows={data.rows} totals={data.totals} currency={currency} />
         </Box>
       )}
     </Box>

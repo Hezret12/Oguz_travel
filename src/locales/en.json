@@ -1410,6 +1410,8 @@
     "previousPeriod": "Previous period",
     "avgSale": "Average sale",
     "topOperators": "Top operators",
-    "openModuleNamed": "Open {{name}}"
+    "openModuleNamed": "Open {{name}}",
+    "allServices": "All services",
+    "refunds": "Refunds"
   }
 }

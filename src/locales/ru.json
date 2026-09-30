@@ -1410,6 +1410,8 @@
     "previousPeriod": "Прошлый период",
     "avgSale": "Средний чек",
     "topOperators": "Лучшие операторы",
-    "openModuleNamed": "Открыть «{{name}}»"
+    "openModuleNamed": "Открыть «{{name}}»",
+    "allServices": "Все услуги",
+    "refunds": "Возвраты"
   }
 }

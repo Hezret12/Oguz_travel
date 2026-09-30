@@ -16,7 +16,7 @@ import dayjs from "dayjs";
 import PageHeader from "../../components/PageHeader";
 import { useLocale } from "../../hooks/useLocale";
 import { useGet } from "../../hooks/CRUD/useGet";
-import { getAllOfficeApi } from "../../api/queries/getters";
+import { getAllCategoriesApi, getAllOfficeApi } from "../../api/queries/getters";
 import { KpiCard } from "../Finance/Overview/Contents/KpiGrid";
 import PeriodRangeFilter from "../Finance/Overview/Contents/PeriodRangeFilter";
 import CategoryCard from "../Finance/Overview/Contents/CategoryCard";
@@ -25,18 +25,21 @@ import { KPI_TONES } from "../Finance/Overview/functions/analyticsFormat";
 import { useAnalyticsPrefs } from "../Finance/Overview/functions/useAnalyticsPrefs";
 import {
   EMPTY_CARDS,
+  EMPTY_CATEGORY_ANALYTICS,
   EMPTY_PAYMENT,
   combineQueries,
   dashboardGranularity,
   toDashboardParams,
   useDashboardCards,
   useDashboardCategories,
+  useDashboardCategoryAnalytics,
   useDashboardChart,
   useDashboardOperators,
   useDashboardStatus,
 } from "../Finance/Overview/functions/dashboardData";
 import SalesTrendCard from "./Contents/SalesTrendCard";
 import PaymentStatusCard from "./Contents/PaymentStatusCard";
+import ServiceAnalyticsCard from "./Contents/ServiceAnalyticsCard";
 
 const STORAGE_KEY = "admin_dashboard_prefs";
 
@@ -48,8 +51,9 @@ const AdminDashboard = () => {
   const { t, selectedLang } = useLocale();
   const mode = useTheme().palette.mode === "dark" ? "dark" : "light";
 
-  const [prefs, updatePrefs] = useAnalyticsPrefs(STORAGE_KEY, { office: "" });
-  const { period, customRange, currency, office } = prefs;
+  // `service` is the category picked for the per-service view ("" = all).
+  const [prefs, updatePrefs] = useAnalyticsPrefs(STORAGE_KEY, { office: "", service: "" });
+  const { period, customRange, currency, office, service } = prefs;
 
   const rangeStart = customRange?.start;
   const rangeEnd = customRange?.end;
@@ -64,19 +68,34 @@ const AdminDashboard = () => {
     [period, rangeStart, rangeEnd, office, currency],
   );
 
+  // The per-service view and the operator ranking follow the picked service.
+  const serviceParams = useMemo(() => (service ? { ...params, category_guid: service } : params), [params, service]);
+
   const cardsQuery = useDashboardCards(params);
   const chartQuery = useDashboardChart(params);
   const statusQuery = useDashboardStatus(params);
   const categoriesQuery = useDashboardCategories(params);
-  const operatorsQuery = useDashboardOperators(params);
-  const { isLoading, isFetching, isError, refetch, updatedAt } = combineQueries([
-    cardsQuery,
-    chartQuery,
-    statusQuery,
-    categoriesQuery,
-    operatorsQuery,
-  ]);
+  const analyticsQuery = useDashboardCategoryAnalytics(serviceParams);
+  const operatorsQuery = useDashboardOperators(serviceParams);
+  const pageQueries = [cardsQuery, chartQuery, statusQuery, categoriesQuery];
+  const serviceQueries = [analyticsQuery, operatorsQuery];
+  const { isLoading, isError, refetch, updatedAt } = combineQueries([...pageQueries, ...serviceQueries]);
+  // Picking a service refetches only its two blocks, so only they dim.
+  const isFetching = combineQueries(pageQueries).isFetching;
+  const isServiceFetching = combineQueries(serviceQueries).isFetching;
   const hasData = Boolean(cardsQuery.data);
+
+  const { data: categoriesData } = useGet({ apiFn: getAllCategoriesApi, key: "categories" });
+  const serviceOptions = useMemo(
+    () =>
+      (Array.isArray(categoriesData) ? categoriesData : []).map((c) => ({
+        value: c.guid,
+        label: selectedLang(c.name) || c.name?.tk || "—",
+      })),
+    [categoriesData, selectedLang],
+  );
+  const serviceName = serviceOptions.find((s) => s.value === service)?.label;
+  const selectService = (next) => updatePrefs({ service: next });
 
   const { data: officesData } = useGet({ apiFn: getAllOfficeApi, key: "all-offices-filter" });
   const officeOptions = useMemo(
@@ -244,12 +263,34 @@ const AdminDashboard = () => {
             </Grid>
           </Grid>
 
+          <ServiceAnalyticsCard
+            services={serviceOptions}
+            selected={service}
+            onSelect={selectService}
+            analytics={analyticsQuery.data ?? EMPTY_CATEGORY_ANALYTICS}
+            currency={currency}
+            loading={isServiceFetching}
+          />
+
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, lg: 6 }} sx={{ display: "flex", flexDirection: "column" }}>
-              <CategoryCard categories={categoriesQuery.data ?? []} currency={currency} />
+              <CategoryCard
+                categories={categoriesQuery.data ?? []}
+                currency={currency}
+                selectedKey={service}
+                onSelect={selectService}
+              />
             </Grid>
-            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: "flex", flexDirection: "column" }}>
-              <OperatorCard operators={operatorsQuery.data ?? []} currency={currency} />
+            <Grid
+              size={{ xs: 12, lg: 6 }}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                opacity: isServiceFetching ? 0.6 : 1,
+                transition: "opacity .2s ease",
+              }}
+            >
+              <OperatorCard operators={operatorsQuery.data ?? []} currency={currency} scope={serviceName} />
             </Grid>
           </Grid>
         </Box>

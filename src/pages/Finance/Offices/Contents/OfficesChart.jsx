@@ -137,7 +137,9 @@ const OfficeCard = ({ office, currency, rank, total, colors }) => {
   const inflow = office.inflow[currency];
   const outflow = office.outflow[currency];
   const profit = office.profit[currency];
+  const change = office.profitChange?.[currency] ?? 0;
   const up = profit >= 0;
+  const grew = change >= 0;
   const margin = percentOf(profit, inflow);
   const costShare = inflow > 0 ? Math.min(100, (outflow / inflow) * 100) : 100;
   const money = (v) => formatAmount(v, currency);
@@ -195,24 +197,31 @@ const OfficeCard = ({ office, currency, rank, total, colors }) => {
           <Typography sx={{ fontSize: "1.35rem", fontWeight: 700, lineHeight: 1.2, color: up ? "text.primary" : "error.main" }}>
             {money(profit)}
           </Typography>
-          <Box
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 0.25,
-              px: 0.75,
-              py: 0.2,
-              borderRadius: "6px",
-              fontSize: "0.72rem",
-              fontWeight: 700,
-              color: up ? "success.main" : "error.main",
-              backgroundColor: (theme) => alpha(up ? theme.palette.success.main : theme.palette.error.main, 0.12),
-            }}
-          >
-            {up ? <ArrowUpRight size={12} strokeWidth={2.6} /> : <ArrowDownRight size={12} strokeWidth={2.6} />}
-            {formatPercent(margin, 1)}
-          </Box>
+          {/* Profit change vs the previous period (from the API) */}
+          <Tooltip title={t("finance.analytics.vsPrevious")} arrow>
+            <Box
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.25,
+                px: 0.75,
+                py: 0.2,
+                borderRadius: "6px",
+                fontSize: "0.72rem",
+                fontWeight: 700,
+                fontVariantNumeric: "tabular-nums",
+                color: grew ? "success.main" : "error.main",
+                backgroundColor: (theme) => alpha(grew ? theme.palette.success.main : theme.palette.error.main, 0.12),
+              }}
+            >
+              {grew ? <ArrowUpRight size={12} strokeWidth={2.6} /> : <ArrowDownRight size={12} strokeWidth={2.6} />}
+              {formatPercent(Math.abs(change), 1)}
+            </Box>
+          </Tooltip>
         </Box>
+        <Typography sx={{ mt: 0.5, fontSize: "0.72rem", color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>
+          {t("finance.analytics.margin", { value: formatPercent(margin, 1) })}
+        </Typography>
       </Box>
 
       {/* Where the office's money in went: out vs. kept */}

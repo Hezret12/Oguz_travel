@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import {
   getDashboardCardsApi,
   getDashboardCategoriesApi,
+  getDashboardCategoryAnalyticsApi,
   getDashboardChartApi,
   getDashboardOfficesApi,
   getDashboardOperatorsApi,
@@ -81,6 +82,7 @@ const mapCards = (raw) => ({
 export const EMPTY_CARDS = mapCards(null);
 
 // Chart points in the request's currency; `balance` is the running profit since the start.
+// The series has no credit, so the receivable card shows no sparkline.
 const mapChart = (raw) => {
   const rows = Array.isArray(raw) ? raw : [];
   const days = rows.map((r) => String(r.period)).filter(isDayKey);
@@ -92,7 +94,6 @@ const mapChart = (raw) => {
     count: num(r.sales_count),
     revenue: num(r.sale_price),
     cost: num(r.net_price),
-    receivable: num(r.credit_price),
     profit: num(r.profit),
     balance: num(r.last_profit),
   }));
@@ -126,25 +127,43 @@ const mapCategories = (raw, currency) =>
     [currency]: { revenue: num(c.sale_price), cost: num(c.net_price), profit: num(c.profit) },
   }));
 
-const pairOf = (m) => ({ USD: num(m?.usd), TMT: num(m?.tmt) });
-
-// Offices report rows: sales as money in, cost of sales as money out.
-const mapOffices = (raw) => ({
-  rows: (Array.isArray(raw?.offices) ? raw.offices : []).map((o) => ({
+// One office row in one currency (the endpoint answers per currency).
+const mapOffices = (raw) =>
+  (Array.isArray(raw) ? raw : []).map((o) => ({
     guid: o.office_guid,
     name: toI18nName(o.name),
-    inflow: pairOf(o.sale_price),
-    outflow: pairOf(o.net_price),
-    credit: pairOf(o.credit_price),
-    profit: pairOf(o.profit),
-  })),
-  totals: {
-    inflow: pairOf(raw?.jemi?.sale_price),
-    outflow: pairOf(raw?.jemi?.net_price),
-    credit: pairOf(raw?.jemi?.credit_price),
-    profit: pairOf(raw?.jemi?.profit),
-  },
-});
+    sale: num(o.sale_price),
+    net: num(o.net_price),
+    profit: num(o.profit),
+    profitChange: num(o.profit_change_percentage),
+  }));
+
+// A change percentage is null where the previous period has nothing to compare with.
+const changeOrNull = (percentage, hasPrevious) => (hasPrevious ? num(percentage) : null);
+
+// One service (or all): totals, change vs the previous period and the chart.
+const mapCategoryAnalytics = (raw) => {
+  const chart = (Array.isArray(raw?.chart) ? raw.chart : []).map((p) => ({
+    label: p.label,
+    sale: num(p.sale),
+    profit: num(p.profit),
+    prevSale: num(p.prev_sale),
+  }));
+  // The API reports +100% when the previous period is empty; show no change then.
+  const hasPrevious = chart.some((p) => p.prevSale !== 0);
+  return {
+    sale: num(raw?.total_sale),
+    profit: num(raw?.total_profit),
+    credit: num(raw?.total_credit),
+    count: num(raw?.total_count),
+    refunds: num(raw?.total_refund_count),
+    saleChange: changeOrNull(raw?.comparison?.sale_percentage, hasPrevious),
+    profitChange: changeOrNull(raw?.comparison?.profit_percentage, hasPrevious),
+    chart,
+  };
+};
+
+export const EMPTY_CATEGORY_ANALYTICS = mapCategoryAnalytics(null);
 
 // The previous result stays on screen while the next one loads.
 const useDashboardQuery = (name, apiFn, params, map) =>
@@ -162,6 +181,8 @@ export const useDashboardOperators = (params) =>
   useDashboardQuery("operators", getDashboardOperatorsApi, params, (raw) => mapOperators(raw, params.currency));
 export const useDashboardCategories = (params) =>
   useDashboardQuery("categories", getDashboardCategoriesApi, params, (raw) => mapCategories(raw, params.currency));
+export const useDashboardCategoryAnalytics = (params) =>
+  useDashboardQuery("categoryAnalytics", getDashboardCategoryAnalyticsApi, params, mapCategoryAnalytics);
 export const useDashboardOffices = (params) => useDashboardQuery("offices", getDashboardOfficesApi, params, mapOffices);
 
 /** Loading / fetching / error flags and a refetch for a group of dashboard queries. */

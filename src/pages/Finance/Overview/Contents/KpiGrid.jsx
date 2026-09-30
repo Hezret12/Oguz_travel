@@ -119,6 +119,7 @@ export const KpiCard = ({
   const change = changePercent(value, previous);
   const diff = value - previous;
   const gradientId = `kpi-spark-${id}`;
+  const hasSeries = Array.isArray(points) && points.some((p) => p != null);
 
   return (
     <Box
@@ -210,22 +211,27 @@ export const KpiCard = ({
         </Box>
       </Tooltip>
 
-      <Box sx={{ mt: 1.5, mx: -0.5 }}>
-        <ChartGradients gradients={[{ id: gradientId, color, opacity: 0.2 }]} />
-        <SparkLineChart
-          data={points}
-          height={56}
-          area
-          curve="linear"
-          color={color}
-          showTooltip
-          showHighlight
-          margin={{ top: 4, bottom: 2, left: 4, right: 4 }}
-          xAxis={{ scaleType: "point", data: labels }}
-          valueFormatter={(v) => fmt(v)}
-          slotProps={tooltipSlotProps}
-          sx={chartSx({ "*": gradientId })}
-        />
+      {/* Figures the API has no series for keep the space, so the cards line up. */}
+      <Box sx={{ mt: 1.5, mx: -0.5, height: 56 }}>
+        {hasSeries && (
+          <>
+            <ChartGradients gradients={[{ id: gradientId, color, opacity: 0.2 }]} />
+            <SparkLineChart
+              data={points}
+              height={56}
+              area
+              curve="linear"
+              color={color}
+              showTooltip
+              showHighlight
+              margin={{ top: 4, bottom: 2, left: 4, right: 4 }}
+              xAxis={{ scaleType: "point", data: labels }}
+              valueFormatter={(v) => fmt(v)}
+              slotProps={tooltipSlotProps}
+              sx={chartSx({ "*": gradientId })}
+            />
+          </>
+        )}
       </Box>
     </Box>
   );

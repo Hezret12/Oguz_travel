@@ -1396,6 +1396,8 @@
     "previousPeriod": "Öňki döwür",
     "avgSale": "Ortaça satyş",
     "topOperators": "Iň köp satan operatorlar",
-    "openModuleNamed": "{{name}} bölümini aç"
+    "openModuleNamed": "{{name}} bölümini aç",
+    "allServices": "Ähli hyzmatlar",
+    "refunds": "Yzyna gaýtarylan"
   }
 }

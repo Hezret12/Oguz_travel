@@ -20,7 +20,8 @@ import {
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 
 // Sales, cost, profit and margin per ledger category, in one currency.
-const CategoryCard = ({ categories, currency }) => {
+// With `onSelect`, a table row picks that category (click again to clear).
+const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
   const { t, selectedLang } = useLocale();
   const colors = useSeriesColors();
   const [view, setView] = useState("table");
@@ -124,7 +125,13 @@ const CategoryCard = ({ categories, currency }) => {
                 const m = c[currency];
                 const share = percentOf(m.revenue, total.revenue);
                 return (
-                  <TableRow key={c.key} hover>
+                  <TableRow
+                    key={c.key}
+                    hover
+                    selected={Boolean(onSelect) && c.key === selectedKey}
+                    onClick={onSelect ? () => onSelect(c.key === selectedKey ? "" : c.key) : undefined}
+                    sx={onSelect ? { cursor: "pointer" } : undefined}
+                  >
                     <TableCell sx={{ minWidth: 150 }}>
                       <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, mb: 0.5 }}>
                         <Typography sx={{ fontSize: "0.85rem", fontWeight: 600 }} noWrap>

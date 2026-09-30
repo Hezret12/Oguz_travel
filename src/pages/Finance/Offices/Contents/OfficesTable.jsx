@@ -30,10 +30,11 @@ const groupStart = { borderLeft: "1px solid", borderLeftColor: "divider", pl: 2 
 const sortValue = (row, by) => (by === "name" ? row.name : row[by.group][by.currency]);
 
 // One total per office: money in, money out and profit, in USD and TMT.
-const OfficesTable = ({ rows, totals }) => {
+// `currency` is the page's main one: the default sort and the share bar use it.
+const OfficesTable = ({ rows, totals, currency: mainCurrency }) => {
   const { t } = useLocale();
   const colors = useSeriesColors();
-  const [sort, setSort] = useState({ by: { group: "inflow", currency: "USD" }, dir: "desc" });
+  const [sort, setSort] = useState({ by: { group: "inflow", currency: mainCurrency }, dir: "desc" });
 
   const groupLabel = {
     inflow: t("finance.analytics.cash.inflow"),
@@ -131,7 +132,7 @@ const OfficesTable = ({ rows, totals }) => {
             </TableHead>
             <TableBody>
               {sorted.map((row) => {
-                const share = percentOf(row.inflow.USD, totals.inflow.USD);
+                const share = percentOf(row.inflow[mainCurrency], totals.inflow[mainCurrency]);
                 return (
                   <TableRow key={row.guid} hover>
                     <TableCell sx={{ minWidth: 170 }}>
@@ -143,7 +144,7 @@ const OfficesTable = ({ rows, totals }) => {
                           {formatPercent(share, 0)}
                         </Typography>
                       </Box>
-                      {/* Share of all offices' USD money in. */}
+                      {/* Share of all offices' money in, in the main currency. */}
                       <ShareBar value={share} color={colors.inflow} />
                     </TableCell>
                     {GROUPS.flatMap((group) =>
