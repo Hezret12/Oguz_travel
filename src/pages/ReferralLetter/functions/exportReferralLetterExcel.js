@@ -201,8 +201,7 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
   worksheet.getColumn(2).width = 4;
   worksheet.getColumn(3).width = 4;
 
-  // Same columns, order and header texts as the paper report
-  // ("Çykyş syýahat hasabat"), plus the contract date at the end.
+
   const columnsConfig = [
     { header: "T/b", key: "index_number", width: 8, align: "center" },
     { header: "Syýahatçynyň F.A.A.a.", key: "client_name", width: 44, align: "left" },
