@@ -39,7 +39,6 @@ const TURKMEN_MONTHS = [
   "iýul", "awgust", "sentýabr", "oktýabr", "noýabr", "dekabr",
 ];
 
-// "2026-njy ýylyň"
 const yearOf = (d) => `${d.year()}${getTurkmenOrdinalSuffix(d.year())} ýylyň`;
 const monthOf = (d) => TURKMEN_MONTHS[d.month()];
 
