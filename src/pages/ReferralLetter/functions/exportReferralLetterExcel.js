@@ -134,8 +134,7 @@ const resolveDateText = (letters = [], options = {}) => {
 
 const bgnDepartureOf = (row) => String(row.bgn_departure || row.tranzit || "").trim();
 
-// Printed 7-digit form; only a plain 7-digit serial sorts by number, anything
-// else (empty, malformed) goes after them.
+
 const yhSortKey = (row) => {
   const yh = formatYhNumber(row.travel_document_number);
   return /^[0-9]{7}$/.test(yh) ? yh : null;
