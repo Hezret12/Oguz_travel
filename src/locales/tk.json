@@ -393,6 +393,7 @@
     "cashFlow": "Pul Akymy",
     "financeOverview": "Maliýe Hasabaty",
     "financeOffices": "Ofisleriň hasabaty",
+    "officeCash": "Ofis kassalary",
     "salary": "Aýlyk",
     "taskFlow": "Ýumuşlar",
     "general": "Umumy",
@@ -1181,6 +1182,17 @@
       "shareOfIncome": "Jemi satyşdaky paýy",
       "cardsView": "Kartlar"
     },
+    "officeCash": {
+      "title": "Ofis kassalary",
+      "allOffices": "Ähli ofisler",
+      "officeCount": "{{count}} ofis",
+      "office": "Ofis",
+      "balance": "Galyndy",
+      "noTransactions": "Heniz amal ýok",
+      "lastTransaction": "Soňky amal: {{date}}",
+      "addForOffice": "Amal goşmak",
+      "balanceHint": "Galyndy = girdeji − çykdajy, diňe ofisiň kassa amallary boýunça"
+    },
     "cashBook": {
       "date": "Sene",
       "dateFrom": "Senesinden",
@@ -1386,7 +1398,6 @@
     "paymentSubtitle": "Döwürdäki satyşlar töleg boýunça",
     "noStatus": "Ýagdaý ýok",
     "salesN": "{{count}} satyş",
-    "allOffices": "Ähli ofisler",
     "updatedAt": "Täzelendi {{time}}",
     "refresh": "Täzele",
     "loadError": "Maglumatlary ýükläp bolmady. Täzeläp görüň.",

@@ -14,6 +14,7 @@ import taskFiltersReducer from './slices/filters/taskFilterSlice';
 import cafeteriaFiltersReducer from './slices/filters/cafeteriaFilterSlice';
 import financeLotFiltersReducer from './slices/filters/financeLotFilterSlice';
 import cashFlowFiltersReducer from './slices/filters/cashFlowFilterSlice';
+import officeCashFiltersReducer from './slices/filters/officeCashFilterSlice';
 import salaryFiltersReducer from './slices/filters/salaryFilterSlice';
 import letterStockFiltersReducer from './slices/filters/letterStockFilterSlice';
 import notificationsReducer from './slices/notificationSlice';
@@ -37,6 +38,7 @@ const store = configureStore({
     cafeteriaFilters: cafeteriaFiltersReducer,
     financeLotFilters: financeLotFiltersReducer,
     cashFlowFilters:   cashFlowFiltersReducer,
+    officeCashFilters: officeCashFiltersReducer,
     salaryFilters:     salaryFiltersReducer,
     letterStockFilters: letterStockFiltersReducer,
     // paymentFilters: paymentFiltersReducer,

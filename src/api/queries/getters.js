@@ -251,6 +251,11 @@ export const getAllTotalCalculationsApi = async (params = {}) => {
   return await api.getPrivate('/total-calculations/get-all-total-calculations', params);
 };
 
+// Every office with its cash balance per currency (Finance → Office cash).
+export const getOfficeBalancesApi = async (params = {}) => {
+  return await api.getPrivate('/total-calculations/get-office-balances', params);
+};
+
 export const getAllCategoriesApi = async (params = {}) => {
   return await api.getPrivate('/category/get-all-category', params);
 };

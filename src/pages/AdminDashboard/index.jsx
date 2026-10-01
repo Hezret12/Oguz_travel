@@ -4,9 +4,7 @@ import {
   Box,
   Grid,
   IconButton,
-  MenuItem,
   Skeleton,
-  TextField,
   Tooltip,
   Typography,
   useTheme,
@@ -16,7 +14,7 @@ import dayjs from "dayjs";
 import PageHeader from "../../components/PageHeader";
 import { useLocale } from "../../hooks/useLocale";
 import { useGet } from "../../hooks/CRUD/useGet";
-import { getAllCategoriesApi, getAllOfficeApi } from "../../api/queries/getters";
+import { getAllCategoriesApi } from "../../api/queries/getters";
 import { KpiCard } from "../Finance/Overview/Contents/KpiGrid";
 import PeriodRangeFilter from "../Finance/Overview/Contents/PeriodRangeFilter";
 import CategoryCard from "../Finance/Overview/Contents/CategoryCard";
@@ -46,14 +44,14 @@ const STORAGE_KEY = "admin_dashboard_prefs";
 const countFormat = (v) => Math.round(Number(v) || 0).toLocaleString("en-US");
 
 // Sales across every module (B2B, THY, outbound, visa, translation, referral
-// letters, cafe) for the selected period, office and currency.
+// letters, cafe) and every office, for the selected period and currency.
 const AdminDashboard = () => {
   const { t, selectedLang } = useLocale();
   const mode = useTheme().palette.mode === "dark" ? "dark" : "light";
 
   // `service` is the category picked for the per-service view ("" = all).
-  const [prefs, updatePrefs] = useAnalyticsPrefs(STORAGE_KEY, { office: "", service: "" });
-  const { period, customRange, currency, office, service } = prefs;
+  const [prefs, updatePrefs] = useAnalyticsPrefs(STORAGE_KEY, { service: "" });
+  const { period, customRange, currency, service } = prefs;
 
   const rangeStart = customRange?.start;
   const rangeEnd = customRange?.end;
@@ -62,10 +60,9 @@ const AdminDashboard = () => {
       toDashboardParams({
         period,
         customRange: rangeStart && rangeEnd ? { start: rangeStart, end: rangeEnd } : null,
-        officeGuid: office,
         currency,
       }),
-    [period, rangeStart, rangeEnd, office, currency],
+    [period, rangeStart, rangeEnd, currency],
   );
 
   // The per-service view and the operator ranking follow the picked service.
@@ -96,16 +93,6 @@ const AdminDashboard = () => {
   );
   const serviceName = serviceOptions.find((s) => s.value === service)?.label;
   const selectService = (next) => updatePrefs({ service: next });
-
-  const { data: officesData } = useGet({ apiFn: getAllOfficeApi, key: "all-offices-filter" });
-  const officeOptions = useMemo(
-    () =>
-      (Array.isArray(officesData) ? officesData : []).map((o) => ({
-        value: o.guid,
-        label: selectedLang(o.shortName) || selectedLang(o.fullName) || "—",
-      })),
-    [officesData, selectedLang],
-  );
 
   const otherCurrency = currency === "USD" ? "TMT" : "USD";
   // The cards carry both currencies; the chart and lists come in `currency`.
@@ -168,22 +155,6 @@ const AdminDashboard = () => {
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
           <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />
-
-          <TextField
-            select
-            size="small"
-            value={office}
-            onChange={(e) => updatePrefs({ office: e.target.value })}
-            sx={{ minWidth: 170, "& .MuiOutlinedInput-root": { height: 38, borderRadius: "10px", fontSize: "0.85rem" } }}
-            slotProps={{ select: { displayEmpty: true } }}
-          >
-            <MenuItem value="">{t("dashboard.allOffices")}</MenuItem>
-            {officeOptions.map((o) => (
-              <MenuItem key={o.value} value={o.value}>
-                {o.label}
-              </MenuItem>
-            ))}
-          </TextField>
 
           <Tooltip title={t("dashboard.refresh")} arrow>
             <span>

@@ -393,6 +393,7 @@
     "cashFlow": "Cash Flow",
     "financeOverview": "Financial Report",
     "financeOffices": "Offices report",
+    "officeCash": "Office cash",
     "salary": "Salary",
     "taskFlow": "Tasks",
     "general": "General",
@@ -1195,6 +1196,17 @@
       "shareOfIncome": "Share of total sales",
       "cardsView": "Cards"
     },
+    "officeCash": {
+      "title": "Office cash",
+      "allOffices": "All offices",
+      "officeCount": "Offices: {{count}}",
+      "office": "Office",
+      "balance": "Balance",
+      "noTransactions": "No transactions yet",
+      "lastTransaction": "Last transaction: {{date}}",
+      "addForOffice": "Add transaction",
+      "balanceHint": "Balance = income − expense, from the office's cash transactions only"
+    },
     "cashBook": {
       "date": "Date",
       "dateFrom": "From date",
@@ -1400,7 +1412,6 @@
     "paymentSubtitle": "Sales in the period by payment",
     "noStatus": "No status",
     "salesN": "{{count}} sales",
-    "allOffices": "All offices",
     "updatedAt": "Updated {{time}}",
     "refresh": "Refresh",
     "loadError": "Couldn’t load the data. Try refreshing.",

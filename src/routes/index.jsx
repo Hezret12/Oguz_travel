@@ -54,6 +54,7 @@ const CafeteriaPage = lazyRetry(() => import('../pages/Cafeteria'));
 const FinanceCashFlowPage = lazyRetry(() => import('../pages/Finance/CashFlow'));
 const FinanceOverviewPage = lazyRetry(() => import('../pages/Finance/Overview'));
 const FinanceOfficesPage = lazyRetry(() => import('../pages/Finance/Offices'));
+const FinanceOfficeCashPage = lazyRetry(() => import('../pages/Finance/OfficeCash'));
 const FinanceSalaryPage = lazyRetry(() => import('../pages/Finance/Salary'));
 const ProfessionalTranslationPage = lazyRetry(() => import('../pages/ProfessionalTranslation'));
 const OfficePage = lazyRetry(() => import('../pages/ProfessionalTranslation/Office'));
@@ -131,6 +132,7 @@ const Cafeteria = Loadable(CafeteriaPage);
 const FinanceCashFlow = Loadable(FinanceCashFlowPage);
 const FinanceOverview = Loadable(FinanceOverviewPage);
 const FinanceOffices = Loadable(FinanceOfficesPage);
+const FinanceOfficeCash = Loadable(FinanceOfficeCashPage);
 const FinanceSalary = Loadable(FinanceSalaryPage);
 const ProfessionalTranslation = Loadable(ProfessionalTranslationPage);
 const Office = Loadable(OfficePage);
@@ -197,6 +199,7 @@ const router = createBrowserRouter([
               { path: 'finance/cash-flow', element: <FinanceCashFlow /> },
               { path: 'finance/overview', element: <FinanceOverview /> },
               { path: 'finance/offices', element: <FinanceOffices /> },
+              { path: 'finance/office-cash', element: <FinanceOfficeCash /> },
               { path: 'finance/salary', element: <FinanceSalary /> },
               {
                 path: 'professional-translation',

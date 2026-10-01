@@ -39,7 +39,7 @@ const menuPaperProps = {
   },
 };
 
-const FilterSelect = ({
+export const FilterSelect = ({
   label,
   name,
   value,
@@ -101,7 +101,7 @@ const FilterSelect = ({
   </FormControl>
 );
 
-const FilterDate = ({ label, name, value, onChange }) => (
+export const FilterDate = ({ label, name, value, onChange }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"

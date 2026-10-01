@@ -393,6 +393,7 @@
     "cashFlow": "Движение денег",
     "financeOverview": "Финансовый отчет",
     "financeOffices": "Отчёт по офисам",
+    "officeCash": "Кассы офисов",
     "salary": "Зарплата",
     "taskFlow": "Задачи",
     "general": "Общие",
@@ -1195,6 +1196,17 @@
       "shareOfIncome": "Доля в общих продажах",
       "cardsView": "Карточки"
     },
+    "officeCash": {
+      "title": "Кассы офисов",
+      "allOffices": "Все офисы",
+      "officeCount": "Офисов: {{count}}",
+      "office": "Офис",
+      "balance": "Остаток",
+      "noTransactions": "Операций пока нет",
+      "lastTransaction": "Последняя операция: {{date}}",
+      "addForOffice": "Добавить операцию",
+      "balanceHint": "Остаток = доход − расход, только по кассовым операциям офиса"
+    },
     "cashBook": {
       "date": "Дата",
       "dateFrom": "С даты",
@@ -1400,7 +1412,6 @@
     "paymentSubtitle": "Продажи за период по оплате",
     "noStatus": "Без статуса",
     "salesN": "{{count}} продаж",
-    "allOffices": "Все офисы",
     "updatedAt": "Обновлено {{time}}",
     "refresh": "Обновить",
     "loadError": "Не удалось загрузить данные. Попробуйте обновить.",

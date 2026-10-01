@@ -29,6 +29,7 @@ import {
   MapPinHouse,
   Tags,
   Globe,
+  Landmark,
 } from "lucide-react";
 import TurkishAirlinesIcon from "../assets/icons/turkishAirlines.svg";
 import { PATHS } from "../routes/paths";
@@ -75,6 +76,12 @@ export const useSidebarItems = () => {
             text: t("sidebar.financeOffices"),
             path: PATHS.FINANCE.OFFICES,
             icon: createElement(ChartNoAxesCombined, { size: 18, strokeWidth: 2.2 }),
+          },
+          {
+            id: "finance-office-cash",
+            text: t("sidebar.officeCash"),
+            path: PATHS.FINANCE.OFFICE_CASH,
+            icon: createElement(Landmark, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "finance-salary",

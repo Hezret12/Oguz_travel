@@ -595,6 +595,21 @@ export const useValidShema = () => {
     company: yup.string().nullable().max(255),
   });
 
+  // Finance → Office cash: one office, one currency, a required description.
+  const officeTransaction = yup.object({
+    office_guid: yup.string().required(t("validation.required")),
+    type: yup.string().oneOf(["INCOME", "EXPENSE"]).required(t("validation.required")),
+    amount: yup
+      .number()
+      .transform((value, original) => (original === "" ? undefined : value))
+      .typeError(t("validation.invalidNumber"))
+      .moreThan(0, t("validation.invalidNumber"))
+      .required(t("validation.required")),
+    currency: yup.string().required(t("validation.required")),
+    datetime: yup.string().nullable().required(t("validation.dateRequired")),
+    description: yup.string().trim().required(t("validation.required")),
+  });
+
   const addCategory = yup.object({
     name_tk: yup
       .string()
@@ -651,6 +666,7 @@ export const useValidShema = () => {
     addReferralCountry,
     editReferralCountry,
     cashTransaction,
+    officeTransaction,
     editTranslator,
     addTask,
     editTask,
