@@ -1,5 +1,6 @@
 import { memo, useMemo } from "react";
 import { Stack } from "@mui/material";
+import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { getAllOfficeApi } from "../../../../api/queries/getters";
@@ -14,7 +15,7 @@ const OfficeCashFilter = ({ draft = {}, setDraftFilter, selectsOpen = {}, openSe
   const officeOptions = useMemo(
     () =>
       (Array.isArray(officesData) ? officesData : []).map((o) => ({
-        label: selectedLang(o.shortName) || selectedLang(o.fullName) || "—",
+        label: selectedLang(o.fullName) || selectedLang(o.shortName) || "—",
         value: o.guid,
       })),
     [officesData, selectedLang],
@@ -71,12 +72,14 @@ const OfficeCashFilter = ({ draft = {}, setDraftFilter, selectsOpen = {}, openSe
           label={t("finance.cashBook.dateFrom")}
           name="date_from"
           value={draft.date_from}
+          maxDate={draft.date_to ? dayjs(draft.date_to) : undefined}
           onChange={setDraftFilter}
         />
         <FilterDate
           label={t("finance.cashBook.dateTo")}
           name="date_to"
           value={draft.date_to}
+          minDate={draft.date_from ? dayjs(draft.date_from) : undefined}
           onChange={setDraftFilter}
         />
       </Stack>

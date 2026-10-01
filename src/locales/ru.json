@@ -56,7 +56,8 @@
     "minPassengers": "At least 1 passenger must be selected",
     "invalidReturnDate": "Return date cannot be before departure date",
     "invalidDate": "Неверный формат даты",
-    "dateOutOfRange": "Дата должна быть в диапазоне {{min}}–{{max}}"
+    "dateOutOfRange": "Дата должна быть в диапазоне {{min}}–{{max}}",
+    "profitTooHigh": "Прибыль не может быть больше цены"
   },
   "deleteConfirm": {
     "employee": "Вы действительно хотите удалить этого сотрудника? Это действие нельзя отменить."
@@ -1186,7 +1187,7 @@
       "officeCount": "Офисов: {{count}}",
       "office": "Офис",
       "profitHint": "Прибыль от продаж",
-      "topOffice": "Самый прибыльный офис",
+      "topExpenseOffice": "Офис с наибольшим расходом",
       "chartTitle": "Сравнение офисов",
       "chartSubtitle": "Продажи, себестоимость и прибыль по офисам",
       "tableTitle": "Итоги по офисам",
@@ -1198,7 +1199,8 @@
     },
     "officeCash": {
       "title": "Кассы офисов",
-      "office": "Офис"
+      "office": "Офис",
+      "price": "Цена"
     },
     "cashBook": {
       "date": "Дата",

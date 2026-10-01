@@ -56,7 +56,8 @@
     "minPassengers": "1 myhman saýlanmaly",
     "invalidReturnDate": "Gidiş senesinden öň bolup bilmez",
     "invalidDate": "Sene nädogry girizildi",
-    "dateOutOfRange": "Sene {{min}}–{{max}} ýyllaryň aralygynda bolmaly"
+    "dateOutOfRange": "Sene {{min}}–{{max}} ýyllaryň aralygynda bolmaly",
+    "profitTooHigh": "Peýda bahadan köp bolup bilmez"
   },
   "deleteConfirm": {
     "employee": "Siz hakykatdan hem bu işgäri pozmak isleýärsiňizmi?"
@@ -1172,7 +1173,7 @@
       "officeCount": "{{count}} ofis",
       "office": "Ofis",
       "profitHint": "Satyşdan peýda",
-      "topOffice": "Iň girdejili ofis",
+      "topExpenseOffice": "Iň köp çykdajyly ofis",
       "chartTitle": "Ofisleri deňeşdirmek",
       "chartSubtitle": "Her ofisiň satyşy, özüne düşýän bahasy we peýdasy",
       "tableTitle": "Ofisler boýunça jemi",
@@ -1184,7 +1185,8 @@
     },
     "officeCash": {
       "title": "Ofis kassalary",
-      "office": "Ofis"
+      "office": "Ofis",
+      "price": "Bahasy"
     },
     "cashBook": {
       "date": "Sene",

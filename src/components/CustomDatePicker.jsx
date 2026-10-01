@@ -24,6 +24,8 @@ const CustomDatePicker = ({
   inputSx = {},
   slotProps: externalSlotProps = {},
   validateFormat = false,
+  // Called with the new ISO string (or null) after the form value changes.
+  onValueChange,
   ...props
 }) => {
   const PickerComponent = showTime ? DateTimePicker : DatePicker;
@@ -107,8 +109,10 @@ const CustomDatePicker = ({
               onChange={(newValue) => {
                 if (!newValue) {
                   field.onChange(null);
+                  onValueChange?.(null);
                 } else if (dayjs.isDayjs(newValue) && newValue.isValid()) {
                   field.onChange(newValue.toISOString());
+                  onValueChange?.(newValue.toISOString());
                 } else if (validateFormat) {
                   setInvalidDraft(newValue);
                   field.onChange(INVALID_DATE);

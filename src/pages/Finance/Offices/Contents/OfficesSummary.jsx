@@ -1,6 +1,6 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { BanknoteArrowDown, BanknoteArrowUp, PiggyBank, Trophy } from "lucide-react";
+import { BanknoteArrowDown, BanknoteArrowUp, HandCoins, PiggyBank } from "lucide-react";
 import { useLocale } from "../../../../hooks/useLocale";
 import { KPI_TONES, formatAmount } from "../../Overview/functions/analyticsFormat";
 
@@ -76,13 +76,16 @@ const DualAmount = ({ value }) => (
   </Box>
 );
 
-// Headline totals across every office, plus the most profitable office.
+// Headline totals across every office, plus the office with the most money out.
 const OfficesSummary = ({ rows, totals }) => {
   const { t } = useLocale();
   const mode = useTheme().palette.mode === "dark" ? "dark" : "light";
   const count = t("finance.offices.officeCount", { count: rows.length });
 
-  const top = [...rows].sort((a, b) => b.profit.USD - a.profit.USD || b.profit.TMT - a.profit.TMT)[0];
+  // USD decides, TMT breaks ties; an office with no expense at all is not "top".
+  const topExpense = [...rows]
+    .filter((r) => r.outflow.USD > 0 || r.outflow.TMT > 0)
+    .sort((a, b) => b.outflow.USD - a.outflow.USD || b.outflow.TMT - a.outflow.TMT)[0];
 
   return (
     <Box
@@ -110,14 +113,14 @@ const OfficesSummary = ({ rows, totals }) => {
       >
         <DualAmount value={totals.profit} />
       </Tile>
-      <Tile icon={Trophy} color={KPI_TONES.credit[mode]} label={t("finance.offices.topOffice")}>
-        {top ? (
+      <Tile icon={HandCoins} color={KPI_TONES.outflow[mode]} label={t("finance.offices.topExpenseOffice")}>
+        {topExpense ? (
           <>
             <Typography noWrap sx={{ fontSize: "1.5rem", fontWeight: 700, lineHeight: 1.25, letterSpacing: "-0.01em" }}>
-              {top.name}
+              {topExpense.name}
             </Typography>
             <Typography noWrap sx={{ ...amountSx, mt: 0.5, fontSize: "0.85rem", fontWeight: 600, color: "text.secondary" }}>
-              {formatAmount(top.profit.USD, "USD")} · {formatAmount(top.profit.TMT, "TMT")}
+              {formatAmount(topExpense.outflow.USD, "USD")} · {formatAmount(topExpense.outflow.TMT, "TMT")}
             </Typography>
           </>
         ) : (

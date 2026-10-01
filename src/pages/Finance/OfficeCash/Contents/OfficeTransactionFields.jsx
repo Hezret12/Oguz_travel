@@ -1,25 +1,37 @@
 import { useMemo } from "react";
+import { useController, useWatch } from "react-hook-form";
 import { Grid } from "@mui/material";
 import CustomTextField from "../../../../components/CustomTextField";
-import CustomSelect from "../../../../components/CustomSelect";
+import CurrencyAmount from "../../../../components/inputs/CurrencyAmount";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
 import AppAutocomplete from "../../../../components/AppAutocomplete";
 import { useLocale } from "../../../../hooks/useLocale";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import { getAllOfficeApi } from "../../../../api/queries/getters";
 import CashTypeToggle from "../../CashFlow/Contents/CashTypeToggle";
-import { CURRENCY_OPTIONS } from "../../CashFlow/functions/cashFlowHelpers";
 
 // Shared by AddOfficeTransactionModal / EditOfficeTransactionModal.
 const OfficeTransactionFields = ({ control }) => {
   const { t, selectedLang } = useLocale();
+  // The currency picker lives inside the amount field (CurrencyAmount).
+  const { field: currencyField } = useController({ name: "currency", control });
+  const [type, amount, profit] = useWatch({ control, name: ["type", "amount", "profit"] });
+  const isIncome = type === "INCOME";
+
+  // Income: Çykdajy (money paid out) = price − profit, shown read-only.
+  const price = parseFloat(amount);
+  const profitValue = parseFloat(profit);
+  const expense =
+    isIncome && Number.isFinite(price) && Number.isFinite(profitValue)
+      ? String(Math.round((price - profitValue) * 100) / 100)
+      : "";
 
   const { data: officesData } = useGet({ apiFn: getAllOfficeApi, key: "all-offices-filter" });
 
   const officeOptions = useMemo(
     () =>
       (Array.isArray(officesData) ? officesData : []).map((o) => ({
-        label: selectedLang(o.shortName) || selectedLang(o.fullName) || "—",
+        label: selectedLang(o.fullName) || selectedLang(o.shortName) || "—",
         value: o.guid,
       })),
     [officesData, selectedLang],
@@ -42,16 +54,48 @@ const OfficeTransactionFields = ({ control }) => {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6 }}>
-        <CustomTextField name="amount" control={control} label={t("finance.amount")} type="number" required />
+        <CurrencyAmount
+          name="amount"
+          control={control}
+          label={isIncome ? t("finance.officeCash.price") : t("finance.amount")}
+          currency={currencyField.value}
+          onCurrencyChange={currencyField.onChange}
+          allowNegative={false}
+          placeholder=""
+          required
+        />
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6 }}>
-        <CustomSelect name="currency" control={control} label={t("currency")} options={CURRENCY_OPTIONS} required />
-      </Grid>
-
-      <Grid size={{ xs: 12 }}>
         <CustomDatePicker name="datetime" control={control} label={t("finance.cashBook.date")} showTime required />
       </Grid>
+
+      {isIncome && (
+        <>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CurrencyAmount
+              name="profit"
+              control={control}
+              label={t("finance.profit")}
+              currency={currencyField.value}
+              onCurrencyChange={currencyField.onChange}
+              allowNegative={false}
+              placeholder=""
+              required
+            />
+          </Grid>
+
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <CurrencyAmount
+              label={t("finance.expense")}
+              value={expense}
+              currency={currencyField.value}
+              placeholder=""
+              disabled
+            />
+          </Grid>
+        </>
+      )}
 
       <Grid size={{ xs: 12 }}>
         <CustomTextField

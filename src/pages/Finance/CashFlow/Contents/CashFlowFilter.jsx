@@ -1,4 +1,6 @@
 import { useMemo, memo } from "react";
+import { useForm } from "react-hook-form";
+import dayjs from "dayjs";
 import {
   Box,
   FormControl,
@@ -6,9 +8,9 @@ import {
   Select,
   Stack,
   Typography,
-  TextField,
 } from "@mui/material";
 import { ChevronDown } from "lucide-react";
+import CustomDatePicker from "../../../../components/CustomDatePicker";
 import { useLocale } from "../../../../hooks/useLocale";
 import { useGet } from "../../../../hooks/CRUD/useGet";
 import {
@@ -101,27 +103,24 @@ export const FilterSelect = ({
   </FormControl>
 );
 
-export const FilterDate = ({ label, name, value, onChange }) => (
-  <FormControl fullWidth size="small">
-    <Typography
-      variant="body2"
-      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
-    >
-      {label}
-    </Typography>
-    <TextField
-      fullWidth
-      size="small"
-      type="date"
-      value={value ?? ""}
-      onChange={(e) => onChange(name, e.target.value)}
-      slotProps={{
-        inputLabel: { shrink: true },
-        input: { sx: selectSx },
-      }}
+// CustomDatePicker bound to a filter draft value ("YYYY-MM-DD" or ""). The
+// local form only mirrors the draft (`values` keeps it in sync on reset).
+export const FilterDate = ({ label, name, value, onChange, ...pickerProps }) => {
+  const { control } = useForm({ values: { [name]: value || null } });
+
+  return (
+    <CustomDatePicker
+      name={name}
+      control={control}
+      label={label}
+      // Two pickers share a row in the 380px drawer; without minWidth 0 each
+      // keeps its ~240px content width and the second one overflows.
+      sx={{ flex: 1, minWidth: 0 }}
+      onValueChange={(iso) => onChange(name, iso ? dayjs(iso).format("YYYY-MM-DD") : "")}
+      {...pickerProps}
     />
-  </FormControl>
-);
+  );
+};
 
 const CashFlowFilter = ({
   draft = {},
@@ -217,12 +216,14 @@ const CashFlowFilter = ({
           label={t("finance.cashBook.dateFrom")}
           name="date_from"
           value={draft.date_from}
+          maxDate={draft.date_to ? dayjs(draft.date_to) : undefined}
           onChange={setDraftFilter}
         />
         <FilterDate
           label={t("finance.cashBook.dateTo")}
           name="date_to"
           value={draft.date_to}
+          minDate={draft.date_from ? dayjs(draft.date_from) : undefined}
           onChange={setDraftFilter}
         />
       </Stack>

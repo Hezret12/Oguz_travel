@@ -32,6 +32,24 @@ import { OFFICE_CASH_SOURCES } from "./functions/officeCashHelpers";
 const GREEN = "#16a34a";
 const RED = "#dc2626";
 
+// An amount cell; without a value it renders a muted dash.
+const MoneyText = ({ value, currency, color }) =>
+  value === undefined ? (
+    <Typography sx={{ fontSize: "13px", color: "text.disabled" }}>—</Typography>
+  ) : (
+    <Typography
+      sx={{
+        fontSize: "13.5px",
+        fontWeight: 700,
+        fontVariantNumeric: "tabular-nums",
+        whiteSpace: "nowrap",
+        color: value === 0 ? "text.secondary" : color,
+      }}
+    >
+      {fmtMoney(value, currency || "USD")}
+    </Typography>
+  );
+
 const OfficeCashFilterDrawer = () => {
   const {
     draft,
@@ -156,7 +174,7 @@ const OfficeCash = () => {
       {
         accessorKey: "description",
         header: t("finance.cashBook.description"),
-        size: 320,
+        size: 260,
         Cell: ({ cell }) => {
           const text = cell.getValue();
           if (!text) return <Typography sx={{ fontSize: "13px", color: "text.secondary" }}>—</Typography>;
@@ -169,7 +187,7 @@ const OfficeCash = () => {
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
-                  maxWidth: 420,
+                  maxWidth: 340,
                 }}
               >
                 {text}
@@ -178,30 +196,42 @@ const OfficeCash = () => {
           );
         },
       },
+      // Income: price, profit and Çykdajy = price − profit (net_price).
+      // Expense: only Çykdajy, the amount paid out.
       {
-        id: "amount",
-        header: t("finance.amount"),
-        size: 140,
+        id: "price",
+        header: t("finance.officeCash.price"),
+        size: 130,
+        muiTableHeadCellProps: { align: "right" },
+        muiTableBodyCellProps: { align: "right" },
+        Cell: ({ row }) =>
+          row.original.type === "INCOME" ? (
+            <MoneyText value={cashAmount(row.original)} currency={row.original.currency} color={GREEN} />
+          ) : (
+            <MoneyText />
+          ),
+      },
+      {
+        id: "profit",
+        header: t("finance.profit"),
+        size: 120,
         muiTableHeadCellProps: { align: "right" },
         muiTableBodyCellProps: { align: "right" },
         Cell: ({ row }) => {
           const r = row.original;
-          const income = r.type === "INCOME";
-          return (
-            <Typography
-              sx={{
-                fontSize: "13.5px",
-                fontWeight: 700,
-                fontVariantNumeric: "tabular-nums",
-                whiteSpace: "nowrap",
-                color: income ? GREEN : RED,
-              }}
-            >
-              {income ? "+" : "-"}
-              {fmtMoney(cashAmount(r), r.currency || "USD")}
-            </Typography>
-          );
+          if (r.type !== "INCOME") return <MoneyText />;
+          return <MoneyText value={cashAmount(r) - (Number(r.net_price) || 0)} currency={r.currency} color="text.primary" />;
         },
+      },
+      {
+        id: "expense",
+        header: t("finance.expense"),
+        size: 130,
+        muiTableHeadCellProps: { align: "right" },
+        muiTableBodyCellProps: { align: "right" },
+        Cell: ({ row }) => (
+          <MoneyText value={Number(row.original.net_price) || 0} currency={row.original.currency} color={RED} />
+        ),
       },
       {
         id: "actions",

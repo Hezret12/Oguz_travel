@@ -56,7 +56,8 @@
     "minPassengers": "At least 1 passenger must be selected",
     "invalidReturnDate": "Return date cannot be before departure date",
     "invalidDate": "Invalid date format",
-    "dateOutOfRange": "Date must be between {{min}} and {{max}}"
+    "dateOutOfRange": "Date must be between {{min}} and {{max}}",
+    "profitTooHigh": "Profit cannot be greater than the price"
   },
   "deleteConfirm": {
     "employee": "Are you sure you want to delete this employee? This action cannot be undone."
@@ -1186,7 +1187,7 @@
       "officeCount": "Offices: {{count}}",
       "office": "Office",
       "profitHint": "Profit on sales",
-      "topOffice": "Most profitable office",
+      "topExpenseOffice": "Highest-expense office",
       "chartTitle": "Office comparison",
       "chartSubtitle": "Sales, cost and profit per office",
       "tableTitle": "Totals by office",
@@ -1198,7 +1199,8 @@
     },
     "officeCash": {
       "title": "Office cash",
-      "office": "Office"
+      "office": "Office",
+      "price": "Price"
     },
     "cashBook": {
       "date": "Date",

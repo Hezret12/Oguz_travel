@@ -605,6 +605,20 @@ export const useValidShema = () => {
       .typeError(t("validation.invalidNumber"))
       .moreThan(0, t("validation.invalidNumber"))
       .required(t("validation.required")),
+    // Income only: 0 ≤ profit ≤ price, so Çykdajy (price − profit) is never negative.
+    profit: yup
+      .number()
+      .transform((value, original) => (original === "" ? undefined : value))
+      .when("type", {
+        is: "INCOME",
+        then: (s) =>
+          s
+            .typeError(t("validation.invalidNumber"))
+            .min(0, t("validation.invalidNumber"))
+            .max(yup.ref("amount"), t("validation.profitTooHigh"))
+            .required(t("validation.required")),
+        otherwise: (s) => s.strip(),
+      }),
     currency: yup.string().required(t("validation.required")),
     datetime: yup.string().nullable().required(t("validation.dateRequired")),
     description: yup.string().trim().required(t("validation.required")),
