@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
 import { Box, Tooltip, Typography, alpha } from "@mui/material";
-import { ArrowDownLeft, ArrowUpRight, Info } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import TableErrorState from "../../../components/TableErrorState";
@@ -13,23 +13,21 @@ import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import DeleteDialog from "../../../components/DeleteDialog";
 import FilterDrawer from "../../../components/FilterDrawer";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
-import { useGet } from "../../../hooks/CRUD/useGet";
 import { useDelete } from "../../../hooks/CRUD/useDelete";
 import { useDeleteDialog } from "../../../hooks/useDeleteDialog";
 import { useTableFilters, useDrawerFilters } from "../../../hooks/usePageFilters";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { deleteTotalCalculationApi } from "../../../api/queries/delete";
-import { getAllTotalCalculationsApi, getOfficeBalancesApi } from "../../../api/queries/getters";
+import { getAllTotalCalculationsApi } from "../../../api/queries/getters";
 import {
   officeCashFilterActions,
   officeCashFilterSelectors,
 } from "../../../store/slices/filters/officeCashFilterSlice";
 import { cashAmount, fmtMoney } from "../CashFlow/functions/cashFlowHelpers";
-import OfficeBalanceCards from "./Contents/OfficeBalanceCards";
 import OfficeCashFilter from "./Contents/OfficeCashFilter";
 import AddOfficeTransactionModal from "./AddOfficeTransactionModal";
 import EditOfficeTransactionModal from "./EditOfficeTransactionModal";
-import { OFFICE_CASH_SOURCES, currenciesOf, sumTotals } from "./functions/officeCashHelpers";
+import { OFFICE_CASH_SOURCES } from "./functions/officeCashHelpers";
 
 const GREEN = "#16a34a";
 const RED = "#dc2626";
@@ -60,16 +58,15 @@ const OfficeCashFilterDrawer = () => {
   );
 };
 
-// Every office's cash balance, and the income / expense transactions booked
-// to it: an amount in one currency with a description.
+// Income / expense transactions booked to offices: an amount in one currency
+// with a description.
 const OfficeCash = () => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
   const { formatChange } = useDateFormat();
-  // null = closed; otherwise the office to preselect ("" = none).
-  const [addForOffice, setAddForOffice] = useState(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
-  const { applied, openDrawer, setFilter, searchQuery, setSearch, page, setPage, limit, queryParams } =
+  const { applied, openDrawer, searchQuery, setSearch, page, setPage, limit, queryParams } =
     useTableFilters({ actions: officeCashFilterActions, selectors: officeCashFilterSelectors });
 
   const selectedOffice = applied?.office_guid ?? "";
@@ -84,16 +81,6 @@ const OfficeCash = () => {
     [queryParams],
   );
 
-  const {
-    data: balancesData,
-    isLoading: isBalancesLoading,
-    refetch: refetchBalances,
-  } = useGet({ apiFn: getOfficeBalancesApi, key: "officeBalances" });
-
-  const offices = useMemo(() => (Array.isArray(balancesData) ? balancesData : []), [balancesData]);
-  const allTotals = useMemo(() => sumTotals(offices), [offices]);
-  const currencies = useMemo(() => currenciesOf(offices), [offices]);
-
   const { data: rows, isLoading, isFetching, isError, refetch, totalItems, pageCount } = usePagginationGet({
     apiFn: getAllTotalCalculationsApi,
     key: "totalCalculations",
@@ -105,7 +92,6 @@ const OfficeCash = () => {
     queryKey: "totalCalculations",
     idKey: "guid",
     isPaginated: true,
-    invalidateQueries: ["officeBalances"],
   });
 
   const deleteDialog = useDeleteDialog({ onConfirm: (item) => deleteTransaction(item.guid) });
@@ -267,10 +253,7 @@ const OfficeCash = () => {
             value={searchQuery}
             onChange={setSearch}
             placeholder={t("search")}
-            onRefetch={() => {
-              refetch();
-              refetchBalances();
-            }}
+            onRefetch={refetch}
             isFetching={isFetching}
           />
         </Box>
@@ -309,25 +292,9 @@ const OfficeCash = () => {
         title={t("finance.officeCash.title")}
         pageTitle={`${t("finance.officeCash.title")} | Oguz Travel`}
         addButtonText={t("finance.addTransaction")}
-        onAddClick={() => setAddForOffice(selectedOffice)}
+        onAddClick={() => setIsAddOpen(true)}
         filterButtonText={t("filter")}
         onFilterClick={openDrawer}
-      >
-        <Tooltip title={t("finance.officeCash.balanceHint")} placement="bottom" arrow>
-          <Box sx={{ display: { xs: "none", md: "inline-flex" }, color: "text.secondary", cursor: "help" }}>
-            <Info size={16} />
-          </Box>
-        </Tooltip>
-      </PageHeader>
-
-      <OfficeBalanceCards
-        offices={offices}
-        allTotals={allTotals}
-        currencies={currencies}
-        selectedGuid={selectedOffice}
-        onSelect={(guid) => setFilter("office_guid", guid)}
-        onAdd={setAddForOffice}
-        isLoading={isBalancesLoading}
       />
 
       <MaterialReactTable table={table} />
@@ -337,9 +304,9 @@ const OfficeCash = () => {
       )}
 
       <AddOfficeTransactionModal
-        open={addForOffice !== null}
-        officeGuid={addForOffice ?? ""}
-        close={() => setAddForOffice(null)}
+        open={isAddOpen}
+        officeGuid={selectedOffice}
+        close={() => setIsAddOpen(false)}
       />
 
       <OfficeCashFilterDrawer />

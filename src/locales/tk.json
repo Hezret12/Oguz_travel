@@ -1184,14 +1184,7 @@
     },
     "officeCash": {
       "title": "Ofis kassalary",
-      "allOffices": "Ähli ofisler",
-      "officeCount": "{{count}} ofis",
-      "office": "Ofis",
-      "balance": "Galyndy",
-      "noTransactions": "Heniz amal ýok",
-      "lastTransaction": "Soňky amal: {{date}}",
-      "addForOffice": "Amal goşmak",
-      "balanceHint": "Galyndy = girdeji − çykdajy, diňe ofisiň kassa amallary boýunça"
+      "office": "Ofis"
     },
     "cashBook": {
       "date": "Sene",

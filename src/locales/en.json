@@ -1198,14 +1198,7 @@
     },
     "officeCash": {
       "title": "Office cash",
-      "allOffices": "All offices",
-      "officeCount": "Offices: {{count}}",
-      "office": "Office",
-      "balance": "Balance",
-      "noTransactions": "No transactions yet",
-      "lastTransaction": "Last transaction: {{date}}",
-      "addForOffice": "Add transaction",
-      "balanceHint": "Balance = income − expense, from the office's cash transactions only"
+      "office": "Office"
     },
     "cashBook": {
       "date": "Date",

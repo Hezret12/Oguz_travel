@@ -32,7 +32,6 @@ const AddOfficeTransactionModal = ({ open, close, officeGuid = "" }) => {
     apiFn: addTotalCalculationApi,
     key: "totalCalculations",
     isPaginated: true,
-    invalidateQueries: ["officeBalances"],
     onSuccess: handleClose,
   });
 

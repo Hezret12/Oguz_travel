@@ -40,10 +40,9 @@ const EditOfficeTransactionModal = ({ open, close, table, row }) => {
   const { mutate: updateTransaction, isPending } = useUpdate({
     apiFn: updateTotalCalculationApi,
     key: "totalCalculations",
-    // A moved office, amount or currency changes which rows match and the
-    // office balances, so refetch both instead of only merging the row.
+    // A moved office can take the row out of the filtered list, so refetch
+    // instead of only merging the row.
     isPaginated: true,
-    invalidateQueries: ["officeBalances"],
     idKey: "guid",
     onSuccessUpdate: handleClose,
   });

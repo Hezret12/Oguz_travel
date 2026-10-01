@@ -1,12 +1,24 @@
 import { memo, useMemo } from "react";
 import { Stack } from "@mui/material";
 import { useLocale } from "../../../../hooks/useLocale";
+import { useGet } from "../../../../hooks/CRUD/useGet";
+import { getAllOfficeApi } from "../../../../api/queries/getters";
 import { FilterDate, FilterSelect } from "../../CashFlow/Contents/CashFlowFilter";
 import { CURRENCY_OPTIONS } from "../../CashFlow/functions/cashFlowHelpers";
 
-// The office itself is picked with the office cards above the table.
 const OfficeCashFilter = ({ draft = {}, setDraftFilter, selectsOpen = {}, openSelect, closeSelect }) => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
+
+  const { data: officesData } = useGet({ apiFn: getAllOfficeApi, key: "all-offices-filter" });
+
+  const officeOptions = useMemo(
+    () =>
+      (Array.isArray(officesData) ? officesData : []).map((o) => ({
+        label: selectedLang(o.shortName) || selectedLang(o.fullName) || "—",
+        value: o.guid,
+      })),
+    [officesData, selectedLang],
+  );
 
   const typeOptions = useMemo(
     () => [
@@ -18,6 +30,18 @@ const OfficeCashFilter = ({ draft = {}, setDraftFilter, selectsOpen = {}, openSe
 
   return (
     <Stack spacing={2.5}>
+      <FilterSelect
+        label={t("finance.officeCash.office")}
+        name="office_guid"
+        value={draft.office_guid}
+        options={officeOptions}
+        isOpen={selectsOpen.office_guid}
+        allText={t("all")}
+        onChange={setDraftFilter}
+        onOpen={openSelect}
+        onClose={closeSelect}
+      />
+
       <FilterSelect
         label={t("finance.cashBook.direction")}
         name="type"

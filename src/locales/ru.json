@@ -1198,14 +1198,7 @@
     },
     "officeCash": {
       "title": "Кассы офисов",
-      "allOffices": "Все офисы",
-      "officeCount": "Офисов: {{count}}",
-      "office": "Офис",
-      "balance": "Остаток",
-      "noTransactions": "Операций пока нет",
-      "lastTransaction": "Последняя операция: {{date}}",
-      "addForOffice": "Добавить операцию",
-      "balanceHint": "Остаток = доход − расход, только по кассовым операциям офиса"
+      "office": "Офис"
     },
     "cashBook": {
       "date": "Дата",
