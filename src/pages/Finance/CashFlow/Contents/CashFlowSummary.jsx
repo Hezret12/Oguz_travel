@@ -19,11 +19,11 @@ const TotalGroup = ({ label, icon: Icon, tone, items }) => {
   return (
     <Box
       sx={(theme) => ({
-        height: 40,
+        height: 44,
         display: "flex",
         alignItems: "center",
-        gap: 1,
-        px: 1.5,
+        gap: 1.25,
+        px: 1.75,
         borderRadius: "10px",
         whiteSpace: "nowrap",
         backgroundColor: alpha(theme.palette[tone].main, theme.palette.mode === "dark" ? 0.1 : 0.06),
@@ -34,8 +34,8 @@ const TotalGroup = ({ label, icon: Icon, tone, items }) => {
         aria-hidden
         sx={(theme) => ({
           flexShrink: 0,
-          width: 22,
-          height: 22,
+          width: 26,
+          height: 26,
           borderRadius: "6px",
           display: "flex",
           alignItems: "center",
@@ -44,15 +44,15 @@ const TotalGroup = ({ label, icon: Icon, tone, items }) => {
           bgcolor: alpha(theme.palette[tone].main, theme.palette.mode === "dark" ? 0.16 : 0.1),
         })}
       >
-        <Icon size={13} strokeWidth={2.25} />
+        <Icon size={15} strokeWidth={2.25} />
       </Box>
-      <Typography sx={{ fontSize: "13px", fontWeight: 600, color: "text.secondary", whiteSpace: "nowrap" }}>
+      <Typography sx={{ fontSize: "14px", fontWeight: 600, color: "text.secondary", whiteSpace: "nowrap" }}>
         {label}
       </Typography>
       {items.map((it, i) => (
         <Fragment key={it.currency}>
           {i > 0 && (
-            <Typography component="span" sx={{ color: "text.disabled", fontSize: "13px" }}>
+            <Typography component="span" sx={{ color: "text.disabled", fontSize: "15px" }}>
               ·
             </Typography>
           )}
@@ -63,7 +63,7 @@ const TotalGroup = ({ label, icon: Icon, tone, items }) => {
             <Typography
               component="span"
               sx={{
-                fontSize: "13px",
+                fontSize: "15px",
                 fontWeight: 700,
                 fontVariantNumeric: "tabular-nums",
                 whiteSpace: "nowrap",
@@ -71,7 +71,7 @@ const TotalGroup = ({ label, icon: Icon, tone, items }) => {
                 cursor: "default",
               }}
             >
-              <Box component="span" sx={{ mr: 0.5, fontSize: "11px", fontWeight: 700, color: "text.secondary" }}>
+              <Box component="span" sx={{ mr: 0.5, fontSize: "12px", fontWeight: 700, color: "text.secondary" }}>
                 {it.currency}
               </Box>
               {fmtNumber(it.value)}
@@ -93,8 +93,8 @@ const CashFlowSummary = ({ totals = [], isLoading, isProjectTab, note }) => {
     return (
       <Skeleton
         variant="rounded"
-        width={460}
-        height={40}
+        width={500}
+        height={44}
         sx={{ borderRadius: "10px", display: { xs: "none", md: "block" } }}
       />
     );
@@ -143,7 +143,7 @@ const CashFlowSummary = ({ totals = [], isLoading, isProjectTab, note }) => {
       {note && (
         <Tooltip title={note} placement="top" arrow>
           <Box sx={{ display: "inline-flex", color: "text.secondary", cursor: "help" }}>
-            <Info size={15} />
+            <Info size={16} />
           </Box>
         </Tooltip>
       )}
