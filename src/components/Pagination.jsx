@@ -54,13 +54,13 @@ const Pagination = ({ pageIndex = 0, pageCount = 1, onPageChange, totalRows }) =
     ...baseBtn,
     backgroundColor: theme.palette.primary.main,
     borderColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
+    color: theme.palette.common.white,
     fontWeight: 700,
     boxShadow: isDark ? "0 2px 8px rgba(0,0,0,0.3)" : "0 2px 8px rgba(37,99,235,0.35)",
     "&:hover": {
       backgroundColor: theme.palette.primary.dark,
       borderColor: theme.palette.primary.dark,
-      color: theme.palette.primary.contrastText,
+      color: theme.palette.common.white,
     },
   };
 

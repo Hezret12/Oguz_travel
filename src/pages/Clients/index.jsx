@@ -241,7 +241,7 @@ const Clients = () => {
                 gap: 1,
               }}
             >
-              {canAccessFiles && (
+              {canAccessFiles ? (
                 <Tooltip title={t("clients.documents")} arrow>
                   <IconButton
                     onClick={(e) => {
@@ -281,6 +281,9 @@ const Clients = () => {
                     <FileUp size={15} strokeWidth={2} />
                   </IconButton>
                 </Tooltip>
+              ) : (
+                // Keeps edit/delete aligned with rows that show the documents button.
+                <Box sx={{ width: "28px", height: "28px", flexShrink: 0 }} />
               )}
 
               <ColumnActionButtons

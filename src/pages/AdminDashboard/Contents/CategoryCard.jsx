@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { useLocale } from "../../../../hooks/useLocale";
-import SectionCard, { EmptyState, LegendRow, ShareBar, ViewToggle } from "./SectionCard";
+import { useLocale } from "../../../hooks/useLocale";
+import SectionCard, { EmptyState, LegendRow, ShareBar, ViewToggle } from "../../Finance/Overview/Contents/SectionCard";
 import {
   chartSx,
   formatAmount,
@@ -12,10 +12,10 @@ import {
   tableSx,
   tickLabelStyle,
   tooltipSlotProps,
-  useSeriesColors,
+  useDashboardColors,
   xAxisBase,
   yAxisBase,
-} from "../functions/analyticsFormat";
+} from "../../Finance/Overview/functions/analyticsFormat";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 
@@ -23,7 +23,7 @@ const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace
 // With `onSelect`, a table row picks that category (click again to clear).
 const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
   const { t, selectedLang } = useLocale();
-  const colors = useSeriesColors();
+  const colors = useDashboardColors();
   const [view, setView] = useState("table");
 
   const rows = categories
@@ -59,7 +59,7 @@ const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
         <>
           <LegendRow
             items={[
-              { label: t("finance.analytics.kpi.revenue"), color: colors.revenue, shape: "bar" },
+              { label: t("finance.analytics.kpi.revenue"), color: colors.sale, shape: "bar" },
               { label: t("finance.analytics.categories.profit"), color: colors.profit, shape: "bar" },
             ]}
           />
@@ -69,7 +69,7 @@ const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
               height={rows.length * 46 + 50}
               hideLegend
               skipAnimation
-              borderRadius={2}
+              borderRadius={4}
               grid={{ vertical: true }}
               yAxis={[
                 {
@@ -88,7 +88,7 @@ const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
                   id: "revenue",
                   label: t("finance.analytics.kpi.revenue"),
                   data: rows.map((c) => c[currency].revenue),
-                  color: colors.revenue,
+                  color: colors.sale,
                   valueFormatter: (v) => formatAmount(v, currency),
                 },
                 {
@@ -141,7 +141,7 @@ const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
                           {formatPercent(share, 0)}
                         </Typography>
                       </Box>
-                      <ShareBar value={share} color={colors.revenue} />
+                      <ShareBar value={share} color={colors.sale} />
                     </TableCell>
                     <TableCell sx={num}>{c.count}</TableCell>
                     <TableCell sx={{ ...num, fontWeight: 600 }}>{formatAmount(m.revenue, currency)}</TableCell>

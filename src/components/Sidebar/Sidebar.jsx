@@ -165,7 +165,7 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
 
       return navItems
         .map((item) => {
-          if (item.alwaysVisible) {
+          if (item.alwaysVisible || item.openToAll) {
             return item;
           }
           if (item.isGroup && item.children) {

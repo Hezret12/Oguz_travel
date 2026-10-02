@@ -289,6 +289,11 @@ export const getDashboardChartApi = async (params = {}) => {
   return await api.getPrivate('/dashboard/admin-vs-maliya-chart-data', params);
 };
 
+// Money out per period: cost of sales, salaries and kassa expenses.
+export const getDashboardMoneyOutApi = async (params = {}) => {
+  return await api.getPrivate('/dashboard/money-out', params);
+};
+
 // Sales split by payment status.
 export const getDashboardStatusApi = async (params = {}) => {
   return await api.getPrivate('/dashboard/admin-by-status', params);

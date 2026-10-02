@@ -20,7 +20,6 @@ import {
   UtensilsCrossed,
   Wallet,
   ArrowLeftRight,
-  PieChart,
   LayoutGrid,
   Building,
   ChartNoAxesCombined,
@@ -44,6 +43,9 @@ export const useSidebarItems = () => {
         text: t("sidebar.adminDashboard"),
         path: PATHS.ROOT,
         icon: createElement(LayoutDashboard, { size: 20, strokeWidth: 2.2 }),
+        // Shown to everyone (their own office's figures), yet still granted
+        // in the access tab: the permission opens every office.
+        openToAll: true,
       },
       {
         id: "tasks",
@@ -62,13 +64,6 @@ export const useSidebarItems = () => {
             text: t("sidebar.cashFlow", "Pul Akymy"),
             path: PATHS.FINANCE.CASH_FLOW,
             icon: createElement(ArrowLeftRight, { size: 18, strokeWidth: 2.2 }),
-            alwaysVisible: true,
-          },
-          {
-            id: "finance-overview",
-            text: t("sidebar.financeOverview", "Maliýe Hasabaty"),
-            path: PATHS.FINANCE.OVERVIEW,
-            icon: createElement(PieChart, { size: 18, strokeWidth: 2.2 }),
             alwaysVisible: true,
           },
           {

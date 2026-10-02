@@ -138,6 +138,23 @@ const Salary = () => {
     return rest;
   }, [queryParams]);
 
+  // BERMELI footer: the summary sums payable_amount as is, so a row below zero
+  // (advances or loans beyond the salary) pulls the total under what the month
+  // lock pays, which is max(payable, 0) per row. With the whole filtered month
+  // on this page the split is exact; across pages only the net sum is known.
+  const payableSplit = useMemo(() => {
+    if (!totalItems || salaries.length < totalItems) return null;
+    return salaries.reduce(
+      (acc, r) => {
+        const value = toNumber(r.payable_amount);
+        return value < 0
+          ? { ...acc, negative: acc.negative + value }
+          : { ...acc, payout: acc.payout + value };
+      },
+      { payout: 0, negative: 0 },
+    );
+  }, [salaries, totalItems]);
+
   const { data: summary } = useGet({
     apiFn: getSalarySummaryApi,
     key: "salarySummary",
@@ -403,7 +420,7 @@ const Salary = () => {
               <Tooltip title={t("salary.bonusPercent")} arrow placement="top">
                 <Box sx={{ textAlign: "right", lineHeight: 1.2, minWidth: 0, flexGrow: 1 }}>
                   <Box component="span" sx={{ fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-                    {formatMoney(row.original.bonus)}
+                    {formatMoney(row.original.bonus, { currency })}
                   </Box>
                   <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
                     {t("salary.percentOf", {
@@ -445,19 +462,60 @@ const Salary = () => {
         header: t("salary.payable"),
         size: 120,
         ...COMPUTED,
-        Cell: ({ row }) => (
-          <Box
-            component="span"
-            sx={{
-              fontWeight: 800,
-              fontVariantNumeric: "tabular-nums",
-              color: toNumber(row.original.payable_amount) < 0 ? "error.main" : "primary.main",
-            }}
-          >
-            {formatMoney(row.original.payable_amount)}
-          </Box>
-        ),
-        Footer: footerMoney("payable_amount"),
+        // BERMELI is TMT; a USD bonus is paid on top, so it is listed under it.
+        Cell: ({ row }) => {
+          const usdBonus =
+            getBonusCurrency(row.original) === BONUS_CURRENCY.USD ? toNumber(row.original.bonus) : 0;
+          return (
+            <Box sx={{ textAlign: "right", lineHeight: 1.2 }}>
+              <Box
+                component="span"
+                sx={{
+                  fontWeight: 800,
+                  fontVariantNumeric: "tabular-nums",
+                  color: toNumber(row.original.payable_amount) < 0 ? "error.main" : "primary.main",
+                }}
+              >
+                {formatMoney(row.original.payable_amount)}
+              </Box>
+              {usdBonus > 0 && (
+                <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                  + {formatMoney(usdBonus, { currency: BONUS_CURRENCY.USD })}
+                </Typography>
+              )}
+            </Box>
+          );
+        },
+        // What the month lock pays out; rows below zero are listed under it.
+        Footer: () => {
+          const bonusUsd = toNumber(summary?.bonus_usd);
+          const payout = payableSplit ? payableSplit.payout : summary?.payable_amount;
+          return (
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+              <FooterValue value={formatMoney(payout)} />
+              {payableSplit?.negative < 0 && (
+                <Tooltip title={t("salary.footerNegativeHint")} arrow placement="top">
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: "0.72rem",
+                      fontWeight: 600,
+                      color: "error.main",
+                      whiteSpace: "nowrap",
+                      fontVariantNumeric: "tabular-nums",
+                      cursor: "help",
+                    }}
+                  >
+                    {t("salary.footerNegative", { amount: formatMoney(payableSplit.negative) })}
+                  </Typography>
+                </Tooltip>
+              )}
+              {bonusUsd > 0 && (
+                <FooterValue value={`+ ${formatMoney(bonusUsd, { currency: BONUS_CURRENCY.USD })}`} />
+              )}
+            </Box>
+          );
+        },
       },
       {
         id: "paid_date",
@@ -556,8 +614,10 @@ const Salary = () => {
       page,
       limit,
       summary,
+      payableSplit,
       footerMoney,
       editable,
+      saveCell,
       isLocked,
       isMarkingPaid,
       handleMarkPaid,

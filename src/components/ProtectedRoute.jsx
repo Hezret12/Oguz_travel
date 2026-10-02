@@ -19,8 +19,9 @@ const ProtectedRoute = () => {
     '/finance/cash-flow',
     '/finance/overview',
   ];
-  // Matched exactly: '/finance' only redirects to /finance/cash-flow.
-  const ALWAYS_ALLOWED_EXACT_PATHS = ['/finance'];
+  // Matched exactly: '/finance' only redirects to /finance/cash-flow, and the
+  // dashboard ('/') shows a user without its permission their own office only.
+  const ALWAYS_ALLOWED_EXACT_PATHS = ['/', '/finance'];
 
   if (Array.isArray(user.permissions) && user.permissions.length > 0) {
     const currentPath = location.pathname;

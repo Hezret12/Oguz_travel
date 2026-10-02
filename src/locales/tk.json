@@ -1094,7 +1094,8 @@
         "moneyOut": "Özüne düşýän baha",
         "moneyIn": "Satyş",
         "credit": "Kredit",
-        "profit": "Peýda"
+        "profit": "Peýda",
+        "salary": "Aýlyk çykdajysy"
       },
       "vsPeriod": {
         "thisMonth": "geçen aýa görä",
@@ -1328,6 +1329,8 @@
     "earned": "Hasaplanan",
     "deductions": "Tutulýan",
     "employeesCount": "Işgär",
+    "footerNegative": "Minusda: {{amount}}",
+    "footerNegativeHint": "Bermelisi minus bolan işgärler. Aý ýapylanda olara 0 tölenýär, şonuň üçin jem diňe položitel mukdarlary goşýar.",
     "allOffices": "Ähli ofisler",
     "previousMonth": "Öňki aý",
     "nextMonth": "Indiki aý",
@@ -1404,6 +1407,13 @@
     "topOperators": "Iň köp satan operatorlar",
     "openModuleNamed": "{{name}} bölümini aç",
     "allServices": "Ähli hyzmatlar",
-    "refunds": "Yzyna gaýtarylan"
+    "refunds": "Yzyna gaýtarylan",
+    "allOffices": "Ähli ofisler",
+    "moneyTitle": "Girdeji we çykdajy",
+    "outTotal": "Çykdajy jemi",
+    "netResult": "Arassa netije",
+    "officesTitle": "Ofisler boýunça",
+    "officesSubtitle": "Satyş, peýda we marža",
+    "peakPeriod": "Iň işjeň döwür: {{label}} · {{count}} satyş"
   }
 }

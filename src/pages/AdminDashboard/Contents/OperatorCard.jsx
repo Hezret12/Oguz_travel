@@ -1,13 +1,13 @@
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { useLocale } from "../../../../hooks/useLocale";
-import SectionCard, { EmptyState, ShareBar } from "./SectionCard";
+import { useLocale } from "../../../hooks/useLocale";
+import SectionCard, { EmptyState, ShareBar } from "../../Finance/Overview/Contents/SectionCard";
 import {
   formatAmount,
   formatPercent,
   percentOf,
   tableSx,
-  useSeriesColors,
-} from "../functions/analyticsFormat";
+  useDashboardColors,
+} from "../../Finance/Overview/functions/analyticsFormat";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 
@@ -15,7 +15,7 @@ const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace
 // selected service's name) is added to the subtitle when the list is narrowed.
 const OperatorCard = ({ operators, currency, scope }) => {
   const { t } = useLocale();
-  const colors = useSeriesColors();
+  const colors = useDashboardColors();
   const subtitle = t("finance.analytics.operators.subtitle");
 
   const rows = operators
@@ -59,7 +59,7 @@ const OperatorCard = ({ operators, currency, scope }) => {
                               {formatPercent(share, 0)}
                             </Typography>
                           </Box>
-                          <ShareBar value={share} color={colors.revenue} />
+                          <ShareBar value={share} color={colors.sale} />
                         </Box>
                       </Box>
                     </TableCell>

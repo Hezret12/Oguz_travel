@@ -52,7 +52,6 @@ const NotificationPage = lazyRetry(() => import('../pages/Notification'));
 const ProfilePage = lazyRetry(() => import('../pages/Profile/index'));
 const CafeteriaPage = lazyRetry(() => import('../pages/Cafeteria'));
 const FinanceCashFlowPage = lazyRetry(() => import('../pages/Finance/CashFlow'));
-const FinanceOverviewPage = lazyRetry(() => import('../pages/Finance/Overview'));
 const FinanceOfficesPage = lazyRetry(() => import('../pages/Finance/Offices'));
 const FinanceOfficeCashPage = lazyRetry(() => import('../pages/Finance/OfficeCash'));
 const FinanceSalaryPage = lazyRetry(() => import('../pages/Finance/Salary'));
@@ -130,7 +129,6 @@ const Notification = Loadable(NotificationPage);
 const Profile = Loadable(ProfilePage);
 const Cafeteria = Loadable(CafeteriaPage);
 const FinanceCashFlow = Loadable(FinanceCashFlowPage);
-const FinanceOverview = Loadable(FinanceOverviewPage);
 const FinanceOffices = Loadable(FinanceOfficesPage);
 const FinanceOfficeCash = Loadable(FinanceOfficeCashPage);
 const FinanceSalary = Loadable(FinanceSalaryPage);
@@ -197,7 +195,8 @@ const router = createBrowserRouter([
               { path: 'cafeteria', element: <Cafeteria /> },
               { path: 'finance', element: <Navigate to="/finance/cash-flow" replace /> },
               { path: 'finance/cash-flow', element: <FinanceCashFlow /> },
-              { path: 'finance/overview', element: <FinanceOverview /> },
+              // The finance report was merged into the dashboard; old links land there.
+              { path: 'finance/overview', element: <Navigate to="/" replace /> },
               { path: 'finance/offices', element: <FinanceOffices /> },
               { path: 'finance/office-cash', element: <FinanceOfficeCash /> },
               { path: 'finance/salary', element: <FinanceSalary /> },

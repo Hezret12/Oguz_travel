@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { CURRENCIES } from "./analyticsFormat";
 import { CUSTOM_PERIOD, PERIODS, isValidCustomRange } from "./periods";
 
 const read = (storageKey) => {
@@ -18,11 +19,11 @@ const write = (storageKey, prefs) => {
 };
 
 /**
- * The remembered filter selection of an analytics page: reporting range, plus
+ * The remembered filter selection of an analytics page: reporting range and currency, plus
  * whatever else the page adds through `extraDefaults` (e.g. the picked office).
  *
- * A saved value is only restored when it is still valid — a period that no longer exists or a
- * range reaching into the future falls back to the default.
+ * A saved value is only restored when it is still valid — a period that no longer exists, a
+ * range reaching into the future or an unknown currency falls back to the default.
  *
  * @returns {[object, (patch: object) => void]} the current prefs and a patching setter.
  */
@@ -43,8 +44,7 @@ export const useAnalyticsPrefs = (storageKey, extraDefaults = {}) => {
           ? saved.period
           : "thisMonth",
       customRange,
-      // Dashboards report in USD only; there is no currency switch.
-      currency: "USD",
+      currency: CURRENCIES.includes(saved.currency) ? saved.currency : "USD",
     };
   });
 

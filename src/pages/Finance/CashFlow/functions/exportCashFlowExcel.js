@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 import { fetchAllPaginatedData } from "../../../../functions/excelExportHelper";
-import { isCashRow } from "./cashFlowHelpers";
+import { dualCurrencyAmounts, isCashRow, isProjectExpense } from "./cashFlowHelpers";
 
 const ACCENT_RED = "FFDC2626";
 const AMOUNT_FMT = '#,##0.00;-#,##0.00;"-"';
@@ -11,7 +11,6 @@ const CURRENCY_ORDER = ["TMT", "USD"];
 const KIND_STYLE = {
   income: { bg: "FFDCFCE7", fg: "FF166534", border: "FF86EFAC" },
   expense: { bg: "FFFEF2F2", fg: ACCENT_RED, border: "FFFECACA" },
-  project: { bg: "FFDBEAFE", fg: "FF1D4ED8", border: "FF93C5FD" },
 };
 
 const toNumber = (v) => {
@@ -43,11 +42,21 @@ const outerBorder = (colNumber, startCol, endCol, color = "FFD9D9D9") => ({
       : { style: "thin", color: { argb: color } },
 });
 
+// A visa row carries a TMT and a USD price at once; the sheet has one
+// currency per row, so it becomes one row per priced currency.
+const expandDualCurrency = (row) => {
+  const dual = dualCurrencyAmounts(row);
+  if (!dual) return [row];
+  return dual.map(({ currency, value }) => ({ ...row, currency, sale_price: value, net_price: 0 }));
+};
+
 // Same split as the table: cash income → income, cash expense → expense,
-// project row → sale as income and cost as expense.
+// cost-only project row (salary) → expense, other project row (visa,
+// tickets…) → income: its sale as income and its cost as expense.
 const splitAmounts = (row) => {
+  if (isProjectExpense(row)) return { kind: "expense", income: 0, expense: toNumber(row.net_price) };
   if (!isCashRow(row)) {
-    return { kind: "project", income: toNumber(row.sale_price), expense: toNumber(row.net_price) };
+    return { kind: "income", income: toNumber(row.sale_price), expense: toNumber(row.net_price) };
   }
   return row.type === "INCOME"
     ? { kind: "income", income: toNumber(row.sale_price), expense: 0 }
@@ -64,7 +73,7 @@ export const exportCashFlowExcel = async ({ apiFn, params = {}, onProgress = nul
 
   onProgress?.({ message: t("finance.cashBook.export.fetching"), percent: 5 });
 
-  const items = await fetchAllPaginatedData(
+  const fetched = await fetchAllPaginatedData(
     apiFn,
     cleanParams,
     (loaded, total) =>
@@ -75,7 +84,8 @@ export const exportCashFlowExcel = async ({ apiFn, params = {}, onProgress = nul
     100,
   );
 
-  if (!items?.length) throw new Error(t("common.exportExcelNoData"));
+  if (!fetched?.length) throw new Error(t("common.exportExcelNoData"));
+  const items = fetched.flatMap(expandDualCurrency);
 
   onProgress?.({ message: t("finance.cashBook.export.generating"), percent: 90 });
 
@@ -198,7 +208,6 @@ export const exportCashFlowExcel = async ({ apiFn, params = {}, onProgress = nul
   const kindLabels = {
     income: t("finance.income"),
     expense: t("finance.expense"),
-    project: t("finance.cashBook.projectSale"),
   };
 
   items.forEach((row, offset) => {
@@ -323,7 +332,7 @@ export const exportCashFlowExcel = async ({ apiFn, params = {}, onProgress = nul
   saveAs(blob, `${t("finance.cashBook.export.fileName")}_${dayjs().format("YYYY-MM-DD")}.xlsx`);
 
   onProgress?.({ message: t("finance.cashBook.export.success"), percent: 100 });
-  return items.length;
+  return fetched.length;
 };
 
 export default exportCashFlowExcel;

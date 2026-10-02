@@ -1108,7 +1108,8 @@
         "moneyOut": "Себестоимость",
         "moneyIn": "Продажи",
         "credit": "Кредит",
-        "profit": "Прибыль"
+        "profit": "Прибыль",
+        "salary": "Расходы на зарплату"
       },
       "vsPeriod": {
         "thisMonth": "к прошлому месяцу",
@@ -1342,6 +1343,8 @@
     "earned": "Начислено",
     "deductions": "Удержано",
     "employeesCount": "Сотрудников",
+    "footerNegative": "В минусе: {{amount}}",
+    "footerNegativeHint": "Сотрудники с отрицательной суммой к выплате. При закрытии месяца им выплачивается 0, поэтому итог складывает только положительные суммы.",
     "allOffices": "Все офисы",
     "previousMonth": "Предыдущий месяц",
     "nextMonth": "Следующий месяц",
@@ -1418,6 +1421,13 @@
     "topOperators": "Лучшие операторы",
     "openModuleNamed": "Открыть «{{name}}»",
     "allServices": "Все услуги",
-    "refunds": "Возвраты"
+    "refunds": "Возвраты",
+    "allOffices": "Все офисы",
+    "moneyTitle": "Доходы и расходы",
+    "outTotal": "Всего расходов",
+    "netResult": "Чистый результат",
+    "officesTitle": "По офисам",
+    "officesSubtitle": "Продажи, прибыль и маржа",
+    "peakPeriod": "Пик: {{label}} · {{count}} продаж"
   }
 }

@@ -1108,7 +1108,8 @@
         "moneyOut": "Cost of sales",
         "moneyIn": "Sales",
         "credit": "Credit",
-        "profit": "Profit"
+        "profit": "Profit",
+        "salary": "Salaries"
       },
       "vsPeriod": {
         "thisMonth": "vs last month",
@@ -1342,6 +1343,8 @@
     "earned": "Earned",
     "deductions": "Deductions",
     "employeesCount": "Employees",
+    "footerNegative": "Below zero: {{amount}}",
+    "footerNegativeHint": "Employees whose payable is below zero. Locking the month pays them 0, so the total adds only the positive amounts.",
     "allOffices": "All offices",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
@@ -1418,6 +1421,13 @@
     "topOperators": "Top operators",
     "openModuleNamed": "Open {{name}}",
     "allServices": "All services",
-    "refunds": "Refunds"
+    "refunds": "Refunds",
+    "allOffices": "All offices",
+    "moneyTitle": "Money in and out",
+    "outTotal": "Total money out",
+    "netResult": "Net result",
+    "officesTitle": "By office",
+    "officesSubtitle": "Sales, profit and margin",
+    "peakPeriod": "Busiest: {{label}} · {{count}} sales"
   }
 }

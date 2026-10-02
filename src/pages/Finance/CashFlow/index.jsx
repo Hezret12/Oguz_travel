@@ -32,7 +32,7 @@ import CashFlowExportModal from "./Contents/CashFlowExportModal";
 import ExportExcelButton from "../../../components/ExportExcelButton";
 import AddCashTransactionModal from "./AddCashTransactionModal";
 import EditCashTransactionModal from "./EditCashTransactionModal";
-import { cashAmount, dualCurrencyAmounts, fmtMoney, isCashRow } from "./functions/cashFlowHelpers";
+import { rowAmounts } from "./functions/cashFlowHelpers";
 import { segmentedSx } from "../Overview/functions/analyticsFormat";
 
 const GREEN = "#16a34a";
@@ -46,11 +46,11 @@ const SOURCE_TABS = [
   { value: "PROJECT", labelKey: "finance.cashBook.tabs.project", Icon: Zap },
 ];
 
-const rowKind = (row) => {
-  if (!isCashRow(row)) return { color: BLUE, Icon: Zap, labelKey: "finance.cashBook.projectSale" };
-  return row.type === "INCOME"
-    ? { color: GREEN, Icon: ArrowDownLeft, labelKey: "finance.income" }
-    : { color: RED, Icon: ArrowUpRight, labelKey: "finance.expense" };
+// Every row is money in or out — a visa or ticket sale is Girdeji, the
+// month's salary is Çykdajy; the line under it says where the row came from.
+const KIND_STYLE = {
+  income: { color: GREEN, Icon: ArrowDownLeft, labelKey: "finance.income" },
+  expense: { color: RED, Icon: ArrowUpRight, labelKey: "finance.expense" },
 };
 
 const Muted = ({ children }) => (
@@ -58,6 +58,60 @@ const Muted = ({ children }) => (
     {children}
   </Typography>
 );
+
+const NUM_SX = {
+  fontSize: "13px",
+  fontWeight: 600,
+  fontVariantNumeric: "tabular-nums",
+  whiteSpace: "nowrap",
+};
+
+const fmtNumber = (val) =>
+  Math.abs(Number(val || 0)).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const EmptyAmount = () => (
+  <Typography component="span" sx={{ ...NUM_SX, fontWeight: 400, color: "text.disabled" }}>
+    —
+  </Typography>
+);
+
+// Signed amount in a currency column: green "+" money in, red "−" money out.
+const SignedAmount = ({ value }) => {
+  if (value === null || value === undefined) return <EmptyAmount />;
+  const income = value >= 0;
+  return (
+    <Typography component="span" sx={{ ...NUM_SX, color: income ? GREEN : RED }}>
+      {income ? "+" : "−"}
+      {fmtNumber(value)}
+    </Typography>
+  );
+};
+
+// Profit in the row's own currency, its code in small muted type after it.
+const ProfitAmount = ({ profit }) => {
+  if (!profit) return <EmptyAmount />;
+  return (
+    <Typography
+      component="span"
+      sx={{ ...NUM_SX, color: profit.value < 0 ? RED : "text.primary" }}
+    >
+      {profit.value < 0 && "−"}
+      {fmtNumber(profit.value)}
+      <Box component="span" sx={{ ml: 0.5, fontSize: "10.5px", fontWeight: 600, color: "text.secondary" }}>
+        {profit.currency}
+      </Box>
+    </Typography>
+  );
+};
+
+const AMOUNT_COLUMN = {
+  size: 120,
+  muiTableHeadCellProps: { align: "right" },
+  muiTableBodyCellProps: { align: "right" },
+};
 
 const CashFlowFilterDrawer = () => {
   const {
@@ -167,7 +221,7 @@ const CashFlow = () => {
         header: t("finance.cashBook.direction"),
         size: 130,
         Cell: ({ row }) => {
-          const { color, Icon, labelKey } = rowKind(row.original);
+          const { color, Icon, labelKey } = KIND_STYLE[rowAmounts(row.original).kind];
           const source = row.original.source;
           return (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -270,57 +324,25 @@ const CashFlow = () => {
           return name ? <Typography sx={{ fontSize: "13px" }}>{name}</Typography> : <Muted>—</Muted>;
         },
       },
+      // TMT and USD never share a column, so neither is ever summed into the
+      // other; a visa priced in both fills both.
       {
-        id: "amount",
-        header: t("finance.amount"),
-        size: 150,
-        muiTableHeadCellProps: { align: "right" },
-        muiTableBodyCellProps: { align: "right" },
-        Cell: ({ row }) => {
-          const r = row.original;
-          const cur = r.currency || "USD";
-          const numSx = { fontSize: "13.5px", fontWeight: 700, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
-
-          if (isCashRow(r)) {
-            const income = r.type === "INCOME";
-            return (
-              <Typography sx={{ ...numSx, color: income ? GREEN : RED }}>
-                {income ? "+" : "-"}
-                {fmtMoney(cashAmount(r), cur)}
-              </Typography>
-            );
-          }
-
-          // Visa: the same sale priced in two currencies, no profit side.
-          const dual = dualCurrencyAmounts(r);
-          if (dual) {
-            return (
-              <Box sx={{ lineHeight: 1.3 }}>
-                {dual.map(({ currency, value }) => (
-                  <Typography key={currency} sx={{ ...numSx, color: GREEN }}>
-                    +{fmtMoney(value, currency)}
-                  </Typography>
-                ))}
-              </Box>
-            );
-          }
-
-          // Every other project row: sale price on top, profit underneath.
-          const sale = Number(r.sale_price || 0);
-          const profit = Number(r.profit || 0);
-          return (
-            <Box sx={{ lineHeight: 1.25 }}>
-              <Typography sx={{ ...numSx, color: GREEN }}>+{fmtMoney(sale, cur)}</Typography>
-              <Typography sx={{ fontSize: "11.5px", color: "text.secondary", whiteSpace: "nowrap" }}>
-                {t("finance.profit")}{" "}
-                <Box component="span" sx={{ color: profit >= 0 ? GREEN : RED, fontWeight: 600 }}>
-                  {profit >= 0 ? "+" : "-"}
-                  {fmtMoney(Math.abs(profit), cur)}
-                </Box>
-              </Typography>
-            </Box>
-          );
-        },
+        id: "amount_tmt",
+        header: "TMT",
+        ...AMOUNT_COLUMN,
+        Cell: ({ row }) => <SignedAmount value={rowAmounts(row.original).amounts.TMT} />,
+      },
+      {
+        id: "amount_usd",
+        header: "USD",
+        ...AMOUNT_COLUMN,
+        Cell: ({ row }) => <SignedAmount value={rowAmounts(row.original).amounts.USD} />,
+      },
+      {
+        id: "profit",
+        header: t("finance.profit"),
+        ...AMOUNT_COLUMN,
+        Cell: ({ row }) => <ProfitAmount profit={rowAmounts(row.original).profit} />,
       },
       {
         id: "actions",
@@ -371,7 +393,7 @@ const CashFlow = () => {
     },
     muiTableBodyRowProps: ({ row }) => ({
       sx: {
-        boxShadow: `inset 3px 0 0 ${rowKind(row.original).color}`,
+        boxShadow: `inset 3px 0 0 ${KIND_STYLE[rowAmounts(row.original).kind].color}`,
         "&:hover td": { bgcolor: "action.hover" },
       },
     }),

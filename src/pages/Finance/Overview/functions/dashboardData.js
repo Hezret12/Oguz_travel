@@ -5,6 +5,7 @@ import {
   getDashboardCategoriesApi,
   getDashboardCategoryAnalyticsApi,
   getDashboardChartApi,
+  getDashboardMoneyOutApi,
   getDashboardOfficesApi,
   getDashboardOperatorsApi,
   getDashboardStatusApi,
@@ -44,7 +45,16 @@ export const toDashboardParams = ({ period, customRange, officeGuid, currency })
   };
 };
 
-export const dashboardGranularity = (period) => (period === "year" ? "month" : "day");
+// The bucket size the API picks for a period (see intervalFor on the server):
+// the month presets by day, the year by month, a picked range by its length —
+// about a month by day, about half a year by week, longer by month.
+export const dashboardGranularity = (period, customRange) => {
+  if (period === "year") return "month";
+  if (period === "thisMonth" || period === "lastMonth") return "day";
+  const { start, end } = getPeriodRange(period, customRange);
+  const days = end.diff(start, "day", true);
+  return days <= 45 ? "day" : days <= 190 ? "week" : "month";
+};
 
 // { status, data } envelope from the API's response interceptor.
 const unwrap = (res) => res?.data?.data;
@@ -60,8 +70,12 @@ const toI18nName = (name) =>
 const isDayKey = (period) => /^\d{4}-\d{2}-\d{2}$/.test(period);
 const periodDate = (period) => dayjs(isDayKey(period) ? period : `${period}-01`);
 
-const bucketLabel = (period, sameMonth) =>
-  isDayKey(period) ? periodDate(period).format(sameMonth ? "DD" : "DD.MM") : periodDate(period).format("MM.YYYY");
+// Day and week buckets are keyed by date: "DD" within one month, "DD.MM" within
+// one year, "DD.MM.YY" across years. Months read "MM.YYYY".
+const bucketLabel = (period, sameMonth, sameYear = true) =>
+  isDayKey(period)
+    ? periodDate(period).format(sameMonth ? "DD" : sameYear ? "DD.MM" : "DD.MM.YY")
+    : periodDate(period).format("MM.YYYY");
 
 // One `{ value, previous }` per figure and currency. The API sends the change as `difference`.
 const toPair = (metric) => ({
@@ -77,6 +91,8 @@ const mapCards = (raw) => ({
   cost: byCurrency(raw?.net_price),
   receivable: byCurrency(raw?.credit_price),
   profit: byCurrency(raw?.profit),
+  // Not a sale: locked months' salaries and USD bonuses (no chart bucket).
+  salary: byCurrency(raw?.salary),
 });
 
 export const EMPTY_CARDS = mapCards(null);
@@ -96,10 +112,11 @@ const mapChart = (raw, params) => {
     : all;
   const days = rows.map((r) => String(r.period)).filter(isDayKey);
   const sameMonth = days.length > 0 && days.every((p) => p.slice(0, 7) === days[0].slice(0, 7));
+  const sameYear = days.every((p) => p.slice(0, 4) === days[0].slice(0, 4));
   return rows.map((r) => ({
     key: r.period,
     date: periodDate(r.period).format("YYYY-MM-DD"),
-    label: bucketLabel(r.period, sameMonth),
+    label: bucketLabel(r.period, sameMonth, sameYear),
     count: num(r.sales_count),
     revenue: num(r.sale_price),
     cost: num(r.net_price),
@@ -107,6 +124,16 @@ const mapChart = (raw, params) => {
     balance: num(r.last_profit),
   }));
 };
+
+// Money out by group; `byPeriod` is keyed like the chart buckets ("YYYY-MM-DD" / "YYYY-MM").
+const toOutGroups = (g) => ({ cost: num(g?.cost), salary: num(g?.salary), expense: num(g?.expense) });
+const mapMoneyOut = (raw) => ({
+  totals: toOutGroups(raw?.totals),
+  previous: toOutGroups(raw?.previous),
+  byPeriod: new Map((Array.isArray(raw?.series) ? raw.series : []).map((r) => [String(r.period), toOutGroups(r)])),
+});
+
+export const EMPTY_MONEY_OUT = mapMoneyOut(null);
 
 const toStatus = (s) => ({ count: num(s?.count), amount: num(s?.total_sale) });
 
@@ -150,8 +177,8 @@ const mapOffices = (raw) =>
 // A change percentage is null where the previous period has nothing to compare with.
 const changeOrNull = (percentage, hasPrevious) => (hasPrevious ? num(percentage) : null);
 
-// Chart labels here are preformatted: "MM.YYYY" per month, "DD.MM" per day. Only the
-// running presets are cut, where "DD.MM" is always in the current year.
+// Points carry a sortable `key` ("YYYY-MM-DD" per day / week, "YYYY-MM" per month).
+// An older API sent only the preformatted label: "MM.YYYY", or "DD.MM" in the current year.
 const labelIsAhead = (label) => {
   const [first, second] = String(label).split(".");
   return second?.length === 4
@@ -162,7 +189,10 @@ const labelIsAhead = (label) => {
 // One service (or all): totals, change vs the previous period and the chart.
 const mapCategoryAnalytics = (raw, params) => {
   const points = Array.isArray(raw?.chart) ? raw.chart : [];
-  const chart = (isRunning(params) ? points.filter((p) => !labelIsAhead(p.label)) : points).map((p) => ({
+  const isAhead = (p) =>
+    p.key ? notYet(periodDate(p.key), isDayKey(p.key) ? "day" : "month") : labelIsAhead(p.label);
+  const chart = (isRunning(params) ? points.filter((p) => !isAhead(p)) : points).map((p) => ({
+    key: p.key ?? p.label,
     label: p.label,
     sale: num(p.sale),
     profit: num(p.profit),
@@ -185,17 +215,20 @@ const mapCategoryAnalytics = (raw, params) => {
 export const EMPTY_CATEGORY_ANALYTICS = mapCategoryAnalytics(null);
 
 // The previous result stays on screen while the next one loads.
-const useDashboardQuery = (name, apiFn, params, map) =>
+const useDashboardQuery = (name, apiFn, params, map, options = {}) =>
   useQuery({
     queryKey: ["dashboard", name, params],
     queryFn: async () => map(unwrap(await apiFn(params))),
     placeholderData: keepPreviousData,
     staleTime: STALE_MS,
+    ...options,
   });
 
 export const useDashboardCards = (params) => useDashboardQuery("cards", getDashboardCardsApi, params, mapCards);
 export const useDashboardChart = (params) =>
   useDashboardQuery("chart", getDashboardChartApi, params, (raw) => mapChart(raw, params));
+export const useDashboardMoneyOut = (params) =>
+  useDashboardQuery("moneyOut", getDashboardMoneyOutApi, params, mapMoneyOut);
 export const useDashboardStatus = (params) => useDashboardQuery("status", getDashboardStatusApi, params, mapStatus);
 export const useDashboardOperators = (params) =>
   useDashboardQuery("operators", getDashboardOperatorsApi, params, (raw) => mapOperators(raw, params.currency));
@@ -205,7 +238,8 @@ export const useDashboardCategoryAnalytics = (params) =>
   useDashboardQuery("categoryAnalytics", getDashboardCategoryAnalyticsApi, params, (raw) =>
     mapCategoryAnalytics(raw, params),
   );
-export const useDashboardOffices = (params) => useDashboardQuery("offices", getDashboardOfficesApi, params, mapOffices);
+export const useDashboardOffices = (params, options) =>
+  useDashboardQuery("offices", getDashboardOfficesApi, params, mapOffices, options);
 
 /** Loading / fetching / error flags and a refetch for a group of dashboard queries. */
 export const combineQueries = (queries) => ({

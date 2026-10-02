@@ -69,6 +69,27 @@ export const useFlowColors = () => {
   };
 };
 
+// Dashboard series: sales, cost and profit, the dataviz reference categorical
+// slots 1 (blue), 2 (orange) and 3 (aqua) — the same hue for the same measure
+// on every chart. Validated all-pairs on #ffffff / #12131A: every hard gate
+// passes in both modes; the light aqua sits under 3:1, so each chart ships a
+// legend with values and a table view. A previous-period line is the same
+// measure as sales, so it keeps the sales hue — dashed and faded.
+// Money out stacks cost (orange), salaries (violet, slot 7) and kassa expenses
+// (yellow, slot 4); validated in stack order beside sales. The light yellow
+// sits under 3:1, so the stack keeps 2px surface gaps, a legend and a table.
+export const useDashboardColors = () => {
+  const { palette } = useTheme();
+  const dark = palette.mode === "dark";
+  return {
+    sale: dark ? "#3987e5" : "#2a78d6",
+    cost: dark ? "#d95926" : "#eb6834",
+    profit: dark ? "#199e70" : "#1baf7a",
+    salary: dark ? "#9085e9" : "#4a3aa7",
+    expense: dark ? "#c98500" : "#eda100",
+  };
+};
+
 // Slice colours for part-to-whole donuts, in fixed order (never cycled):
 // the dataviz reference categorical slots 1–5, plus a neutral for "Other".
 // Validated adjacent-pair on #ffffff / #12131A — all hard gates pass; in light
@@ -94,6 +115,7 @@ export const KPI_TONES = {
   inflow: { light: "#0E8584", dark: "#13A89A" }, // brand teal
   credit: { light: "#B7791F", dark: "#C98500" }, // amber — money still owed
   profit: { light: "#2A78D6", dark: "#3987E5" }, // blue
+  expense: { light: "#64748B", dark: "#94A3B8" }, // slate — office running cost, not a sale
 };
 
 // Shared look for x-charts (v9 class names): no axis lines or ticks, a
