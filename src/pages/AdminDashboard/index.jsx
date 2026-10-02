@@ -114,6 +114,10 @@ const AdminDashboard = () => {
     [officesData, selectedLang],
   );
   const serviceName = serviceOptions.find((s) => s.value === service)?.label;
+  // The saved prefs arrive before the option lists load; until the stored guid
+  // is among the options the selects show "all" instead of an unknown value.
+  const officeValue = officeOptions.some((o) => o.value === office) ? office : "";
+  const serviceValue = serviceName ? service : "";
   const ownOfficeName = typeof user?.office === "string" ? user.office : selectedLang(user?.office);
   const selectService = (next) => updatePrefs({ service: next });
 
@@ -176,7 +180,7 @@ const AdminDashboard = () => {
             <TextField
               select
               size="small"
-              value={office}
+              value={officeValue}
               onChange={(e) => updatePrefs({ office: e.target.value })}
               sx={{
                 width: 180,
@@ -248,7 +252,7 @@ const AdminDashboard = () => {
                 currency={currency}
                 granularity={granularity}
                 services={serviceOptions}
-                service={service}
+                service={serviceValue}
                 onServiceChange={selectService}
                 loading={isServiceFetching}
               />
