@@ -403,7 +403,6 @@
     "department": "Department",
     "position": "Position",
     "translator": "Translator",
-    "category": "Category",
     "referralCountry": "Referral countries"
   },
   "turkish": {
@@ -1204,6 +1203,7 @@
       "price": "Price"
     },
     "cashBook": {
+      "otherCategory": "Other",
       "date": "Date",
       "dateFrom": "From date",
       "dateTo": "To date",
@@ -1218,15 +1218,15 @@
       "close": "Close",
       "operations": "{{count}} operations",
       "projectSale": "Sale",
-      "projectLocked": "Created automatically from the project — edit it in its own section",
-      "allTabNote": "“All” shows project sales and cash-book movements together. Cash income also includes sales money handed in by offices — pick “Cash book” or “Project” to compare totals.",
+      "projectLocked": "Created automatically from a service — edit it in its own section",
+      "allTabNote": "“All” shows service sales and cash desk movements together. Cash income also includes sales money handed in by offices — pick “Cash desk” or “Services” to compare totals.",
       "tabs": {
         "all": "All",
-        "kassa": "Cash book",
-        "project": "Project operations"
+        "kassa": "Cash desk",
+        "project": "Services"
       },
       "source": {
-        "PROJECT": "Project",
+        "PROJECT": "Service",
         "MANUAL": "Manual",
         "EXCEL": "Excel"
       },
@@ -1287,16 +1287,6 @@
       "nameRu": "Position Name, Ru",
       "nameEn": "Position Name, En",
       "deleteConfirm": "Are you sure you want to delete this position?"
-    },
-    "category": {
-      "title": "Categories",
-      "addCategory": "Add Category",
-      "editCategory": "Edit Category",
-      "name": "Category Name",
-      "nameTk": "Category Name, Tk",
-      "nameRu": "Category Name, Ru",
-      "nameEn": "Category Name, En",
-      "deleteConfirm": "Are you sure you want to delete this category?"
     },
     "referralCountry": {
       "title": "Referral countries",

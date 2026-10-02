@@ -171,7 +171,10 @@ export const tooltipSlotProps = {
 };
 
 // Segmented control look shared by the period and currency switches.
-export const segmentedSx = {
+// A function so the selected pill can lift in dark mode: there
+// background.paper is darker than the action.hover track and would read as a
+// hole, not a raised tab.
+export const segmentedSx = (theme) => ({
   p: 0.375,
   gap: 0.375,
   borderRadius: "10px",
@@ -193,9 +196,14 @@ export const segmentedSx = {
       color: "text.primary",
       backgroundColor: "background.paper",
       boxShadow: "0 1px 2px rgba(0,0,0,0.12)",
+      ...theme.applyStyles("dark", {
+        // Neutral lift; the dark action.selected is teal-tinted.
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.4)",
+      }),
     },
   },
-};
+});
 
 // Quiet table: light header, roomy rows, hairline separators.
 export const tableSx = (theme) => ({

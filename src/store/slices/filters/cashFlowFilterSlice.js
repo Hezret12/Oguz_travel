@@ -6,7 +6,6 @@ export const cashFlowFilterSlice = createFilterSlice({
     search: '',
     source: '',
     type: '',
-    category_guid: '',
     date_from: '',
     date_to: '',
     receiver_opr_guid: '',

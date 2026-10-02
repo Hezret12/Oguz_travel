@@ -403,7 +403,6 @@
     "department": "Bölüm",
     "position": "Wezipe",
     "translator": "Terjimeçi",
-    "category": "Kategoriýa",
     "referralCountry": "Ýollanma ýurtlary"
   },
   "turkish": {
@@ -1190,11 +1189,12 @@
       "price": "Bahasy"
     },
     "cashBook": {
+      "otherCategory": "Beýlekiler",
       "date": "Sene",
       "dateFrom": "Senesinden",
       "dateTo": "Senesine çenli",
       "direction": "Görnüşi",
-      "description": "Açyklama",
+      "description": "Düşündiriş",
       "giver": "Tabşyran",
       "receiver": "Kabul eden",
       "company": "Kärhana",
@@ -1204,15 +1204,15 @@
       "close": "Ýapmak",
       "operations": "{{count}} amal",
       "projectSale": "Satyş",
-      "projectLocked": "Proýektden awtomatik gelýär — üýtgetmek üçin öz bölüminde düzediň",
-      "allTabNote": "«Hemmesi» proýekt satyşlaryny we kassa hereketlerini bile görkezýär. Kassa girdejisi ofislerden tabşyrylan satyş pullaryny hem öz içine alýar — jemleri deňeşdirmek üçin «Kassa» ýa-da «Proýekt» bölümini saýlaň.",
+      "projectLocked": "Hyzmatdan awtomatik gelýär — üýtgetmek üçin öz bölüminde düzediň",
+      "allTabNote": "«Ählisi» hyzmat satyşlaryny we kassa hereketlerini bile görkezýär. Kassa girdejisi ofislerden tabşyrylan satyş pullaryny hem öz içine alýar — jemleri deňeşdirmek üçin «Kassa» ýa-da «Hyzmatlar» bölümini saýlaň.",
       "tabs": {
-        "all": "Hemmesi",
+        "all": "Ählisi",
         "kassa": "Kassa",
-        "project": "Proýekt amallary"
+        "project": "Hyzmatlar"
       },
       "source": {
-        "PROJECT": "Proýekt",
+        "PROJECT": "Hyzmat",
         "MANUAL": "Elde goşulan",
         "EXCEL": "Excel"
       },
@@ -1273,16 +1273,6 @@
       "nameRu": "Wezipe ady, Ru",
       "nameEn": "Wezipe ady, En",
       "deleteConfirm": "Bu wezipäni pozmak isleýändigiňize ynanýarsyňyzmy?"
-    },
-    "category": {
-      "title": "Kategoriýalar",
-      "addCategory": "Kategoriýa goşmak",
-      "editCategory": "Kategoriýany üýtgetmek",
-      "name": "Kategoriýa ady",
-      "nameTk": "Kategoriýa ady, Tk",
-      "nameRu": "Kategoriýa ady, Ru",
-      "nameEn": "Kategoriýa ady, En",
-      "deleteConfirm": "Bu kategoriýany pozmak isleýändigiňize ynanýarsyňyzmy?"
     },
     "referralCountry": {
       "title": "Ýollanma ýurtlary",

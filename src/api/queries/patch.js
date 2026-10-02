@@ -230,10 +230,6 @@ export const updateTotalCalculationApi = async (data) => {
   return await api.patchPrivate('/total-calculations/update-total-calculation', data);
 };
 
-export const updateCategoryApi = async (data) => {
-  return await api.patchPrivate('/category/update-category', data);
-};
-
 export const updateReferralCountryApi = async (data) => {
   return await api.patchPrivate('/refferal-country/update-refferal-country', data);
 };

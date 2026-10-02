@@ -4,7 +4,7 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import { Box, Chip, ToggleButton, ToggleButtonGroup, Tooltip, Typography, alpha } from "@mui/material";
-import { ArrowDownLeft, ArrowUpRight, Layers, Lock, Wallet, Zap } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Lock } from "lucide-react";
 
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import TableErrorState from "../../../components/TableErrorState";
@@ -32,18 +32,17 @@ import CashFlowExportModal from "./Contents/CashFlowExportModal";
 import ExportExcelButton from "../../../components/ExportExcelButton";
 import AddCashTransactionModal from "./AddCashTransactionModal";
 import EditCashTransactionModal from "./EditCashTransactionModal";
-import { rowAmounts } from "./functions/cashFlowHelpers";
+import { isCashRow, rowAmounts } from "./functions/cashFlowHelpers";
 import { segmentedSx } from "../Overview/functions/analyticsFormat";
 
 const GREEN = "#16a34a";
 const RED = "#dc2626";
-const BLUE = "#2563eb";
 
 // Tab value → `source` query param
 const SOURCE_TABS = [
-  { value: "", labelKey: "finance.cashBook.tabs.all", Icon: Layers },
-  { value: "MANUAL,EXCEL", labelKey: "finance.cashBook.tabs.kassa", Icon: Wallet },
-  { value: "PROJECT", labelKey: "finance.cashBook.tabs.project", Icon: Zap },
+  { value: "", labelKey: "finance.cashBook.tabs.all" },
+  { value: "MANUAL,EXCEL", labelKey: "finance.cashBook.tabs.kassa" },
+  { value: "PROJECT", labelKey: "finance.cashBook.tabs.project" },
 ];
 
 // Every row is money in or out — a visa or ticket sale is Girdeji, the
@@ -254,8 +253,11 @@ const CashFlow = () => {
         header: t("category"),
         size: 150,
         Cell: ({ row }) => {
+          // Cash-ledger rows have no category of their own — always "Other".
           const cat = row.original.category;
-          const label = cat ? selectedLang(cat.name) || cat.name?.tk || cat.name?.en || "" : "";
+          const label = isCashRow(row.original)
+            ? t("finance.cashBook.otherCategory")
+            : cat ? selectedLang(cat.name) || cat.name?.tk || cat.name?.en || "" : "";
           if (!label) return <Muted>—</Muted>;
           return (
             <Chip
@@ -399,7 +401,7 @@ const CashFlow = () => {
     }),
     renderTopToolbarCustomActions: () => (
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, py: 0.5, flexWrap: "wrap", width: "100%" }}>
-        {/* Same segmented control as the Finance overview period/currency switches */}
+        {/* Same quiet segmented control as the Finance overview switches */}
         <ToggleButtonGroup
           exclusive
           value={activeSource}
@@ -407,19 +409,15 @@ const CashFlow = () => {
           sx={[
             segmentedSx,
             {
-              "& .MuiToggleButton-root": { height: 34, px: 1.75, gap: 0.75, fontSize: "13px" },
-              "& .MuiToggleButton-root.Mui-selected, & .MuiToggleButton-root.Mui-selected:hover": {
-                color: "#fff",
-                backgroundColor: BLUE,
-                boxShadow: `0 1px 3px ${alpha(BLUE, 0.4)}`,
-              },
-              "& .MuiToggleButton-root.Mui-selected:hover": { backgroundColor: "#1d4ed8" },
+              border: "1px solid",
+              borderColor: "divider",
+              "& .MuiToggleButton-root": { height: 30, px: 2, fontSize: "13px", fontWeight: 500 },
+              "& .MuiToggleButton-root.Mui-selected": { fontWeight: 600 },
             },
           ]}
         >
-          {SOURCE_TABS.map(({ value, labelKey, Icon }) => (
+          {SOURCE_TABS.map(({ value, labelKey }) => (
             <ToggleButton key={value || "all"} value={value}>
-              <Icon size={15} strokeWidth={2.2} />
               {t(labelKey)}
             </ToggleButton>
           ))}

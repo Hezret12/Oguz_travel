@@ -587,8 +587,6 @@ export const useValidShema = () => {
       .required(t("validation.required")),
     currency: yup.string().required(t("validation.required")),
     datetime: yup.string().nullable().required(t("validation.dateRequired")),
-    category_guid: yup.string().nullable(),
-    receiver_opr_guid: yup.string().nullable(),
     description: yup.string().nullable(),
     giver: yup.string().nullable().max(255),
     receiver: yup.string().nullable().max(255),
@@ -624,25 +622,6 @@ export const useValidShema = () => {
     description: yup.string().trim().required(t("validation.required")),
   });
 
-  const addCategory = yup.object({
-    name_tk: yup
-      .string()
-      .trim()
-      .required(t("validation.required") || "Hökman girizilmeli"),
-    name_ru: stringOptionalValidSchema(),
-    name_en: stringOptionalValidSchema(),
-  });
-
-  const editCategory = yup.object({
-    guid: guidRequiredValidSchema(),
-    name_tk: yup
-      .string()
-      .trim()
-      .required(t("validation.required") || "Hökman girizilmeli"),
-    name_ru: stringOptionalValidSchema(),
-    name_en: stringOptionalValidSchema(),
-  });
-
   const addReferralCountry = yup.object({
     name: yup.string().trim().required(t("validation.required")),
   });
@@ -675,8 +654,6 @@ export const useValidShema = () => {
     editDepartment,
     addPosition,
     editPosition,
-    addCategory,
-    editCategory,
     addReferralCountry,
     editReferralCountry,
     cashTransaction,
