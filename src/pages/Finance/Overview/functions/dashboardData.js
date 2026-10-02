@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQueries, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import {
   getDashboardCardsApi,
@@ -87,6 +87,9 @@ const byCurrency = (metric) => ({ USD: toPair(metric?.usd), TMT: toPair(metric?.
 
 const mapCards = (raw) => ({
   count: toPair(raw?.sales_count),
+  // Every sale once, whatever its currency (a visa priced in both is one sale).
+  // An API without it gives the request currency's count.
+  countAll: toPair(raw?.sales_count_all ?? raw?.sales_count),
   revenue: byCurrency(raw?.sale_price),
   cost: byCurrency(raw?.net_price),
   receivable: byCurrency(raw?.credit_price),
@@ -118,6 +121,7 @@ const mapChart = (raw, params) => {
     date: periodDate(r.period).format("YYYY-MM-DD"),
     label: bucketLabel(r.period, sameMonth, sameYear),
     count: num(r.sales_count),
+    countAll: num(r.count_all ?? r.sales_count),
     revenue: num(r.sale_price),
     cost: num(r.net_price),
     profit: num(r.profit),
@@ -135,7 +139,7 @@ const mapMoneyOut = (raw) => ({
 
 export const EMPTY_MONEY_OUT = mapMoneyOut(null);
 
-const toStatus = (s) => ({ count: num(s?.count), amount: num(s?.total_sale) });
+const toStatus = (s) => ({ count: num(s?.count), countAll: num(s?.count_all ?? s?.count), amount: num(s?.total_sale) });
 
 const mapStatus = (raw) => ({
   PAID: toStatus(raw?.statuses?.paid),
@@ -152,6 +156,7 @@ const mapOperators = (raw, currency) =>
     guid: o.operator_guid,
     fullName: o.operator_name,
     count: num(o.sales_count),
+    countAll: o.count_all == null ? null : num(o.count_all),
     [currency]: { revenue: num(o.sale_price), profit: num(o.profit) },
   }));
 
@@ -160,6 +165,7 @@ const mapCategories = (raw, currency) =>
     key: c.category_guid,
     name: toI18nName(c.category_name),
     count: num(c.sales_count),
+    countAll: c.count_all == null ? null : num(c.count_all),
     [currency]: { revenue: num(c.sale_price), cost: num(c.net_price), profit: num(c.profit) },
   }));
 
@@ -240,6 +246,119 @@ export const useDashboardCategoryAnalytics = (params) =>
   );
 export const useDashboardOffices = (params, options) =>
   useDashboardQuery("offices", getDashboardOfficesApi, params, mapOffices, options);
+
+// ── Both currencies at once ────────────────────────────────────────────────
+// The endpoints answer in one currency, so a page that shows TMT and USD side
+// by side asks once per currency. The figures stay apart; only the sales count
+// is shared (`countAll`).
+export const BOTH_CURRENCIES = ["TMT", "USD"];
+
+// One query per currency merged into `{ TMT, USD }`; it behaves like a single
+// query for combineQueries. `params` carries no currency of its own.
+const useDashboardQueryByCurrency = (name, apiFn, params, map, options = {}) =>
+  useQueries({
+    queries: BOTH_CURRENCIES.map((currency) => {
+      const currencyParams = { ...params, currency };
+      return {
+        queryKey: ["dashboard", name, currencyParams],
+        queryFn: async () => map(unwrap(await apiFn(currencyParams)), currencyParams),
+        placeholderData: keepPreviousData,
+        staleTime: STALE_MS,
+        ...options,
+      };
+    }),
+    combine: (results) => ({
+      data: results.every((r) => r.data)
+        ? Object.fromEntries(BOTH_CURRENCIES.map((currency, i) => [currency, results[i].data]))
+        : undefined,
+      isLoading: results.some((r) => r.isLoading),
+      isFetching: results.some((r) => r.isFetching),
+      isError: results.some((r) => r.isError),
+      dataUpdatedAt: Math.max(0, ...results.map((r) => r.dataUpdatedAt || 0)),
+      refetch: () => Promise.all(results.map((r) => r.refetch())),
+    }),
+  });
+
+// Rows of both currencies joined by `idKey`; each keeps its figures under
+// `TMT` / `USD` (zeros where a currency has none). `count` is the
+// currency-free count, or the two counts added on an API without it.
+const ZERO_FIGURES = { revenue: 0, cost: 0, profit: 0 };
+const mergeByCurrency = (byCurrency, idKey) => {
+  const rows = new Map();
+  BOTH_CURRENCIES.forEach((currency) => {
+    (byCurrency?.[currency] ?? []).forEach((item) => {
+      const row = rows.get(item[idKey]) ?? {
+        ...item,
+        count: 0,
+        countAll: null,
+        ...Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, ZERO_FIGURES])),
+      };
+      row.count += item.count;
+      row.countAll = row.countAll ?? item.countAll;
+      row[currency] = item[currency];
+      rows.set(item[idKey], row);
+    });
+  });
+  return [...rows.values()].map(({ countAll, ...row }) => ({ ...row, count: countAll ?? row.count }));
+};
+
+// Chart buckets of both currencies by key: amounts per currency, one count.
+// Week buckets only come where there are sales, so the two lists can differ;
+// the keys ("YYYY-MM-DD" / "YYYY-MM") sort as text.
+const EMPTY_BUCKET = { count: 0, countAll: 0, revenue: 0, cost: 0, profit: 0, balance: 0 };
+const mergeBuckets = (byCurrency) => {
+  const byKey = new Map();
+  BOTH_CURRENCIES.forEach((currency) => {
+    (byCurrency?.[currency] ?? []).forEach((bucket) => {
+      const row = byKey.get(bucket.key) ?? {
+        key: bucket.key,
+        label: bucket.label,
+        count: bucket.countAll,
+        ...Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, EMPTY_BUCKET])),
+      };
+      row[currency] = bucket;
+      byKey.set(bucket.key, row);
+    });
+  });
+  return [...byKey.values()].sort((a, b) => String(a.key).localeCompare(String(b.key)));
+};
+
+export const useDashboardChartByCurrency = (params) => {
+  const query = useDashboardQueryByCurrency("chart", getDashboardChartApi, params, mapChart);
+  return { ...query, data: query.data && mergeBuckets(query.data) };
+};
+export const useDashboardMoneyOutByCurrency = (params) =>
+  useDashboardQueryByCurrency("moneyOut", getDashboardMoneyOutApi, params, mapMoneyOut);
+export const useDashboardStatusByCurrency = (params) =>
+  useDashboardQueryByCurrency("status", getDashboardStatusApi, params, mapStatus);
+export const useDashboardCategoryAnalyticsByCurrency = (params) =>
+  useDashboardQueryByCurrency("categoryAnalytics", getDashboardCategoryAnalyticsApi, params, mapCategoryAnalytics);
+export const useDashboardOperatorsByCurrency = (params) => {
+  const query = useDashboardQueryByCurrency("operators", getDashboardOperatorsApi, params, (raw, p) => mapOperators(raw, p.currency));
+  return { ...query, data: query.data && mergeByCurrency(query.data, "guid") };
+};
+export const useDashboardCategoriesByCurrency = (params) => {
+  const query = useDashboardQueryByCurrency("categories", getDashboardCategoriesApi, params, (raw, p) => mapCategories(raw, p.currency));
+  return { ...query, data: query.data && mergeByCurrency(query.data, "key") };
+};
+// Offices keyed by guid with { sale, net, profit, profitChange } per currency.
+export const useDashboardOfficesByCurrency = (params, options) => {
+  const query = useDashboardQueryByCurrency("offices", getDashboardOfficesApi, params, mapOffices, options);
+  const data =
+    query.data &&
+    [...new Set(BOTH_CURRENCIES.flatMap((c) => query.data[c].map((o) => o.guid)))].map((guid) => {
+      const of = (currency) => query.data[currency].find((o) => o.guid === guid);
+      const any = BOTH_CURRENCIES.map(of).find(Boolean);
+      return {
+        guid,
+        name: any.name,
+        ...Object.fromEntries(
+          BOTH_CURRENCIES.map((c) => [c, of(c) ?? { sale: 0, net: 0, profit: 0, profitChange: 0 }]),
+        ),
+      };
+    });
+  return { ...query, data };
+};
 
 /** Loading / fetching / error flags and a refetch for a group of dashboard queries. */
 export const combineQueries = (queries) => ({

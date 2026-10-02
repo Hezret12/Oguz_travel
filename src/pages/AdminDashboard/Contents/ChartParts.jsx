@@ -1,7 +1,8 @@
 import { Box, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
-import { formatPercent } from "../../Finance/Overview/functions/analyticsFormat";
+import { formatAmount, formatPercent } from "../../Finance/Overview/functions/analyticsFormat";
+import { BOTH_CURRENCIES } from "../../Finance/Overview/functions/dashboardData";
 
 // Change vs the previous period: arrow + percentage in a quiet pill, green when
 // the move is good for the business and red when it is not (cost ↑ reads red).
@@ -72,4 +73,72 @@ export const LegendStat = ({ color, shape = "line", dashed, label, value, change
 // A row of LegendStats above a chart.
 export const StatRow = ({ children }) => (
   <Box sx={{ display: "flex", gap: { xs: 2.5, sm: 4 }, flexWrap: "wrap" }}>{children}</Box>
+);
+
+// TMT and USD as two panels, side by side from `md` up (or always stacked):
+// amounts in two currencies never share an axis or a sum. `children` renders
+// one panel for the currency it is given.
+export const CurrencyPanels = ({ children, stacked = false }) => (
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: { xs: "minmax(0,1fr)", md: stacked ? "minmax(0,1fr)" : "repeat(2, minmax(0,1fr))" },
+      gap: 3,
+    }}
+  >
+    {BOTH_CURRENCIES.map((currency) => (
+      <Box key={currency} sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+        <CurrencyTag currency={currency} />
+        {children(currency)}
+      </Box>
+    ))}
+  </Box>
+);
+
+// Small neutral tag naming a panel's currency.
+export const CurrencyTag = ({ currency }) => (
+  <Typography
+    component="span"
+    sx={{
+      alignSelf: "flex-start",
+      px: 0.875,
+      py: 0.25,
+      borderRadius: "6px",
+      fontSize: "0.7rem",
+      fontWeight: 700,
+      letterSpacing: "0.04em",
+      lineHeight: 1.4,
+      color: "text.secondary",
+      backgroundColor: "action.hover",
+      border: "1px solid",
+      borderColor: "divider",
+    }}
+  >
+    {currency}
+  </Typography>
+);
+
+// One amount per currency, one per line, for table cells. A currency with
+// nothing booked reads as a muted dash. `color(value)` may colour a line.
+export const AmountLines = ({ values, color, weight = 600 }) => (
+  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.25 }}>
+    {BOTH_CURRENCIES.map((currency) => {
+      const value = values?.[currency] ?? 0;
+      return (
+        <Typography
+          key={currency}
+          component="span"
+          sx={{
+            fontSize: "inherit",
+            fontWeight: value ? weight : 400,
+            fontVariantNumeric: "tabular-nums",
+            whiteSpace: "nowrap",
+            color: value ? color?.(value) ?? "inherit" : "text.disabled",
+          }}
+        >
+          {value ? formatAmount(value, currency) : `— ${currency}`}
+        </Typography>
+      );
+    })}
+  </Box>
 );

@@ -3,6 +3,8 @@ import { CheckCircle2, CircleDashed, Clock, RotateCcw } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import SectionCard, { EmptyState } from "../../Finance/Overview/Contents/SectionCard";
 import { formatAmount, formatPercent, percentOf } from "../../Finance/Overview/functions/analyticsFormat";
+import { BOTH_CURRENCIES } from "../../Finance/Overview/functions/dashboardData";
+import { AmountLines } from "./ChartParts";
 import { SALES_PAYMENT_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 
 const STATUSES = [
@@ -12,11 +14,17 @@ const STATUSES = [
   { key: "NONE", icon: CircleDashed, color: null, labelKey: "dashboard.noStatus" },
 ];
 
-// How the period's sales stand on payment: the receivable up top, then one
-// segmented bar (share of sales count) and a row per status with its icon.
-const PaymentStatusCard = ({ payment, receivable, currency }) => {
+// How the period's sales stand on payment: the receivable in both currencies
+// up top, then one segmented bar (share of sales count) and a row per status
+// with its count and its amount in each currency. `payment` is { TMT, USD };
+// the count is the currency-free one, the same in both.
+const PaymentStatusCard = ({ payment, receivable }) => {
   const { t } = useLocale();
-  const items = STATUSES.map((s) => ({ ...s, ...payment[s.key] })).filter((s) => s.count > 0);
+  const items = STATUSES.map((s) => ({
+    ...s,
+    count: payment.TMT[s.key].countAll,
+    amounts: Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, payment[c][s.key].amount])),
+  })).filter((s) => s.count > 0);
   const totalCount = items.reduce((sum, s) => sum + s.count, 0);
 
   return (
@@ -27,9 +35,14 @@ const PaymentStatusCard = ({ payment, receivable, currency }) => {
         <>
           <Box>
             <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{t("dashboard.receivable")}</Typography>
-            <Typography sx={{ fontSize: "1.9rem", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em" }}>
-              {formatAmount(receivable, currency)}
-            </Typography>
+            {BOTH_CURRENCIES.map((currency) => (
+              <Typography
+                key={currency}
+                sx={{ fontSize: "1.5rem", fontWeight: 700, lineHeight: 1.25, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums" }}
+              >
+                {formatAmount(receivable[currency], currency)}
+              </Typography>
+            ))}
           </Box>
 
           {/* One bar, segments separated by a 2px surface gap */}
@@ -75,9 +88,9 @@ const PaymentStatusCard = ({ payment, receivable, currency }) => {
                       {t("dashboard.salesN", { count: s.count })}
                     </Typography>
                   </Box>
-                  <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-                    {formatAmount(s.amount, currency)}
-                  </Typography>
+                  <Box sx={{ fontSize: "0.875rem" }}>
+                    <AmountLines values={s.amounts} />
+                  </Box>
                   <Typography sx={{ fontSize: "0.75rem", color: "text.secondary", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
                     {formatPercent(percentOf(s.count, totalCount), 0)}
                   </Typography>
