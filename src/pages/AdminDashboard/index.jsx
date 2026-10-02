@@ -9,10 +9,10 @@ import { useAuth } from "../../context/useAuth";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllCategoriesApi, getAllOfficeApi } from "../../api/queries/getters";
 import PeriodRangeFilter from "../Finance/Overview/Contents/PeriodRangeFilter";
-import CurrencySwitch from "../Finance/Overview/Contents/CurrencySwitch";
 import { formatPercent, percentOf } from "../Finance/Overview/functions/analyticsFormat";
 import { useAnalyticsPrefs } from "../Finance/Overview/functions/useAnalyticsPrefs";
 import {
+  BOTH_CURRENCIES,
   EMPTY_CARDS,
   EMPTY_CATEGORY_ANALYTICS,
   EMPTY_MONEY_OUT,
@@ -21,13 +21,13 @@ import {
   dashboardGranularity,
   toDashboardParams,
   useDashboardCards,
-  useDashboardCategories,
-  useDashboardCategoryAnalytics,
-  useDashboardChart,
-  useDashboardMoneyOut,
-  useDashboardOffices,
-  useDashboardOperators,
-  useDashboardStatus,
+  useDashboardCategoriesByCurrency,
+  useDashboardCategoryAnalyticsByCurrency,
+  useDashboardChartByCurrency,
+  useDashboardMoneyOutByCurrency,
+  useDashboardOfficesByCurrency,
+  useDashboardOperatorsByCurrency,
+  useDashboardStatusByCurrency,
 } from "../Finance/Overview/functions/dashboardData";
 import KpiStrip from "./Contents/KpiStrip";
 import TrendCard from "./Contents/TrendCard";
@@ -43,8 +43,16 @@ const CONTROL_HEIGHT = 38;
 
 const listOf = (data) => (Array.isArray(data) ? data : []);
 
+// Empty `{ TMT, USD }` stand-ins while the per-currency queries load.
+const bothOf = (empty) => Object.fromEntries(BOTH_CURRENCIES.map((currency) => [currency, empty]));
+const EMPTY_BY_CURRENCY = {
+  analytics: bothOf(EMPTY_CATEGORY_ANALYTICS),
+  payment: bothOf(EMPTY_PAYMENT),
+  moneyOut: bothOf(EMPTY_MONEY_OUT),
+};
+
 // Sales, cost, profit, receivables and salaries for the period, by service
-// and by operator. Who may open the dashboard ("*" or "/") sees every office
+// and by operator, in TMT and USD at once — never added, no currency picker. Who may open the dashboard ("*" or "/") sees every office
 // and can narrow it to one; everyone else sees their own office only.
 const AdminDashboard = () => {
   const { t, selectedLang } = useLocale();
@@ -55,7 +63,7 @@ const AdminDashboard = () => {
 
   // `service` is the category picked for the trend and operators ("" = all).
   const [prefs, updatePrefs] = useAnalyticsPrefs(STORAGE_KEY, { service: "", office: "" });
-  const { period, customRange, currency, service, office } = prefs;
+  const { period, customRange, service, office } = prefs;
   const officeGuid = canSeeAllOffices ? office || null : user?.office_guid || null;
 
   const rangeStart = customRange?.start;
@@ -66,9 +74,8 @@ const AdminDashboard = () => {
         period,
         customRange: rangeStart && rangeEnd ? { start: rangeStart, end: rangeEnd } : null,
         officeGuid,
-        currency,
       }),
-    [period, rangeStart, rangeEnd, officeGuid, currency],
+    [period, rangeStart, rangeEnd, officeGuid],
   );
   const serviceParams = useMemo(() => (service ? { ...params, category_guid: service } : params), [params, service]);
   // The office ranking covers every office, so it drops the office filter and
@@ -81,13 +88,13 @@ const AdminDashboard = () => {
   }, [params]);
 
   const cardsQuery = useDashboardCards(params);
-  const chartQuery = useDashboardChart(params);
-  const moneyOutQuery = useDashboardMoneyOut(params);
-  const statusQuery = useDashboardStatus(params);
-  const categoriesQuery = useDashboardCategories(params);
-  const analyticsQuery = useDashboardCategoryAnalytics(serviceParams);
-  const operatorsQuery = useDashboardOperators(serviceParams);
-  const officesQuery = useDashboardOffices(officesParams, { enabled: showOffices });
+  const chartQuery = useDashboardChartByCurrency(params);
+  const moneyOutQuery = useDashboardMoneyOutByCurrency(params);
+  const statusQuery = useDashboardStatusByCurrency(params);
+  const categoriesQuery = useDashboardCategoriesByCurrency(params);
+  const analyticsQuery = useDashboardCategoryAnalyticsByCurrency(serviceParams);
+  const operatorsQuery = useDashboardOperatorsByCurrency(serviceParams);
+  const officesQuery = useDashboardOfficesByCurrency(officesParams, { enabled: showOffices });
   const pageQueries = [cardsQuery, chartQuery, moneyOutQuery, statusQuery, categoriesQuery, ...(showOffices ? [officesQuery] : [])];
   const serviceQueries = [analyticsQuery, operatorsQuery];
   const { isLoading, isError, refetch, updatedAt } = combineQueries([...pageQueries, ...serviceQueries]);
@@ -125,13 +132,12 @@ const AdminDashboard = () => {
   const cards = cardsQuery.data ?? EMPTY_CARDS;
   const buckets = chartQuery.data ?? [];
   const granularity = dashboardGranularity(period, customRange);
-  const revenue = cards.revenue[currency].value;
   const kpis = [
     {
       key: "revenue",
       label: t("dashboard.sales"),
       figure: cards.revenue,
-      note: t("dashboard.salesN", { count: cards.count.value }),
+      note: t("dashboard.salesN", { count: cards.countAll.value }),
       upIsGood: true,
     },
     { key: "cost", label: <BaseFareLabel />, figure: cards.cost, upIsGood: false },
@@ -139,7 +145,12 @@ const AdminDashboard = () => {
       key: "profit",
       label: t("dashboard.profit"),
       figure: cards.profit,
-      note: revenue ? t("finance.analytics.margin", { value: formatPercent(percentOf(cards.profit[currency].value, revenue)) }) : null,
+      hint: (currency) => {
+        const revenue = cards.revenue[currency].value;
+        return revenue
+          ? t("finance.analytics.margin", { value: formatPercent(percentOf(cards.profit[currency].value, revenue)) })
+          : null;
+      },
       upIsGood: true,
     },
     { key: "receivable", label: t("dashboard.receivable"), figure: cards.receivable, upIsGood: false },
@@ -204,7 +215,6 @@ const AdminDashboard = () => {
 
           <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />
 
-          <CurrencySwitch value={currency} onChange={(next) => updatePrefs({ currency: next })} />
 
           <Tooltip title={t("dashboard.refresh")} arrow>
             <span>
@@ -244,13 +254,12 @@ const AdminDashboard = () => {
             transition: "opacity .2s ease",
           }}
         >
-          <KpiStrip cells={kpis} currency={currency} compareLabel={t(`finance.analytics.vsPeriod.${period}`)} />
+          <KpiStrip cells={kpis} compareLabel={t(`finance.analytics.vsPeriod.${period}`)} />
 
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, lg: 8 }} sx={{ display: "flex", flexDirection: "column" }}>
               <TrendCard
-                analytics={analyticsQuery.data ?? EMPTY_CATEGORY_ANALYTICS}
-                currency={currency}
+                analytics={analyticsQuery.data ?? EMPTY_BY_CURRENCY.analytics}
                 granularity={granularity}
                 services={serviceOptions}
                 service={serviceValue}
@@ -260,9 +269,8 @@ const AdminDashboard = () => {
             </Grid>
             <Grid size={{ xs: 12, lg: 4 }} sx={{ display: "flex", flexDirection: "column" }}>
               <PaymentStatusCard
-                payment={statusQuery.data ?? EMPTY_PAYMENT}
-                receivable={cards.receivable[currency].value}
-                currency={currency}
+                payment={statusQuery.data ?? EMPTY_BY_CURRENCY.payment}
+                receivable={{ TMT: cards.receivable.TMT.value, USD: cards.receivable.USD.value }}
               />
             </Grid>
           </Grid>
@@ -271,23 +279,21 @@ const AdminDashboard = () => {
             <Grid size={{ xs: 12, lg: 8 }} sx={{ display: "flex", flexDirection: "column" }}>
               <IncomeExpenseCard
                 buckets={buckets}
-                moneyOut={moneyOutQuery.data ?? EMPTY_MONEY_OUT}
-                currency={currency}
+                moneyOut={moneyOutQuery.data ?? EMPTY_BY_CURRENCY.moneyOut}
                 granularity={granularity}
               />
             </Grid>
             <Grid size={{ xs: 12, lg: 4 }} sx={{ display: "flex", flexDirection: "column" }}>
-              <VolumeCard buckets={buckets} currency={currency} granularity={granularity} />
+              <VolumeCard buckets={buckets} granularity={granularity} />
             </Grid>
           </Grid>
 
-          {showOffices && <OfficesRankCard offices={officesQuery.data ?? []} currency={currency} />}
+          {showOffices && <OfficesRankCard offices={officesQuery.data ?? []} />}
 
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, lg: 7 }} sx={{ display: "flex", flexDirection: "column" }}>
               <CategoryCard
                 categories={categoriesQuery.data ?? []}
-                currency={currency}
                 selectedKey={service}
                 onSelect={selectService}
               />
@@ -301,7 +307,7 @@ const AdminDashboard = () => {
                 transition: "opacity .2s ease",
               }}
             >
-              <OperatorCard operators={operatorsQuery.data ?? []} currency={currency} scope={serviceName} />
+              <OperatorCard operators={operatorsQuery.data ?? []} scope={serviceName} />
             </Grid>
           </Grid>
         </Box>

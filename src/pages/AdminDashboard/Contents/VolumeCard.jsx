@@ -11,25 +11,34 @@ import {
   xAxisBase,
   yAxisBase,
 } from "../../Finance/Overview/functions/analyticsFormat";
+import { BOTH_CURRENCIES } from "../../Finance/Overview/functions/dashboardData";
 import { LegendStat, StatRow } from "./ChartParts";
 
 const countFormat = (v) => Math.round(Number(v) || 0).toLocaleString("en-US");
 
 // How many sales per day / month, the average ticket and the busiest bucket:
 // is growth coming from more sales or from bigger ones? One series, named by
-// the title, so it needs no legend.
-const VolumeCard = ({ buckets, currency, granularity }) => {
+// the title, so it needs no legend. The count is currency-free (a sale priced
+// in both currencies is one sale); the average ticket is per currency, over
+// that currency's own sales.
+const VolumeCard = ({ buckets, granularity }) => {
   const { t } = useLocale();
   const colors = useDashboardColors();
   const total = buckets.reduce((sum, b) => sum + b.count, 0);
-  const revenue = buckets.reduce((sum, b) => sum + b.revenue, 0);
   const peak = buckets.reduce((best, b) => (b.count > (best?.count ?? 0) ? b : best), null);
+  const avgSale = BOTH_CURRENCIES.map((currency) => {
+    const revenue = buckets.reduce((sum, b) => sum + b[currency].revenue, 0);
+    const count = buckets.reduce((sum, b) => sum + b[currency].count, 0);
+    return count ? formatAmount(revenue / count, currency) : null;
+  })
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <SectionCard title={t("dashboard.salesCount")} subtitle={t(`finance.analytics.trend.by.${granularity}`)}>
       <StatRow>
         <LegendStat label={t("finance.analytics.total")} value={countFormat(total)} />
-        <LegendStat label={t("dashboard.avgSale")} value={total ? formatAmount(revenue / total, currency) : "—"} />
+        <LegendStat label={t("dashboard.avgSale")} value={avgSale || "—"} />
       </StatRow>
 
       {total === 0 ? (

@@ -19,20 +19,18 @@ import {
   xAxisBase,
   yAxisBase,
 } from "../../Finance/Overview/functions/analyticsFormat";
-import { LegendStat, StatRow } from "./ChartParts";
+import { CurrencyPanels, LegendStat, StatRow } from "./ChartParts";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 const axisLabelStyle = { ...tickLabelStyle, fontSize: 11.5 };
 const OUT_GROUPS = ["cost", "salary", "expense"];
 const NO_OUT = { cost: 0, salary: 0, expense: 0 };
 
-// Money in vs money out per day / month. Money in is the period's sales; money
-// out stacks the cost of those sales, salaries and kassa expenses, so the
-// reader sees both how much went out and where it went. Net result on top.
-const IncomeExpenseCard = ({ buckets, moneyOut, currency, granularity }) => {
+// One currency's money in vs money out: totals, where the money went, then
+// the chart or the table.
+const MoneyPanel = ({ buckets, moneyOut, currency, view }) => {
   const { t } = useLocale();
   const colors = useDashboardColors();
-  const [view, setView] = useState("chart");
   const money = (v) => formatAmount(v, currency);
 
   const groupLabel = {
@@ -41,9 +39,10 @@ const IncomeExpenseCard = ({ buckets, moneyOut, currency, granularity }) => {
     expense: t("finance.analytics.flow.groups.expense"),
   };
   const rows = buckets.map((b) => {
+    const revenue = b[currency].revenue;
     const out = moneyOut.byPeriod.get(String(b.key)) ?? NO_OUT;
     const outTotal = out.cost + out.salary + out.expense;
-    return { key: b.key, label: b.label, revenue: b.revenue, ...out, outTotal, net: b.revenue - outTotal };
+    return { key: b.key, label: b.label, revenue, ...out, outTotal, net: revenue - outTotal };
   });
 
   const revenue = rows.reduce((sum, r) => sum + r.revenue, 0);
@@ -63,18 +62,7 @@ const IncomeExpenseCard = ({ buckets, moneyOut, currency, granularity }) => {
   }));
 
   return (
-    <SectionCard
-      title={t("dashboard.moneyTitle")}
-      subtitle={t(`finance.analytics.trend.by.${granularity}`)}
-      action={
-        <ViewToggle
-          value={view}
-          onChange={setView}
-          chartLabel={t("finance.analytics.trend.chart")}
-          tableLabel={t("finance.analytics.trend.table")}
-        />
-      }
-    >
+    <>
       <StatRow>
         <LegendStat color={colors.sale} shape="bar" label={t("finance.income")} value={money(revenue)} />
         <LegendStat
@@ -109,11 +97,11 @@ const IncomeExpenseCard = ({ buckets, moneyOut, currency, granularity }) => {
       ) : view === "chart" ? (
         <Box sx={{ mx: -1 }}>
           <BarChart
-            height={300}
+            height={260}
             hideLegend
             skipAnimation
             borderRadius={4}
-            margin={{ top: 8, right: 16, bottom: 0, left: 0 }}
+            margin={{ top: 8, right: 12, bottom: 0, left: 0 }}
             grid={{ horizontal: true }}
             xAxis={[
               {
@@ -129,7 +117,7 @@ const IncomeExpenseCard = ({ buckets, moneyOut, currency, granularity }) => {
             yAxis={[
               {
                 ...yAxisBase,
-                width: 56,
+                width: 52,
                 tickNumber: 4,
                 valueFormatter: (v) => formatCompactAmount(v, currency),
                 tickLabelStyle: axisLabelStyle,
@@ -188,6 +176,34 @@ const IncomeExpenseCard = ({ buckets, moneyOut, currency, granularity }) => {
           </Table>
         </TableContainer>
       )}
+    </>
+  );
+};
+
+// Money in vs money out per day / month. Money in is the period's sales; money
+// out stacks the cost of those sales, salaries and kassa expenses, so the
+// reader sees both how much went out and where it went. A panel per currency:
+// side by side as charts, one under the other as (wider) tables.
+const IncomeExpenseCard = ({ buckets, moneyOut, granularity }) => {
+  const { t } = useLocale();
+  const [view, setView] = useState("chart");
+
+  return (
+    <SectionCard
+      title={t("dashboard.moneyTitle")}
+      subtitle={t(`finance.analytics.trend.by.${granularity}`)}
+      action={
+        <ViewToggle
+          value={view}
+          onChange={setView}
+          chartLabel={t("finance.analytics.trend.chart")}
+          tableLabel={t("finance.analytics.trend.table")}
+        />
+      }
+    >
+      <CurrencyPanels stacked={view === "table"}>
+        {(currency) => <MoneyPanel buckets={buckets} moneyOut={moneyOut[currency]} currency={currency} view={view} />}
+      </CurrencyPanels>
     </SectionCard>
   );
 };

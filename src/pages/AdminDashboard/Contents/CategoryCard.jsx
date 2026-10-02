@@ -17,29 +17,104 @@ import {
   xAxisBase,
   yAxisBase,
 } from "../../Finance/Overview/functions/analyticsFormat";
+import { BOTH_CURRENCIES } from "../../Finance/Overview/functions/dashboardData";
+import { AmountLines, CurrencyPanels } from "./ChartParts";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
+const ZERO = { revenue: 0, cost: 0, profit: 0 };
 
-// Sales, cost, profit and margin per ledger category, in one currency.
-// With `onSelect`, a table row picks that category (click again to clear).
-const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
+// One currency's sales and profit per service, as horizontal bars.
+const CategoryChart = ({ rows, currency }) => {
+  const { t, selectedLang } = useLocale();
+  const colors = useDashboardColors();
+  const bars = rows.filter((c) => c[currency].revenue > 0).sort((a, b) => b[currency].revenue - a[currency].revenue);
+
+  if (bars.length === 0) return <EmptyState>{t("finance.analytics.noData")}</EmptyState>;
+
+  return (
+    <Box sx={{ mx: -1 }}>
+      <BarChart
+        layout="horizontal"
+        height={bars.length * 46 + 50}
+        hideLegend
+        skipAnimation
+        borderRadius={4}
+        grid={{ vertical: true }}
+        yAxis={[
+          {
+            ...yAxisBase,
+            scaleType: "band",
+            data: bars.map((c) => selectedLang(c.name)),
+            width: 130,
+            categoryGapRatio: 0.3,
+            barGapRatio: 0.15,
+            tickLabelStyle: { ...tickLabelStyle, fontSize: 12 },
+          },
+        ]}
+        xAxis={[{ ...xAxisBase, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
+        series={[
+          {
+            id: "revenue",
+            label: t("finance.analytics.kpi.revenue"),
+            data: bars.map((c) => c[currency].revenue),
+            color: colors.sale,
+            valueFormatter: (v) => formatAmount(v, currency),
+          },
+          {
+            id: "profit",
+            label: t("finance.analytics.categories.profit"),
+            data: bars.map((c) => c[currency].profit),
+            color: colors.profit,
+            valueFormatter: (v, { dataIndex }) =>
+              `${formatAmount(v, currency)} · ${t("finance.analytics.categories.margin")} ${formatPercent(
+                percentOf(v, bars[dataIndex]?.[currency].revenue),
+              )}`,
+          },
+        ]}
+        sx={chartSx()}
+        slotProps={tooltipSlotProps}
+      />
+    </Box>
+  );
+};
+
+// Margin per currency, one per line.
+const MarginLines = ({ figures }) => (
+  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.25 }}>
+    {BOTH_CURRENCIES.map((c) => (
+      <Typography key={c} component="span" sx={{ fontSize: "inherit", fontWeight: "inherit", color: figures[c].revenue ? "inherit" : "text.disabled" }}>
+        {figures[c].revenue ? formatPercent(percentOf(figures[c].profit, figures[c].revenue)) : "—"}
+      </Typography>
+    ))}
+  </Box>
+);
+
+// Sales count, sales, base fare, profit and margin per service. The count is
+// currency-free and orders the rows; every amount is listed per currency.
+// With `onSelect`, a table row picks that service (click again to clear).
+const CategoryCard = ({ categories, selectedKey, onSelect }) => {
   const { t, selectedLang } = useLocale();
   const colors = useDashboardColors();
   const [view, setView] = useState("table");
 
   const rows = categories
-    .filter((c) => c[currency].revenue > 0)
-    .sort((a, b) => b[currency].revenue - a[currency].revenue);
-
-  const total = rows.reduce(
-    (acc, c) => ({
-      count: acc.count + c.count,
-      revenue: acc.revenue + c[currency].revenue,
-      cost: acc.cost + c[currency].cost,
-      profit: acc.profit + c[currency].profit,
-    }),
-    { count: 0, revenue: 0, cost: 0, profit: 0 },
+    .filter((c) => BOTH_CURRENCIES.some((cur) => c[cur].revenue > 0))
+    .sort((a, b) => b.count - a.count);
+  const totalCount = rows.reduce((sum, c) => sum + c.count, 0);
+  const total = Object.fromEntries(
+    BOTH_CURRENCIES.map((cur) => [
+      cur,
+      rows.reduce(
+        (acc, c) => ({
+          revenue: acc.revenue + c[cur].revenue,
+          cost: acc.cost + c[cur].cost,
+          profit: acc.profit + c[cur].profit,
+        }),
+        ZERO,
+      ),
+    ]),
   );
+  const pick = (figures, field) => Object.fromEntries(BOTH_CURRENCIES.map((cur) => [cur, figures[cur][field]]));
 
   return (
     <SectionCard
@@ -64,49 +139,7 @@ const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
               { label: t("finance.analytics.categories.profit"), color: colors.profit, shape: "bar" },
             ]}
           />
-          <Box sx={{ mx: -1 }}>
-            <BarChart
-              layout="horizontal"
-              height={rows.length * 46 + 50}
-              hideLegend
-              skipAnimation
-              borderRadius={4}
-              grid={{ vertical: true }}
-              yAxis={[
-                {
-                  ...yAxisBase,
-                  scaleType: "band",
-                  data: rows.map((c) => selectedLang(c.name)),
-                  width: 130,
-                  categoryGapRatio: 0.3,
-                  barGapRatio: 0.15,
-                  tickLabelStyle: { ...tickLabelStyle, fontSize: 12 },
-                },
-              ]}
-              xAxis={[{ ...xAxisBase, valueFormatter: (v) => formatCompactAmount(v, currency), tickLabelStyle }]}
-              series={[
-                {
-                  id: "revenue",
-                  label: t("finance.analytics.kpi.revenue"),
-                  data: rows.map((c) => c[currency].revenue),
-                  color: colors.sale,
-                  valueFormatter: (v) => formatAmount(v, currency),
-                },
-                {
-                  id: "profit",
-                  label: t("finance.analytics.categories.profit"),
-                  data: rows.map((c) => c[currency].profit),
-                  color: colors.profit,
-                  valueFormatter: (v, { dataIndex }) =>
-                    `${formatAmount(v, currency)} · ${t("finance.analytics.categories.margin")} ${formatPercent(
-                      percentOf(v, rows[dataIndex]?.[currency].revenue),
-                    )}`,
-                },
-              ]}
-              sx={chartSx()}
-            slotProps={tooltipSlotProps}
-            />
-          </Box>
+          <CurrencyPanels stacked>{(currency) => <CategoryChart rows={rows} currency={currency} />}</CurrencyPanels>
         </>
       ) : (
         <TableContainer>
@@ -123,8 +156,7 @@ const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
             </TableHead>
             <TableBody>
               {rows.map((c) => {
-                const m = c[currency];
-                const share = percentOf(m.revenue, total.revenue);
+                const share = percentOf(c.count, totalCount);
                 return (
                   <TableRow
                     key={c.key}
@@ -145,10 +177,18 @@ const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
                       <ShareBar value={share} color={colors.sale} />
                     </TableCell>
                     <TableCell sx={num}>{c.count}</TableCell>
-                    <TableCell sx={{ ...num, fontWeight: 600 }}>{formatAmount(m.revenue, currency)}</TableCell>
-                    <TableCell sx={{ ...num, color: "text.secondary" }}>{formatAmount(m.cost, currency)}</TableCell>
-                    <TableCell sx={{ ...num, fontWeight: 700 }}>{formatAmount(m.profit, currency)}</TableCell>
-                    <TableCell sx={num}>{formatPercent(percentOf(m.profit, m.revenue))}</TableCell>
+                    <TableCell sx={num}>
+                      <AmountLines values={pick(c, "revenue")} />
+                    </TableCell>
+                    <TableCell sx={{ ...num, color: "text.secondary" }}>
+                      <AmountLines values={pick(c, "cost")} weight={400} />
+                    </TableCell>
+                    <TableCell sx={num}>
+                      <AmountLines values={pick(c, "profit")} weight={700} />
+                    </TableCell>
+                    <TableCell sx={num}>
+                      <MarginLines figures={c} />
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -156,11 +196,19 @@ const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
             <TableFooter>
               <TableRow sx={{ "& td": { fontWeight: 800, color: "text.primary", fontSize: "0.85rem", borderBottom: 0 } }}>
                 <TableCell>{t("finance.analytics.total")}</TableCell>
-                <TableCell sx={num}>{total.count}</TableCell>
-                <TableCell sx={num}>{formatAmount(total.revenue, currency)}</TableCell>
-                <TableCell sx={num}>{formatAmount(total.cost, currency)}</TableCell>
-                <TableCell sx={num}>{formatAmount(total.profit, currency)}</TableCell>
-                <TableCell sx={num}>{formatPercent(percentOf(total.profit, total.revenue))}</TableCell>
+                <TableCell sx={num}>{totalCount}</TableCell>
+                <TableCell sx={num}>
+                  <AmountLines values={pick(total, "revenue")} weight={800} />
+                </TableCell>
+                <TableCell sx={num}>
+                  <AmountLines values={pick(total, "cost")} weight={800} />
+                </TableCell>
+                <TableCell sx={num}>
+                  <AmountLines values={pick(total, "profit")} weight={800} />
+                </TableCell>
+                <TableCell sx={num}>
+                  <MarginLines figures={total} />
+                </TableCell>
               </TableRow>
             </TableFooter>
           </Table>

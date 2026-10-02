@@ -231,19 +231,6 @@ const useDashboardQuery = (name, apiFn, params, map, options = {}) =>
   });
 
 export const useDashboardCards = (params) => useDashboardQuery("cards", getDashboardCardsApi, params, mapCards);
-export const useDashboardChart = (params) =>
-  useDashboardQuery("chart", getDashboardChartApi, params, (raw) => mapChart(raw, params));
-export const useDashboardMoneyOut = (params) =>
-  useDashboardQuery("moneyOut", getDashboardMoneyOutApi, params, mapMoneyOut);
-export const useDashboardStatus = (params) => useDashboardQuery("status", getDashboardStatusApi, params, mapStatus);
-export const useDashboardOperators = (params) =>
-  useDashboardQuery("operators", getDashboardOperatorsApi, params, (raw) => mapOperators(raw, params.currency));
-export const useDashboardCategories = (params) =>
-  useDashboardQuery("categories", getDashboardCategoriesApi, params, (raw) => mapCategories(raw, params.currency));
-export const useDashboardCategoryAnalytics = (params) =>
-  useDashboardQuery("categoryAnalytics", getDashboardCategoryAnalyticsApi, params, (raw) =>
-    mapCategoryAnalytics(raw, params),
-  );
 export const useDashboardOffices = (params, options) =>
   useDashboardQuery("offices", getDashboardOfficesApi, params, mapOffices, options);
 

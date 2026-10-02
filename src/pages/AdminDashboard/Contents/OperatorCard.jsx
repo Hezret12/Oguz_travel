@@ -2,26 +2,29 @@ import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
 import { useLocale } from "../../../hooks/useLocale";
 import SectionCard, { EmptyState, ShareBar } from "../../Finance/Overview/Contents/SectionCard";
 import {
-  formatAmount,
   formatPercent,
   percentOf,
   tableSx,
   useDashboardColors,
 } from "../../Finance/Overview/functions/analyticsFormat";
+import { BOTH_CURRENCIES } from "../../Finance/Overview/functions/dashboardData";
+import { AmountLines } from "./ChartParts";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 
-// Operator ranking by sales in the selected currency. `scope` (e.g. the
-// selected service's name) is added to the subtitle when the list is narrowed.
-const OperatorCard = ({ operators, currency, scope }) => {
+// Operator ranking by sales count (currency-free), with sales and profit in
+// each currency. `scope` (e.g. the selected service's name) is added to the
+// subtitle when the list is narrowed.
+const OperatorCard = ({ operators, scope }) => {
   const { t } = useLocale();
   const colors = useDashboardColors();
   const subtitle = t("finance.analytics.operators.subtitle");
 
   const rows = operators
-    .filter((o) => o[currency].revenue > 0)
-    .sort((a, b) => b[currency].revenue - a[currency].revenue);
-  const totalRevenue = rows.reduce((sum, o) => sum + o[currency].revenue, 0);
+    .filter((o) => BOTH_CURRENCIES.some((c) => o[c].revenue > 0))
+    .sort((a, b) => b.count - a.count);
+  const totalCount = rows.reduce((sum, o) => sum + o.count, 0);
+  const pick = (o, field) => Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, o[c][field]]));
 
   return (
     <SectionCard
@@ -44,28 +47,28 @@ const OperatorCard = ({ operators, currency, scope }) => {
             </TableHead>
             <TableBody>
               {rows.map((o, index) => {
-                const share = percentOf(o[currency].revenue, totalRevenue);
+                const share = percentOf(o.count, totalCount);
                 return (
                   <TableRow key={o.guid} hover>
                     <TableCell sx={{ color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>{index + 1}</TableCell>
-                    <TableCell sx={{ minWidth: 190 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25 }}>
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, mb: 0.5 }}>
-                            <Typography noWrap sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
-                              {o.fullName}
-                            </Typography>
-                            <Typography sx={{ fontSize: "0.72rem", color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>
-                              {formatPercent(share, 0)}
-                            </Typography>
-                          </Box>
-                          <ShareBar value={share} color={colors.sale} />
-                        </Box>
+                    <TableCell sx={{ minWidth: 170 }}>
+                      <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1, mb: 0.5 }}>
+                        <Typography noWrap sx={{ fontSize: "0.85rem", fontWeight: 500 }}>
+                          {o.fullName}
+                        </Typography>
+                        <Typography sx={{ fontSize: "0.72rem", color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>
+                          {formatPercent(share, 0)}
+                        </Typography>
                       </Box>
+                      <ShareBar value={share} color={colors.sale} />
                     </TableCell>
                     <TableCell sx={num}>{o.count}</TableCell>
-                    <TableCell sx={{ ...num, fontWeight: 600 }}>{formatAmount(o[currency].revenue, currency)}</TableCell>
-                    <TableCell sx={{ ...num, fontWeight: 700 }}>{formatAmount(o[currency].profit, currency)}</TableCell>
+                    <TableCell sx={num}>
+                      <AmountLines values={pick(o, "revenue")} />
+                    </TableCell>
+                    <TableCell sx={num}>
+                      <AmountLines values={pick(o, "profit")} weight={700} />
+                    </TableCell>
                   </TableRow>
                 );
               })}
