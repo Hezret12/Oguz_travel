@@ -26,6 +26,7 @@ import { useDeleteDialog } from "../../hooks/useDeleteDialog";
 import { useDelete } from "../../hooks/CRUD/useDelete";
 import { deleteUser } from "../../api/queries/delete";
 import { useAuth } from "../../context/useAuth";
+import { resolveUserRole } from "../../utils/auth";
 import UserProfileModal from "./UserProfileModal";
 
 const Users = () => {
@@ -102,7 +103,7 @@ const Users = () => {
         size: 150,
       },
       {
-        accessorFn: (row) => row.isAdmin,
+        accessorFn: (row) => resolveUserRole(row) === "admin",
         id: "isAdmin",
         header: t("columns.role"),
         size: 110,

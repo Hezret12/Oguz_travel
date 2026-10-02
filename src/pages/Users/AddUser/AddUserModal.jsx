@@ -50,11 +50,11 @@ const AddUserModal = ({ table }) => {
 
   const onSubmit = async (data) => {
     try {
+      // Backend stores admin status only in `role` ("Admin" | "User").
+      const { isAdmin, ...rest } = data;
       const formattedData = {
-        ...data,
-        isAdmin: Boolean(data.isAdmin),
-        user_is_admin: Boolean(data.isAdmin),
-        role: data.isAdmin ? "admin" : "user",
+        ...rest,
+        role: isAdmin ? "Admin" : "User",
         phone_number: data.phone_number
           ? (data.phone_number.startsWith("+993")
             ? data.phone_number

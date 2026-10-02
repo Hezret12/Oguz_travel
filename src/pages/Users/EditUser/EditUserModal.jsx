@@ -16,6 +16,7 @@ import UserAccessTab from "../AddUser/UserAccessTab";
 import { tabStyles, scrollAreaStyles } from "../shared/modalStyles";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { updateUserApi } from "../../../api/queries/patch";
+import { resolveUserRole } from "../../../utils/auth";
 
 const EditUserModal = ({ table, row }) => {
   const { t } = useLocale();
@@ -48,7 +49,7 @@ const EditUserModal = ({ table, row }) => {
       phone_number: formattedPhone,
       isActive: rowData?.isActive ?? true,
       isExternalUser: rowData?.isExternalUser ?? !isEmp,
-      isAdmin: Boolean(rowData?.isAdmin),
+      isAdmin: resolveUserRole(rowData) === "admin",
       permissions: Array.isArray(rowData?.permissions) ? rowData.permissions : [],
     };
   }, [rowData, rowEmp, isEmp, formattedPhone]);
@@ -72,13 +73,13 @@ const EditUserModal = ({ table, row }) => {
 
   const onSubmit = async (data) => {
     try {
+      // Backend stores admin status only in `role` ("Admin" | "User").
+      const { isAdmin, ...rest } = data;
       const formattedData = {
-        ...data,
+        ...rest,
         guid: rowData?.guid || data.guid,
         user_guid: rowData?.guid || data.guid,
-        isAdmin: Boolean(data.isAdmin),
-        user_is_admin: Boolean(data.isAdmin),
-        role: data.isAdmin ? "admin" : "user",
+        role: isAdmin ? "Admin" : "User",
         phone_number: data.phone_number
           ? (data.phone_number.startsWith("+993")
             ? data.phone_number
