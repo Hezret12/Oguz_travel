@@ -2,6 +2,7 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { BanknoteArrowDown, BanknoteArrowUp, HandCoins, PiggyBank } from "lucide-react";
 import { useLocale } from "../../../../hooks/useLocale";
+import BaseFareLabel from "../../../../components/BaseFareLabel";
 import { KPI_TONES, formatAmount } from "../../Overview/functions/analyticsFormat";
 
 const amountSx = { fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
@@ -102,7 +103,7 @@ const OfficesSummary = ({ rows, totals }) => {
       <Tile icon={BanknoteArrowDown} color={KPI_TONES.inflow[mode]} label={t("finance.analytics.kpi.moneyIn")} footer={count}>
         <DualAmount value={totals.inflow} />
       </Tile>
-      <Tile icon={BanknoteArrowUp} color={KPI_TONES.outflow[mode]} label={t("finance.analytics.kpi.moneyOut")} footer={count}>
+      <Tile icon={BanknoteArrowUp} color={KPI_TONES.outflow[mode]} label={<BaseFareLabel />} footer={count}>
         <DualAmount value={totals.outflow} />
       </Tile>
       <Tile

@@ -82,7 +82,7 @@ export const LegendRow = ({ items }) => (
             borderTop: item.shape === "bar" ? "none" : `2px ${item.dashed ? "dashed" : "solid"} ${item.color}`,
           }}
         />
-        <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{item.label}</Typography>
+        <Typography sx={{ fontSize: "0.75rem", color: item.labelColor || "text.secondary" }}>{item.label}</Typography>
       </Box>
     ))}
   </Box>

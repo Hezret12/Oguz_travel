@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useLocale } from "../../../../hooks/useLocale";
+import BaseFareLabel from "../../../../components/BaseFareLabel";
 import SectionCard, { EmptyState, ShareBar } from "../../Overview/Contents/SectionCard";
 import {
   CURRENCIES,
@@ -38,7 +39,7 @@ const OfficesTable = ({ rows, totals, currency: mainCurrency }) => {
 
   const groupLabel = {
     inflow: t("finance.analytics.cash.inflow"),
-    outflow: t("finance.analytics.cash.outflow"),
+    outflow: <BaseFareLabel />,
     profit: t("finance.analytics.kpi.profit"),
   };
 

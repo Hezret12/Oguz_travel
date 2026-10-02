@@ -4,6 +4,8 @@ import { alpha } from "@mui/material/styles";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useLocale } from "../../../../hooks/useLocale";
+import BaseFareLabel from "../../../../components/BaseFareLabel";
+import { BASE_FARE_TEXT } from "../../../../functions/baseFare";
 import SectionCard, { EmptyState, LegendRow, ViewToggle } from "../../Overview/Contents/SectionCard";
 import {
   chartSx,
@@ -27,7 +29,7 @@ const OfficesColumns = ({ offices, currency, colors }) => {
   const { t } = useLocale();
   const names = {
     inflow: t("finance.analytics.cash.inflow"),
-    outflow: t("finance.analytics.cash.outflow"),
+    outflow: BASE_FARE_TEXT,
     profit: t("finance.analytics.kpi.profit"),
   };
   const theme = useTheme();
@@ -236,7 +238,7 @@ const OfficeCard = ({ office, currency, rank, total, colors }) => {
             <Typography noWrap sx={{ fontSize: "0.82rem", fontWeight: 600 }}>{money(inflow)}</Typography>
           </Box>
           <Box sx={{ minWidth: 0, textAlign: "right" }}>
-            <Typography sx={{ fontSize: "0.7rem", color: "text.secondary" }}>{t("finance.analytics.cash.outflow")}</Typography>
+            <Typography sx={{ fontSize: "0.7rem", color: "text.secondary" }}><BaseFareLabel /></Typography>
             <Typography noWrap sx={{ fontSize: "0.82rem", fontWeight: 600 }}>{money(outflow)}</Typography>
           </Box>
         </Box>
@@ -268,11 +270,11 @@ const OfficesChart = ({ rows, currency }) => {
                 view === "chart"
                   ? [
                       { label: t("finance.analytics.cash.inflow"), color: colors.inflow, shape: "bar" },
-                      { label: t("finance.analytics.cash.outflow"), color: colors.outflow, shape: "bar" },
+                      { label: BASE_FARE_TEXT, labelColor: "error.main", color: colors.outflow, shape: "bar" },
                       { label: t("finance.analytics.kpi.profit"), color: colors.neutral, shape: "bar" },
                     ]
                   : [
-                      { label: t("finance.analytics.cash.outflow"), color: colors.outflow, shape: "bar" },
+                      { label: BASE_FARE_TEXT, labelColor: "error.main", color: colors.outflow, shape: "bar" },
                       { label: t("finance.analytics.kpi.profit"), color: colors.inflow, shape: "bar" },
                     ]
               }

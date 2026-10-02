@@ -3,6 +3,7 @@ import { Alert, Box, Grid, IconButton, MenuItem, Skeleton, TextField, Tooltip, T
 import { MapPinHouse, RefreshCw } from "lucide-react";
 import dayjs from "dayjs";
 import PageHeader from "../../components/PageHeader";
+import BaseFareLabel from "../../components/BaseFareLabel";
 import { useLocale } from "../../hooks/useLocale";
 import { useAuth } from "../../context/useAuth";
 import { useGet } from "../../hooks/CRUD/useGet";
@@ -133,7 +134,7 @@ const AdminDashboard = () => {
       note: t("dashboard.salesN", { count: cards.count.value }),
       upIsGood: true,
     },
-    { key: "cost", label: t("finance.analytics.kpi.cost"), figure: cards.cost, upIsGood: false },
+    { key: "cost", label: <BaseFareLabel />, figure: cards.cost, upIsGood: false },
     {
       key: "profit",
       label: t("dashboard.profit"),

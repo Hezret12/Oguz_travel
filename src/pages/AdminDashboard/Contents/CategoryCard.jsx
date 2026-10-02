@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useLocale } from "../../../hooks/useLocale";
+import BaseFareLabel from "../../../components/BaseFareLabel";
 import SectionCard, { EmptyState, LegendRow, ShareBar, ViewToggle } from "../../Finance/Overview/Contents/SectionCard";
 import {
   chartSx,
@@ -115,7 +116,7 @@ const CategoryCard = ({ categories, currency, selectedKey, onSelect }) => {
                 <TableCell>{t("finance.analytics.categories.service")}</TableCell>
                 <TableCell sx={num}>{t("finance.analytics.categories.count")}</TableCell>
                 <TableCell sx={num}>{t("finance.analytics.kpi.revenue")}</TableCell>
-                <TableCell sx={num}>{t("finance.analytics.kpi.cost")}</TableCell>
+                <TableCell sx={num}><BaseFareLabel /></TableCell>
                 <TableCell sx={num}>{t("finance.analytics.categories.profit")}</TableCell>
                 <TableCell sx={num}>{t("finance.analytics.categories.margin")}</TableCell>
               </TableRow>

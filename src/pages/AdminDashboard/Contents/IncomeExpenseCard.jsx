@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useLocale } from "../../../hooks/useLocale";
+import BaseFareLabel from "../../../components/BaseFareLabel";
+import { BASE_FARE_TEXT } from "../../../functions/baseFare";
 import SectionCard, { EmptyState, ViewToggle } from "../../Finance/Overview/Contents/SectionCard";
 import {
   chartSx,
@@ -34,7 +36,7 @@ const IncomeExpenseCard = ({ buckets, moneyOut, currency, granularity }) => {
   const money = (v) => formatAmount(v, currency);
 
   const groupLabel = {
-    cost: t("finance.analytics.kpi.cost"),
+    cost: BASE_FARE_TEXT,
     salary: t("finance.analytics.flow.groups.salary"),
     expense: t("finance.analytics.flow.groups.expense"),
   };
@@ -95,7 +97,7 @@ const IncomeExpenseCard = ({ buckets, moneyOut, currency, granularity }) => {
             key={g}
             color={colors[g]}
             shape="bar"
-            label={groupLabel[g]}
+            label={g === "cost" ? <BaseFareLabel /> : groupLabel[g]}
             value={money(totals[g])}
             hint={outTotal ? formatPercent(percentOf(totals[g], outTotal), 0) : null}
           />
@@ -161,7 +163,7 @@ const IncomeExpenseCard = ({ buckets, moneyOut, currency, granularity }) => {
                 <TableCell sx={num}>{t("finance.income")}</TableCell>
                 {OUT_GROUPS.map((g) => (
                   <TableCell key={g} sx={num}>
-                    {groupLabel[g]}
+                    {g === "cost" ? <BaseFareLabel /> : groupLabel[g]}
                   </TableCell>
                 ))}
                 <TableCell sx={num}>{t("dashboard.netResult")}</TableCell>
