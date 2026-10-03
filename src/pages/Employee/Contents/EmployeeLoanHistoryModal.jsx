@@ -137,10 +137,15 @@ const EmployeeLoanHistoryModal = ({ open, close, employee, onEditEmployee }) => 
     options: { enabled: Boolean(open && employeeGuid) },
   });
 
-  const details =
-    loanResponse?.employee_guid || loanResponse?.empl_loan !== undefined
-      ? loanResponse
-      : loanResponse?.data ?? loanResponse ?? {};
+  // Memoised: while the request is pending this falls back to a new {} on
+  // every render, which would recompute loanRecords each time.
+  const details = useMemo(
+    () =>
+      loanResponse?.employee_guid || loanResponse?.empl_loan !== undefined
+        ? loanResponse
+        : loanResponse?.data ?? loanResponse ?? {},
+    [loanResponse],
+  );
 
   const empl_loan = Number(
     details.empl_loan ?? employee?.empl_loan ?? employee?.loan ?? 0

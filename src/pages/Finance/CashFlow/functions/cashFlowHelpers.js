@@ -14,18 +14,6 @@ export const fmtMoney = (val, currency = "USD") => {
   return symbol ? `${symbol}${num}` : `${num} ${currency}`;
 };
 
-// Compact form for summary cards: 10.93M, 81.6K
-export const fmtCompact = (val, currency = "USD") => {
-  const abs = Math.abs(Number(val || 0));
-  const sign = Number(val) < 0 ? "-" : "";
-  let body;
-  if (abs >= 1e6) body = `${(abs / 1e6).toFixed(2)}M`;
-  else if (abs >= 1e4) body = `${(abs / 1e3).toFixed(1)}K`;
-  else body = abs.toLocaleString("en-US", { maximumFractionDigits: 2 });
-  const symbol = CURRENCY_SYMBOL[currency];
-  return symbol ? `${sign}${symbol}${body}` : `${sign}${body} ${currency}`;
-};
-
 // Cash-ledger rows (manual / Excel) carry a type; project rows don't.
 export const isCashRow = (row) => row?.source === "MANUAL" || row?.source === "EXCEL" || Boolean(row?.type);
 

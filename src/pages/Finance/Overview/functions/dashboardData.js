@@ -320,70 +320,12 @@ export const useDashboardStatusByCurrency = (params) =>
   useDashboardQueryByCurrency("status", getDashboardStatusApi, params, mapStatus);
 export const useDashboardCategoryAnalyticsByCurrency = (params) =>
   useDashboardQueryByCurrency("categoryAnalytics", getDashboardCategoryAnalyticsApi, params, mapCategoryAnalytics);
-// Development only: `?mock_operators=40` in the URL swaps the operator list
-// for that many made-up ones, to see how the card holds a long list (and
-// `?mock_categories=30` the services, below). Never
-// active in a production build; the real data and the database are untouched.
-// The count is remembered for the browser tab, so it survives moving between
-// pages (the menu links drop the query); `?mock_operators=0` turns it off.
-const mockCount = (param) => {
-  const fromUrl = new URLSearchParams(window.location.search).get(param);
-  try {
-    if (fromUrl !== null) sessionStorage.setItem(param, fromUrl);
-    return Number(sessionStorage.getItem(param)) || 0;
-  } catch {
-    return Number(fromUrl) || 0;
-  }
-};
-const mockOperators = (count) =>
-  Array.from({ length: count }, (_, i) => {
-    // Uneven on purpose: a few big sellers, a long tail, some in one currency only.
-    const weight = 1 / (i + 1) ** 0.8;
-    const tmt = i % 7 === 3 ? 0 : Math.round(60000 * weight * (0.6 + ((i * 37) % 10) / 12));
-    const usd = i % 5 === 4 ? 0 : Math.round(140000 * weight * (0.5 + ((i * 53) % 10) / 10));
-    return {
-      guid: `mock-operator-${i + 1}`,
-      fullName: `Test Operator ${String(i + 1).padStart(2, "0")}`,
-      count: Math.max(1, Math.round(160 * weight)),
-      TMT: { revenue: tmt, profit: Math.round(tmt * (0.15 + (i % 4) * 0.08)) },
-      USD: { revenue: usd, profit: Math.round(usd * (0.04 + (i % 3) * 0.05)) },
-    };
-  });
-
 export const useDashboardOperatorsByCurrency = (params) => {
   const query = useDashboardQueryByCurrency("operators", getDashboardOperatorsApi, params, (raw, p) => mapOperators(raw, p.currency));
-  // Guarded here so a production build drops the whole mock.
-  if (import.meta.env.DEV) {
-    const count = mockCount("mock_operators");
-    if (count > 0) return { ...query, data: mockOperators(count) };
-  }
   return { ...query, data: query.data && mergeByCurrency(query.data, "guid") };
 };
-// The same for services: `?mock_categories=30`. Long names included, to see
-// how the chart shortens them.
-const mockCategories = (count) =>
-  Array.from({ length: count }, (_, i) => {
-    const weight = 1 / (i + 1) ** 1.1;
-    const tmt = i % 6 === 2 ? 0 : Math.round(90000 * weight * (0.6 + ((i * 29) % 10) / 12));
-    const usd = i % 4 === 3 ? 0 : Math.round(120000 * weight * (0.5 + ((i * 41) % 10) / 10));
-    const margin = i % 5 === 1 ? 0 : 0.08 + (i % 4) * 0.15;
-    const name = `Test hyzmat ${String(i + 1).padStart(2, "0")}${i % 3 === 0 ? " uzyn atly" : ""}`;
-    return {
-      key: `mock-category-${i + 1}`,
-      name: { tk: name, ru: name, en: name },
-      count: Math.max(1, Math.round(200 * weight)),
-      TMT: { revenue: tmt, cost: Math.round(tmt * (1 - margin)), profit: Math.round(tmt * margin) },
-      USD: { revenue: usd, cost: Math.round(usd * (1 - margin)), profit: Math.round(usd * margin) },
-    };
-  });
-
 export const useDashboardCategoriesByCurrency = (params) => {
   const query = useDashboardQueryByCurrency("categories", getDashboardCategoriesApi, params, (raw, p) => mapCategories(raw, p.currency));
-  // Guarded here so a production build drops the whole mock.
-  if (import.meta.env.DEV) {
-    const count = mockCount("mock_categories");
-    if (count > 0) return { ...query, data: mockCategories(count) };
-  }
   return { ...query, data: query.data && mergeByCurrency(query.data, "key") };
 };
 // Offices keyed by guid with { sale, net, profit, profitChange } per currency.
