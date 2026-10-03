@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useLocale } from "../../../hooks/useLocale";
@@ -253,4 +253,4 @@ const IncomeExpenseCard = ({ buckets, moneyOut, granularity }) => {
   );
 };
 
-export default IncomeExpenseCard;
+export default memo(IncomeExpenseCard);

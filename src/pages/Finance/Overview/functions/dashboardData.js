@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { keepPreviousData, useQueries, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import {
@@ -176,6 +177,8 @@ const mapOffices = (raw) =>
     name: toI18nName(o.name),
     sale: num(o.sale_price),
     net: num(o.net_price),
+    salary: num(o.salary),
+    expense: num(o.expense),
     profit: num(o.profit),
     profitChange: num(o.profit_change_percentage),
   }));
@@ -220,6 +223,13 @@ const mapCategoryAnalytics = (raw, params) => {
 
 export const EMPTY_CATEGORY_ANALYTICS = mapCategoryAnalytics(null);
 
+// A request the server rejected as invalid (4xx) fails the same way again, so
+// it is not retried; a network or server error gets one more try.
+const retryOnce = (failureCount, error) => {
+  const status = error?.response?.status;
+  return failureCount < 1 && !(status >= 400 && status < 500);
+};
+
 // The previous result stays on screen while the next one loads.
 const useDashboardQuery = (name, apiFn, params, map, options = {}) =>
   useQuery({
@@ -227,6 +237,7 @@ const useDashboardQuery = (name, apiFn, params, map, options = {}) =>
     queryFn: async () => map(unwrap(await apiFn(params))),
     placeholderData: keepPreviousData,
     staleTime: STALE_MS,
+    retry: retryOnce,
     ...options,
   });
 
@@ -240,6 +251,20 @@ export const useDashboardOffices = (params, options) =>
 // is shared (`countAll`).
 export const BOTH_CURRENCIES = ["TMT", "USD"];
 
+// Module-level, so its reference never changes: react-query then re-runs it
+// only when a query result changes and hands back the same object (and the
+// same `data`) on every other render, instead of a new one each time.
+const combineByCurrency = (results) => ({
+  data: results.every((r) => r.data)
+    ? Object.fromEntries(BOTH_CURRENCIES.map((currency, i) => [currency, results[i].data]))
+    : undefined,
+  isLoading: results.some((r) => r.isLoading),
+  isFetching: results.some((r) => r.isFetching),
+  isError: results.some((r) => r.isError),
+  dataUpdatedAt: Math.max(0, ...results.map((r) => r.dataUpdatedAt || 0)),
+  refetch: () => Promise.all(results.map((r) => r.refetch())),
+});
+
 // One query per currency merged into `{ TMT, USD }`; it behaves like a single
 // query for combineQueries. `params` carries no currency of its own.
 const useDashboardQueryByCurrency = (name, apiFn, params, map, options = {}) =>
@@ -251,19 +276,11 @@ const useDashboardQueryByCurrency = (name, apiFn, params, map, options = {}) =>
         queryFn: async () => map(unwrap(await apiFn(currencyParams)), currencyParams),
         placeholderData: keepPreviousData,
         staleTime: STALE_MS,
+        retry: retryOnce,
         ...options,
       };
     }),
-    combine: (results) => ({
-      data: results.every((r) => r.data)
-        ? Object.fromEntries(BOTH_CURRENCIES.map((currency, i) => [currency, results[i].data]))
-        : undefined,
-      isLoading: results.some((r) => r.isLoading),
-      isFetching: results.some((r) => r.isFetching),
-      isError: results.some((r) => r.isError),
-      dataUpdatedAt: Math.max(0, ...results.map((r) => r.dataUpdatedAt || 0)),
-      refetch: () => Promise.all(results.map((r) => r.refetch())),
-    }),
+    combine: combineByCurrency,
   });
 
 // Rows of both currencies joined by `idKey`; each keeps its figures under
@@ -310,9 +327,12 @@ const mergeBuckets = (byCurrency) => {
   return [...byKey.values()].sort((a, b) => String(a.key).localeCompare(String(b.key)));
 };
 
+// The merged lists below are memoised on the query's data: the cards get the
+// same array until the data really changes, so they can skip re-rendering.
 export const useDashboardChartByCurrency = (params) => {
   const query = useDashboardQueryByCurrency("chart", getDashboardChartApi, params, mapChart);
-  return { ...query, data: query.data && mergeBuckets(query.data) };
+  const data = useMemo(() => query.data && mergeBuckets(query.data), [query.data]);
+  return { ...query, data };
 };
 export const useDashboardMoneyOutByCurrency = (params) =>
   useDashboardQueryByCurrency("moneyOut", getDashboardMoneyOutApi, params, mapMoneyOut);
@@ -322,28 +342,33 @@ export const useDashboardCategoryAnalyticsByCurrency = (params) =>
   useDashboardQueryByCurrency("categoryAnalytics", getDashboardCategoryAnalyticsApi, params, mapCategoryAnalytics);
 export const useDashboardOperatorsByCurrency = (params) => {
   const query = useDashboardQueryByCurrency("operators", getDashboardOperatorsApi, params, (raw, p) => mapOperators(raw, p.currency));
-  return { ...query, data: query.data && mergeByCurrency(query.data, "guid") };
+  const data = useMemo(() => query.data && mergeByCurrency(query.data, "guid"), [query.data]);
+  return { ...query, data };
 };
 export const useDashboardCategoriesByCurrency = (params) => {
   const query = useDashboardQueryByCurrency("categories", getDashboardCategoriesApi, params, (raw, p) => mapCategories(raw, p.currency));
-  return { ...query, data: query.data && mergeByCurrency(query.data, "key") };
+  const data = useMemo(() => query.data && mergeByCurrency(query.data, "key"), [query.data]);
+  return { ...query, data };
 };
 // Offices keyed by guid with { sale, net, profit, profitChange } per currency.
 export const useDashboardOfficesByCurrency = (params, options) => {
   const query = useDashboardQueryByCurrency("offices", getDashboardOfficesApi, params, mapOffices, options);
-  const data =
-    query.data &&
-    [...new Set(BOTH_CURRENCIES.flatMap((c) => query.data[c].map((o) => o.guid)))].map((guid) => {
-      const of = (currency) => query.data[currency].find((o) => o.guid === guid);
-      const any = BOTH_CURRENCIES.map(of).find(Boolean);
-      return {
-        guid,
-        name: any.name,
-        ...Object.fromEntries(
-          BOTH_CURRENCIES.map((c) => [c, of(c) ?? { sale: 0, net: 0, profit: 0, profitChange: 0 }]),
-        ),
-      };
-    });
+  const data = useMemo(
+    () =>
+      query.data &&
+      [...new Set(BOTH_CURRENCIES.flatMap((c) => query.data[c].map((o) => o.guid)))].map((guid) => {
+        const of = (currency) => query.data[currency].find((o) => o.guid === guid);
+        const any = BOTH_CURRENCIES.map(of).find(Boolean);
+        return {
+          guid,
+          name: any.name,
+          ...Object.fromEntries(
+            BOTH_CURRENCIES.map((c) => [c, of(c) ?? { sale: 0, net: 0, profit: 0, profitChange: 0 }]),
+          ),
+        };
+      }),
+    [query.data],
+  );
   return { ...query, data };
 };
 

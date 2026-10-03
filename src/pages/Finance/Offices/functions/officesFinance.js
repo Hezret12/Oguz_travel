@@ -7,9 +7,13 @@ import { combineQueries, toDashboardParams, useDashboardOffices } from "../../Ov
 
 const zero = () => ({ USD: 0, TMT: 0 });
 
+// An office's money out: the cost of its sales, salaries, kassa expenses and their sum.
+const zeroOut = () => ({ cost: zero(), salary: zero(), expense: zero(), total: zero() });
+
 /**
  * Every office's sales (money in), cost of sales (money out) and profit for a
- * period, from GET /dashboard/offices-by-office. The endpoint answers in one
+ * period, plus the make-up of its money out (`out`: cost of sales, salaries,
+ * kassa expenses, total), from GET /dashboard/offices-by-office. The endpoint answers in one
  * currency, so USD and TMT are fetched side by side and joined per office;
  * they are never converted or added together.
  */
@@ -54,21 +58,29 @@ export const useOfficesFinance = (period, customRange) => {
             outflow: zero(),
             profit: zero(),
             profitChange: zero(),
+            out: zeroOut(),
           };
         row.inflow[currency] = o.sale;
         row.outflow[currency] = o.net;
         row.profit[currency] = o.profit;
         row.profitChange[currency] = o.profitChange;
+        row.out.cost[currency] = o.net;
+        row.out.salary[currency] = o.salary;
+        row.out.expense[currency] = o.expense;
+        row.out.total[currency] = o.net + o.salary + o.expense;
         byOffice.set(o.guid, row);
       });
     });
 
     const rows = [...byOffice.values()];
-    const totals = { inflow: zero(), outflow: zero(), profit: zero() };
+    const totals = { inflow: zero(), outflow: zero(), profit: zero(), out: zeroOut() };
     rows.forEach((row) => {
-      Object.keys(totals).forEach((group) => {
-        CURRENCIES.forEach((currency) => {
+      CURRENCIES.forEach((currency) => {
+        ["inflow", "outflow", "profit"].forEach((group) => {
           totals[group][currency] += row[group][currency];
+        });
+        Object.keys(totals.out).forEach((part) => {
+          totals.out[part][currency] += row.out[part][currency];
         });
       });
     });

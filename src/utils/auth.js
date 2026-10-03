@@ -99,8 +99,10 @@ export function normalizeUser(rawUser) {
     office,
     avatar_url,
     employee_guid: emp.guid || emp.id || rawUser.employee_guid || null,
-    // The office the user works in; scopes office-level reports.
-    office_guid: emp.office?.guid || rawUser.office_guid || null,
+    // The office the user works in; scopes office-level reports. auth/me
+    // sends it as a root `office: { guid, … }` — read before `office` above
+    // is reduced to its name; an already normalized user keeps its office_guid.
+    office_guid: emp.office?.guid || rawUser.office?.guid || rawUser.office_guid || null,
   };
 }
 

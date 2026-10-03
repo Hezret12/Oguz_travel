@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box, Typography } from "@mui/material";
 import { useLocale } from "../../../hooks/useLocale";
 import SectionCard, { EmptyState } from "../../Finance/Overview/Contents/SectionCard";
@@ -89,4 +90,4 @@ const OfficesRankCard = ({ offices }) => {
   );
 };
 
-export default OfficesRankCard;
+export default memo(OfficesRankCard);

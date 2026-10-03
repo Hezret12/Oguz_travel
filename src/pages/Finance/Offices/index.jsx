@@ -7,6 +7,7 @@ import { useAnalyticsPrefs } from "../Overview/functions/useAnalyticsPrefs";
 import OfficesSummary from "./Contents/OfficesSummary";
 import OfficesChart from "./Contents/OfficesChart";
 import OfficesTable from "./Contents/OfficesTable";
+import OfficesOutCard from "./Contents/OfficesOutCard";
 import { useOfficesFinance } from "./functions/officesFinance";
 
 const STORAGE_KEY = "finance_offices_prefs";
@@ -71,6 +72,7 @@ const FinanceOffices = () => {
         >
           <OfficesSummary rows={data.rows} totals={data.totals} />
           <OfficesChart rows={data.rows} currency={currency} />
+          <OfficesOutCard rows={data.rows} totals={data.totals} currency={currency} />
           <OfficesTable rows={data.rows} totals={data.totals} currency={currency} />
         </Box>
       )}

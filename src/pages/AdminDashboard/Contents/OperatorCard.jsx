@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { useLocale } from "../../../hooks/useLocale";
 import SectionCard, { EmptyState, ShareBar, ViewToggle } from "../../Finance/Overview/Contents/SectionCard";
@@ -19,16 +19,17 @@ const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace
 // The currencies an operator sold in: one who sold only in USD gets no empty TMT lines.
 const rowCurrencies = (figures) => BOTH_CURRENCIES.filter((c) => figures[c].revenue || figures[c].profit);
 
-// Operator ranking. Opens on the chart: a donut per currency of each
-// operator's share of sales. The table orders by sales count (currency-free)
-// with sales and profit in each currency. Only the currencies with sales are shown,
+// Operator ranking, as a donut per currency of each operator's share of sales
+// or as a table ordered by sales count (currency-free) with sales and profit
+// in each currency. It opens on whichever shows the whole list. Only the currencies with sales are shown,
 // so a USD-only service has no empty TMT lines. `scope` (e.g. the selected
 // service's name) is added to the subtitle when the list is narrowed.
 const OperatorCard = ({ operators, scope }) => {
   const { t } = useLocale();
   const colors = useDashboardColors();
   const { slots } = useSliceColors();
-  const [view, setView] = useState("chart");
+  // null until the user picks a view; until then the card opens on the one that fits (below).
+  const [pickedView, setView] = useState(null);
   const subtitle = t("finance.analytics.operators.subtitle");
 
   const rows = operators
@@ -38,6 +39,12 @@ const OperatorCard = ({ operators, scope }) => {
   const totalCount = rows.reduce((sum, o) => sum + o.count, 0);
   const pick = (o, field) => Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, o[c][field]]));
   const slotOf = assignSliceSlots(rows, currencies, slots.length, (o) => o.guid);
+  // A donut names as many operators as it has colours. While every operator
+  // fits, it is the clearer picture; past that most of it would be one grey
+  // "other" slice, so the card opens on the ranked table instead. The toggle
+  // still switches, and the user's own choice then stays.
+  const fitsDonut = currencies.every((c) => rows.filter((o) => o[c].revenue > 0).length <= slots.length);
+  const view = pickedView ?? (fitsDonut ? "chart" : "table");
   const chartLabels = {
     profit: t("finance.analytics.categories.profit"),
     margin: t("finance.analytics.categories.margin"),
@@ -124,4 +131,4 @@ const OperatorCard = ({ operators, scope }) => {
   );
 };
 
-export default OperatorCard;
+export default memo(OperatorCard);

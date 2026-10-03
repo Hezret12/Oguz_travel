@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box, Tooltip, Typography, useTheme } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { useLocale } from "../../../hooks/useLocale";
@@ -130,4 +131,4 @@ const KpiStrip = ({ cells, compareLabel }) => (
   </Box>
 );
 
-export default KpiStrip;
+export default memo(KpiStrip);

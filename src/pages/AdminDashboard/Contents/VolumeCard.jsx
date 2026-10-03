@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useLocale } from "../../../hooks/useLocale";
@@ -86,4 +87,4 @@ const VolumeCard = ({ buckets, granularity }) => {
   );
 };
 
-export default VolumeCard;
+export default memo(VolumeCard);

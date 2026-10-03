@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box, Tooltip, Typography } from "@mui/material";
 import { CheckCircle2, CircleDashed, Clock, RotateCcw } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
@@ -104,4 +105,4 @@ const PaymentStatusCard = ({ payment, receivable }) => {
   );
 };
 
-export default PaymentStatusCard;
+export default memo(PaymentStatusCard);

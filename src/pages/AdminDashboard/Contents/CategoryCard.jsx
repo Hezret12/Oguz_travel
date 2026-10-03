@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Box, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
+import { memo, useState } from "react";
+import { Box, Chip, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
 import { useLocale } from "../../../hooks/useLocale";
 import BaseFareLabel from "../../../components/BaseFareLabel";
 import SectionCard, { EmptyState, LegendRow, ShareBar, ViewToggle } from "../../Finance/Overview/Contents/SectionCard";
 import {
+  formatAmount,
   formatPercent,
   percentOf,
   scrollTableSx,
@@ -67,10 +68,22 @@ const CategoryCard = ({ categories, selectedKey, onSelect }) => {
     margin: t("finance.analytics.categories.margin"),
     noData: t("finance.analytics.noData"),
     topShown: (count) => t("dashboard.topShown", { count }),
-    shareOfSales: (value) => t("dashboard.shareOfSales", { value }),
+    shareOfTotal: (value) => t("dashboard.shareOfSales", { value }),
     showAll: (count) => t("dashboard.showAll", { count }),
   };
+  const chartSeries = [
+    { id: "revenue", label: chartLabels.revenue, color: colors.sale, value: (row, currency) => row[currency].revenue },
+    {
+      id: "profit",
+      label: chartLabels.profit,
+      color: colors.profit,
+      value: (row, currency) => row[currency].profit,
+      tooltip: (value, row, currency) =>
+        `${formatAmount(value, currency)} · ${chartLabels.margin} ${formatPercent(percentOf(value, row?.[currency].revenue))}`,
+    },
+  ];
   const showTable = () => setView("table");
+  const selected = selectedKey ? rows.find((c) => c.key === selectedKey) : null;
   const pick = (figures, field) => Object.fromEntries(BOTH_CURRENCIES.map((cur) => [cur, figures[cur][field]]));
 
   return (
@@ -90,17 +103,31 @@ const CategoryCard = ({ categories, selectedKey, onSelect }) => {
         <EmptyState>{t("finance.analytics.noData")}</EmptyState>
       ) : view === "chart" ? (
         <>
-          <LegendRow
-            items={[
-              { label: chartLabels.revenue, color: colors.sale, shape: "bar" },
-              { label: chartLabels.profit, color: colors.profit, shape: "bar" },
-            ]}
-          />
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, flexWrap: "wrap", minHeight: 24 }}>
+            <LegendRow
+              items={[
+                { label: chartLabels.revenue, color: colors.sale, shape: "bar" },
+                { label: chartLabels.profit, color: colors.profit, shape: "bar" },
+              ]}
+            />
+            {/* The picked service, named: it is what the trend and the operators are narrowed to */}
+            {selected && onSelect && (
+              <Chip
+                size="small"
+                color="primary"
+                variant="outlined"
+                label={selectedLang(selected.name)}
+                onDelete={() => onSelect("")}
+                sx={{ fontWeight: 600, borderRadius: "8px" }}
+              />
+            )}
+          </Box>
           <CurrencyPanels currencies={currencies}>
             {(currency) => (
               <ColumnBreakdown
                 rows={rows.map((c) => ({ ...c, label: selectedLang(c.name) }))}
                 currency={currency}
+                series={chartSeries}
                 labels={chartLabels}
                 selectedKey={selectedKey}
                 onSelect={onSelect}
@@ -187,4 +214,4 @@ const CategoryCard = ({ categories, selectedKey, onSelect }) => {
   );
 };
 
-export default CategoryCard;
+export default memo(CategoryCard);

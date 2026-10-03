@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import {
   Box,
   MenuItem,
@@ -194,4 +194,4 @@ const TrendCard = ({ analytics, granularity, services, service, onServiceChange,
   );
 };
 
-export default TrendCard;
+export default memo(TrendCard);

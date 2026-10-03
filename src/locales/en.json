@@ -1200,7 +1200,10 @@
       "cardsTitle": "Office results",
       "cardsSubtitle": "Each office’s sales, cost and profit",
       "shareOfIncome": "Share of total sales",
-      "cardsView": "Cards"
+      "cardsView": "Cards",
+      "outTitle": "Office money out",
+      "outSubtitle": "Each office's total money out · the make-up is in the table",
+      "outTotal": "Total money out"
     },
     "officeCash": {
       "title": "Office cash",

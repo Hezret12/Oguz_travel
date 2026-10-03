@@ -1186,7 +1186,10 @@
       "cardsTitle": "Ofisleriň netijesi",
       "cardsSubtitle": "Her ofisiň satyşy, özüne düşýän bahasy we peýdasy",
       "shareOfIncome": "Jemi satyşdaky paýy",
-      "cardsView": "Kartlar"
+      "cardsView": "Kartlar",
+      "outTitle": "Ofisleriň çykdajysy",
+      "outSubtitle": "Her ofisiň jemi çykdajysy · düzümi tablisada",
+      "outTotal": "Jemi çykdajy"
     },
     "officeCash": {
       "title": "Ofis kassalary",
