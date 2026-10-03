@@ -320,12 +320,70 @@ export const useDashboardStatusByCurrency = (params) =>
   useDashboardQueryByCurrency("status", getDashboardStatusApi, params, mapStatus);
 export const useDashboardCategoryAnalyticsByCurrency = (params) =>
   useDashboardQueryByCurrency("categoryAnalytics", getDashboardCategoryAnalyticsApi, params, mapCategoryAnalytics);
+// Development only: `?mock_operators=40` in the URL swaps the operator list
+// for that many made-up ones, to see how the card holds a long list (and
+// `?mock_categories=30` the services, below). Never
+// active in a production build; the real data and the database are untouched.
+// The count is remembered for the browser tab, so it survives moving between
+// pages (the menu links drop the query); `?mock_operators=0` turns it off.
+const mockCount = (param) => {
+  const fromUrl = new URLSearchParams(window.location.search).get(param);
+  try {
+    if (fromUrl !== null) sessionStorage.setItem(param, fromUrl);
+    return Number(sessionStorage.getItem(param)) || 0;
+  } catch {
+    return Number(fromUrl) || 0;
+  }
+};
+const mockOperators = (count) =>
+  Array.from({ length: count }, (_, i) => {
+    // Uneven on purpose: a few big sellers, a long tail, some in one currency only.
+    const weight = 1 / (i + 1) ** 0.8;
+    const tmt = i % 7 === 3 ? 0 : Math.round(60000 * weight * (0.6 + ((i * 37) % 10) / 12));
+    const usd = i % 5 === 4 ? 0 : Math.round(140000 * weight * (0.5 + ((i * 53) % 10) / 10));
+    return {
+      guid: `mock-operator-${i + 1}`,
+      fullName: `Test Operator ${String(i + 1).padStart(2, "0")}`,
+      count: Math.max(1, Math.round(160 * weight)),
+      TMT: { revenue: tmt, profit: Math.round(tmt * (0.15 + (i % 4) * 0.08)) },
+      USD: { revenue: usd, profit: Math.round(usd * (0.04 + (i % 3) * 0.05)) },
+    };
+  });
+
 export const useDashboardOperatorsByCurrency = (params) => {
   const query = useDashboardQueryByCurrency("operators", getDashboardOperatorsApi, params, (raw, p) => mapOperators(raw, p.currency));
+  // Guarded here so a production build drops the whole mock.
+  if (import.meta.env.DEV) {
+    const count = mockCount("mock_operators");
+    if (count > 0) return { ...query, data: mockOperators(count) };
+  }
   return { ...query, data: query.data && mergeByCurrency(query.data, "guid") };
 };
+// The same for services: `?mock_categories=30`. Long names included, to see
+// how the chart shortens them.
+const mockCategories = (count) =>
+  Array.from({ length: count }, (_, i) => {
+    const weight = 1 / (i + 1) ** 1.1;
+    const tmt = i % 6 === 2 ? 0 : Math.round(90000 * weight * (0.6 + ((i * 29) % 10) / 12));
+    const usd = i % 4 === 3 ? 0 : Math.round(120000 * weight * (0.5 + ((i * 41) % 10) / 10));
+    const margin = i % 5 === 1 ? 0 : 0.08 + (i % 4) * 0.15;
+    const name = `Test hyzmat ${String(i + 1).padStart(2, "0")}${i % 3 === 0 ? " uzyn atly" : ""}`;
+    return {
+      key: `mock-category-${i + 1}`,
+      name: { tk: name, ru: name, en: name },
+      count: Math.max(1, Math.round(200 * weight)),
+      TMT: { revenue: tmt, cost: Math.round(tmt * (1 - margin)), profit: Math.round(tmt * margin) },
+      USD: { revenue: usd, cost: Math.round(usd * (1 - margin)), profit: Math.round(usd * margin) },
+    };
+  });
+
 export const useDashboardCategoriesByCurrency = (params) => {
   const query = useDashboardQueryByCurrency("categories", getDashboardCategoriesApi, params, (raw, p) => mapCategories(raw, p.currency));
+  // Guarded here so a production build drops the whole mock.
+  if (import.meta.env.DEV) {
+    const count = mockCount("mock_categories");
+    if (count > 0) return { ...query, data: mockCategories(count) };
+  }
   return { ...query, data: query.data && mergeByCurrency(query.data, "key") };
 };
 // Offices keyed by guid with { sale, net, profit, profitChange } per currency.
@@ -354,27 +412,44 @@ export const currenciesWith = (rows, field) => {
   return found.length ? found : BOTH_CURRENCIES;
 };
 
-// Colour slots for donuts drawn once per currency: a row (service, operator)
-// keeps one slot in every donut. Slots go to each currency's biggest rows in
-// turn — first of TMT, first of USD, second of TMT… — until `slotCount` are
-// taken; a row left without one folds into the donut's "other" slice.
-// Returns a lookup: key → slot index, or undefined.
+// Colour slots for donuts drawn once per currency. Every donut names its own
+// `slotCount` biggest rows (the rest fold into its "other" slice), so both
+// always show the same number of rows. A row named in both donuts keeps one
+// colour in both: shared colours go to each currency's biggest rows in turn —
+// first of TMT, first of USD, second of TMT… A colour whose owner is not in a
+// donut's top rows is free there and goes to that donut's next biggest row.
+// Returns a lookup: (key, currency) → slot index, or undefined.
 export const assignSliceSlots = (rows, currencies, slotCount, keyOf = (row) => row.key) => {
-  const ranked = currencies.map((currency) =>
-    rows
-      .filter((row) => row[currency].revenue > 0)
-      .sort((a, b) => b[currency].revenue - a[currency].revenue)
-      .map(keyOf),
+  const ranked = Object.fromEntries(
+    currencies.map((currency) => [
+      currency,
+      rows
+        .filter((row) => row[currency].revenue > 0)
+        .sort((x, y) => y[currency].revenue - x[currency].revenue)
+        .map(keyOf),
+    ]),
   );
-  const slots = new Map();
-  const longest = Math.max(0, ...ranked.map((keys) => keys.length));
-  for (let i = 0; i < longest && slots.size < slotCount; i += 1) {
-    ranked.forEach((keys) => {
-      const key = keys[i];
-      if (key !== undefined && !slots.has(key) && slots.size < slotCount) slots.set(key, slots.size);
+
+  const shared = new Map();
+  const longest = Math.max(0, ...currencies.map((currency) => ranked[currency].length));
+  for (let i = 0; i < longest && shared.size < slotCount; i += 1) {
+    currencies.forEach((currency) => {
+      const key = ranked[currency][i];
+      if (key !== undefined && !shared.has(key) && shared.size < slotCount) shared.set(key, shared.size);
     });
   }
-  return (key) => slots.get(key);
+
+  const perCurrency = Object.fromEntries(
+    currencies.map((currency) => {
+      const top = ranked[currency].slice(0, slotCount);
+      const slots = new Map(top.filter((key) => shared.has(key)).map((key) => [key, shared.get(key)]));
+      const taken = new Set(slots.values());
+      const free = Array.from({ length: slotCount }, (_, slot) => slot).filter((slot) => !taken.has(slot));
+      top.filter((key) => !slots.has(key)).forEach((key) => slots.set(key, free.shift()));
+      return [currency, slots];
+    }),
+  );
+  return (key, currency) => perCurrency[currency]?.get(key);
 };
 
 /** Loading / fetching / error flags and a refetch for a group of dashboard queries. */

@@ -1434,6 +1434,9 @@
     "netResult": "Net result",
     "officesTitle": "By office",
     "officesSubtitle": "Sales, profit and margin",
-    "peakPeriod": "Busiest: {{label}} · {{count}} sales"
+    "peakPeriod": "Busiest: {{label}} · {{count}} sales",
+    "topShown": "Top {{count}} shown",
+    "showAll": "See all ({{count}})",
+    "shareOfSales": "{{value}} of all sales"
   }
 }

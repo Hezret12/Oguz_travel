@@ -43,7 +43,10 @@ const OperatorCard = ({ operators, scope }) => {
     margin: t("finance.analytics.categories.margin"),
     other: t("finance.analytics.flow.other"),
     total: t("finance.analytics.total"),
+    topShown: (count) => t("dashboard.topShown", { count }),
+    showAll: (count) => t("dashboard.showAll", { count }),
   };
+  const showTable = () => setView("table");
 
   return (
     <SectionCard
@@ -69,6 +72,7 @@ const OperatorCard = ({ operators, scope }) => {
               slotOf={slotOf}
               labels={chartLabels}
               meta={(o) => t("dashboard.salesN", { count: o.count })}
+              onShowAll={showTable}
             />
           )}
         </CurrencyPanels>

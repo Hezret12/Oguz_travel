@@ -1420,6 +1420,9 @@
     "netResult": "Arassa netije",
     "officesTitle": "Ofisler boýunça",
     "officesSubtitle": "Satyş, peýda we marža",
-    "peakPeriod": "Iň işjeň döwür: {{label}} · {{count}} satyş"
+    "peakPeriod": "Iň işjeň döwür: {{label}} · {{count}} satyş",
+    "topShown": "Iň uly {{count}} görkezilýär",
+    "showAll": "Hemmesini gör ({{count}})",
+    "shareOfSales": "satyşdaky paýy {{value}}"
   }
 }

@@ -90,14 +90,18 @@ export const useDashboardColors = () => {
   };
 };
 
-// Slice colours for part-to-whole donuts, in fixed order (never cycled):
-// the dataviz reference categorical slots 1–5, plus a neutral for "Other".
-// Validated adjacent-pair on #ffffff / #12131A — all hard gates pass; in light
-// mode aqua/yellow/magenta sit under 3:1, so every donut ships a visible
-// legend with names and amounts.
+// Slice colours for part-to-whole donuts, plus a neutral for "Other". Four,
+// not more: a donut orders its slices by size, so any two colours can end up
+// side by side and the set has to pass the dataviz checker on ALL pairs, not
+// only neighbours. A fifth hue (amber, pink) lands too close to the orange,
+// and in dark mode pink ↔ green collapses for red-green colour blindness —
+// so a fifth row folds into "Other" instead. Validated with --pairs all on
+// #ffffff / #12131A: normal-vision and CVD pass (dark magenta ↔ blue sits in
+// the 6–8 band, which needs the gaps and the labelled list every donut has);
+// green is under 3:1 on white, covered by that same list.
 const SLICE_COLORS = {
-  light: ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"],
-  dark: ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"],
+  light: ["#2a78d6", "#eb6834", "#1baf7a", "#c44d9e"],
+  dark: ["#3987e5", "#d95926", "#199e70", "#c05ac0"],
 };
 export const useSliceColors = () => {
   const { palette } = useTheme();

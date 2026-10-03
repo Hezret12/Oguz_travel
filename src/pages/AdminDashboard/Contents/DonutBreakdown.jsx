@@ -1,4 +1,4 @@
-import { Box, ButtonBase, Typography } from "@mui/material";
+import { Box, ButtonBase, Link, Typography } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import {
   formatAmount,
@@ -15,25 +15,26 @@ const OTHER_KEY = "__other__";
 // total in its hole, and beside it a list that carries every number — name,
 // amount, share, profit and margin — so nothing is read from colour alone.
 //
-// `slotOf` gives a row its colour slot, the same in every currency's donut (a
-// service is one colour in TMT and in USD). Rows without a slot fold into one
-// grey "other" slice. `meta(row)` adds to a row's detail line; with
-// `onSelect`, a list row picks its key (again clears it).
-const DonutBreakdown = ({ rows, currency, slotOf, labels, selectedKey, onSelect, meta }) => {
+// `slotOf(key, currency)` gives a row its colour slot in this donut — the same
+// in the other currency's donut when it is named there too. Rows without a slot fold into one
+// grey "other" slice — never a black box: that row and the note under the
+// list both call `onShowAll` (the card's full table). `meta(row)` adds to a
+// row's detail line; with `onSelect`, a list row picks its key (again clears it).
+const DonutBreakdown = ({ rows, currency, slotOf, labels, selectedKey, onSelect, onShowAll, meta }) => {
   const { slots, other } = useSliceColors();
   const money = (v) => formatAmount(v, currency);
 
   const ranked = rows
     .filter((r) => r[currency].revenue > 0)
     .sort((a, b) => b[currency].revenue - a[currency].revenue);
-  const named = ranked.filter((r) => slotOf(r.key) !== undefined);
-  const rest = ranked.filter((r) => slotOf(r.key) === undefined);
+  const named = ranked.filter((r) => slotOf(r.key, currency) !== undefined);
+  const rest = ranked.filter((r) => slotOf(r.key, currency) === undefined);
 
   const slices = [
     ...named.map((r) => ({
       key: r.key,
       label: r.label,
-      color: slots[slotOf(r.key)],
+      color: slots[slotOf(r.key, currency)],
       revenue: r[currency].revenue,
       profit: r[currency].profit,
       extra: meta?.(r),
@@ -99,11 +100,12 @@ const DonutBreakdown = ({ rows, currency, slotOf, labels, selectedKey, onSelect,
         {slices.map((s) => {
           const selected = s.selectable && Boolean(selectedKey) && s.key === selectedKey;
           const canSelect = Boolean(onSelect) && s.selectable;
+          const opensAll = s.key === OTHER_KEY && Boolean(onShowAll);
           return (
             <ButtonBase
               key={s.key}
-              onClick={canSelect ? () => onSelect(selected ? "" : s.key) : undefined}
-              disabled={!canSelect}
+              onClick={opensAll ? onShowAll : canSelect ? () => onSelect(selected ? "" : s.key) : undefined}
+              disabled={!canSelect && !opensAll}
               sx={{
                 display: "grid",
                 gridTemplateColumns: "10px minmax(0,1fr) auto",
@@ -148,6 +150,22 @@ const DonutBreakdown = ({ rows, currency, slotOf, labels, selectedKey, onSelect,
             </ButtonBase>
           );
         })}
+
+        {rest.length > 0 && onShowAll && (
+          <Box sx={{ mt: 0.75, pt: 0.75, borderTop: "1px solid", borderColor: "divider", fontSize: "0.75rem", color: "text.secondary" }}>
+            {labels.topShown(named.length)}
+            {" · "}
+            <Link
+              component="button"
+              type="button"
+              underline="hover"
+              onClick={onShowAll}
+              sx={{ fontSize: "inherit", fontWeight: 600, verticalAlign: "baseline" }}
+            >
+              {labels.showAll(ranked.length)} →
+            </Link>
+          </Box>
+        )}
       </Box>
     </Box>
   );

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
 import { useLocale } from "../../../hooks/useLocale";
 import BaseFareLabel from "../../../components/BaseFareLabel";
-import SectionCard, { EmptyState, ShareBar, ViewToggle } from "../../Finance/Overview/Contents/SectionCard";
+import SectionCard, { EmptyState, LegendRow, ShareBar, ViewToggle } from "../../Finance/Overview/Contents/SectionCard";
 import {
   formatPercent,
   percentOf,
@@ -10,11 +10,10 @@ import {
   stickyFooterSx,
   tableSx,
   useDashboardColors,
-  useSliceColors,
 } from "../../Finance/Overview/functions/analyticsFormat";
-import { BOTH_CURRENCIES, assignSliceSlots, currenciesWith } from "../../Finance/Overview/functions/dashboardData";
+import { BOTH_CURRENCIES, currenciesWith } from "../../Finance/Overview/functions/dashboardData";
 import { AmountLines, CurrencyPanels } from "./ChartParts";
-import DonutBreakdown from "./DonutBreakdown";
+import ColumnBreakdown from "./ColumnBreakdown";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 const ZERO = { revenue: 0, cost: 0, profit: 0 };
@@ -36,13 +35,12 @@ const MarginLines = ({ figures, currencies = BOTH_CURRENCIES }) => (
 );
 
 // Sales count, sales, base fare, profit and margin per service. Opens on the
-// chart: a donut per currency of each service's share of sales. In the table
+// chart: per currency, a sales and a profit column for each of the biggest services. In the table
 // the count is currency-free and orders the rows; amounts are per currency.
 // With `onSelect`, a table row picks that service (click again to clear).
 const CategoryCard = ({ categories, selectedKey, onSelect }) => {
   const { t, selectedLang } = useLocale();
   const colors = useDashboardColors();
-  const { slots } = useSliceColors();
   const [view, setView] = useState("chart");
 
   const rows = categories
@@ -63,13 +61,16 @@ const CategoryCard = ({ categories, selectedKey, onSelect }) => {
     ]),
   );
   const currencies = currenciesWith(rows, "revenue");
-  const slotOf = assignSliceSlots(rows, currencies, slots.length);
   const chartLabels = {
+    revenue: t("finance.analytics.kpi.revenue"),
     profit: t("finance.analytics.categories.profit"),
     margin: t("finance.analytics.categories.margin"),
-    other: t("finance.analytics.flow.other"),
-    total: t("finance.analytics.total"),
+    noData: t("finance.analytics.noData"),
+    topShown: (count) => t("dashboard.topShown", { count }),
+    shareOfSales: (value) => t("dashboard.shareOfSales", { value }),
+    showAll: (count) => t("dashboard.showAll", { count }),
   };
+  const showTable = () => setView("table");
   const pick = (figures, field) => Object.fromEntries(BOTH_CURRENCIES.map((cur) => [cur, figures[cur][field]]));
 
   return (
@@ -88,18 +89,26 @@ const CategoryCard = ({ categories, selectedKey, onSelect }) => {
       {rows.length === 0 ? (
         <EmptyState>{t("finance.analytics.noData")}</EmptyState>
       ) : view === "chart" ? (
-        <CurrencyPanels currencies={currencies}>
-          {(currency) => (
-            <DonutBreakdown
-              rows={rows.map((c) => ({ ...c, label: selectedLang(c.name) }))}
-              currency={currency}
-              slotOf={slotOf}
-              labels={chartLabels}
-              selectedKey={selectedKey}
-              onSelect={onSelect}
-            />
-          )}
-        </CurrencyPanels>
+        <>
+          <LegendRow
+            items={[
+              { label: chartLabels.revenue, color: colors.sale, shape: "bar" },
+              { label: chartLabels.profit, color: colors.profit, shape: "bar" },
+            ]}
+          />
+          <CurrencyPanels currencies={currencies}>
+            {(currency) => (
+              <ColumnBreakdown
+                rows={rows.map((c) => ({ ...c, label: selectedLang(c.name) }))}
+                currency={currency}
+                labels={chartLabels}
+                selectedKey={selectedKey}
+                onSelect={onSelect}
+                onShowAll={showTable}
+              />
+            )}
+          </CurrencyPanels>
+        </>
       ) : (
         <TableContainer sx={scrollTableSx}>
           <Table size="small" stickyHeader sx={[tableSx, stickyFooterSx]}>

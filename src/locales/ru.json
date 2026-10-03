@@ -1434,6 +1434,9 @@
     "netResult": "Чистый результат",
     "officesTitle": "По офисам",
     "officesSubtitle": "Продажи, прибыль и маржа",
-    "peakPeriod": "Пик: {{label}} · {{count}} продаж"
+    "peakPeriod": "Пик: {{label}} · {{count}} продаж",
+    "topShown": "Показаны {{count}} крупнейших",
+    "showAll": "Показать все ({{count}})",
+    "shareOfSales": "{{value}} всех продаж"
   }
 }
