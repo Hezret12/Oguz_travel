@@ -69,7 +69,8 @@ const TrendPanel = ({ analytics, currency, view }) => {
             height={240}
             hideLegend
             skipAnimation
-            margin={{ top: 8, right: 12, bottom: 0, left: 0 }}
+            // Room for half of the last date label, which a point scale centres on the plot's edge.
+            margin={{ top: 8, right: 32, bottom: 0, left: 0 }}
             grid={{ horizontal: true }}
             axisHighlight={{ x: "line" }}
             xAxis={[{ ...xAxisBase, scaleType: "point", data: chart.map((p) => p.label), tickLabelStyle: axisLabelStyle }]}
