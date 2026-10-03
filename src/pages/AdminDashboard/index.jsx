@@ -303,7 +303,7 @@ const AdminDashboard = () => {
           <KpiStrip cells={kpis} compareLabel={t(`finance.analytics.vsPeriod.${period}`)} />
 
           <Grid container spacing={2.5}>
-            <Grid size={{ xs: 12, lg: 8 }} sx={{ display: "flex", flexDirection: "column" }}>
+            <Grid size={{ xs: 12 }} sx={{ display: "flex", flexDirection: "column" }}>
               <TrendCard
                 analytics={analyticsQuery.data ?? EMPTY_BY_CURRENCY.analytics}
                 granularity={granularity}
@@ -313,7 +313,7 @@ const AdminDashboard = () => {
                 loading={isServiceFetching}
               />
             </Grid>
-            <Grid size={{ xs: 12, lg: 4 }} sx={{ display: "flex", flexDirection: "column" }}>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: "flex", flexDirection: "column" }}>
               <PaymentStatusCard
                 payment={statusQuery.data ?? EMPTY_BY_CURRENCY.payment}
                 receivable={{ TMT: cards.receivable.TMT.value, USD: cards.receivable.USD.value }}
@@ -322,14 +322,14 @@ const AdminDashboard = () => {
           </Grid>
 
           <Grid container spacing={2.5}>
-            <Grid size={{ xs: 12, lg: 8 }} sx={{ display: "flex", flexDirection: "column" }}>
+            <Grid size={{ xs: 12 }} sx={{ display: "flex", flexDirection: "column" }}>
               <IncomeExpenseCard
                 buckets={buckets}
                 moneyOut={moneyOutQuery.data ?? EMPTY_BY_CURRENCY.moneyOut}
                 granularity={granularity}
               />
             </Grid>
-            <Grid size={{ xs: 12, lg: 4 }} sx={{ display: "flex", flexDirection: "column" }}>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ display: "flex", flexDirection: "column" }}>
               <VolumeCard buckets={buckets} granularity={granularity} />
             </Grid>
           </Grid>
