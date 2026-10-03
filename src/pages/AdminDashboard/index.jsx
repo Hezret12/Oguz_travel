@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Alert, Box, Grid, IconButton, MenuItem, Skeleton, TextField, Tooltip, Typography } from "@mui/material";
-import { MapPinHouse, RefreshCw } from "lucide-react";
+import { BanknoteArrowDown, BanknoteArrowUp, HandCoins, MapPinHouse, PiggyBank, RefreshCw } from "lucide-react";
 import dayjs from "dayjs";
 import PageHeader from "../../components/PageHeader";
 import BaseFareLabel from "../../components/BaseFareLabel";
@@ -9,7 +9,7 @@ import { useAuth } from "../../context/useAuth";
 import { useGet } from "../../hooks/CRUD/useGet";
 import { getAllCategoriesApi, getAllOfficeApi } from "../../api/queries/getters";
 import PeriodRangeFilter from "../Finance/Overview/Contents/PeriodRangeFilter";
-import { formatPercent, percentOf } from "../Finance/Overview/functions/analyticsFormat";
+import { KPI_TONES, formatPercent, percentOf } from "../Finance/Overview/functions/analyticsFormat";
 import { useAnalyticsPrefs } from "../Finance/Overview/functions/useAnalyticsPrefs";
 import {
   BOTH_CURRENCIES,
@@ -136,14 +136,24 @@ const AdminDashboard = () => {
     {
       key: "revenue",
       label: t("dashboard.sales"),
+      icon: BanknoteArrowDown,
+      tone: KPI_TONES.inflow,
       figure: cards.revenue,
-      note: t("dashboard.salesN", { count: cards.countAll.value }),
       upIsGood: true,
     },
-    { key: "cost", label: <BaseFareLabel />, figure: cards.cost, upIsGood: false },
+    {
+      key: "cost",
+      label: <BaseFareLabel />,
+      icon: BanknoteArrowUp,
+      tone: KPI_TONES.outflow,
+      figure: cards.cost,
+      upIsGood: false,
+    },
     {
       key: "profit",
       label: t("dashboard.profit"),
+      icon: PiggyBank,
+      tone: KPI_TONES.profit,
       figure: cards.profit,
       hint: (currency) => {
         const revenue = cards.revenue[currency].value;
@@ -153,8 +163,14 @@ const AdminDashboard = () => {
       },
       upIsGood: true,
     },
-    { key: "receivable", label: t("dashboard.receivable"), figure: cards.receivable, upIsGood: false },
-    { key: "salary", label: t("finance.analytics.kpi.salary"), figure: cards.salary, upIsGood: false },
+    {
+      key: "receivable",
+      label: t("dashboard.receivable"),
+      icon: HandCoins,
+      tone: KPI_TONES.credit,
+      figure: cards.receivable,
+      upIsGood: false,
+    },
   ];
 
   return (
@@ -169,70 +185,100 @@ const AdminDashboard = () => {
     >
       <PageHeader title={t("sidebar.adminDashboard")} pageTitle={`${t("sidebar.adminDashboard")} | Oguz Travel`} />
 
-      {/* One filter row scopes everything below it */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2, flexWrap: "wrap", mt: -1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: "text.secondary", minWidth: 0 }}>
-          {!canSeeAllOffices && ownOfficeName && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0 }}>
-              <MapPinHouse size={15} />
-              <Typography noWrap sx={{ fontSize: "0.85rem", fontWeight: 500, color: "text.primary" }}>
-                {ownOfficeName}
-              </Typography>
-            </Box>
-          )}
-          {updatedAt > 0 && (
-            <Typography noWrap sx={{ fontSize: "0.75rem" }}>
-              {t("dashboard.updatedAt", { time: dayjs(updatedAt).format("HH:mm") })}
+      {/* One filter row scopes everything below it: the office on the left,
+          the period and the refresh on the right, every control one height. */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, flexWrap: "wrap", mt: -1 }}>
+        {canSeeAllOffices ? (
+          <TextField
+            select
+            size="small"
+            value={officeValue}
+            onChange={(e) => updatePrefs({ office: e.target.value })}
+            sx={{
+              width: 210,
+              "& .MuiInputBase-root": {
+                height: CONTROL_HEIGHT,
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                borderRadius: "10px",
+                backgroundColor: "background.paper",
+              },
+              "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+              "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <Box component="span" sx={{ display: "flex", mr: 1, color: "text.secondary", flexShrink: 0 }}>
+                    <MapPinHouse size={16} />
+                  </Box>
+                ),
+              },
+            }}
+          >
+            <MenuItem value="" sx={{ fontSize: "0.85rem" }}>
+              {t("dashboard.allOffices")}
+            </MenuItem>
+            {officeOptions.map((o) => (
+              <MenuItem key={o.value} value={o.value} sx={{ fontSize: "0.85rem" }}>
+                {o.label}
+              </MenuItem>
+            ))}
+          </TextField>
+        ) : (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              height: CONTROL_HEIGHT,
+              px: 1.5,
+              minWidth: 0,
+              borderRadius: "10px",
+              border: "1px solid",
+              borderColor: "divider",
+              backgroundColor: "background.paper",
+              color: "text.secondary",
+              visibility: ownOfficeName ? "visible" : "hidden",
+            }}
+          >
+            <MapPinHouse size={16} style={{ flexShrink: 0 }} />
+            <Typography noWrap sx={{ fontSize: "0.85rem", fontWeight: 600, color: "text.primary" }}>
+              {ownOfficeName}
             </Typography>
-          )}
-        </Box>
+          </Box>
+        )}
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-          {canSeeAllOffices && (
-            <TextField
-              select
-              size="small"
-              value={officeValue}
-              onChange={(e) => updatePrefs({ office: e.target.value })}
-              sx={{
-                width: 180,
-                "& .MuiInputBase-root": { height: CONTROL_HEIGHT, fontSize: "0.8rem", fontWeight: 600, borderRadius: "10px" },
-              }}
-              slotProps={{
-                input: { startAdornment: <MapPinHouse size={15} style={{ marginRight: 8, flexShrink: 0, opacity: 0.6 }} /> },
-              }}
-            >
-              <MenuItem value="" sx={{ fontSize: "0.85rem" }}>
-                {t("dashboard.allOffices")}
-              </MenuItem>
-              {officeOptions.map((o) => (
-                <MenuItem key={o.value} value={o.value} sx={{ fontSize: "0.85rem" }}>
-                  {o.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          )}
-
           <PeriodRangeFilter period={period} customRange={customRange} onChange={updatePrefs} />
 
-
-          <Tooltip title={t("dashboard.refresh")} arrow>
-            <span>
-              <IconButton
-                onClick={refetch}
-                disabled={isFetching}
-                sx={{
-                  width: CONTROL_HEIGHT,
-                  height: CONTROL_HEIGHT,
-                  borderRadius: "10px",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <RefreshCw size={16} style={{ animation: isFetching ? "dashSpin 1s linear infinite" : "none" }} />
-              </IconButton>
-            </span>
-          </Tooltip>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, pl: 1, ml: 0.25, borderLeft: "1px solid", borderColor: "divider" }}>
+            {updatedAt > 0 && (
+              <Typography noWrap sx={{ fontSize: "0.75rem", color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>
+                {t("dashboard.updatedAt", { time: dayjs(updatedAt).format("HH:mm") })}
+              </Typography>
+            )}
+            <Tooltip title={t("dashboard.refresh")} arrow>
+              <span>
+                <IconButton
+                  onClick={refetch}
+                  disabled={isFetching}
+                  sx={{
+                    width: CONTROL_HEIGHT,
+                    height: CONTROL_HEIGHT,
+                    borderRadius: "10px",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    backgroundColor: "background.paper",
+                    color: "text.secondary",
+                    "&:hover": { borderColor: "primary.main", color: "primary.main", backgroundColor: "background.paper" },
+                  }}
+                >
+                  <RefreshCw size={16} style={{ animation: isFetching ? "dashSpin 1s linear infinite" : "none" }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
 
@@ -291,7 +337,7 @@ const AdminDashboard = () => {
           {showOffices && <OfficesRankCard offices={officesQuery.data ?? []} />}
 
           <Grid container spacing={2.5}>
-            <Grid size={{ xs: 12, lg: 7 }} sx={{ display: "flex", flexDirection: "column" }}>
+            <Grid size={{ xs: 12 }} sx={{ display: "flex", flexDirection: "column" }}>
               <CategoryCard
                 categories={categoriesQuery.data ?? []}
                 selectedKey={service}
@@ -299,7 +345,7 @@ const AdminDashboard = () => {
               />
             </Grid>
             <Grid
-              size={{ xs: 12, lg: 5 }}
+              size={{ xs: 12 }}
               sx={{
                 display: "flex",
                 flexDirection: "column",

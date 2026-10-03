@@ -257,6 +257,10 @@ export const addTotalCalculationApi = async (data) => {
   return await api.postPrivate('/total-calculations/add-total-calculation', data);
 };
 
+export const addCategoryApi = async (data) => {
+  return await api.postPrivate('/category/add-category', data);
+};
+
 export const addReferralCountryApi = async (data) => {
   return await api.postPrivate('/refferal-country/add-refferal-country', data);
 };

@@ -77,16 +77,20 @@ export const StatRow = ({ children }) => (
 
 // TMT and USD as two panels, side by side from `md` up (or always stacked):
 // amounts in two currencies never share an axis or a sum. `children` renders
-// one panel for the currency it is given.
-export const CurrencyPanels = ({ children, stacked = false }) => (
+// one panel for the currency it is given; `currencies` limits the panels to
+// the ones with data (a single one spans the width).
+export const CurrencyPanels = ({ children, stacked = false, currencies = BOTH_CURRENCIES }) => (
   <Box
     sx={{
       display: "grid",
-      gridTemplateColumns: { xs: "minmax(0,1fr)", md: stacked ? "minmax(0,1fr)" : "repeat(2, minmax(0,1fr))" },
+      gridTemplateColumns: {
+        xs: "minmax(0,1fr)",
+        md: stacked || currencies.length < 2 ? "minmax(0,1fr)" : "repeat(2, minmax(0,1fr))",
+      },
       gap: 3,
     }}
   >
-    {BOTH_CURRENCIES.map((currency) => (
+    {currencies.map((currency) => (
       <Box key={currency} sx={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
         <CurrencyTag currency={currency} />
         {children(currency)}
@@ -119,10 +123,11 @@ export const CurrencyTag = ({ currency }) => (
 );
 
 // One amount per currency, one per line, for table cells. A currency with
-// nothing booked reads as a muted dash. `color(value)` may colour a line.
-export const AmountLines = ({ values, color, weight = 600 }) => (
+// nothing booked reads as a muted dash. `color(value)` may colour a line;
+// `currencies` limits the lines (e.g. to the currencies a table has data in).
+export const AmountLines = ({ values, color, weight = 600, currencies = BOTH_CURRENCIES }) => (
   <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.25 }}>
-    {BOTH_CURRENCIES.map((currency) => {
+    {currencies.map((currency) => {
       const value = values?.[currency] ?? 0;
       return (
         <Typography

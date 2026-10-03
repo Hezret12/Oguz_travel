@@ -47,6 +47,7 @@ export const PATHS = {
     DEPARTMENT: '/professional-translation/department',
     POSITION: '/professional-translation/position',
     TRANSLATOR: '/professional-translation/translator',
+    CATEGORY: '/professional-translation/category',
     REFERRAL_COUNTRY: '/professional-translation/referral-country',
   },
 };

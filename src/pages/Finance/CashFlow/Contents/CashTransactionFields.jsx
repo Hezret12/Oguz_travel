@@ -3,6 +3,7 @@ import CustomTextField from "../../../../components/CustomTextField";
 import CustomSelect from "../../../../components/CustomSelect";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
 import { useLocale } from "../../../../hooks/useLocale";
+import CategoryAutocomplete from "./CategoryAutocomplete";
 import CashTypeToggle from "./CashTypeToggle";
 import { CURRENCY_OPTIONS } from "../functions/cashFlowHelpers";
 
@@ -33,10 +34,14 @@ const CashTransactionFields = ({ control }) => {
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6 }}>
-        <CustomDatePicker name="datetime" control={control} label={t("finance.cashBook.date")} showTime required />
+        <CategoryAutocomplete name="category_guid" control={control} label={t("category")} />
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6 }}>
+        <CustomDatePicker name="datetime" control={control} label={t("finance.cashBook.date")} showTime required />
+      </Grid>
+
+      <Grid size={{ xs: 12 }}>
         <CustomTextField name="company" control={control} label={t("finance.cashBook.company")} />
       </Grid>
 

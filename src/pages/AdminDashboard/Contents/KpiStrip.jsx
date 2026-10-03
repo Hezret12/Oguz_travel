@@ -1,71 +1,119 @@
-import { Box, Paper, Tooltip, Typography } from "@mui/material";
+import { Box, Tooltip, Typography, useTheme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { useLocale } from "../../../hooks/useLocale";
 import { changePercent, formatAmount } from "../../Finance/Overview/functions/analyticsFormat";
 import { BOTH_CURRENCIES } from "../../Finance/Overview/functions/dashboardData";
 import { Delta } from "./ChartParts";
 
-// One headline figure in both currencies, one line each with its change vs
-// the previous period. The two are listed, never added: there is no exchange
-// rate. `hint(currency)` adds a per-currency note (e.g. the margin).
-const KpiCell = ({ label, figure, note, hint, upIsGood, compareLabel }) => {
+// The bare number; the currency sits in its own column so the rows align.
+const fmtNumber = (value) => {
+  const num = Math.round(Number(value) || 0);
+  return `${num < 0 ? "−" : ""}${Math.abs(num).toLocaleString("en-US")}`;
+};
+
+// One headline figure: an icon in the card's tone, then a row per currency —
+// code, amount, change vs the previous period. The two are listed, never
+// added: there is no exchange rate. The change pill's tooltip names what it
+// compares against; `hint(currency)` adds to it (e.g. the margin).
+const KpiCard = ({ label, icon: Icon, tone, figure, hint, upIsGood, compareLabel }) => {
   const { t } = useLocale();
+  const { palette } = useTheme();
+  const color = tone[palette.mode === "dark" ? "dark" : "light"];
 
   return (
-    <Box sx={{ minWidth: 0, p: 2.5, backgroundColor: "background.paper" }}>
-      <Typography noWrap sx={{ fontSize: "0.8rem", fontWeight: 500, color: "text.secondary" }}>
-        {label}
-      </Typography>
+    <Box
+      sx={{
+        minWidth: 0,
+        p: 2.25,
+        borderRadius: "14px",
+        border: "1px solid",
+        borderColor: "divider",
+        backgroundColor: "background.paper",
+        transition: "border-color 150ms ease",
+        "&:hover": { borderColor: alpha(color, 0.45) },
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0 }}>
+        <Box
+          aria-hidden
+          sx={{
+            flexShrink: 0,
+            width: 34,
+            height: 34,
+            borderRadius: "10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color,
+            backgroundColor: alpha(color, palette.mode === "dark" ? 0.16 : 0.1),
+          }}
+        >
+          <Icon size={18} strokeWidth={2} />
+        </Box>
+        <Typography noWrap sx={{ fontSize: "0.875rem", fontWeight: 600, color: "text.secondary", minWidth: 0 }}>
+          {label}
+        </Typography>
+      </Box>
 
-      <Box sx={{ mt: 1, display: "flex", flexDirection: "column", gap: 0.75 }}>
+      <Box
+        sx={{
+          mt: 2,
+          display: "grid",
+          gridTemplateColumns: "auto minmax(0,1fr) auto",
+          alignItems: "center",
+          columnGap: 1.25,
+          rowGap: 1,
+        }}
+      >
         {BOTH_CURRENCIES.map((currency) => {
           const { value, previous } = figure[currency];
           const extra = hint?.(currency);
-          return (
-            <Tooltip
-              key={currency}
-              title={`${t("finance.analytics.vsPrevious")}: ${formatAmount(previous, currency)}`}
-              arrow
-              placement="top-start"
+          return [
+            <Typography
+              key={`${currency}-code`}
+              sx={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.04em", color: "text.secondary" }}
             >
-              <Box
-                sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", columnGap: 1, rowGap: 0.25, minWidth: 0, cursor: "default" }}
-              >
-                <Typography
-                  noWrap
-                  sx={{
-                    fontSize: "1.3rem",
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    letterSpacing: "-0.02em",
-                    fontVariantNumeric: "tabular-nums",
-                    color: value < 0 ? "error.main" : "text.primary",
-                  }}
-                >
-                  {formatAmount(value, currency)}
-                </Typography>
+              {currency}
+            </Typography>,
+            <Typography
+              key={`${currency}-value`}
+              noWrap
+              sx={{
+                fontSize: "1.35rem",
+                fontWeight: 700,
+                lineHeight: 1.2,
+                letterSpacing: "-0.02em",
+                fontVariantNumeric: "tabular-nums",
+                color: value < 0 ? "error.main" : "text.primary",
+              }}
+            >
+              {fmtNumber(value)}
+            </Typography>,
+            <Tooltip
+              key={`${currency}-change`}
+              arrow
+              placement="top-end"
+              title={[
+                `${compareLabel} · ${t("finance.analytics.vsPrevious")}: ${formatAmount(previous, currency)}`,
+                extra,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            >
+              <Box sx={{ display: "flex", justifyContent: "flex-end", minWidth: 0, cursor: "default" }}>
                 <Delta change={changePercent(value, previous)} upIsGood={upIsGood} />
-                {extra && (
-                  <Typography noWrap sx={{ fontSize: "0.72rem", color: "text.secondary", minWidth: 0 }}>
-                    {extra}
-                  </Typography>
-                )}
               </Box>
-            </Tooltip>
-          );
+            </Tooltip>,
+          ];
         })}
       </Box>
-
-      <Typography noWrap sx={{ mt: 1.25, fontSize: "0.72rem", color: "text.secondary" }}>
-        {[compareLabel, note].filter(Boolean).join(" · ")}
-      </Typography>
     </Box>
   );
 };
 
-// The period's headline figures in one hairline-divided strip.
+// The period's headline figures as a row of cards.
 const KpiStrip = ({ cells, compareLabel }) => (
-  <Paper
-    elevation={0}
+  <Box
     sx={{
       display: "grid",
       gridTemplateColumns: {
@@ -73,30 +121,13 @@ const KpiStrip = ({ cells, compareLabel }) => (
         sm: "repeat(2, minmax(0,1fr))",
         lg: `repeat(${cells.length}, minmax(0,1fr))`,
       },
-      // 1px gaps over the divider colour draw the hairlines between cells.
-      gap: "1px",
-      backgroundColor: "divider",
-      border: "1px solid",
-      borderColor: "divider",
-      borderRadius: "12px",
-      overflow: "hidden",
-      boxShadow: "none",
-      // An odd last cell spans the row on the two-column layout.
-      "& > :last-of-type": { gridColumn: { sm: cells.length % 2 ? "1 / -1" : "auto", lg: "auto" } },
+      gap: 2,
     }}
   >
-    {cells.map((c) => (
-      <KpiCell
-        key={c.key}
-        label={c.label}
-        figure={c.figure}
-        note={c.note}
-        hint={c.hint}
-        upIsGood={c.upIsGood}
-        compareLabel={compareLabel}
-      />
+    {cells.map(({ key, ...cell }) => (
+      <KpiCard key={key} {...cell} compareLabel={compareLabel} />
     ))}
-  </Paper>
+  </Box>
 );
 
 export default KpiStrip;

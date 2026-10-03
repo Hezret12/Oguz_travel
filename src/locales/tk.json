@@ -403,6 +403,7 @@
     "department": "Bölüm",
     "position": "Wezipe",
     "translator": "Terjimeçi",
+    "category": "Kategoriýa",
     "referralCountry": "Ýollanma ýurtlary"
   },
   "turkish": {
@@ -1077,6 +1078,10 @@
       "noData": "Bu walýutada maglumat ýok",
       "total": "Jemi",
       "periods": {
+        "today": "Şu gün",
+        "yesterday": "Düýn",
+        "last7": "Soňky 7 gün",
+        "last30": "Soňky 30 gün",
         "thisMonth": "Şu aý",
         "lastMonth": "Geçen aý",
         "quarter": "Soňky 3 aý",
@@ -1273,6 +1278,16 @@
       "nameRu": "Wezipe ady, Ru",
       "nameEn": "Wezipe ady, En",
       "deleteConfirm": "Bu wezipäni pozmak isleýändigiňize ynanýarsyňyzmy?"
+    },
+    "category": {
+      "title": "Kategoriýalar",
+      "addCategory": "Kategoriýa goşmak",
+      "editCategory": "Kategoriýany üýtgetmek",
+      "name": "Kategoriýa ady",
+      "nameTk": "Kategoriýa ady, Tk",
+      "nameRu": "Kategoriýa ady, Ru",
+      "nameEn": "Kategoriýa ady, En",
+      "deleteConfirm": "Bu kategoriýany pozmak isleýändigiňize ynanýarsyňyzmy?"
     },
     "referralCountry": {
       "title": "Ýollanma ýurtlary",

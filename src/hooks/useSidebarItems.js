@@ -26,6 +26,7 @@ import {
   Award,
   WalletMinimal,
   MapPinHouse,
+  Tags,
   Globe,
   Landmark,
 } from "lucide-react";
@@ -192,6 +193,12 @@ export const useSidebarItems = () => {
             text: t("sidebar.translator"),
             path: PATHS.PROFESSIONAL_TRANSLATION.TRANSLATOR,
             icon: createElement(Languages, { size: 18, strokeWidth: 2.2 }),
+          },
+          {
+            id: "pt-category",
+            text: t("sidebar.category"),
+            path: PATHS.PROFESSIONAL_TRANSLATION.CATEGORY,
+            icon: createElement(Tags, { size: 18, strokeWidth: 2.2 }),
           },
           {
             id: "pt-referral-country",

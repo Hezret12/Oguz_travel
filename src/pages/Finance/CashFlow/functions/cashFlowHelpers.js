@@ -101,6 +101,7 @@ export const rowAmounts = (row) => {
 
 export const toFormValues = (row = {}) => ({
   type: row.type || "EXPENSE",
+  category_guid: row.category_guid || row.category?.guid || "",
   amount: row.guid ? String(cashAmount(row) || "") : "",
   currency: row.currency || "USD",
   datetime: row.datetime || new Date().toISOString(),
@@ -118,9 +119,10 @@ export const toPayload = (form) => ({
   // whichever backend version is deployed. Income has no legacy field.
   ...(form.type === "EXPENSE" ? { net_price: Number(form.amount) } : {}),
   currency: form.currency || "USD",
-  // No category_guid / receiver_opr_guid: cash rows are always "Other" and
-  // have no operator. Leaving them out (not null) makes the backend keep an
-  // older row's operator — and so its office — on edit.
+  // null clears a category picked earlier; the table then shows "Other".
+  category_guid: form.category_guid || null,
+  // No receiver_opr_guid: the form has no operator. Leaving it out (not null)
+  // makes the backend keep an older row's operator — and so its office — on edit.
   datetime: form.datetime ? new Date(form.datetime).toISOString() : new Date().toISOString(),
   description: form.description?.trim() || "",
   giver: form.giver?.trim() || "",

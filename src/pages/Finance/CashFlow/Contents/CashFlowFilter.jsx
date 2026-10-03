@@ -13,7 +13,11 @@ import { ChevronDown } from "lucide-react";
 import CustomDatePicker from "../../../../components/CustomDatePicker";
 import { useLocale } from "../../../../hooks/useLocale";
 import { useGet } from "../../../../hooks/CRUD/useGet";
-import { getAllEmployeeApi, getAllOfficeApi } from "../../../../api/queries/getters";
+import {
+  getAllEmployeeApi,
+  getAllOfficeApi,
+  getAllCategoriesApi,
+} from "../../../../api/queries/getters";
 
 const selectSx = {
   borderRadius: "8px",
@@ -138,6 +142,27 @@ const CashFlowFilter = ({
     key: "all-offices-filter",
   });
 
+  const { data: categoriesData } = useGet({
+    apiFn: getAllCategoriesApi,
+    key: "categories",
+  });
+
+  const categoryOptions = useMemo(() => {
+    const raw =
+      categoriesData?.data?.data ??
+      categoriesData?.data ??
+      categoriesData ??
+      [];
+    const list = Array.isArray(raw) ? raw : [];
+    return list.map((cat) => ({
+      label:
+        typeof cat.name === "object"
+          ? selectedLang(cat.name) || cat.name?.tk || cat.name?.ru || cat.name?.en || "—"
+          : String(cat.name || "—"),
+      value: cat.guid,
+    }));
+  }, [categoriesData, selectedLang]);
+
   const employeeOptions = useMemo(() => {
     const raw = employeesData?.data ?? employeesData ?? [];
     const list = Array.isArray(raw) ? raw : [];
@@ -202,6 +227,18 @@ const CashFlowFilter = ({
           onChange={setDraftFilter}
         />
       </Stack>
+
+      <FilterSelect
+        label={t("category", "Kategoriýa")}
+        name="category_guid"
+        value={draft.category_guid}
+        options={categoryOptions}
+        isOpen={selectsOpen.category_guid}
+        allText={t("all")}
+        onChange={setDraftFilter}
+        onOpen={openSelect}
+        onClose={closeSelect}
+      />
 
       <FilterSelect
         label={t("operator", "Jogapkär / Operator")}

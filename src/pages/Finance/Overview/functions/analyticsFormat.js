@@ -205,6 +205,19 @@ export const segmentedSx = (theme) => ({
   },
 });
 
+// A ranking table that may get long (a row per service, per operator): past
+// this height it scrolls inside its card instead of stretching the page. Use
+// with `stickyHeader` on the Table; `stickyFooterSx` keeps a totals row in view.
+export const scrollTableSx = { maxHeight: 460, overflowY: "auto", scrollbarWidth: "thin" };
+export const stickyFooterSx = {
+  "& .MuiTableCell-footer": {
+    position: "sticky",
+    bottom: 0,
+    zIndex: 2,
+    backgroundColor: "background.paper",
+  },
+};
+
 // Quiet table: light header, roomy rows, hairline separators.
 export const tableSx = (theme) => ({
   "& .MuiTableCell-root": { borderColor: theme.palette.divider },

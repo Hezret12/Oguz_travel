@@ -253,11 +253,11 @@ const CashFlow = () => {
         header: t("category"),
         size: 150,
         Cell: ({ row }) => {
-          // Cash-ledger rows have no category of their own — always "Other".
+          // A cash-ledger row saved without a category reads "Other".
           const cat = row.original.category;
-          const label = isCashRow(row.original)
-            ? t("finance.cashBook.otherCategory")
-            : cat ? selectedLang(cat.name) || cat.name?.tk || cat.name?.en || "" : "";
+          const label =
+            (cat ? selectedLang(cat.name) || cat.name?.tk || cat.name?.en || "" : "") ||
+            (isCashRow(row.original) ? t("finance.cashBook.otherCategory") : "");
           if (!label) return <Muted>—</Muted>;
           return (
             <Chip

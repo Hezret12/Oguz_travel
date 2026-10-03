@@ -24,22 +24,22 @@ import {
   xAxisBase,
   yAxisBase,
 } from "../../Finance/Overview/functions/analyticsFormat";
+import { BOTH_CURRENCIES } from "../../Finance/Overview/functions/dashboardData";
 import { CurrencyPanels, LegendStat, StatRow } from "./ChartParts";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 const GRADIENT = "dashboard-trend-sale";
 const axisLabelStyle = { ...tickLabelStyle, fontSize: 11.5 };
 
-// One currency's sales and profit against the previous period's sales.
+const hasSales = (analytics) => analytics.chart.some((p) => p.sale || p.profit);
+
+// One currency's sales and profit over the period.
 const TrendPanel = ({ analytics, currency, view }) => {
   const { t } = useLocale();
   const colors = useDashboardColors();
   const money = (v) => formatAmount(v, currency);
   const { chart } = analytics;
-  const hasData = chart.some((p) => p.sale || p.profit || p.prevSale);
-  const prevTotal = chart.reduce((sum, p) => sum + p.prevSale, 0);
-  // With nothing booked in the previous period a flat zero line says nothing.
-  const hasPrevious = prevTotal > 0;
+  const hasData = hasSales(analytics);
 
   return (
     <>
@@ -58,9 +58,6 @@ const TrendPanel = ({ analytics, currency, view }) => {
           change={analytics.profitChange}
           upIsGood
         />
-        {hasPrevious && (
-          <LegendStat color={colors.sale} dashed label={t("dashboard.previousPeriod")} value={money(prevTotal)} />
-        )}
       </StatRow>
 
       {!hasData ? (
@@ -86,19 +83,6 @@ const TrendPanel = ({ analytics, currency, view }) => {
               },
             ]}
             series={[
-              ...(hasPrevious
-                ? [
-                    {
-                      id: "prevSale",
-                      label: t("dashboard.previousPeriod"),
-                      data: chart.map((p) => p.prevSale),
-                      color: colors.sale,
-                      curve: "monotoneX",
-                      showMark: false,
-                      valueFormatter: money,
-                    },
-                  ]
-                : []),
               {
                 id: "sale",
                 label: t("dashboard.sales"),
@@ -120,10 +104,9 @@ const TrendPanel = ({ analytics, currency, view }) => {
               },
             ]}
             sx={[
-              chartSx({ sale: `${GRADIENT}-${currency}` }, ["prevSale"]),
+              chartSx({ sale: `${GRADIENT}-${currency}` }),
               (theme) => ({
                 "& .MuiLineChart-line": { strokeWidth: 2 },
-                "& .MuiLineChart-line[data-series=\"prevSale\"]": { strokeWidth: 1.5, strokeOpacity: 0.5 },
                 "& .MuiChartsAxisHighlight-root": { stroke: theme.palette.text.secondary, strokeOpacity: 0.35 },
               }),
             ]}
@@ -138,7 +121,6 @@ const TrendPanel = ({ analytics, currency, view }) => {
                 <TableCell>{t("finance.analytics.trend.date")}</TableCell>
                 <TableCell sx={num}>{t("dashboard.sales")}</TableCell>
                 <TableCell sx={num}>{t("dashboard.profit")}</TableCell>
-                {hasPrevious && <TableCell sx={num}>{t("dashboard.previousPeriod")}</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -149,7 +131,6 @@ const TrendPanel = ({ analytics, currency, view }) => {
                   <TableCell sx={{ ...num, color: p.profit < 0 ? "error.main" : "text.primary" }}>
                     {money(p.profit)}
                   </TableCell>
-                  {hasPrevious && <TableCell sx={{ ...num, color: "text.secondary" }}>{money(p.prevSale)}</TableCell>}
                 </TableRow>
               ))}
             </TableBody>
@@ -160,11 +141,13 @@ const TrendPanel = ({ analytics, currency, view }) => {
   );
 };
 
-// Sales and profit over the period for every service or a picked one, against
-// the previous period's sales — a panel per currency, each on its own axis.
+// Sales and profit over the period for every service or a picked one — a
+// panel per currency, each on its own axis. A currency with no sales in the
+// period (a USD-only service) gets no panel.
 const TrendCard = ({ analytics, granularity, services, service, onServiceChange, loading }) => {
   const { t } = useLocale();
   const [view, setView] = useState("chart");
+  const currencies = BOTH_CURRENCIES.filter((currency) => hasSales(analytics[currency]));
 
   return (
     <SectionCard
@@ -202,7 +185,7 @@ const TrendCard = ({ analytics, granularity, services, service, onServiceChange,
       }
     >
       <Box sx={{ opacity: loading ? 0.6 : 1, transition: "opacity .2s ease" }}>
-        <CurrencyPanels>
+        <CurrencyPanels currencies={currencies.length ? currencies : BOTH_CURRENCIES}>
           {(currency) => <TrendPanel analytics={analytics[currency]} currency={currency} view={view} />}
         </CurrencyPanels>
       </Box>

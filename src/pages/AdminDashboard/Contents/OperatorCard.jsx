@@ -1,41 +1,80 @@
+import { useState } from "react";
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { useLocale } from "../../../hooks/useLocale";
-import SectionCard, { EmptyState, ShareBar } from "../../Finance/Overview/Contents/SectionCard";
+import SectionCard, { EmptyState, ShareBar, ViewToggle } from "../../Finance/Overview/Contents/SectionCard";
 import {
   formatPercent,
   percentOf,
+  scrollTableSx,
   tableSx,
   useDashboardColors,
+  useSliceColors,
 } from "../../Finance/Overview/functions/analyticsFormat";
-import { BOTH_CURRENCIES } from "../../Finance/Overview/functions/dashboardData";
-import { AmountLines } from "./ChartParts";
+import { BOTH_CURRENCIES, assignSliceSlots, currenciesWith } from "../../Finance/Overview/functions/dashboardData";
+import { AmountLines, CurrencyPanels } from "./ChartParts";
+import DonutBreakdown from "./DonutBreakdown";
 
 const num = { textAlign: "right", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
 
-// Operator ranking by sales count (currency-free), with sales and profit in
-// each currency. `scope` (e.g. the selected service's name) is added to the
-// subtitle when the list is narrowed.
+// The currencies an operator sold in: one who sold only in USD gets no empty TMT lines.
+const rowCurrencies = (figures) => BOTH_CURRENCIES.filter((c) => figures[c].revenue || figures[c].profit);
+
+// Operator ranking. Opens on the chart: a donut per currency of each
+// operator's share of sales. The table orders by sales count (currency-free)
+// with sales and profit in each currency. Only the currencies with sales are shown,
+// so a USD-only service has no empty TMT lines. `scope` (e.g. the selected
+// service's name) is added to the subtitle when the list is narrowed.
 const OperatorCard = ({ operators, scope }) => {
   const { t } = useLocale();
   const colors = useDashboardColors();
+  const { slots } = useSliceColors();
+  const [view, setView] = useState("chart");
   const subtitle = t("finance.analytics.operators.subtitle");
 
   const rows = operators
     .filter((o) => BOTH_CURRENCIES.some((c) => o[c].revenue > 0))
     .sort((a, b) => b.count - a.count);
+  const currencies = currenciesWith(rows, "revenue");
   const totalCount = rows.reduce((sum, o) => sum + o.count, 0);
   const pick = (o, field) => Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, o[c][field]]));
+  const slotOf = assignSliceSlots(rows, currencies, slots.length, (o) => o.guid);
+  const chartLabels = {
+    profit: t("finance.analytics.categories.profit"),
+    margin: t("finance.analytics.categories.margin"),
+    other: t("finance.analytics.flow.other"),
+    total: t("finance.analytics.total"),
+  };
 
   return (
     <SectionCard
       title={t("finance.analytics.operators.title")}
       subtitle={scope ? `${scope} · ${subtitle}` : subtitle}
+      action={
+        <ViewToggle
+          value={view}
+          onChange={setView}
+          chartLabel={t("finance.analytics.trend.chart")}
+          tableLabel={t("finance.analytics.trend.table")}
+        />
+      }
     >
       {rows.length === 0 ? (
         <EmptyState>{t("finance.analytics.noData")}</EmptyState>
+      ) : view === "chart" ? (
+        <CurrencyPanels currencies={currencies}>
+          {(currency) => (
+            <DonutBreakdown
+              rows={rows.map((o) => ({ ...o, key: o.guid, label: o.fullName }))}
+              currency={currency}
+              slotOf={slotOf}
+              labels={chartLabels}
+              meta={(o) => t("dashboard.salesN", { count: o.count })}
+            />
+          )}
+        </CurrencyPanels>
       ) : (
-        <TableContainer>
-          <Table size="small" sx={tableSx}>
+        <TableContainer sx={scrollTableSx}>
+          <Table size="small" stickyHeader sx={tableSx}>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ width: 32 }}>№</TableCell>
@@ -48,6 +87,7 @@ const OperatorCard = ({ operators, scope }) => {
             <TableBody>
               {rows.map((o, index) => {
                 const share = percentOf(o.count, totalCount);
+                const own = rowCurrencies(o);
                 return (
                   <TableRow key={o.guid} hover>
                     <TableCell sx={{ color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>{index + 1}</TableCell>
@@ -64,10 +104,10 @@ const OperatorCard = ({ operators, scope }) => {
                     </TableCell>
                     <TableCell sx={num}>{o.count}</TableCell>
                     <TableCell sx={num}>
-                      <AmountLines values={pick(o, "revenue")} />
+                      <AmountLines values={pick(o, "revenue")} currencies={own} />
                     </TableCell>
                     <TableCell sx={num}>
-                      <AmountLines values={pick(o, "profit")} weight={700} />
+                      <AmountLines values={pick(o, "profit")} weight={700} currencies={own} />
                     </TableCell>
                   </TableRow>
                 );

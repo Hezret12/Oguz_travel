@@ -403,6 +403,7 @@
     "department": "Department",
     "position": "Position",
     "translator": "Translator",
+    "category": "Category",
     "referralCountry": "Referral countries"
   },
   "turkish": {
@@ -1091,6 +1092,10 @@
       "noData": "No data in this currency",
       "total": "Total",
       "periods": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "last7": "Last 7 days",
+        "last30": "Last 30 days",
         "thisMonth": "This month",
         "lastMonth": "Last month",
         "quarter": "Last 3 months",
@@ -1287,6 +1292,16 @@
       "nameRu": "Position Name, Ru",
       "nameEn": "Position Name, En",
       "deleteConfirm": "Are you sure you want to delete this position?"
+    },
+    "category": {
+      "title": "Categories",
+      "addCategory": "Add Category",
+      "editCategory": "Edit Category",
+      "name": "Category Name",
+      "nameTk": "Category Name, Tk",
+      "nameRu": "Category Name, Ru",
+      "nameEn": "Category Name, En",
+      "deleteConfirm": "Are you sure you want to delete this category?"
     },
     "referralCountry": {
       "title": "Referral countries",

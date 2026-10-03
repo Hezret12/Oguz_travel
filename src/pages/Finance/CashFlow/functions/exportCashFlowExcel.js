@@ -227,7 +227,7 @@ export const exportCashFlowExcel = async ({ apiFn, params = {}, onProgress = nul
       date: dt ? dt.format("DD.MM.YYYY") : "",
       time: dt ? dt.format("HH:mm") : "",
       kind: kindLabels[kind],
-      category: isCashRow(row) ? t("finance.cashBook.otherCategory") : langText(row.category?.name),
+      category: langText(row.category?.name) || (isCashRow(row) ? t("finance.cashBook.otherCategory") : ""),
       description: row.description ? String(row.description).trim() : "",
       giver: row.giver || "",
       receiver: row.receiver || "",

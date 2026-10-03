@@ -347,6 +347,36 @@ export const useDashboardOfficesByCurrency = (params, options) => {
   return { ...query, data };
 };
 
+// The currencies a list has any `field` in, in display order — so a list
+// narrowed to a USD-only service shows no empty TMT lines or panel.
+export const currenciesWith = (rows, field) => {
+  const found = BOTH_CURRENCIES.filter((c) => rows.some((r) => r[c]?.[field]));
+  return found.length ? found : BOTH_CURRENCIES;
+};
+
+// Colour slots for donuts drawn once per currency: a row (service, operator)
+// keeps one slot in every donut. Slots go to each currency's biggest rows in
+// turn — first of TMT, first of USD, second of TMT… — until `slotCount` are
+// taken; a row left without one folds into the donut's "other" slice.
+// Returns a lookup: key → slot index, or undefined.
+export const assignSliceSlots = (rows, currencies, slotCount, keyOf = (row) => row.key) => {
+  const ranked = currencies.map((currency) =>
+    rows
+      .filter((row) => row[currency].revenue > 0)
+      .sort((a, b) => b[currency].revenue - a[currency].revenue)
+      .map(keyOf),
+  );
+  const slots = new Map();
+  const longest = Math.max(0, ...ranked.map((keys) => keys.length));
+  for (let i = 0; i < longest && slots.size < slotCount; i += 1) {
+    ranked.forEach((keys) => {
+      const key = keys[i];
+      if (key !== undefined && !slots.has(key) && slots.size < slotCount) slots.set(key, slots.size);
+    });
+  }
+  return (key) => slots.get(key);
+};
+
 /** Loading / fetching / error flags and a refetch for a group of dashboard queries. */
 export const combineQueries = (queries) => ({
   isLoading: queries.some((q) => q.isLoading),
