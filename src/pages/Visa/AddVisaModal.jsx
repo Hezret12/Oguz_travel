@@ -62,6 +62,8 @@ const AddVisaModal = ({ table }) => {
       },
       price_tmt: null,
       price_usd: null,
+      profit_tmt: null,
+      profit_usd: null,
       note: "",
     },
     resolver: yupResolver(addVisa),
@@ -80,6 +82,8 @@ const AddVisaModal = ({ table }) => {
       is_paid: Boolean(values.is_paid),
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),
+      profit_tmt: Number(values.profit_tmt || 0),
+      profit_usd: Number(values.profit_usd || 0),
       agent:
         values.agent?.name || values.agent?.phone_number ? values.agent : null,
     };
@@ -134,14 +138,7 @@ const AddVisaModal = ({ table }) => {
             required
           />
 
-          <CustomSelect
-            name="status"
-            control={control}
-            label={t("columns.visaStatus")}
-            options={statusOptions}
-            required
-          />
-
+          {/* Each profit sits under its own price: it is the part of that price that stays */}
           <CustomTextField
             name="price_tmt"
             control={control}
@@ -155,6 +152,30 @@ const AddVisaModal = ({ table }) => {
             control={control}
             type="number"
             label={`${t("price")}, USD`}
+            endIcon="USD"
+          />
+
+          <CustomSelect
+            name="status"
+            control={control}
+            label={t("columns.visaStatus")}
+            options={statusOptions}
+            required
+          />
+
+          <CustomTextField
+            name="profit_tmt"
+            control={control}
+            type="number"
+            label={`${t("columns.profit")}, TMT`}
+            endIcon="TMT"
+          />
+
+          <CustomTextField
+            name="profit_usd"
+            control={control}
+            type="number"
+            label={`${t("columns.profit")}, USD`}
             endIcon="USD"
           />
 

@@ -127,8 +127,22 @@ export const useValidShema = () => {
     contract_date: optionalDateSchema,
   });
 
+  // A visa's profit is part of its price in the same currency: 0 ≤ profit ≤ price.
+  const visaProfit = (priceField) =>
+    yup
+      .number()
+      .transform((value, original) => (original === "" || original === null ? undefined : value))
+      .typeError(t("validation.invalidNumber"))
+      .min(0, t("validation.invalidNumber"))
+      .test("not-above-price", t("validation.profitTooHigh"), function (value) {
+        return !value || value <= (Number(this.parent[priceField]) || 0);
+      })
+      .optional();
+
   const addVisa = yup.object({
     is_paid: yup.boolean().optional(),
+    profit_tmt: visaProfit("price_tmt"),
+    profit_usd: visaProfit("price_usd"),
   });
 
   const addB2BTicket = yup.object({

@@ -89,20 +89,26 @@ const SignedAmount = ({ value }) => {
   );
 };
 
-// Profit in the row's own currency, its code in small muted type after it.
-const ProfitAmount = ({ profit }) => {
-  if (!profit) return <EmptyAmount />;
+// A row's profit, its currency code in small muted type after it — one line
+// per currency for a visa that has a profit in both.
+const ProfitAmount = ({ profits }) => {
+  if (!profits.length) return <EmptyAmount />;
   return (
-    <Typography
-      component="span"
-      sx={{ ...NUM_SX, color: profit.value < 0 ? RED : "text.primary" }}
-    >
-      {profit.value < 0 && "−"}
-      {fmtNumber(profit.value)}
-      <Box component="span" sx={{ ml: 0.5, fontSize: "10.5px", fontWeight: 600, color: "text.secondary" }}>
-        {profit.currency}
-      </Box>
-    </Typography>
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.3 }}>
+      {profits.map((profit) => (
+        <Typography
+          key={profit.currency}
+          component="span"
+          sx={{ ...NUM_SX, color: profit.value < 0 ? RED : "text.primary" }}
+        >
+          {profit.value < 0 && "−"}
+          {fmtNumber(profit.value)}
+          <Box component="span" sx={{ ml: 0.5, fontSize: "10.5px", fontWeight: 600, color: "text.secondary" }}>
+            {profit.currency}
+          </Box>
+        </Typography>
+      ))}
+    </Box>
   );
 };
 
@@ -344,7 +350,7 @@ const CashFlow = () => {
         id: "profit",
         header: t("finance.profit"),
         ...AMOUNT_COLUMN,
-        Cell: ({ row }) => <ProfitAmount profit={rowAmounts(row.original).profit} />,
+        Cell: ({ row }) => <ProfitAmount profits={rowAmounts(row.original).profits} />,
       },
       {
         id: "actions",

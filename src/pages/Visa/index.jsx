@@ -298,6 +298,20 @@ const Visa = () => {
           return val.toFixed(2);
         },
       },
+      // The profit inside each price; a visa with none entered shows a dash.
+      ...["tmt", "usd"].map((currency) => ({
+        accessorFn: (row) => row[`profit_${currency}`],
+        id: `profit_${currency}`,
+        header: `${t("columns.profit")}, ${currency.toUpperCase()}`,
+        size: 110,
+        enableSorting: false,
+        muiTableHeadCellProps: { align: "center" },
+        muiTableBodyCellProps: { align: "right" },
+        Cell: ({ cell }) => {
+          const val = Number(cell.getValue() || 0);
+          return val ? val.toFixed(2) : "—";
+        },
+      })),
       {
         id: "agent",
         header: t("columns.agent"),

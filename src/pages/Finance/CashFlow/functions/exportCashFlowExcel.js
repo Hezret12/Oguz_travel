@@ -47,7 +47,7 @@ const outerBorder = (colNumber, startCol, endCol, color = "FFD9D9D9") => ({
 const expandDualCurrency = (row) => {
   const dual = dualCurrencyAmounts(row);
   if (!dual) return [row];
-  return dual.map(({ currency, value }) => ({ ...row, currency, sale_price: value, net_price: 0 }));
+  return dual.map(({ currency, value, cost }) => ({ ...row, currency, sale_price: value, net_price: cost }));
 };
 
 // Same split as the table: cash income → income, cash expense → expense,

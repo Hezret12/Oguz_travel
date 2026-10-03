@@ -23,19 +23,38 @@ export const cashAmount = (row) =>
 // Fixed guids of the backend's system categories (SYSTEM_CATEGORIES).
 const VISA_CATEGORY_GUID = "e1000000-0000-0000-0000-000000000008";
 
-// Visa project rows are priced in both currencies at once and have no cost
-// side, so there is no profit to show — they render as one line per priced
-// currency. The row is booked as TMT: the TMT price is sale_price and the USD
-// price is sale_price_usd. Every other project row (tickets, translations…)
-// is single-currency and renders as sale price + profit.
+// Visa project rows are priced in both currencies at once — they render as
+// one line per priced currency. The row is booked as TMT: its TMT side is
+// sale_price / net_price / profit, its USD side sale_price_usd /
+// net_price_usd / profit_usd. Each line carries its price (`value`), cost and
+// profit; a visa with no profit entered has neither. Every other project row
+// (tickets, translations…) is single-currency: sale price + profit.
 export const dualCurrencyAmounts = (row) => {
   if (isCashRow(row)) return null;
   const usd = Number(row?.sale_price_usd) || 0;
   if (row?.category_guid !== VISA_CATEGORY_GUID && usd === 0) return null;
   const tmt = Number(row?.sale_price) || 0;
   const items = [
-    ...(tmt || !usd ? [{ currency: row?.currency || "TMT", value: tmt }] : []),
-    ...(usd ? [{ currency: "USD", value: usd }] : []),
+    ...(tmt || !usd
+      ? [
+          {
+            currency: row?.currency || "TMT",
+            value: tmt,
+            cost: Number(row?.net_price) || 0,
+            profit: Number(row?.profit) || 0,
+          },
+        ]
+      : []),
+    ...(usd
+      ? [
+          {
+            currency: "USD",
+            value: usd,
+            cost: Number(row?.net_price_usd) || 0,
+            profit: Number(row?.profit_usd) || 0,
+          },
+        ]
+      : []),
   ];
   return items;
 };
@@ -48,12 +67,13 @@ export const isProjectExpense = (row) =>
   !(Number(row?.sale_price) || 0) &&
   !(Number(row?.sale_price_usd) || 0);
 
-// One row → money in or out, its signed amount per currency and its profit.
+// One row → money in or out, its signed amount per currency and its profits
+// (`profits`: one per currency that has one — only a visa can have two).
 // Drives the table's TMT · USD · Peýda columns; a currency the row does not
 // touch stays null.
 //   cash row        → ± amount in its currency; profit only when a cost was booked
 //   salary / bonus  → − cost, no profit
-//   visa            → + TMT price and + USD price, no profit
+//   visa            → + TMT price and + USD price, the profit entered for each
 //   other project   → + sale price, profit in its currency
 export const rowAmounts = (row) => {
   const currency = String(row?.currency || "USD").toUpperCase();
@@ -68,23 +88,24 @@ export const rowAmounts = (row) => {
     const amount = cashAmount(row);
     put(currency, income ? amount : -amount);
     const cost = Number(row.net_price) || 0;
-    const profit = income && cost > 0 ? { value: amount - cost, currency } : null;
-    return { kind: income ? "income" : "expense", amounts, profit };
+    const profits = income && cost > 0 ? [{ value: amount - cost, currency }] : [];
+    return { kind: income ? "income" : "expense", amounts, profits };
   }
 
   if (isProjectExpense(row)) {
     put(currency, -(Number(row.net_price) || 0));
-    return { kind: "expense", amounts, profit: null };
+    return { kind: "expense", amounts, profits: [] };
   }
 
   const dual = dualCurrencyAmounts(row);
   if (dual) {
     dual.forEach(({ currency: cur, value }) => put(cur, value));
-    return { kind: "income", amounts, profit: null };
+    const profits = dual.filter((line) => line.profit).map((line) => ({ value: line.profit, currency: line.currency }));
+    return { kind: "income", amounts, profits };
   }
 
   put(currency, Number(row.sale_price) || 0);
-  return { kind: "income", amounts, profit: { value: Number(row.profit) || 0, currency } };
+  return { kind: "income", amounts, profits: [{ value: Number(row.profit) || 0, currency }] };
 };
 
 export const toFormValues = (row = {}) => ({

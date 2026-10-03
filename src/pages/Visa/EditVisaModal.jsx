@@ -71,6 +71,9 @@ const EditVisaModal = ({ table, row }) => {
       agent: row?.original?.agent ? row?.original?.agent : { name: "", phone_number: "" },
       price_tmt: row?.original?.price_tmt || null,
       price_usd: row?.original?.price_usd || null,
+      // "0.00" from the API reads as not entered.
+      profit_tmt: Number(row?.original?.profit_tmt) || null,
+      profit_usd: Number(row?.original?.profit_usd) || null,
       note: row?.original?.note || "",
     },
     resolver: yupResolver(addVisa),
@@ -88,6 +91,8 @@ const EditVisaModal = ({ table, row }) => {
       is_paid: Boolean(values.is_paid),
       price_tmt: Number(values.price_tmt || 0),
       price_usd: Number(values.price_usd || 0),
+      profit_tmt: Number(values.profit_tmt || 0),
+      profit_usd: Number(values.profit_usd || 0),
       agent:
         values.agent?.name || values.agent?.phone_number ? values.agent : null,
     };
@@ -144,14 +149,7 @@ const EditVisaModal = ({ table, row }) => {
             required
           />
 
-          <CustomSelect
-            name="status"
-            control={control}
-            label={t("columns.visaStatus")}
-            options={statusOptions}
-            required
-          />
-
+          {/* Each profit sits under its own price: it is the part of that price that stays */}
           <CustomTextField
             name="price_tmt"
             control={control}
@@ -165,6 +163,30 @@ const EditVisaModal = ({ table, row }) => {
             control={control}
             type="number"
             label={`${t("price")}, USD`}
+            endIcon="USD"
+          />
+
+          <CustomSelect
+            name="status"
+            control={control}
+            label={t("columns.visaStatus")}
+            options={statusOptions}
+            required
+          />
+
+          <CustomTextField
+            name="profit_tmt"
+            control={control}
+            type="number"
+            label={`${t("columns.profit")}, TMT`}
+            endIcon="TMT"
+          />
+
+          <CustomTextField
+            name="profit_usd"
+            control={control}
+            type="number"
+            label={`${t("columns.profit")}, USD`}
             endIcon="USD"
           />
 
