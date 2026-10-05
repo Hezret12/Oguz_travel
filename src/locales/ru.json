@@ -274,13 +274,13 @@
       "access": "Доступ"
     },
     "validation": {
-      "employeeRequired": "Işgär saýlanmalydyr",
+      "employeeRequired": "Необходимо выбрать сотрудника",
       "phoneNumberRequired": "Telefon belgisi zerurdyr",
       "phoneNumberLength": "Telefon belgisi 8 sandan ybarat bolmalydyr",
-      "phoneNumberInvalid": "Nädogry telefon belgisi (61/62/63/64/65/71/12 bilen başlamaly we 8 sany bolmaly)",
+      "phoneNumberInvalid": "Неверный номер телефона (должен начинаться с 61/62/63/64/65/71/12 и содержать 8 цифр)",
       "passwordRequired": "Parol zerurdyr",
-      "passwordTooShort": "Parol gaty gysga (iň az 6 simwol)",
-      "permissionsRequired": "Aşamynda bir hukuk saýlanmalydyr"
+      "passwordTooShort": "Пароль слишком короткий (минимум 6 символов)",
+      "permissionsRequired": "Необходимо выбрать хотя бы одно право"
     }
   },
   "profile": {
