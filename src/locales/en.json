@@ -1070,20 +1070,6 @@
     "totalCost": "Total Costs",
     "netProfit": "Net Profit",
     "totalCredit": "Credit / Payments",
-    "categories": {
-      "TICKET_SALES": "Flight Ticket Sales",
-      "TOUR_OUTBOUND": "Tours & Outbound",
-      "VISA_SERVICE": "Visa Services",
-      "TRANSLATION": "Translation Services",
-      "HOTEL_RAIL": "Hotel & Rail",
-      "OTHER_INCOME": "Other Income",
-      "SALARY_COMMISSION": "Salaries & Commissions",
-      "SUBCONTRACTOR": "Subcontractors",
-      "OFFICE_RENT": "Office Rent",
-      "COMMUNICATION": "Internet & Telecom",
-      "TRANSPORT": "Transport Expenses",
-      "OTHER_EXPENSE": "Other Expenses"
-    },
     "analytics": {
       "demo": "Demo data",
       "demoHint": "These numbers are sample data. Real office figures will appear once the API is connected.",

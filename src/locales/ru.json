@@ -1070,20 +1070,6 @@
     "totalCost": "Всего расходы",
     "netProfit": "Чистая прибыль",
     "totalCredit": "Кредит / Оплаты",
-    "categories": {
-      "TICKET_SALES": "Продажа авиабилетов",
-      "TOUR_OUTBOUND": "Туры и путевки",
-      "VISA_SERVICE": "Визовые услуги",
-      "TRANSLATION": "Услуги перевода",
-      "HOTEL_RAIL": "Отели и ЖД билеты",
-      "OTHER_INCOME": "Прочие доходы",
-      "SALARY_COMMISSION": "Зарплаты и комиссии",
-      "SUBCONTRACTOR": "Субподрядчики (перевод и др.)",
-      "OFFICE_RENT": "Аренда офиса",
-      "COMMUNICATION": "Связь и интернет",
-      "TRANSPORT": "Транспортные расходы",
-      "OTHER_EXPENSE": "Прочие расходы"
-    },
     "analytics": {
       "demo": "Демо-данные",
       "demoHint": "Показаны тестовые цифры. После подключения API появятся реальные данные офиса.",
