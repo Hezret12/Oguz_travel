@@ -409,7 +409,7 @@
   "turkish": {
     "addTicket": "Добавить билет Turkish Airlines",
     "editTicket": "Редактировать билет Turkish Airlines",
-    "add": "Bilet goşmak"
+    "add": "Добавить билет"
   },
   "payment": {
     "clientName": "Имя клиента",
@@ -430,8 +430,8 @@
   },
   "b2b": {
     "title": "B2B",
-    "addTicket": "B2B bilet goşmak",
-    "editTicket": "B2B bileti üýtgetmek",
+    "addTicket": "Добавить билет B2B",
+    "editTicket": "Изменить билет B2B",
     "agentPhoneNumber": "Телефон агента"
   },
   "referralLetter": {
