@@ -317,3 +317,19 @@ export const getDashboardCategoryAnalyticsApi = async (params = {}) => {
 export const getDashboardOfficesApi = async (params = {}) => {
   return await api.getPrivate('/dashboard/offices-by-office', params);
 };
+
+export const getAllInboundExpectedApi = async (params = {}) => {
+  return await api.getPrivate('/inbound-reports/get-all-expected', params);
+};
+
+export const getAllInboundArrivalsApi = async (params = {}) => {
+  return await api.getPrivate('/inbound-reports/get-all-arrivals', params);
+};
+
+export const getAllInboundInvitationsApi = async (params = {}) => {
+  return await api.getPrivate('/inbound-reports/get-all-invitations', params);
+};
+
+export const getInboundSummaryApi = async (params = {}) => {
+  return await api.getPrivate('/inbound-reports/get-summary', params);
+};

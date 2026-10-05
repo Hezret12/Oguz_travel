@@ -284,3 +284,15 @@ export const generateSalaryMonthApi = async (data) => {
 export const markSalaryPaidApi = async (data) => {
   return await api.postPrivate("/salary/mark-paid", data);
 };
+
+export const addInboundExpectedApi = async (data) => {
+  return await api.postPrivate('/inbound-reports/add-expected', data);
+};
+
+export const addInboundArrivalApi = async (data) => {
+  return await api.postPrivate('/inbound-reports/add-arrival', data);
+};
+
+export const addInboundInvitationApi = async (data) => {
+  return await api.postPrivate('/inbound-reports/add-invitation', data);
+};

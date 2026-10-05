@@ -183,3 +183,18 @@ export const deleteSalaryApi = async (guid) => {
   const actualGuid = typeof guid === "object" && !Array.isArray(guid) ? (guid?.guid || guid?.id) : guid;
   return await api.deletePrivate('/salary/delete-salary', { guid: actualGuid });
 };
+
+export const deleteInboundExpectedApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/inbound-reports/delete-expected', { guid: actualGuid });
+};
+
+export const deleteInboundArrivalApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/inbound-reports/delete-arrival', { guid: actualGuid });
+};
+
+export const deleteInboundInvitationApi = async (guid) => {
+  const actualGuid = typeof guid === "object" ? (guid?.guid || guid?.id) : guid;
+  return await api.deletePrivate('/inbound-reports/delete-invitation', { guid: actualGuid });
+};

@@ -372,6 +372,7 @@
     "notifications": "Notifications",
     "profile": "Profile",
     "outbound": "Outbound",
+    "inbound": "Inbound",
     "packages": "Packages",
     "clients": "Clients",
     "employee": "Employee",
@@ -593,6 +594,93 @@
     "lastMonth": "Last Month",
     "thisYear": "This Year",
     "allTime": "All Time"
+  },
+  "inbound": {
+    "title": "Inbound",
+    "tabs": {
+      "expected": "Expected",
+      "arrivals": "Arrived",
+      "invitations": "Invitations"
+    },
+    "expected": {
+      "add": "Add expected group",
+      "edit": "Edit expected group"
+    },
+    "arrivals": {
+      "add": "Add arrived tourist",
+      "edit": "Edit arrived tourist"
+    },
+    "invitations": {
+      "add": "Add invitation result",
+      "edit": "Edit invitation result"
+    },
+    "gender": {
+      "MALE": "Male",
+      "FEMALE": "Female"
+    },
+    "days": "{{count}} days",
+    "fields": {
+      "country": "Country",
+      "touristsCount": "Number of tourists",
+      "tripStart": "Trip start date",
+      "tripEnd": "Trip end date",
+      "tripPeriod": "Trip period",
+      "route": "Travel route",
+      "transport": "Type of transport",
+      "fullName": "Tourist's full name",
+      "passport": "Passport series and number",
+      "citizenship": "Citizenship",
+      "invitationNumber": "Invitation №",
+      "voucherNumber": "Travel voucher №",
+      "entryDate": "Entry date",
+      "exitDate": "Exit date",
+      "entryBorder": "Entry checkpoint",
+      "exitBorder": "Exit checkpoint",
+      "reportMonth": "Report month",
+      "submittedCount": "Applications submitted (people)",
+      "grantedCount": "Invitation granted",
+      "refusedCount": "Invitation refused",
+      "pendingCount": "Awaiting result"
+    },
+    "placeholders": {
+      "route": "Ashgabat – Dashoguz – Kunya-Urgench – Ashgabat",
+      "transport": "Plane, car",
+      "citizenship": "USA",
+      "border": "FARAP"
+    },
+    "summary": {
+      "groups": "Groups",
+      "tourists": "Tourists",
+      "totalArrivals": "Total arrived",
+      "otherCountries": "Other countries",
+      "submitted": "Submitted",
+      "granted": "Granted",
+      "refused": "Refused",
+      "pending": "Pending"
+    },
+    "filter": {
+      "nextMonth": "Next Month",
+      "hintExpected": "Filters by the trip start date.",
+      "hintArrivals": "Filters by the tourist's entry date.",
+      "hintInvitations": "Filters by the report month."
+    },
+    "validation": {
+      "endBeforeStart": "The end date cannot be before the start date",
+      "exitBeforeEntry": "The exit date cannot be before the entry date",
+      "countRequired": "Enter at least one count"
+    },
+    "export": {
+      "modalDesc": "Pick the report month. The file holds that month's arrived tourists and invitation results, plus the tourists expected in the following month.",
+      "people": "{{count}} people",
+      "fetching": "Fetching data...",
+      "generating": "Building the Excel file...",
+      "success": "Inbound report downloaded"
+    },
+    "searchPlaceholder": {
+      "expected": "Country, route, transport...",
+      "arrivals": "Name, passport, citizenship...",
+      "invitations": "Country..."
+    }
   },
   "visaIntake": {
     "title": "Visa Intake",

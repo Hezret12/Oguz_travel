@@ -372,6 +372,7 @@
     "notifications": "Bildirişler",
     "profile": "Profil",
     "outbound": "Outbound",
+    "inbound": "Inbound",
     "packages": "Wiza resminamalar",
     "clients": "Müşderiler",
     "employee": "Işgärler",
@@ -593,6 +594,93 @@
     "lastMonth": "Geçen aý",
     "thisYear": "Şu ýyl",
     "allTime": "Ähli döwür"
+  },
+  "inbound": {
+    "title": "Inbound",
+    "tabs": {
+      "expected": "Garaşylýan",
+      "arrivals": "Gelen",
+      "invitations": "Çakylyklar"
+    },
+    "expected": {
+      "add": "Garaşylýan topar goşmak",
+      "edit": "Garaşylýan topary üýtgetmek"
+    },
+    "arrivals": {
+      "add": "Gelen syýahatçy goşmak",
+      "edit": "Gelen syýahatçyny üýtgetmek"
+    },
+    "invitations": {
+      "add": "Çakylyk netijesini goşmak",
+      "edit": "Çakylyk netijesini üýtgetmek"
+    },
+    "gender": {
+      "MALE": "Erkek",
+      "FEMALE": "Aýal"
+    },
+    "days": "{{count}} gün",
+    "fields": {
+      "country": "Ýurdy",
+      "touristsCount": "Syýahatçylaryň sany",
+      "tripStart": "Syýahatyň başlanýan senesi",
+      "tripEnd": "Syýahatyň gutarýan senesi",
+      "tripPeriod": "Syýahatyň möhleti",
+      "route": "Syýahat ugurlary",
+      "transport": "Ulagyň görnüşi",
+      "fullName": "Syýahatçynyň F.A.A.a.",
+      "passport": "Pasportynyň seriýasy we belgisi",
+      "citizenship": "Raýatlygy",
+      "invitationNumber": "Çakylygyň №",
+      "voucherNumber": "Syýahat ýolhatynyň №",
+      "entryDate": "Giren senesi",
+      "exitDate": "Çykýan senesi",
+      "entryBorder": "BGN giriş",
+      "exitBorder": "BGN çykyş",
+      "reportMonth": "Hasabat aýy",
+      "submittedCount": "Berlen arzalar (adam sany)",
+      "grantedCount": "Çakylyk berlenler",
+      "refusedCount": "Çakylyk berilmedikler",
+      "pendingCount": "Netijesine garaşylýanlar"
+    },
+    "placeholders": {
+      "route": "Aşgabat – Daşoguz – Köneürgenç – Aşgabat",
+      "transport": "Uçar, ulag",
+      "citizenship": "USA",
+      "border": "FARAP"
+    },
+    "summary": {
+      "groups": "Topar",
+      "tourists": "Syýahatçy",
+      "totalArrivals": "Jemi gelen",
+      "otherCountries": "Beýleki ýurtlar",
+      "submitted": "Berlen arza",
+      "granted": "Berlen",
+      "refused": "Berilmedik",
+      "pending": "Garaşylýan"
+    },
+    "filter": {
+      "nextMonth": "Indiki aý",
+      "hintExpected": "Syýahatyň başlanýan senesi boýunça süzülýär.",
+      "hintArrivals": "Syýahatçynyň giren senesi boýunça süzülýär.",
+      "hintInvitations": "Hasabat aýy boýunça süzülýär."
+    },
+    "validation": {
+      "endBeforeStart": "Gutarýan sene başlanýan seneden öň bolup bilmez",
+      "exitBeforeEntry": "Çykýan sene giren seneden öň bolup bilmez",
+      "countRequired": "Iň azyndan bir san giriziň"
+    },
+    "export": {
+      "modalDesc": "Hasabat aýyny saýlaň. Faýlda şol aýyň gelen syýahatçylary we çakylyk netijeleri, şeýle hem indiki aýda garaşylýan syýahatçylar bolar.",
+      "people": "{{count}} adam",
+      "fetching": "Maglumatlar alynýar...",
+      "generating": "Excel faýly döredilýär...",
+      "success": "Inbound hasabaty üstünlikli ýüklenildi"
+    },
+    "searchPlaceholder": {
+      "expected": "Ýurt, ugur, ulag...",
+      "arrivals": "Ady, pasport, raýatlyk...",
+      "invitations": "Ýurt..."
+    }
   },
   "visaIntake": {
     "title": "Kabul ediji bölümi",

@@ -469,6 +469,82 @@ export const useValidShema = () => {
     office_guid: yup.string().nullable().required(t("validation.required")),
   });
 
+  // Head counts arrive as strings; empty stays empty so `required` can catch it.
+  const inboundCount = (min) =>
+    yup
+      .number()
+      .transform((value, original) => (original === "" || original == null ? undefined : value))
+      .typeError(t("validation.invalidNumber"))
+      .integer(t("validation.invalidNumber"))
+      .min(min, t("validation.invalidNumber"));
+
+  // `this.parent[startKey]` must not be later than the validated date.
+  const notBefore = (startKey) =>
+    function (value) {
+      const start = this.parent?.[startKey];
+      if (!value || !start || !dayjs(value).isValid() || !dayjs(start).isValid()) return true;
+      return !dayjs(value).isBefore(dayjs(start), "day");
+    };
+
+  const inboundExpected = yup.object({
+    country: requiredNullableString,
+    tourists_count: inboundCount(1).required(t("validation.required")),
+    start_date: requiredDateSchema,
+    end_date: requiredDateSchema.test(
+      "not-before-start",
+      t("inbound.validation.endBeforeStart"),
+      notBefore("start_date"),
+    ),
+    route: yup.string().nullable(),
+    transport: yup.string().nullable(),
+    note: yup.string().nullable(),
+  });
+
+  const inboundArrival = yup.object({
+    full_name: requiredNullableString,
+    gender: requiredNullableString,
+    // Not `optionalDateSchema`: its 2000+ year floor would reject birth dates.
+    birth_date: yup
+      .string()
+      .nullable()
+      .test("valid-date", t("validation.invalidDate"), (value) => !value || dayjs(value).isValid())
+      .test(
+        "not-future",
+        t("validation.invalidDate"),
+        (value) => !value || !dayjs(value).isValid() || !dayjs(value).isAfter(dayjs(), "day"),
+      ),
+    passport_number: requiredNullableString,
+    citizenship: requiredNullableString,
+    invitation_number: yup.string().nullable(),
+    voucher_number: yup.string().nullable(),
+    entry_date: requiredDateSchema,
+    exit_date: optionalDateSchema.test(
+      "not-before-entry",
+      t("inbound.validation.exitBeforeEntry"),
+      notBefore("entry_date"),
+    ),
+    entry_border: yup.string().nullable(),
+    exit_border: yup.string().nullable(),
+    note: yup.string().nullable(),
+  });
+
+  const inboundInvitation = yup.object({
+    report_month: requiredDateSchema,
+    country: requiredNullableString,
+    // The message sits under the first count, but any of the three satisfies it.
+    granted_count: inboundCount(0).test(
+      "any-count",
+      t("inbound.validation.countRequired"),
+      function (value) {
+        const { refused_count, pending_count } = this.parent || {};
+        return [value, refused_count, pending_count].some((n) => Number(n) > 0);
+      },
+    ),
+    refused_count: inboundCount(0),
+    pending_count: inboundCount(0),
+    note: yup.string().nullable(),
+  });
+
   // Money inputs arrive as strings; empty means 0.
   const salaryMoney = () =>
     yup
@@ -681,6 +757,9 @@ export const useValidShema = () => {
     addOutbound,
     addNotification,
     addCafeteriaTransaction,
+    inboundExpected,
+    inboundArrival,
+    inboundInvitation,
     salary,
     addOffice,
     editOffice,

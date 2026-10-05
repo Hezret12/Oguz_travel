@@ -372,6 +372,7 @@
     "notifications": "Уведомления",
     "profile": "Профиль",
     "outbound": "Outbound",
+    "inbound": "Inbound",
     "packages": "Пакеты",
     "clients": "Клиенты",
     "employee": "Сотрудники",
@@ -593,6 +594,93 @@
     "lastMonth": "Прошлый месяц",
     "thisYear": "Этот год",
     "allTime": "Все время"
+  },
+  "inbound": {
+    "title": "Inbound",
+    "tabs": {
+      "expected": "Ожидаемые",
+      "arrivals": "Прибывшие",
+      "invitations": "Приглашения"
+    },
+    "expected": {
+      "add": "Добавить ожидаемую группу",
+      "edit": "Изменить ожидаемую группу"
+    },
+    "arrivals": {
+      "add": "Добавить прибывшего туриста",
+      "edit": "Изменить прибывшего туриста"
+    },
+    "invitations": {
+      "add": "Добавить результат приглашений",
+      "edit": "Изменить результат приглашений"
+    },
+    "gender": {
+      "MALE": "Мужской",
+      "FEMALE": "Женский"
+    },
+    "days": "{{count}} дн.",
+    "fields": {
+      "country": "Страна",
+      "touristsCount": "Количество туристов",
+      "tripStart": "Дата начала поездки",
+      "tripEnd": "Дата окончания поездки",
+      "tripPeriod": "Срок поездки",
+      "route": "Маршрут поездки",
+      "transport": "Вид транспорта",
+      "fullName": "Ф.И.О. туриста",
+      "passport": "Серия и номер паспорта",
+      "citizenship": "Гражданство",
+      "invitationNumber": "№ приглашения",
+      "voucherNumber": "№ туристической путёвки",
+      "entryDate": "Дата въезда",
+      "exitDate": "Дата выезда",
+      "entryBorder": "КПП въезда",
+      "exitBorder": "КПП выезда",
+      "reportMonth": "Отчётный месяц",
+      "submittedCount": "Подано заявлений (чел.)",
+      "grantedCount": "Приглашение выдано",
+      "refusedCount": "Приглашение не выдано",
+      "pendingCount": "Ожидают результата"
+    },
+    "placeholders": {
+      "route": "Ашхабад – Дашогуз – Кёнеургенч – Ашхабад",
+      "transport": "Самолёт, автомобиль",
+      "citizenship": "USA",
+      "border": "FARAP"
+    },
+    "summary": {
+      "groups": "Групп",
+      "tourists": "Туристов",
+      "totalArrivals": "Всего прибыло",
+      "otherCountries": "Другие страны",
+      "submitted": "Подано",
+      "granted": "Выдано",
+      "refused": "Не выдано",
+      "pending": "Ожидают"
+    },
+    "filter": {
+      "nextMonth": "Следующий месяц",
+      "hintExpected": "Фильтр по дате начала поездки.",
+      "hintArrivals": "Фильтр по дате въезда туриста.",
+      "hintInvitations": "Фильтр по отчётному месяцу."
+    },
+    "validation": {
+      "endBeforeStart": "Дата окончания не может быть раньше даты начала",
+      "exitBeforeEntry": "Дата выезда не может быть раньше даты въезда",
+      "countRequired": "Укажите хотя бы одно количество"
+    },
+    "export": {
+      "modalDesc": "Выберите отчётный месяц. В файл попадут прибывшие туристы и результаты приглашений за этот месяц, а также туристы, ожидаемые в следующем месяце.",
+      "people": "{{count}} чел.",
+      "fetching": "Получение данных...",
+      "generating": "Создание Excel-файла...",
+      "success": "Отчёт Inbound успешно загружен"
+    },
+    "searchPlaceholder": {
+      "expected": "Страна, маршрут, транспорт...",
+      "arrivals": "Ф.И.О., паспорт, гражданство...",
+      "invitations": "Страна..."
+    }
   },
   "visaIntake": {
     "title": "Прием документов",

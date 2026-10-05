@@ -45,6 +45,7 @@ const PackagePage = lazyRetry(() => import('../pages/Visa/Package/Package'));
 const PackagesViewPage = lazyRetry(() => import('../pages/Packages'));
 const TranslatePage = lazyRetry(() => import('../pages/Translate'));
 const OutboundPage = lazyRetry(() => import('../pages/Outbound/Outbound'));
+const InboundPage = lazyRetry(() => import('../pages/Inbound'));
 const VisaIntakePage = lazyRetry(() => import('../pages/VisaIntake'));
 const TurkishAirlinesReportPage = lazyRetry(() => import('../pages/Reports/TurkishAirlinesReport'));
 const TaskFlowPage = lazyRetry(() => import('../pages/TaskFlow'));
@@ -119,6 +120,7 @@ const Package = Loadable(PackagePage);
 const PackagesView = Loadable(PackagesViewPage);
 const Translate = Loadable(TranslatePage);
 const Outbound = Loadable(OutboundPage);
+const Inbound = Loadable(InboundPage);
 const Ticket = Loadable(TicketPage);
 const TicketB2B = Loadable(TicketB2BPage);
 const TicketTurkish = Loadable(TicketTurkishAirlinesPage);
@@ -179,6 +181,7 @@ const router = createBrowserRouter([
               { path: 'visa/package', element: <Package /> },
               { path: 'translation', element: <Translate /> },
               { path: 'outbound', element: <Outbound /> },
+              { path: 'inbound', element: <Inbound /> },
               { path: 'packages', element: <PackagesView /> },
               {
                 path: 'ticket',

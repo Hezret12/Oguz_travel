@@ -257,3 +257,15 @@ export const updateSalaryApi = async (data) => {
 export const lockSalaryMonthApi = async (data) => {
   return await api.patchPrivate("/salary/lock-month", data);
 };
+
+export const updateInboundExpectedApi = async (data) => {
+  return await api.patchPrivate('/inbound-reports/update-expected', data);
+};
+
+export const updateInboundArrivalApi = async (data) => {
+  return await api.patchPrivate('/inbound-reports/update-arrival', data);
+};
+
+export const updateInboundInvitationApi = async (data) => {
+  return await api.patchPrivate('/inbound-reports/update-invitation', data);
+};

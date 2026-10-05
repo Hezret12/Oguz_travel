@@ -16,6 +16,7 @@ import {
   FileCheck,
   Languages,
   PlaneTakeoff,
+  PlaneLanding,
   ClipboardCheck,
   UtensilsCrossed,
   Wallet,
@@ -219,6 +220,12 @@ export const useSidebarItems = () => {
         text: t("sidebar.outbound"),
         path: PATHS.OUTBOUND,
         icon: createElement(PlaneTakeoff, { size: 20, strokeWidth: 2.2 }),
+      },
+      {
+        id: "inbound",
+        text: t("sidebar.inbound"),
+        path: PATHS.INBOUND,
+        icon: createElement(PlaneLanding, { size: 20, strokeWidth: 2.2 }),
       },
       {
         id: "packages",

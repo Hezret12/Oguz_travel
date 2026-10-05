@@ -9,6 +9,7 @@ import referralLetterFiltersReducer from './slices/filters/referralLetterFilterS
 import visaFiltersReducer from './slices/filters/visaFilterSlice';
 import translateFiltersReducer from './slices/filters/translateFilterSlice';
 import outboundFiltersReducer from './slices/filters/outboundFilterSlice';
+import inboundFiltersReducer from './slices/filters/inboundFilterSlice';
 import visaIntakeFiltersReducer from './slices/filters/visaIntakeFilterSlice';
 import taskFiltersReducer from './slices/filters/taskFilterSlice';
 import cafeteriaFiltersReducer from './slices/filters/cafeteriaFilterSlice';
@@ -33,6 +34,7 @@ const store = configureStore({
     visaFilters:    visaFiltersReducer,
     translateFilters: translateFiltersReducer,
     outboundFilters: outboundFiltersReducer,
+    inboundFilters: inboundFiltersReducer,
     visaIntakeFilters: visaIntakeFiltersReducer,
     taskFilters:     taskFiltersReducer,
     cafeteriaFilters: cafeteriaFiltersReducer,

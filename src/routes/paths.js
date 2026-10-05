@@ -25,6 +25,7 @@ export const PATHS = {
   TRANSLATION: '/translation',
   REFERRAL_LETTERS: '/referal-letters',
   OUTBOUND: '/outbound',
+  INBOUND: '/inbound',
   REPORTS: {
     ROOT: '/reports',
     TURKISH_AIRLINES: '/reports/turkish-airlines',
