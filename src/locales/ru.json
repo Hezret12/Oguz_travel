@@ -255,23 +255,23 @@
   },
   "users": {
     "title": "Ulanyjylar",
-    "add": "Ulanyjy goş",
+    "add": "Добавить пользователя",
     "isAdmin": "Администратор",
-    "deleteConfirm": "Hakykatdan hem bu ulanyjyny öçürmek isleýärsiňizmi?",
+    "deleteConfirm": "Вы действительно хотите удалить этого пользователя?",
     "statusActiveLabel": "Aktiw",
     "statusInactiveLabel": "Passiw",
-    "permissionsCount": "Saýlanan",
-    "editTitle": "Ulanyjyny redaktirlemek",
-    "addTitle": "Ulanyjy goş",
-    "selectEmployee": "Işgär saýlaň...",
+    "permissionsCount": "Выбрано",
+    "editTitle": "Редактировать пользователя",
+    "addTitle": "Добавить пользователя",
+    "selectEmployee": "Выберите сотрудника...",
     "phoneNumberPlaceholder": "61 123456",
-    "passwordEditPlaceholder": "Häzirki paroly saklamak üçin boş goýuň",
+    "passwordEditPlaceholder": "Оставьте пустым, чтобы сохранить текущий пароль",
     "statusActive": "Aktiw ulanyjy",
-    "isExternalUser": "Daşarky ulanyjy",
-    "selected": "Saýlanan",
+    "isExternalUser": "Внешний пользователь",
+    "selected": "Выбрано",
     "tabs": {
       "information": "Maglumat",
-      "access": "Giriş"
+      "access": "Доступ"
     },
     "validation": {
       "employeeRequired": "Işgär saýlanmalydyr",
