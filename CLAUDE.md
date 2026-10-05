@@ -418,3 +418,17 @@ Confirmed examples: `Translate`, `Cafeteria`, `Ticket` (with nested `B2B`/`Turki
   - `Gysga ady, Tk` (NOT `Gysga ady (TK)`)
   - `Bölüm ady, Tk` (NOT `Bölüm ady (TK)`)
 - **Rationale**: Ensures a clean, modern, and unified typographical style across all forms, modals, and locale translation files.
+
+---
+
+## 17. Dashboard & Finance Report Conventions
+
+- **TMT and USD together, never added.** The admin dashboard has no currency switch. Per-currency endpoints are called once per currency through the `use…ByCurrency` hooks in `src/pages/Finance/Overview/functions/dashboardData.js`; cards receive a `{ TMT, USD }` shape.
+- **Charts:** one panel per currency with `CurrencyPanels`; table cells with one line per currency with `AmountLines` (both in `src/pages/AdminDashboard/Contents/ChartParts.jsx`). Never put TMT and USD on one axis.
+- **Column charts:** use `ColumnBreakdown` (`src/pages/AdminDashboard/Contents/ColumnBreakdown.jsx`) — pass `series: [{ id, label, color, value(row, currency) }]`. It draws the top 8 rows and links to the table for the rest.
+- **Donuts:** use `DonutBreakdown` with `assignSliceSlots`; four colours plus a grey "other" slice (`useSliceColors`). Do not add a fifth hue — the set is validated on all pairs.
+- **Cost of sales label:** always the fixed red `BaseFareLabel` (`src/components/BaseFareLabel.jsx`), or `BASE_FARE_TEXT` where a plain string is needed. It is not translated.
+- **Date range:** `PeriodRangeFilter` (`src/pages/Finance/Overview/Contents/PeriodRangeFilter.jsx`) — one button, presets plus a range calendar. Props: `{ period, customRange, onChange }`.
+- **Office scope:** the dashboard reports the signed-in user's own office (`user.office_guid`, set in `normalizeUser`). There is no office select.
+- **Card safety:** wrap each dashboard card in `ComponentErrorBoundary` so one card's render error does not take the page down, and `memo()` the card.
+- **Long tables in cards:** `scrollTableSx` on the `TableContainer` with `stickyHeader`; `stickyFooterSx` keeps a totals row in view.
