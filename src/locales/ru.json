@@ -28,7 +28,7 @@
   "tripTypeOneWay": "В одну сторону",
   "tripTypeRoundTrip": "В обе стороны",
   "kassa": "Касса",
-  "price": "Bahasy",
+  "price": "Цена",
   "validation": {
     "required": "Обязательное поле",
     "emailRequired": "Введите email",
@@ -382,7 +382,7 @@
     "visaApplications": "Визовые анкеты",
     "visaIntake": "Прием документов",
     "reports": "Отчёты",
-    "reportTurkishAirlines": "Turkish Airlines",
+    "reportTurkishAirlines": "Турецкие авиалинии",
     "reportReferralLetter": "Рекомендательные письма",
     "visa": {
       "title": "Виза",

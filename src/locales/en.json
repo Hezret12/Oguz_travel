@@ -28,7 +28,7 @@
   "tripTypeOneWay": "One Way",
   "tripTypeRoundTrip": "Round Trip",
   "kassa": "Kassa",
-  "price": "Bahasy",
+  "price": "Price",
   "validation": {
     "required": "Required",
     "emailRequired": "Email is required",
