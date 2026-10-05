@@ -1090,12 +1090,10 @@
       },
       "kpi": {
         "revenue": "Satyş",
-        "cost": "Özüne düşýän baha",
         "grossProfit": "Brutto peýda",
         "expenses": "Çykdajylar",
         "netProfit": "Arassa peýda",
         "receivable": "Alynmaly",
-        "moneyOut": "Özüne düşýän baha",
         "moneyIn": "Satyş",
         "credit": "Kredit",
         "profit": "Peýda",
@@ -1147,7 +1145,6 @@
         "title": "Satyş we özüne düşýän baha",
         "subtitle": "Döwür boýunça satyş we onuň özüne düşýän bahasy",
         "inflow": "Satyş",
-        "outflow": "Özüne düşýän baha",
         "net": "Peýda",
         "closing": "Jemlenen peýda"
       },
@@ -1418,7 +1415,6 @@
     "refunds": "Yzyna gaýtarylan",
     "allOffices": "Ähli ofisler",
     "moneyTitle": "Girdeji we çykdajy",
-    "outTotal": "Çykdajy jemi",
     "outBreakdown": "Çykdajy nirä gitdi",
     "netResult": "Arassa netije",
     "officesTitle": "Ofisler boýunça",

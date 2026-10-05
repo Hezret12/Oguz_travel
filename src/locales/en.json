@@ -1090,12 +1090,10 @@
       },
       "kpi": {
         "revenue": "Sales",
-        "cost": "Cost of sales",
         "grossProfit": "Gross profit",
         "expenses": "Expenses",
         "netProfit": "Net profit",
         "receivable": "Receivable",
-        "moneyOut": "Cost of sales",
         "moneyIn": "Sales",
         "credit": "Credit",
         "profit": "Profit",
@@ -1147,7 +1145,6 @@
         "title": "Sales and cost",
         "subtitle": "Sales and their cost over the period",
         "inflow": "Sales",
-        "outflow": "Cost of sales",
         "net": "Profit",
         "closing": "Running profit"
       },
@@ -1418,7 +1415,6 @@
     "refunds": "Refunds",
     "allOffices": "All offices",
     "moneyTitle": "Money in and out",
-    "outTotal": "Total money out",
     "outBreakdown": "Where the money went",
     "netResult": "Net result",
     "officesTitle": "By office",
