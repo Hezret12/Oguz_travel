@@ -369,10 +369,8 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
       passport: row.client?.passport_number
         ? String(row.client.passport_number).toUpperCase()
         : "",
-      // Country names are Turkmen only; older letters only have the free-text country.
-      destination_country: String(
-        row.refferalCountry?.name?.tk || "",
-      ).trim(),
+      // Country names are Turkmen only.
+      destination_country: String(row.refferalCountry?.name?.tk || "").trim(),
       bgn_departure: bgnDepartureOf(row),
       bgn_arrival: row.bgn_arrival ? String(row.bgn_arrival).trim() : "",
       travel_doc: formatYhNumber(row.travel_document_number),
