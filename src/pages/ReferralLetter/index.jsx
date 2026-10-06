@@ -277,7 +277,7 @@ const ReferalLetter = () => {
       },
       {
         // Country names are Turkmen only; older letters only have the free-text country.
-        accessorFn: (row) => row.refferalCountry?.name?.tk || row.destination_country || "",
+        accessorFn: (row) => row.refferalCountry?.name?.tk || "",
         id: "destination_country",
         header: t("columns.destinationCountry"),
         size: 110,

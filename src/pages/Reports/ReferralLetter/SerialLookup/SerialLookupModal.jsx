@@ -136,8 +136,10 @@ const SerialLookupModal = ({ open, close }) => {
         </InfoRow>
         {letter.isRefferal ? (
           <>
-            {letter.destination_country && (
-              <InfoRow label={t("columns.destinationCountry")}>{letter.destination_country}</InfoRow>
+            {letter.refferalCountry?.name?.tk && (
+              <InfoRow label={t("columns.destinationCountry")}>
+                {letter.refferalCountry.name.tk}
+              </InfoRow>
             )}
             {letter.departure_date && (
               <InfoRow label={t("columns.departureDate")}>

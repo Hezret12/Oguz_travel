@@ -250,7 +250,7 @@ const toLetterValues = (child, offset, t) => {
     // Referral letters have no note of their own; their destination and departure day identify
     // them instead, as in the panel.
     note: isReferral
-      ? [letter.destination_country, formatExcelDate(letter.departure_date)]
+      ? [letter.refferalCountry?.name?.tk, formatExcelDate(letter.departure_date)]
           .filter(Boolean)
           .join(" • ")
       : String(letter.note || "").trim(),

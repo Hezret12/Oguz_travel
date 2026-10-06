@@ -371,7 +371,7 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
         : "",
       // Country names are Turkmen only; older letters only have the free-text country.
       destination_country: String(
-        row.refferalCountry?.name?.tk || row.destination_country || "",
+        row.refferalCountry?.name?.tk || "",
       ).trim(),
       bgn_departure: bgnDepartureOf(row),
       bgn_arrival: row.bgn_arrival ? String(row.bgn_arrival).trim() : "",

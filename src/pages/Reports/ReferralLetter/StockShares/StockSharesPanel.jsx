@@ -199,7 +199,7 @@ const StockSharesPanel = ({ stock }) => {
         Cell: ({ row }) => {
           const { letter } = row.original;
           const text = letter.isRefferal
-            ? [letter.destination_country, formatChange(letter.departure_date, { dateOnly: true })]
+            ? [letter.refferalCountry?.name?.tk, formatChange(letter.departure_date, { dateOnly: true })]
                 .filter(Boolean)
                 .join(" • ")
             : letter.note;
