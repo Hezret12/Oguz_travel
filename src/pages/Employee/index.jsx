@@ -136,6 +136,12 @@ const Employee = () => {
     [departments, positions, offices, selectedLang],
   );
 
+  // The API names the position filter in the plural: an employee can hold several positions.
+  const listParams = useMemo(() => {
+    const { position_guid, ...rest } = queryParams;
+    return position_guid ? { ...rest, position_guids: position_guid } : rest;
+  }, [queryParams]);
+
   const {
     data: employeesData,
     isLoading,
@@ -147,7 +153,7 @@ const Employee = () => {
   } = usePagginationGet({
     apiFn: getAllEmployeeApi,
     key: "employees",
-    params: queryParams,
+    params: listParams,
   });
 
   const { mutate: deleteEmployeeMutate, isPending: isDeleting } = useDelete({
