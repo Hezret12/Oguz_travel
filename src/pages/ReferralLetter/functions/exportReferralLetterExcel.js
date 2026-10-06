@@ -333,7 +333,9 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
   });
 
   // The column header already says TMT, so the amount is shown as a plain number.
-  const currencyNumFmt = "#,##0.00";
+  // A whole amount shows without decimals (100, not 100.00); kopecks keep two.
+  const currencyNumFmt = "#,##0";
+  const fractionNumFmt = "#,##0.00";
 
   // One style object per column, shared by all its cells: with thousands of
   // rows, fresh font/border objects per cell cost hundreds of MB.
@@ -345,6 +347,8 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
     border,
     ...(col.key === "price" ? { numFmt: currencyNumFmt } : {}),
   }));
+  const priceIdx = columnsConfig.findIndex((col) => col.key === "price");
+  const fractionPriceStyle = { ...cellStyles[priceIdx], numFmt: fractionNumFmt };
 
   // Data rows
   letters.forEach((row, offset) => {
@@ -384,7 +388,8 @@ function addLetterSheet(workbook, sheetName, letters, { dateText, titleBanner })
     rowData.forEach((val, idx) => {
       const cell = currentRow.getCell(START_COL + idx);
       cell.value = val;
-      cell.style = cellStyles[idx];
+      cell.style =
+        idx === priceIdx && !Number.isInteger(price) ? fractionPriceStyle : cellStyles[idx];
     });
   });
 

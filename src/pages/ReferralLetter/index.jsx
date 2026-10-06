@@ -336,7 +336,9 @@ const ReferalLetter = () => {
           const amount = cell.getValue();
           const currency = row.original.currency || "TMT";
           const symbol = CURRENCY_SYMBOLS[currency] || currency;
-          return `${Number(amount || 0).toFixed(2)} ${symbol}`;
+          // A whole amount shows without decimals (100, not 100.00), as in the Excel export.
+          const value = Number(amount || 0);
+          return `${Number.isInteger(value) ? value : value.toFixed(2)} ${symbol}`;
         },
         muiTableHeadCellProps: { align: "center" },
         muiTableBodyCellProps: { align: "right" },
