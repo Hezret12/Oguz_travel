@@ -99,6 +99,11 @@ const getColumnValue = (client, column, t) => {
     (key === "passport_number" ? client?.passportNumber : undefined);
 
   if (format) return format(rawValue, client);
+  // Stored as Male/Female; shown translated, as on the Clients page.
+  if (key === "gender") {
+    if (rawValue === "Female" || rawValue === "Women") return t("clients.genderWomen");
+    if (rawValue === "Male" || rawValue === "Men") return t("clients.genderMen");
+  }
   return rawValue ?? "";
 };
 
@@ -224,7 +229,21 @@ const ListboxWithHeader = forwardRef(function ListboxWithHeader(
 ) {
   delete rest.ownerState;
   return (
-    <ul ref={ref} {...rest} style={{ ...rest.style, padding: 0 }}>
+    // A custom listbox slot does not get MUI's own listbox styles, so the height
+    // limit and scrolling are set here; without them the list runs off the screen.
+    <ul
+      ref={ref}
+      {...rest}
+      style={{
+        listStyle: "none",
+        margin: 0,
+        maxHeight: "40vh",
+        overflow: "auto",
+        position: "relative",
+        ...rest.style,
+        padding: 0,
+      }}
+    >
       {lbColumns && lbColumns.length > 0 && (
         <Box
           component="li"
