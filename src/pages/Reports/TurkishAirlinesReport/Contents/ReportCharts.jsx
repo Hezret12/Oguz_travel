@@ -4,7 +4,6 @@ import {
   Typography,
   Paper,
   Skeleton,
-  LinearProgress,
   Grid,
   alpha,
   useTheme,
@@ -16,6 +15,7 @@ import { MapPinHouse } from "lucide-react";
 import PieChartRoundedIcon from "@mui/icons-material/PieChartRounded";
 import { useLocale } from "../../../../hooks/useLocale";
 import QuarterReportCard from "./QuarterReportCard";
+import OfficeBreakdown from "./OfficeBreakdown";
 
 const SectionTitle = ({ icon, title, subtitle, color, action }) => (
   <Box
@@ -443,8 +443,8 @@ const ReportCharts = ({
           >
             <SectionTitle
               icon={<MapPinHouse size={20} />}
-              title={t("report.turkishAirlines.officeBreakdown") || "Ofisler boýunça paýy"}
-              subtitle={t("report.turkishAirlines.officeBreakdownSubtitle") || "Toplam ciroya katkı oranları"}
+              title={t("report.turkishAirlines.officeBreakdown")}
+              subtitle={t("report.turkishAirlines.officeBreakdownSubtitle")}
               color={accent}
             />
 
@@ -455,77 +455,7 @@ const ReportCharts = ({
                 ))}
               </Box>
             ) : officeBreakdown && officeBreakdown.length > 0 ? (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-                {officeBreakdown.map((item) => (
-                  <Box key={item.key || item.office}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 0.6,
-                      }}
-                    >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Box
-                          sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: "50%",
-                            backgroundColor: item.color,
-                            boxShadow: `0 0 8px ${alpha(item.color, 0.4)}`,
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 700,
-                            color: "text.primary",
-                            fontSize: 13,
-                          }}
-                        >
-                          {item.office}
-                        </Typography>
-                      </Box>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          color: "text.secondary",
-                          fontSize: 13,
-                        }}
-                      >
-                        {formatNumber(item.totalQuoted)}{" "}
-                        <Typography
-                          component="span"
-                          sx={{
-                            fontSize: 11,
-                            color: item.color,
-                            fontWeight: 700,
-                            ml: 0.5,
-                          }}
-                        >
-                          ({item.percentage})
-                        </Typography>
-                      </Typography>
-                    </Box>
-                    <LinearProgress
-                      variant="determinate"
-                      value={item.barWidth}
-                      sx={{
-                        height: 7,
-                        borderRadius: 4,
-                        backgroundColor: "action.hover",
-                        "& .MuiLinearProgress-bar": {
-                          borderRadius: 4,
-                          backgroundColor: item.color,
-                          transition: "transform 0.3s ease",
-                        },
-                      }}
-                    />
-                  </Box>
-                ))}
-              </Box>
+              <OfficeBreakdown items={officeBreakdown} formatNumber={formatNumber} color={accent} />
             ) : (
               <EmptyState
                 icon={

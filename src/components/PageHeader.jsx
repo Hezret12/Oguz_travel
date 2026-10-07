@@ -3,7 +3,7 @@ import { Funnel } from "lucide-react";
 import AddButton from "./AddButton";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
-const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonText, onFilterClick, children }) => {
+const PageHeader = ({ title, titleSlot, pageTitle, addButtonText, onAddClick, filterButtonText, onFilterClick, children }) => {
   useDocumentTitle(pageTitle);
 
   const showAddButton = Boolean(onAddClick);
@@ -15,18 +15,23 @@ const PageHeader = ({ title, pageTitle, addButtonText, onAddClick, filterButtonT
         direction="row"
         sx={{ py: 2, width: "100%", alignItems: "center", justifyContent: "space-between" }}
       >
-        <Typography
-          variant="h5"
-          sx={{
-            flex: 1,
-            fontWeight: 600,
-            fontSize: { xs: "20px", sm: "24px" },
-            letterSpacing: "-0.3px",
-            lineHeight: 1.3,
-          }}
-        >
-          {title}
-        </Typography>
+        {/* Tabs that name the page take the title's place. */}
+        {titleSlot ? (
+          <Box sx={{ flex: 1, display: "flex", alignItems: "center", minWidth: 0 }}>{titleSlot}</Box>
+        ) : (
+          <Typography
+            variant="h5"
+            sx={{
+              flex: 1,
+              fontWeight: 600,
+              fontSize: { xs: "20px", sm: "24px" },
+              letterSpacing: "-0.3px",
+              lineHeight: 1.3,
+            }}
+          >
+            {title}
+          </Typography>
+        )}
 
         {(showFilterButton || showAddButton || children) && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>

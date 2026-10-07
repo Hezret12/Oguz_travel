@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import dayjs from "dayjs";
 import { fetchAllPaginatedData } from "../../../../functions/excelExportHelper";
-import { dualCurrencyAmounts, isCashRow, isProjectExpense } from "./cashFlowHelpers";
+import { dualCurrencyAmounts, isCashRow, isProjectExpense, projectExpenseCosts } from "./cashFlowHelpers";
 
 const ACCENT_RED = "FFDC2626";
 const AMOUNT_FMT = '#,##0.00;-#,##0.00;"-"';
@@ -45,6 +45,15 @@ const outerBorder = (colNumber, startCol, endCol, color = "FFD9D9D9") => ({
 // A visa row carries a TMT and a USD price at once; the sheet has one
 // currency per row, so it becomes one row per priced currency.
 const expandDualCurrency = (row) => {
+  // So does a closed salary month paid in both: one expense row per currency.
+  if (isProjectExpense(row)) {
+    return projectExpenseCosts(row).map(({ currency, cost }) => ({
+      ...row,
+      currency,
+      net_price: cost,
+      net_price_usd: 0,
+    }));
+  }
   const dual = dualCurrencyAmounts(row);
   if (!dual) return [row];
   return dual.map(({ currency, value, cost }) => ({ ...row, currency, sale_price: value, net_price: cost }));

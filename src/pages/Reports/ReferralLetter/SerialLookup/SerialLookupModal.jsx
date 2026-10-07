@@ -13,6 +13,7 @@ import { useDateFormat } from "../../../../functions/generalHelpers";
 import { fetchAllPaginatedData } from "../../../../functions/excelExportHelper";
 import { REFERRAL_REPORT_STATUS_CONFIG } from "../../../../functions/statusChipConfigs";
 import { getAllReportsApi, getLettersByDocumentRangeApi } from "../../../../api/queries/getters";
+import { completeYhNumber } from "../../../../functions/yhNumber";
 import {
   STOCK_LETTERS_KEY,
   YH_INPUT_PROPS,
@@ -63,7 +64,7 @@ const SerialLookupModal = ({ open, close }) => {
   const { t } = useLocale();
   const { formatChange } = useDateFormat();
 
-  const { control } = useForm({ defaultValues: { number: "" } });
+  const { control, setValue } = useForm({ defaultValues: { number: "" } });
   const value = useWatch({ control, name: "number" });
   const isValid = isYhNumber(value);
   const number = isValid ? Number(normalizeYhNumber(value)) : null;
@@ -255,6 +256,18 @@ const SerialLookupModal = ({ open, close }) => {
           placeholder="0369420"
           InputProps={YH_INPUT_PROPS}
           autoFocus
+          // A pasted number is complete, so it is taken whole (the 7-character limit would cut
+          // "00000013" short) and brought to the 7-digit form; so is a short one on Enter or blur.
+          onPaste={(event) => {
+            event.preventDefault();
+            setValue("number", completeYhNumber(event.clipboardData.getData("text")));
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && value) setValue("number", completeYhNumber(value));
+          }}
+          onBlur={() => {
+            if (value) setValue("number", completeYhNumber(value));
+          }}
         />
         {renderResult()}
       </Box>

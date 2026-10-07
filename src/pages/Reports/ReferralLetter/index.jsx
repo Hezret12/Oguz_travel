@@ -4,7 +4,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Funnel, Package, RotateCw, ScanSearch } from "lucide-react";
+import { Funnel, RotateCw, ScanSearch } from "lucide-react";
 import dayjs from "dayjs";
 import AddButton from "../../../components/AddButton";
 import ExportExcelButton from "../../../components/ExportExcelButton";
@@ -19,7 +19,7 @@ import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import { useDateFormat } from "../../../functions/generalHelpers";
 import AddLetterStockModal from "./LetterStock/AddLetterStockModal";
 import EditLetterStockModal from "./LetterStock/EditLetterStockModal";
-import StockSharesPanel from "./StockShares/StockSharesPanel";
+import TotalStockPill from "./components/TotalStockPill";
 import SerialLookupModal from "./SerialLookup/SerialLookupModal";
 import { usePagginationGet } from "../../../hooks/usePagginationGet";
 import { useTableFilters, useDrawerFilters } from "../../../hooks/usePageFilters";
@@ -56,7 +56,7 @@ const LetterStockFilterDrawer = () => {
   );
 };
 
-const ReferralLetterPage = () => {
+const ReferralLetterPage = ({ tabs }) => {
   const { t } = useLocale();
   const { formatChange } = useDateFormat();
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
@@ -203,30 +203,6 @@ const ReferralLetterPage = () => {
     columns: stockColumns,
     data: stockList,
     enableColumnPinning: false,
-    enableExpanding: true,
-    renderDetailPanel: ({ row }) => <StockSharesPanel stock={row.original} />,
-    muiTableBodyRowProps: (props) => {
-      if (props.isDetailPanel) {
-        return {
-          sx: {
-            backgroundColor: "background.paper",
-            "&:hover": { backgroundColor: "transparent !important" },
-          },
-        };
-      }
-      const base = defaultMrtOptions.muiTableBodyRowProps(props);
-      if (!props.row.getIsExpanded()) return base;
-      return {
-        ...base,
-        sx: (tTheme) => ({
-          ...base.sx(tTheme),
-          "& > td": { backgroundColor: tTheme.palette.action.selected },
-        }),
-      };
-    },
-    muiDetailPanelProps: {
-      sx: { px: 0, py: 0, backgroundColor: "background.paper" },
-    },
     muiTablePaperProps: {
       sx: (tTheme) => ({
         display: "flex",
@@ -391,50 +367,14 @@ const ReferralLetterPage = () => {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            {t("referralLetter.stockTab")}
-          </Typography>
-
-          {totalStockCount !== null && (
-            <Box
-              sx={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 1,
-                px: 2,
-                height: 48,
-                borderRadius: "12px",
-                backgroundColor: "action.hover",
-                border: "1px solid",
-                borderColor: "divider",
-              }}
-            >
-              <Package size={17} style={{ opacity: 0.75 }} />
-              <Typography
-                variant="body2"
-                sx={{
-                  fontSize: "0.825rem",
-                  color: "text.secondary",
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.6,
-                }}
-              >
-                {t("referralLetter.totalStock")}:
-                <Box
-                  component="span"
-                  sx={{
-                    color: "text.primary",
-                    fontWeight: 700,
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
-                  {totalStockCount} {t("referralLetter.letterUnit")}
-                </Box>
-              </Typography>
-            </Box>
+          {/* Inside the referral letters page the tab switch names this view. */}
+          {tabs || (
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {t("referralLetter.stockTab")}
+            </Typography>
           )}
+
+          <TotalStockPill count={totalStockCount} />
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>

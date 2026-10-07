@@ -101,7 +101,7 @@ const ReferralLetterFilterDrawer = () => {
   );
 };
 
-const ReferalLetter = () => {
+const ReferalLetter = ({ tabs }) => {
   const { t } = useLocale();
   const countryOptions = useReferralCountryOptions();
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
@@ -539,6 +539,7 @@ const ReferalLetter = () => {
     <>
       <PageHeader
         title={t("referralLetter.title")}
+        titleSlot={tabs}
         pageTitle={`${t("referralLetter.title")} | Oguz Travel`}
         addButtonText={t("referralLetter.add")}
         filterButtonText={t("filter")}

@@ -39,8 +39,7 @@ const TicketTurkishAirlinesPage = lazyRetry(() => import('../pages/Ticket/Turkis
 const NotFoundPage = lazyRetry(() => import('../pages/NotFound'));
 const UnauthorizedPage = lazyRetry(() => import('../pages/Unauthorized'));
 const VisaPage = lazyRetry(() => import('../pages/Visa'));
-const ReferralLetterPage = lazyRetry(() => import('../pages/ReferralLetter'));
-const ReferralLetterReportPage = lazyRetry(() => import('../pages/Reports/ReferralLetter/index'));
+const ReferralLetterPage = lazyRetry(() => import('../pages/ReferralLetter/ReferralLetterTabs'));
 const PackagePage = lazyRetry(() => import('../pages/Visa/Package/Package'));
 const PackagesViewPage = lazyRetry(() => import('../pages/Packages'));
 const TranslatePage = lazyRetry(() => import('../pages/Translate'));
@@ -115,7 +114,6 @@ const Clients = Loadable(ClientsPage);
 const Users = Loadable(UsersPage);
 const Visa = Loadable(VisaPage);
 const ReferralLetter = Loadable(ReferralLetterPage);
-const ReferralLetterReport = Loadable(ReferralLetterReportPage);
 const Package = Loadable(PackagePage);
 const PackagesView = Loadable(PackagesViewPage);
 const Translate = Loadable(TranslatePage);
@@ -194,7 +192,8 @@ const router = createBrowserRouter([
               },
               { path: 'intake', element: <Intake /> },
               { path: 'reports/turkish-airlines', element: <TurkishReport /> },
-              { path: 'reports/referral-letter', element: <ReferralLetterReport /> },
+              // The letter stock report is now a tab of the referral letters page.
+              { path: 'reports/referral-letter', element: <Navigate to="/referal-letters?tab=stock" replace /> },
               { path: 'cafeteria', element: <Cafeteria /> },
               { path: 'finance', element: <Navigate to="/finance/cash-flow" replace /> },
               { path: 'finance/cash-flow', element: <FinanceCashFlow /> },

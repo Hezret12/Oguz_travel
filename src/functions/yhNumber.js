@@ -27,5 +27,17 @@ export const formatYhNumber = (value) => {
     : text;
 };
 
+/**
+ * A pasted or finished entry as a serial: only its digits, extra leading zeros dropped and a
+ * short number padded, so "13", " 0000013" and "00000013" all become "0000013". A number with
+ * more than 7 significant digits is left as typed, so it shows as invalid instead of being cut.
+ */
+export const completeYhNumber = (value) => {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  if (!digits) return "";
+  const significant = digits.replace(/^0+/, "");
+  return significant.length <= YH_NUMBER_LENGTH ? significant.padStart(YH_NUMBER_LENGTH, "0") : digits;
+};
+
 /** Input props for a serial field: numeric keyboard, at most 7 characters. */
 export const YH_INPUT_PROPS = { inputProps: { maxLength: YH_NUMBER_LENGTH, inputMode: "numeric" } };

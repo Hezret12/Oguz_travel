@@ -384,7 +384,6 @@
     "visaIntake": "Visa Intake",
     "reports": "Reports",
     "reportTurkishAirlines": "Turkish Airlines",
-    "reportReferralLetter": "Referral Letters",
     "visa": {
       "title": "Visa",
       "package": "Packages",
@@ -746,7 +745,7 @@
       "statusChart": "Status Chart",
       "statusChartSubtitle": "Monthly status distribution",
       "officeBreakdown": "Office Breakdown",
-      "officeBreakdownSubtitle": "Contribution rates to total turnover",
+      "officeBreakdownSubtitle": "By amount sold, largest first",
       "dailyReportTable": "Daily Detailed Report Table",
       "daysData": "days of data",
       "totalSummary": "GRAND TOTAL",
@@ -784,7 +783,8 @@
       "dailyAvg": "Daily average",
       "bestDay": "Best day",
       "dayN": "Day {{day}}",
-      "margin": "Margin"
+      "margin": "Margin",
+      "officesNoSales": "No sales this month"
     }
   },
   "task": {

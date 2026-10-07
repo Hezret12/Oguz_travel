@@ -60,19 +60,30 @@ export const dualCurrencyAmounts = (row) => {
 };
 
 // Project rows with only a cost side (the month's salary, a USD bonus) are
-// money going out, not a sale.
+// money going out, not a sale. A closed salary month is one row that can cost
+// in both currencies: the TMT pay in net_price, USD bonuses in net_price_usd.
 export const isProjectExpense = (row) =>
   !isCashRow(row) &&
-  (Number(row?.net_price) || 0) > 0 &&
+  ((Number(row?.net_price) || 0) > 0 || (Number(row?.net_price_usd) || 0) > 0) &&
   !(Number(row?.sale_price) || 0) &&
   !(Number(row?.sale_price_usd) || 0);
+
+// The cost of such a row, one entry per currency it was paid in.
+export const projectExpenseCosts = (row) => {
+  const own = Number(row?.net_price) || 0;
+  const usd = Number(row?.net_price_usd) || 0;
+  return [
+    ...(own ? [{ currency: String(row?.currency || "TMT").toUpperCase(), cost: own }] : []),
+    ...(usd ? [{ currency: "USD", cost: usd }] : []),
+  ];
+};
 
 // One row → money in or out, its signed amount per currency and its profits
 // (`profits`: one per currency that has one — only a visa can have two).
 // Drives the table's TMT · USD · Peýda columns; a currency the row does not
 // touch stays null.
 //   cash row        → ± amount in its currency; profit only when a cost was booked
-//   salary / bonus  → − cost, no profit
+//   salary / bonus  → − cost in each currency it was paid in, no profit
 //   visa            → + TMT price and + USD price, the profit entered for each
 //   other project   → + sale price, profit in its currency
 export const rowAmounts = (row) => {
@@ -93,7 +104,7 @@ export const rowAmounts = (row) => {
   }
 
   if (isProjectExpense(row)) {
-    put(currency, -(Number(row.net_price) || 0));
+    projectExpenseCosts(row).forEach(({ currency: cur, cost }) => put(cur, -cost));
     return { kind: "expense", amounts, profits: [] };
   }
 

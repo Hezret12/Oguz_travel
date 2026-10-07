@@ -95,12 +95,6 @@ export const useSidebarItems = () => {
               style: { width: 30, height: 28, objectFit: "contain" },
             }),
           },
-          {
-            id: "report-referral-letter",
-            text: t("sidebar.reportReferralLetter"),
-            path: PATHS.REPORTS.REFERRAL_LETTER,
-            icon: createElement(FileText, { size: 18, strokeWidth: 2.2 }),
-          },
         ],
       },
       {

@@ -384,7 +384,6 @@
     "visaIntake": "Прием документов",
     "reports": "Отчёты",
     "reportTurkishAirlines": "Турецкие авиалинии",
-    "reportReferralLetter": "Рекомендательные письма",
     "visa": {
       "title": "Виза",
       "package": "Пакеты",
@@ -746,7 +745,7 @@
       "statusChart": "График статусов",
       "statusChartSubtitle": "Распределение статусов за месяц",
       "officeBreakdown": "Доля по офисам",
-      "officeBreakdownSubtitle": "Вклад в общий оборот",
+      "officeBreakdownSubtitle": "По сумме продаж, по убыванию",
       "dailyReportTable": "Ежедневная подробная таблица отчета",
       "daysData": "дней данных",
       "totalSummary": "ОБЩИЙ ИТОГ",
@@ -784,7 +783,8 @@
       "dailyAvg": "Среднее в день",
       "bestDay": "Лучший день",
       "dayN": "{{day}}-й день",
-      "margin": "Маржа"
+      "margin": "Маржа",
+      "officesNoSales": "Без продаж в этом месяце"
     }
   },
   "task": {

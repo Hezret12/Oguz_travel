@@ -384,7 +384,6 @@
     "visaIntake": "Kabul ediji",
     "reports": "Hasabat",
     "reportTurkishAirlines": "Türk howa ýollary",
-    "reportReferralLetter": "Ýollanma haty",
     "visa": {
       "title": "Wiza",
       "package": "Wiza resminamalar",
@@ -746,7 +745,7 @@
       "statusChart": "Status grafikleri",
       "statusChartSubtitle": "Aýlyk status paýlanşygy",
       "officeBreakdown": "Ofisler boýunça",
-      "officeBreakdownSubtitle": "Ofisler boýunça paýlanylşy",
+      "officeBreakdownSubtitle": "Satylan baha boýunça, köpden aza",
       "dailyReportTable": "Satyşlaryň günlik paýlanylşy",
       "daysData": "Türk howa ýollary hasabat",
       "totalSummary": "Jemi",
@@ -784,7 +783,8 @@
       "dailyAvg": "Günlük ortaça",
       "bestDay": "Iň gowy gün",
       "dayN": "{{day}}-nji gün",
-      "margin": "Peýda paýy"
+      "margin": "Peýda paýy",
+      "officesNoSales": "Bu aýda satuw ýok"
     }
   },
   "task": {
