@@ -1262,8 +1262,6 @@
       "title": "Offices report",
       "officeCount": "Offices: {{count}}",
       "office": "Office",
-      "profitHint": "Profit on sales",
-      "topExpenseOffice": "Highest-expense office",
       "tableTitle": "Totals by office",
       "tableSubtitle": "One row per office · USD and TMT kept separate",
       "cardsTitle": "Office results",

@@ -1262,8 +1262,6 @@
       "title": "Ofisleriň hasabaty",
       "officeCount": "{{count}} ofis",
       "office": "Ofis",
-      "profitHint": "Satyşdan peýda",
-      "topExpenseOffice": "Iň köp çykdajyly ofis",
       "tableTitle": "Ofisler boýunça jemi",
       "tableSubtitle": "Her ofis bir setir · USD we TMT aýratyn",
       "cardsTitle": "Ofisleriň netijesi",

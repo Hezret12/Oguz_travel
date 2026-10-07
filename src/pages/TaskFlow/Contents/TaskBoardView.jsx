@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, useCallback, useRef } from "react";
+import { memo, useState, useMemo, useCallback, useEffect, useRef } from "react";
 import {
   Box,
   Button,
@@ -29,6 +29,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useLocale } from "../../../hooks/useLocale";
 import { getAllTasksApi } from "../../../api/queries/getters";
 import AppAvatarGroup from "../../../components/AppAvatarGroup";
+import TableErrorState from "../../../components/TableErrorState";
 import {
   TASK_STATUS_ITEMS,
   getTaskPriority,
@@ -290,6 +291,9 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     isFetchingNextPage,
     isLoading,
     isFetching,
+    isError,
+    isFetchNextPageError,
+    refetch,
   } = useInfiniteQuery({
     queryKey: [TASK_BOARD_KEY, col.id, columnParams],
     // Keyset pagination: "" asks for the first page, then each page hands back the
@@ -326,8 +330,23 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // The next page only loads on scroll, and a column with no overflow never scrolls. That
+  // happens when cards are moved or deleted out of it, or on a tall screen: the rest of the
+  // column would stay out of reach. So whenever the loaded cards do not fill the column and
+  // the server has more, the next page is asked for here. A failed page is not retried in a
+  // loop — the retry row below is for that.
+  const loadedCount = tasks.length;
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !hasNextPage || isFetching || isFetchNextPageError) return;
+    if (container.scrollHeight <= container.clientHeight + 80) fetchNextPage();
+  }, [loadedCount, hasNextPage, isFetching, isFetchNextPageError, fetchNextPage]);
+
   const showSkeletons = isLoading && tasks.length === 0;
-  const showEmptyState = !isLoading && tasks.length === 0;
+  // A failed request must not read as "no tasks": with nothing loaded the column shows the
+  // error and a retry instead of the empty message.
+  const showError = isError && tasks.length === 0;
+  const showEmptyState = !isLoading && !isError && tasks.length === 0;
 
   return (
     <Grid
@@ -439,6 +458,8 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
             </Box>
           )}
 
+          {showError && <TableErrorState onRetry={refetch} isRetrying={isFetching} />}
+
           {showEmptyState && (
             <Box
               sx={{
@@ -487,6 +508,13 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
               onOpenMenu={onOpenMenu}
             />
           ))}
+
+          {/* The cards already loaded stay; only the page that failed is offered again. */}
+          {isFetchNextPageError && !isFetchingNextPage && (
+            <Box sx={{ flexShrink: 0 }}>
+              <TableErrorState onRetry={fetchNextPage} isRetrying={isFetchingNextPage} />
+            </Box>
+          )}
 
           {isFetchingNextPage && (
             <Box

@@ -1,21 +1,12 @@
 import { memo } from "react";
-import { Box, Button, Paper, Badge } from "@mui/material";
-import ViewWeekIcon from "@mui/icons-material/ViewWeek";
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import { Box, Button, Badge } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { Funnel } from "lucide-react";
 
 import { useLocale } from "../../../hooks/useLocale";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 
-const VIEW_MODES = [
-  { mode: "board", labelKey: "task.board", Icon: ViewWeekIcon },
-  { mode: "list", labelKey: "task.list", Icon: FormatListBulletedIcon },
-];
-
 function TaskFlowHeader({
-  viewMode,
-  setViewMode,
   onOpenCreateModal,
   searchQuery,
   setSearchQuery,
@@ -102,47 +93,6 @@ function TaskFlowHeader({
             flexWrap: "wrap",
           }}
         >
-          <Paper
-            elevation={0}
-            sx={{
-              display: "flex",
-              p: 0.4,
-              gap: 0.4,
-              borderRadius: "8px",
-              border: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
-            }}
-          >
-            {VIEW_MODES.map(({ mode, labelKey, Icon }) => {
-              const isActive = viewMode === mode;
-              return (
-                <Button
-                  key={mode}
-                  size="small"
-                  aria-pressed={isActive}
-                  startIcon={<Icon sx={{ fontSize: 18 }} />}
-                  onClick={() => setViewMode(mode)}
-                  sx={{
-                    textTransform: "none",
-                    fontWeight: 600,
-                    fontSize: "0.8125rem",
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: "6px",
-                    bgcolor: isActive ? "action.selected" : "transparent",
-                    color: isActive ? "text.primary" : "text.secondary",
-                    "&:hover": {
-                      bgcolor: isActive ? "action.selected" : "action.hover",
-                    },
-                  }}
-                >
-                  {t(labelKey)}
-                </Button>
-              );
-            })}
-          </Paper>
-
           {/* + New Task Primary Button */}
           <Button
             variant="contained"

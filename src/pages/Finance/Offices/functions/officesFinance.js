@@ -87,5 +87,13 @@ export const useOfficesFinance = (period, customRange) => {
     return { rows, totals };
   }, [usd, tmt, shortNames, selectedLang]);
 
-  return { data, isLoading: status.isLoading, isFetching: status.isFetching, isError: status.isError };
+  return {
+    data,
+    isLoading: status.isLoading,
+    isFetching: status.isFetching,
+    isError: status.isError,
+    // Both currencies are fetched together; the older of the two is how fresh the page is.
+    updatedAt: Math.min(usdQuery.dataUpdatedAt || 0, tmtQuery.dataUpdatedAt || 0),
+    refetch: status.refetch,
+  };
 };

@@ -1262,8 +1262,6 @@
       "title": "Отчёт по офисам",
       "officeCount": "Офисов: {{count}}",
       "office": "Офис",
-      "profitHint": "Прибыль от продаж",
-      "topExpenseOffice": "Офис с наибольшим расходом",
       "tableTitle": "Итоги по офисам",
       "tableSubtitle": "Одна строка на офис · USD и TMT отдельно",
       "cardsTitle": "Результаты офисов",

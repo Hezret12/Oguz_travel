@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -9,6 +9,7 @@ import { ArrowDownLeft, ArrowUpRight, Lock } from "lucide-react";
 import { getDefaultMRTOptions } from "../../../hooks/getDefaultMRTOptions";
 import TableErrorState from "../../../components/TableErrorState";
 import { useLocale } from "../../../hooks/useLocale";
+import { useAuth } from "../../../context/useAuth";
 import PageHeader from "../../../components/PageHeader";
 import Pagination from "../../../components/Pagination";
 import { useDateFormat } from "../../../functions/generalHelpers";
@@ -153,6 +154,10 @@ const CashFlowFilterDrawer = () => {
   );
 };
 
+// Users whose own office was already put in the filter this session. After that the filter is
+// theirs: clearing it, or picking another office, is not undone when they come back to the page.
+const officeDefaultedFor = new Set();
+
 const CashFlow = () => {
   const { t, selectedLang } = useLocale();
   const defaultMrtOptions = useMemo(() => getDefaultMRTOptions(), []);
@@ -175,6 +180,20 @@ const CashFlow = () => {
     selectors: cashFlowFilterSelectors,
   });
 
+  // The page opens on the signed-in user's own office. Until that filter is in place the list
+  // is not requested, so the first thing shown is never every office's rows.
+  const { user } = useAuth();
+  const ownOfficeGuid = user?.office_guid || null;
+  const userKey = user?.guid || null;
+  const isOfficeDefaultPending =
+    Boolean(ownOfficeGuid) && !officeDefaultedFor.has(userKey) && !applied?.office_guid;
+
+  useEffect(() => {
+    if (!ownOfficeGuid || officeDefaultedFor.has(userKey)) return;
+    officeDefaultedFor.add(userKey);
+    if (!applied?.office_guid) setFilter("office_guid", ownOfficeGuid);
+  }, [ownOfficeGuid, userKey, applied?.office_guid, setFilter]);
+
   const {
     data: rows,
     meta,
@@ -188,6 +207,7 @@ const CashFlow = () => {
     apiFn: getAllTotalCalculationsApi,
     key: "totalCalculations",
     params: queryParams,
+    options: { enabled: !isOfficeDefaultPending },
   });
 
   const serverTotals = meta?.totals;

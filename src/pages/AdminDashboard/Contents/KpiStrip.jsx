@@ -15,8 +15,9 @@ const fmtNumber = (value) => {
 // One headline figure: an icon in the card's tone, then a row per currency —
 // code, amount, change vs the previous period. The two are listed, never
 // added: there is no exchange rate. The change pill's tooltip names what it
-// compares against; `hint(currency)` adds to it (e.g. the margin).
-const KpiCard = ({ label, icon: Icon, tone, figure, hint, upIsGood, compareLabel }) => {
+// compares against; `hint(currency)` adds to it (e.g. the margin). A page that does not
+// compare periods passes `showChange={false}` and gets the two figures alone.
+const KpiCard = ({ label, icon: Icon, tone, figure, hint, upIsGood, compareLabel, showChange = true }) => {
   const { t } = useLocale();
   const { palette } = useTheme();
   const color = tone[palette.mode === "dark" ? "dark" : "light"];
@@ -60,7 +61,7 @@ const KpiCard = ({ label, icon: Icon, tone, figure, hint, upIsGood, compareLabel
         sx={{
           mt: 2,
           display: "grid",
-          gridTemplateColumns: "auto minmax(0,1fr) auto",
+          gridTemplateColumns: showChange ? "auto minmax(0,1fr) auto" : "auto minmax(0,1fr)",
           alignItems: "center",
           columnGap: 1.25,
           rowGap: 1,
@@ -90,21 +91,23 @@ const KpiCard = ({ label, icon: Icon, tone, figure, hint, upIsGood, compareLabel
             >
               {fmtNumber(value)}
             </Typography>,
-            <Tooltip
-              key={`${currency}-change`}
-              arrow
-              placement="top-end"
-              title={[
-                `${compareLabel} · ${t("finance.analytics.vsPrevious")}: ${formatAmount(previous, currency)}`,
-                extra,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            >
-              <Box sx={{ display: "flex", justifyContent: "flex-end", minWidth: 0, cursor: "default" }}>
-                <Delta change={changePercent(value, previous)} upIsGood={upIsGood} />
-              </Box>
-            </Tooltip>,
+            showChange && (
+              <Tooltip
+                key={`${currency}-change`}
+                arrow
+                placement="top-end"
+                title={[
+                  `${compareLabel} · ${t("finance.analytics.vsPrevious")}: ${formatAmount(previous, currency)}`,
+                  extra,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              >
+                <Box sx={{ display: "flex", justifyContent: "flex-end", minWidth: 0, cursor: "default" }}>
+                  <Delta change={changePercent(value, previous)} upIsGood={upIsGood} />
+                </Box>
+              </Tooltip>
+            ),
           ];
         })}
       </Box>
@@ -113,7 +116,7 @@ const KpiCard = ({ label, icon: Icon, tone, figure, hint, upIsGood, compareLabel
 };
 
 // The period's headline figures as a row of cards.
-const KpiStrip = ({ cells, compareLabel }) => (
+const KpiStrip = ({ cells, compareLabel, showChange = true }) => (
   <Box
     sx={{
       display: "grid",
@@ -126,7 +129,7 @@ const KpiStrip = ({ cells, compareLabel }) => (
     }}
   >
     {cells.map(({ key, ...cell }) => (
-      <KpiCard key={key} {...cell} compareLabel={compareLabel} />
+      <KpiCard key={key} {...cell} compareLabel={compareLabel} showChange={showChange} />
     ))}
   </Box>
 );

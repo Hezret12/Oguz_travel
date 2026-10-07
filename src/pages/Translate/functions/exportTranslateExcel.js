@@ -172,6 +172,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
     { header: "PEÝDA", key: "profit", width: 16, align: "right" },
     { header: "TÖLEG\nÝAGDAÝY", key: "is_paid", width: 15, align: "center" },
     { header: "TÖLEG\nGÖTERIMI", key: "paid_percentage", width: 15, align: "center" },
+    { header: "BELLIK", key: "note", width: 32, align: "left" },
   ];
 
   const statusColIdx = columnsConfig.findIndex((c) => c.key === "status");
@@ -282,6 +283,7 @@ export const exportTranslateExcel = async (translations = [], options = {}) => {
       profit,
       isPaidLabel,
       pctValue,
+      row.note ? String(row.note).trim() : "",
     ];
 
     rowData.forEach((val, idx) => {

@@ -7,7 +7,9 @@ import { useLocale } from "../../../../hooks/useLocale";
 import BaseFareLabel from "../../../../components/BaseFareLabel";
 import { BASE_FARE_TEXT } from "../../../../functions/baseFare";
 import SectionCard, { EmptyState, LegendRow, ViewToggle } from "../../Overview/Contents/SectionCard";
+import { CurrencyPanels } from "../../../AdminDashboard/Contents/ChartParts";
 import {
+  CURRENCIES,
   chartSx,
   formatAmount,
   formatCompactAmount,
@@ -55,9 +57,13 @@ const OfficesColumns = ({ offices, currency, colors }) => {
   const outflow = offices.map((o) => o.outflow[currency]);
   const profit = offices.map((o) => o.profit[currency]);
   const max = Math.max(...inflow, ...outflow, 1);
+  // Two offices can share a name, and a band axis merges equal labels, so the axis is keyed by
+  // the office's guid and only shows its name.
+  const nameOf = new Map(offices.map((o) => [o.guid, o.name]));
   const min = Math.min(0, ...profit);
 
-  const label = (fmt) => (showLabels ? (item) => (item.value == null ? null : fmt(item.value)) : undefined);
+  // An empty column gets no "0" written over it.
+  const label = (fmt) => (showLabels ? (item) => (item.value ? fmt(item.value) : null) : undefined);
 
   return (
     <Box ref={setEl} sx={{ mx: -1 }}>
@@ -72,7 +78,8 @@ const OfficesColumns = ({ offices, currency, colors }) => {
           {
             ...xAxisBase,
             scaleType: "band",
-            data: offices.map((o) => o.name),
+            data: offices.map((o) => o.guid),
+            valueFormatter: (guid) => nameOf.get(guid) ?? "",
             categoryGapRatio,
             barGapRatio: 0.1,
             tickLabelStyle: { ...tickLabelStyle, fontSize: 12.5, fontWeight: 600 },
@@ -143,7 +150,7 @@ const OfficeCard = ({ office, currency, rank, total, colors }) => {
   const up = profit >= 0;
   const grew = change >= 0;
   const margin = percentOf(profit, inflow);
-  const costShare = inflow > 0 ? Math.min(100, (outflow / inflow) * 100) : 100;
+  const costShare = inflow > 0 ? Math.min(100, (outflow / inflow) * 100) : outflow > 0 ? 100 : 0;
   const money = (v) => formatAmount(v, currency);
 
   return (
@@ -247,16 +254,33 @@ const OfficeCard = ({ office, currency, rank, total, colors }) => {
   );
 };
 
-// Chart view (default) or one card per office.
-const OfficesChart = ({ rows, currency }) => {
-  const { t } = useLocale();
-  const colors = useFlowColors();
-  const [view, setView] = useState("chart");
-
+// One currency's offices, as the column chart or as one card per office.
+const OfficesPanel = ({ rows, currency, view, colors }) => {
+  // Offices with nothing in the period are left out. Best profit first.
   const offices = rows
     .filter((r) => r.inflow[currency] || r.outflow[currency])
     .sort((a, b) => b.profit[currency] - a.profit[currency]);
   const total = offices.reduce((s, r) => s + r.inflow[currency], 0);
+
+  return view === "chart" ? (
+    <OfficesColumns offices={offices} currency={currency} colors={colors} />
+  ) : (
+    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 2 }}>
+      {offices.map((office, i) => (
+        <OfficeCard key={office.guid} office={office} currency={currency} rank={i + 1} total={total} colors={colors} />
+      ))}
+    </Box>
+  );
+};
+
+// Chart view (default) or one card per office, with a panel for each currency the period has
+// figures in. TMT and USD are never put on one axis.
+const OfficesChart = ({ rows }) => {
+  const { t } = useLocale();
+  const colors = useFlowColors();
+  const [view, setView] = useState("chart");
+
+  const currencies = CURRENCIES.filter((c) => rows.some((r) => r.inflow[c] || r.outflow[c]));
 
   return (
     <SectionCard
@@ -289,16 +313,12 @@ const OfficesChart = ({ rows, currency }) => {
         </>
       }
     >
-      {offices.length === 0 ? (
-        <EmptyState>{t("finance.analytics.noData")}</EmptyState>
-      ) : view === "chart" ? (
-        <OfficesColumns offices={offices} currency={currency} colors={colors} />
+      {currencies.length === 0 ? (
+        <EmptyState>{t("noData")}</EmptyState>
       ) : (
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 2 }}>
-          {offices.map((office, i) => (
-            <OfficeCard key={office.guid} office={office} currency={currency} rank={i + 1} total={total} colors={colors} />
-          ))}
-        </Box>
+        <CurrencyPanels stacked currencies={currencies}>
+          {(currency) => <OfficesPanel rows={rows} currency={currency} view={view} colors={colors} />}
+        </CurrencyPanels>
       )}
     </SectionCard>
   );
