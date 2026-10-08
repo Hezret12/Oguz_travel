@@ -140,7 +140,15 @@ const ProfilePage = () => {
 
   const handleUpdateProfile = (updatedProfile) => {
     const payload = sanitizeProfilePayload(updatedProfile);
-    mutateUpdateProfile(payload);
+    if (!payload.avatar_file) {
+      mutateUpdateProfile(payload);
+      return;
+    }
+    // A picture goes as multipart, where objects and lists travel as JSON text and an API
+    // that mishandles it saves them empty. A picture is only ever changed alone or with the
+    // name, and the API leaves a field it is not given untouched, so they are not sent.
+    const { guid, full_name, role, status, personal_summary, avatar_file } = payload;
+    mutateUpdateProfile({ guid, full_name, role, status, personal_summary, avatar_file });
   };
 
   return (
