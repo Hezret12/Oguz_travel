@@ -29,6 +29,8 @@ const PRESETS = { thisMonth: "this_month", lastMonth: "last_month", year: "this_
 
 // No offset, so the server reads it as its own local midnight, like the presets.
 const LOCAL_DAY = "YYYY-MM-DD[T]00:00:00";
+// The range's last day runs to its last second: sent as midnight it would be an empty day.
+const LOCAL_DAY_END = "YYYY-MM-DD[T]23:59:59";
 
 export const toDashboardParams = ({ period, customRange, officeGuid, currency }) => {
   const preset = PRESETS[period];
@@ -37,7 +39,7 @@ export const toDashboardParams = ({ period, customRange, officeGuid, currency })
     range = { period_preset: preset };
   } else {
     const { start, end } = getPeriodRange(period, customRange);
-    range = { start_date: start.format(LOCAL_DAY), end_date: end.format(LOCAL_DAY) };
+    range = { start_date: start.format(LOCAL_DAY), end_date: end.format(LOCAL_DAY_END) };
   }
   return {
     ...range,
