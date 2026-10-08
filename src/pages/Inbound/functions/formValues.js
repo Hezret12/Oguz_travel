@@ -61,6 +61,7 @@ export const getInvitationDefaults = (item) => ({
   granted_count: item?.granted_count ?? "",
   refused_count: item?.refused_count ?? "",
   pending_count: item?.pending_count ?? "",
+  not_arrived_count: item?.not_arrived_count ?? "",
   note: item?.note || "",
 });
 
@@ -70,5 +71,6 @@ export const toInvitationPayload = (values) => ({
   granted_count: toCount(values.granted_count),
   refused_count: toCount(values.refused_count),
   pending_count: toCount(values.pending_count),
+  not_arrived_count: toCount(values.not_arrived_count),
   note: trimText(values.note),
 });

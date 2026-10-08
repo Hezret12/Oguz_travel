@@ -119,6 +119,11 @@ const InboundSummary = ({ tab, queryParams = {} }) => {
         value={formatCount(summary.invitations?.pending)}
         color="warning"
       />
+      <StatPill
+        label={t("inbound.summary.notArrived")}
+        value={formatCount(summary.invitations?.not_arrived)}
+        color="info"
+      />
     </>
   );
 };

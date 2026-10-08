@@ -78,8 +78,18 @@ const InvitationFields = ({ control }) => {
         />
       </Grid>
 
-      <Grid size={{ xs: 12 }}>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <SubmittedTotal control={control} />
+      </Grid>
+      {/* Of those granted: not one of the three results, so not in the sum. */}
+      <Grid size={{ xs: 12, sm: 6 }}>
+        <CustomTextField
+          name="not_arrived_count"
+          control={control}
+          type="number"
+          allowNegative={false}
+          label={t("inbound.fields.notArrivedCount")}
+        />
       </Grid>
 
       <Grid size={{ xs: 12 }}>

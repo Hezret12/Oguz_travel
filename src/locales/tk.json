@@ -639,7 +639,8 @@
       "submittedCount": "Berlen arzalar (adam sany)",
       "grantedCount": "Çakylyk berlenler",
       "refusedCount": "Çakylyk berilmedikler",
-      "pendingCount": "Netijesine garaşylýanlar"
+      "pendingCount": "Netijesine garaşylýanlar",
+      "notArrivedCount": "Çakylyk berlip gelmedikler"
     },
     "placeholders": {
       "route": "Aşgabat – Daşoguz – Köneürgenç – Aşgabat",
@@ -655,7 +656,8 @@
       "submitted": "Berlen arza",
       "granted": "Berlen",
       "refused": "Berilmedik",
-      "pending": "Garaşylýan"
+      "pending": "Garaşylýan",
+      "notArrived": "Gelmedik"
     },
     "filter": {
       "nextMonth": "Indiki aý",
@@ -666,7 +668,8 @@
     "validation": {
       "endBeforeStart": "Gutarýan sene başlanýan seneden öň bolup bilmez",
       "exitBeforeEntry": "Çykýan sene giren seneden öň bolup bilmez",
-      "countRequired": "Iň azyndan bir san giriziň"
+      "countRequired": "Iň azyndan bir san giriziň",
+      "notArrivedOverGranted": "Gelmedikleriň sany çakylyk berlenlerden köp bolup bilmez"
     },
     "export": {
       "modalDesc": "Hasabat aýyny saýlaň. Faýlda şol aýyň gelen syýahatçylary we çakylyk netijeleri, şeýle hem indiki aýda garaşylýan syýahatçylar bolar.",

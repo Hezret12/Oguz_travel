@@ -81,6 +81,14 @@ const InvitationsTab = (props) => {
         ...center,
       },
       {
+        accessorKey: "not_arrived_count",
+        id: "not_arrived_count",
+        header: t("inbound.fields.notArrivedCount"),
+        size: 190,
+        Cell: countCell("info.main"),
+        ...center,
+      },
+      {
         accessorKey: "note",
         id: "note",
         header: t("columns.note"),

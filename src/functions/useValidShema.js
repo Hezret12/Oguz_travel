@@ -542,6 +542,14 @@ export const useValidShema = () => {
     ),
     refused_count: inboundCount(0),
     pending_count: inboundCount(0),
+    // Only someone granted an invitation can fail to come.
+    not_arrived_count: inboundCount(0).test(
+      "not-over-granted",
+      t("inbound.validation.notArrivedOverGranted"),
+      function (value) {
+        return (Number(value) || 0) <= (Number(this.parent?.granted_count) || 0);
+      },
+    ),
     note: yup.string().nullable(),
   });
 

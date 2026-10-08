@@ -639,7 +639,8 @@
       "submittedCount": "Applications submitted (people)",
       "grantedCount": "Invitation granted",
       "refusedCount": "Invitation refused",
-      "pendingCount": "Awaiting result"
+      "pendingCount": "Awaiting result",
+      "notArrivedCount": "Invitation granted, did not arrive"
     },
     "placeholders": {
       "route": "Ashgabat – Dashoguz – Kunya-Urgench – Ashgabat",
@@ -655,7 +656,8 @@
       "submitted": "Submitted",
       "granted": "Granted",
       "refused": "Refused",
-      "pending": "Pending"
+      "pending": "Pending",
+      "notArrived": "Did not arrive"
     },
     "filter": {
       "nextMonth": "Next Month",
@@ -666,7 +668,8 @@
     "validation": {
       "endBeforeStart": "The end date cannot be before the start date",
       "exitBeforeEntry": "The exit date cannot be before the entry date",
-      "countRequired": "Enter at least one count"
+      "countRequired": "Enter at least one count",
+      "notArrivedOverGranted": "Cannot be more than the number granted an invitation"
     },
     "export": {
       "modalDesc": "Pick the report month. The file holds that month's arrived tourists and invitation results, plus the tourists expected in the following month.",
