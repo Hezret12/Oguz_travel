@@ -128,7 +128,6 @@ export const toFormValues = (row = {}) => ({
   description: row.description || "",
   giver: row.giver || "",
   receiver: row.receiver || "",
-  company: row.company || "",
 });
 
 export const toPayload = (form) => ({
@@ -147,5 +146,4 @@ export const toPayload = (form) => ({
   description: form.description?.trim() || "",
   giver: form.giver?.trim() || "",
   receiver: form.receiver?.trim() || "",
-  company: form.company?.trim() || "",
 });

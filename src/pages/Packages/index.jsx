@@ -77,28 +77,6 @@ const PackagesPage = () => {
         ),
       },
       {
-        accessorKey: "title",
-        header: t("visaDocument.docTitle"),
-        size: 280,
-        Cell: ({ row }) => {
-          const title = row.original.title || t("visaDocument.title");
-          return (
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 600,
-                color: "text.primary",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {title}
-            </Typography>
-          );
-        },
-      },
-      {
         accessorKey: "country",
         header: t("visaDocument.country"),
         size: 160,
@@ -126,6 +104,28 @@ const PackagesPage = () => {
                 color: "text.primary",
               }}
             />
+          );
+        },
+      },
+      {
+        accessorKey: "title",
+        header: t("visaDocument.docTitle"),
+        size: 280,
+        Cell: ({ row }) => {
+          const title = row.original.title || t("visaDocument.title");
+          return (
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                color: "text.primary",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {title}
+            </Typography>
           );
         },
       },

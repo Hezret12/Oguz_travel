@@ -5,6 +5,7 @@ import { CustomDialogHeader } from "../../../components/Dialog/CustomDialogHeade
 import { CustomForm } from "../../../components/Dialog/CustomForm";
 import FooterButton from "../../../components/Dialog/FooterButton";
 import { useLocale } from "../../../hooks/useLocale";
+import { useAuth } from "../../../context/useAuth";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { addTotalCalculationApi } from "../../../api/queries/post";
 import { useValidShema } from "../../../functions/useValidShema";
@@ -13,6 +14,7 @@ import { toFormValues, toPayload } from "./functions/cashFlowHelpers";
 
 const AddCashTransactionModal = ({ open, close, table }) => {
   const { t } = useLocale();
+  const { user } = useAuth();
   const { cashTransaction } = useValidShema();
 
   const isModalOpen =
@@ -38,7 +40,12 @@ const AddCashTransactionModal = ({ open, close, table }) => {
     onSuccess: handleClose,
   });
 
-  const onSubmit = (formData) => createTransaction(toPayload(formData));
+  // A new row is booked to the office of whoever enters it; the form has no office field.
+  const onSubmit = (formData) =>
+    createTransaction({
+      ...toPayload(formData),
+      ...(user?.office_guid ? { office_guid: user.office_guid } : {}),
+    });
 
   return (
     <CustomDialog open={isModalOpen} close={handleClose} widthX={640}>

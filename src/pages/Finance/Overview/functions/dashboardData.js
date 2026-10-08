@@ -97,6 +97,8 @@ const mapCards = (raw) => ({
   profit: byCurrency(raw?.profit),
   // Not a sale: locked months' salaries and USD bonuses (no chart bucket).
   salary: byCurrency(raw?.salary),
+  // Money out: cost of sales, salaries and kassa expenses together. Null from an API without it.
+  outTotal: raw?.total_out ? byCurrency(raw.total_out) : null,
 });
 
 export const EMPTY_CARDS = mapCards(null);
@@ -179,6 +181,8 @@ const mapOffices = (raw) =>
     net: num(o.net_price),
     salary: num(o.salary),
     expense: num(o.expense),
+    // An API without the total gives the sum of its parts.
+    totalOut: num(o.total_out ?? num(o.net_price) + num(o.salary) + num(o.expense)),
     profit: num(o.profit),
     profitChange: num(o.profit_change_percentage),
   }));

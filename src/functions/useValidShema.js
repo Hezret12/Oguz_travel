@@ -681,7 +681,6 @@ export const useValidShema = () => {
     description: yup.string().nullable(),
     giver: yup.string().nullable().max(255),
     receiver: yup.string().nullable().max(255),
-    company: yup.string().nullable().max(255),
   });
 
   // Finance → Office cash: one office, one currency, a required description.

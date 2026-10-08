@@ -67,7 +67,7 @@ export const useOfficesFinance = (period, customRange) => {
         row.out.cost[currency] = o.net;
         row.out.salary[currency] = o.salary;
         row.out.expense[currency] = o.expense;
-        row.out.total[currency] = o.net + o.salary + o.expense;
+        row.out.total[currency] = o.totalOut;
         byOffice.set(o.guid, row);
       });
     });

@@ -94,7 +94,7 @@ const FinanceOffices = () => {
             transition: "opacity .2s ease",
           }}
         >
-          <OfficesSummary cards={cards} />
+          <OfficesSummary cards={cards} outTotal={data.totals.out.total} />
           <OfficesChart rows={data.rows} />
           <OfficesOutCard rows={data.rows} totals={data.totals} currency={currency} />
           {/* Keyed by the leading currency: its default sort follows it when the period changes. */}

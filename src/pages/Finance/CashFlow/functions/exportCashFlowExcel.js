@@ -128,7 +128,7 @@ export const exportCashFlowExcel = async ({ apiFn, params = {}, onProgress = nul
     { header: t("finance.cashBook.giver"), key: "giver", width: 18, align: "left" },
     { header: t("finance.cashBook.receiver"), key: "receiver", width: 18, align: "left" },
     { header: t("operator"), key: "operator", width: 18, align: "left" },
-    { header: t("finance.cashBook.officeCompany"), key: "office", width: 16, align: "left" },
+    { header: t("finance.officeCash.office"), key: "office", width: 16, align: "left" },
     { header: t("finance.income"), key: "income", width: 15, align: "right" },
     { header: t("finance.expense"), key: "expense", width: 15, align: "right" },
     { header: t("currency"), key: "currency", width: 9, align: "center" },

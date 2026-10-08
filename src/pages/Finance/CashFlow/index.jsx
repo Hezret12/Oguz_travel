@@ -344,7 +344,7 @@ const CashFlow = () => {
       },
       {
         id: "office",
-        header: t("finance.cashBook.officeCompany"),
+        header: t("finance.officeCash.office"),
         size: 140,
         Cell: ({ row }) => {
           const off = row.original.office;

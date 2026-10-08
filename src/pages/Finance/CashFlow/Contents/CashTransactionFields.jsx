@@ -42,10 +42,6 @@ const CashTransactionFields = ({ control }) => {
       </Grid>
 
       <Grid size={{ xs: 12 }}>
-        <CustomTextField name="company" control={control} label={t("finance.cashBook.company")} />
-      </Grid>
-
-      <Grid size={{ xs: 12 }}>
         <CustomTextField
           name="description"
           control={control}
