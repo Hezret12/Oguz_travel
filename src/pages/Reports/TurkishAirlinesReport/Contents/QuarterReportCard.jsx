@@ -74,6 +74,7 @@ export default function QuarterReportCard({ selectedQuarter, onQuarterChange, pa
   const { data: quarterRes, isLoading } = useQuery({
     queryKey: ["turkish-quarter", quarter],
     queryFn: () => getTurkishQuarterApi({ quarter }),
+    refetchOnMount: "always",
   });
 
   const qi = useMemo(() => buildQuarterComparison(quarterRes?.data), [quarterRes]);

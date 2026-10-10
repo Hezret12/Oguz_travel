@@ -73,6 +73,7 @@ const useReportData = (selectedDate) => {
     queryFn: () => getTurkishAirlinesReportApi({ year_month: yearMonth }),
     select: selectReport,
     staleTime: 1000 * 60 * 5,
+    refetchOnMount: "always",
   });
 
   const reportData = useMemo(() => report?.reportData ?? [], [report]);
@@ -85,6 +86,7 @@ const useReportData = (selectedDate) => {
     queryFn: () => getTurkishAirlinesStatusMonthApi({ year_month: yearMonth, yearMonth }),
     select: selectStatus,
     staleTime: 1000 * 60 * 5,
+    refetchOnMount: "always",
   });
 
   const { data: dbOffices = [] } = useQuery({

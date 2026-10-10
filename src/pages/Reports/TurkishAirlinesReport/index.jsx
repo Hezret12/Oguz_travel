@@ -25,6 +25,7 @@ const TurkishAirlinesReport = () => {
   const { data: quarterRes } = useQuery({
     queryKey: ["turkish-quarter", selectedQuarter],
     queryFn: () => getTurkishQuarterApi({ quarter: selectedQuarter }),
+    refetchOnMount: "always",
   });
 
   const quarterComparison = useMemo(
