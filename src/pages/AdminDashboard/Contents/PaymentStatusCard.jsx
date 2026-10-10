@@ -4,7 +4,7 @@ import { CheckCircle2, CircleDashed, Clock, RotateCcw } from "lucide-react";
 import { useLocale } from "../../../hooks/useLocale";
 import SectionCard, { EmptyState } from "../../Finance/Overview/Contents/SectionCard";
 import { formatAmount, formatPercent, percentOf } from "../../Finance/Overview/functions/analyticsFormat";
-import { BOTH_CURRENCIES } from "../../Finance/Overview/functions/dashboardData";
+import { BOTH_CURRENCIES, sharedCount } from "../../Finance/Overview/functions/dashboardData";
 import { AmountLines } from "./ChartParts";
 import { SALES_PAYMENT_STATUS_CONFIG } from "../../../functions/statusChipConfigs";
 
@@ -23,7 +23,7 @@ const PaymentStatusCard = ({ payment, receivable }) => {
   const { t } = useLocale();
   const items = STATUSES.map((s) => ({
     ...s,
-    count: payment.TMT[s.key].countAll,
+    count: sharedCount(Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, payment[c][s.key]]))),
     amounts: Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, payment[c][s.key].amount])),
   })).filter((s) => s.count > 0);
   const totalCount = items.reduce((sum, s) => sum + s.count, 0);

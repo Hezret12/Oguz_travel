@@ -289,6 +289,13 @@ const useDashboardQueryByCurrency = (name, apiFn, params, map, options = {}) =>
     combine: combineByCurrency,
   });
 
+// The count of sales shared by both currencies. `count_all` (every sale once, the same number
+// in each currency's answer) leads; where the API sends it as 0 although there are sales, or
+// not at all, the per-currency counts added together stand in.
+export const sharedCount = (figures) =>
+  Math.max(...BOTH_CURRENCIES.map((c) => figures[c]?.countAll || 0)) ||
+  BOTH_CURRENCIES.reduce((sum, c) => sum + (figures[c]?.count || 0), 0);
+
 // Rows of both currencies joined by `idKey`; each keeps its figures under
 // `TMT` / `USD` (zeros where a currency has none). `count` is the
 // currency-free count, or the two counts added on an API without it.
@@ -309,7 +316,9 @@ const mergeByCurrency = (byCurrency, idKey) => {
       rows.set(item[idKey], row);
     });
   });
-  return [...rows.values()].map(({ countAll, ...row }) => ({ ...row, count: countAll ?? row.count }));
+  // `count_all` (every sale once) leads; where the API sends it as 0 for a row that has sales,
+  // or not at all, the per-currency counts stand in.
+  return [...rows.values()].map(({ countAll, ...row }) => ({ ...row, count: countAll || row.count }));
 };
 
 // Chart buckets of both currencies by key: amounts per currency, one count.
@@ -323,14 +332,15 @@ const mergeBuckets = (byCurrency) => {
       const row = byKey.get(bucket.key) ?? {
         key: bucket.key,
         label: bucket.label,
-        count: bucket.countAll,
         ...Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, EMPTY_BUCKET])),
       };
       row[currency] = bucket;
       byKey.set(bucket.key, row);
     });
   });
-  return [...byKey.values()].sort((a, b) => String(a.key).localeCompare(String(b.key)));
+  return [...byKey.values()]
+    .map((row) => ({ ...row, count: sharedCount(row) }))
+    .sort((a, b) => String(a.key).localeCompare(String(b.key)));
 };
 
 // The merged lists below are memoised on the query's data: the cards get the
