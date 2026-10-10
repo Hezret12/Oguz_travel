@@ -4,10 +4,6 @@ import { IconButton, Box, Tooltip, useColorScheme } from "@mui/material";
 import { Sun, Moon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-/**
- * Modern Dark/Light theme toggle button with Circular Reveal View Transition
- * and smooth morphing rotation & scale transition.
- */
 const ThemeToggle = memo(({ variant = "header" }) => {
   const { t } = useTranslation();
   const { mode, setMode } = useColorScheme();
