@@ -18,7 +18,6 @@ const ThemeToggle = memo(({ variant = "header" }) => {
     (event) => {
       const nextMode = isDark ? "light" : "dark";
 
-      // Circular Reveal View Transition (if supported by the browser)
       const isAppearanceTransition =
         typeof document.startViewTransition === "function" &&
         !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
