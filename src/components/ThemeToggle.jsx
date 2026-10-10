@@ -132,7 +132,6 @@ const ThemeToggle = memo(({ variant = "header" }) => {
             <Sun size={20} strokeWidth={2.2} />
           </Box>
 
-          {/* Moon icon (Dark mode) */}
           <Box
             sx={{
               position: "absolute",
