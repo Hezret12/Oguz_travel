@@ -13,7 +13,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, RefreshCw } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 import ExportExcelButton from "../../../../components/ExportExcelButton";
@@ -65,6 +65,9 @@ const ReportHeader = ({
   selectedQuarter,
   onQuarterChange,
   onExportExcel,
+  updatedAt = 0,
+  onRefresh,
+  isRefreshing = false,
   teal = "#0D9488",
 }) => {
   const { t } = useLocale();
@@ -116,6 +119,7 @@ const ReportHeader = ({
         pt: 1,
         pb: 0.5,
         width: "100%",
+        "@keyframes reportSpin": { to: { transform: "rotate(360deg)" } },
       }}
     >
       {/* Title & Active Period */}
@@ -323,6 +327,36 @@ const ReportHeader = ({
 
         {onExportExcel && (
           <ExportExcelButton onClick={onExportExcel} />
+        )}
+
+        {onRefresh && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, pl: 1.5, borderLeft: "1px solid", borderColor: "divider" }}>
+            {updatedAt > 0 && (
+              <Typography noWrap sx={{ fontSize: "0.75rem", color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>
+                {t("dashboard.updatedAt", { time: dayjs(updatedAt).format("HH:mm") })}
+              </Typography>
+            )}
+            <Tooltip title={t("dashboard.refresh")} arrow>
+              <span>
+                <IconButton
+                  onClick={onRefresh}
+                  disabled={isRefreshing}
+                  sx={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: "10px",
+                    border: "1px solid",
+                    borderColor: "divider",
+                    backgroundColor: "background.paper",
+                    color: "text.secondary",
+                    "&:hover": { borderColor: teal, color: teal, backgroundColor: "background.paper" },
+                  }}
+                >
+                  <RefreshCw size={16} style={{ animation: isRefreshing ? "reportSpin 1s linear infinite" : "none" }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
         )}
       </Box>
     </Box>

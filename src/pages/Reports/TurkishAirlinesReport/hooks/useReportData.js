@@ -68,12 +68,17 @@ const useReportData = (selectedDate) => {
   const yearMonth = useMemo(() => validDate.format("YYYY-MM"), [validDate]);
   const daysInMonth = useMemo(() => validDate.daysInMonth(), [validDate]);
 
-  const { data: report, isLoading, isFetching, refetch } = useQuery({
+  const {
+    data: report,
+    isLoading,
+    isFetching: isReportFetching,
+    refetch: refetchReport,
+    dataUpdatedAt: reportUpdatedAt,
+  } = useQuery({
     queryKey: ["turkishAirlinesReport", yearMonth],
     queryFn: () => getTurkishAirlinesReportApi({ year_month: yearMonth }),
     select: selectReport,
     staleTime: 1000 * 60 * 5,
-    refetchOnMount: "always",
   });
 
   const reportData = useMemo(() => report?.reportData ?? [], [report]);
@@ -81,13 +86,24 @@ const useReportData = (selectedDate) => {
   const footer = useMemo(() => report?.footer ?? [], [report]);
   const grandTotal = useMemo(() => report?.grandTotal ?? {}, [report]);
 
-  const { data: statusList = [], isLoading: isStatusLoading } = useQuery({
+  const {
+    data: statusList = [],
+    isLoading: isStatusLoading,
+    isFetching: isStatusFetching,
+    refetch: refetchStatus,
+    dataUpdatedAt: statusUpdatedAt,
+  } = useQuery({
     queryKey: ["turkishAirlinesStatusMonth", yearMonth],
     queryFn: () => getTurkishAirlinesStatusMonthApi({ year_month: yearMonth, yearMonth }),
     select: selectStatus,
     staleTime: 1000 * 60 * 5,
-    refetchOnMount: "always",
   });
+
+  const isFetching = isReportFetching || isStatusFetching;
+  const refetch = useCallback(
+    () => Promise.all([refetchReport(), refetchStatus()]),
+    [refetchReport, refetchStatus]
+  );
 
   const { data: dbOffices = [] } = useQuery({
     queryKey: ["allOffices"],
@@ -307,6 +323,8 @@ const useReportData = (selectedDate) => {
     isLoading,
     isFetching,
     refetch,
+    reportUpdatedAt,
+    statusUpdatedAt,
     isStatusLoading,
     reportData,
     dailyTotals,

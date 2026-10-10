@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Box } from "@mui/material";
 import dayjs from "dayjs";
 
@@ -22,10 +22,14 @@ const TurkishAirlinesReport = () => {
   const [selectedQuarter, setSelectedQuarter] = useState(() => getQuarterOfDate(dayjs()));
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-  const { data: quarterRes } = useQuery({
+  const {
+    data: quarterRes,
+    isFetching: isQuarterFetching,
+    refetch: refetchQuarter,
+    dataUpdatedAt: quarterUpdatedAt,
+  } = useQuery({
     queryKey: ["turkish-quarter", selectedQuarter],
     queryFn: () => getTurkishQuarterApi({ quarter: selectedQuarter }),
-    refetchOnMount: "always",
   });
 
   const quarterComparison = useMemo(
@@ -35,6 +39,10 @@ const TurkishAirlinesReport = () => {
 
   const {
     isLoading,
+    isFetching: isReportFetching,
+    refetch: refetchReport,
+    reportUpdatedAt,
+    statusUpdatedAt,
     isStatusLoading,
     footer,
     grandTotal,
@@ -47,6 +55,15 @@ const TurkishAirlinesReport = () => {
     findFooter,
     daysInMonth,
   } = useReportData(selectedDate);
+
+  // The oldest of the loaded answers, so the time never claims fresher data than is on screen.
+  const loadedTimes = [reportUpdatedAt, statusUpdatedAt, quarterUpdatedAt].filter(Boolean);
+  const updatedAt = loadedTimes.length ? Math.min(...loadedTimes) : 0;
+  const isFetching = isReportFetching || isQuarterFetching;
+  const handleRefresh = useCallback(
+    () => Promise.all([refetchReport(), refetchQuarter()]),
+    [refetchReport, refetchQuarter]
+  );
 
   const {
     colors,
@@ -73,6 +90,9 @@ const TurkishAirlinesReport = () => {
         selectedQuarter={selectedQuarter}
         onQuarterChange={setSelectedQuarter}
         onExportExcel={() => setIsExportModalOpen(true)}
+        updatedAt={updatedAt}
+        onRefresh={handleRefresh}
+        isRefreshing={isFetching}
         teal={colors.teal}
         borderCol={colors.border}
         paperSx={paperSx}
