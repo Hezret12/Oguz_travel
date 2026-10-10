@@ -89,10 +89,6 @@ const toPair = (metric) => ({
 const byCurrency = (metric) => ({ USD: toPair(metric?.usd), TMT: toPair(metric?.tmt) });
 
 const mapCards = (raw) => ({
-  count: toPair(raw?.sales_count),
-  // Every sale once, whatever its currency (a visa priced in both is one sale).
-  // An API without it gives the request currency's count.
-  countAll: toPair(raw?.sales_count_all ?? raw?.sales_count),
   revenue: byCurrency(raw?.sale_price),
   cost: byCurrency(raw?.net_price),
   receivable: byCurrency(raw?.credit_price),
@@ -126,7 +122,7 @@ const mapChart = (raw, params) => {
     date: periodDate(r.period).format("YYYY-MM-DD"),
     label: bucketLabel(r.period, sameMonth, sameYear),
     count: num(r.sales_count),
-    countAll: num(r.count_all ?? r.sales_count),
+    countAll: num(r.count_all),
     revenue: num(r.sale_price),
     cost: num(r.net_price),
     profit: num(r.profit),
@@ -144,7 +140,7 @@ const mapMoneyOut = (raw) => ({
 
 export const EMPTY_MONEY_OUT = mapMoneyOut(null);
 
-const toStatus = (s) => ({ count: num(s?.count), countAll: num(s?.count_all ?? s?.count), amount: num(s?.total_sale) });
+const toStatus = (s) => ({ count: num(s?.count), countAll: num(s?.count_all), amount: num(s?.total_sale) });
 
 const mapStatus = (raw) => ({
   PAID: toStatus(raw?.statuses?.paid),
@@ -161,7 +157,7 @@ const mapOperators = (raw, currency) =>
     guid: o.operator_guid,
     fullName: o.operator_name,
     count: num(o.sales_count),
-    countAll: o.count_all == null ? null : num(o.count_all),
+    countAll: num(o.count_all),
     [currency]: { revenue: num(o.sale_price), profit: num(o.profit) },
   }));
 
@@ -170,7 +166,7 @@ const mapCategories = (raw, currency) =>
     key: c.category_guid,
     name: toI18nName(c.category_name),
     count: num(c.sales_count),
-    countAll: c.count_all == null ? null : num(c.count_all),
+    countAll: num(c.count_all),
     [currency]: { revenue: num(c.sale_price), cost: num(c.net_price), profit: num(c.profit) },
   }));
 
@@ -192,22 +188,13 @@ const mapOffices = (raw) =>
 // A change percentage is null where the previous period has nothing to compare with.
 const changeOrNull = (percentage, hasPrevious) => (hasPrevious ? num(percentage) : null);
 
-// Points carry a sortable `key` ("YYYY-MM-DD" per day / week, "YYYY-MM" per month).
-// An older API sent only the preformatted label: "MM.YYYY", or "DD.MM" in the current year.
-const labelIsAhead = (label) => {
-  const [first, second] = String(label).split(".");
-  return second?.length === 4
-    ? notYet(dayjs(`${second}-${first}-01`), "month")
-    : notYet(dayjs(`${dayjs().year()}-${second}-${first}`), "day");
-};
-
 // One service (or all): totals, change vs the previous period and the chart.
 const mapCategoryAnalytics = (raw, params) => {
+  // Points carry a sortable `key` ("YYYY-MM-DD" per day / week, "YYYY-MM" per month).
   const points = Array.isArray(raw?.chart) ? raw.chart : [];
-  const isAhead = (p) =>
-    p.key ? notYet(periodDate(p.key), isDayKey(p.key) ? "day" : "month") : labelIsAhead(p.label);
+  const isAhead = (p) => notYet(periodDate(p.key), isDayKey(p.key) ? "day" : "month");
   const chart = (isRunning(params) ? points.filter((p) => !isAhead(p)) : points).map((p) => ({
-    key: p.key ?? p.label,
+    key: p.key,
     label: p.label,
     sale: num(p.sale),
     profit: num(p.profit),
@@ -297,28 +284,22 @@ export const sharedCount = (figures) =>
   BOTH_CURRENCIES.reduce((sum, c) => sum + (figures[c]?.count || 0), 0);
 
 // Rows of both currencies joined by `idKey`; each keeps its figures under
-// `TMT` / `USD` (zeros where a currency has none). `count` is the
-// currency-free count, or the two counts added on an API without it.
-const ZERO_FIGURES = { revenue: 0, cost: 0, profit: 0 };
+// `TMT` / `USD` (zeros where a currency has none). `count` is the shared count.
+const ZERO_FIGURES = { count: 0, countAll: 0, revenue: 0, cost: 0, profit: 0 };
 const mergeByCurrency = (byCurrency, idKey) => {
   const rows = new Map();
   BOTH_CURRENCIES.forEach((currency) => {
     (byCurrency?.[currency] ?? []).forEach((item) => {
+      const { count, countAll, ...rest } = item;
       const row = rows.get(item[idKey]) ?? {
-        ...item,
-        count: 0,
-        countAll: null,
+        ...rest,
         ...Object.fromEntries(BOTH_CURRENCIES.map((c) => [c, ZERO_FIGURES])),
       };
-      row.count += item.count;
-      row.countAll = row.countAll ?? item.countAll;
-      row[currency] = item[currency];
+      row[currency] = { ...item[currency], count, countAll };
       rows.set(item[idKey], row);
     });
   });
-  // `count_all` (every sale once) leads; where the API sends it as 0 for a row that has sales,
-  // or not at all, the per-currency counts stand in.
-  return [...rows.values()].map(({ countAll, ...row }) => ({ ...row, count: countAll || row.count }));
+  return [...rows.values()].map((row) => ({ ...row, count: sharedCount(row) }));
 };
 
 // Chart buckets of both currencies by key: amounts per currency, one count.
