@@ -207,7 +207,9 @@ const CashFlow = () => {
     apiFn: getAllTotalCalculationsApi,
     key: "totalCalculations",
     params: queryParams,
-    options: { enabled: !isOfficeDefaultPending },
+    // Refetched on every visit: sales and payments booked on other pages change this list, so
+    // what the cache kept from the last visit is shown only until the fresh rows arrive.
+    options: { enabled: !isOfficeDefaultPending, refetchOnMount: "always" },
   });
 
   const serverTotals = meta?.totals;
