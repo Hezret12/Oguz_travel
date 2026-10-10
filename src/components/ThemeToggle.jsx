@@ -111,7 +111,6 @@ const ThemeToggle = memo(({ variant = "header" }) => {
             transition: "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
           }}
         >
-          {/* Sun icon (Light mode) */}
           <Box
             sx={{
               position: "absolute",
