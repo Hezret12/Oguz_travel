@@ -22,11 +22,15 @@ const STANDARD_KEYS = new Set([
 ]);
 
 const STATUS_ORDER = [VISA_STATUS.PROCESS, VISA_STATUS.DONE, VISA_STATUS.FAIL];
+// `row` paints the whole application row: yellow while in process, red when cancelled /
+// refunded, nothing when done. The status label keeps a colour that reads on that fill.
 const STATUS_EXCEL = {
-  [VISA_STATUS.PROCESS]: { label: "Işlenýär", dot: "FF2563EB", text: "FF1D4ED8", bg: "FFEFF6FF", border: "FFBFDBFE" },
-  [VISA_STATUS.DONE]: { label: "Tamamlandy", dot: "FF16A34A", text: "FF15803D", bg: "FFF0FDF4", border: "FFBBF7D0" },
-  [VISA_STATUS.FAIL]: { label: "Ýatyryldy", dot: "FFDC2626", text: "FFB91C1C", bg: "FFFEF2F2", border: "FFFECACA" },
+  [VISA_STATUS.PROCESS]: { label: "Işlenýär", dot: "FFB45309", text: "FF9C5700", row: "FFFFEB9C", border: "FFE6CF7A" },
+  [VISA_STATUS.DONE]: { label: "Tamamlandy", dot: "FF16A34A", text: "FF15803D", row: null, border: "FFD9D9D9" },
+  [VISA_STATUS.FAIL]: { label: "Ýatyryldy", dot: "FFDC2626", text: "FF9C0006", row: "FFFFC7CE", border: "FFE8A5AE" },
 };
+const statusStyle = (statusKey) => STATUS_EXCEL[statusKey] ?? STATUS_EXCEL[VISA_STATUS.PROCESS];
+const solidFill = (argb) => ({ type: "pattern", pattern: "solid", fgColor: { argb } });
 
 const HEADER_FILL = { type: "pattern", pattern: "solid", fgColor: { argb: "FF66A64F" } };
 const HEADER_FONT = { name: "Calibri", size: 9.5, bold: true, color: { argb: "FFFFFFFF" } };
@@ -138,16 +142,14 @@ const writeTitle = (ws, value, endCol) => {
   ws.getRow(2).height = 24;
 };
 
-const statusBadge = (cell, statusKey, c, endCol) => {
-  const s = STATUS_EXCEL[statusKey] ?? STATUS_EXCEL[VISA_STATUS.PROCESS];
+const statusBadge = (cell, statusKey) => {
+  const s = statusStyle(statusKey);
   cell.value = {
     richText: [
       { text: "● ", font: { name: "Calibri", size: 9, bold: true, color: { argb: s.dot } } },
       { text: s.label, font: { name: "Calibri", size: 9.5, bold: true, color: { argb: s.text } } },
     ],
   };
-  cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: s.bg } };
-  cell.border = border(c, endCol, s.border);
 };
 
 // Excel sheet names: max 31 chars, no []:*?/\ and unique within the workbook.
@@ -202,13 +204,15 @@ const addCountrySheet = (workbook, { sheetName, countryName, items, fields, reso
 
     const row = ws.getRow(firstDataRow + offset);
     row.height = 21;
+    const style = statusStyle(data.status);
     columns.forEach((col, i) => {
       const c = START_COL + i;
       const cell = row.getCell(c);
       cell.font = { name: "Calibri", size: 10 };
       cell.alignment = { vertical: "middle", horizontal: col.align, wrapText: col.key === "note" };
-      cell.border = border(c, endCol, "FFD9D9D9");
-      if (col.key === "status") statusBadge(cell, data.status, c, endCol);
+      cell.border = border(c, endCol, style.border);
+      if (style.row) cell.fill = solidFill(style.row);
+      if (col.key === "status") statusBadge(cell, data.status);
       else cell.value = data[col.key];
     });
   });
