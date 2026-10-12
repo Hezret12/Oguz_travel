@@ -3,6 +3,8 @@ import { LogOut, MapPin } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 import { useLocale } from "../../hooks/useLocale";
 
+const APP_VERSION = `v${import.meta.env.VITE_APP_VERSION}`;
+
 const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
   const { user } = useAuth();
   const { selectedLang } = useLocale();
@@ -41,6 +43,19 @@ const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
             <LogOut size={17} />
           </IconButton>
         </Tooltip>
+        <Typography
+          variant="caption"
+          sx={{
+            mt: 0.5,
+            fontSize: "0.62rem",
+            fontWeight: 500,
+            color: "text.secondary",
+            lineHeight: 1.2,
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {APP_VERSION}
+        </Typography>
       </Box>
     );
   }
@@ -57,24 +72,38 @@ const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
         gap: 1,
       }}
     >
-      {officeName && (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, minWidth: 0 }}>
-          <MapPin size={15} style={{ color: isDark ? "#2DD4BF" : "#0E8584", flexShrink: 0 }} />
-          <Typography
-            variant="caption"
-            noWrap
-            sx={{
-              fontSize: "0.76rem",
-              fontWeight: 650,
-              color: "text.primary",
-              display: "block",
-              lineHeight: 1.2,
-            }}
-          >
-            {officeName}
-          </Typography>
-        </Box>
-      )}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.4, minWidth: 0 }}>
+        {officeName && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, minWidth: 0 }}>
+            <MapPin size={15} style={{ color: isDark ? "#2DD4BF" : "#0E8584", flexShrink: 0 }} />
+            <Typography
+              variant="caption"
+              noWrap
+              sx={{
+                fontSize: "0.76rem",
+                fontWeight: 650,
+                color: "text.primary",
+                display: "block",
+                lineHeight: 1.2,
+              }}
+            >
+              {officeName}
+            </Typography>
+          </Box>
+        )}
+        <Typography
+          variant="caption"
+          sx={{
+            fontSize: "0.68rem",
+            fontWeight: 500,
+            color: "text.secondary",
+            lineHeight: 1.2,
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {APP_VERSION}
+        </Typography>
+      </Box>
 
       <Tooltip title="Logout">
         <IconButton
@@ -85,7 +114,6 @@ const SidebarFooter = ({ collapsed, onLogout, isDark }) => {
             height: 32,
             borderRadius: "8px",
             color: "text.secondary",
-            ml: officeName ? 0 : "auto",
             "&:hover": {
               color: "#EF4444",
               backgroundColor: "rgba(239, 68, 68, 0.08)",
