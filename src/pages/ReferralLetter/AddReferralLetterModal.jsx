@@ -24,7 +24,7 @@ import { addReferralLetterApi } from "../../api/queries/post";
 const AddReferralLetterModal = ({ table }) => {
   const { t } = useLocale();
   const { addReferralLetter } = useValidShema();
-  const countryOptions = useReferralCountryOptions();
+  const countryOptions = useReferralCountryOptions({ refreshOnOpen: true });
 
   const { mutate: createReferralLetter, isPending: isSubmit } = useCreate({
     apiFn: addReferralLetterApi,

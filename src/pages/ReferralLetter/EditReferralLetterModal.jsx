@@ -24,7 +24,7 @@ import { updateReferralLetterApi } from "../../api/queries/patch";
 const EditReferralLetterModal = ({ table, row }) => {
   const { t } = useLocale();
   const { addReferralLetter } = useValidShema();
-  const countryOptions = useReferralCountryOptions();
+  const countryOptions = useReferralCountryOptions({ refreshOnOpen: true });
 
   const { mutate: updateReferralLetter, isPending: isSubmit } = useUpdate({
     apiFn: updateReferralLetterApi,

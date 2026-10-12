@@ -4,8 +4,16 @@ import { getAllReferralCountriesApi } from "../../../api/queries/getters";
 
 // Referral countries as `{ label, value }` select options. Country names are
 // kept in Turkmen only. Shares its cache with the Referral countries page.
-export const useReferralCountryOptions = () => {
-  const { data } = useGet({ apiFn: getAllReferralCountriesApi, key: "referralCountries" });
+//
+// `refreshOnOpen` is for the add/edit dialogs, which mount each time they
+// open: the list is refetched then once it is over 5 minutes old, so a country
+// added by someone else shows up without a page reload.
+export const useReferralCountryOptions = ({ refreshOnOpen = false } = {}) => {
+  const { data } = useGet({
+    apiFn: getAllReferralCountriesApi,
+    key: "referralCountries",
+    options: refreshOnOpen ? { staleTime: 5 * 60 * 1000 } : {},
+  });
 
   return useMemo(
     () =>

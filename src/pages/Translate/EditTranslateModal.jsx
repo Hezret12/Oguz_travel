@@ -72,6 +72,10 @@ const EditTranslateModal = ({ row, onClose }) => {
   const { data: translators = [] } = useGet({
     apiFn: getAllTranslatorsApi,
     key: "translators",
+    // The dialog stays mounted, so the list is checked on open and refetched
+    // once it is over 5 minutes old: a translator added by someone else shows
+    // up without a page reload.
+    options: { enabled: Boolean(row), staleTime: 5 * 60 * 1000 },
   });
 
   // react-hook-form setup
