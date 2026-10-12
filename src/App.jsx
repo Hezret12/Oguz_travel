@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import AppRouter from "./routes/index";
+import { Box } from "@mui/material";
 import { Toaster } from "react-hot-toast";
 import OguzTravelLogo from "./layouts/Logo";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -105,22 +106,62 @@ function App() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="tr">
       {showSplash && (
-        <div
-          style={{
+        <Box
+          sx={{
             position: "fixed",
             inset: 0,
             zIndex: 99999,
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            background: "#fff",
+            bgcolor: "background.default",
             opacity: fadeOut ? 0 : 1,
             transition: "opacity 0.35s ease-out",
             pointerEvents: fadeOut ? "none" : "auto",
           }}
         >
-          <OguzTravelLogo autoPlay style={{ width: 400, maxWidth: "90vw" }} />
-        </div>
+          {/* The logo drifts forward a touch as the splash dissolves. */}
+          <Box
+            sx={{
+              width: 360,
+              maxWidth: "78vw",
+              transform: fadeOut ? "scale(1.04)" : "scale(1)",
+              transition: "transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+          >
+            <OguzTravelLogo autoPlay style={{ width: "100%", display: "block" }} />
+          </Box>
+          {/* Only fades in once the intro is over, i.e. on a slow load. */}
+          <Box
+            sx={{
+              position: "relative",
+              width: 140,
+              height: 2,
+              mt: 3,
+              borderRadius: 1,
+              overflow: "hidden",
+              bgcolor: "action.hover",
+              opacity: 0,
+              animation: "splashBarIn 0.4s ease-out 1.5s forwards",
+              "@keyframes splashBarIn": { to: { opacity: 1 } },
+              "@keyframes splashBarSlide": {
+                from: { transform: "translateX(-100%)" },
+                to: { transform: "translateX(350%)" },
+              },
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                inset: 0,
+                width: "40%",
+                borderRadius: 1,
+                bgcolor: "primary.main",
+                animation:
+                  "splashBarSlide 1.3s cubic-bezier(0.65, 0, 0.35, 1) infinite",
+              },
+            }}
+          />
+        </Box>
       )}
       <NetworkStatusBanner />
       <AppRouter />

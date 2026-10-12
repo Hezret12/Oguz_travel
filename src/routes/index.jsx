@@ -1,6 +1,7 @@
 import { lazy, Suspense, useState, useEffect } from 'react';
 import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom';
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
+import OguzLogo from '../assets/icons/OguzLogo';
 import ErrorBoundary from '../components/ErrorBoundary';
 import ScrollToTop from '../components/ScrollToTop';
 import ProtectedRoute from '../components/ProtectedRoute';
@@ -76,6 +77,8 @@ function PageLoader() {
 
   return (
     <Box
+      role="status"
+      aria-busy="true"
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -83,17 +86,62 @@ function PageLoader() {
         flexGrow: 1,
         width: '100%',
         minHeight: '60vh',
-        opacity: 0.9,
-        transition: 'opacity 0.2s ease-in',
+        animation: 'pageLoaderIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both',
+        '@keyframes pageLoaderIn': {
+          from: { opacity: 0, transform: 'scale(0.94)' },
+          to: { opacity: 1, transform: 'scale(1)' },
+        },
+        '@keyframes pageLoaderSpin': { to: { transform: 'rotate(360deg)' } },
+        '@keyframes pageLoaderBreathe': {
+          '0%, 100%': { opacity: 0.75, transform: 'scale(0.96)' },
+          '50%': { opacity: 1, transform: 'scale(1)' },
+        },
       }}
     >
-      <CircularProgress
-        size={42}
-        thickness={4}
+      {/* Brand emblem inside a thin orbiting arc */}
+      <Box
         sx={{
-          color: (theme) => theme.palette.primary.main,
+          position: 'relative',
+          width: 76,
+          height: 76,
+          display: 'grid',
+          placeItems: 'center',
+          color: 'primary.main',
         }}
-      />
+      >
+        <Box
+          component="svg"
+          viewBox="0 0 76 76"
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            animation: 'pageLoaderSpin 1.1s linear infinite',
+          }}
+        >
+          <circle cx="38" cy="38" r="36" fill="none" stroke="currentColor" strokeOpacity="0.14" strokeWidth="2" />
+          <circle
+            cx="38"
+            cy="38"
+            r="36"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="62 164"
+          />
+        </Box>
+        <OguzLogo
+          iconOnly
+          sx={{
+            width: 36,
+            height: 'auto',
+            animation: 'pageLoaderBreathe 1.8s ease-in-out infinite',
+            '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+          }}
+        />
+      </Box>
     </Box>
   );
 }
