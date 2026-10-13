@@ -266,14 +266,6 @@ const useReportData = (selectedDate) => {
       (monthQuoted > 0 ? monthQuoted - monthBase : 0);
     const monthPaid =
       Number(grandTotal.month_total_paid ?? grandTotal.total_paid ?? grandTotal.paid_sum) || 0;
-    const monthCredit =
-      Number(
-        grandTotal.month_total_credit ??
-          grandTotal.total_credit ??
-          grandTotal.credit_sum ??
-          Math.max(0, monthQuoted - monthPaid)
-      ) || 0;
-
     const workingDays = Number(grandTotal.working_days_count) || 0;
     const dailyAvg = workingDays > 0 ? Math.round(monthQuoted / workingDays) : (daysInMonth > 0 ? Math.round(monthQuoted / daysInMonth) : 0);
 
@@ -287,7 +279,7 @@ const useReportData = (selectedDate) => {
       }
     });
 
-    return { monthBase, monthQuoted, monthProfit, monthPaid, monthCredit, workingDays, dailyAvg, bestDay, bestDayNum };
+    return { monthBase, monthQuoted, monthProfit, monthPaid, workingDays, dailyAvg, bestDay, bestDayNum };
   }, [grandTotal, dailyTotals, daysInMonth]);
 
   const officeBreakdown = useMemo(() => {

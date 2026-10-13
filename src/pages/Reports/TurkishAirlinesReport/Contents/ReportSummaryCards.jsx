@@ -108,9 +108,9 @@ const ReportSummaryCards = ({
 
   const quoted = Number(stats?.monthQuoted) || 0;
   const profit = Number(stats?.monthProfit) || 0;
-  const credit = Number(stats?.monthCredit) || 0;
+  // The current year's quarter credit; the monthly report has no credit figure.
+  const credit = quarterComparison ? quarterComparison.current.credit : null;
   const margin = shareOf(profit, quoted);
-  const unpaid = shareOf(credit, quoted);
 
   const achievement = quarterComparison?.achievement ?? null;
   const growth = quarterComparison?.growth ?? null;
@@ -180,13 +180,8 @@ const ReportSummaryCards = ({
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <SummaryCard
           icon={<PendingActionsRoundedIcon sx={{ fontSize: 22 }} />}
-          value={formatCompact(credit)}
+          value={credit === null ? "—" : formatCompact(credit)}
           label={t("paymentCredit")}
-          meta={
-            unpaid !== null && credit > 0 && (
-              <MetaPill color={orange}>{formatPercent(unpaid)}</MetaPill>
-            )
-          }
           sublabel={t("report.turkishAirlines.sublabelCredit")}
           color={orange}
           paperSx={paperSx}

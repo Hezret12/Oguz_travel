@@ -37,6 +37,9 @@ export const buildQuarterComparison = (body, currentYear = dayjs().year()) => {
       hasData: Boolean(row),
       profit: toNumber(row?.profit),
       revenue: toNumber(row?.total_quoted_price),
+      // Unpaid amount of that year's quarter. The body's `total_credit_price`
+      // adds both years together, so it is not used.
+      credit: toNumber(row?.credit_price),
     };
   };
 
