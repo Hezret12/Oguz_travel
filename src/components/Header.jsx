@@ -288,35 +288,58 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                   aria-haspopup="menu"
                   aria-expanded={Boolean(anchorElUser)}
                   sx={{
-                    p: '4px 10px 4px 4px',
-                    gap: 1.25,
+                    // Same box as the theme and language buttons beside it:
+                    // 1px border, 10px corners, soft fill, teal border on hover/open.
+                    height: 40,
+                    p: '0 10px 0 5px',
+                    gap: 1,
                     minWidth: 0,
-                    borderRadius: '12px',
+                    borderRadius: '10px',
                     textTransform: 'none',
                     textAlign: 'left',
-                    // Quiet at rest; the fill appears on hover and stays while the menu is open.
-                    backgroundColor: anchorElUser ? 'action.hover' : 'transparent',
-                    '&:hover': { backgroundColor: 'action.hover' },
-                    transition: 'background-color 0.2s ease',
+                    border: '1px solid',
+                    borderColor: anchorElUser ? 'primary.main' : 'divider',
+                    backgroundColor: anchorElUser ? 'action.selected' : 'action.hover',
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      backgroundColor: 'action.selected',
+                    },
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                 >
-                  <Avatar
-                    src={getFileUrl(user.avatar_url || user.avatar)}
-                    alt={user.name}
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      background: (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'linear-gradient(135deg, #0D9488 0%, #14B8A6 100%)'
-                          : 'linear-gradient(135deg, #0E8584 0%, #14B8A6 100%)',
-                      color: '#ffffff',
-                      fontWeight: 700,
-                      fontSize: '0.875rem',
-                    }}
-                  >
-                    {(user.name || user.fullName || user.phone_number || '?').charAt(0).toUpperCase()}
-                  </Avatar>
+                  <Box sx={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
+                    <Avatar
+                      src={getFileUrl(user.avatar_url || user.avatar)}
+                      alt={user.name}
+                      sx={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: '8px',
+                        background: (theme) =>
+                          theme.palette.mode === 'dark'
+                            ? 'linear-gradient(135deg, #0D9488 0%, #14B8A6 100%)'
+                            : 'linear-gradient(135deg, #0E8584 0%, #14B8A6 100%)',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        fontSize: '0.8rem',
+                      }}
+                    >
+                      {(user.name || user.fullName || user.phone_number || '?').charAt(0).toUpperCase()}
+                    </Avatar>
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: -2,
+                        right: -2,
+                        width: 9,
+                        height: 9,
+                        bgcolor: '#10B981',
+                        borderRadius: '50%',
+                        border: '2px solid',
+                        borderColor: 'background.paper',
+                      }}
+                    />
+                  </Box>
 
                   <Box
                     sx={{
@@ -330,9 +353,8 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                       noWrap
                       sx={{
                         fontWeight: 650,
-                        fontSize: '0.84rem',
-                        lineHeight: 1.3,
-                        letterSpacing: '-0.005em',
+                        fontSize: '0.8rem',
+                        lineHeight: 1.25,
                         color: 'text.primary',
                       }}
                     >
@@ -342,8 +364,8 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                       noWrap
                       sx={{
                         fontWeight: 500,
-                        fontSize: '0.74rem',
-                        lineHeight: 1.3,
+                        fontSize: '0.7rem',
+                        lineHeight: 1.25,
                         color: 'text.secondary',
                       }}
                     >
@@ -355,8 +377,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                     component="span"
                     sx={{
                       display: 'inline-flex',
-                      color: 'text.secondary',
-                      opacity: 0.7,
+                      color: anchorElUser ? 'primary.main' : 'text.secondary',
                       transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                       transform: anchorElUser ? 'rotate(180deg)' : 'none',
                     }}
