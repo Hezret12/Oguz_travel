@@ -359,6 +359,8 @@
     "languageTooltip": "Язык / Dil",
     "themeTooltipDark": "Темный режим",
     "themeTooltipLight": "Светлый режим",
+    "roleAdmin": "Администратор",
+    "roleUser": "Сотрудник",
     "userMenuTooltip": "Меню пользователя",
     "profile": "Профиль",
     "logout": "Выйти"

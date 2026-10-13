@@ -359,6 +359,8 @@
     "languageTooltip": "Language / Dil",
     "themeTooltipDark": "Dark Mode",
     "themeTooltipLight": "Light Mode",
+    "roleAdmin": "Administrator",
+    "roleUser": "Employee",
     "userMenuTooltip": "User menu",
     "profile": "Profile",
     "logout": "Log Out"

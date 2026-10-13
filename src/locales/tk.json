@@ -359,6 +359,8 @@
     "languageTooltip": "Dil / Language",
     "themeTooltipDark": "Gara režim",
     "themeTooltipLight": "Ýagty režim",
+    "roleAdmin": "Administrator",
+    "roleUser": "Işgär",
     "userMenuTooltip": "Ulanyjy menýusy",
     "profile": "Profil",
     "logout": "Ulgamdan çyk"

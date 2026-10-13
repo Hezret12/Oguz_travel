@@ -15,10 +15,11 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import { ChevronDown, Home, User } from 'lucide-react';
+import { ChevronDown, Home, Mail, MapPin, Phone, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import { useLocale } from '../hooks/useLocale';
 import { useSidebarItems } from '../hooks/useSidebarItems';
 import LanguageSwitcher from './LanguageSwitcher';
 import ThemeToggle from './ThemeToggle';
@@ -70,7 +71,30 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
   const location = useLocation();
   const sidebarItems = useSidebarItems();
 
+  const { selectedLang } = useLocale();
+
   const [anchorElUser, setAnchorElUser] = useState(null);
+
+  // The job title: the employee's position, else the title typed on the profile,
+  // else the account role in the UI language. A profile title that only repeats
+  // the role ("User", "admin") is skipped, so the raw role never shows.
+  const typedTitle = String(user?.position || user?.position_name || '').trim();
+  const isRoleEcho = ['user', 'admin'].includes(typedTitle.toLowerCase());
+  const userTitle =
+    selectedLang(user?.positions?.[0]?.name) ||
+    (isRoleEcho ? '' : typedTitle) ||
+    t(user?.role === 'admin' ? 'header.roleAdmin' : 'header.roleUser');
+  // `normalizeUser` reduces the office to its multilingual name object.
+  const officeName =
+    selectedLang(user?.office?.shortName) ||
+    selectedLang(user?.office?.fullName) ||
+    selectedLang(user?.office) ||
+    (typeof user?.office === 'string' ? user.office : '');
+  const userFacts = [
+    { key: 'office', Icon: MapPin, value: officeName },
+    { key: 'phone', Icon: Phone, value: user?.phone_number },
+    { key: 'email', Icon: Mail, value: user?.email },
+  ].filter((fact) => fact.value);
 
   const currentRouteInfo = getRouteBreadcrumb(location.pathname, sidebarItems, t('sidebar.adminDashboard'));
 
@@ -353,13 +377,11 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                           fontWeight: 600,
                           fontSize: '0.68rem',
                           lineHeight: 1.1,
-                          color: (theme) =>
-                            theme.palette.mode === 'dark' ? '#2DD4BF' : '#0E8584',
-                          textTransform: 'capitalize',
+                          color: 'text.secondary',
                           maxWidth: '100%',
                         }}
                       >
-                        {user.position || user.position_name || user.role || 'User'}
+                        {userTitle}
                       </Typography>
                     </Box>
 
@@ -393,7 +415,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                     sx: {
                       mt: 1.5,
                       borderRadius: '14px',
-                      minWidth: 230,
+                      width: 264,
                       p: 1,
                       border: '1px solid',
                       borderColor: 'divider',
@@ -406,36 +428,21 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                   },
                 }}
               >
-                {/* User Info Header in Dropdown */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                    px: 1.5,
-                    py: 1.2,
-                    mb: 0.5,
-                    borderRadius: '10px',
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.03)'
-                        : 'rgba(0,0,0,0.02)',
-                  }}
-                >
+                {/* Who is signed in */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1.5, pt: 1, pb: 1.5 }}>
                   <Avatar
                     src={getFileUrl(user.avatar_url || user.avatar)}
                     alt={user.name}
                     sx={{
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
                       background: (theme) =>
                         theme.palette.mode === 'dark'
                           ? 'linear-gradient(135deg, #0D9488 0%, #14B8A6 100%)'
                           : 'linear-gradient(135deg, #0E8584 0%, #14B8A6 100%)',
                       color: '#ffffff',
                       fontWeight: 700,
-                      fontSize: '0.95rem',
-                      boxShadow: '0 2px 8px rgba(14, 133, 132, 0.25)',
+                      fontSize: '1rem',
                     }}
                   >
                     {(user.name || user.fullName || user.phone_number || '?').charAt(0).toUpperCase()}
@@ -443,53 +450,43 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
 
                   <Box sx={{ minWidth: 0, flex: 1 }}>
                     <Typography
-                      variant="subtitle2"
                       noWrap
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: '0.875rem',
-                        color: 'text.primary',
-                      }}
+                      sx={{ fontWeight: 700, fontSize: '0.9rem', lineHeight: 1.3, color: 'text.primary' }}
                     >
                       {user.name || user.fullName || user.phone_number}
                     </Typography>
-                    {user.email ? (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        noWrap
-                        sx={{ display: 'block', mt: 0.25 }}
-                      >
-                        {user.email}
-                      </Typography>
-                    ) : null}
-
-                    <Box
-                      sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        mt: 0.5,
-                        px: 1,
-                        py: 0.2,
-                        borderRadius: '6px',
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.02em',
-                        backgroundColor: (theme) =>
-                          theme.palette.mode === 'dark'
-                            ? 'rgba(20, 184, 166, 0.15)'
-                            : 'rgba(14, 133, 132, 0.10)',
-                        color: (theme) =>
-                          theme.palette.mode === 'dark' ? '#2DD4BF' : '#0E8584',
-                        textTransform: 'uppercase',
-                      }}
+                    <Typography
+                      noWrap
+                      sx={{ fontSize: '0.78rem', lineHeight: 1.4, color: 'text.secondary' }}
                     >
-                      {user.position || user.position_name || user.role || 'User'}
-                    </Box>
+                      {userTitle}
+                    </Typography>
                   </Box>
                 </Box>
 
-                <Divider sx={{ my: 0.75 }} />
+                {/* Where they work and how to reach them */}
+                {/* (Menu takes no fragments, hence two separate conditions.) */}
+                {userFacts.length > 0 && <Divider />}
+                {userFacts.length > 0 && (
+                  <Box sx={{ px: 1.5, py: 1.25, display: 'flex', flexDirection: 'column', gap: 0.9 }}>
+                    {userFacts.map(({ key, Icon, value }) => (
+                      <Box
+                        key={key}
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1.25, color: 'text.secondary' }}
+                      >
+                        <Icon size={15} style={{ flexShrink: 0 }} />
+                        <Typography
+                          noWrap
+                          sx={{ fontSize: '0.8rem', fontWeight: 500, color: 'text.primary' }}
+                        >
+                          {value}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+
+                <Divider sx={{ mb: 0.75 }} />
 
                 <MenuItem
                   onClick={() => {
