@@ -285,120 +285,83 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
               <Tooltip title={t('header.userMenuTooltip') || 'Profile'}>
                 <Button
                   onClick={handleOpenUserMenu}
+                  aria-haspopup="menu"
+                  aria-expanded={Boolean(anchorElUser)}
                   sx={{
-                    p: '3px 8px 3px 4px',
-                    borderRadius: '24px',
+                    p: '4px 10px 4px 4px',
+                    gap: 1.25,
+                    minWidth: 0,
+                    borderRadius: '12px',
                     textTransform: 'none',
                     textAlign: 'left',
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.04)'
-                        : 'rgba(0, 0, 0, 0.03)',
-                    border: '1px solid',
-                    borderColor: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.08)'
-                        : 'rgba(0, 0, 0, 0.06)',
-                    '&:hover': {
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.08)'
-                          : 'rgba(0, 0, 0, 0.05)',
-                      borderColor: (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'rgba(20, 184, 166, 0.3)'
-                          : 'rgba(14, 133, 132, 0.25)',
-                    },
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    // Quiet at rest; the fill appears on hover and stays while the menu is open.
+                    backgroundColor: anchorElUser ? 'action.hover' : 'transparent',
+                    '&:hover': { backgroundColor: 'action.hover' },
+                    transition: 'background-color 0.2s ease',
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {/* Modern Avatar with Online Status Indicator */}
-                    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                      <Avatar
-                        src={getFileUrl(user.avatar_url || user.avatar)}
-                        alt={user.name}
-                        sx={{
-                          width: 34,
-                          height: 34,
-                          background: (theme) =>
-                            theme.palette.mode === 'dark'
-                              ? 'linear-gradient(135deg, #0D9488 0%, #14B8A6 100%)'
-                              : 'linear-gradient(135deg, #0E8584 0%, #14B8A6 100%)',
-                          color: '#ffffff',
-                          fontWeight: 700,
-                          fontSize: '0.85rem',
-                          boxShadow: '0 2px 8px rgba(14, 133, 132, 0.25)',
-                        }}
-                      >
-                        {(user.name || user.fullName || user.phone_number || '?').charAt(0).toUpperCase()}
-                      </Avatar>
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          bottom: 0,
-                          right: 0,
-                          width: 9,
-                          height: 9,
-                          bgcolor: '#10B981',
-                          borderRadius: '50%',
-                          border: (theme) =>
-                            `2px solid ${theme.palette.background.paper}`,
-                        }}
-                      />
-                    </Box>
+                  <Avatar
+                    src={getFileUrl(user.avatar_url || user.avatar)}
+                    alt={user.name}
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      background: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? 'linear-gradient(135deg, #0D9488 0%, #14B8A6 100%)'
+                          : 'linear-gradient(135deg, #0E8584 0%, #14B8A6 100%)',
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    {(user.name || user.fullName || user.phone_number || '?').charAt(0).toUpperCase()}
+                  </Avatar>
 
-                    <Box
+                  <Box
+                    sx={{
+                      display: { xs: 'none', sm: 'flex' },
+                      flexDirection: 'column',
+                      minWidth: 0,
+                      maxWidth: 160,
+                    }}
+                  >
+                    <Typography
+                      noWrap
                       sx={{
-                        display: { xs: 'none', sm: 'flex' },
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        maxWidth: 130,
+                        fontWeight: 650,
+                        fontSize: '0.84rem',
+                        lineHeight: 1.3,
+                        letterSpacing: '-0.005em',
+                        color: 'text.primary',
                       }}
                     >
-                      <Typography
-                        variant="body2"
-                        noWrap
-                        sx={{
-                          fontWeight: 650,
-                          fontSize: '0.825rem',
-                          lineHeight: 1.2,
-                          color: (theme) =>
-                            theme.palette.mode === 'dark' ? '#F8FAFC' : '#0F172A',
-                          maxWidth: '100%',
-                        }}
-                      >
-                        {user.name || user.fullName || user.phone_number}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        noWrap
-                        sx={{
-                          fontWeight: 600,
-                          fontSize: '0.68rem',
-                          lineHeight: 1.1,
-                          color: 'text.secondary',
-                          maxWidth: '100%',
-                        }}
-                      >
-                        {userTitle}
-                      </Typography>
-                    </Box>
-
-                    <Box
-                      component="span"
+                      {user.name || user.fullName || user.phone_number}
+                    </Typography>
+                    <Typography
+                      noWrap
                       sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
+                        fontWeight: 500,
+                        fontSize: '0.74rem',
+                        lineHeight: 1.3,
                         color: 'text.secondary',
-                        transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                        transform: anchorElUser ? 'rotate(180deg)' : 'none',
-                        ml: -0.25,
                       }}
                     >
-                      <ChevronDown size={15} />
-                    </Box>
+                      {userTitle}
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    component="span"
+                    sx={{
+                      display: 'inline-flex',
+                      color: 'text.secondary',
+                      opacity: 0.7,
+                      transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      transform: anchorElUser ? 'rotate(180deg)' : 'none',
+                    }}
+                  >
+                    <ChevronDown size={16} />
                   </Box>
                 </Button>
               </Tooltip>
