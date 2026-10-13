@@ -63,6 +63,18 @@ function getRouteBreadcrumb(pathname, sidebarItems, defaultTitle) {
   return null;
 }
 
+// A plain string for display: text and numbers as they are, a multilingual
+// `{ tk, ru, en }` object in the UI language (or whichever language is filled
+// in), and '' for anything else.
+function toDisplayText(value, selectedLang) {
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number') return String(value);
+  if (value && typeof value === 'object') {
+    const text = selectedLang(value) || value.tk || value.ru || value.en;
+    return typeof text === 'string' ? text.trim() : '';
+  }
+  return '';
+}
 
 const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => {
   const { t } = useTranslation();
@@ -78,22 +90,25 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
   // The job title: the employee's position, else the title typed on the profile,
   // else the account role in the UI language. A profile title that only repeats
   // the role ("User", "admin") is skipped, so the raw role never shows.
-  const typedTitle = String(user?.position || user?.position_name || '').trim();
+  // Every user field goes through `toText` before it is rendered, so a
+  // missing value or an unexpected shape shows nothing instead of breaking
+  // the header.
+  const toText = (value) => toDisplayText(value, selectedLang);
+  const displayName =
+    toText(user?.name) || toText(user?.fullName) || toText(user?.phone_number);
+  const typedTitle = toText(user?.position) || toText(user?.position_name);
   const isRoleEcho = ['user', 'admin'].includes(typedTitle.toLowerCase());
   const userTitle =
-    selectedLang(user?.positions?.[0]?.name) ||
+    toText(user?.positions?.[0]?.name) ||
     (isRoleEcho ? '' : typedTitle) ||
     t(user?.role === 'admin' ? 'header.roleAdmin' : 'header.roleUser');
   // `normalizeUser` reduces the office to its multilingual name object.
   const officeName =
-    selectedLang(user?.office?.shortName) ||
-    selectedLang(user?.office?.fullName) ||
-    selectedLang(user?.office) ||
-    (typeof user?.office === 'string' ? user.office : '');
+    toText(user?.office?.shortName) || toText(user?.office?.fullName) || toText(user?.office);
   const userFacts = [
     { key: 'office', Icon: MapPin, value: officeName },
-    { key: 'phone', Icon: Phone, value: user?.phone_number },
-    { key: 'email', Icon: Mail, value: user?.email },
+    { key: 'phone', Icon: Phone, value: toText(user?.phone_number) },
+    { key: 'email', Icon: Mail, value: toText(user?.email) },
   ].filter((fact) => fact.value);
 
   const currentRouteInfo = getRouteBreadcrumb(location.pathname, sidebarItems, t('sidebar.adminDashboard'));
@@ -310,7 +325,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                   <Box sx={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
                     <Avatar
                       src={getFileUrl(user.avatar_url || user.avatar)}
-                      alt={user.name}
+                      alt={displayName}
                       sx={{
                         width: 30,
                         height: 30,
@@ -324,7 +339,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                         fontSize: '0.8rem',
                       }}
                     >
-                      {(user.name || user.fullName || user.phone_number || '?').charAt(0).toUpperCase()}
+                      {(displayName || '?').charAt(0).toUpperCase()}
                     </Avatar>
                     <Box
                       sx={{
@@ -358,7 +373,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                         color: 'text.primary',
                       }}
                     >
-                      {user.name || user.fullName || user.phone_number}
+                      {displayName}
                     </Typography>
                     <Typography
                       noWrap
@@ -416,7 +431,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1.5, pt: 1, pb: 1.5 }}>
                   <Avatar
                     src={getFileUrl(user.avatar_url || user.avatar)}
-                    alt={user.name}
+                    alt={displayName}
                     sx={{
                       width: 44,
                       height: 44,
@@ -429,7 +444,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                       fontSize: '1rem',
                     }}
                   >
-                    {(user.name || user.fullName || user.phone_number || '?').charAt(0).toUpperCase()}
+                    {(displayName || '?').charAt(0).toUpperCase()}
                   </Avatar>
 
                   <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -437,7 +452,7 @@ const Header = ({ sidebarWidth = 100, onSidebarCollapse, sidebarCollapsed }) => 
                       noWrap
                       sx={{ fontWeight: 700, fontSize: '0.9rem', lineHeight: 1.3, color: 'text.primary' }}
                     >
-                      {user.name || user.fullName || user.phone_number}
+                      {displayName}
                     </Typography>
                     <Typography
                       noWrap
