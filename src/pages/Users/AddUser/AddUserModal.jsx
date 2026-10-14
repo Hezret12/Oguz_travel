@@ -17,10 +17,24 @@ import { tabStyles, scrollAreaStyles } from "../shared/modalStyles";
 import { useCreate } from "../../../hooks/CRUD/useCreate";
 import { addUserApi } from "../../../api/queries/post";
 
-const AddUserModal = ({ table }) => {
+const INFORMATION_TAB = 0;
+const ACCESS_TAB = 1;
+
+const AddUserModal = ({ table, open, close }) => {
   const { t } = useLocale();
   const { addUser } = useValidShema();
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(INFORMATION_TAB);
+
+  const isModalOpen =
+    open !== undefined ? Boolean(open) : Boolean(table?.getState().creatingRow);
+
+  const handleClose = () => {
+    if (table) {
+      table.setCreatingRow(null);
+      table.setEditingRow(null);
+    }
+    close?.();
+  };
 
   const { mutate: createUser, isPending } = useCreate({
     apiFn: addUserApi,
@@ -28,11 +42,8 @@ const AddUserModal = ({ table }) => {
     // The list is paginated server side, so the new record is fetched back
     // rather than pushed into the cached page (which would leave a wrong count).
     isPaginated: true,
-    onSuccess: () => {
-      table.setCreatingRow(null);
-    },
+    onSuccess: handleClose,
   });
-
 
   const { control, handleSubmit, setValue } = useForm({
     defaultValues: {
@@ -48,34 +59,30 @@ const AddUserModal = ({ table }) => {
     mode: "onSubmit",
   });
 
-  const onSubmit = async (data) => {
-    try {
-      // Backend stores admin status only in `role` ("Admin" | "User").
-      const { isAdmin, ...rest } = data;
-      const formattedData = {
-        ...rest,
-        role: isAdmin ? "Admin" : "User",
-        phone_number: data.phone_number
-          ? (data.phone_number.startsWith("+993")
-            ? data.phone_number
-            : `+993${data.phone_number}`)
-          : "",
-      };
-      await createUser(formattedData);
-    } catch (err) {
-      console.error(err);
-    }
+  const onSubmit = (data) => {
+    // Backend stores admin status only in `role` ("Admin" | "User").
+    const { isAdmin, ...rest } = data;
+    createUser({
+      ...rest,
+      role: isAdmin ? "Admin" : "User",
+      phone_number: data.phone_number
+        ? (data.phone_number.startsWith("+993")
+          ? data.phone_number
+          : `+993${data.phone_number}`)
+        : "",
+    });
   };
-  const closeDialog = () => {
-    if (table) {
-      table.setCreatingRow(null);
-    }
+
+  // Errors show only on the tab that holds the field, so a failed save moves
+  // to that tab instead of seeming to do nothing.
+  const onInvalid = (errors) => {
+    const accessOnly = Object.keys(errors).every((field) => field === "permissions");
+    setActiveTab(accessOnly ? ACCESS_TAB : INFORMATION_TAB);
   };
 
   return (
-    <CustomDialog widthX={560} open={open} close={closeDialog}>
+    <CustomDialog widthX={560} open={isModalOpen} close={handleClose}>
       <Box
-        key={String(open)}
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -83,12 +90,9 @@ const AddUserModal = ({ table }) => {
           height: "100%",
         }}
       >
-        <CustomDialogHeader
-          variant="h5"
-          title={t("users.addTitle") ?? "Add User"}
-        />
+        <CustomDialogHeader variant="h5" title={t("users.addTitle")} />
 
-        <CustomForm handleSubmit={handleSubmit(onSubmit)}>
+        <CustomForm handleSubmit={handleSubmit(onSubmit, onInvalid)}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Tabs
               value={activeTab}
@@ -101,7 +105,7 @@ const AddUserModal = ({ table }) => {
             </Tabs>
 
             <Box sx={scrollAreaStyles}>
-              {activeTab === 0 ? (
+              {activeTab === INFORMATION_TAB ? (
                 <UserInformationTab
                   control={control}
                   setValue={setValue}
@@ -114,7 +118,7 @@ const AddUserModal = ({ table }) => {
 
             <FooterButton
               loading={isPending}
-              onCancel={closeDialog}
+              onCancel={handleClose}
               type="submit"
               sx={{ mt: "auto" }}
             />
