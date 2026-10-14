@@ -156,6 +156,15 @@ const VisaIntakeFilter = ({ filters, onFilterChange }) => {
         onChange={onFilterChange}
       />
 
+      <FilterSelect
+        label={t("columns.office")}
+        name="office_guid"
+        value={filters.office_guid}
+        options={officeOptions}
+        allText={t("all")}
+        onChange={onFilterChange}
+      />
+
       {/* Loads operators 40 at a time (more on scroll) and searches them on the server. */}
       <GlobalEmployeeAutocomplete
         name="operator_guid"
@@ -164,15 +173,6 @@ const VisaIntakeFilter = ({ filters, onFilterChange }) => {
         label={t("columns.operator")}
         placeholder={t("all")}
         size="small"
-      />
-
-      <FilterSelect
-        label={t("columns.office")}
-        name="office_guid"
-        value={filters.office_guid}
-        options={officeOptions}
-        allText={t("all")}
-        onChange={onFilterChange}
       />
 
       <FilterSelect
