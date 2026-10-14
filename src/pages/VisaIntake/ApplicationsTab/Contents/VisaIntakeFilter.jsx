@@ -1,9 +1,75 @@
-import { memo } from "react";
-import { FormControl, Stack, Typography } from "@mui/material";
+import { memo, useMemo } from "react";
+import { Box, FormControl, MenuItem, Select, Stack, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
 import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
+import { VISA_STATUS, VISA_STATUS_CONFIG } from "../../../../functions/statusChipConfigs";
+
+const selectSx = {
+  borderRadius: "8px",
+  "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+  "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "primary.main" },
+};
+
+const menuPaperProps = {
+  paper: {
+    sx: {
+      borderRadius: "12px",
+      marginTop: "4px",
+      maxHeight: 300,
+      boxShadow: (theme) =>
+        theme.palette.mode === "dark"
+          ? "0 8px 24px rgba(0,0,0,0.5)"
+          : "0 4px 20px rgba(0,0,0,0.08)",
+    },
+  },
+};
+
+const StatusOption = ({ color, label }) => (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
+    <Typography sx={{ fontSize: "0.875rem" }}>{label}</Typography>
+  </Box>
+);
+
+const StatusFilter = ({ label, value, options, allText, onChange }) => (
+  <FormControl fullWidth size="small">
+    <Typography
+      variant="body2"
+      sx={{ mb: 0.75, fontWeight: 600, color: "text.primary" }}
+    >
+      {label}
+    </Typography>
+    <Select
+      value={value ?? ""}
+      onChange={(e) => onChange("status", e.target.value)}
+      displayEmpty
+      sx={selectSx}
+      MenuProps={{ slotProps: menuPaperProps }}
+      IconComponent={(props) => <ChevronDown size={18} {...props} />}
+      renderValue={(selected) => {
+        const opt = options.find((o) => o.value === selected);
+        return opt ? (
+          <StatusOption color={opt.color} label={opt.label} />
+        ) : (
+          <Typography sx={{ color: "text.secondary", fontSize: "0.875rem" }}>{allText}</Typography>
+        );
+      }}
+    >
+      <MenuItem value="">
+        <Typography sx={{ color: "text.secondary", fontSize: "0.875rem" }}>{allText}</Typography>
+      </MenuItem>
+      {options.map((opt) => (
+        <MenuItem key={opt.value} value={opt.value}>
+          <StatusOption color={opt.color} label={opt.label} />
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+);
 
 const FilterDatePicker = ({ label, name, value, onChange }) => (
   <FormControl fullWidth size="small">
@@ -49,6 +115,16 @@ const FilterDatePicker = ({ label, name, value, onChange }) => (
 const VisaIntakeFilter = ({ filters, onFilterChange }) => {
   const { t } = useLocale();
 
+  // Same labels as the intake form's status select; colours from the table's status chip.
+  const statusOptions = useMemo(
+    () => [
+      { value: VISA_STATUS.PROCESS, label: t("visa.statusProcess") },
+      { value: VISA_STATUS.DONE, label: t("visa.statusDone") },
+      { value: VISA_STATUS.FAIL, label: t("visa.statusFail") },
+    ].map((o) => ({ ...o, color: VISA_STATUS_CONFIG[o.value].color })),
+    [t],
+  );
+
   return (
     <Stack spacing={2.5}>
       <FilterDatePicker
@@ -73,6 +149,14 @@ const VisaIntakeFilter = ({ filters, onFilterChange }) => {
         label={t("columns.operator")}
         placeholder={t("all")}
         size="small"
+      />
+
+      <StatusFilter
+        label={t("columns.visaStatus")}
+        value={filters.status}
+        options={statusOptions}
+        allText={t("all")}
+        onChange={onFilterChange}
       />
     </Stack>
   );
