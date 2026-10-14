@@ -1,5 +1,7 @@
-import { Box } from "@mui/material";
+import { useState } from "react";
+import { Box, IconButton, Tooltip } from "@mui/material";
 import { useWatch } from "react-hook-form";
+import { Eye, EyeOff } from "lucide-react";
 import GlobalEmployeeAutocomplete from "../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomCheckbox from "../../../components/CustomCheckbox";
@@ -13,6 +15,8 @@ const UserInformationTab = ({
   initialEmployee = null,
 }) => {
   const { t } = useLocale();
+  const [showPassword, setShowPassword] = useState(false);
+  const passwordToggleLabel = showPassword ? t("users.hidePassword") : t("users.showPassword");
   const [rawIsExternalUser] = useWatch({
     control,
     name: ["isExternalUser"],
@@ -69,7 +73,7 @@ const UserInformationTab = ({
       <CustomTextField
         name="password"
         control={control}
-        type="password"
+        type={showPassword ? "text" : "password"}
         label={t("columns.password")}
         placeholder={
           isEdit
@@ -77,6 +81,23 @@ const UserInformationTab = ({
             : "******"
         }
         required={!isEdit}
+        // A new user's password: keeps the browser from filling in the admin's own.
+        autoComplete="new-password"
+        endIcon={
+          <Tooltip title={passwordToggleLabel} arrow>
+            <IconButton
+              onClick={() => setShowPassword((visible) => !visible)}
+              onMouseDown={(event) => event.preventDefault()}
+              aria-label={passwordToggleLabel}
+              aria-pressed={showPassword}
+              edge="end"
+              size="small"
+              sx={{ color: "text.secondary" }}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </IconButton>
+          </Tooltip>
+        }
       />
 
       <Box

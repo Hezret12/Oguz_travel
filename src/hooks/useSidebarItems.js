@@ -44,9 +44,6 @@ export const useSidebarItems = () => {
         text: t("sidebar.adminDashboard"),
         path: PATHS.ROOT,
         icon: createElement(LayoutDashboard, { size: 20, strokeWidth: 2.2 }),
-        // Shown to everyone (their own office's figures), yet still granted
-        // in the access tab: the permission opens every office.
-        openToAll: true,
       },
       {
         id: "tasks",
@@ -265,6 +262,8 @@ export const useSidebarItems = () => {
         text: t("sidebar.profile"),
         path: PATHS.PROFILE,
         icon: createElement(UserCircle, { size: 20, strokeWidth: 2.2 }),
+        // Every user's own page, and where a user without the dashboard lands.
+        alwaysVisible: true,
       },
     ],
     [t],

@@ -110,6 +110,17 @@ export function getRoleHomePath() {
   return '/';
 }
 
+// Grants that open the dashboard ('/'): its path, the legacy id older users
+// were saved with, and the full-access wildcard. A user without a permissions
+// list (not restricted at all) sees it too.
+const DASHBOARD_PERMISSIONS = ['*', '/', 'dashboard_view'];
+
+export function canViewDashboard(user) {
+  const permissions = user?.permissions;
+  if (!Array.isArray(permissions)) return true;
+  return permissions.some((permission) => DASHBOARD_PERMISSIONS.includes(permission));
+}
+
 export function getStoredSession() {
   const accessToken = Cookies.get('accessToken');
   const refreshToken = Cookies.get('refreshToken');

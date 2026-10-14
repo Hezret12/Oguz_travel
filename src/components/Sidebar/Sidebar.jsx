@@ -6,6 +6,8 @@ import SidebarItem from "./SidebarItem";
 import SidebarFooter from "./SidebarFooter";
 import { useAuth } from "../../context/useAuth";
 import { useNavItems } from "../../hooks/useSidebarItems";
+import { canViewDashboard } from "../../utils/auth";
+import { PATHS } from "../../routes/paths";
 import OguzLogo from "../../assets/icons/OguzLogo";
 
 const SIDEBAR_W = 280;
@@ -158,6 +160,7 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
     if (Array.isArray(user.permissions)) {
       const isPathAllowed = (path) => {
         if (!path) return false;
+        if (path === PATHS.ROOT) return canViewDashboard(user);
         return user.permissions.some(
           (perm) => path === perm || (perm !== "/" && path.startsWith(perm + "/")),
         );
@@ -165,7 +168,7 @@ const Sidebar = ({ mobileOpen, onSidebarClose, collapsed }) => {
 
       return navItems
         .map((item) => {
-          if (item.alwaysVisible || item.openToAll) {
+          if (item.alwaysVisible) {
             return item;
           }
           if (item.isGroup && item.children) {

@@ -72,9 +72,6 @@ const AdminDashboard = () => {
   const { t, selectedLang } = useLocale();
   const { user } = useAuth();
 
-  const permissions = user?.permissions;
-  const canSeeAllOffices = !Array.isArray(permissions) || permissions.includes("*") || permissions.includes("/");
-
   // `service` is the category picked for the trend and operators ("" = all).
   const [prefs, updatePrefs] = useAnalyticsPrefs(STORAGE_KEY, { service: "" });
   const { period, customRange } = prefs;
@@ -102,7 +99,8 @@ const AdminDashboard = () => {
   const serviceParams = useMemo(() => (service ? { ...params, category_guid: service } : params), [params, service]);
   // The office ranking covers every office, so it drops the office filter and
   // only shows (and loads) while the dashboard itself covers every office.
-  const showOffices = canSeeAllOffices && !officeGuid;
+  // Only users granted the dashboard reach this page (ProtectedRoute).
+  const showOffices = !officeGuid;
   const officesParams = useMemo(() => {
     const rest = { ...params };
     delete rest.office_guid;

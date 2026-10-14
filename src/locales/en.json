@@ -266,6 +266,8 @@
     "selectEmployee": "Select an employee...",
     "phoneNumberPlaceholder": "61 123456",
     "passwordEditPlaceholder": "Leave empty to keep the current password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "statusActive": "Aktiw ulanyjy",
     "isExternalUser": "External user",
     "selected": "Selected",

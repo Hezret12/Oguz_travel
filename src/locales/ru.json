@@ -266,6 +266,8 @@
     "selectEmployee": "Выберите сотрудника...",
     "phoneNumberPlaceholder": "61 123456",
     "passwordEditPlaceholder": "Оставьте пустым, чтобы сохранить текущий пароль",
+    "showPassword": "Показать пароль",
+    "hidePassword": "Скрыть пароль",
     "statusActive": "Aktiw ulanyjy",
     "isExternalUser": "Внешний пользователь",
     "selected": "Выбрано",

@@ -1,5 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import { canViewDashboard } from '../utils/auth';
+import { PATHS } from '../routes/paths';
 
 const ProtectedRoute = () => {
   const { user, loading } = useAuth();
@@ -19,12 +21,23 @@ const ProtectedRoute = () => {
     '/finance/cash-flow',
     '/finance/overview',
   ];
-  // Matched exactly: '/finance' only redirects to /finance/cash-flow, and the
-  // dashboard ('/') shows a user without its permission their own office only.
-  const ALWAYS_ALLOWED_EXACT_PATHS = ['/', '/finance'];
+  // Matched exactly: '/finance' only redirects to /finance/cash-flow.
+  const ALWAYS_ALLOWED_EXACT_PATHS = ['/finance'];
 
-  if (Array.isArray(user.permissions) && user.permissions.length > 0) {
+  const { permissions } = user;
+  // An empty list restricts too: such a user has no pages beyond the open ones.
+  if (Array.isArray(permissions) && !permissions.includes('*')) {
     const currentPath = location.pathname;
+
+    // '/' is where login, the logo and "go home" land, so a user without the
+    // dashboard goes to their profile, which every user can open.
+    if (currentPath === PATHS.ROOT) {
+      if (!canViewDashboard(user)) {
+        return <Navigate to={PATHS.PROFILE} replace />;
+      }
+      return <Outlet />;
+    }
+
     const isAlwaysAllowed =
       ALWAYS_ALLOWED_EXACT_PATHS.includes(currentPath) ||
       ALWAYS_ALLOWED_PATHS.some(
@@ -32,7 +45,7 @@ const ProtectedRoute = () => {
       );
 
     if (!isAlwaysAllowed) {
-      const isAllowed = user.permissions.some(
+      const isAllowed = permissions.some(
         (permission) =>
           currentPath === permission || currentPath.startsWith(permission + '/')
       );

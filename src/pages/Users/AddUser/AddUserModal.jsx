@@ -22,7 +22,7 @@ const AddUserModal = ({ table }) => {
   const { addUser } = useValidShema();
   const [activeTab, setActiveTab] = useState(0);
 
-  const { mutate: createUser, isLoading } = useCreate({
+  const { mutate: createUser, isPending } = useCreate({
     apiFn: addUserApi,
     key: "users",
     // The list is paginated server side, so the new record is fetched back
@@ -113,7 +113,7 @@ const AddUserModal = ({ table }) => {
             </Box>
 
             <FooterButton
-              loading={isLoading}
+              loading={isPending}
               onCancel={closeDialog}
               type="submit"
               sx={{ mt: "auto" }}

@@ -26,7 +26,7 @@ const AddClient = ({ table }) => {
   const { clientValidShema } = useValidShema();
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  const { mutate: createClient, isLoading } = useCreate({
+  const { mutate: createClient, isPending } = useCreate({
     apiFn: addClientsApi,
     key: "clients",
     // The list is paginated server side, so the new record is fetched back
@@ -258,7 +258,7 @@ const AddClient = ({ table }) => {
         </Grid>
 
         <FooterButton
-          loading={isLoading}
+          loading={isPending}
           onCancel={closeDialog}
           type="submit"
         />

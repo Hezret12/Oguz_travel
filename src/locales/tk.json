@@ -266,6 +266,8 @@
     "selectEmployee": "Işgär saýlaň...",
     "phoneNumberPlaceholder": "61 123456",
     "passwordEditPlaceholder": "Häzirki paroly saklamak üçin boş goýuň",
+    "showPassword": "Paroly görkez",
+    "hidePassword": "Paroly gizle",
     "statusActive": "Aktiw ulanyjy",
     "isExternalUser": "Daşarky ulanyjy",
     "selected": "Saýlanan",

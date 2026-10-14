@@ -1,3 +1,4 @@
+import { useCallback, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { hdlErrResMsg, hdlSuccessResMsg } from "../../functions/generalHelpers";
 
@@ -95,5 +96,31 @@ export const useCreate = ({
     },
   });
 
-  return mutation;
+  // One create at a time: a call made while the previous request is still on
+  // its way (a double click that got past the form) gets that request's
+  // promise instead of sending a duplicate record.
+  const inFlight = useRef(null);
+  const { mutateAsync: send } = mutation;
+
+  const mutateAsync = useCallback(
+    (variables, options) => {
+      if (inFlight.current) return inFlight.current;
+      const request = send(variables, options).finally(() => {
+        inFlight.current = null;
+      });
+      inFlight.current = request;
+      return request;
+    },
+    [send],
+  );
+
+  // Like react-query's `mutate`: errors are already shown by onError.
+  const mutate = useCallback(
+    (variables, options) => {
+      mutateAsync(variables, options).catch(() => {});
+    },
+    [mutateAsync],
+  );
+
+  return { ...mutation, mutate, mutateAsync };
 };

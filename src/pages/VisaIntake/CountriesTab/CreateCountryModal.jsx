@@ -23,7 +23,7 @@ const schema = yup.object().shape({
 export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
   const { t } = useLocale();
 
-  const { mutate: createCountry, isLoading } = useCreate({
+  const { mutate: createCountry, isPending } = useCreate({
     apiFn: createCountryApi,
     key: "countries",
     // The list is paginated server side, so the new record is fetched back
@@ -134,7 +134,7 @@ export const CreateCountryModal = ({ open, onClose, onRefresh }) => {
 
           <CountryFieldSelector control={control} name="fields" />
 
-          <FooterButton loading={isLoading} onCancel={onClose} type="submit" />
+          <FooterButton loading={isPending} onCancel={onClose} type="submit" />
         </Box>
       </CustomForm>
     </CustomDialog>
