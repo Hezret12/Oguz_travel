@@ -4,6 +4,8 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { ChevronDown } from "lucide-react";
 import dayjs from "dayjs";
 import { useLocale } from "../../../../hooks/useLocale";
+import { useGet } from "../../../../hooks/CRUD/useGet";
+import { getAllOfficeApi } from "../../../../api/queries/getters";
 import GlobalEmployeeAutocomplete from "../../../../components/global/GlobalEmployeeAutocomplete/GlobalEmployeeAutocomplete";
 import { VISA_STATUS, VISA_STATUS_CONFIG } from "../../../../functions/statusChipConfigs";
 
@@ -28,14 +30,17 @@ const menuPaperProps = {
   },
 };
 
-const StatusOption = ({ color, label }) => (
-  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-    <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
-    <Typography sx={{ fontSize: "0.875rem" }}>{label}</Typography>
+// An option's label, after a coloured dot when the option has a colour (statuses).
+const OptionLabel = ({ color, label }) => (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+    {color && (
+      <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: color, flexShrink: 0 }} />
+    )}
+    <Typography noWrap sx={{ fontSize: "0.875rem" }}>{label}</Typography>
   </Box>
 );
 
-const StatusFilter = ({ label, value, options, allText, onChange }) => (
+const FilterSelect = ({ label, name, value, options, allText, onChange }) => (
   <FormControl fullWidth size="small">
     <Typography
       variant="body2"
@@ -45,7 +50,7 @@ const StatusFilter = ({ label, value, options, allText, onChange }) => (
     </Typography>
     <Select
       value={value ?? ""}
-      onChange={(e) => onChange("status", e.target.value)}
+      onChange={(e) => onChange(name, e.target.value)}
       displayEmpty
       sx={selectSx}
       MenuProps={{ slotProps: menuPaperProps }}
@@ -53,7 +58,7 @@ const StatusFilter = ({ label, value, options, allText, onChange }) => (
       renderValue={(selected) => {
         const opt = options.find((o) => o.value === selected);
         return opt ? (
-          <StatusOption color={opt.color} label={opt.label} />
+          <OptionLabel color={opt.color} label={opt.label} />
         ) : (
           <Typography sx={{ color: "text.secondary", fontSize: "0.875rem" }}>{allText}</Typography>
         );
@@ -64,7 +69,7 @@ const StatusFilter = ({ label, value, options, allText, onChange }) => (
       </MenuItem>
       {options.map((opt) => (
         <MenuItem key={opt.value} value={opt.value}>
-          <StatusOption color={opt.color} label={opt.label} />
+          <OptionLabel color={opt.color} label={opt.label} />
         </MenuItem>
       ))}
     </Select>
@@ -113,7 +118,17 @@ const FilterDatePicker = ({ label, name, value, onChange }) => (
 );
 
 const VisaIntakeFilter = ({ filters, onFilterChange }) => {
-  const { t } = useLocale();
+  const { t, selectedLang } = useLocale();
+
+  const { data: offices } = useGet({ apiFn: getAllOfficeApi, key: "office" });
+  const officeOptions = useMemo(
+    () =>
+      (Array.isArray(offices) ? offices : []).map((o) => ({
+        value: o.guid,
+        label: selectedLang(o.fullName) || selectedLang(o.shortName),
+      })),
+    [offices, selectedLang],
+  );
 
   // Same labels as the intake form's status select; colours from the table's status chip.
   const statusOptions = useMemo(
@@ -151,8 +166,18 @@ const VisaIntakeFilter = ({ filters, onFilterChange }) => {
         size="small"
       />
 
-      <StatusFilter
+      <FilterSelect
+        label={t("columns.office")}
+        name="office_guid"
+        value={filters.office_guid}
+        options={officeOptions}
+        allText={t("all")}
+        onChange={onFilterChange}
+      />
+
+      <FilterSelect
         label={t("columns.visaStatus")}
+        name="status"
         value={filters.status}
         options={statusOptions}
         allText={t("all")}

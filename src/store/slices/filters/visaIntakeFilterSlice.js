@@ -6,6 +6,7 @@ export const visaIntakeFilterSlice = createFilterSlice({
     search: '',
     start_date: '',
     end_date: '',
+    office_guid: '',
     operator_guid: '',
     status: '',
     visa_category: '',
