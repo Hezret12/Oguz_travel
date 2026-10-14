@@ -8,7 +8,7 @@ import { CustomForm } from "../../../components/Dialog/CustomForm";
 import FooterButton from "../../../components/Dialog/FooterButton";
 import CustomTextField from "../../../components/CustomTextField";
 import CustomSelect from "../../../components/CustomSelect";
-import { isReservedFieldKey, slugifyFieldKey } from "../../../functions/visaCountryFieldConfigs";
+import { isReservedFieldKey, slugifyFieldKey, toWordCase } from "../../../functions/visaCountryFieldConfigs";
 import { useUpdate } from "../../../hooks/CRUD/useUpdate";
 import { updateCustomFieldApi } from "../../../api/queries/patch";
 
@@ -104,9 +104,9 @@ export const EditCustomFieldModal = ({
     const payload = {
       guid: itemData.guid,
       field_label: {
-        tk: data.labelTm.trim(),
-        ru: data.labelRu.trim(),
-        en: data.labelEn.trim(),
+        tk: toWordCase(data.labelTm.trim()),
+        ru: toWordCase(data.labelRu.trim()),
+        en: toWordCase(data.labelEn.trim()),
       },
       field_key: computedFieldKey,
       field_type: data.fieldType,

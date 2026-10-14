@@ -37,7 +37,6 @@ import ColumnActionButtons from "../../../components/ColumnActionButtons";
 import DeleteDialog from "../../../components/DeleteDialog";
 import GlobalSearchInput from "../../../components/GlobalSearchInput";
 import Pagination from "../../../components/Pagination";
-import StackedCell from "../../../components/inputs/StackCell";
 import StatusChip from "../../../components/StatusChip";
 import TableEmptyState from "../../../components/TableEmptyState";
 import { sortVisaFields, isNotesField } from "../../../functions/visaCountryFieldConfigs";
@@ -72,6 +71,7 @@ const STANDARD_KEYS = new Set([
   "accepted_opr_guid",
   "operator_guid",
   "operator",
+  "office",
   "application_date",
   "status",
   "note",
@@ -196,9 +196,9 @@ export const ApplicationsTable = forwardRef(
       return sortVisaFields(Array.isArray(apiList) ? apiList : []);
     }, [countryFieldsLoaded, rawCountryFields, selectedCountry]);
 
-    // The operator's name comes with the record itself; this list only adds the
-    // office under it, and covers every employee who can take an application so
-    // that line doesn't disappear for the ones a short page would miss.
+    // The operator's name comes with the record itself; this list fills in a
+    // missing name and the office of a record saved without one, and covers every
+    // employee who can take an application so a short page doesn't miss any.
     const employeeParams = useMemo(() => ({ page: 1, limit: 500 }), []);
     const { data: employees = [] } = useGet({
       apiFn: getAllEmployeeApi,
@@ -262,20 +262,27 @@ export const ApplicationsTable = forwardRef(
         const oprGuid = row.accepted_opr_guid || row.operator_guid;
         // The record's own operator name comes first (create/update answers
         // carry it through the Sequelize include); the employee list fills in
-        // both the list endpoint's null and the office line under the name.
+        // the list endpoint's null.
         const known = (oprGuid && employeeMap.get(oprGuid)) || null;
         const fullName =
           row.operator_fullName || row.operator?.fullName || known?.fullName || "";
+        // The office the application was taken in; one saved without it shows
+        // its operator's office.
+        const ownOffice = row.office_fullName || row.office_shortName;
         const office =
-          known?.office || getOfficeLabel(row.operator?.office) || row.office_shortName || "";
+          (ownOffice ? toDisplayText(ownOffice) : "") ||
+          getOfficeLabel(row.office) ||
+          known?.office ||
+          getOfficeLabel(row.operator?.office);
 
         return {
           ...row,
           custom_field_values: parseCustomFieldValues(row.custom_field_values),
-          __operator: fullName ? { fullName, office } : null,
+          __operator: fullName ? { fullName } : null,
+          __office: office || "",
         };
       });
-    }, [activeCountryGuid, rawApplicationsData, employeeMap, getOfficeLabel]);
+    }, [activeCountryGuid, rawApplicationsData, employeeMap, getOfficeLabel, toDisplayText]);
 
     const handleCountrySelect = useCallback(
       (newCountry) => {
@@ -332,7 +339,41 @@ export const ApplicationsTable = forwardRef(
         });
       }
 
-      // 1. Client
+      // 1. Application Date
+      const appDateField = fieldMap.get("application_date");
+      const appDateLabel =
+        resolveFieldLabel(appDateField) || t("visaIntake.fields.applicationDate");
+
+      cols.push({
+        id: "application_date",
+        header: appDateLabel,
+        size: 100,
+        accessorFn: (row) =>
+          row.application_date ?? row.custom_field_values?.application_date,
+        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
+      });
+
+      // 2. Office
+      cols.push({
+        id: "office",
+        header: t("columns.office"),
+        size: 110,
+        accessorFn: (row) => row.__office || "-",
+      });
+
+      // 3. Operator
+      const acceptedOprField = fieldMap.get("accepted_opr_guid");
+      const acceptedOprLabel =
+        resolveFieldLabel(acceptedOprField) || t("visaIntake.fields.operator");
+
+      cols.push({
+        id: "accepted_opr_guid",
+        header: acceptedOprLabel,
+        size: 180,
+        accessorFn: (row) => row.__operator?.fullName || "-",
+      });
+
+      // 4. Client
       const clientField = fieldMap.get("client_guid");
       const clientLabel =
         resolveFieldLabel(clientField) || t("columns.client");
@@ -347,7 +388,7 @@ export const ApplicationsTable = forwardRef(
         accessorFn: (row) => toDisplayText(row.client?.fullName || row.client_name),
       });
 
-      // 2. Client Details (Passport, Date of Birth)
+      // 5. Client Details (Passport, Date of Birth)
       cols.push({
         id: "passport_number",
         header: t("columns.passportNumber"),
@@ -367,38 +408,7 @@ export const ApplicationsTable = forwardRef(
         Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
       });
 
-      // 3. Operator
-      const acceptedOprField = fieldMap.get("accepted_opr_guid");
-      const acceptedOprLabel =
-        resolveFieldLabel(acceptedOprField) || t("visaIntake.fields.operator");
-
-      cols.push({
-        id: "accepted_opr_guid",
-        header: acceptedOprLabel,
-        size: 200,
-        accessorFn: (row) => row.__operator?.fullName || "-",
-        Cell: ({ row }) => {
-          const emp = row.original.__operator;
-          if (!emp?.fullName) return "-";
-          return <StackedCell primary={emp.fullName} secondary={emp.office} />;
-        },
-      });
-
-      // 4. Application Date
-      const appDateField = fieldMap.get("application_date");
-      const appDateLabel =
-        resolveFieldLabel(appDateField) || t("visaIntake.fields.applicationDate");
-
-      cols.push({
-        id: "application_date",
-        header: appDateLabel,
-        size: 100,
-        accessorFn: (row) =>
-          row.application_date ?? row.custom_field_values?.application_date,
-        Cell: ({ cell }) => formatChange(cell.getValue(), { dateOnly: true }),
-      });
-
-      // 5. Status
+      // 6. Status
       cols.push({
         id: "status",
         header: t("columns.visaStatus"),
@@ -409,7 +419,7 @@ export const ApplicationsTable = forwardRef(
         ),
       });
 
-      // 6. Dynamic Fields (All dynamic country-specific fields in order)
+      // 7. Dynamic Fields (All dynamic country-specific fields in order)
       const usedKeys = new Set(STANDARD_KEYS);
 
       sortedFields.forEach((field) => {
@@ -479,7 +489,7 @@ export const ApplicationsTable = forwardRef(
         }
       });
 
-      // 7. Note (ALWAYS after all dynamic fields, at the end before actions)
+      // 8. Note (ALWAYS after all dynamic fields, at the end before actions)
       const noteField = fieldMap.get("note") || sortedFields.find(isNotesField);
       const noteLabel = resolveFieldLabel(noteField) || t("columns.note");
 

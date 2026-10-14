@@ -21,6 +21,7 @@ const menuPaperProps = {
     sx: {
       borderRadius: "12px",
       marginTop: "4px",
+      maxHeight: 300,
       boxShadow: 3,
     },
   },

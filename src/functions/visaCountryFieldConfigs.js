@@ -1,7 +1,7 @@
 export const DEFAULT_VISA_FIELDS = [
   {
     fieldKey: "client_guid",
-    label: { tk: "Müşderi", ru: "ФИО клиента", en: "Client full name" },
+    label: { tk: "Müşderi", ru: "И.Ф.О клиента", en: "Client full name" },
     fieldType: "client_autocomplete",
     isDefault: true,
     gridSize: 12,
@@ -16,7 +16,7 @@ export const DEFAULT_VISA_FIELDS = [
   },
   {
     fieldKey: "application_date",
-    label: { tk: "Arza senesi", ru: "Дата подачи", en: "Application date" },
+    label: { tk: "Arza senesi", ru: "Дата Заявки", en: "Application date" },
     fieldType: "date",
     isDefault: true,
     gridSize: 4,
@@ -146,6 +146,20 @@ export const ensureAllVisaFields = (apiFields = []) => {
 };
 
 export const sortVisaFields = ensureAllVisaFields;
+
+/**
+ * A label typed all in capitals gets a capital only at the start of each word:
+ * "ДАТА ЗАП.АНКЕТЫ" → "Дата Зап.Анкеты". A label with any lowercase letter is the
+ * author's own casing and stays, and so does a short acronym ("ОАЭ", "ABŞ").
+ */
+export const toWordCase = (label) => {
+  if (typeof label !== "string") return label;
+  const letters = label.replace(/[^\p{L}]/gu, "");
+  if (letters.length < 4 || letters !== letters.toUpperCase()) return label;
+  return label
+    .toLowerCase()
+    .replace(/(^|[\s./()-])(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
+};
 
 export const slugifyFieldKey = (text) => {
   if (!text || typeof text !== "string") return "";

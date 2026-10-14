@@ -24,9 +24,6 @@ const VisaIntakeFilterDrawer = () => {
     setDraftFilter,
     applyFilters,
     resetFilters,
-    selectsOpen,
-    openSelect,
-    closeSelect,
   } = useDrawerFilters({
     actions: visaIntakeFilterActions,
     selectors: visaIntakeFilterSelectors,
@@ -39,13 +36,7 @@ const VisaIntakeFilterDrawer = () => {
       onApply={applyFilters}
       onReset={resetFilters}
     >
-      <VisaIntakeFilter
-        filters={filterDraft}
-        selectsOpen={selectsOpen}
-        onFilterChange={setDraftFilter}
-        onSelectOpen={openSelect}
-        onSelectClose={closeSelect}
-      />
+      <VisaIntakeFilter filters={filterDraft} onFilterChange={setDraftFilter} />
     </FilterDrawer>
   );
 };

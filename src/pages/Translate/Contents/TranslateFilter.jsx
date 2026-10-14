@@ -44,6 +44,7 @@ const menuPaperProps = {
     sx: {
       borderRadius: "12px",
       marginTop: "4px",
+      maxHeight: 300,
       boxShadow: (theme) =>
         theme.palette.mode === "dark"
           ? "0 8px 24px rgba(0,0,0,0.5)"
