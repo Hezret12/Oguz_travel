@@ -10,19 +10,13 @@ const ProtectedRoute = () => {
   if (loading) return null;
   if (!user)   return <Navigate to="/login" replace />;
 
-  // Matched with their sub-paths. Finance is listed page by page (these match
-  // the `alwaysVisible` sidebar items) so permission-gated pages under it,
-  // like /finance/salary, are not opened to everyone.
+  // Open paths accessible by all authenticated users without explicit permissions.
   const ALWAYS_ALLOWED_PATHS = [
     '/profile',
     '/notifications',
     '/unauthorized',
     '/packages',
-    '/finance/cash-flow',
-    '/finance/overview',
   ];
-  // Matched exactly: '/finance' only redirects to /finance/cash-flow.
-  const ALWAYS_ALLOWED_EXACT_PATHS = ['/finance'];
 
   const { permissions } = user;
   // An empty list restricts too: such a user has no pages beyond the open ones.
@@ -38,11 +32,9 @@ const ProtectedRoute = () => {
       return <Outlet />;
     }
 
-    const isAlwaysAllowed =
-      ALWAYS_ALLOWED_EXACT_PATHS.includes(currentPath) ||
-      ALWAYS_ALLOWED_PATHS.some(
-        (path) => currentPath === path || currentPath.startsWith(path + '/')
-      );
+    const isAlwaysAllowed = ALWAYS_ALLOWED_PATHS.some(
+      (path) => currentPath === path || currentPath.startsWith(path + '/')
+    );
 
     if (!isAlwaysAllowed) {
       const isAllowed = permissions.some(
