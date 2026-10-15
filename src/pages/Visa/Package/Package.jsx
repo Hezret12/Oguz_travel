@@ -19,7 +19,7 @@ import { deleteVisaDocApi } from "../../../api/queries/delete";
 const Package = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(24);
+  const [limit, setLimit] = useState(35);
 
   // 1. Fetch all Visa Docs from Backend via usePagginationGet
   const {

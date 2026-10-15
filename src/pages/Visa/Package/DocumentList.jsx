@@ -26,7 +26,7 @@ const DocumentList = ({
   searchQuery = "",
   setSearchQuery,
   page = 1,
-  limit = 24,
+  limit = 35,
   setPage,
   // eslint-disable-next-line no-unused-vars
   setPageSize,
