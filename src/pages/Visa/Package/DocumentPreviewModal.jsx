@@ -72,13 +72,14 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="md"
+      maxWidth="lg"
       fullWidth
       slotProps={{
         paper: {
           sx: {
             borderRadius: "18px",
             maxHeight: "94vh",
+            maxWidth: "960px",
             backgroundColor: "background.default",
             border: "1px solid",
             borderColor: "divider",
@@ -148,7 +149,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
       {/* Main A4 Document Sheet Canvas */}
       <DialogContent
         sx={{
-          p: { xs: 2, sm: 4 },
+          p: { xs: 1.5, sm: 2.5 },
           backgroundColor: "background.secondary",
           overflowY: "auto",
           display: "flex",
@@ -171,12 +172,12 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
             id="printable-word-document"
             sx={{
               width: "100%",
-              maxWidth: "780px",
+              maxWidth: "880px",
               minHeight: "980px",
               backgroundColor: "#ffffff",
               color: "#0f172a",
               border: "1px solid #d8dfe5",
-              p: { xs: 3, sm: 5.5 },
+              p: { xs: 2, sm: 3 },
               borderRadius: "4px",
               boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
               position: "relative",
@@ -192,9 +193,9 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: 2,
-                mx: { xs: -3, sm: -5.5 },
-                mt: { xs: -3, sm: -5.5 },
-                px: { xs: 3, sm: 5.5 },
+                mx: { xs: -2, sm: -3 },
+                mt: { xs: -2, sm: -3 },
+                px: { xs: 2, sm: 3 },
                 backgroundColor: BRAND_COLOR,
               }}
             >
@@ -222,8 +223,8 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
               </Box>
             </Box>
             {/* Letterhead double rule */}
-            <Box className="letterhead-bleed" sx={{ mx: { xs: -3, sm: -5.5 }, height: "3px", backgroundColor: "#0E8584" }} />
-            <Box className="letterhead-bleed" sx={{ mx: { xs: -3, sm: -5.5 }, height: "1px", backgroundColor: "#0E8584", opacity: 0.35, mb: 4.5 }} />
+            <Box className="letterhead-bleed" sx={{ mx: { xs: -2, sm: -3 }, height: "3px", backgroundColor: "#0E8584" }} />
+            <Box className="letterhead-bleed" sx={{ mx: { xs: -2, sm: -3 }, height: "1px", backgroundColor: "#0E8584", opacity: 0.35, mb: 3.5 }} />
 
             {/* Body content (title + tables) — gets its own reduced padding in print */}
             <Box className="print-body-padding">
