@@ -4,44 +4,45 @@ export const PATHS = {
   UNAUTHORIZED: '/unauthorized',
   TASKS: '/tasks',
   NOTIFICATIONS: '/notifications',
-  EMPLOYEE: {
-    ROOT: '/employee',
-    EMPLOYEES: '/employee',
-    USERS: '/employee/users',
-  },
-  TICKET: {
-    ROOT: '/ticket',
-    B2B: '/ticket/b2b',
-    TURKISH_AIRLINES: '/ticket/turkish-airlines',
-  },
+  PROFILE: '/profile',
   CLIENTS: '/clients',
-  VISA: {
-    ROOT: '/visa',
-    APPLICATIONS: '/visa/applications',
-    PACKAGE: '/visa/package',
-    INTAKE: '/intake',
-  },
   INTAKE: '/intake',
   TRANSLATION: '/translation',
   REFERRAL_LETTERS: '/referal-letters',
   OUTBOUND: '/outbound',
   INBOUND: '/inbound',
-  REPORTS: {
-    ROOT: '/reports',
-    TURKISH_AIRLINES: '/reports/turkish-airlines',
-    REFERRAL_LETTER: '/reports/referral-letter',
-  },
   CAFETERIA: '/cafeteria',
+  PACKAGES: '/packages', // Public/All-staff read-only visa package documents
+
+  EMPLOYEE: {
+    ROOT: '/employee',
+    EMPLOYEES: '/employee',
+    USERS: '/employee/users',
+  },
+
+  TICKET: {
+    ROOT: '/ticket',
+    B2B: '/ticket/b2b',
+    TURKISH_AIRLINES: '/ticket/turkish-airlines',
+  },
+
+  VISA: {
+    APPLICATIONS: '/visa/applications',
+    PACKAGE: '/visa/package', // Visa package management (admin / editor)
+  },
+
+  REPORTS: {
+    TURKISH_AIRLINES: '/reports/turkish-airlines',
+  },
+
   FINANCE: {
     ROOT: '/finance',
     CASH_FLOW: '/finance/cash-flow',
-    OVERVIEW: '/finance/overview',
     OFFICES: '/finance/offices',
     OFFICE_CASH: '/finance/office-cash',
     SALARY: '/finance/salary',
   },
-  PROFILE: '/profile',
-  PACKAGES: '/packages',
+
   PROFESSIONAL_TRANSLATION: {
     ROOT: '/professional-translation',
     OFFICE: '/professional-translation/office',
@@ -52,8 +53,3 @@ export const PATHS = {
     REFERRAL_COUNTRY: '/professional-translation/referral-country',
   },
 };
-
-export function joinPath(...segments) {
-  return `/${segments.filter(Boolean).join('/')}`;
-}
-
