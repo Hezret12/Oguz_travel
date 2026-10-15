@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -8,6 +8,9 @@ import {
   Typography,
   IconButton,
   CircularProgress,
+  ToggleButtonGroup,
+  ToggleButton,
+  Tooltip,
 } from "@mui/material";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import PrintRoundedIcon from "@mui/icons-material/PrintRounded";
@@ -26,6 +29,20 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
   const { t } = useLocale();
   const { formatChange } = useDateFormat();
   const docSheetRef = useRef(null);
+
+  const [widthMode, setWidthMode] = useState("wide"); // "standard" | "wide" | "full"
+
+  const widthConfig = useMemo(() => {
+    switch (widthMode) {
+      case "standard":
+        return { dialogMaxWidth: "md", paperMaxWidth: "900px", sheetMaxWidth: "820px" };
+      case "full":
+        return { dialogMaxWidth: "xl", paperMaxWidth: "96vw", sheetMaxWidth: "100%" };
+      case "wide":
+      default:
+        return { dialogMaxWidth: "lg", paperMaxWidth: "1140px", sheetMaxWidth: "1040px" };
+    }
+  }, [widthMode]);
 
   const docGuid = doc?.guid || doc?.id;
   const hasTables = doc?.tables?.length > 0;
@@ -72,14 +89,15 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="lg"
+      maxWidth={widthConfig.dialogMaxWidth}
       fullWidth
       slotProps={{
         paper: {
           sx: {
             borderRadius: "18px",
             maxHeight: "94vh",
-            maxWidth: "960px",
+            maxWidth: widthConfig.paperMaxWidth,
+            transition: "max-width 0.22s ease-in-out",
             backgroundColor: "background.default",
             border: "1px solid",
             borderColor: "divider",
@@ -95,16 +113,77 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
         className="no-print"
         sx={{
           display: "flex",
-          justifyContent: "flex-end",
+          justifyContent: "space-between",
           alignItems: "center",
-          px: 3,
-          py: 2,
+          px: { xs: 2, sm: 3 },
+          py: 1.5,
           borderBottom: "1px solid",
           borderColor: "divider",
           backgroundColor: "background.paper",
         }}
       >
-        {/* Action Buttons on Toolbar */}
+        {/* Left: Width Mode Toggle */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 700,
+              color: "text.secondary",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              display: { xs: "none", sm: "block" },
+            }}
+          >
+            Giňlik:
+          </Typography>
+          <ToggleButtonGroup
+            size="small"
+            value={widthMode}
+            exclusive
+            onChange={(_, val) => {
+              if (val) setWidthMode(val);
+            }}
+            sx={{
+              height: 32,
+              backgroundColor: "action.hover",
+              borderRadius: "8px",
+              p: 0.25,
+              "& .MuiToggleButtonGroup-grouped": {
+                border: "none !important",
+                borderRadius: "6px !important",
+                px: 1.5,
+                py: 0.25,
+                fontSize: "0.78rem",
+                fontWeight: 600,
+                textTransform: "none",
+                color: "text.secondary",
+                "&.Mui-selected": {
+                  backgroundColor: `${BRAND_COLOR} !important`,
+                  color: "#ffffff !important",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
+                },
+              },
+            }}
+          >
+            <ToggleButton value="standard">
+              <Tooltip title="A4 Standart (820px) — Çap üçin" arrow>
+                <span>A4 (820px)</span>
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="wide">
+              <Tooltip title="Giňiş Ekran (1040px)" arrow>
+                <span>Giňiş (1040px)</span>
+              </Tooltip>
+            </ToggleButton>
+            <ToggleButton value="full">
+              <Tooltip title="Doly Ekran (100%)" arrow>
+                <span>Doly Ekran</span>
+              </Tooltip>
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+
+        {/* Right: Action Buttons on Toolbar */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, flexShrink: 0 }}>
           <Button
             size="small"
@@ -115,9 +194,9 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
               borderRadius: "8px",
               textTransform: "none",
               fontWeight: 700,
-              fontSize: "0.88rem",
-              px: 2.5,
-              py: 0.65,
+              fontSize: "0.85rem",
+              px: 2.25,
+              py: 0.6,
               backgroundColor: BRAND_COLOR,
               color: "#ffffff",
               boxShadow: "0 1px 4px rgba(11, 110, 109, 0.25)",
@@ -172,7 +251,8 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
             id="printable-word-document"
             sx={{
               width: "100%",
-              maxWidth: "880px",
+              maxWidth: widthConfig.sheetMaxWidth,
+              transition: "max-width 0.22s ease-in-out",
               minHeight: "980px",
               backgroundColor: "#ffffff",
               color: "#0f172a",
@@ -278,7 +358,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                     component="table"
                     sx={{
                       width: "100%",
-                      tableLayout: "fixed",
+                      tableLayout: "auto",
                       borderCollapse: "collapse",
                       "& td, & th": {
                         border: "1px solid #cbd5e1",
@@ -341,6 +421,8 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                                       color: "#0f172a",
                                       textAlign: isOrderCol ? "center" : "left",
                                       width: isOrderCol ? "48px" : undefined,
+                                      minWidth: isOrderCol ? "48px" : undefined,
+                                      maxWidth: isOrderCol ? "52px" : undefined,
                                       whiteSpace: "pre-wrap",
                                       verticalAlign: isHeaderRow ? "middle" : "top",
                                     }}
