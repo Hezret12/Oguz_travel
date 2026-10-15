@@ -67,9 +67,9 @@
   },
   "columns": {
     "code": "Code",
-    "countryNameTm": "Country Name (TM)",
-    "countryNameRu": "Country Name (RU)",
-    "countryNameEn": "Country Name (EN)",
+    "countryNameTm": "Country Name, Tm",
+    "countryNameRu": "Country Name, Ru",
+    "countryNameEn": "Country Name, En",
     "fullName": "Full Name",
     "phoneNumber": "Phone Number",
     "gmail": "Email",

@@ -17,7 +17,7 @@ import { useGet } from "../../../hooks/CRUD/useGet";
 
 const schema = yup.object().shape({
   code: yup.string().required("Ýurt kody (Code) hökmany"),
-  nameTm: yup.string().required("Ýurt ady (TM) hökmany"),
+  nameTm: yup.string().required("Ýurt ady, Tm hökmany"),
   nameRu: yup.string().nullable(),
   nameEn: yup.string().nullable(),
   fields: yup.array().nullable(),

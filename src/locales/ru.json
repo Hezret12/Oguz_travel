@@ -67,9 +67,9 @@
   },
   "columns": {
     "code": "Код",
-    "countryNameTm": "Название страны (TM)",
-    "countryNameRu": "Название страны (RU)",
-    "countryNameEn": "Название страны (EN)",
+    "countryNameTm": "Название страны, Tm",
+    "countryNameRu": "Название страны, Ru",
+    "countryNameEn": "Название страны, En",
     "fullName": "Полное имя",
     "phoneNumber": "Номер телефона",
     "gmail": "Эл. почта",
