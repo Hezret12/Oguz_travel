@@ -904,6 +904,11 @@
     "goBack": "Go Back",
     "quickLinks": "Quick Links"
   },
+  "unauthorized": {
+    "title": "Unauthorized Access",
+    "desc": "You do not have permission to view this page. Please use the dashboard corresponding to your role.",
+    "goHome": "Back to Home"
+  },
   "login": {
     "title": "Login",
     "validation": {

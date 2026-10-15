@@ -904,6 +904,11 @@
     "goBack": "Yza gaýt",
     "quickLinks": "Esasy bölümler"
   },
+  "unauthorized": {
+    "title": "Ygtyýarsyz Giriş",
+    "desc": "Bu sahypany görmäge ygtyýaryňyz ýok. Öz wezipäňize degişli dolandyryş panelini ulanyň.",
+    "goHome": "Baş Sahypa Dön"
+  },
   "login": {
     "title": "Giriş",
     "validation": {

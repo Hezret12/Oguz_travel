@@ -4,12 +4,14 @@ import GppBadIcon from '@mui/icons-material/GppBad';
 import { useAuth } from "../../context/useAuth";
 import { getRoleHomePath } from '../../utils/auth';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
+import { useLocale } from '../../hooks/useLocale';
 
 const Unauthorized = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLocale();
 
-  useDocumentTitle('Yetkisiz Erişim | Oguz Travel');
+  useDocumentTitle(`${t('unauthorized.title')} | Oguz Travel`);
 
   const handleGoHome = () => {
     navigate(getRoleHomePath(user?.role), { replace: true });
@@ -39,15 +41,15 @@ const Unauthorized = () => {
         <GppBadIcon color="error" sx={{ fontSize: 72, mb: 2 }} />
         
         <Typography variant="h5" sx={{ fontWeight: 800, mb: 1 }}>
-          Yetkisiz Erişim
+          {t('unauthorized.title')}
         </Typography>
         
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Bu sayfayı görüntülemek için gerekli yetkilere sahip değilsiniz. Lütfen kendi rolünüze uygun kontrol panelini kullanın.
+          {t('unauthorized.desc')}
         </Typography>
 
         <Button variant="contained" size="large" onClick={handleGoHome} sx={{ px: 4, py: 1.2, fontWeight: 600 }}>
-          Ana Sayfaya Dön
+          {t('unauthorized.goHome')}
         </Button>
       </Paper>
     </Box>
