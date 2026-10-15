@@ -440,37 +440,49 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                 </Box>
 
                 {/* Table Note */}
-                {table.note && (
-                  <Box
-                    sx={{
-                      pt: 1,
-                      mt: 0.5,
-                      borderTop: "1px solid #e2e8f0",
-                    }}
-                  >
-                    <Typography
-                      component="span"
+                {table.note && (() => {
+                  const noteText = table.note.trim();
+                  const startsWithBellik = /^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：\-]?\s*/i.test(noteText);
+                  const cleanText = startsWithBellik
+                    ? noteText.replace(/^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：\-]?\s*/i, "")
+                    : noteText;
+
+                  return (
+                    <Box
                       sx={{
-                        fontSize: "0.78rem",
-                        fontWeight: 600,
-                        letterSpacing: "0.2px",
+                        mt: 2,
+                        p: 2,
+                        borderRadius: "8px",
+                        backgroundColor: "#f8fafc",
+                        border: "1px solid #e2e8f0",
+                        borderLeft: `4px solid ${BRAND_COLOR}`,
                       }}
                     >
-                      Bellik:
-                    </Typography>
-                    <Typography
-                      component="span"
-                      sx={{
-                        fontSize: "0.82rem",
-                        color: "#475569",
-                        lineHeight: 1.6,
-                        whiteSpace: "pre-wrap",
-                      }}
-                    >
-                      {table.note}
-                    </Typography>
-                  </Box>
-                )}
+                      <Typography
+                        sx={{
+                          fontSize: "0.9rem",
+                          fontWeight: 700,
+                          color: "#0f172a",
+                          mb: 0.75,
+                          letterSpacing: "0.2px",
+                        }}
+                      >
+                        Bellik:
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: "0.88rem",
+                          color: "#1e293b",
+                          lineHeight: 1.65,
+                          fontWeight: 500,
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        {cleanText}
+                      </Typography>
+                    </Box>
+                  );
+                })()}
               </Box>
             ))}
             </Box>
