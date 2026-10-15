@@ -62,7 +62,6 @@ export const useSidebarItems = () => {
             text: t("sidebar.cashFlow", "Pul Akymy"),
             path: PATHS.FINANCE.CASH_FLOW,
             icon: createElement(ArrowLeftRight, { size: 18, strokeWidth: 2.2 }),
-            alwaysVisible: true,
           },
           {
             id: "finance-offices",
@@ -256,6 +255,7 @@ export const useSidebarItems = () => {
         text: t("sidebar.notifications"),
         path: PATHS.NOTIFICATIONS,
         icon: createElement(Bell, { size: 20, strokeWidth: 2.2 }),
+        alwaysVisible: true,
       },
       {
         id: "profile",
