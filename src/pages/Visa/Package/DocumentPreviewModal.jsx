@@ -179,7 +179,6 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
               p: { xs: 3, sm: 5.5 },
               borderRadius: "4px",
               boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-              fontFamily: "'Times New Roman', Times, serif",
               position: "relative",
               display: "flex",
               flexDirection: "column",
@@ -235,8 +234,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                   sx={{
                     fontWeight: 700,
                     color: "#0f172a",
-                    fontFamily: "'Times New Roman', Times, serif",
-                    fontSize: { xs: "1.4rem", sm: "1.7rem" },
+                    fontSize: { xs: "1.3rem", sm: "1.6rem" },
                     letterSpacing: "0.2px",
                     lineHeight: 1.3,
                   }}
@@ -249,21 +247,20 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
               {(currentDoc?.tables || []).map((table, tIdx) => (
                 <Box key={table.id || tIdx} sx={{ mb: 4.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
-                  <Box sx={{ flex: 1, height: "1px" }} />
+                  <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
                   <Typography
                     sx={{
                       fontWeight: 700,
-                      fontSize: "0.88rem",
-                      letterSpacing: "1px",
+                      fontSize: "0.9rem",
+                      letterSpacing: "0.5px",
                       color: "#0f172a",
                       textTransform: "uppercase",
-                      fontFamily: "'Times New Roman', Times, serif",
                       whiteSpace: "nowrap",
                     }}
                   >
                     {table.title || (tIdx === 0 ? "Gerekli resminamalar" : "Wizaň bahalary we möhletleri")}
                   </Typography>
-                  <Box sx={{ flex: 1, height: "1px" }} />
+                  <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
                 </Box>
 
                 {/* Table Grid */}
@@ -283,13 +280,13 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                       tableLayout: "fixed",
                       borderCollapse: "collapse",
                       "& td, & th": {
-                        border: "1px solid #e2e8f0",
-                        p: "9px 10px",
-                        fontSize: "0.8rem",
+                        border: "1px solid #cbd5e1",
+                        p: "10px 12px",
+                        fontSize: "0.85rem",
                         color: "#0f172a",
-                        lineHeight: 1.4,
+                        lineHeight: 1.5,
                         wordBreak: "break-word",
-                        whiteSpace: "normal",
+                        whiteSpace: "pre-wrap",
                       },
                     }}
                   >
@@ -333,11 +330,18 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                                     rowSpan={cellRowSpan}
                                     style={{
                                       fontWeight: isHeaderRow ? 700 : isOrderCol ? 700 : 400,
-                                      backgroundColor: isHeaderRow ? "#0E8584" : isOrderCol ? "#fafafa" : "#ffffff",
-                                      color: isHeaderRow ? "#ffffff" : "#000000",
+                                      backgroundColor: isHeaderRow
+                                        ? isOrderCol
+                                          ? "#f8fafc"
+                                          : "#f1f5f9"
+                                        : isOrderCol
+                                          ? "#fafafa"
+                                          : "#ffffff",
+                                      color: "#0f172a",
                                       textAlign: isOrderCol ? "center" : "left",
-                                      width: isOrderCol ? "44px" : undefined,
-                                      letterSpacing: isHeaderRow ? "0.3px" : undefined,
+                                      width: isOrderCol ? "48px" : undefined,
+                                      whiteSpace: "pre-wrap",
+                                      verticalAlign: isHeaderRow ? "middle" : "top",
                                     }}
                                   >
                                     {displayValue}

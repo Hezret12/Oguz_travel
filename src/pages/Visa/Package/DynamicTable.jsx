@@ -650,7 +650,7 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
         <TextField
           fullWidth
           multiline
-          rows={3}
+          minRows={2}
           value={table.note || ""}
           onChange={(e) => onUpdate({ ...table, note: e.target.value })}
           placeholder={t("visaDocument.tableNotePlaceholder")}
@@ -660,7 +660,11 @@ const DynamicTable = ({ table, tableIndex, onUpdate }) => {
                 borderRadius: "8px",
                 fontSize: "0.92rem",
                 p: 1.5,
-                backgroundColor: "#ffffff",
+                backgroundColor: "background.paper",
+                "& textarea": {
+                  lineHeight: 1.55,
+                  resize: "vertical",
+                },
                 ...theme.applyStyles("dark", {
                   backgroundColor: "rgba(255, 255, 255, 0.03)",
                 }),
