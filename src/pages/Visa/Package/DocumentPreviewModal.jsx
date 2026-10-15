@@ -464,9 +464,9 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                   {/* Table Note */}
                   {table.note && (() => {
                     const noteText = table.note.trim();
-                    const startsWithBellik = /^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：\-]?\s*/i.test(noteText);
+                    const startsWithBellik = /^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：-]?\s*/i.test(noteText);
                     const cleanText = startsWithBellik
-                      ? noteText.replace(/^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：\-]?\s*/i, "")
+                      ? noteText.replace(/^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：-]?\s*/i, "")
                       : noteText;
 
                     return (
