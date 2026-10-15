@@ -332,7 +332,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                   <Typography
                     sx={{
                       fontWeight: 700,
-                      fontSize: "0.9rem",
+                      fontSize: "0.98rem",
                       letterSpacing: "0.5px",
                       color: "#0f172a",
                       textTransform: "uppercase",
@@ -362,10 +362,10 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                       borderCollapse: "collapse",
                       "& td, & th": {
                         border: "1px solid #cbd5e1",
-                        p: "10px 12px",
-                        fontSize: "0.85rem",
+                        p: "11px 14px",
+                        fontSize: "0.93rem",
                         color: "#0f172a",
-                        lineHeight: 1.5,
+                        lineHeight: 1.55,
                         wordBreak: "break-word",
                         whiteSpace: "pre-wrap",
                       },
@@ -450,8 +450,8 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                   return (
                     <Box
                       sx={{
-                        mt: 2,
-                        p: 2,
+                        mt: 2.5,
+                        p: 2.5,
                         borderRadius: "8px",
                         backgroundColor: "#f8fafc",
                         border: "1px solid #e2e8f0",
@@ -460,7 +460,7 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                     >
                       <Typography
                         sx={{
-                          fontSize: "0.9rem",
+                          fontSize: "1rem",
                           fontWeight: 700,
                           color: "#0f172a",
                           mb: 0.75,
@@ -471,9 +471,9 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                       </Typography>
                       <Typography
                         sx={{
-                          fontSize: "0.88rem",
+                          fontSize: "0.96rem",
                           color: "#1e293b",
-                          lineHeight: 1.65,
+                          lineHeight: 1.7,
                           fontWeight: 500,
                           whiteSpace: "pre-wrap",
                         }}
