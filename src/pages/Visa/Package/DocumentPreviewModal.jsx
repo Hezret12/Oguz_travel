@@ -326,52 +326,62 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
 
               {/* Tables */}
               {(currentDoc?.tables || []).map((table, tIdx) => (
-                <Box key={table.id || tIdx} sx={{ mb: 4.5 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
-                  <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
-                  <Typography
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: "0.98rem",
-                      letterSpacing: "0.5px",
-                      color: "#0f172a",
-                      textTransform: "uppercase",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {table.title || (tIdx === 0 ? "Gerekli resminamalar" : "Wizaň bahalary we möhletleri")}
-                  </Typography>
-                  <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
-                </Box>
+                <Box key={table.id || tIdx} className="doc-table-section" sx={{ mb: 4.5 }}>
+                  <Box className="doc-section-header" sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+                    <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "0.98rem",
+                        letterSpacing: "0.5px",
+                        color: "#0f172a",
+                        textTransform: "uppercase",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {table.title || (tIdx === 0 ? "Gerekli resminamalar" : "Wizaň bahalary we möhletleri")}
+                    </Typography>
+                    <Box sx={{ flex: 1, height: "1px", backgroundColor: "divider" }} />
+                  </Box>
 
-                {/* Table Grid */}
-                <Box
-                  sx={{
-                    width: "100%",
-                    border: "1px solid #cbd5e1",
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                    mb: 1.5,
-                  }}
-                >
+                  {/* Table Grid */}
                   <Box
-                    component="table"
+                    className="table-card-container"
                     sx={{
                       width: "100%",
-                      tableLayout: "auto",
-                      borderCollapse: "collapse",
-                      "& td, & th": {
-                        border: "1px solid #cbd5e1",
-                        p: "11px 14px",
-                        fontSize: "0.93rem",
-                        color: "#0f172a",
-                        lineHeight: 1.55,
-                        wordBreak: "break-word",
-                        whiteSpace: "pre-wrap",
-                      },
+                      border: "1px solid #cbd5e1",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      mb: 1.5,
                     }}
                   >
-                    <tbody>
+                    <Box
+                      component="table"
+                      sx={{
+                        width: "100%",
+                        tableLayout: "auto",
+                        borderCollapse: "collapse",
+                        "& thead": {
+                          display: "table-header-group",
+                        },
+                        "& tbody": {
+                          display: "table-row-group",
+                        },
+                        "& tr": {
+                          pageBreakInside: "avoid",
+                          breakInside: "avoid",
+                        },
+                        "& td, & th": {
+                          border: "1px solid #cbd5e1",
+                          p: "11px 14px",
+                          fontSize: "0.93rem",
+                          color: "#0f172a",
+                          lineHeight: 1.55,
+                          wordBreak: "break-word",
+                          whiteSpace: "pre-wrap",
+                        },
+                      }}
+                    >
                       {(() => {
                         let headerRowCount = 1;
                         (table.rows?.[0] || []).forEach((c) => {
@@ -380,12 +390,11 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                           }
                         });
 
-                        return (table.rows || []).map((row, rIdx) => {
-                          const isHeaderRow = rIdx < headerRowCount;
-                          const dataRowNumber = rIdx >= headerRowCount ? rIdx - headerRowCount + 1 : 0;
+                        const renderRow = (row, rIdx, isHeaderRow) => {
+                          const dataRowNumber = !isHeaderRow ? rIdx - headerRowCount + 1 : 0;
 
                           return (
-                            <tr key={rIdx}>
+                            <tr key={rIdx} style={{ pageBreakInside: "avoid", breakInside: "avoid" }}>
                               {row.map((cell, cIdx) => {
                                 const isOrderCol = cIdx === 0;
 
@@ -433,58 +442,74 @@ const DocumentPreviewModal = ({ open, onClose, document: doc }) => {
                               })}
                             </tr>
                           );
-                        });
+                        };
+
+                        const headerRows = (table.rows || []).slice(0, headerRowCount);
+                        const bodyRows = (table.rows || []).slice(headerRowCount);
+
+                        return (
+                          <>
+                            <thead style={{ display: "table-header-group" }}>
+                              {headerRows.map((row, rIdx) => renderRow(row, rIdx, true))}
+                            </thead>
+                            <tbody style={{ display: "table-row-group" }}>
+                              {bodyRows.map((row, relativeIdx) => renderRow(row, relativeIdx + headerRowCount, false))}
+                            </tbody>
+                          </>
+                        );
                       })()}
-                    </tbody>
-                  </Box>
-                </Box>
-
-                {/* Table Note */}
-                {table.note && (() => {
-                  const noteText = table.note.trim();
-                  const startsWithBellik = /^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：\-]?\s*/i.test(noteText);
-                  const cleanText = startsWithBellik
-                    ? noteText.replace(/^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：\-]?\s*/i, "")
-                    : noteText;
-
-                  return (
-                    <Box
-                      sx={{
-                        mt: 2.5,
-                        p: 2.5,
-                        borderRadius: "8px",
-                        backgroundColor: "#f8fafc",
-                        border: "1px solid #e2e8f0",
-                        borderLeft: `4px solid ${BRAND_COLOR}`,
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontSize: "1rem",
-                          fontWeight: 700,
-                          color: "#0f172a",
-                          mb: 0.75,
-                          letterSpacing: "0.2px",
-                        }}
-                      >
-                        Bellik:
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontSize: "0.96rem",
-                          color: "#1e293b",
-                          lineHeight: 1.7,
-                          fontWeight: 500,
-                          whiteSpace: "pre-wrap",
-                        }}
-                      >
-                        {cleanText}
-                      </Typography>
                     </Box>
-                  );
-                })()}
-              </Box>
-            ))}
+                  </Box>
+
+                  {/* Table Note */}
+                  {table.note && (() => {
+                    const noteText = table.note.trim();
+                    const startsWithBellik = /^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：\-]?\s*/i.test(noteText);
+                    const cleanText = startsWithBellik
+                      ? noteText.replace(/^(Bellik|Bellikler|\*Bellik|\*Bellikler|BELLIK|BELLIKLER)\s*[:：\-]?\s*/i, "")
+                      : noteText;
+
+                    return (
+                      <Box
+                        className="doc-note-box"
+                        sx={{
+                          mt: 2.5,
+                          p: 2.5,
+                          borderRadius: "8px",
+                          backgroundColor: "#f8fafc",
+                          border: "1px solid #e2e8f0",
+                          borderLeft: `4px solid ${BRAND_COLOR}`,
+                          breakInside: "avoid",
+                          pageBreakInside: "avoid",
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            fontSize: "1rem",
+                            fontWeight: 700,
+                            color: "#0f172a",
+                            mb: 0.75,
+                            letterSpacing: "0.2px",
+                          }}
+                        >
+                          Bellik:
+                        </Typography>
+                        <Typography
+                          sx={{
+                            fontSize: "0.96rem",
+                            color: "#1e293b",
+                            lineHeight: 1.7,
+                            fontWeight: 500,
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          {cleanText}
+                        </Typography>
+                      </Box>
+                    );
+                  })()}
+                </Box>
+              ))}
             </Box>
           </Box>
         )}
