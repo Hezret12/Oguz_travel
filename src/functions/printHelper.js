@@ -31,7 +31,10 @@ export const printElement = (element, docTitle = "") => {
     <style>
       @page {
         size: A4 portrait;
-        margin: 0mm !important; /* Suppresses browser headers (URL, title, date) and footers */
+        margin: 8mm 0mm 8mm 0mm !important;
+      }
+      @page :first {
+        margin-top: 0mm !important;
       }
       *, *::before, *::after {
         box-sizing: border-box;
@@ -45,8 +48,10 @@ export const printElement = (element, docTitle = "") => {
         color: #1e293b !important;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
+        overflow: visible !important;
+        height: auto !important;
       }
-      #printable-cv-sheet, #printable-word-document, #printable-doc-sheet {
+      #printable-cv-sheet, #printable-doc-sheet {
         box-shadow: none !important;
         border: none !important;
         margin: 0 auto !important;
@@ -61,16 +66,78 @@ export const printElement = (element, docTitle = "") => {
       #printable-cv-sheet {
         padding: 0 !important;
         border-radius: 0 !important;
-        /* Fill a full A4 page so the footer (margin-top: auto) sits at the bottom.
-           1mm under 297mm avoids rounding spilling onto a blank second page. */
         min-height: 296mm !important;
         overflow: visible !important;
       }
       #printable-cv-sheet .cv-print-body {
         padding: 8mm 14mm 10mm 14mm !important;
       }
+
+      /* Multi-page Word/Document print pagination styles */
       #printable-word-document {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 0 !important;
+        height: auto !important;
+        margin: 0 !important;
         padding: 0 !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      #printable-word-document,
+      #printable-word-document * {
+        box-sizing: border-box !important;
+      }
+      /* Remove all overflow:hidden and fixed heights inside printable document */
+      #printable-word-document div,
+      #printable-word-document section,
+      #printable-word-document .table-card-container {
+        overflow: visible !important;
+        max-height: none !important;
+        height: auto !important;
+      }
+      #printable-word-document .table-card-container {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 0 !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+      #printable-word-document table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+      #printable-word-document thead {
+        display: table-header-group !important;
+      }
+      #printable-word-document tbody {
+        display: table-row-group !important;
+      }
+      #printable-word-document tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      #printable-word-document td,
+      #printable-word-document th {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      #printable-word-document .doc-table-section {
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+      #printable-word-document .doc-section-header {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+      #printable-word-document .doc-note-box {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       #printable-word-document .letterhead-bleed {
         margin: 0 !important;
