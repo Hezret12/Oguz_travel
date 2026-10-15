@@ -28,7 +28,7 @@ const PackagesPage = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [limit] = useState(25);
+  const [limit] = useState(35);
   const [previewDocument, setPreviewDocument] = useState(null);
 
   const queryParams = useMemo(
