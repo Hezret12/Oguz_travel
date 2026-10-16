@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import OverflowTooltipLabel from "../../OverflowTooltipLabel";
+import OverflowTooltipTypography from "../../OverflowTooltipTypography";
 import { ChevronDown, User } from "lucide-react";
 import { Controller } from "react-hook-form";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
@@ -85,9 +86,9 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
       })}
     >
       {/* Full Width Employee Name */}
-      <Typography
+      <OverflowTooltipTypography
+        text={employee?.fullName || ""}
         variant="body2"
-        noWrap
         sx={{
           fontWeight: 650,
           color: "text.primary",
@@ -96,7 +97,7 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
         }}
       >
         <HighlightedText text={employee?.fullName} query={query} />
-      </Typography>
+      </OverflowTooltipTypography>
 
       {/* Subtitle Row: Phone Number & Office Name Side-by-Side */}
       {(employee?.phone_number || officeName) && (
@@ -121,9 +122,9 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
           </Typography>
 
           {officeName && (
-            <Typography
+            <OverflowTooltipTypography
+              text={officeName}
               variant="caption"
-              noWrap
               sx={{
                 color: "text.secondary",
                 fontSize: "0.75rem",
@@ -132,7 +133,7 @@ const EmployeeOption = ({ employee, query, selected, selectedLang }) => {
               }}
             >
               {officeName}
-            </Typography>
+            </OverflowTooltipTypography>
           )}
         </Box>
       )}

@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import OverflowTooltipLabel from "../../OverflowTooltipLabel";
+import OverflowTooltipTypography from "../../OverflowTooltipTypography";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import AddIcon from "@mui/icons-material/Add";
 import { ChevronDown } from "lucide-react";
@@ -206,17 +207,17 @@ const ClientOption = ({ client, columns, query, selected, t }) => (
             minWidth: 0,
           }}
         >
-          <Typography
+          <OverflowTooltipTypography
+            text={String(value ?? "")}
             component="span"
             variant="body2"
-            noWrap
             sx={{
               display: "block",
               fontWeight: key === "fullName" ? 700 : 500,
             }}
           >
             <HighlightedText text={value} query={query} />
-          </Typography>
+          </OverflowTooltipTypography>
         </Box>
       );
     })}

@@ -1,4 +1,5 @@
 import { Box, Typography } from "@mui/material";
+import OverflowTooltipTypography from "../../OverflowTooltipTypography";
 
 const ClientOption = ({ client, dense = false, isHeader = false }) => {
   const columnStyles = {
@@ -31,9 +32,18 @@ const ClientOption = ({ client, dense = false, isHeader = false }) => {
     >
       {/* Sütun 1: İsim */}
       <Box sx={columnStyles.name}>
-        <Typography sx={{ ...textStyles, fontWeight: isHeader ? 700 : 600 }}>
-          {isHeader ? "Client Name" : client.fullName}
-        </Typography>
+        {isHeader ? (
+          <Typography sx={{ ...textStyles, fontWeight: 700 }}>
+            Client Name
+          </Typography>
+        ) : (
+          <OverflowTooltipTypography
+            text={client?.fullName || ""}
+            sx={{ ...textStyles, fontWeight: 600 }}
+          >
+            {client?.fullName}
+          </OverflowTooltipTypography>
+        )}
       </Box>
 
       {/* Sütun 2: ID */}
