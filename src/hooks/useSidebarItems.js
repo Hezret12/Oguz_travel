@@ -50,6 +50,7 @@ export const useSidebarItems = () => {
         text: t("sidebar.tasks"),
         path: PATHS.TASKS,
         icon: createElement(CheckSquare, { size: 20, strokeWidth: 2.2 }),
+        alwaysVisible: true,
       },
       {
         id: "finance",

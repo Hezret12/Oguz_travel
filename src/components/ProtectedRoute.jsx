@@ -16,6 +16,7 @@ const ProtectedRoute = () => {
     '/notifications',
     '/unauthorized',
     '/packages',
+    '/tasks',
   ];
 
   const { permissions } = user;
