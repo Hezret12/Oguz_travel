@@ -184,7 +184,7 @@ export const exportTurkishAirlinesExcel = async (tickets = [], options = {}) => 
     { header: "Uçuş güni", key: "flight_date", width: 14, align: "center" },
     { header: "Töleg ýagdaýy", key: "is_paid", width: 15, align: "center" },
     { header: "Töleg %", key: "percent", width: 15, align: "center" },
-    { header: "Net baha", key: "base_fare", width: 16, align: "right" },
+    { header: "Base fare", key: "base_fare", width: 16, align: "right" },
     { header: "Satyş baha", key: "total_price", width: 16, align: "right" },
     { header: "Aýdylan baha", key: "quoted_price", width: 16, align: "right" },
     { header: "Kabul edildi", key: "accepted_price", width: 16, align: "right" },
