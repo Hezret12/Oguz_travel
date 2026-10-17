@@ -10,60 +10,32 @@ import GlobalModal from "./components/GlobalModal";
 import AddClientModal from "./components/global/AddClientModal/AddClientModal";
 import NetworkStatusBanner from "./components/NetworkStatusBanner";
 
+import { useLocale } from "./hooks/useLocale";
+
 import dayjs from "dayjs";
 import updateLocale from "dayjs/plugin/updateLocale";
-import "dayjs/locale/tr";
+import "dayjs/locale/tk";
+import "dayjs/locale/ru";
+import "dayjs/locale/en";
 
 dayjs.extend(updateLocale);
 
-dayjs.updateLocale("tr", {
-  weekdays: [
-    "Duşenbe",
-    "Sişenbe",
-    "Çarşenbe",
-    "Penşenbe",
-    "Anna",
-    "Şenbe",
-    "Ýekşenbe",
-  ],
-  weekdaysShort: ["Du", "Şi", "Ça", "Pe", "An", "Şe", "Ýe"],
-  weekdaysMin: ["Du", "Şi", "Ça", "Pe", "An", "Şe", "Ýe"],
-  months: [
-    "Ýanwar",
-    "Fewral",
-    "Mart",
-    "Aprel",
-    "Maý",
-    "Iýun",
-    "Iýul",
-    "Awgust",
-    "Sentýabr",
-    "Oktýabr",
-    "Noýabr",
-    "Dekabr",
-  ],
-  monthsShort: [
-    "Ýan",
-    "Few",
-    "Mar",
-    "Apr",
-    "Maý",
-    "Iýn",
-    "Iýl",
-    "Awg",
-    "Sen",
-    "Okt",
-    "Noý",
-    "Dek",
-  ],
-  weekStart: 1,
+dayjs.updateLocale("tk", {
+  weekdaysShort: ["Ýek", "Duş", "Siş", "Çar", "Pen", "Ann", "Şen"],
+  weekdaysMin: ["Ýe", "Du", "Şi", "Ça", "Pe", "An", "Şe"],
 });
 
-dayjs.locale("tr");
-
 function App() {
+  const { currentLanguage } = useLocale();
   const [showSplash, setShowSplash] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
+
+  const activeLocale =
+    currentLanguage === "ru" ? "ru" : currentLanguage === "en" ? "en" : "tk";
+
+  useEffect(() => {
+    dayjs.locale(activeLocale);
+  }, [activeLocale]);
 
   useEffect(() => {
     let minTimePassed = false;
@@ -104,7 +76,11 @@ function App() {
   }, []);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="tr">
+    <LocalizationProvider
+      dateAdapter={AdapterDayjs}
+      adapterLocale={activeLocale}
+      key={activeLocale}
+    >
       {showSplash && (
         <Box
           sx={{

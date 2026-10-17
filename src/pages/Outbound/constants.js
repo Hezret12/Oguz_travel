@@ -12,7 +12,8 @@ export const OUTBOUND_TABS = [
 export const SOURCE_OPTIONS = [
   { value: "Trip", label: "Trip" },
   { value: "B2B", label: "B2B" },
-  { value: "Ratehap", label: "Ratehap" },
+  { value: "Ratehawk", label: "Ratehawk" },
+  { value: "Partner", label: "Partner" },
   { value: "Booking", label: "Booking" },
   { value: "Halal booking", label: "Halal Booking" },
   { value: "Agoda", label: "Agoda" },
