@@ -6,6 +6,7 @@ import { markNotificationReadApi } from '../api/queries/patch';
 import { showNotificationToast } from '../components/NotificationToast';
 import { PATHS } from '../routes/paths';
 import { useLocale } from './useLocale';
+import { useAuth } from '../context/useAuth';
 import { resetTaskBoard } from '../pages/TaskFlow/functions/taskBoardCache';
 
 const WATCHER_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes
@@ -50,6 +51,7 @@ export const useNotificationWatcher = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { t } = useLocale();
+  const { user } = useAuth();
 
   const isInitialMountRef = useRef(true);
   const lastCheckTimeRef = useRef(getStoredLastCheckTime());
@@ -136,7 +138,37 @@ export const useNotificationWatcher = () => {
 
     // Check for newly created notifications since baselineTime
     const newUnreadItems = list.filter((item) => {
-      const isUnread = !(item.isRead ?? item.empltaskAssignee?.[0]?.isRead ?? false);
+      // 1. Kullanıcı kendi oluşturduğu veya kendi eylemi olan bildirimi asla toast/bildirim olarak almamalıdır:
+      // - Admin yeni görev oluşturduğunda Admin'e toast çıkmaz.
+      // - Personel görev durumunu değiştirdiğinde Personel'e toast çıkmaz.
+      const senderGuid = item.adm_user_guid || item.admuser?.guid;
+      if (senderGuid && user?.guid && senderGuid === user.guid) {
+        return false;
+      }
+
+      // 2. Eğer bildirim belirli kişilere atanmışsa (empltaskAssignee varsa), mevcut kullanıcı hedef alıcılar arasında değilse almamalıdır
+      if (Array.isArray(item.empltaskAssignee) && item.empltaskAssignee.length > 0 && user?.guid) {
+        const isRecipient = item.empltaskAssignee.some(
+          (assignee) => assignee.assignee_guid === user.guid || assignee.user?.guid === user.guid
+        );
+        if (!isRecipient) {
+          return false;
+        }
+      }
+
+      // 3. Mevcut kullanıcının okuma durumu kontrol edilir
+      let isUnread = true;
+      if (item.isRead !== undefined) {
+        isUnread = !item.isRead;
+      }
+      if (Array.isArray(item.empltaskAssignee) && user?.guid) {
+        const myAssignment = item.empltaskAssignee.find(
+          (assignee) => assignee.assignee_guid === user.guid || assignee.user?.guid === user.guid
+        );
+        if (myAssignment && myAssignment.isRead !== undefined) {
+          isUnread = !myAssignment.isRead;
+        }
+      }
       if (!isUnread || !item.guid) return false;
 
       const itemCreatedTime = new Date(item.createdAt || item.updatedAt || 0).getTime();
@@ -202,5 +234,5 @@ export const useNotificationWatcher = () => {
       newUnreadItems.forEach((item) => seenGuidsRef.current.add(item.guid));
       saveStoredSeenIds(seenGuidsRef.current);
     }
-  }, [rawResponse, queryClient, handleNavigateToNotifications, handleQuickMarkRead, navigate, t]);
+  }, [rawResponse, queryClient, handleNavigateToNotifications, handleQuickMarkRead, navigate, t, user?.guid]);
 };
