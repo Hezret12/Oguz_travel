@@ -304,6 +304,7 @@ const TaskBoardColumn = memo(function TaskBoardColumn({
     },
     initialPageParam: "",
     getNextPageParam: (lastPage) => lastPage?.meta?.nextCursor ?? undefined,
+    staleTime: 60 * 1000,
   });
 
   const tasks = useMemo(() => {

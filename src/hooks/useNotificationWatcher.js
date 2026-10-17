@@ -6,6 +6,7 @@ import { markNotificationReadApi } from '../api/queries/patch';
 import { showNotificationToast } from '../components/NotificationToast';
 import { PATHS } from '../routes/paths';
 import { useLocale } from './useLocale';
+import { resetTaskBoard } from '../pages/TaskFlow/functions/taskBoardCache';
 
 const WATCHER_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes
 const LAST_CHECK_KEY = 'oguz_last_notification_check_time';
@@ -150,6 +151,16 @@ export const useNotificationWatcher = () => {
       queryClient.invalidateQueries({ queryKey: ['headerNotifications'] });
       queryClient.invalidateQueries({ queryKey: ['notificationsPage'] });
 
+      // Check if any of the new unread notifications is related to a task
+      // In backend, tasks are explicitly created with `isMessage: false`, and have status/priority
+      const hasTaskNotification = newUnreadItems.some(
+        (item) => item.isMessage === false || (item.status !== undefined && item.status !== null)
+      );
+
+      if (hasTaskNotification) {
+        resetTaskBoard(queryClient);
+      }
+
       // Update baseline check time to the latest item timestamp or now
       const latestTimestamp = newUnreadItems.reduce((max, item) => {
         const itemTime = new Date(item.createdAt || item.updatedAt || 0).getTime();
@@ -161,18 +172,29 @@ export const useNotificationWatcher = () => {
 
       // Trigger bottom-right popup toast for the latest unread item
       const newest = newUnreadItems[0];
-      const title = newest.title || t('notifications.title');
+      const isNewestTask =
+        newest.isMessage === false || (newest.status !== undefined && newest.status !== null);
+      const title =
+        newest.title || (isNewestTask ? t('notifications.task') : t('notifications.title'));
       const description = newest.description || '';
       const sender =
         newest.admuser?.employee?.fullName ||
         newest.admuser?.phone_number ||
         '';
 
+      const handleToastView = () => {
+        if (isNewestTask) {
+          navigate(PATHS.TASKS);
+        } else {
+          handleNavigateToNotifications();
+        }
+      };
+
       showNotificationToast({
         title,
         description,
         sender,
-        onView: handleNavigateToNotifications,
+        onView: handleToastView,
         onMarkRead: () => handleQuickMarkRead(newest.guid),
       });
 
@@ -180,5 +202,5 @@ export const useNotificationWatcher = () => {
       newUnreadItems.forEach((item) => seenGuidsRef.current.add(item.guid));
       saveStoredSeenIds(seenGuidsRef.current);
     }
-  }, [rawResponse, queryClient, handleNavigateToNotifications, handleQuickMarkRead, t]);
+  }, [rawResponse, queryClient, handleNavigateToNotifications, handleQuickMarkRead, navigate, t]);
 };

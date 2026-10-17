@@ -100,5 +100,6 @@ export const resetTaskBoard = (queryClient) => {
       ? { pages: data.pages.slice(0, 1), pageParams: data.pageParams.slice(0, 1) }
       : data,
   );
+  queryClient.invalidateQueries({ queryKey: ["tasks"] });
   return queryClient.invalidateQueries({ queryKey: [TASK_BOARD_KEY] });
 };
